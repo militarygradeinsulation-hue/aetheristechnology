@@ -8,9 +8,9 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -27,13 +27,12 @@ const trackCareersCta = (cta: string) => {
   } catch {}
 };
 import {
-  DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
-  Shield, Rocket, GraduationCap, Users, Clock, Brain, Trophy, MapPin, Headphones,
+  Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
+  Shield, Rocket, GraduationCap, Users, Clock, Brain, MapPin, Headphones,
 } from 'lucide-react';
-import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import careersHero from '@/assets/careers-hero.jpg';
 import careersIntroVideo from '@/assets/careers-intro.mp4';
-import careersIntroPoster from '@/assets/careers-intro-poster.jpg';
+
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -105,8 +104,8 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Sales Rep, Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell the 21-Day Revenue Diagnostic ($18,500) and Implementation Retainer ($15,000/mo) to specialty manufacturers. $5,000 per flagship close, $4,000/mo recurring."
+        title="Independent Sales Rep | Aetheris AI"
+        description="Join Aetheris as an independent, commission-based sales rep. Sell forensic business diagnostics to SMB owners, work remotely, and grow with a founder-led operator team."
         path="/careers"
       />
       <Background />
@@ -160,28 +159,12 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             Take the Qualifying Test →
           </Button>
         </a>
-        <a href="#earnings">
+        <a href="#why-us">
           <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-            See the Numbers
+            Why Join Aetheris
           </Button>
         </a>
       </div>
-    </div>
-
-    {/* QUICK STATS */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-      {[
-        { stat: '$5K', label: 'Per flagship close, flat' },
-        { stat: '$4K/mo', label: 'Recurring retainer cut' },
-        { stat: '7d', label: 'Pay timeline post-clearance' },
-        { stat: '0', label: 'Caps · clawbacks · ceilings' },
-      ].map((s, i) => (
-        <div key={s.label} className="forensic-tile rounded-xl p-5 text-center">
-          <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase">// stat_{String(i+1).padStart(2,'0')}</p>
-          <p className="font-display text-3xl md:text-4xl text-amber font-bold mt-1">{s.stat}</p>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
-        </div>
-      ))}
     </div>
 
     {/* GATE */}
@@ -195,90 +178,6 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </CardContent>
     </Card>
 
-    {/* FLAGSHIP COMMISSIONS + BONUSES */}
-    <div id="earnings" className="mb-14 relative rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.07] via-card/40 to-card/40 p-6 md:p-10 backdrop-blur overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.08] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(245,166,35,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,1) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
-      <div className="relative">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Payout · Flagship Tier</p>
-            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-1">
-              Real numbers. <span className="text-amber">Real payouts.</span>
-            </h2>
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-amber/30 rounded px-2 py-1">
-            FIXED-DOLLAR · NO CLAWBACK · 7-DAY PAYOUT
-          </span>
-        </div>
-
-        {/* Flagship product cards */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
-            <p className="font-display text-xl text-foreground mt-1">21-Day Revenue Diagnostic</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $18,500 fixed</p>
-            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
-              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
-              <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $10,500 · Rep $5,000 · Partner $3,000 (sum $18,500). Paid within 7 days of clearance.</p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
-            <p className="font-display text-xl text-foreground mt-1">Implementation Retainer</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $15,000/mo · 3-mo min</p>
-            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
-              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
-              <p className="font-display text-5xl text-amber font-bold mt-1">$4,000<span className="text-lg text-amber/70">/mo</span></p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $8K · Rep $4K · Partner $3K — every month the client stays. 12 months = <strong className="text-amber">$48,000</strong>.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* BONUS BANDS */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Volume Bonus</p>
-            <p className="font-display text-foreground">Stack closes in a single month.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>2 closes</span><span className="text-amber">+$1,000</span></li>
-              <li className="flex justify-between"><span>3 closes</span><span className="text-amber">+$2,500</span></li>
-              <li className="flex justify-between"><span>5 closes</span><span className="text-amber">+$5,000</span></li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Retention Bonus</p>
-            <p className="font-display text-foreground">Get paid when your clients stay.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>3 months</span><span className="text-amber">+$1,000</span></li>
-              <li className="flex justify-between"><span>6 months</span><span className="text-amber">+$2,500</span></li>
-              <li className="flex justify-between"><span>12 months</span><span className="text-amber">+$5,000</span></li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Referral Bonus</p>
-            <p className="font-display text-foreground">Bring in another closer.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>Onboard</span><span className="text-amber">+$500</span></li>
-              <li className="flex justify-between"><span>Their 1st close</span><span className="text-amber">+$7,000</span></li>
-              <li className="flex justify-between"><span>Override / sale</span><span className="text-amber">+$500 · 12 mo</span></li>
-            </ul>
-          </div>
-        </div>
-
-        <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
-        </p>
-      </div>
-    </div>
 
     {/* WHY OPERATORS CHOOSE US */}
     <div id="why-us" className="mb-14">
@@ -288,7 +187,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the $2,500 Signal Pack as the entry bundle, and the $18,500 21-Day Revenue Diagnostic + $15,000/mo Implementation Retainer as the flagships. The pitch writes itself.' },
+          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the Signal Pack as the entry bundle, and the 21-Day Revenue Diagnostic + Implementation Retainer as the flagships. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
           { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
@@ -344,7 +243,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
+          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. You want a commission-driven side lane where results matter more than clocking in.' },
           { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
@@ -375,7 +274,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
           { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using, you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests, all open.' },
-          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring payouts for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
+          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring commissions for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
           <div key={tag} className="forensic-tile rounded-xl p-5">
             <p className="font-mono text-[10px] tracking-[0.3em] text-amber">// {tag}</p>
@@ -489,120 +388,6 @@ const PlaybookSection = () => (
       </a>
     </div>
 
-    {/* PRICING LADDER */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> The Pricing Ladder</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">Three operator-led bundles, then two flagships. You sell the operator — not a list of tools.</p>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Offer</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Format</TableHead>
-              <TableHead>Purpose</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ["Signal Pack",                "$2,500",      "Bundle · ~6 hrs operator time",    "Entry — find the leak. Website + brand + friction read, operator memo."],
-              ["Revenue Pack",               "$5,000",      "Bundle · ~14 hrs operator time",   "Core — fix the sales engine. Scripts + follow-up + questions + calendar as one engine."],
-              ["Operator Suite",             "$10,000",     "Bundle · ~30 hrs over 3 weeks",    "Embedded — full stack against the real business. Credits 1:1 toward Retainer."],
-              ["21-Day Revenue Diagnostic",  "$18,500",     "FLAGSHIP · fixed-fee, fit call",   "Forensic audit of CRM + sales + ops. 15–30 page report, prioritized fixes."],
-              ["Implementation Retainer",    "$15,000/mo",  "FLAGSHIP · 3-mo min, Diagnostic clients only", "Operator executes the fixes. Re-measured every month."],
-            ].map(([service, price, format, purpose]) => (
-              <TableRow key={service}>
-                <TableCell className="font-medium text-foreground">{service}</TableCell>
-                <TableCell className="text-primary font-semibold">{price}</TableCell>
-                <TableCell className="text-muted-foreground">{format}</TableCell>
-                <TableCell className="text-muted-foreground">{purpose}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-
-    {/* COMMISSION */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><TrendingUp className="text-primary" /> Your Commission</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
-          <p className="text-foreground font-medium">
-            Two pay models, depending on what you close.
-          </p>
-          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            <li>
-              <span className="text-foreground font-semibold">Operator-led bundles & legacy catalog:</span>{' '}
-              tiered split — <span className="text-primary font-bold">30% / 25% / 20% rep</span> at Tier 1 / 2 / 3 by sale size.
-              All three public bundles are Tier 3, so you keep <span className="text-primary font-bold">20% of every bundle close</span>.
-            </li>
-            <li>
-              <span className="text-foreground font-semibold">Flagships (fixed-dollar):</span>{' '}
-              21-Day Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
-              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed.
-            </li>
-          </ul>
-          <p className="text-xs text-muted-foreground">
-            Paid within 7 days of client payment clearing. No clawbacks on completed work.
-          </p>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Offer</TableHead>
-              <TableHead className="text-right">Client Price</TableHead>
-              <TableHead className="text-right">Model</TableHead>
-              <TableHead className="text-right">Your Cut</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Signal Pack</TableCell>
-              <TableCell className="text-right text-muted-foreground">$2,500</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$500</TableCell>
-            </TableRow>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Revenue Pack</TableCell>
-              <TableCell className="text-right text-muted-foreground">$5,000</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$1,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Operator Suite</TableCell>
-              <TableCell className="text-right text-muted-foreground">$10,000</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$2,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-amber/10">
-              <TableCell className="font-semibold text-foreground">21-Day Revenue Diagnostic</TableCell>
-              <TableCell className="text-right text-muted-foreground">$18,500</TableCell>
-              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$5,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-amber/10">
-              <TableCell className="font-semibold text-foreground">Implementation Retainer (every month)</TableCell>
-              <TableCell className="text-right text-muted-foreground">$15,000/mo</TableCell>
-              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$4,000/mo</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="text-foreground">Legacy à la carte tools (rep-led only)</TableCell>
-              <TableCell className="text-right text-muted-foreground">$29–$499</TableCell>
-              <TableCell className="text-right text-muted-foreground">T1/T2 tiered</TableCell>
-              <TableCell className="text-right text-muted-foreground">30% / 25% of sale</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-        <p className="text-sm text-muted-foreground">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
-      </CardContent>
-    </Card>
 
 
     {/* HOW TO SELL */}
@@ -619,8 +404,8 @@ const PlaybookSection = () => (
               "Visit their website. Find 2-3 obvious leaks (slow load, no mobile, outdated photos, dead CTAs, broken follow-up).",
               "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
               "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
-              "Once they see the leaks, position the 21-Day Revenue Diagnostic ($18,500 fixed) as the operator-led version that quantifies the damage.",
-              "After the Diagnostic, the Implementation Retainer ($15,000/mo, 3-month minimum) sells itself, that's where your $4,000/mo recurring kicks in.",
+              "Once they see the leaks, position the 21-Day Revenue Diagnostic as the operator-led version that quantifies the damage.",
+              "After the Diagnostic, the Implementation Retainer sells itself. That's where your recurring commission kicks in.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
@@ -667,30 +452,6 @@ const PlaybookSection = () => (
       </CardContent>
     </Card>
 
-    {/* SAMPLE EARNINGS */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
-            { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
-            { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
-          ].map((row) => (
-            <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
-              <p className="text-sm text-muted-foreground">{row.label}</p>
-              <p className="text-foreground mt-1">{row.detail}</p>
-              <p className="text-primary font-semibold mt-1">{row.total}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Retainer clients held for 12 months = <strong className="text-foreground">$96,000</strong> in residual commission alone, before bonuses.</p>
-      </CardContent>
-    </Card>
 
     {/* HOW TO GET STARTED */}
     <Card className="bg-card/60 backdrop-blur border-border/50">
@@ -703,7 +464,7 @@ const PlaybookSection = () => (
             { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
             { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
             { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site, I think you're losing 8–15% of revenue silently. Want to see where?'" },
-            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $18,500 21-Day Revenue Diagnostic." },
+            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the 21-Day Revenue Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">
               <CardContent className="p-5 flex items-start gap-3">
