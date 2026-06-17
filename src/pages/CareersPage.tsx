@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -27,10 +27,9 @@ const trackCareersCta = (cta: string) => {
   } catch {}
 };
 import {
-  DollarSign, TrendingUp, Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
-  Shield, Rocket, GraduationCap, Users, Clock, Brain, Trophy, MapPin, Headphones,
+  Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
+  Shield, Rocket, GraduationCap, Users, Clock, Brain, MapPin, Headphones,
 } from 'lucide-react';
-import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import careersHero from '@/assets/careers-hero.jpg';
 import careersIntroVideo from '@/assets/careers-intro.mp4';
 import careersIntroPoster from '@/assets/careers-intro-poster.jpg';
@@ -160,28 +159,12 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
             Take the Qualifying Test →
           </Button>
         </a>
-        <a href="#earnings">
+        <a href="#why-us">
           <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-            See the Numbers
+            Why Join Aetheris
           </Button>
         </a>
       </div>
-    </div>
-
-    {/* QUICK STATS */}
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-      {[
-        { stat: '$5K', label: 'Per flagship close, flat' },
-        { stat: '$4K/mo', label: 'Recurring retainer cut' },
-        { stat: '7d', label: 'Pay timeline post-clearance' },
-        { stat: '0', label: 'Caps · clawbacks · ceilings' },
-      ].map((s, i) => (
-        <div key={s.label} className="forensic-tile rounded-xl p-5 text-center">
-          <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase">// stat_{String(i+1).padStart(2,'0')}</p>
-          <p className="font-display text-3xl md:text-4xl text-amber font-bold mt-1">{s.stat}</p>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
-        </div>
-      ))}
     </div>
 
     {/* GATE */}
@@ -195,90 +178,6 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </CardContent>
     </Card>
 
-    {/* FLAGSHIP COMMISSIONS + BONUSES */}
-    <div id="earnings" className="mb-14 relative rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.07] via-card/40 to-card/40 p-6 md:p-10 backdrop-blur overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.08] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(245,166,35,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,1) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
-      <div className="relative">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Payout · Flagship Tier</p>
-            <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-1">
-              Real numbers. <span className="text-amber">Real payouts.</span>
-            </h2>
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground border border-amber/30 rounded px-2 py-1">
-            FIXED-DOLLAR · NO CLAWBACK · 7-DAY PAYOUT
-          </span>
-        </div>
-
-        {/* Flagship product cards */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · ONE-TIME</p>
-            <p className="font-display text-xl text-foreground mt-1">21-Day Revenue Diagnostic</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $18,500 fixed</p>
-            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
-              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
-              <p className="font-display text-5xl text-amber font-bold mt-1">$5,000</p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $10,500 · Rep $5,000 · Partner $3,000 (sum $18,500). Paid within 7 days of clearance.</p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-amber/30 bg-background/60 p-5 text-center">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FLAGSHIP · RECURRING</p>
-            <p className="font-display text-xl text-foreground mt-1">Implementation Retainer</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Client price · $15,000/mo · 3-mo min</p>
-            <div className="mt-4 rounded-lg bg-amber/10 border border-amber/40 p-5">
-              <p className="font-mono text-[10px] tracking-[0.25em] text-amber uppercase">Your Cut</p>
-              <p className="font-display text-5xl text-amber font-bold mt-1">$4,000<span className="text-lg text-amber/70">/mo</span></p>
-              <p className="text-xs text-muted-foreground mt-2">Split: Company $8K · Rep $4K · Partner $3K — every month the client stays. 12 months = <strong className="text-amber">$48,000</strong>.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* BONUS BANDS */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Volume Bonus</p>
-            <p className="font-display text-foreground">Stack closes in a single month.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>2 closes</span><span className="text-amber">+$1,000</span></li>
-              <li className="flex justify-between"><span>3 closes</span><span className="text-amber">+$2,500</span></li>
-              <li className="flex justify-between"><span>5 closes</span><span className="text-amber">+$5,000</span></li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Retention Bonus</p>
-            <p className="font-display text-foreground">Get paid when your clients stay.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>3 months</span><span className="text-amber">+$1,000</span></li>
-              <li className="flex justify-between"><span>6 months</span><span className="text-amber">+$2,500</span></li>
-              <li className="flex justify-between"><span>12 months</span><span className="text-amber">+$5,000</span></li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-amber/20 bg-background/50 p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Referral Bonus</p>
-            <p className="font-display text-foreground">Bring in another closer.</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground font-mono">
-              <li className="flex justify-between"><span>Onboard</span><span className="text-amber">+$500</span></li>
-              <li className="flex justify-between"><span>Their 1st close</span><span className="text-amber">+$7,000</span></li>
-              <li className="flex justify-between"><span>Override / sale</span><span className="text-amber">+$500 · 12 mo</span></li>
-            </ul>
-          </div>
-        </div>
-
-        <p className="text-xs text-muted-foreground mt-5 font-mono uppercase tracking-[0.18em] text-center">
-          // Flagships are the volume game. Catalog tools pay tiered splits (30% / 25% / 20% rep cut by price tier) — see the product table below.
-        </p>
-      </div>
-    </div>
 
     {/* WHY OPERATORS CHOOSE US */}
     <div id="why-us" className="mb-14">
@@ -288,7 +187,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the $2,500 Signal Pack as the entry bundle, and the $18,500 21-Day Revenue Diagnostic + $15,000/mo Implementation Retainer as the flagships. The pitch writes itself.' },
+          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the Signal Pack as the entry bundle, and the 21-Day Revenue Diagnostic + Implementation Retainer as the flagships. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
           { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
@@ -344,7 +243,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. 5–10 closes a month and you\'re replacing your salary in residuals.' },
+          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. You want a commission-driven side lane where results matter more than clocking in.' },
           { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
@@ -375,7 +274,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
           { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using, you walk in already different.' },
           { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests, all open.' },
-          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring payouts for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
+          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring commissions for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
         ].map(({ tag, title, desc }) => (
           <div key={tag} className="forensic-tile rounded-xl p-5">
             <p className="font-mono text-[10px] tracking-[0.3em] text-amber">// {tag}</p>
