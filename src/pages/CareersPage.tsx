@@ -388,120 +388,6 @@ const PlaybookSection = () => (
       </a>
     </div>
 
-    {/* PRICING LADDER */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> The Pricing Ladder</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">Three operator-led bundles, then two flagships. You sell the operator — not a list of tools.</p>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Offer</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Format</TableHead>
-              <TableHead>Purpose</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ["Signal Pack",                "$2,500",      "Bundle · ~6 hrs operator time",    "Entry — find the leak. Website + brand + friction read, operator memo."],
-              ["Revenue Pack",               "$5,000",      "Bundle · ~14 hrs operator time",   "Core — fix the sales engine. Scripts + follow-up + questions + calendar as one engine."],
-              ["Operator Suite",             "$10,000",     "Bundle · ~30 hrs over 3 weeks",    "Embedded — full stack against the real business. Credits 1:1 toward Retainer."],
-              ["21-Day Revenue Diagnostic",  "$18,500",     "FLAGSHIP · fixed-fee, fit call",   "Forensic audit of CRM + sales + ops. 15–30 page report, prioritized fixes."],
-              ["Implementation Retainer",    "$15,000/mo",  "FLAGSHIP · 3-mo min, Diagnostic clients only", "Operator executes the fixes. Re-measured every month."],
-            ].map(([service, price, format, purpose]) => (
-              <TableRow key={service}>
-                <TableCell className="font-medium text-foreground">{service}</TableCell>
-                <TableCell className="text-primary font-semibold">{price}</TableCell>
-                <TableCell className="text-muted-foreground">{format}</TableCell>
-                <TableCell className="text-muted-foreground">{purpose}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-
-    {/* COMMISSION */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><TrendingUp className="text-primary" /> Your Commission</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
-          <p className="text-foreground font-medium">
-            Two pay models, depending on what you close.
-          </p>
-          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            <li>
-              <span className="text-foreground font-semibold">Operator-led bundles & legacy catalog:</span>{' '}
-              tiered split — <span className="text-primary font-bold">30% / 25% / 20% rep</span> at Tier 1 / 2 / 3 by sale size.
-              All three public bundles are Tier 3, so you keep <span className="text-primary font-bold">20% of every bundle close</span>.
-            </li>
-            <li>
-              <span className="text-foreground font-semibold">Flagships (fixed-dollar):</span>{' '}
-              21-Day Diagnostic <span className="text-primary font-bold">$5,000 to you</span> per close · Implementation Retainer{' '}
-              <span className="text-primary font-bold">$4,000/mo to you</span> every month the client stays subscribed.
-            </li>
-          </ul>
-          <p className="text-xs text-muted-foreground">
-            Paid within 7 days of client payment clearing. No clawbacks on completed work.
-          </p>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Offer</TableHead>
-              <TableHead className="text-right">Client Price</TableHead>
-              <TableHead className="text-right">Model</TableHead>
-              <TableHead className="text-right">Your Cut</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Signal Pack</TableCell>
-              <TableCell className="text-right text-muted-foreground">$2,500</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$500</TableCell>
-            </TableRow>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Revenue Pack</TableCell>
-              <TableCell className="text-right text-muted-foreground">$5,000</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$1,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-primary/5">
-              <TableCell className="font-semibold text-foreground">Operator Suite</TableCell>
-              <TableCell className="text-right text-muted-foreground">$10,000</TableCell>
-              <TableCell className="text-right text-muted-foreground">T3 · 20%</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$2,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-amber/10">
-              <TableCell className="font-semibold text-foreground">21-Day Revenue Diagnostic</TableCell>
-              <TableCell className="text-right text-muted-foreground">$18,500</TableCell>
-              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$5,000</TableCell>
-            </TableRow>
-            <TableRow className="bg-amber/10">
-              <TableCell className="font-semibold text-foreground">Implementation Retainer (every month)</TableCell>
-              <TableCell className="text-right text-muted-foreground">$15,000/mo</TableCell>
-              <TableCell className="text-right text-muted-foreground">FLAGSHIP fixed</TableCell>
-              <TableCell className="text-right font-semibold text-primary">$4,000/mo</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="text-foreground">Legacy à la carte tools (rep-led only)</TableCell>
-              <TableCell className="text-right text-muted-foreground">$29–$499</TableCell>
-              <TableCell className="text-right text-muted-foreground">T1/T2 tiered</TableCell>
-              <TableCell className="text-right text-muted-foreground">30% / 25% of sale</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-        <p className="text-sm text-muted-foreground">Commission paid within 7 days of client payment clearing. No clawbacks on completed work.</p>
-      </CardContent>
-    </Card>
 
 
     {/* HOW TO SELL */}
@@ -518,8 +404,8 @@ const PlaybookSection = () => (
               "Visit their website. Find 2-3 obvious leaks (slow load, no mobile, outdated photos, dead CTAs, broken follow-up).",
               "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
               "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
-              "Once they see the leaks, position the 21-Day Revenue Diagnostic ($18,500 fixed) as the operator-led version that quantifies the damage.",
-              "After the Diagnostic, the Implementation Retainer ($15,000/mo, 3-month minimum) sells itself, that's where your $4,000/mo recurring kicks in.",
+              "Once they see the leaks, position the 21-Day Revenue Diagnostic as the operator-led version that quantifies the damage.",
+              "After the Diagnostic, the Implementation Retainer sells itself. That's where your recurring commission kicks in.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>
@@ -566,30 +452,6 @@ const PlaybookSection = () => (
       </CardContent>
     </Card>
 
-    {/* SAMPLE EARNINGS */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary" /> Realistic Monthly Earnings</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">Honest math built on the two flagships ($5,000 per Diagnostic, $4,000/mo per Retainer) plus catalog tier splits:</p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            { label: 'Light month', detail: '3 catalog tools sold (Snapshot, Sales Script Pack, Strategy Blueprint)', total: '~$135 one-time' },
-            { label: 'First flagship', detail: '1 × 21-Day Revenue Diagnostic closed ($18,500)', total: '$5,000 one-time' },
-            { label: 'Strong month', detail: '1 Diagnostic + Retainer signed ($15K/mo, 3-mo min)', total: '$9,000 first month, then $4,000/mo recurring' },
-            { label: 'Heavy month', detail: '2 Diagnostics + 1 Retainer signed + volume bonus (2 closes)', total: '$15,000 first month + $4,000/mo recurring' },
-          ].map((row) => (
-            <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-4">
-              <p className="text-sm text-muted-foreground">{row.label}</p>
-              <p className="text-foreground mt-1">{row.detail}</p>
-              <p className="text-primary font-semibold mt-1">{row.total}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mt-4">Recurring retainers compound. Two Retainer clients held for 12 months = <strong className="text-foreground">$96,000</strong> in residual commission alone, before bonuses.</p>
-      </CardContent>
-    </Card>
 
     {/* HOW TO GET STARTED */}
     <Card className="bg-card/60 backdrop-blur border-border/50">
@@ -602,7 +464,7 @@ const PlaybookSection = () => (
             { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
             { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
             { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site, I think you're losing 8–15% of revenue silently. Want to see where?'" },
-            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the $18,500 21-Day Revenue Diagnostic." },
+            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the 21-Day Revenue Diagnostic." },
           ].map(({ icon: Icon, title, desc }) => (
             <Card key={title} className="bg-background/50 border-border/30">
               <CardContent className="p-5 flex items-start gap-3">
