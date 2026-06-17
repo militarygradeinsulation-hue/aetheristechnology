@@ -8,7 +8,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import careersHero from '@/assets/careers-hero.jpg';
 import careersIntroVideo from '@/assets/careers-intro.mp4';
-import careersIntroPoster from '@/assets/careers-intro-poster.jpg';
+
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -104,8 +104,8 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Sales Rep, Commission-Only | Aetheris AI"
-        description="Independent commission sales role. Sell the 21-Day Revenue Diagnostic ($18,500) and Implementation Retainer ($15,000/mo) to specialty manufacturers. $5,000 per flagship close, $4,000/mo recurring."
+        title="Independent Sales Rep | Aetheris AI"
+        description="Join Aetheris as an independent, commission-based sales rep. Sell forensic business diagnostics to SMB owners, work remotely, and grow with a founder-led operator team."
         path="/careers"
       />
       <Background />
