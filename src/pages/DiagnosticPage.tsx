@@ -491,6 +491,8 @@ const DiagnosticPage: React.FC = () => {
             </section>
 
           </div>
+
+          <PackageTiers onRequest={() => setContactOpen(true)} />
         </main>
         <Footer />
       </div>
