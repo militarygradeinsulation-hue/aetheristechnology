@@ -8,6 +8,7 @@ import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { PackageTiers } from '@/components/PackageTiers';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 
