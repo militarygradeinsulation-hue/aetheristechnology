@@ -426,6 +426,24 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </Card>
     </div>
 
+    {/* REALITY CHECK */}
+    <div className="mb-12">
+      <div className="forensic-tile rounded-2xl border border-crimson/40 p-6 md:p-8">
+        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">
+          Reality Check
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold font-display text-crimson leading-tight mb-4">
+          If you need a paycheck next week, this isn't for you.
+        </h2>
+        <p className="text-sm md:text-base text-foreground/90 leading-relaxed mb-3">
+          We are looking for people who are not desperate for a paycheck. People who can be patient, absorb the vision, and build with us.
+        </p>
+        <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
+          A lot of people talk the talk. They don't last two weeks because our systems are too advanced for them. If you're here to fake it until you make it, you'll be gone before the onboarding finishes.
+        </p>
+      </div>
+    </div>
+
     {/* GATE, FINAL */}
     <Card className="bg-card/60 backdrop-blur border-amber/40">
       <CardHeader>
