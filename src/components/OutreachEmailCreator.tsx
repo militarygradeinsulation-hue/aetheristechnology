@@ -23,9 +23,17 @@ interface EmailOut { subject: string; body: string; why_it_works: string }
 interface SubjectHook { subject: string; angle: string; why: string }
 interface SubjectsOut { hooks: SubjectHook[] }
 interface AnalysisProblem { severity: 'critical' | 'major' | 'minor'; category: string; quote: string; issue: string; fix: string }
+interface AnalysisPillar { key: string; label: string; score: number; max: number; note: string }
+interface AnalysisTrigger { phrase: string; category: string; why_bad: string; swap_with: string }
+interface AnalysisGuard { level: 'low' | 'medium' | 'high' | 'hostile'; why: string; fix: string }
 interface Analysis {
   overall_grade: string;
   verdict: string;
+  total_score?: number;
+  score_bar?: 'danger' | 'weak' | 'decent' | 'strong' | 'elite';
+  pillars?: AnalysisPillar[];
+  trigger_words_found?: AnalysisTrigger[];
+  guard_meter?: AnalysisGuard;
   subject_critique: { current: string; score: number; problems: string[]; rewrites: string[] };
   problems: AnalysisProblem[];
   what_works: string[];
