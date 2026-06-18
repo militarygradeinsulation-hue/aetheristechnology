@@ -535,8 +535,11 @@ export default function OperatorAppPage() {
         </header>
 
         <div className="px-3 py-4">
-          <Tabs defaultValue="scan" className="w-full">
-            <TabsList className="grid grid-cols-5 w-full mb-4 h-auto bg-card/40 border border-amber/20 rounded-sm p-1">
+          <Tabs defaultValue="agents" className="w-full">
+            <TabsList className="grid grid-cols-6 w-full mb-4 h-auto bg-card/40 border border-amber/20 rounded-sm p-1">
+              <TabsTrigger value="agents" className="text-[10px] py-2 font-mono uppercase tracking-wider data-[state=active]:bg-amber data-[state=active]:text-charcoal data-[state=active]:font-bold">
+                <Bot className="w-3 h-3 mr-1" />Agents
+              </TabsTrigger>
               <TabsTrigger value="scan" className="text-[10px] py-2 font-mono uppercase tracking-wider data-[state=active]:bg-amber data-[state=active]:text-charcoal data-[state=active]:font-bold">
                 <Search className="w-3 h-3 mr-1" />Scan
               </TabsTrigger>
@@ -554,6 +557,7 @@ export default function OperatorAppPage() {
               </TabsTrigger>
             </TabsList>
 
+            <TabsContent value="agents"><AgentsTab /></TabsContent>
             <TabsContent value="scan"><ScanTab /></TabsContent>
             <TabsContent value="op"><OperatorTab /></TabsContent>
             <TabsContent value="grow"><GrowthTab /></TabsContent>
