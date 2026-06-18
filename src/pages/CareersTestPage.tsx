@@ -119,6 +119,11 @@ const CareersTestPage = () => {
 
   const submit = async (auto = false) => {
     if (!attemptId) return;
+    if (!resumeFile) {
+      toast({ title: 'Resume missing', description: 'Your resume must be attached to submit. Both resume and test are required.', variant: 'destructive' });
+      setPhase('apply');
+      return;
+    }
     if (!auto && Object.keys(answers).length < questions.length) {
       if (!confirm(`You've answered ${Object.keys(answers).length}/${questions.length}. Submit anyway?`)) return;
     }
