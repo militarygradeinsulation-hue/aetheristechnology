@@ -244,7 +244,7 @@ function renderRepScript(rs) {
        </details>` : "";
   return `
     <div style="margin-top:8px;padding:8px;border:2px solid rgba(245,158,11,.6);background:rgba(245,158,11,.1);border-radius:6px">
-      <div style="font-family:monospace;font-size:11px;text-transform:uppercase;color:#f59e0b;margin-bottom:4px">🎯 Rep Talk Track</div>
+      <div style="font-family:monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#f59e0b;margin-bottom:4px">// REP TALK TRACK</div>
       ${block("Cold Call Opener", rs.cold_call_opener)}
       ${block("Voicemail", rs.voicemail)}
       ${block("Cold Email", rs.cold_email)}
@@ -385,10 +385,10 @@ function openMoreMenu(anchor, leak) {
   menu.className = "menu-pop";
   const subPages = ["/", "/about", "/pricing", "/contact", "/blog", "/services"];
   menu.innerHTML = `
-    <button data-act="copy-fix">📋 Copy fix text</button>
-    <button data-act="copy-leak">📋 Copy leak as JSON</button>
-    <button data-act="open-tab">↗ Open page in new tab</button>
-    <button data-act="open-devtools">🛠 Inspect element (console hint)</button>
+    <button data-act="copy-fix">Copy fix text</button>
+    <button data-act="copy-leak">Copy leak as JSON</button>
+    <button data-act="open-tab">Open page in new tab</button>
+    <button data-act="open-devtools">Inspect element (console hint)</button>
     <hr style="border:0;border-top:1px solid var(--line);margin:4px 0" />
     <div style="padding:6px 10px;font:600 10px var(--mono);color:var(--muted);letter-spacing:.1em">SCAN SUB-PAGE</div>
     ${subPages.map((p) => `<button data-scan-sub="${p}">→ ${p}</button>`).join("")}
