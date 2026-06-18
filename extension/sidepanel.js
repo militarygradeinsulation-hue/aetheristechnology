@@ -1441,3 +1441,122 @@ $("af-apply")?.addEventListener("click", async () => {
     });
   });
 })();
+
+// ---------------- AGENTS (one-click) ----------------
+(function initAgentsTab() {
+  const out = document.getElementById("ag-out");
+  const status = document.getElementById("ag-status");
+  const actions = document.getElementById("ag-actions");
+  const briefEl = document.getElementById("ag-brief");
+  const confirmBtn = document.getElementById("ag-confirm");
+  const discardBtn = document.getElementById("ag-discard");
+  if (!out) return;
+
+  let pending = null; // { agent, url, plan }
+
+  function setStatus(msg) { status.textContent = msg || ""; }
+  function renderPlan(label, plan) {
+    const sections = [];
+    if (plan.summary) sections.push(`<div style="border-left:2px solid var(--amber);padding:6px 10px;background:rgba(0,0,0,0.3);font-style:italic;margin-bottom:8px">${escapeHtml(plan.summary)}</div>`);
+    if (plan.verdict) {
+      sections.push(`<div style="display:flex;gap:6px;margin-bottom:8px">
+        <span class="badge">Grade ${escapeHtml(plan.verdict.grade||"—")}</span>
+        <span class="badge">Score ${escapeHtml(String(plan.verdict.score||"—"))}/100</span>
+        <span class="badge">${escapeHtml(plan.verdict.annualLeakUSD||"—")}</span>
+      </div>`);
+    }
+    if (Array.isArray(plan.evidence) && plan.evidence.length) {
+      sections.push(`<div><div class="card-title">Evidence</div><ul>${plan.evidence.map(e=>`<li>${escapeHtml(e)}</li>`).join("")}</ul></div>`);
+    }
+    if (Array.isArray(plan.fixes) && plan.fixes.length) {
+      sections.push(`<div><div class="card-title">Fixes</div>${plan.fixes.map(f=>`
+        <div style="border:1px solid var(--border,#333);border-radius:6px;padding:8px;margin-bottom:6px">
+          <div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.1em">${escapeHtml(f.field||f.selector||f.title||"")}</div>
+          ${f.before?`<div style="text-decoration:line-through;color:#888;font-size:12px">${escapeHtml(f.before)}</div>`:""}
+          <div style="font-weight:600;font-size:13px">${escapeHtml(f.after||f.action||"")}</div>
+          ${f.why?`<div style="font-size:11px;color:#aaa;margin-top:2px">— ${escapeHtml(f.why)}</div>`:""}
+        </div>`).join("")}</div>`);
+    }
+    if (Array.isArray(plan.linkedinPosts) && plan.linkedinPosts.length) {
+      sections.push(`<div><div class="card-title">LinkedIn posts</div>${plan.linkedinPosts.map(p=>`
+        <div style="border:1px solid var(--border,#333);border-radius:6px;padding:8px;margin-bottom:6px;white-space:pre-wrap">
+          <div style="font-weight:600;margin-bottom:4px">${escapeHtml(p.hook||"")}</div>
+          <div style="font-size:13px">${escapeHtml(p.body||"")}</div>
+        </div>`).join("")}</div>`);
+    }
+    if (Array.isArray(plan.coldEmails) && plan.coldEmails.length) {
+      sections.push(`<div><div class="card-title">Cold emails</div>${plan.coldEmails.map(e=>`
+        <div style="border:1px solid var(--border,#333);border-radius:6px;padding:8px;margin-bottom:6px;white-space:pre-wrap">
+          <div style="font-weight:600;margin-bottom:4px">Subject: ${escapeHtml(e.subject||"")}</div>
+          <div style="font-size:13px">${escapeHtml(e.body||"")}</div>
+        </div>`).join("")}</div>`);
+    }
+    if (Array.isArray(plan.ninetyDayPlan) && plan.ninetyDayPlan.length) {
+      sections.push(`<div><div class="card-title">90-day plan</div>${plan.ninetyDayPlan.map(p=>`
+        <div style="border:1px solid var(--border,#333);border-radius:6px;padding:8px;margin-bottom:6px">
+          <div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:.1em">${escapeHtml(p.phase||"")}</div>
+          <div style="font-weight:600">${escapeHtml(p.focus||"")}</div>
+          <ul>${(p.moves||[]).map(m=>`<li>${escapeHtml(m)}</li>`).join("")}</ul>
+        </div>`).join("")}</div>`);
+    }
+    out.innerHTML = `<div class="card-title">${escapeHtml(label)} · plan</div>${sections.join("")}`;
+  }
+
+  function escapeHtml(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  async function runAgent(agent) {
+    const url = state?.activeUrl || "";
+    pending = null;
+    actions.style.display = "none";
+    out.innerHTML = "";
+    setStatus(`${agent.toUpperCase()} running on ${url || "(no URL)"} …`);
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/agents-run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+        body: JSON.stringify({
+          agent, url, brief: briefEl.value.trim(), mode: "plan",
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok || data.error) throw new Error(data.error || `HTTP ${r.status}`);
+      pending = { agent, url, plan: data.plan };
+      renderPlan(data.label, data.plan);
+      actions.style.display = "flex";
+      setStatus("Review the plan. Confirm to save to Library.");
+    } catch (e) {
+      setStatus("");
+      out.innerHTML = `<div class="bubble err">${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  document.querySelectorAll('#tab-agents [data-agent]').forEach((b) => {
+    b.addEventListener("click", () => runAgent(b.dataset.agent));
+  });
+
+  confirmBtn?.addEventListener("click", async () => {
+    if (!pending) return;
+    setStatus("Saving to Library…");
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/agents-run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+        body: JSON.stringify({ ...pending, mode: "execute" }),
+      });
+      const data = await r.json();
+      if (!r.ok || data.error) throw new Error(data.error || `HTTP ${r.status}`);
+      setStatus(`Saved · ${data.item?.title || "Library item"}`);
+      actions.style.display = "none";
+      pending = null;
+    } catch (e) {
+      setStatus("Save failed: " + e.message);
+    }
+  });
+
+  discardBtn?.addEventListener("click", () => {
+    pending = null;
+    out.innerHTML = "";
+    actions.style.display = "none";
+    setStatus("");
+  });
+})();
