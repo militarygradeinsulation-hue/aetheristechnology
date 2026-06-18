@@ -260,6 +260,23 @@ const LeakLanderPage: React.FC = () => {
 
 
 
+          {/* Booking embed. merged from /home */}
+          <section
+            id="book"
+            className="mt-12 max-w-3xl mx-auto scroll-mt-24 animate-fade-in"
+            style={{ animationDelay: "340ms", animationFillMode: "both" }}
+          >
+            <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3 text-center">
+              Or skip the scan — talk to the operator
+            </p>
+            <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              />
+            </div>
+          </section>
+
           {/* Contact info. compact glass row */}
           <section
             className="relative mt-12 animate-fade-in"
