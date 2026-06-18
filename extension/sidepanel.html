@@ -97,6 +97,31 @@
 
       <!-- LinkedIn Reply -->
       <div class="gpanel active" id="gpanel-reply">
+        <div class="card" id="li-auto-card">
+          <div class="card-title">Auto-Reply Mode · LinkedIn notifications</div>
+          <div class="muted" style="margin-bottom:8px">
+            While you're on linkedin.com, this scans your notifications every hour for new comments/replies on your posts and answers them automatically in your voice (no dashes).
+          </div>
+          <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="li-auto-enabled" />
+              <span><strong>Auto-Reply ON</strong></span>
+            </label>
+            <select id="li-auto-cadence" title="Scan cadence">
+              <option value="60" selected>Every 60 min</option>
+              <option value="30">Every 30 min</option>
+              <option value="15">Every 15 min</option>
+            </select>
+            <select id="li-auto-mode" title="Send mode">
+              <option value="send" selected>Auto-send</option>
+              <option value="draft">Draft only (don't send)</option>
+            </select>
+            <button id="li-auto-scan-now" class="ghost" type="button">Scan now</button>
+          </div>
+          <div id="li-auto-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+          <div id="li-auto-log" class="muted" style="margin-top:6px;font-size:11px;max-height:140px;overflow:auto;border:1px solid var(--border,#333);border-radius:6px;padding:6px;display:none"></div>
+        </div>
+
         <div class="card">
           <div class="card-title">LinkedIn reply drafter</div>
           <div class="muted" style="margin-bottom:8px">Same engine as the Content Studio. Vision-aware. Three source modes.</div>
