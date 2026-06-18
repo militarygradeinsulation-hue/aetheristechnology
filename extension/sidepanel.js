@@ -1380,3 +1380,64 @@ $("af-apply")?.addEventListener("click", async () => {
   if (!confirm(`Push ${patches.length} change${patches.length === 1 ? "" : "s"} LIVE to ${$("af-site").value}? This rewrites the post content.`)) return;
   return afCall("apply", { patches, dryRun: false });
 });
+
+// ===== LinkedIn Auto-Reply Mode wiring =====
+(function () {
+  const KEYS = {
+    enabled: "liAutoReply.enabled",
+    cadence: "liAutoReply.cadenceMin",
+    mode: "liAutoReply.sendMode",
+    log: "liAutoReply.log",
+    lastRun: "liAutoReply.lastRun",
+  };
+  const chk = document.getElementById("li-auto-enabled");
+  const cad = document.getElementById("li-auto-cadence");
+  const mode = document.getElementById("li-auto-mode");
+  const scanBtn = document.getElementById("li-auto-scan-now");
+  const statusEl = document.getElementById("li-auto-status");
+  const logEl = document.getElementById("li-auto-log");
+  if (!chk || !cad || !mode || !scanBtn) return;
+
+  function paintStatus(s) {
+    const on = !!s[KEYS.enabled];
+    const last = s[KEYS.lastRun] ? new Date(s[KEYS.lastRun]).toLocaleTimeString() : "never";
+    statusEl.textContent = `${on ? "● ON" : "○ OFF"} · cadence ${s[KEYS.cadence] || 60} min · mode ${s[KEYS.mode] || "send"} · last scan ${last}`;
+  }
+  function paintLog(arr) {
+    if (!Array.isArray(arr) || !arr.length) { logEl.style.display = "none"; return; }
+    logEl.style.display = "block";
+    logEl.innerHTML = arr.slice(-30).reverse().map((l) => {
+      const t = new Date(l.t).toLocaleTimeString();
+      const color = l.level === "error" ? "#e88" : l.level === "warn" ? "#eb8" : "#9c9";
+      return `<div style="color:${color}">[${t}] ${l.msg.replace(/</g,"&lt;")}</div>`;
+    }).join("");
+  }
+
+  chrome.storage.local.get(Object.values(KEYS), (s) => {
+    chk.checked = !!s[KEYS.enabled];
+    cad.value = String(s[KEYS.cadence] || 60);
+    mode.value = s[KEYS.mode] || "send";
+    paintStatus(s);
+    paintLog(s[KEYS.log]);
+  });
+
+  chrome.storage.onChanged.addListener((c, area) => {
+    if (area !== "local") return;
+    chrome.storage.local.get(Object.values(KEYS), (s) => {
+      paintStatus(s);
+      if (c[KEYS.log]) paintLog(s[KEYS.log]);
+    });
+  });
+
+  chk.addEventListener("change", () => chrome.storage.local.set({ [KEYS.enabled]: chk.checked }));
+  cad.addEventListener("change", () => chrome.storage.local.set({ [KEYS.cadence]: Number(cad.value) || 60 }));
+  mode.addEventListener("change", () => chrome.storage.local.set({ [KEYS.mode]: mode.value }));
+  scanBtn.addEventListener("click", () => {
+    chrome.runtime.sendMessage({
+      type: "AETHERIS_RELAY_TO_TAB",
+      payload: { type: "AETHERIS_LI_SCAN_NOW" },
+    }, (resp) => {
+      if (resp?.error) statusEl.textContent = `Scan failed: ${resp.error} (must be on a linkedin.com tab)`;
+    });
+  });
+})();
