@@ -138,7 +138,7 @@ export const AllInOneGenerator: React.FC = () => {
       fn: 'generate-content-calendar',
       body: () => ({
         industry: f.industry || f.businessName || 'general business',
-        goals: f.goals || 'grow brand awareness and inbound leads',
+        goals: f.goals || 'surface revenue leaks and book Diagnostic calls',
         platforms: 'LinkedIn, Facebook, Instagram',
       }),
       titleFor: () => `${f.industry || f.businessName || f.url}, 30-Day Calendar`,
