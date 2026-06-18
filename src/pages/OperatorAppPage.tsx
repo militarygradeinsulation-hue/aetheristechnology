@@ -193,10 +193,12 @@ function OperatorTab() {
     setLog(l => [...l, { role: "user", text: msg }]);
     setPrompt(""); setLoading(true);
     try {
+      const history = log.slice(-6).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text }));
       const { data, error } = await supabase.functions.invoke("extension-operator-chat", {
-        body: { url: url.trim() || undefined, message: msg },
+        body: { pageUrl: url.trim() || undefined, userText: msg, history },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       const reply = data?.reply || data?.text || "(no reply)";
       setLog(l => [...l, { role: "ai", text: reply }]);
     } catch (e: any) {
