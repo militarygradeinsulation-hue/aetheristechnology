@@ -460,17 +460,116 @@ export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, default
       {/* Analysis result */}
       {analysis && (
         <Card className="glass p-5 space-y-5 border-amber/30">
-          {/* Verdict + grade */}
-          <div className="flex items-start gap-4">
-            <div className={`shrink-0 w-16 h-16 rounded-xl flex items-center justify-center font-display font-bold text-3xl ${
-              ['A','B'].includes(analysis.overall_grade) ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                : analysis.overall_grade === 'C' ? 'bg-amber/15 text-amber border border-amber/30'
-                : 'bg-crimson/15 text-crimson border border-crimson/30'
-            }`}>{analysis.overall_grade}</div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Verdict</div>
-              <div className="font-display font-bold text-foreground text-lg leading-snug mt-1">{analysis.verdict}</div>
+          {/* Score header */}
+          {(() => {
+            const score = typeof analysis.total_score === 'number' ? analysis.total_score : null;
+            const bar = analysis.score_bar || (score === null ? 'decent' : score >= 85 ? 'elite' : score >= 70 ? 'strong' : score >= 55 ? 'decent' : score >= 35 ? 'weak' : 'danger');
+            const barStyle: Record<string, string> = {
+              elite: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
+              strong: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+              decent: 'bg-amber/15 text-amber border-amber/30',
+              weak: 'bg-amber/10 text-amber/80 border-amber/30',
+              danger: 'bg-crimson/15 text-crimson border-crimson/40',
+            };
+            const gradeStyle = ['A','B'].includes(analysis.overall_grade)
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+              : analysis.overall_grade === 'C' ? 'bg-amber/15 text-amber border-amber/30'
+              : 'bg-crimson/15 text-crimson border-crimson/30';
+            return (
+              <div className="flex items-start gap-4">
+                <div className={`shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center border-2 ${barStyle[bar]}`}>
+                  <div className="font-display font-bold text-4xl leading-none">{score ?? '—'}</div>
+                  <div className="text-[9px] uppercase tracking-widest font-bold opacity-80 mt-1">/ 100</div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Verdict</div>
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${gradeStyle}`}>Grade {analysis.overall_grade}</span>
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${barStyle[bar]}`}>{bar}</span>
+                  </div>
+                  <div className="font-display font-bold text-foreground text-lg leading-snug mt-1.5">{analysis.verdict}</div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Pillar bars */}
+          {analysis.pillars && analysis.pillars.length > 0 && (
+            <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Scorecard</div>
+              <div className="space-y-2.5">
+                {analysis.pillars.map((p) => {
+                  const ratio = p.max > 0 ? p.score / p.max : 0;
+                  const fill = ratio >= 0.8 ? 'bg-emerald-400' : ratio >= 0.5 ? 'bg-amber' : 'bg-crimson';
+                  const text = ratio >= 0.8 ? 'text-emerald-400' : ratio >= 0.5 ? 'text-amber' : 'text-crimson';
+                  return (
+                    <div key={p.key} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-foreground">{p.label}</span>
+                        <span className={`font-mono font-bold ${text}`}>{p.score}/{p.max}</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-background border border-border overflow-hidden">
+                        <div className={`h-full ${fill}`} style={{ width: `${Math.max(0, Math.min(100, ratio * 100))}%` }} />
+                      </div>
+                      {p.note && <div className="text-[11px] text-muted-foreground leading-snug">{p.note}</div>}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+          )}
+
+          {/* Guard meter */}
+          {analysis.guard_meter && (() => {
+            const lvl = analysis.guard_meter.level;
+            const map: Record<string, { bg: string; label: string }> = {
+              low: { bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', label: 'Guard Low' },
+              medium: { bg: 'bg-amber/15 text-amber border-amber/40', label: 'Guard Medium' },
+              high: { bg: 'bg-crimson/15 text-crimson border-crimson/40', label: 'Guard High' },
+              hostile: { bg: 'bg-crimson/25 text-crimson border-crimson/60', label: 'Guard Hostile' },
+            };
+            const m = map[lvl] || map.medium;
+            return (
+              <div className={`rounded-lg border p-4 space-y-2 ${m.bg}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[10px] uppercase tracking-widest font-bold">Reader Guard</div>
+                  <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border border-current">{m.label}</span>
+                </div>
+                {analysis.guard_meter.why && <div className="text-sm text-foreground"><span className="font-bold">Why:</span> {analysis.guard_meter.why}</div>}
+                {analysis.guard_meter.fix && <div className="text-sm text-foreground"><span className="font-bold">Lower it:</span> {analysis.guard_meter.fix}</div>}
+              </div>
+            );
+          })()}
+
+          {/* Trigger words */}
+          <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                Trigger Words {analysis.trigger_words_found ? `(${analysis.trigger_words_found.length})` : ''}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">−5 each</div>
+            </div>
+            {(!analysis.trigger_words_found || analysis.trigger_words_found.length === 0) ? (
+              <div className="text-sm text-emerald-400 flex items-center gap-2">
+                <ThumbsUp className="w-3.5 h-3.5"/> No trigger words detected. Guard stays down.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {analysis.trigger_words_found.map((t, i) => (
+                  <div key={i} className="rounded-md border border-crimson/30 bg-crimson/5 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-crimson">{t.category.replace(/_/g,' ')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap text-sm">
+                      <span className="font-mono text-crimson line-through">"{t.phrase}"</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="text-emerald-400">{t.swap_with}</span>
+                    </div>
+                    {t.why_bad && <div className="text-xs text-muted-foreground">{t.why_bad}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Subject critique */}
