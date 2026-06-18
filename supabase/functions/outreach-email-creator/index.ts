@@ -260,6 +260,97 @@ function stripDashes(s: string): string {
   return out;
 }
 
+// Trigger-word catalog used for server-side regex backstop. Each entry has a
+// concrete `swap_with` the rep can paste in. Categories match the schema enum.
+type TriggerCategory = "spam_trigger" | "sales_jargon" | "guard_raiser" | "fake_flattery" | "false_urgency" | "corporate_filler";
+const TRIGGER_LIBRARY: { pattern: RegExp; phrase: string; category: TriggerCategory; why_bad: string; swap_with: string }[] = [
+  // spam_trigger
+  { pattern: /\bjust checking in\b/i, phrase: "just checking in", category: "spam_trigger", why_bad: "Reads as a filler nudge. Signals no new value.", swap_with: "Lead with one specific update or observation about them." },
+  { pattern: /\bcircling back\b/i, phrase: "circling back", category: "spam_trigger", why_bad: "Classic sales-template phrase. Guard goes up instantly.", swap_with: "Reference the exact thing you noticed since last time." },
+  { pattern: /\btouching base\b/i, phrase: "touching base", category: "spam_trigger", why_bad: "Empty phrase that signals a pitch is coming.", swap_with: "State the one reason you are writing today." },
+  { pattern: /\bas per my last email\b/i, phrase: "as per my last email", category: "spam_trigger", why_bad: "Passive-aggressive. Damages trust immediately.", swap_with: "Restate the question in one new sentence." },
+  { pattern: /\bper our conversation\b/i, phrase: "per our conversation", category: "spam_trigger", why_bad: "Corporate filler that adds no value.", swap_with: "Reference the specific thing they said." },
+  { pattern: /\bdid you (see|get) my (last )?(email|message)\b/i, phrase: "did you see my last email", category: "spam_trigger", why_bad: "Guilt-trip nudge. Pushes the reader away.", swap_with: "Send a new angle instead of poking the old one." },
+  { pattern: /\bI hope (this finds you well|you('|')?re doing well|you are doing well|all is well)\b/i, phrase: "I hope this finds you well", category: "spam_trigger", why_bad: "Generic greeting that signals a template.", swap_with: "Open with one specific observation about them." },
+  { pattern: /\bto whom it may concern\b/i, phrase: "To whom it may concern", category: "spam_trigger", why_bad: "Shows you did not research the recipient.", swap_with: "Use their first name." },
+  { pattern: /\bdear sir\/?madam\b/i, phrase: "Dear Sir/Madam", category: "spam_trigger", why_bad: "Reads as mass mail.", swap_with: "Use their first name." },
+  // sales_jargon
+  { pattern: /\bsynerg(y|ies)\b/i, phrase: "synergy", category: "sales_jargon", why_bad: "Consultant-speak. Raises the guard.", swap_with: "Name the specific overlap in plain language." },
+  { pattern: /\bleverage\b/i, phrase: "leverage", category: "sales_jargon", why_bad: "Overused verb that screams pitch deck.", swap_with: "Use \"use\" or name the concrete action." },
+  { pattern: /\bunlock\b/i, phrase: "unlock", category: "sales_jargon", why_bad: "Marketing cliche. Reader tunes out.", swap_with: "Name the concrete outcome in dollars or time." },
+  { pattern: /\brevolutionary\b/i, phrase: "revolutionary", category: "sales_jargon", why_bad: "Hype word. Erodes trust.", swap_with: "Cut it. Let the specifics speak." },
+  { pattern: /\bgame[- ]changer\b/i, phrase: "game-changer", category: "sales_jargon", why_bad: "Hype word with no proof.", swap_with: "Name the specific change with a number." },
+  { pattern: /\bcutting[- ]edge\b/i, phrase: "cutting-edge", category: "sales_jargon", why_bad: "Empty buzzword.", swap_with: "Describe the actual mechanism." },
+  { pattern: /\bworld[- ]class\b/i, phrase: "world-class", category: "sales_jargon", why_bad: "Self-flattery.", swap_with: "Cut it. Show, do not tell." },
+  { pattern: /\bbest[- ]in[- ]class\b/i, phrase: "best-in-class", category: "sales_jargon", why_bad: "Self-flattery.", swap_with: "Cut it. Show one concrete proof point." },
+  { pattern: /\bROI\b/, phrase: "ROI", category: "sales_jargon", why_bad: "Sales-deck shorthand. Sounds transactional.", swap_with: "Quote the actual dollar return." },
+  { pattern: /\bsolutions?\b/i, phrase: "solution", category: "sales_jargon", why_bad: "Generic vendor word. Signals selling.", swap_with: "Name the specific thing you do." },
+  { pattern: /\bvalue[- ](add|prop|proposition)\b/i, phrase: "value prop", category: "sales_jargon", why_bad: "Marketing jargon. Guard up.", swap_with: "State the outcome in plain English." },
+  { pattern: /\bour (platform|software|solution|product)\b/i, phrase: "our platform", category: "sales_jargon", why_bad: "Pivots to you, not them. Kills the email.", swap_with: "Stay on them for at least three more lines." },
+  { pattern: /\bat scale\b/i, phrase: "at scale", category: "sales_jargon", why_bad: "Empty modifier.", swap_with: "Quote the actual volume." },
+  { pattern: /\bmove the needle\b/i, phrase: "move the needle", category: "sales_jargon", why_bad: "Cliche.", swap_with: "Name the metric and the delta." },
+  { pattern: /\blow[- ]hanging fruit\b/i, phrase: "low-hanging fruit", category: "sales_jargon", why_bad: "Cliche.", swap_with: "Point to the specific easy win." },
+  { pattern: /\bboil the ocean\b/i, phrase: "boil the ocean", category: "sales_jargon", why_bad: "Cliche.", swap_with: "Describe the scope plainly." },
+  { pattern: /\btake this offline\b/i, phrase: "take this offline", category: "sales_jargon", why_bad: "Corporate shorthand. Vague.", swap_with: "Ask one direct question by email." },
+  { pattern: /\bbandwidth\b/i, phrase: "bandwidth", category: "sales_jargon", why_bad: "Corporate filler.", swap_with: "Say \"time\" or name the constraint." },
+  { pattern: /\balign(ment)?\b/i, phrase: "align", category: "sales_jargon", why_bad: "Vague consultant word.", swap_with: "Name the specific decision you want." },
+  { pattern: /\bholistic\b/i, phrase: "holistic", category: "sales_jargon", why_bad: "Buzzword.", swap_with: "List the parts you actually cover." },
+  { pattern: /\bseamless\b/i, phrase: "seamless", category: "sales_jargon", why_bad: "Marketing word.", swap_with: "Describe the actual integration step." },
+  { pattern: /\brobust\b/i, phrase: "robust", category: "sales_jargon", why_bad: "Empty modifier.", swap_with: "Quote the specific spec." },
+  { pattern: /\btransformative\b/i, phrase: "transformative", category: "sales_jargon", why_bad: "Hype.", swap_with: "Name the before and after." },
+  { pattern: /\bparadigm\b/i, phrase: "paradigm", category: "sales_jargon", why_bad: "Buzzword.", swap_with: "Describe the actual shift in one line." },
+  { pattern: /\bdisrupt(ing|ive)?\b/i, phrase: "disrupting", category: "sales_jargon", why_bad: "Tech-bro cliche.", swap_with: "Cut it. Show the concrete change." },
+  // guard_raiser
+  { pattern: /\bhop on a (quick )?call\b/i, phrase: "hop on a call", category: "guard_raiser", why_bad: "Asks for time before earning trust.", swap_with: "Ask one yes/no question by reply." },
+  { pattern: /\bquick (call|chat)\b/i, phrase: "quick call", category: "guard_raiser", why_bad: "Reader knows it is never quick.", swap_with: "Ask one specific question by reply." },
+  { pattern: /\b(15|20|30) minutes?\b/i, phrase: "15 minutes", category: "guard_raiser", why_bad: "Asks for calendar time too early.", swap_with: "Ask for a one-line reply instead." },
+  { pattern: /\b(book|schedule) a demo\b/i, phrase: "book a demo", category: "guard_raiser", why_bad: "Maximum sales pressure. Guard hostile.", swap_with: "Offer a short loom or a single question." },
+  { pattern: /\bpick your brain\b/i, phrase: "pick your brain", category: "guard_raiser", why_bad: "Asks for free time, signals taking.", swap_with: "Offer something first, then ask one question." },
+  { pattern: /\bpartnership opportunity\b/i, phrase: "partnership opportunity", category: "guard_raiser", why_bad: "Vague and salesy.", swap_with: "Name the specific collaboration in one line." },
+  { pattern: /\bwhen we work together\b/i, phrase: "when we work together", category: "guard_raiser", why_bad: "Presumptive. Reader has not agreed.", swap_with: "Use \"if it makes sense\" or just ask." },
+  // fake_flattery
+  { pattern: /\bloved your post\b/i, phrase: "loved your post", category: "fake_flattery", why_bad: "Generic. Signals you skimmed.", swap_with: "Quote one specific line from the post." },
+  { pattern: /\bhuge fan\b/i, phrase: "huge fan", category: "fake_flattery", why_bad: "Empty flattery. Lowers credibility.", swap_with: "Cite one specific thing they shipped." },
+  { pattern: /\bimpressive work\b/i, phrase: "impressive work", category: "fake_flattery", why_bad: "Generic compliment.", swap_with: "Name the exact piece of work." },
+  // false_urgency
+  { pattern: /\bexclusive offer\b/i, phrase: "exclusive offer", category: "false_urgency", why_bad: "Spam-marker. Guard goes hostile.", swap_with: "Cut it. State the actual offer plainly." },
+  { pattern: /\blimited time\b/i, phrase: "limited time", category: "false_urgency", why_bad: "Manufactured urgency.", swap_with: "Cut it. Use a real deadline if one exists." },
+  { pattern: /\bact now\b/i, phrase: "act now", category: "false_urgency", why_bad: "Reads as spam.", swap_with: "State the next step in calm language." },
+  { pattern: /\bdon('|')?t miss out\b/i, phrase: "don't miss out", category: "false_urgency", why_bad: "Spam-marker.", swap_with: "Cut it." },
+];
+
+function scanTriggers(text: string): { phrase: string; category: TriggerCategory; why_bad: string; swap_with: string }[] {
+  if (!text) return [];
+  const seen = new Set<string>();
+  const out: { phrase: string; category: TriggerCategory; why_bad: string; swap_with: string }[] = [];
+  for (const t of TRIGGER_LIBRARY) {
+    if (t.pattern.test(text)) {
+      const key = t.phrase.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ phrase: t.phrase, category: t.category, why_bad: t.why_bad, swap_with: t.swap_with });
+    }
+  }
+  return out;
+}
+
+function deriveScoreBar(score: number): "danger" | "weak" | "decent" | "strong" | "elite" {
+  if (score >= 85) return "elite";
+  if (score >= 70) return "strong";
+  if (score >= 55) return "decent";
+  if (score >= 35) return "weak";
+  return "danger";
+}
+
+const DEFAULT_PILLARS = [
+  { key: "opener", label: "Opener", max: 20 },
+  { key: "specificity", label: "Specificity", max: 20 },
+  { key: "guard_low", label: "Guard Low", max: 20 },
+  { key: "clarity", label: "Clarity", max: 15 },
+  { key: "ask", label: "Ask", max: 15 },
+  { key: "tone_fit", label: "Tone Fit", max: 10 },
+];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
