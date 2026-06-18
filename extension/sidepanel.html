@@ -32,8 +32,32 @@
   </nav>
 
   <main>
+    <!-- AGENTS -->
+    <section class="panel active" id="tab-agents">
+      <div class="card">
+        <div class="card-title">One-Click AI Agents</div>
+        <div class="muted" style="margin-bottom:8px">
+          Uses your current tab as the target. Each agent plans first — you confirm before it saves or pushes anything.
+        </div>
+        <label class="li-lbl">Optional brief</label>
+        <textarea id="ag-brief" rows="2" placeholder="e.g. focus on enterprise buyers, ignore SMB"></textarea>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button class="primary" data-agent="detective">Detective</button>
+          <button class="primary" data-agent="marketer">Marketer</button>
+          <button class="primary" data-agent="consultant">Consultant</button>
+          <button class="primary" data-agent="programmer">Programmer</button>
+        </div>
+        <div id="ag-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <div id="ag-out" class="out" style="margin-top:10px"></div>
+        <div id="ag-actions" class="row" style="gap:6px;margin-top:8px;display:none">
+          <button id="ag-confirm" class="primary" style="background:var(--amber);color:#000">Confirm + Save to Library</button>
+          <button id="ag-discard" class="ghost">Discard</button>
+        </div>
+      </div>
+    </section>
+
     <!-- SCAN -->
-    <section class="panel active" id="tab-scan">
+    <section class="panel" id="tab-scan">
       <div class="row" style="flex-wrap:wrap;gap:6px">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
         <button id="scan-clear" class="ghost" title="Clear this scan, remove overlays, and undo preview fixes">Clear / Start Over</button>
