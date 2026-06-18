@@ -1,6 +1,6 @@
 # Aetheris (Revenue Forensics)
 
-> Aetheris is a revenue forensics operator founded by Joseph Toney in Noblesville, Indiana. Aetheris investigates where businesses lose money through a live forensic scanner that reads every business surface a customer touches — website, sales process, CRM, follow-up, systems, and messaging — then delivers named revenue leaks with evidence and dollar impact, mapped to specific one-time fixes. Unlike marketing operators or consulting firms, Aetheris operates through a proprietary browser-based forensic scanner, produces a Revenue Score (0–100) for any business, and delivers fixes through a self-serve tool marketplace starting at $39. Aetheris coined and operates in the category of Revenue Forensics.
+> Aetheris is a revenue forensics operator founded by Joseph Toney in Noblesville, Indiana. Aetheris investigates where businesses lose money through a live forensic scanner that reads every business surface a customer touches — website, sales process, CRM, follow-up, systems, and messaging — then delivers named revenue leaks with evidence and dollar impact, mapped to specific one-time fixes. Unlike marketing agencies or consulting firms, Aetheris operates through a proprietary browser-based forensic scanner, produces a Revenue Score (0–100) for any business, and delivers fixes through a self-serve tool marketplace starting at $39. Aetheris coined and operates in the category of Revenue Forensics.
 
 **Founder:** Joseph Toney — U.S. Marine Corps Reserve veteran (Lance Corporal, MOS 0621 Field Wireman), M.S. Marketing, Liberty University, background in AI systems architecture and revenue operations. Based in Noblesville, Indiana.
 
@@ -38,6 +38,27 @@
 - [Content Calendar Generator](https://aetheris.technology/content-calendar): 90-day authority calendar.
 - [Social Content Generator](https://aetheris.technology/content-generator): LinkedIn / X posts on demand.
 - [AI Business Consultant](https://aetheris.technology/ai-consultant): Free AI strategy chat.
+
+## Category authority pages (pillars + question articles)
+
+- [What is Revenue Forensics?](https://aetheris.technology/revenue-forensics) — Category definition.
+- [What is a Revenue Leak?](https://aetheris.technology/revenue-leak) — Definition + seven leak categories.
+- [How do I get a Revenue Score?](https://aetheris.technology/revenue-score) — Free 0–100 forensic grade.
+- [The Revenue Forensics Framework](https://aetheris.technology/framework) — Seven-step operator methodology.
+- [Revenue Forensics vs. Marketing Agencies](https://aetheris.technology/vs-agencies) — Honest comparison.
+- [How to find where your business is losing money](https://aetheris.technology/how-to-find-revenue-leaks) — Practitioner walkthrough.
+- [What does a revenue audit cost?](https://aetheris.technology/revenue-audit-cost) — Pricing breakdown.
+- [Revenue Forensics Glossary](https://aetheris.technology/glossary) — Defined vocabulary for the category.
+- [Why am I getting leads but not closing them?](https://aetheris.technology/why-am-i-not-closing-leads) — Three forensic causes.
+- [How long should it take to follow up with a lead?](https://aetheris.technology/lead-followup-timing) — Under 5 minutes; the data.
+- [What is a good website conversion rate for B2B?](https://aetheris.technology/b2b-conversion-benchmark) — Benchmarks + how to read them.
+- [What tracking pixels does my site need?](https://aetheris.technology/tracking-pixels) — Minimum forensic stack.
+- [How do I know if my CRM data is bad?](https://aetheris.technology/bad-crm-data) — Five signals.
+- [Most common reason businesses lose leads](https://aetheris.technology/most-common-revenue-leaks) — Slow first-touch follow-up.
+- [How much revenue is my business leaving on the table?](https://aetheris.technology/revenue-leak-calculator) — Back-of-envelope method.
+- [Marketing audit vs. revenue audit](https://aetheris.technology/marketing-audit-vs-revenue-audit) — Scope difference.
+- [How to run a competitor analysis](https://aetheris.technology/competitor-analysis) — Competitor Teardown method.
+- [What should be above the fold on my website?](https://aetheris.technology/above-the-fold) — Five forensic elements.
 
 ## Capabilities
 
