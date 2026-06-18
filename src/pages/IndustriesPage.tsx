@@ -448,7 +448,7 @@ const IndustriesPage: React.FC = () => {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search your industry or niche (e.g. dental, freight, agency)…"
+                placeholder="Search your industry or niche (e.g. dental, freight, studio)…"
                 className="pl-9 h-12 bg-background/60 border-amber/30 focus-visible:ring-amber/50"
                 aria-label="Search industries"
               />

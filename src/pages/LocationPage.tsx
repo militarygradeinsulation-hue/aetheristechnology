@@ -169,7 +169,7 @@ const LocationPage: React.FC = () => {
                 <li><strong className="text-amber">1. Free Leak Audit ($0).</strong> 14-question self-scan. PDF case file with an estimated annual leak in dollars.</li>
                 <li><strong className="text-amber">2. Forensic Diagnostic ($2,500).</strong> Operator-led walk-through with Joseph Toney. Flagged leak list, prioritization, rebuild order. Fee applied 1:1 toward any engagement.</li>
                 <li><strong className="text-amber">3. 14-Day Operational Diagnostic ($7,500).</strong> Full forensic breakdown of workflow inefficiencies, disconnected systems, and automation opportunities. Guaranteed.</li>
-                <li><strong className="text-amber">4. Implementation Retainer ($15K/mo).</strong> 3-month minimum. We execute the prioritized fixes ourselves. Available only to Diagnostic clients.</li>
+                <li><strong className="text-amber">4. Active Case ($15K/mo).</strong> 3-month minimum. The forensic case stays open while we execute the prioritized fixes. Available only to Diagnostic clients.</li>
               </ol>
             </section>
 

@@ -290,7 +290,7 @@ export default function ResumeForensicsPage() {
                   <Textarea
                     id="role-notes"
                     rows={4}
-                    placeholder="Must own a $1.5M quota. Must have CRM rigor. No agency-only backgrounds. Remote, US only…"
+                    placeholder="Must own a $1.5M quota. Must have CRM rigor. No vendor-only backgrounds. Remote, US only…"
                     value={roleNotes}
                     onChange={(e) => setRoleNotes(e.target.value)}
                   />

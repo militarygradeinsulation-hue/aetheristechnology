@@ -15,7 +15,7 @@ export const CORE_LEAK_FACTS: CitedFact[] = [
   {
     answer: 'The operator-led Forensic Diagnostic is $2,500 flat — applied toward any follow-on engagement.',
     support:
-      'Joseph Toney runs the audit personally. Output: flagged leak list, prioritization, and rebuild order. The $2,500 fee is credited 1:1 to a retainer or implementation if you proceed.',
+      'Joseph Toney runs the audit personally. Output: flagged leak list, prioritization, and rebuild order. The $2,500 fee is credited 1:1 to an Active Case or implementation engagement if you proceed.',
     source: 'Aetheris pricing, /diagnostic',
     implication:
       'There is no risk premium to start. The diagnostic either pays for itself in a follow-on or stands alone as the most concrete vendor evaluation you will run this quarter.',
@@ -115,9 +115,9 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
       'HubSpot, Salesforce, Pipedrive, Zoho, Close, and any CRM that can export deals, contacts, and activities to CSV. We have also run the audit against Excel-only revenue tracking.',
   },
   {
-    question: 'What does the implementation retainer cost?',
+    question: 'What does the Active Case cost?',
     answer:
-      '$15,000/month with a 3-month minimum. The Forensic Diagnostic fee is credited toward the first month. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
+      '$15,000/month with a 3-month minimum. The Forensic Diagnostic fee is credited toward the first month. The case stays open until the Leak Register\'s high-priority entries are sealed. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
   },
   {
     question: 'What if you do not find anything?',
@@ -152,7 +152,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'Who owns the deliverables?',
     answer:
-      'You do. Client owns the written report, the source-data appendix, the implementation quote, and any custom code or workflows built during a retainer. Aetheris retains the right to use anonymized methodology insights.',
+      'You do. Client owns the written report, the source-data appendix, the implementation quote, the Leak Register, and any custom code or workflows built during an Active Case. Aetheris retains the right to use anonymized methodology insights.',
   },
   {
     question: 'How do I start?',

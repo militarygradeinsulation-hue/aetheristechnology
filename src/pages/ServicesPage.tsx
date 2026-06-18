@@ -14,10 +14,10 @@ const ServicesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Services, 21-Day Diagnostic + Implementation | Aetheris"
-        description="Two offers. The 21-Day Revenue Diagnostic ($18,500 fixed fee) and Implementation Retainer ($15K/mo, Diagnostic clients only)."
+        title="Services, 21-Day Diagnostic + Active Case | Aetheris"
+        description="Two offers. The 21-Day Revenue Diagnostic ($18,500 fixed fee) and the Active Case ($15K/mo, Diagnostic clients only) — the open forensic engagement that stays live until the leaks are sealed."
         path="/services"
-        keywords="revenue diagnostic, implementation retainer, manufacturing CRM consulting"
+        keywords="revenue diagnostic, active case engagement, manufacturing CRM forensics"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Services', path: '/services' }]}
       />
       <Background />
@@ -33,7 +33,7 @@ const ServicesPage: React.FC = () => {
                 Diagnose, then implement.
               </h1>
               <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We don't sell à la carte. You start with the Diagnostic. If you want us to fix what we find, we run the implementation retainer.
+                We don't sell à la carte. You start with the Diagnostic. If you want us to fix what we find, we open an Active Case — your forensic engagement stays open until the leaks are sealed.
               </p>
             </div>
 
@@ -42,7 +42,7 @@ const ServicesPage: React.FC = () => {
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 1 · Sales-led</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">21-Day Revenue Diagnostic</h2>
                 <div className="font-forensic text-5xl font-bold text-foreground mt-4">$18,500</div>
-                <p className="text-xs text-muted-foreground mt-1">Fixed fee. One-time. No retainer required.</p>
+                <p className="text-xs text-muted-foreground mt-1">Fixed fee. One-time. Nothing else required to read the report.</p>
                 <ul className="space-y-2 mt-5 text-sm text-foreground/85 flex-1">
                   {[
                     'Map every leak in CRM, sales follow-up, and lead flow',
@@ -62,14 +62,15 @@ const ServicesPage: React.FC = () => {
 
               <div className="forensic-tile rounded-sm border border-border/60 p-7 flex flex-col">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 2 · Diagnostic clients only</div>
-                <h2 className="font-forensic text-2xl font-bold text-foreground">Implementation Retainer</h2>
+                <h2 className="font-forensic text-2xl font-bold text-foreground">Active Case</h2>
                 <div className="font-forensic text-5xl font-bold text-foreground mt-4">$15,000<span className="text-xl text-muted-foreground"> /mo</span></div>
-                <p className="text-xs text-muted-foreground mt-1">3-month minimum. Operator-led execution.</p>
+                <p className="text-xs text-muted-foreground mt-1">3-month minimum. Case stays open until leaks are sealed.</p>
                 <ul className="space-y-2 mt-5 text-sm text-foreground/85 flex-1">
                   {[
                     'We execute the prioritized fixes ourselves',
                     'CRM build / rebuild + data migration',
                     'Weekly readout, monthly metric re-measurement',
+                    'Living Leak Register tracks every fix + recovery',
                     'Documented handoff so your team can run it',
                   ].map((i) => (
                     <li key={i} className="flex gap-2"><Check className="w-4 h-4 text-amber shrink-0 mt-0.5" />{i}</li>
@@ -77,7 +78,7 @@ const ServicesPage: React.FC = () => {
                 </ul>
                 <Link to="/implementation" className="mt-6">
                   <Button variant="outline" className="w-full glass-hover border-amber/40 text-amber">
-                    Implementation details <ArrowRight className="w-4 h-4 ml-2" />
+                    How the case works <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -113,11 +114,11 @@ const ServicesPage: React.FC = () => {
                 </div>
 
                 <div className="forensic-tile rounded-sm border border-amber/40 p-6">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 2 · Retainer override</div>
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 2 · Active Case override</div>
                   <div className="font-forensic text-4xl font-bold text-foreground">$1,500<span className="text-lg text-muted-foreground"> /mo</span></div>
-                  <p className="text-xs text-muted-foreground mt-1">Every month the client stays on retainer ($15K/mo)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Every month the client's case stays open ($15K/mo)</p>
                   <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
-                    Recurring override for the full life of the engagement. A single referral that stays 12 months pays $18,000 on top of the Diagnostic bonus.
+                    Recurring override for the full life of the engagement. A single referral whose case stays open 12 months pays $18,000 on top of the Diagnostic bonus.
                   </p>
                 </div>
 
@@ -136,8 +137,8 @@ const ServicesPage: React.FC = () => {
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">The math on one good referral</div>
                     <p className="text-sm text-foreground/85 leading-relaxed">
-                      Intro bonus + Diagnostic close + 6-month retainer override =
-                      <span className="text-amber font-bold"> $11,500</span> from a single warm introduction. Twelve months on retainer pushes it past <span className="text-amber font-bold">$20,500</span>.
+                      Intro bonus + Diagnostic close + 6-month Active Case override =
+                      <span className="text-amber font-bold"> $11,500</span> from a single warm introduction. Twelve months with the case open pushes it past <span className="text-amber font-bold">$20,500</span>.
                     </p>
                   </div>
                   <div>

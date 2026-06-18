@@ -65,7 +65,7 @@ const TIERS: Tier[] = [
     tagline: 'Embedded — 3 weeks of an operator.',
     forWho: 'Owners who want the whole machine, not a tool drawer.',
     price: '$10,000',
-    priceNote: 'one-time · credit toward Retainer',
+    priceNote: 'one-time · credit toward Active Case',
     operatorHours: '~30 hours over 3 weeks',
     pairingRationale: 'The operator embeds, runs every tool against your real business, hands you a working revenue system.',
     included: [
@@ -73,7 +73,7 @@ const TIERS: Tier[] = [
       'Strategy Blueprint + Social Pack',
       'Lead-Nurture Automation',
       'Weekly calls + async ops channel',
-      '$10k credit toward Retainer',
+      '$10k credit toward Active Case',
     ],
     cta: 'Talk to an operator',
   },
@@ -229,7 +229,7 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
                 Flagship · Monthly
               </div>
               <h4 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2">
-                Implementation Retainer
+                Active Case
               </h4>
               <div className="font-forensic text-3xl font-bold text-foreground mb-1">$15,000<span className="text-base text-muted-foreground">/mo</span></div>
               <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
