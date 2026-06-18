@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import landingOneButtonInfographic from "@/assets/landing-one-button-infographic.jpg.asset.json";
+import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
@@ -19,6 +20,16 @@ const LeakLanderPage: React.FC = () => {
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
 
   const handleLogoTap = () => {
     tapCountRef.current += 1;
@@ -101,6 +112,19 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
+          {/* Editorial hero banner. merged from /home */}
+          <section
+            className="mt-2 max-w-5xl mx-auto animate-fade-in"
+            style={{ animationDelay: "80ms", animationFillMode: "both" }}
+          >
+            <img
+              src={homeHeroBanner.url}
+              alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks, turns real data into insight, and keeps your business confidential."
+              className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </section>
 
 
           {/* Catch phrase */}
@@ -130,12 +154,6 @@ const LeakLanderPage: React.FC = () => {
             className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
-              <Link to="/home">
-                <ExternalLink className="w-5 h-5 mr-2 text-amber relative" />
-                <span className="relative">Main Site</span>
-              </Link>
-            </Button>
             <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/contact">
                 <FileText className="w-5 h-5 mr-2 text-amber relative" />
@@ -241,6 +259,23 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
+
+          {/* Booking embed. merged from /home */}
+          <section
+            id="book"
+            className="mt-12 max-w-3xl mx-auto scroll-mt-24 animate-fade-in"
+            style={{ animationDelay: "340ms", animationFillMode: "both" }}
+          >
+            <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3 text-center">
+              Or skip the scan — talk to the operator
+            </p>
+            <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
+              <div
+                className="meetings-iframe-container"
+                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              />
+            </div>
+          </section>
 
           {/* Contact info. compact glass row */}
           <section
