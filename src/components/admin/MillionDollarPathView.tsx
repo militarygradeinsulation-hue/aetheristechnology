@@ -18,7 +18,7 @@ const STORAGE_KEY = "hires.mdp.done";
 
 export const MillionDollarPathView: React.FC = () => {
   const [diagnostics, setDiagnostics] = useState(30);
-  const [active cases, setActive Cases] = useState(18);
+  const [activeCases, setActiveCases] = useState(18);
   const [recurringMonths, setRecurringMonths] = useState(14);
   const [done, setDone] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
@@ -27,8 +27,8 @@ export const MillionDollarPathView: React.FC = () => {
     const next = { ...s, [k]: !s[k] }; localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); return next;
   });
 
-  const scenario = useMemo(() => buildScenario({ diagnostics, active cases, recurringMonths }),
-    [diagnostics, active cases, recurringMonths]);
+  const scenario = useMemo(() => buildScenario({ diagnostics, activeCases, recurringMonths }),
+    [diagnostics, activeCases, recurringMonths]);
   const weeks = useMemo(() => buildWeeks(), []);
   const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [pushing, setPushing] = useState(false);
@@ -53,8 +53,8 @@ export const MillionDollarPathView: React.FC = () => {
         color: "cat:kickoff_90day",
         ai_plan: {
           summary: "$1M in 90 days operator sprint kickoff.",
-          tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.active casesToClose} closes needed`],
-          kpis: [`$${(MDP_GOAL_CENTS/100000).toFixed(0)}k gross`, `${scenario.diagnosticsToClose} Diagnostics closed`, `${scenario.active casesToClose} Active Cases closed`],
+          tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.activeCasesToClose} closes needed`],
+          kpis: [`$${(MDP_GOAL_CENTS/100000).toFixed(0)}k gross`, `${scenario.diagnosticsToClose} Diagnostics closed`, `${scenario.activeCasesToClose} Active Cases closed`],
         },
       });
       ok++;
@@ -202,7 +202,7 @@ export const MillionDollarPathView: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-3 gap-3">
             <MixInput label="Diagnostics ($18k each)" value={diagnostics} onChange={setDiagnostics} />
-            <MixInput label="Active Cases (mo 1, $15k)"   value={active cases}   onChange={setActive Cases} />
+            <MixInput label="Active Cases (mo 1, $15k)"   value={activeCases}   onChange={setActiveCases} />
             <MixInput label="Recurring months ($15k)"  value={recurringMonths} onChange={setRecurringMonths} />
           </div>
 
@@ -219,7 +219,7 @@ export const MillionDollarPathView: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-4 gap-3">
-            <FunnelStat icon={DollarSign} label="Closes needed" value={`${scenario.diagnosticsToClose + scenario.active casesToClose}`} sub="Diagnostic + Active Case" />
+            <FunnelStat icon={DollarSign} label="Closes needed" value={`${scenario.diagnosticsToClose + scenario.activeCasesToClose}`} sub="Diagnostic + Active Case" />
             <FunnelStat icon={FileText}   label="Proposals to send" value={`${scenario.proposalsNeeded}`} sub={`@ ${(FUNNEL.proposalToClose * 100).toFixed(0)}% close`} />
             <FunnelStat icon={Calendar}   label="Meetings to run"   value={`${scenario.meetingsNeeded}`} sub={`~${scenario.meetingsPerWeek}/week`} />
             <FunnelStat icon={Phone}      label="Outbound touches"  value={`${scenario.outboundNeeded.toLocaleString()}`} sub={`~${scenario.outboundPerDay}/day team-wide`} />
