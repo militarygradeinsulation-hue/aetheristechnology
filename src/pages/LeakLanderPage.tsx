@@ -70,6 +70,8 @@ const LeakLanderPage: React.FC = () => {
         path="/"
       />
 
+      <Navbar onContactClick={() => {}} />
+
       {/* LinkedIn premium offer banner */}
       <a
         href="https://www.linkedin.com/in/thejosephtoney"
