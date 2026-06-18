@@ -306,27 +306,27 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
                   <TrendingUp className="w-3.5 h-3.5" /> Full-stack close, what one client is worth in {months} {months === 1 ? 'month' : 'months'}
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Diagnostic ({fmtUsd(diag.priceCents)} one-time) + Active Case ({fmtUsd(active case.priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
-                  <span className="text-foreground font-semibold">{fmtUsd(diag.priceCents + active case.priceCents * months)} in client revenue</span>.
+                  Diagnostic ({fmtUsd(diag.priceCents)} one-time) + Active Case ({fmtUsd(activeCase.priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
+                  <span className="text-foreground font-semibold">{fmtUsd(diag.priceCents + activeCase.priceCents * months)} in client revenue</span>.
                 </p>
                 {showFullSplit ? (
                   <div className="grid sm:grid-cols-3 gap-3">
                     <div className="rounded-md border border-border/50 bg-background/60 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Company</div>
                       <div className="text-xl font-bold text-foreground">
-                        {fmtUsd(diag.split.company + active case.split.company * months)}
+                        {fmtUsd(diag.split.company + activeCase.split.company * months)}
                       </div>
                     </div>
                     <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Rep</div>
                       <div className="text-xl font-bold text-amber">
-                        {fmtUsd(diag.split.rep + active case.split.rep * months)}
+                        {fmtUsd(diag.split.rep + activeCase.split.rep * months)}
                       </div>
                     </div>
                     <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Partner</div>
                       <div className="text-xl font-bold text-amber">
-                        {fmtUsd(diag.split.partner + active case.split.partner * months)}
+                        {fmtUsd(diag.split.partner + activeCase.split.partner * months)}
                       </div>
                     </div>
                   </div>
@@ -334,7 +334,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
                   <div className="rounded-md border border-amber/40 bg-amber/10 p-4 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">You take home</div>
                     <div className="text-4xl font-bold text-amber leading-tight">
-                      {fmtUsd(diag.split.rep + active case.split.rep * months)}
+                      {fmtUsd(diag.split.rep + activeCase.split.rep * months)}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       per full-stack client over {months} {months === 1 ? 'month' : 'months'}

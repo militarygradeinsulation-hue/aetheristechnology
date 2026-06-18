@@ -65,7 +65,7 @@ export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'activeCase', FixedSplitCent
   // 21-Day Revenue Diagnostic — $18,500 one-time
   diagnostic: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   // Active Case — $15,000/mo, paid every month client stays
-  active case:   { company:   800_000, rep: 400_000, partner: 300_000 },
+  activeCase:   { company:   800_000, rep: 400_000, partner: 300_000 },
 };
 
 /** Returns the rep cut for a product — fixed-dollar for flagships, % for tiered. */

@@ -9,7 +9,7 @@ export const MDP_WEEKS = 13;
 // Offer mix, what we're actually selling
 export const OFFERS = {
   diagnostic: { label: "Forensic Diagnostic", price: 18_000, repPayout: 5_000, partnerPayout: 3_000, companyNet: 10_000 },
-  active case:   { label: "Active Case (mo 1)", price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
+  activeCase:   { label: "Active Case (mo 1)", price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
   recurring:  { label: "Active Case recurring (mo 2+)",     price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
 } as const;
 
