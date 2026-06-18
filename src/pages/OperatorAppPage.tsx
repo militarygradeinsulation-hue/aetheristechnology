@@ -8,9 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2, Search, MessageSquare, Sparkles, Database, Wrench,
   AlertTriangle, TrendingDown, Target, CheckCircle2, Copy, Send,
-  Building2, Users, ArrowRight, FileWarning, Activity,
+  Building2, Users, ArrowRight, FileWarning, Activity, Bot,
 } from "lucide-react";
 import { toast } from "sonner";
+import AgentsTab from "@/components/AgentsTab";
 
 // ─────────────────────────── shared bits ───────────────────────────
 function Label({ children }: { children: React.ReactNode }) {
