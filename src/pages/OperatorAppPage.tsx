@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import AgentsTab from "@/components/AgentsTab";
+import { MatrixRain } from "@/components/MatrixRain";
 
 // ─────────────────────────── shared bits ───────────────────────────
 function Label({ children }: { children: React.ReactNode }) {
@@ -615,9 +616,20 @@ export default function OperatorAppPage() {
         title="Aetheris Operator · Mobile Cockpit"
         description="Forensic scan, AI operator chat, growth drafting, HubSpot autopsy, and WordPress auto-fix — from your phone."
       />
-      <main className="min-h-screen bg-background text-foreground pb-24"
-        style={{ backgroundImage: "radial-gradient(circle at 20% 0%, hsl(var(--amber)/0.07), transparent 50%), radial-gradient(circle at 80% 100%, hsl(var(--destructive)/0.06), transparent 50%)" }}>
-        <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-amber/25 px-4 py-3">
+      <main className="relative min-h-screen bg-background text-foreground pb-24 overflow-hidden">
+        {/* Forensic backdrop — moving mathematics + radial glow */}
+        <div className="fixed inset-0 pointer-events-none" aria-hidden="true" style={{ zIndex: 0 }}>
+          <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 18% -10%, hsl(var(--amber)/0.10), transparent 55%), radial-gradient(circle at 82% 110%, hsl(var(--destructive)/0.08), transparent 55%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background)/0.92) 100%)" }} />
+          <div className="absolute inset-0 opacity-[0.32]">
+            <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.28} density={0.85} />
+          </div>
+          {/* faint scanline grid */}
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "repeating-linear-gradient(0deg, hsl(var(--amber)) 0 1px, transparent 1px 4px)" }} />
+          {/* vignette */}
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 35%, hsl(var(--background)) 100%)" }} />
+        </div>
+
+        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-amber/25 px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber flex items-center gap-1.5">
@@ -625,13 +637,13 @@ export default function OperatorAppPage() {
               </div>
               <div className="font-display text-lg font-bold leading-tight">Forensic Cockpit</div>
             </div>
-            <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground border border-amber/25 rounded-sm px-2 py-1">
-              <span className="text-amber">●</span> LIVE
+            <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground border border-amber/25 rounded-sm px-2 py-1 bg-background/60">
+              <span className="text-amber animate-pulse">●</span> LIVE
             </div>
           </div>
         </header>
 
-        <div className="px-3 py-4">
+        <div className="relative z-10 px-3 py-4">
           <Tabs defaultValue="agents" className="w-full">
             <TabsList className="grid grid-cols-6 w-full mb-4 h-auto bg-card/40 border border-amber/20 rounded-sm p-1">
               <TabsTrigger value="agents" className="text-[10px] py-2 font-mono uppercase tracking-wider data-[state=active]:bg-amber data-[state=active]:text-charcoal data-[state=active]:font-bold">
