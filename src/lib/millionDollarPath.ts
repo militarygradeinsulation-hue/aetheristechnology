@@ -23,7 +23,7 @@ export const FUNNEL = {
 
 export interface MdpScenario {
   diagnosticsToClose: number;
-  active casesToClose: number;
+  activeCasesToClose: number;
   recurringMonths: number; // expected MRR months captured inside the 90 days
   grossRevenue: number;
   proposalsNeeded: number;
@@ -37,7 +37,7 @@ export interface MdpScenario {
 // Default scenario: blend that hits $1M with realistic close volume
 export function buildScenario(opts?: {
   diagnostics?: number;
-  active cases?: number;
+  activeCases?: number;
   recurringMonths?: number;
 }): MdpScenario {
   const d = opts?.diagnostics ?? 30;          // 30 diagnostics  = $540k
@@ -51,7 +51,7 @@ export function buildScenario(opts?: {
   const outbound  = Math.ceil(convos / FUNNEL.outboundToConvo);
   return {
     diagnosticsToClose: d,
-    active casesToClose: r,
+    activeCasesToClose: r,
     recurringMonths: rm,
     grossRevenue: gross,
     proposalsNeeded: proposals,
