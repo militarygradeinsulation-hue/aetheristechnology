@@ -47,7 +47,7 @@ function ratesForAmount(amountCents: number): { company: number; rep: number; pa
 // Active Case   $15,000/mo       → Co  $8,000 · Rep $4,000 · Partner $3,000  (every month)
 const FLAGSHIP_FIXED_SPLITS: Record<string, { company: number; rep: number; partner: number; label: string }> = {
   diagnostic_21day_once:   { company: 1_050_000, rep: 500_000, partner: 300_000, label: '21-Day Revenue Diagnostic' },
-  implementation_active case: { company:   800_000, rep: 400_000, partner: 300_000, label: 'Active Case'   },
+  implementation_retainer: { company:   800_000, rep: 400_000, partner: 300_000, label: 'Active Case'   },
 };
 
 function flagshipFixedSplit(priceId: string | null | undefined) {
