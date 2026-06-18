@@ -62,9 +62,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const body = await req.json().catch(() => ({}));
-    const userText = String(body?.userText || "").trim().slice(0, 4000);
-    const pageUrl = String(body?.pageUrl || "").slice(0, 500);
-    const pageText = String(body?.pageText || "").slice(0, 8000);
+    // Accept both legacy ("message"/"url") and canonical ("userText"/"pageUrl") field names.
+    const userText = String(body?.userText || body?.message || "").trim().slice(0, 4000);
+    const pageUrl = String(body?.pageUrl || body?.url || "").slice(0, 500);
+    let pageText = String(body?.pageText || "").slice(0, 8000);
     const screenshot = typeof body?.screenshot === "string" && body.screenshot.startsWith("data:image/") ? body.screenshot : null;
     const history: Array<{ role: "user" | "assistant"; content: string }> = Array.isArray(body?.history) ? body.history.slice(-8) : [];
 
@@ -72,6 +73,24 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "userText required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Mobile app has no DOM scraper — server-side fetch the page when a URL is provided.
+    if (!pageText && pageUrl && /^https?:\/\//i.test(pageUrl)) {
+      try {
+        const r = await fetch(pageUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 AetherisOperatorBot/1.0" },
+          signal: AbortSignal.timeout(12000),
+        });
+        const html = await r.text();
+        pageText = html
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 8000);
+      } catch (_err) { /* keep going with empty pageText */ }
     }
 
     // Build context block for the model.
