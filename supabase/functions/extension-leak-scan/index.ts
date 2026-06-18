@@ -66,10 +66,38 @@ serve(async (req) => {
     try { host = new URL(formattedUrl).hostname.replace(/^www\./, "").toLowerCase(); }
     catch { return new Response(JSON.stringify({ error: "invalid url" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
 
-    const pageText = String(body?.pageText || "").slice(0, 12000);
-    const title = String(body?.title || host).slice(0, 200);
-    const metaDescription = String(body?.metaDescription || "").slice(0, 500);
+    let pageText = String(body?.pageText || "").slice(0, 12000);
+    let title = String(body?.title || "").slice(0, 200);
+    let metaDescription = String(body?.metaDescription || "").slice(0, 500);
     const links: string[] = Array.isArray(body?.links) ? body.links.slice(0, 80).map((l: unknown) => String(l)) : [];
+
+    // Mobile / standalone callers don't pass pageText. Fetch and parse server-side so
+    // the deterministic detectors and the forensic narrator have real evidence to work with.
+    if (!pageText) {
+      try {
+        const r = await fetch(formattedUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 AetherisLeakScanBot/1.0" },
+          signal: AbortSignal.timeout(15000),
+        });
+        const html = await r.text();
+        if (!title) {
+          const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+          if (m) title = m[1].trim().slice(0, 200);
+        }
+        if (!metaDescription) {
+          const m = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+          if (m) metaDescription = m[1].trim().slice(0, 500);
+        }
+        pageText = html
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 12000);
+      } catch (_err) { /* fall through with whatever we have */ }
+    }
+    if (!title) title = host;
 
     const content = `${title}\n${metaDescription}\n${pageText}`;
     const lower = content.toLowerCase();
@@ -121,11 +149,62 @@ serve(async (req) => {
       g.annualCost = `${fmt$(low * share)} - ${fmt$(high * share)}`;
     });
 
+    // ── Forensic AI layer: turn the deterministic gap list + page evidence into a real
+    // case-file narrative with mechanisms, quoted clues, and root causes.
+    let forensics: any = null;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (LOVABLE_API_KEY && pageText && pageText.length > 200) {
+      try {
+        const gapList = gaps.map((g, i) => `${i + 1}. [${g.category}] ${g.title} — ${g.description}`).join("\n");
+        const sys = `You are the Aetheris Forensic Operator. You read live website evidence and explain WHY a business is leaking, not just WHAT is broken.
+Return STRICT JSON only with this shape:
+{
+  "verdict": "1-2 sentence forensic headline naming the dominant failure pattern",
+  "rootCauses": ["3-5 mechanism-level causes — say WHY the leak exists. Reference what the page actually does or fails to do."],
+  "clueTrail": [
+    { "clue": "short label", "evidence": "quote or measurable observation from the page (≤140 chars)", "implication": "what this tells you about the business" }
+  ],
+  "deepLeaks": [
+    { "title": "specific leak (not generic)", "mechanism": "exact sentence explaining HOW money disappears", "trigger": "what on the page causes it", "fix": "one concrete action" }
+  ],
+  "buyerJourneyBreakpoints": ["3 spots where a real buyer would bail, named by what they'd see"]
+}
+RULES: USD only. No hype words. No selling. Quote evidence from the actual page text. If you cannot quote, say so. 4-6 clueTrail items. 4-6 deepLeaks.`;
+        const usr = `URL: ${formattedUrl}
+HOST: ${host}
+TITLE: ${title}
+META: ${metaDescription || "(none)"}
+DETERMINISTIC GAPS DETECTED:
+${gapList}
+
+PAGE TEXT (truncated, this is your evidence — quote from it):
+${pageText.slice(0, 8000)}`;
+        const ai = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "system", content: sys }, { role: "user", content: usr }],
+            response_format: { type: "json_object" },
+            temperature: 0.5,
+          }),
+          signal: AbortSignal.timeout(25000),
+        });
+        if (ai.ok) {
+          const j = await ai.json();
+          const raw = j?.choices?.[0]?.message?.content || "{}";
+          try { forensics = JSON.parse(raw); } catch { /* ignore */ }
+        }
+      } catch (err) { console.error("forensics layer failed:", err); }
+    }
+
     const analysis = {
       url: formattedUrl, host, companyName, score, grade: gradeFromScore(score),
       totalAnnualLeak: totalRange,
-      executiveSummary: `${companyName} is leaking an estimated ${totalRange} per year through visible website gaps. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden.`,
+      executiveSummary: forensics?.verdict ||
+        `${companyName} is leaking an estimated ${totalRange} per year through visible website gaps. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden.`,
       gaps,
+      forensics,
       roadmap: [
         { month: "Week 1", action: "Repair the first-screen message and primary CTA" },
         { month: "Week 2", action: "Add visible contact paths + a low-friction capture asset" },

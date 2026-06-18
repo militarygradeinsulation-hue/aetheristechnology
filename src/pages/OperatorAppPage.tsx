@@ -96,34 +96,129 @@ function ScanTab() {
       {r && !r.error && (
         <>
           {/* Verdict card */}
-          <div className="rounded-sm border-2 border-destructive/60 bg-gradient-to-b from-destructive/10 to-card p-4 shadow-[0_0_30px_-15px_hsl(var(--destructive))]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-destructive font-bold flex items-center gap-1.5">
-                <FileWarning className="w-3.5 h-3.5" /> Case File · {r.host}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Grade <span className={`font-bold ${r.grade === 'F' || r.grade === 'D' ? 'text-destructive' : 'text-amber'}`}>{r.grade}</span></div>
+          <div className="relative rounded-sm border-2 border-destructive/60 bg-gradient-to-b from-destructive/10 to-card p-4 shadow-[0_0_30px_-15px_hsl(var(--destructive))] overflow-hidden">
+            <div className="absolute top-3 right-3 rotate-6 border-2 border-destructive/70 text-destructive font-mono text-[8px] font-black uppercase tracking-[0.2em] px-1.5 py-0.5 opacity-90 pointer-events-none">
+              ACTIVE
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-destructive font-bold flex items-center gap-1.5 mb-2">
+              <FileWarning className="w-3.5 h-3.5" /> Case File · {r.host}
             </div>
             <div className="font-display text-xl font-bold leading-tight mb-1">{r.companyName}</div>
-            <div className="font-mono text-[11px] uppercase tracking-wider text-amber mb-3">Annual leak · <span className="text-base font-bold">{r.totalAnnualLeak}</span></div>
+            <div className="font-mono text-[11px] uppercase tracking-wider text-amber mb-3">
+              Annual leak · <span className="text-base font-bold">{r.totalAnnualLeak}</span>
+            </div>
             <p className="text-sm italic text-foreground/90 border-l-2 border-amber pl-3 py-1 bg-black/30">{r.executiveSummary}</p>
             <div className="grid grid-cols-3 gap-2 mt-3">
+              <StatChip label="Grade" value={String(r.grade || "—")} tone={r.grade === 'F' || r.grade === 'D' ? "crimson" : "amber"} />
               <StatChip label="Score" value={`${r.score}/100`} tone="amber" />
               <StatChip label="Gaps" value={String(r.gaps?.length || 0)} tone="crimson" />
-              <StatChip label="Roadmap" value={`${r.roadmap?.length || 0} wks`} tone="muted" />
             </div>
           </div>
 
-          {/* Gaps */}
+          {/* FORENSIC NARRATIVE — root causes + clue trail */}
+          {r.forensics?.rootCauses?.length > 0 && (
+            <CaseTile className="border-amber/40">
+              <Label>Root Causes · Why It's Leaking</Label>
+              <ul className="space-y-1.5">
+                {r.forensics.rootCauses.map((c: string, i: number) => (
+                  <li key={i} className="text-sm flex gap-2">
+                    <span className="font-mono text-[10px] text-amber font-bold mt-1 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="leading-relaxed">{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </CaseTile>
+          )}
+
+          {r.forensics?.clueTrail?.length > 0 && (
+            <CaseTile>
+              <Label>Clue Trail · Evidence Log</Label>
+              <div className="space-y-2">
+                {r.forensics.clueTrail.map((c: any, i: number) => (
+                  <div key={i} className="rounded-sm border border-amber/25 bg-black/30 p-3 relative">
+                    <div className="absolute -left-px top-0 bottom-0 w-[3px] bg-amber/60" />
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="font-mono text-[9px] text-amber/90 font-bold border border-amber/40 rounded-sm px-1.5 py-0.5">
+                        EVIDENCE-{String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="font-bold text-sm">{c.clue}</span>
+                    </div>
+                    {c.evidence && (
+                      <div className="text-xs italic text-foreground/80 border-l border-muted pl-2 py-0.5 mb-1.5">
+                        "{c.evidence}"
+                      </div>
+                    )}
+                    {c.implication && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="text-amber/80 font-mono uppercase tracking-wider text-[9px]">→ Implication </span>
+                        {c.implication}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CaseTile>
+          )}
+
+          {r.forensics?.deepLeaks?.length > 0 && (
+            <CaseTile className="border-destructive/40">
+              <Label>Deep Leaks · Mechanism + Trigger</Label>
+              <div className="space-y-2">
+                {r.forensics.deepLeaks.map((l: any, i: number) => (
+                  <div key={i} className="rounded-sm border border-destructive/30 bg-destructive/5 p-3">
+                    <div className="font-bold text-sm flex items-center gap-1.5 mb-1.5">
+                      <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                      {l.title}
+                    </div>
+                    {l.mechanism && (
+                      <div className="text-xs mb-1">
+                        <span className="font-mono text-[9px] uppercase tracking-wider text-destructive">Mechanism · </span>
+                        {l.mechanism}
+                      </div>
+                    )}
+                    {l.trigger && (
+                      <div className="text-xs mb-1">
+                        <span className="font-mono text-[9px] uppercase tracking-wider text-amber">Trigger · </span>
+                        {l.trigger}
+                      </div>
+                    )}
+                    {l.fix && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-400">Fix · </span>
+                        {l.fix}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CaseTile>
+          )}
+
+          {r.forensics?.buyerJourneyBreakpoints?.length > 0 && (
+            <CaseTile>
+              <Label>Buyer Bail Points</Label>
+              <ul className="space-y-1.5">
+                {r.forensics.buyerJourneyBreakpoints.map((b: string, i: number) => (
+                  <li key={i} className="text-sm flex gap-2 items-start">
+                    <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0 mt-1" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </CaseTile>
+          )}
+
+          {/* Surface-level gap inventory */}
           {!!r.gaps?.length && (
             <CaseTile>
-              <Label>Leak Inventory</Label>
+              <Label>Leak Inventory · Surface Scan</Label>
               <div className="space-y-2">
                 {r.gaps.map((g: any, i: number) => (
                   <div key={i} className="rounded-sm border border-destructive/25 bg-destructive/5 p-3">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <div className="font-bold text-sm flex items-center gap-1.5">
                         <TrendingDown className="w-3.5 h-3.5 text-destructive" />
-                        {g.title || g.name || `Gap ${i+1}`}
+                        {g.title || g.name || `Gap ${i + 1}`}
                       </div>
                       {g.annualCost && <div className="font-mono text-[11px] text-amber whitespace-nowrap font-bold">{g.annualCost}</div>}
                     </div>
@@ -141,7 +236,7 @@ function ScanTab() {
               <ol className="space-y-2">
                 {r.roadmap.map((s: any, i: number) => (
                   <li key={i} className="flex gap-3 items-start">
-                    <div className="font-mono text-[10px] font-bold text-amber border border-amber/40 rounded-sm px-1.5 py-0.5 mt-0.5">{String(i+1).padStart(2,'0')}</div>
+                    <div className="font-mono text-[10px] font-bold text-amber border border-amber/40 rounded-sm px-1.5 py-0.5 mt-0.5">{String(i + 1).padStart(2, '0')}</div>
                     <div className="flex-1">
                       <div className="font-mono text-[10px] uppercase tracking-wider text-amber">{s.month}</div>
                       <div className="text-sm">{s.action}</div>
@@ -193,10 +288,12 @@ function OperatorTab() {
     setLog(l => [...l, { role: "user", text: msg }]);
     setPrompt(""); setLoading(true);
     try {
+      const history = log.slice(-6).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text }));
       const { data, error } = await supabase.functions.invoke("extension-operator-chat", {
-        body: { url: url.trim() || undefined, message: msg },
+        body: { pageUrl: url.trim() || undefined, userText: msg, history },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       const reply = data?.reply || data?.text || "(no reply)";
       setLog(l => [...l, { role: "ai", text: reply }]);
     } catch (e: any) {
