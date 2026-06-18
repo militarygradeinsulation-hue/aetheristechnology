@@ -35,6 +35,7 @@ const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').th
 const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
 const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
 const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
+const AuthorityPromptStudio = lazy(() => import('@/components/admin/AuthorityPromptStudio'));
 const ServicesPricing = lazy(() => import('@/components/ServicesPricing').then(m => ({ default: m.ServicesPricing })));
 const AdminCrm = lazy(() => import('@/components/crm/AdminCrm').then(m => ({ default: m.AdminCrm })));
 const CampaignControlCenter = lazy(() => import('@/components/admin/CampaignControlCenter').then(m => ({ default: m.CampaignControlCenter })));
@@ -577,7 +578,18 @@ const AdminDashboard: React.FC = () => {
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
-      case 'engine': return <ContentEngine />;
+      case 'engine': return (
+        <Tabs defaultValue="engine" className="w-full">
+          <TabsList>
+            <TabsTrigger value="engine"><Zap className="w-4 h-4 mr-1.5" />Content Engine</TabsTrigger>
+            <TabsTrigger value="authority"><Sparkles className="w-4 h-4 mr-1.5" />AI Authority Prompts</TabsTrigger>
+          </TabsList>
+          <TabsContent value="engine" className="mt-4"><Suspense fallback={<PanelFallback />}><ContentEngine /></Suspense></TabsContent>
+          <TabsContent value="authority" className="mt-4">
+            <Suspense fallback={<PanelFallback />}><AuthorityPromptStudio /></Suspense>
+          </TabsContent>
+        </Tabs>
+      );
       case 'crm': return <AdminCrm />;
       
       case 'commissions': return <CommissionStructurePanel />;
