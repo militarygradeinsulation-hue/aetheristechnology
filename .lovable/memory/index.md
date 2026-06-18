@@ -11,9 +11,12 @@
 - Visuals: Dark charcoal + amber. Crimson reserved for "leak" signals only. Fraunces serif for headlines, JetBrains Mono for case-file labels. Space Grotesk + Inter for body/UI.
 - Generated Images: must include "Aetheris AI Studio" watermark bottom-right.
 - Commission split (locked, rep program intact but not promoted publicly): tiered model in `src/lib/repProducts.ts` / `payments-webhook`.
+- **CATEGORY (locked):** Aetheris owns **Revenue Forensics** — not marketing, not consulting, not AI tools, not an agency. Anchor = Live DOM Scanner. Moats = Competitor Teardown, Revenue Score (0–100), Industry Leak Report, Leak Register. Goal sentence from prospects: "I've never heard of anything like that." See [Revenue Forensics Strategy](mem://strategy/revenue-forensics-category).
+- **HARD KILL LIST** (must never appear on site, posts, AI prompts, emails, decks): SEO services · social media management · brand awareness · digital transformation · retainers (as a service line) · the word **"agency"** — anywhere, ever.
 - FORBIDDEN: Social proof popups, testimonials carousels, purchase popups, 'Magic Robot' analogies, "AI Systems Architect" title, generic AI-guru gradients, 10-industry keyword stacks above the fold, public pilot pricing on the site.
 
 ## Memories
+- [Revenue Forensics Strategy](mem://strategy/revenue-forensics-category) — Category play, 5 structural moats, hard kill list, build priority (kill language → Revenue Score → Industry Leak Report)
 - [Design System](mem://style/design-system) — HSL color tokens, typography stack, gradients, motion utilities
 - [Pricing & Business Model](mem://business/pricing) — Five public offers (3 bundles + 2 flagships), TWO commission models (tiered % for bundles, fixed-dollar for flagships), webhook flagshipFixedSplit, rep portal alignment, Rep-Operator-Playbook.md
 - [Brand Strategy](mem://business/brand-strategy) — Specialty-manufacturer wedge, credentials-first positioning, two-offer surface
