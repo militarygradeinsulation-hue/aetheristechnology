@@ -75,6 +75,8 @@ const ExtensionPage = lazy(() => import("./pages/ExtensionPage"));
 const OperatorAppPage = lazy(() => import("./pages/OperatorAppPage"));
 const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
+const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
+const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -185,6 +187,25 @@ const App = () => (
                       <Route path="/extension" element={<ExtensionPage />} />
                       <Route path="/mobile-app" element={<MobileAppPage />} />
                       <Route path="/operator-app" element={<OperatorAppPage />} />
+                      {/* AI Authority Playbook — Tier-1 pillars + Tier-2 question articles + glossary */}
+                      <Route path="/glossary" element={<GlossaryPage />} />
+                      <Route path="/revenue-forensics" element={<AuthorityArticlePage />} />
+                      <Route path="/revenue-leak" element={<AuthorityArticlePage />} />
+                      <Route path="/revenue-score" element={<AuthorityArticlePage />} />
+                      <Route path="/framework" element={<AuthorityArticlePage />} />
+                      <Route path="/vs-agencies" element={<AuthorityArticlePage />} />
+                      <Route path="/how-to-find-revenue-leaks" element={<AuthorityArticlePage />} />
+                      <Route path="/revenue-audit-cost" element={<AuthorityArticlePage />} />
+                      <Route path="/why-am-i-not-closing-leads" element={<AuthorityArticlePage />} />
+                      <Route path="/lead-followup-timing" element={<AuthorityArticlePage />} />
+                      <Route path="/b2b-conversion-benchmark" element={<AuthorityArticlePage />} />
+                      <Route path="/tracking-pixels" element={<AuthorityArticlePage />} />
+                      <Route path="/bad-crm-data" element={<AuthorityArticlePage />} />
+                      <Route path="/most-common-revenue-leaks" element={<AuthorityArticlePage />} />
+                      <Route path="/revenue-leak-calculator" element={<AuthorityArticlePage />} />
+                      <Route path="/marketing-audit-vs-revenue-audit" element={<AuthorityArticlePage />} />
+                      <Route path="/competitor-analysis" element={<AuthorityArticlePage />} />
+                      <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
