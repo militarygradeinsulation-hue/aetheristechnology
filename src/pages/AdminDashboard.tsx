@@ -679,6 +679,11 @@ const AdminDashboard: React.FC = () => {
                 <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> Extension
               </Button>
             </Link>
+            <Link to="/mobile-app">
+              <Button variant="outline" size="sm" title="Download the Aetheris mobile app">
+                <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> App
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
