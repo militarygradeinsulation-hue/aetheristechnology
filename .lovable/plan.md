@@ -1,106 +1,64 @@
-# Make Lead Scoring Make Sense
+# Aetheris Operator — Native Mobile App
 
-Right now the system has **two different scores** (scrape-time + website-time), **three different tier thresholds** (80/60/40, 75/50, A–F), and the breakdown is buried in a popover. Reps don't know which number to trust or what to do with it. This plan unifies it.
+Wrap a new mobile-friendly "Operator Cockpit" page in Capacitor so it ships as a real iOS/Android app you sideload or submit to the stores. The cockpit uses the same Supabase edge functions the Chrome extension already calls, just driven by URLs you paste in instead of the active browser tab.
 
----
+## Honest constraint (read first)
 
-## The new mental model — one score, two stages
+A Chrome extension can inject scripts into any third-party site you're viewing. A mobile app cannot. So in the mobile app:
 
-Every lead has ONE number: **Lead Score 0–100**. What changes is the **confidence stage** behind it:
+- **Scan / Operator / Growth / CRM-Autopsy / Auto-Fix** all work — they only need a URL + backend, which we already have.
+- **X-Ray overlay on someone else's live site** does not work the same way; we render the findings in our own UI instead.
+- **HubSpot "scan visible tab"** is replaced by the existing session-cookie pull (`crm-pull-deals` / `crm-pull-contacts`) entered via a HubSpot login screen inside the app.
+- **Hourly LinkedIn auto-reply** stays in the Chrome extension. Mobile background execution can't reliably scrape LinkedIn notifications — we'll surface this clearly in the app.
 
-```text
-Stage 1: TRIAGE      → score from contact info + industry/geo/pain    (always present)
-Stage 2: AUDIT       → score from website signals + gaps              (after scan)
-Stage 3: VERIFIED    → score after a rep touches it                   (future, optional)
-```
+## What gets built
 
-Reps see one number. A small badge says which stage it came from. No more "is this the scrape score or the website score?"
+### 1. New cockpit route `/operator-app`
+A mobile-first page with the same tab structure as the extension:
+- **Scan** — URL input → calls existing `forensic-scan` edge function → renders findings, dossier (`deepen-scan`), contradictions, friction, contacts.
+- **Operator** — chat composer with quick-prompt chips → calls `operator-chat` edge function with the scanned URL + scraped text as context (no screenshot on mobile; URL + scrape only).
+- **Growth** — 4 sub-tabs:
+  - LinkedIn Reply (paste post or screenshot via phone camera/upload) → `linkedin-post-respond`
+  - Post From Page → `post-from-page`
+  - Cold Opener → `cold-opener`
+  - Hooks → `hooks-from-page`
+- **CRM** — HubSpot session pulls via `crm-pull-deals` / `crm-pull-contacts`; renders leak detectors.
+- **Auto-Fix Site** — WP URL + Application Password form → `wp-autofix-preview` and `wp-autofix-apply`.
 
----
+Reuses existing components where possible (`PlainEnglishReport`, `CaseFileCard`, etc.). All styling matches forensic identity (charcoal + amber, Fraunces/JetBrains Mono, crimson reserved for leak signals).
 
-## Changes
+### 2. Capacitor wrapper
+- Install `@capacitor/core`, `@capacitor/cli` (dev), `@capacitor/ios`, `@capacitor/android`.
+- Create `capacitor.config.ts` with `appId: app.lovable.1b783889c4604e52a4bd950110dc395b`, `appName: aetheristechnology`, and the sandbox preview URL in `server.url` for hot-reload during development.
+- App icon + splash use the existing Aetheris mark.
+- Default landing inside the app = `/operator-app`.
 
-### 1. One unified tier scale (used everywhere)
+### 3. Download/Install page on the website
+New `/mobile-app` page with:
+- Honest "what works / what doesn't vs the Chrome extension" table.
+- Step-by-step instructions to:
+  1. Export the project to GitHub
+  2. `npm install`
+  3. `npx cap add ios` / `npx cap add android`
+  4. `npm run build && npx cap sync`
+  5. `npx cap run ios` / `npx cap run android`
+- Link to the existing Chrome extension `.zip` for the desktop superpowers.
 
-| Score | Tier | What rep does |
-|---|---|---|
-| 80–100 | 🔥 HOT — call today | Phone first |
-| 60–79 | 🟡 WARM — this week | Email + LinkedIn |
-| 40–59 | ⚪ WORTH A SHOT | Templated outreach |
-| 0–39 | ⬇ SKIP / nurture | Back to pool |
-| `?` | INSUFFICIENT EVIDENCE | Manual look |
-
-Replaces the three inconsistent threshold sets in `LeadsBoard.tsx`.
-
-### 2. Stage badge on every lead card
-
-Next to the score: `TRIAGE`, `AUDIT`, or `VERIFIED` in mono micro-label (case-file style). Hover = "Score based on contact data only. Run the website scan to upgrade."
-
-### 3. Plain-English "what this means" line
-
-Under the score, always one sentence pulled from the lowest-earning + highest-earning components, e.g.:
-
-> "Strong industry fit and direct email, but no case studies or proof of authority."
-
-Generated deterministically from the `parts` array — no AI call.
-
-### 4. Redesigned breakdown card (replaces current popover)
-
-Each component as a row with `earned / weight`, a mini bar, and a one-line *what this measures*:
-
-```text
-Contactability         12 / 15   ████████████░░░  phone + email + form + calendar
-Industry leverage      15 / 15   ███████████████  priority industry for Aetheris
-Revenue band            6 / 10   ██████░░░░░░░░░  $500k–$2M
-Gap severity load       2 / 10   ██░░░░░░░░░░░░░  few real problems surfaced — score capped
-...
-TOTAL                  68 / 100  WARM
-```
-
-Add a "Why this score?" link that opens an info drawer with the full rubric (built from the same constants in `lead-scoring.ts` so docs can't drift).
-
-### 5. Single source of truth in the codebase
-
-- Add `tierFromScore(score)` to `supabase/functions/_shared/lead-scoring.ts` and a mirror in `src/lib/leadScoring.ts`.
-- Delete the duplicate `scoreTier()` and tier branches inside `LeadsBoard.tsx`.
-- Add `explainScore(parts)` returning the plain-English line.
-- Stage field saved on the lead row: `score_stage: 'triage' | 'audit' | 'verified'`.
-
-### 6. Admin Leads view gets the same UI
-
-The admin lead views currently show raw numbers. Use the same `<LeadScoreBadge />` component so admin + rep + portal all read identically.
-
-### 7. Info doc
-
-A short `/docs/lead-scoring` style modal (admin + rep can both open it) explaining the rubric in plain language. Pulled from the same constants. One source, one explanation.
-
----
+### 4. Navigation + SEO
+- Add "Mobile App" link in the footer/resources.
+- `SEOHead` on `/mobile-app` and `/operator-app`.
 
 ## Technical details
 
-**Files to edit:**
-- `supabase/functions/_shared/lead-scoring.ts` — add `tierFromScore`, `explainScore`, export rubric metadata (label + description per component).
-- `src/lib/leadScoring.ts` (new) — frontend mirror of `tierFromScore` + `explainScore`.
-- `src/components/LeadScoreBadge.tsx` (new) — score + tier + stage badge.
-- `src/components/LeadScoreBreakdown.tsx` (new) — bar-style component rows + info drawer.
-- `src/components/portal/LeadsBoard.tsx` — remove duplicate tier logic, use new components.
-- `src/components/crm/*` admin lead views — swap raw score for `<LeadScoreBadge />`.
-- `supabase/functions/admin-scrape-leads/index.ts`, `portal-scrape-leads/index.ts`, `admin-enrich-lead/index.ts`, `scan-website/index.ts`, `extension-leak-scan/index.ts` — set `score_stage` on write.
-- Migration: add `score_stage text` column to `rep_leads` (and admin lead tables) with default `'triage'`.
+- No new edge functions; reuses what the extension already calls.
+- New files: `src/pages/OperatorAppPage.tsx` (cockpit), `src/pages/MobileAppPage.tsx` (download/install), `capacitor.config.ts`.
+- Edits: `src/App.tsx` (routes), `src/components/Footer.tsx` (link), `package.json` (Capacitor deps).
+- Auth: cockpit is gated behind the existing staff/admin unlock so random store visitors can't hit your edge functions.
+- iOS native build requires a Mac + Xcode; Android requires Android Studio. The web build runs fine in the Lovable preview without either.
 
-**Out of scope (ask before doing):**
-- Reweighting the rubric itself.
-- A new "Verified" stage logic (column added, but no UI flow yet).
-- Backfilling stage on historical leads (will default to `'triage'`; audit-stage backfill is a separate script).
+## What I will NOT do
 
----
-
-## What you'll see after
-
-- One number per lead. Same tier names everywhere.
-- A stamp telling you *how confident* that number is (TRIAGE / AUDIT / VERIFIED).
-- A one-sentence reason underneath.
-- A clean breakdown showing exactly where points came from and where they didn't.
-- An info drawer that reads the rubric directly from code — so the explanation can never go stale.
-
-No business logic changes to the scoring math itself. Just clarity, consistency, and one source of truth.
+- Won't replicate the Chrome extension's cross-site script injection (impossible on iOS/Android).
+- Won't port the hourly LinkedIn auto-reply scanner (mobile background limits).
+- Won't change the existing Chrome extension code.
+- Won't add Play Store / App Store submission scaffolding — that's a manual step you take after `npx cap run` looks good on device.
