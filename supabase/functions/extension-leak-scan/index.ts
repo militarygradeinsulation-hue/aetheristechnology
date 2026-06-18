@@ -149,11 +149,62 @@ serve(async (req) => {
       g.annualCost = `${fmt$(low * share)} - ${fmt$(high * share)}`;
     });
 
+    // ── Forensic AI layer: turn the deterministic gap list + page evidence into a real
+    // case-file narrative with mechanisms, quoted clues, and root causes.
+    let forensics: any = null;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (LOVABLE_API_KEY && pageText && pageText.length > 200) {
+      try {
+        const gapList = gaps.map((g, i) => `${i + 1}. [${g.category}] ${g.title} — ${g.description}`).join("\n");
+        const sys = `You are the Aetheris Forensic Operator. You read live website evidence and explain WHY a business is leaking, not just WHAT is broken.
+Return STRICT JSON only with this shape:
+{
+  "verdict": "1-2 sentence forensic headline naming the dominant failure pattern",
+  "rootCauses": ["3-5 mechanism-level causes — say WHY the leak exists. Reference what the page actually does or fails to do."],
+  "clueTrail": [
+    { "clue": "short label", "evidence": "quote or measurable observation from the page (≤140 chars)", "implication": "what this tells you about the business" }
+  ],
+  "deepLeaks": [
+    { "title": "specific leak (not generic)", "mechanism": "exact sentence explaining HOW money disappears", "trigger": "what on the page causes it", "fix": "one concrete action" }
+  ],
+  "buyerJourneyBreakpoints": ["3 spots where a real buyer would bail, named by what they'd see"]
+}
+RULES: USD only. No hype words. No selling. Quote evidence from the actual page text. If you cannot quote, say so. 4-6 clueTrail items. 4-6 deepLeaks.`;
+        const usr = `URL: ${formattedUrl}
+HOST: ${host}
+TITLE: ${title}
+META: ${metaDescription || "(none)"}
+DETERMINISTIC GAPS DETECTED:
+${gapList}
+
+PAGE TEXT (truncated, this is your evidence — quote from it):
+${pageText.slice(0, 8000)}`;
+        const ai = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "system", content: sys }, { role: "user", content: usr }],
+            response_format: { type: "json_object" },
+            temperature: 0.5,
+          }),
+          signal: AbortSignal.timeout(25000),
+        });
+        if (ai.ok) {
+          const j = await ai.json();
+          const raw = j?.choices?.[0]?.message?.content || "{}";
+          try { forensics = JSON.parse(raw); } catch { /* ignore */ }
+        }
+      } catch (err) { console.error("forensics layer failed:", err); }
+    }
+
     const analysis = {
       url: formattedUrl, host, companyName, score, grade: gradeFromScore(score),
       totalAnnualLeak: totalRange,
-      executiveSummary: `${companyName} is leaking an estimated ${totalRange} per year through visible website gaps. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden.`,
+      executiveSummary: forensics?.verdict ||
+        `${companyName} is leaking an estimated ${totalRange} per year through visible website gaps. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden.`,
       gaps,
+      forensics,
       roadmap: [
         { month: "Week 1", action: "Repair the first-screen message and primary CTA" },
         { month: "Week 2", action: "Add visible contact paths + a low-friction capture asset" },
