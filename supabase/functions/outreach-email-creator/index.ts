@@ -457,9 +457,67 @@ serve(async (req) => {
 
     if (mode === "analyze") {
       const sc = parsed.subject_critique || {};
+
+      // Normalize pillars. Force the canonical 6 in canonical order.
+      const modelPillars: any[] = Array.isArray(parsed.pillars) ? parsed.pillars : [];
+      const pillarMap = new Map<string, any>(modelPillars.map((p: any) => [String(p?.key), p]));
+      const pillars = DEFAULT_PILLARS.map((d) => {
+        const m = pillarMap.get(d.key) || {};
+        const rawScore = typeof m.score === "number" ? m.score : 0;
+        const score = Math.max(0, Math.min(d.max, Math.round(rawScore)));
+        return {
+          key: d.key,
+          label: d.label,
+          max: d.max,
+          score,
+          note: stripDashes(m.note || ""),
+        };
+      });
+
+      // Authoritative total = sum of pillars.
+      let total = pillars.reduce((acc, p) => acc + p.score, 0);
+      total = Math.max(0, Math.min(100, total));
+
+      // Server-side trigger backstop. Union model triggers with regex pass on pasted draft.
+      const modelTriggers = Array.isArray(parsed.trigger_words_found) ? parsed.trigger_words_found : [];
+      const triggerMap = new Map<string, any>();
+      for (const t of modelTriggers) {
+        if (!t?.phrase) continue;
+        const key = String(t.phrase).toLowerCase();
+        triggerMap.set(key, {
+          phrase: stripDashes(String(t.phrase)),
+          category: t.category || "corporate_filler",
+          why_bad: stripDashes(t.why_bad || ""),
+          swap_with: stripDashes(t.swap_with || ""),
+        });
+      }
+      for (const t of scanTriggers(pastedText)) {
+        const key = t.phrase.toLowerCase();
+        if (!triggerMap.has(key)) {
+          triggerMap.set(key, { ...t });
+        }
+      }
+      const trigger_words_found = Array.from(triggerMap.values());
+
+      // Each unique trigger deducts 5 from total, floored at 0.
+      total = Math.max(0, total - trigger_words_found.length * 5);
+      const score_bar = deriveScoreBar(total);
+
+      const gm = parsed.guard_meter || {};
+      const guard_meter = {
+        level: ["low", "medium", "high", "hostile"].includes(gm.level) ? gm.level : "medium",
+        why: stripDashes(gm.why || ""),
+        fix: stripDashes(gm.fix || ""),
+      };
+
       const analysis = {
         overall_grade: parsed.overall_grade || "C",
         verdict: stripDashes(parsed.verdict || ""),
+        total_score: total,
+        score_bar,
+        pillars,
+        trigger_words_found,
+        guard_meter,
         subject_critique: {
           current: stripDashes(sc.current || ""),
           score: typeof sc.score === "number" ? sc.score : 5,
