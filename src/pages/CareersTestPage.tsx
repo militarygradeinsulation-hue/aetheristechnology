@@ -119,6 +119,11 @@ const CareersTestPage = () => {
 
   const submit = async (auto = false) => {
     if (!attemptId) return;
+    if (!resumeFile) {
+      toast({ title: 'Resume missing', description: 'Your resume must be attached to submit. Both resume and test are required.', variant: 'destructive' });
+      setPhase('apply');
+      return;
+    }
     if (!auto && Object.keys(answers).length < questions.length) {
       if (!confirm(`You've answered ${Object.keys(answers).length}/${questions.length}. Submit anyway?`)) return;
     }
@@ -154,7 +159,7 @@ const CareersTestPage = () => {
               <CardHeader>
                 <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Two steps. <strong>1)</strong> Submit your full application (resume + 150-word pitch). <strong>2)</strong> Take a 25-question multiple-choice test pulled from a 60-question bank, score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong> Your application is only filed if you pass, random apps go in the trash.
+                  <strong>Both are required, no exceptions.</strong> You must submit a resume <em>and</em> pass the test, missing either one = application rejected automatically. <strong>1)</strong> Upload resume + 150-word pitch. <strong>2)</strong> Take a 25-question test (from a 60-question bank), score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong>
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
