@@ -66,10 +66,38 @@ serve(async (req) => {
     try { host = new URL(formattedUrl).hostname.replace(/^www\./, "").toLowerCase(); }
     catch { return new Response(JSON.stringify({ error: "invalid url" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
 
-    const pageText = String(body?.pageText || "").slice(0, 12000);
-    const title = String(body?.title || host).slice(0, 200);
-    const metaDescription = String(body?.metaDescription || "").slice(0, 500);
+    let pageText = String(body?.pageText || "").slice(0, 12000);
+    let title = String(body?.title || "").slice(0, 200);
+    let metaDescription = String(body?.metaDescription || "").slice(0, 500);
     const links: string[] = Array.isArray(body?.links) ? body.links.slice(0, 80).map((l: unknown) => String(l)) : [];
+
+    // Mobile / standalone callers don't pass pageText. Fetch and parse server-side so
+    // the deterministic detectors and the forensic narrator have real evidence to work with.
+    if (!pageText) {
+      try {
+        const r = await fetch(formattedUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 AetherisLeakScanBot/1.0" },
+          signal: AbortSignal.timeout(15000),
+        });
+        const html = await r.text();
+        if (!title) {
+          const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+          if (m) title = m[1].trim().slice(0, 200);
+        }
+        if (!metaDescription) {
+          const m = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+          if (m) metaDescription = m[1].trim().slice(0, 500);
+        }
+        pageText = html
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 12000);
+      } catch (_err) { /* fall through with whatever we have */ }
+    }
+    if (!title) title = host;
 
     const content = `${title}\n${metaDescription}\n${pageText}`;
     const lower = content.toLowerCase();
