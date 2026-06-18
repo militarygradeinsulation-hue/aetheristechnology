@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import PillarArticleLayout from '@/components/seo/PillarArticleLayout';
 import { ALL_AUTHORITY_ARTICLES } from '@/content/aiAuthorityContent';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
 /**
