@@ -76,8 +76,8 @@ const SITE_BRIEFING: Briefing = {
       id: 'services',
       title: '/services + /implementation — Two Offers, On Purpose',
       body: [
-        'The public site shows ONLY two offers: 21-Day Diagnostic ($18,500) and Implementation Retainer ($15K/mo, 3-mo min, Diagnostic clients only).',
-        'Why only two: decision fatigue kills B2B close rates. A 40-tool catalog reads as "agency." Two offers reads as "operator with a clear engagement path."',
+        'The public site shows ONLY two offers: 21-Day Diagnostic ($18,500) and Active Case ($15K/mo, 3-mo min, Diagnostic clients only).',
+        'Why only two: decision fatigue kills B2B close rates. A 40-tool catalog reads as "operator." Two offers reads as "operator with a clear engagement path."',
         'Legacy products (14-Day, Fractional CTO, tool packs) still resolve at their URLs so rep-portal links don\'t break — but they are hidden from Navbar / Footer / Home. They resurface publicly only after the 90-day wedge proves out.',
         'No Buy Now button on flagships. Sales-led only. A $18,500 self-checkout would convert worse AND attract lower-fit buyers.',
       ],
@@ -200,7 +200,7 @@ const BACKEND_BRIEFING: Briefing = {
       body: [
         'Flagship offers use FIXED-DOLLAR splits, not percentages. Reps can do the math in their head — that\'s the entire point.',
         '- $18K Diagnostic → Company $10K / Rep $5K / Partner $3K.',
-        '- $15K Retainer → Company $8K / Rep $4K / Partner $3K EVERY MONTH the client stays.',
+        '- $15K Active Case → Company $8K / Rep $4K / Partner $3K EVERY MONTH the client stays.',
         '- Tiered catalog (legacy products) → 50/30/20 → 60/25/15 → 70/20/10 by rep volume.',
         '- Bonus stack: volume (+$1K/$2.5K/$5K at 2/3/5 monthly), retention (+$1K/$2.5K/$5K at 3/6/12-mo extensions), referral ($500 onboard + $7K first-close + $500/sale override 12 mo).',
         'All enforced server-side in payments-webhook → flagshipFixedSplit(). Reps can never be shortchanged or overpaid by accident.',
@@ -225,7 +225,7 @@ const BACKEND_BRIEFING: Briefing = {
         '1. Friction is the enemy of revenue. Code-only rep login, in-tab AI coach, in-tab collateral generation — a rep never leaves the portal to close a deal.',
         '2. Visible money = activity. Forecast Center, Flagship Commission Panel, and Incentive Plan all keep the dollar number in front of the rep every login.',
         '3. Operator credibility = price defense. Methodology PDF, credentials PDF, written reports, fixed fees — every layer reinforces "this is a serious shop, the price is fair."',
-        '4. Diagnose-first wedge. Free /leak-audit → $2,500 Forensic → $18,500 Diagnostic → $15K/mo Retainer. Each step costs more and demands more commitment, but each step has already been de-risked by the previous one.',
+        '4. Diagnose-first wedge. Free /leak-audit → $2,500 Forensic → $18,500 Diagnostic → $15K/mo Active Case. Each step costs more and demands more commitment, but each step has already been de-risked by the previous one.',
         '5. Single source of truth. One database, one commission engine, one content library. Nothing falls through the cracks because there are no cracks.',
         '6. AI as force multiplier, never as identity. The product is operator judgment + leak diagnosis. AI runs the heavy work invisibly. The brand stays "forensic operator," not "AI guru."',
       ],

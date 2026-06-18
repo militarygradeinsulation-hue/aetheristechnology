@@ -9,8 +9,8 @@ export const MDP_WEEKS = 13;
 // Offer mix, what we're actually selling
 export const OFFERS = {
   diagnostic: { label: "Forensic Diagnostic", price: 18_000, repPayout: 5_000, partnerPayout: 3_000, companyNet: 10_000 },
-  retainer:   { label: "Implementation Retainer (mo 1)", price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
-  recurring:  { label: "Retainer recurring (mo 2+)",     price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
+  active case:   { label: "Active Case (mo 1)", price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
+  recurring:  { label: "Active Case recurring (mo 2+)",     price: 15_000, repPayout: 4_000, partnerPayout: 3_000, companyNet: 8_000 },
 } as const;
 
 // Funnel math, industry-honest, not optimistic
@@ -23,7 +23,7 @@ export const FUNNEL = {
 
 export interface MdpScenario {
   diagnosticsToClose: number;
-  retainersToClose: number;
+  active casesToClose: number;
   recurringMonths: number; // expected MRR months captured inside the 90 days
   grossRevenue: number;
   proposalsNeeded: number;
@@ -37,13 +37,13 @@ export interface MdpScenario {
 // Default scenario: blend that hits $1M with realistic close volume
 export function buildScenario(opts?: {
   diagnostics?: number;
-  retainers?: number;
+  active cases?: number;
   recurringMonths?: number;
 }): MdpScenario {
   const d = opts?.diagnostics ?? 30;          // 30 diagnostics  = $540k
-  const r = opts?.retainers   ?? 18;          // 18 retainers mo1 = $270k
-  const rm = opts?.recurringMonths ?? 14;     // 14 retainer-months recurring = $210k
-  const gross = d * OFFERS.diagnostic.price + r * OFFERS.retainer.price + rm * OFFERS.recurring.price;
+  const r = opts?.active cases   ?? 18;          // 18 active cases mo1 = $270k
+  const rm = opts?.recurringMonths ?? 14;     // 14 active case-months recurring = $210k
+  const gross = d * OFFERS.diagnostic.price + r * OFFERS.active case.price + rm * OFFERS.recurring.price;
   const closesNeeded = d + r;
   const proposals = Math.ceil(closesNeeded / FUNNEL.proposalToClose);
   const meetings  = Math.ceil(proposals / FUNNEL.meetingToProposal);
@@ -51,7 +51,7 @@ export function buildScenario(opts?: {
   const outbound  = Math.ceil(convos / FUNNEL.outboundToConvo);
   return {
     diagnosticsToClose: d,
-    retainersToClose: r,
+    active casesToClose: r,
     recurringMonths: rm,
     grossRevenue: gross,
     proposalsNeeded: proposals,
@@ -129,7 +129,7 @@ export function buildWeeks(): WeekPlan[] {
       focus: [
         "Outbound floor → 60/day per rep. No exceptions.",
         "Launch referral bonus inside portal ($500 onboard + $7k first close)",
-        "Joseph: 5 partnership outreaches/week to fractional CFOs and agencies",
+        "Joseph: 5 partnership outreaches/week to fractional CFOs and legacy shops",
         "Hire Rep #6. Promote highest-performing rep to mentor new hires.",
         "Stand up the weekly 'closes wall' on portal home, public scoreboard",
       ],
@@ -149,11 +149,11 @@ export function buildWeeks(): WeekPlan[] {
       focus: [
         "Email every closed-Diagnostic client: 'who else needs this?', direct ask",
         "Hire Rep #7. Begin recruiting Rep #8-#10 pipeline.",
-        "Braden: build retainer upsell script for every Diagnostic-only client",
+        "Braden: build active case upsell script for every Diagnostic-only client",
         "Joseph: publish weekly KPI screenshot on LinkedIn (radical transparency)",
         "Tighten Stripe receipts + onboarding email automation",
       ],
-      exitCriteria: "$360k cumulative. Retainer-to-Diagnostic upsell rate ≥40%." },
+      exitCriteria: "$360k cumulative. Active Case-to-Diagnostic upsell rate ≥40%." },
     { week: 7, phase: "Acceleration", theme: "Halfway, pressure test",
       revenueTarget: cum[6], newMeetings: 32, newCloses: 6, hires: 8,
       focus: [
@@ -171,7 +171,7 @@ export function buildWeeks(): WeekPlan[] {
         "Joseph: outreach to 10 podcasts in the operator/CFO space",
         "Reps: each must run 1 referral-only week, 0 cold outbound permitted",
         "Braden: enforce CRM hygiene, no closed-won without full deal record",
-        "Open the Implementation Retainer to existing Diagnostic backlog",
+        "Open the Active Case to existing Diagnostic backlog",
       ],
       exitCriteria: "$580k cumulative. Referrals ≥25% of week's new meetings." },
     { week: 9, phase: "Acceleration", theme: "Stack the calendar",
@@ -180,8 +180,8 @@ export function buildWeeks(): WeekPlan[] {
         "Hire Rep #9. Goal: enter month 3 with 9-10 producing reps.",
         "Joseph: 2-day live workshop or webinar, cheap top-of-funnel lift",
         "Reps: Friday demo day, every rep presents one closed-won breakdown",
-        "Braden: launch 12-month commitment retainer with 5% discount",
-        "Audit churn risk on every active retainer, kill the surprise cancel",
+        "Braden: launch 12-month commitment active case with 5% discount",
+        "Audit churn risk on every active active case, kill the surprise cancel",
       ],
       exitCriteria: "$690k cumulative. Active MRR ≥$60k." },
     { week: 10, phase: "Compounding", theme: "Bigger deals, same headcount",
@@ -197,7 +197,7 @@ export function buildWeeks(): WeekPlan[] {
     { week: 11, phase: "Compounding", theme: "Lock the recurring",
       revenueTarget: cum[10], newMeetings: 30, newCloses: 7, hires: 10,
       focus: [
-        "Every Diagnostic client converted to retainer or scheduled for review",
+        "Every Diagnostic client converted to active case or scheduled for review",
         "Braden: month-end billing audit, no leaked invoices, no failed cards",
         "Reps: write down their personal week-12-13 closing list (named accounts)",
         "Joseph: line up 10 Q1-next-year prospects, start 90-day machine again",

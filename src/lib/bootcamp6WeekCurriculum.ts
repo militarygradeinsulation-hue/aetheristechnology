@@ -65,7 +65,7 @@ Joseph (CEO) is a Marine, former Director of Strategy at a $25M aerospace firm w
       s("w1d1-s2", "Midday · The Pitch", 60, "Pitch in 12 seconds, 30 seconds, and 2 minutes.", [
         t("w1d1-s1-5", "Write the 12-second version in your notes", "'We find the $200K–$2M your business is leaking through broken CRM and follow-up.'"),
         t("w1d1-s1-6", "Write the 30-second version", "Add: who it's for (specialty mfrs $5–$25M), the deliverable (Diagnostic), the price ($18.5K fixed)."),
-        t("w1d1-s1-7", "Write the 2-minute version", "Add: 21-day timeline, retainer upsell, methodology bullets."),
+        t("w1d1-s1-7", "Write the 2-minute version", "Add: 21-day timeline, active case upsell, methodology bullets."),
         t("w1d1-s1-8", "Record yourself saying all three on your phone, listen back"),
       ]),
       s("w1d1-s3", "Afternoon · Portal Setup", 60, "Get your operating system live.", [
@@ -84,9 +84,9 @@ Joseph (CEO) is a Marine, former Director of Strategy at a $25M aerospace firm w
     lesson: {
       title: "Two public offers. One private wedge. Zero discounting.",
       body: `Public Offer #1 — 21-Day Revenue Diagnostic, $18,500 flat fee.
-We map where CRM, sales follow-up, and lead flow are losing money. Deliverable: written report, prioritized fixes, ROI projections, implementation roadmap. CRM-agnostic (runs on a CSV export). No percentage-of-savings games. No retainer required.
+We map where CRM, sales follow-up, and lead flow are losing money. Deliverable: written report, prioritized fixes, ROI projections, implementation roadmap. CRM-agnostic (runs on a CSV export). No percentage-of-savings games. No active case required.
 
-Public Offer #2 — Implementation Retainer, $15,000/month, 3-month minimum.
+Public Offer #2 — Active Case, $15,000/month, 3-month minimum.
 Only available to Diagnostic clients. We do the actual repair.
 
 Private Wedge — Forensic Diagnostic, $2,500 flat (applied toward engagement).
@@ -95,7 +95,7 @@ Used in outbound when $18.5K is too big a first ask. Same forensic frame, scoped
 Pilot pricing ($9,500 for first three) exists in outreach scripts only — never on the public site, never volunteered. If a prospect references it, you confirm. You never offer it unprompted.`,
       keyTakeaways: [
         "$18.5K Diagnostic is the default ask. Don't lead with $2.5K unless they object on size.",
-        "Retainer is ONLY sold post-Diagnostic. Never bundle them on the first call.",
+        "Active Case is ONLY sold post-Diagnostic. Never bundle them on the first call.",
         "We don't discount. We re-scope.",
       ],
     },
@@ -114,7 +114,7 @@ Pilot pricing ($9,500 for first three) exists in outreach scripts only — never
       s("w1d2-s2", "Midday · The Why-Buy-Now List", 60, "Build the urgency triggers that justify each offer.", [
         t("w1d2-s2-1", "List 5 triggers that signal a prospect needs the $2.5K Forensic"),
         t("w1d2-s2-2", "List 5 triggers that signal they need the $18.5K Diagnostic"),
-        t("w1d2-s2-3", "List 3 triggers that flip them into Retainer at month 1"),
+        t("w1d2-s2-3", "List 3 triggers that flip them into Active Case at month 1"),
       ]),
       s("w1d2-s3", "Afternoon · Self-Diagnostic", 60, "Eat your own dog food.", [
         t("w1d2-s3-1", "Run the free Leak Audit on your last employer or a friend's company", undefined, "/leak-audit"),
@@ -146,7 +146,7 @@ Out of scope (politely decline or refer):
 • $100M+ enterprises (politics, procurement, not our gig)`,
       keyTakeaways: [
         "Bigger is not better. Specialty + middle-market = best fit.",
-        "If they don't use HubSpot or Salesforce, they're a Diagnostic-only fit, not a Retainer fit.",
+        "If they don't use HubSpot or Salesforce, they're a Diagnostic-only fit, not a Active Case fit.",
         "Trade show + dead inbox = textbook signal.",
       ],
     },
@@ -225,18 +225,18 @@ You will see these names again in: the audit-engine code, the Diagnostic PDF, ev
     lesson: {
       title: "Flagship splits are FIXED dollars. Catalog splits are tiered.",
       body: `Flagship Diagnostic ($18,500): Company $10K · Rep $5K · Partner (Braden) $3K. One sale = $5K to you.
-Flagship Retainer ($15,000/month): Company $8K · Rep $4K · Partner $3K. EVERY MONTH the client stays. A 6-month retainer = $24K to the closing rep.
+Flagship Active Case ($15,000/month): Company $8K · Rep $4K · Partner $3K. EVERY MONTH the client stays. A 6-month active case = $24K to the closing rep.
 
 Catalog/smaller offers use a tiered split (50/30/20 → 60/25/15 → 70/20/10) as you hit volume.
 
 Bonuses stack:
 • Volume bonus: +$1K at 2 monthly sales, +$2.5K at 3, +$5K at 5.
-• Retention bonus: +$1K at 3mo, +$2.5K at 6mo, +$5K at 12mo retainer extension.
+• Retention bonus: +$1K at 3mo, +$2.5K at 6mo, +$5K at 12mo case extension.
 • Referral bonus: $500 onboard + $7K first-close + $500/sale override for 12 months.
 
 This is enforced server-side in the payments webhook (flagshipFixedSplit). You will be paid what the system computes.`,
       keyTakeaways: [
-        "One Diagnostic + 6 months of Retainer = $29K to you.",
+        "One Diagnostic + 6 months of Active Case = $29K to you.",
         "Bring another rep in via referral = $500 onboard + $7K when they close + $500/sale for 12 months.",
         "Retention bonuses reward keeping clients alive, not just signing them.",
       ],
@@ -247,8 +247,8 @@ This is enforced server-side in the payments webhook (flagshipFixedSplit). You w
     ],
     sessions: [
       s("w1d5-s1", "Morning · Math Drill", 60, "Calculate your commission in your head.", [
-        t("w1d5-s1-1", "Solve aloud: 2 Diagnostics + 1 client at 4-month retainer = ? (Answer: $5K+$5K+$16K = $26K)"),
-        t("w1d5-s1-2", "Solve: 1 Diagnostic + 12-month retainer = ? (Answer: $5K + $48K + $5K retention bonus = $58K)"),
+        t("w1d5-s1-1", "Solve aloud: 2 Diagnostics + 1 client at 4-month active case = ? (Answer: $5K+$5K+$16K = $26K)"),
+        t("w1d5-s1-2", "Solve: 1 Diagnostic + 12-month active case = ? (Answer: $5K + $48K + $5K retention bonus = $58K)"),
         t("w1d5-s1-3", "Open the Flagship Commission Panel and inspect your live projections", undefined, "/portal?tab=incentive"),
       ]),
       s("w1d5-s2", "Midday · Referral Networking", 60, "Plant the seed for compounding income.", [
@@ -403,7 +403,7 @@ The Strategic Question Engine is its sister tool — give it a company name + a 
 • Your partner needs to see real pipeline to coach you.
 • The Forecast Center calculates your projected commission off these statuses — if you don't update them, your numbers lie to you.
 
-Status hygiene: new → contacted → qualified → diagnostic-pitched → diagnostic-won → retainer-pitched → retainer-won → closed-lost. Move fast, never skip.`,
+Status hygiene: new → contacted → qualified → diagnostic-pitched → diagnostic-won → active case-pitched → active case-won → closed-lost. Move fast, never skip.`,
       keyTakeaways: [
         "Log every conversation, even 'not interested.'",
         "Update statuses same day — never let leads rot in 'new.'",
@@ -676,7 +676,7 @@ Selling happens by NOT selling. The prospect convinces themselves.`,
 • Decision Process — Solo or committee? Timeline?
 • Pain — Real or vague? "We need better reporting" = vague. "We lost 3 deals last quarter to follow-up" = real.
 • Champion — Who in the room would walk it through procurement?
-• Competition — Are they evaluating others? (Often yes — usually a marketing agency or a CRM consultant.)
+• Competition — Are they evaluating others? (Often yes — usually a marketing operator or a CRM consultant.)
 
 If you can't fill 5 of 7 boxes after discovery, the deal is NOT qualified. Don't write a proposal.`,
     },
@@ -778,8 +778,8 @@ const week5: DayPlan6W[] = [
       title: "Anchor the deliverable, then the price. Never the other way.",
       body: `Pitch structure (5 minutes):
 1. "Based on what you shared, you're sitting on at least $X in measurable leak across [3 specific categories]."
-2. "Our 21-Day Diagnostic maps it formally — written report, ROI projections, prioritized fix list. Fixed fee, $18,500. No retainer required, no percentage-of-savings, no surprises."
-3. "If you decide to fix it with us afterward, the Implementation Retainer is $15K/month with a 3-month minimum. But you can also take the report and execute internally — about half our clients do."
+2. "Our 21-Day Diagnostic maps it formally — written report, ROI projections, prioritized fix list. Fixed fee, $18,500. No active case required, no percentage-of-savings, no surprises."
+3. "If you decide to fix it with us afterward, the Active Case is $15K/month with a 3-month minimum. But you can also take the report and execute internally — about half our clients do."
 4. "Want me to send the SOW today or do you need to loop someone in first?"
 
 Notice: no slides. No pricing tiers. No "starting from." One price, one deliverable, one ask.`,
@@ -834,7 +834,7 @@ Never discount on the spot. Always re-scope.`,
     tagline: "Existing vendor, internal team, in-house attempt — all handled.",
     lesson: {
       title: "Existing solutions are the easiest objection to flip.",
-      body: `"We already have a marketing agency." → "Perfect. Agencies run programs. We diagnose the system the programs feed into. The agency probably wants this Diagnostic done — it'll make their work convert better. Want me to loop them in?"
+      body: `"We already have a marketing operator." → "Perfect. Legacy shops run programs. We diagnose the system the programs feed into. The operator probably wants this Diagnostic done — it'll make their work convert better. Want me to loop them in?"
 
 "We have an in-house RevOps person." → "Then you already know how hard it is to audit your own house. We're the outside set of eyes that gives them ammunition for the budget they keep getting denied. Want me to talk to them directly?"
 
@@ -908,19 +908,19 @@ const W6_OUT = "End of week: certified Aetheris Operator with a self-sustaining 
 const week6: DayPlan6W[] = [
   {
     week: 6, day: 26, weekTheme: W6_THEME, weekOutcome: W6_OUT,
-    theme: "Day 26 · The Retainer Conversion",
-    tagline: "Diagnostic clients → Retainer clients in 21 days.",
+    theme: "Day 26 · The Active Case Conversion",
+    tagline: "Diagnostic clients → Active Case clients in 21 days.",
     lesson: {
-      title: "The Diagnostic is the salesperson for the Retainer.",
-      body: `By Day 18 of the Diagnostic, you'll know exactly which fixes the client needs. Walk into the readout call with the Retainer SOW ready. The pitch writes itself:
+      title: "The Diagnostic is the salesperson for the Active Case.",
+      body: `By Day 18 of the Diagnostic, you'll know exactly which fixes the client needs. Walk into the readout call with the Active Case SOW ready. The pitch writes itself:
 
-"We mapped $X in leak. Categories 1, 3, and 5 can be fixed internally with this roadmap. Categories 2, 4, and 6 need operator-level work and 90 days of hands-on. That's what the Retainer is for. $15K/month, 3-month minimum, $4K of every month goes to you the rep. Want to start next Monday?"
+"We mapped $X in leak. Categories 1, 3, and 5 can be fixed internally with this roadmap. Categories 2, 4, and 6 need operator-level work and 90 days of hands-on. That's what the Active Case is for. $15K/month, 3-month minimum, $4K of every month goes to you the rep. Want to start next Monday?"
 
-Conversion benchmark: 60% of Diagnostic clients should sign the Retainer. If you're below 40%, your Diagnostic readouts are too generic.`,
+Conversion benchmark: 60% of Diagnostic clients should sign the Active Case. If you're below 40%, your Diagnostic readouts are too generic.`,
     },
     sessions: [
       s("w6d26-s1", "Morning · Build the Readout Template", 60, "One template, reusable.", [
-        t("w6d26-s1-1", "Draft a Diagnostic readout deck/doc that includes the Retainer pitch on slide N"),
+        t("w6d26-s1-1", "Draft a Diagnostic readout deck/doc that includes the Active Case pitch on slide N"),
         t("w6d26-s1-2", "Get Sales Coach to grade it"),
       ]),
       s("w6d26-s2", "Afternoon · If you have a Diagnostic client, prep the readout", 75, "Real reps.", [
@@ -961,7 +961,7 @@ The pitch to your network is forensic, not 'side hustle': "I'm building a sales 
   {
     week: 6, day: 28, weekTheme: W6_THEME, weekOutcome: W6_OUT,
     theme: "Day 28 · Client Retention = Your Monthly Income",
-    tagline: "Every month a Retainer client stays = $4K to you. Keep them alive.",
+    tagline: "Every month a Active Case client stays = $4K to you. Keep them alive.",
     lesson: {
       title: "Retention is a sales skill, not just a delivery skill.",
       body: `Reps who hand off after the close lose retention. Reps who stay involved earn $4K/month for 12+ months.
@@ -981,7 +981,7 @@ Clients churn for one reason: silence. Don't go silent.`,
         t("w6d28-s1-3", "Add monthly recurring tasks to your calendar"),
       ]),
       s("w6d28-s2", "Afternoon · Apply to current clients", 60, "Real touches.", [
-        t("w6d28-s2-1", "If you have active retainer clients, send this month's progress autopsy today"),
+        t("w6d28-s2-1", "If you have active active case clients, send this month's progress autopsy today"),
         t("w6d28-s2-2", "Complete Day 28 quiz", undefined, "/portal?tab=training"),
       ]),
     ],
@@ -1047,7 +1047,7 @@ Welcome to the team. Now go bleed leaks dry.`,
       s("w6d30-s2", "Afternoon · Graduate", 60, "Make it public.", [
         t("w6d30-s2-1", "Post your graduation on the Team Message Board", undefined, "/portal?tab=messages"),
         t("w6d30-s2-2", "Post a LinkedIn announcement using the forensic operator voice"),
-        t("w6d30-s2-3", "Plan Week 7+ — your goal is 2 Diagnostics + 1 Retainer in your first 30 days post-grad"),
+        t("w6d30-s2-3", "Plan Week 7+ — your goal is 2 Diagnostics + 1 Active Case in your first 30 days post-grad"),
       ]),
     ],
     successMetric: "Certified Aetheris Operator with full pipeline and a plan for next 30 days.",

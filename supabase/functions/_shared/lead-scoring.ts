@@ -244,7 +244,7 @@ const PRIORITY_INDUSTRIES = [
   'roofing','hvac','plumbing','electrical','construction','manufacturing','manufacture',
   'logistics','distribution','wholesale','home services','contractor','trades',
   'professional services','accounting','legal','law','dental','medical','clinic','med spa',
-  'saas','software','agency','marketing','real estate','auto','dealership',
+  'saas','software','operator','marketing','real estate','auto','dealership',
 ];
 
 const PAIN_PHRASES = [

@@ -29,7 +29,7 @@ Memorize this line. Use it on every first call:
 | 2 | **Revenue Pack** | $5,000 | one-time | Operator-led bundle · ~14 hrs |
 | 3 | **Operator Suite** | $10,000 | one-time | Operator-led bundle · ~30 hrs / 3 weeks |
 | 4 | **21-Day Revenue Diagnostic** | $18,500 | one-time | **FLAGSHIP** · fixed-fee, fit call required |
-| 5 | **Implementation Retainer** | $15,000 / mo | recurring (3-mo min) | **FLAGSHIP** · Diagnostic clients only |
+| 5 | **Active Case** | $15,000 / mo | recurring (3-mo min) | **FLAGSHIP** · Diagnostic clients only |
 
 That's it. Anything else (Digital Snapshot $149, Strategy Blueprint $349,
 Website Evaluation $599, etc.) is **legacy à la carte** — still in your rep
@@ -51,7 +51,7 @@ portal for internal sales, but never lead with it on the public site.
 - **Operator Suite** — Everything in Revenue + Strategy Blueprint + Social
   Content Pack + Digital Snapshot + Lead-Nurture Automation + Premium Tech
   Suite access + weekly calls + async ops channel. **The $10,000 credits
-  1:1 toward the Implementation Retainer.** _The full stack only matters if
+  1:1 toward the Active Case.** _The full stack only matters if
   someone is wielding it for you._
 
 ### The flagships
@@ -63,7 +63,7 @@ Never quote either price cold over email.
   follow-up, and ops. Output: a 15–30 page written report, prioritized fixes,
   ROI projections, source-data appendix, 60-minute readout.
 
-- **Implementation Retainer — $15,000/mo, 3-month minimum.** Diagnostic
+- **Active Case — $15,000/mo, 3-month minimum.** Diagnostic
   clients only. Operator executes the prioritized fixes and re-measures
   recovered revenue every month.
 
@@ -87,15 +87,15 @@ Every public bundle is Tier 3. The rep keeps:
 | Revenue Pack | $5,000 | **$1,000** | $500 | $3,500 |
 | Operator Suite | $10,000 | **$2,000** | $1,000 | $7,000 |
 
-### Model B — Flagship fixed-dollar (Diagnostic + Retainer only)
+### Model B — Flagship fixed-dollar (Diagnostic + Active Case only)
 
 | Flagship | Sale | **Rep gets** | Partner gets | Company |
 |---|---|---|---|---|
 | 21-Day Diagnostic | $18,500 once | **$5,000** | $3,000 | $10,500 |
-| Implementation Retainer | $15,000 **/mo** | **$4,000 /mo** | $3,000 /mo | $8,000 /mo |
+| Active Case | $15,000 **/mo** | **$4,000 /mo** | $3,000 /mo | $8,000 /mo |
 
-**The retainer pays out every single month the client stays subscribed.**
-If your client stays 12 months, you collect **$48,000** in retainer
+**The active case pays out every single month the client stays subscribed.**
+If your client stays 12 months, you collect **$48,000** in active case
 commission — separate from the $5,000 Diagnostic close that got them there.
 
 ### Bonus stack (sits on top of every commission above)
@@ -109,7 +109,7 @@ commission — separate from the $5,000 Diagnostic close that got them there.
 | Source | Amount |
 |---|---|
 | Diagnostic close | $5,000 |
-| Retainer × 12 months | $48,000 |
+| Active Case × 12 months | $48,000 |
 | 12-month retention bonus | $5,000 |
 | **One client, your take** | **$58,000** |
 
@@ -137,7 +137,7 @@ Map their pain to a bundle:
 - "We need someone to actually do it" → Operator Suite
 - "We're a $5M+ shop and want a full audit" → book the **Diagnostic fit call**
 
-### Flagship qualification (Diagnostic + Retainer)
+### Flagship qualification (Diagnostic + Active Case)
 Required before quoting price:
 1. Revenue band $1M–$50M (sweet spot $5M–$25M specialty manufacturer).
 2. They already know something is broken — exhausted from looking for it.
@@ -155,7 +155,7 @@ call on a tire-kicker.
 - **Never** quote a flagship price before the 15-minute fit call.
 - **Never** discount a bundle. If they need lower, sell the Signal Pack.
 - **Never** describe the Operator Suite credit as a refund — it's a 1:1
-  credit toward the Retainer, only if they keep us.
+  credit toward the Active Case, only if they keep us.
 - **Always** add every conversation to the Leads board. Pipeline visibility
   is how the partner protects your override.
 - **Always** clock in when working. Partners read your $/hr.
@@ -180,18 +180,18 @@ But that is a rep-led private sale, not the public path. Steer them to the
 Revenue Pack ($5,000, you get $1,000) by explaining the script alone gets
 forgotten without the follow-up system around it.
 
-**Q: Does the Operator Suite $10,000 credit reduce my Retainer commission?**
-A: No. The credit reduces the client's invoice for the first Retainer
-month(s). Your $4,000/mo commission is paid on the gross retainer price,
+**Q: Does the Operator Suite $10,000 credit reduce my Active Case commission?**
+A: No. The credit reduces the client's invoice for the first Active Case
+month(s). Your $4,000/mo commission is paid on the gross active case price,
 not the net the client pays. Open question with admin if your specific
 deal is structured differently.
 
 **Q: Fractional CTO/CMO — still a thing?**
 A: Removed from the rep portal as an active offer. If a client asks for an
-embedded operator, the answer is **Operator Suite → Implementation Retainer**.
+embedded operator, the answer is **Operator Suite → Active Case**.
 
 ---
 
 ## 7. One-line cheat sheet
 
-> Signal $2,500 ($500 rep) · Revenue $5,000 ($1k rep) · Operator Suite $10,000 ($2k rep) · Diagnostic $18,500 ($5k rep) · Retainer $15k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.
+> Signal $2,500 ($500 rep) · Revenue $5,000 ($1k rep) · Operator Suite $10,000 ($2k rep) · Diagnostic $18,500 ($5k rep) · Active Case $15k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.

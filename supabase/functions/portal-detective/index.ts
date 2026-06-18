@@ -61,7 +61,7 @@ Then: write the message that uses the verdict.
   "message": {
     "channel": "email" | "linkedin",
     "subject": "Subject line (email only, else null)",
-    "body": "The full message in Aetheris voice. 90-160 words for email, 50-90 for LinkedIn. Reference the specific finding + number. End with a soft next step (the free /leak-audit, the $2,500 Forensic Diagnostic, or a 15-min look). NEVER quote retainer first.",
+    "body": "The full message in Aetheris voice. 90-160 words for email, 50-90 for LinkedIn. Reference the specific finding + number. End with a soft next step (the free /leak-audit, the $2,500 Forensic Diagnostic, or a 15-min look). NEVER quote active case first.",
     "why_it_lands": "1 sentence on why this exact phrasing is hard for this person to ignore."
   },
   "fallback_subjects": ["Alt subject 1", "Alt subject 2"]

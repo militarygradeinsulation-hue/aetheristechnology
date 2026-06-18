@@ -25,7 +25,7 @@ const STARTER_TOPICS = [
   "How the $18,500 Diagnostic actually runs day-by-day",
   "Cold outreach playbook for specialty manufacturers",
   "Onboarding checklist for a new rep in week 1",
-  "How to brief a partner on the Implementation Retainer",
+  "How to brief a partner on the Active Case",
 ];
 
 function downloadMarkdown(filename: string, body: string) {

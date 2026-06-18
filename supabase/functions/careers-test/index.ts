@@ -317,7 +317,7 @@ async function analyzeApplicationFit(admin: any, app: any, apiKey: string) {
   const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
 We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
 Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
-Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
+Penalize: pure marketing/operator fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
 Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
 
 You MUST rate the candidate 1-10 on each of these six sections (1 = total miss, 5 = average, 10 = exceptional). Be strict — most candidates land 3-6.

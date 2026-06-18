@@ -121,7 +121,7 @@ export const PortalDocuments: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            Covers the five-offer public lineup (Signal $2,500 → Operator Suite $10,000 → Diagnostic $18,500 → Retainer $15k/mo), both commission models (tiered % vs flagship fixed-dollar), the exact rep/partner cut per offer, qualification rules for the flagship fit call, and the hard rules ("sell the operator, not the tools").
+            Covers the five-offer public lineup (Signal $2,500 → Operator Suite $10,000 → Diagnostic $18,500 → Active Case $15k/mo), both commission models (tiered % vs flagship fixed-dollar), the exact rep/partner cut per offer, qualification rules for the flagship fit call, and the hard rules ("sell the operator, not the tools").
           </p>
           <div className="flex flex-wrap gap-2">
             <a href="/Rep-Operator-Playbook.md" target="_blank" rel="noopener noreferrer">

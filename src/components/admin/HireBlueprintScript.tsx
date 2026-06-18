@@ -40,7 +40,7 @@ const SECTIONS: ScriptSection[] = [
         say:
 `Welcome aboard. Here's the deal before anything else.
 
-We are not consultants. We are not an agency. We are not "AI experts."
+We are not consultants. We are not an operator. We are not "AI experts."
 
 We are Business Forensics Operators. Our job is to walk into a business, find where it's leaking money, time, and trust — and seal those leaks before the owner loses another quarter.
 
@@ -99,11 +99,11 @@ It's a self-scan. 90 seconds. They get a number back. That number is almost alwa
 
 Your job on the call is not to convince them they're leaking. The audit already did that. Your job is to tell them what to do about it.
 
-The free audit is the bait. The Forensic Diagnostic is the hook. The retainer is the catch.`,
+The free audit is the bait. The Forensic Diagnostic is the hook. The active case is the catch.`,
         beats: [
           "Free audit lives at /leak-audit",
           "Audit creates the discomfort — you don't have to",
-          "Funnel: free audit → diagnostic → retainer",
+          "Funnel: free audit → diagnostic → active case",
         ],
       },
       {
@@ -115,14 +115,14 @@ The free audit is the bait. The Forensic Diagnostic is the hook. The retainer is
         say:
 `This is your most popular sale. $2,500 flat. No hourly. No scope creep.
 
-It is a 21-day, operator-led forensic dig into one business. They get a sealed 15-to-30-page report at the end. Every dollar of the $2,500 is credited back if they move into a retainer.
+It is a 21-day, operator-led forensic dig into one business. They get a sealed 15-to-30-page report at the end. Every dollar of the $2,500 is credited back if they move into a active case.
 
 When you quote it, you quote it like you'd quote a CT scan. "It's twenty-five hundred. That's how we find what's actually wrong before anyone writes a treatment plan." Then stop talking.
 
 If they balk at $2,500, you are not talking to a buyer. You're talking to a tire-kicker. Disqualify and move on.`,
         beats: [
           "$2,500 flat, 21 days, sealed report",
-          "Fully credited toward a retainer",
+          "Fully credited toward a active case",
           "Quote it flat — no apology, no discount",
           "$2,500 objection = disqualifier",
         ],
@@ -130,7 +130,7 @@ If they balk at $2,500, you are not talking to a buyer. You're talking to a tire
       },
       {
         id: "flagship",
-        title: "Flagships — $18k Diagnostic & $15k Retainer",
+        title: "Flagships — $18k Diagnostic & $15k Active Case",
         icon: Briefcase,
         duration: "4 min",
         goal: "Get them excited about the upmarket numbers without skipping the small-ticket reps.",
@@ -139,17 +139,17 @@ If they balk at $2,500, you are not talking to a buyer. You're talking to a tire
 
 The $18,000 Forensic Diagnostic — same methodology, but at enterprise depth. The split is fixed: $10k to the company, $5k to you as the rep, $3k to the partner.
 
-And the $15,000/month Retainer — ongoing operator presence. The split is $8k company, $4k rep, $3k partner — every single month it renews.
+And the $15,000/month Active Case — ongoing operator presence. The split is $8k company, $4k rep, $3k partner — every single month it renews.
 
-That retainer is the prize. One $15k retainer pays you $4,000 a month for as long as it lives. Three of those and you don't need anything else.
+That active case is the prize. One $15k active case pays you $4,000 a month for as long as it lives. Three of those and you don't need anything else.
 
 But — and write this down — flagship deals come from disciplined $2,500 diagnostics. Skip the small ticket and you'll starve waiting for whales.`,
         beats: [
           "$18k diagnostic split: $10k / $5k / $3k",
-          "$15k retainer split: $8k / $4k / $3k MONTHLY",
+          "$15k active case split: $8k / $4k / $3k MONTHLY",
           "Flagships are earned by closing diagnostics first",
         ],
-        followUp: "Show them the Commissions tab in the portal. Have them calculate what 2 retainers + 1 diagnostic pays them in a month.",
+        followUp: "Show them the Commissions tab in the portal. Have them calculate what 2 active cases + 1 diagnostic pays them in a month.",
       },
       {
         id: "bonuses",

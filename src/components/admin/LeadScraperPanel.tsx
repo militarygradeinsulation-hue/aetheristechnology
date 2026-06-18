@@ -253,7 +253,7 @@ export const LeadScraperPanel: React.FC = () => {
               {[
                 'Medspas','Auto Mechanics','Dental','Roofing','HVAC','Plumbing',
                 'Law Firm','Real Estate','Chiropractor','Insurance','Accounting',
-                'Marketing Agency','SaaS','Ecommerce','Home Services','Restaurant',
+                'Marketing Operator','SaaS','Ecommerce','Home Services','Restaurant',
               ].map(label => (
                 <button
                   key={label}

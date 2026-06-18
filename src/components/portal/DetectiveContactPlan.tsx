@@ -29,7 +29,7 @@ const INDUSTRY_TIME: Array<{ match: RegExp; day: string; window: string; reason:
   { match: /real ?estate|realtor|broker|property/i, day: "Tue–Thu", window: "9:00–10:30 AM local", reason: "Between morning showings and client calls." },
   { match: /construction|contractor|trades|hvac|plumb|electric|roof/i, day: "Mon–Wed", window: "6:30–7:30 AM or 4:30–5:30 PM", reason: "Before crews start / after they wrap." },
   { match: /health|clinic|dental|medical|chiropract|therap/i, day: "Tue–Thu", window: "12:00–1:30 PM local", reason: "Lunch break between patient blocks." },
-  { match: /agency|marketing|consult|saas|software|tech/i, day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "Post-standup, pre-lunch decision window." },
+  { match: /operator|marketing|consult|saas|software|tech/i, day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "Post-standup, pre-lunch decision window." },
   { match: /finance|accounting|cpa|bookkeep|insurance/i, day: "Tue–Thu", window: "9:30–11:00 AM local", reason: "After market open, before client meetings stack." },
   { match: /manufactur|industrial|logistics|warehouse/i, day: "Tue–Wed", window: "7:30–9:00 AM local", reason: "Shift handover — owners on the floor with coffee." },
   { match: /auto|dealer|repair|mechanic/i, day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "After service bays fill, before lunch." },

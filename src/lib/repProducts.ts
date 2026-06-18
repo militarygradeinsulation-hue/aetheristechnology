@@ -9,10 +9,10 @@
 //    Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
 //    The 3 bundles ($2,500 / $5,000 / $10,000) all land in Tier 3.
 //
-// 2) FLAGSHIP FIXED-DOLLAR (Diagnostic + Retainer ONLY)
+// 2) FLAGSHIP FIXED-DOLLAR (Diagnostic + Active Case ONLY)
 //    21-Day Revenue Diagnostic ($18,500 one-time)
 //      → Company $10,500 · Rep $5,000 · Partner $3,000
-//    Implementation Retainer ($15,000/mo, paid every month client stays)
+//    Active Case ($15,000/mo, paid every month client stays)
 //      → Company $8,000  · Rep $4,000 · Partner $3,000
 //    Enforced server-side in payments-webhook flagshipFixedSplit().
 //
@@ -50,7 +50,7 @@ export interface RepProduct {
   /** Marks one of the three sealed operator-led bundles. */
   bundle?: boolean;
   /** Marks a flagship offer with FIXED-DOLLAR commission split. */
-  flagship?: 'diagnostic' | 'retainer';
+  flagship?: 'diagnostic' | 'active case';
   /** What this product actually does. One sentence the rep can read aloud. */
   description?: string;
   /** Who the product is for / ICP language for the rep. */
@@ -61,11 +61,11 @@ export interface RepProduct {
 // webhook enforces the same numbers in flagshipFixedSplit().
 export interface FixedSplitCents { company: number; rep: number; partner: number; }
 
-export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'retainer', FixedSplitCents> = {
+export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'active case', FixedSplitCents> = {
   // 21-Day Revenue Diagnostic — $18,500 one-time
   diagnostic: { company: 1_050_000, rep: 500_000, partner: 300_000 },
-  // Implementation Retainer — $15,000/mo, paid every month client stays
-  retainer:   { company:   800_000, rep: 400_000, partner: 300_000 },
+  // Active Case — $15,000/mo, paid every month client stays
+  active case:   { company:   800_000, rep: 400_000, partner: 300_000 },
 };
 
 /** Returns the rep cut for a product — fixed-dollar for flagships, % for tiered. */
@@ -89,14 +89,14 @@ export const REP_PRODUCTS: RepProduct[] = [
     flagship: 'diagnostic',
     highlight: true,
     description: 'Operator-led 3-week forensic teardown of the client\'s revenue system. Ends with a written leak report, a 90-day remediation plan, and a redesigned funnel.',
-    forWho: 'Owners doing $1M–$25M who know money is leaking but cannot pinpoint where. Pre-requisite to the Retainer.',
+    forWho: 'Owners doing $1M–$25M who know money is leaking but cannot pinpoint where. Pre-requisite to the Active Case.',
   },
   {
-    name: 'Implementation Retainer',
+    name: 'Active Case',
     priceCents: 1_500_000,
     tier: 3,
     recurring: true,
-    flagship: 'retainer',
+    flagship: 'active case',
     highlight: true,
     description: 'Monthly embedded operator. We rebuild and run the systems the Diagnostic exposed — sales follow-up, CRM hygiene, content engine, dashboards.',
     forWho: 'Diagnostic graduates who want the operator to ship the fixes, not hand them a PDF.',
@@ -196,7 +196,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: 'CRM Setup & Optimization', priceCents: 39900, tier: 2, legacy: true,
     description: 'Full CRM setup or rebuild — pipelines, automations, dashboards, integrations — in HubSpot or Pipedrive.',
     forWho: 'Teams who bought a CRM and never actually used it.' },
-  { name: 'Sales Coaching Retainer', priceCents: 49900, tier: 2, recurring: true, legacy: true,
+  { name: 'Sales Coaching Active Case', priceCents: 49900, tier: 2, recurring: true, legacy: true,
     description: 'Weekly 1:1 coaching for the rep or sales leader — calls, deals, pipeline, deal review.',
     forWho: 'Founders selling solo or first-time sales managers.' },
   // Tier 3, High-Ticket ($599+) — pre-bundle catalog

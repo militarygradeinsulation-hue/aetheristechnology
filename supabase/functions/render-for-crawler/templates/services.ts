@@ -23,8 +23,8 @@ export async function renderServices(
 
   const defaultFaqs = [
     { question: "How much is the Forensic Diagnostic?", answer: "$2,500 flat. 14 days. Includes operator-led intake autopsy, funnel pressure test, quote-to-close inspection, follow-up pulse check, ops friction map, tooling drag analysis, and the full leak ledger. Fee applies toward any engagement." },
-    { question: "What does an engagement cost after the diagnostic?", answer: "Engagement pricing is scoped to the specific leaks we agree to close. Typically ranges $5K–$50K depending on leak count, complexity, and required tooling/automation builds. No retainers." },
-    { question: "Do you have monthly retainers?", answer: "No. Retainers usually pay for activity, not outcomes. Every Aetheris engagement is scoped to specific leak closure with specific success criteria." },
+    { question: "What does an engagement cost after the diagnostic?", answer: "Engagement pricing is scoped to the specific leaks we agree to close. Typically ranges $5K–$50K depending on leak count, complexity, and required tooling/automation builds. No active cases." },
+    { question: "Do you have active cases?", answer: "No. Active Cases usually pay for activity, not outcomes. Every Aetheris engagement is scoped to specific leak closure with specific success criteria." },
     { question: "What's included in the Forensic Diagnostic?", answer: "Operator interviews with you and key team members, data review (CRM, sales pipeline, ops metrics, tooling spend), 7-step Leak Audit applied to your business, and a written leak ledger with dollar-quantified findings, prioritized fix list, and projected ROI per fix." },
     { question: "Do you work with companies outside Indianapolis?", answer: "Yes. We work with operators across the U.S. Most engagements are remote with optional onsite if it's worth the travel cost." },
   ];
@@ -57,7 +57,7 @@ export async function renderServices(
     <main>
       <header>
         <h1>Services & Pricing</h1>
-        <p class="tldr"><strong>TL;DR:</strong> One front door — the $2,500 Forensic Diagnostic. From there, scoped engagements to close the leaks we found. No retainers. No slide decks. No "discovery phases."</p>
+        <p class="tldr"><strong>TL;DR:</strong> One front door — the $2,500 Forensic Diagnostic. From there, scoped engagements to close the leaks we found. No active cases. No slide decks. No "discovery phases."</p>
       </header>
 
       <section>
@@ -82,7 +82,7 @@ export async function renderServices(
         <h2>Engagement — Scoped per leak</h2>
         <p>After the diagnostic, we scope engagement to the specific leaks worth closing. Typical range: $5K–$50K. Pricing depends on leak count, build complexity, and required automation.</p>
         <ul>
-          <li>No retainers</li>
+          <li>No active cases</li>
           <li>No "transformation roadmaps"</li>
           <li>Specific outcomes, specific success criteria, specific timeline</li>
         </ul>

@@ -24,7 +24,7 @@ import socialContentPackThumb from '@/assets/packages/social-content-pack.png';
 import digitalSnapshotThumb from '@/assets/packages/digital-snapshot.png';
 import fullWebsiteReportThumb from '@/assets/packages/full-website-report.png';
 import leadNurtureAutomationThumb from '@/assets/packages/lead-nurture-automation.png';
-import salesCoachingRetainerThumb from '@/assets/packages/sales-coaching-retainer.png';
+import salesCoachingActive CaseThumb from '@/assets/packages/sales-coaching-active case.png';
 import marketingSalesAlignmentThumb from '@/assets/packages/marketing-sales-alignment.png';
 import leadGenSprintThumb from '@/assets/packages/lead-gen-sprint.png';
 import salesProcessRedesignThumb from '@/assets/packages/sales-process-redesign.png';
@@ -252,7 +252,7 @@ const services: ServiceTile[] = [
     successStat: '20–40% improvement in forecast accuracy after structural cleanup',
     longDescription: 'Full CRM audit + setup improvements + team training. We restructure your pipeline, standardize contact fields, build basic automation workflows, train your sales team live (2 hours), and check in 30 days later to optimize what\'s actually working.',
     deliverables: ['Full health check (built in)', 'Pipeline structure optimization', 'Contact field cleanup & standardization', 'Basic automation workflows', 'Live sales team training (2 hrs)', '30-day follow-up optimization'],
-    whyValuable: 'Most CRM implementations are broken. This unlocks 20–40% more accurate forecasting and the training piece means the team actually uses it. Natural bridge into ongoing optimization retainers.',
+    whyValuable: 'Most CRM implementations are broken. This unlocks 20–40% more accurate forecasting and the training piece means the team actually uses it. Natural bridge into ongoing optimization active cases.',
     includes: [{ name: 'CRM Health Check', value: '$79' }, { name: 'Live Team Training', value: 'included' }, { name: '30-Day Optimization', value: 'included' }],
   },
   {
@@ -290,7 +290,7 @@ const services: ServiceTile[] = [
     successStat: '$999 typically pays for itself in the first 1–2 qualified deals closed',
     longDescription: 'A 30-day done-for-you lead generation campaign. We run a strategy workshop, execute LinkedIn outreach (100+ connections), email sequences, paid ads ($500 budget included), build the landing page + lead magnet, integrate with your CRM, and report results daily.',
     deliverables: ['Lead strategy workshop (2 hrs)', 'LinkedIn outreach campaign (100+ connections)', 'Email sequence execution', 'Paid ads campaign ($500 budget included)', 'Landing page creation', 'Lead magnet setup', 'CRM integration', 'Daily optimization', '30-day results report'],
-    whyValuable: 'Companies are desperate for leads. "Done-for-you" eliminates the execution barrier and the results are measurable. Natural bridge into ongoing $499/mo retainers.',
+    whyValuable: 'Companies are desperate for leads. "Done-for-you" eliminates the execution barrier and the results are measurable. Natural bridge into ongoing $499/mo active cases.',
   },
   // ============ Phase 4: Premium / Recurring ============
   {
@@ -300,7 +300,7 @@ const services: ServiceTile[] = [
     successStat: 'Average 20–40% revenue increase within 90 days of new process',
     longDescription: 'A complete overhaul of how your team sells. Methodology selection (Consultative, Value-based, MEDDIC, etc.), full process documentation lead-to-close, 5 sales team training sessions, CRM configuration for the new process, playbook creation, new-rep onboarding materials, and 90-day implementation support.',
     deliverables: ['Sales process audit (current state)', 'Methodology selection', 'Full lead-to-close documentation', '5 sales team training sessions', 'CRM configuration for new process', 'Playbook creation', 'New-rep onboarding materials', '90-day implementation support'],
-    whyValuable: 'Most businesses sell wrong because they have no clear process. Fixing it generates 20–40% more revenue immediately and shortens the sales cycle. Bridge into $1K–$3K/mo coaching retainers.',
+    whyValuable: 'Most businesses sell wrong because they have no clear process. Fixing it generates 20–40% more revenue immediately and shortens the sales cycle. Bridge into $1K–$3K/mo coaching active cases.',
   },
   {
     icon: Handshake, title: 'Marketing-to-Sales Alignment', thumbnail: marketingSalesAlignmentThumb, pricing: '$1,299', priceRaw: 129900, pricingDetail: '2-day workshop + 60-day coaching', priceId: 'marketing_sales_alignment_once', bundleable: true, badge: 'PREMIUM',
@@ -309,10 +309,10 @@ const services: ServiceTile[] = [
     successStat: 'Misalignment costs the average company 6+ figures/year in wasted leads',
     longDescription: 'A 2-day workshop (off-site or virtual) that fixes the disconnect between marketing and sales. We build the SLA, lead-scoring framework, handoff process, messaging alignment, content collaboration framework, reporting dashboard, and provide 60 days of follow-up coaching.',
     deliverables: ['2-day off-site or virtual workshop', 'SLA definition', 'Lead scoring framework', 'Handoff process documentation', 'Messaging alignment across channels', 'Content collaboration framework', 'Reporting/metrics dashboard setup', '60-day coaching/support'],
-    whyValuable: 'Marketing and sales hate each other in 90% of companies and that misalignment costs 6+ figures/year. Premium high-touch workshop that usually leads into bigger combined retainers.',
+    whyValuable: 'Marketing and sales hate each other in 90% of companies and that misalignment costs 6+ figures/year. Premium high-touch workshop that usually leads into bigger combined active cases.',
   },
   {
-    icon: TrendingUp, title: 'Sales Coaching Engagement', thumbnail: salesCoachingRetainerThumb, pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_retainer_monthly', badge: 'RECURRING',
+    icon: TrendingUp, title: 'Sales Coaching Engagement', thumbnail: salesCoachingActive CaseThumb, pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_active case_monthly', badge: 'RECURRING',
     description: 'Ongoing sales team coaching, pipeline reviews, and CRM optimization.',
     successStat: 'Average client stays 12–18 months, recurring revenue engine',
     longDescription: 'Ongoing sales team coaching and optimization. Weekly team call, 1:1 coaching for each rep (30–60 min), deal reviews on stuck pipeline, CRM optimization, playbook/script updates, quarterly strategy refresh, and a monthly performance dashboard. Tier B ($699) and Tier C ($999) add daily Slack support and a dedicated account manager.',

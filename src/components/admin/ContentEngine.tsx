@@ -146,7 +146,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
     'Indianapolis vs. Chicago: why Indy operators get squeezed harder on margin',
   ],
   'Trust & Positioning': [
-    'I don\'t do retainers until I find the leak. Here\'s why.',
+    'I don\'t do active cases until I find the leak. Here\'s why.',
     'What a "Business Forensics Operator" actually does (it\'s not consulting)',
     'Why I refuse to pitch, and what I do instead',
     'The 3 kinds of clients I turn away (and why you should too)',
