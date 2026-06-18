@@ -155,12 +155,6 @@ const LeakLanderPage: React.FC = () => {
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
             <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
-              <Link to="/home">
-                <ExternalLink className="w-5 h-5 mr-2 text-amber relative" />
-                <span className="relative">Main Site</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
               <Link to="/contact">
                 <FileText className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Intake Form</span>
