@@ -59,6 +59,25 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
     return true;
   }
+
+
+  // 4) LinkedIn auto-reply: open the post in a background tab so the
+  //    content script there can drop in the queued reply, then self-close.
+  if (msg?.type === "AETHERIS_LI_OPEN_AND_HANDLE") {
+    const url = String(msg.url || "");
+    if (!url || !/linkedin\.com/.test(url)) {
+      sendResponse({ ok: false, error: "bad url" });
+      return true;
+    }
+    chrome.tabs.create({ url, active: false }, (tab) => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ ok: false, error: chrome.runtime.lastError.message });
+        return;
+      }
+      sendResponse({ ok: true, tabId: tab.id });
+    });
+    return true;
+  }
 });
 
 // Re-broadcast tab updates so the panel can refresh its header + auto-Observe.
