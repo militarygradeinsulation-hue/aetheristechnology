@@ -272,6 +272,13 @@ const LeakLanderPage: React.FC = () => {
             <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3 text-center">
               Or skip the scan — talk to the operator
             </p>
+            <div className="mb-4 rounded-sm border border-amber/40 bg-background/60 px-4 py-3 text-sm leading-relaxed text-foreground/90">
+              <p className="font-semibold text-amber mb-1">Only schedule a meeting if I can help you.</p>
+              <p>I don't sell, and I don't entertain sales offers from people.</p>
+              <p className="mt-2 text-foreground/75">
+                Applicants must go through the <Link to="/careers" className="text-amber underline underline-offset-2 hover:text-amber/80">careers page</Link> only — not here.
+              </p>
+            </div>
             <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
               <div
                 className="meetings-iframe-container"
