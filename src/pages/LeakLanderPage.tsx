@@ -12,6 +12,7 @@ import landingOneButtonInfographic from "@/assets/landing-one-button-infographic
 import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
+import { Navbar } from "@/components/Navbar";
 
 const LeakLanderPage: React.FC = () => {
   const [deckOpen, setDeckOpen] = useState(false);
@@ -68,6 +69,8 @@ const LeakLanderPage: React.FC = () => {
         description="78% of leaks we find, the owner already felt. they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
         path="/"
       />
+
+      <Navbar onContactClick={() => {}} />
 
       {/* LinkedIn premium offer banner */}
       <a
