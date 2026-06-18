@@ -64,14 +64,14 @@ export function IncentivePlan() {
   // Sample monthly stack
   const sample = useMemo(() => {
     const directDiag = 5000;       // close 1 Diagnostic
-    const active caseMo = 4000;       // 1 active case that month
+    const activeCaseMo = 4000;       // 1 active case that month
     const referralFirstClose = 7000; // 1 referred Diagnostic closes
     const referralOverride = 500 * 2; // 2 prior-referred sales tick this month
     const qualifiedRef = 250 * 2;   // 2 qualified referrals (no close yet)
     const aptBonus = 250 * 1;       // 1 booked-and-closed appointment
     const webinarBonus = 400 * 1;   // 1 webinar attendee converted
-    const total = directDiag + active caseMo + referralFirstClose + referralOverride + qualifiedRef + aptBonus + webinarBonus;
-    return { directDiag, active caseMo, referralFirstClose, referralOverride, qualifiedRef, aptBonus, webinarBonus, total };
+    const total = directDiag + activeCaseMo + referralFirstClose + referralOverride + qualifiedRef + aptBonus + webinarBonus;
+    return { directDiag, activeCaseMo, referralFirstClose, referralOverride, qualifiedRef, aptBonus, webinarBonus, total };
   }, []);
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
@@ -306,7 +306,7 @@ export function IncentivePlan() {
               </thead>
               <tbody className="divide-y divide-border/50">
                 <tr><td className="py-2">Closed 1 Diagnostic herself</td><td className="text-xs">Direct</td><td className="text-right font-mono">{fmt(sample.directDiag)}</td></tr>
-                <tr><td className="py-2">1 Active Case client billing this month</td><td className="text-xs">Recurring</td><td className="text-right font-mono">{fmt(sample.active caseMo)}</td></tr>
+                <tr><td className="py-2">1 Active Case client billing this month</td><td className="text-xs">Recurring</td><td className="text-right font-mono">{fmt(sample.activeCaseMo)}</td></tr>
                 <tr><td className="py-2">1 referred prospect closed Diagnostic</td><td className="text-xs">Tier 1 referral</td><td className="text-right font-mono">{fmt(sample.referralFirstClose)}</td></tr>
                 <tr><td className="py-2">2 prior-referred accounts bought again</td><td className="text-xs">12-mo override</td><td className="text-right font-mono">{fmt(sample.referralOverride)}</td></tr>
                 <tr><td className="py-2">2 qualified referrals (no close yet)</td><td className="text-xs">Tier 2 referral</td><td className="text-right font-mono">{fmt(sample.qualifiedRef)}</td></tr>

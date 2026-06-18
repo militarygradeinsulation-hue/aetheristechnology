@@ -94,7 +94,7 @@ const FLAGSHIPS: Flagship[] = [
     split: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   },
   {
-    key: 'active case',
+    key: 'activeCase',
     name: 'Active Case',
     band: 'flagship',
     blurb: '3-month minimum. Diagnostic clients only. Recurring monthly. Rep & partner get paid EVERY month the client stays.',
@@ -299,7 +299,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           {/* Combined-deal example — wired to the flagship offers by key, not array index. */}
           {(() => {
             const diag = FLAGSHIPS.find(f => f.key === 'diagnostic')!;
-            const active case = FLAGSHIPS.find(f => f.key === 'active case')!;
+            const activeCase = FLAGSHIPS.find(f => f.key === 'activeCase')!;
             return (
               <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
                 <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">

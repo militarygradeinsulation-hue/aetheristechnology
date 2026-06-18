@@ -50,7 +50,7 @@ export interface RepProduct {
   /** Marks one of the three sealed operator-led bundles. */
   bundle?: boolean;
   /** Marks a flagship offer with FIXED-DOLLAR commission split. */
-  flagship?: 'diagnostic' | 'active case';
+  flagship?: 'diagnostic' | 'activeCase';
   /** What this product actually does. One sentence the rep can read aloud. */
   description?: string;
   /** Who the product is for / ICP language for the rep. */
@@ -61,7 +61,7 @@ export interface RepProduct {
 // webhook enforces the same numbers in flagshipFixedSplit().
 export interface FixedSplitCents { company: number; rep: number; partner: number; }
 
-export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'active case', FixedSplitCents> = {
+export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'activeCase', FixedSplitCents> = {
   // 21-Day Revenue Diagnostic — $18,500 one-time
   diagnostic: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   // Active Case — $15,000/mo, paid every month client stays
@@ -96,7 +96,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     priceCents: 1_500_000,
     tier: 3,
     recurring: true,
-    flagship: 'active case',
+    flagship: 'activeCase',
     highlight: true,
     description: 'Monthly embedded operator. We rebuild and run the systems the Diagnostic exposed — sales follow-up, CRM hygiene, content engine, dashboards.',
     forWho: 'Diagnostic graduates who want the operator to ship the fixes, not hand them a PDF.',

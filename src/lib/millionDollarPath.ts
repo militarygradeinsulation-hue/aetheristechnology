@@ -43,7 +43,7 @@ export function buildScenario(opts?: {
   const d = opts?.diagnostics ?? 30;          // 30 diagnostics  = $540k
   const r = opts?.active cases   ?? 18;          // 18 active cases mo1 = $270k
   const rm = opts?.recurringMonths ?? 14;     // 14 active case-months recurring = $210k
-  const gross = d * OFFERS.diagnostic.price + r * OFFERS.active case.price + rm * OFFERS.recurring.price;
+  const gross = d * OFFERS.diagnostic.price + r * OFFERS.activeCase.price + rm * OFFERS.recurring.price;
   const closesNeeded = d + r;
   const proposals = Math.ceil(closesNeeded / FUNNEL.proposalToClose);
   const meetings  = Math.ceil(proposals / FUNNEL.meetingToProposal);

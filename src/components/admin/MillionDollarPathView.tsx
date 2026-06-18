@@ -48,7 +48,7 @@ export const MillionDollarPathView: React.FC = () => {
         date: startDate,
         kind: "goal",
         title: `🎯 $1M in 90 Days, Sprint Begins`,
-        body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${active cases} Active Cases (mo1) + ${recurringMonths} recurring active case-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
+        body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${activeCases} Active Cases (mo1) + ${recurringMonths} recurring active case-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
         pinned: true,
         color: "cat:kickoff_90day",
         ai_plan: {
@@ -353,7 +353,7 @@ export const MillionDollarPathView: React.FC = () => {
         <CardContent className="space-y-2 text-sm">
           <div className="grid md:grid-cols-3 gap-3">
             <NetCard label="Diagnostics × 30" company={OFFERS.diagnostic.companyNet * 30} rep={OFFERS.diagnostic.repPayout * 30} partner={OFFERS.diagnostic.partnerPayout * 30} />
-            <NetCard label="Active Case mo1 × 18" company={OFFERS.active case.companyNet * 18} rep={OFFERS.active case.repPayout * 18} partner={OFFERS.active case.partnerPayout * 18} />
+            <NetCard label="Active Case mo1 × 18" company={OFFERS.activeCase.companyNet * 18} rep={OFFERS.activeCase.repPayout * 18} partner={OFFERS.activeCase.partnerPayout * 18} />
             <NetCard label="Recurring × 14 mo" company={OFFERS.recurring.companyNet * 14} rep={OFFERS.recurring.repPayout * 14} partner={OFFERS.recurring.partnerPayout * 14} />
           </div>
           <div className="text-xs text-muted-foreground italic">
