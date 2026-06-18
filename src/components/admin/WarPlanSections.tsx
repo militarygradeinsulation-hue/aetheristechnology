@@ -23,9 +23,9 @@ const useCopy = () => {
 const OFFERS_TABLE = [
   { name: "Forensic Diagnostic (Leak Audit)", what: "Full forensic: CRM, marketing, ops, systems. Ranked list of where money is being lost and how to recover it.", price: "$2.5k → applied", time: "7–10 days", use: "Entry point. Almost always reveals enough to sell implementation." },
   { name: "Revenue Recovery Sprint", what: "Fix the top 3 highest-impact leaks identified in the audit. CRM cleanup, automation, offer restructuring, funnel repair.", price: "$25k – $50k", time: "30 days", use: "Post-audit upsell. High close rate, the problem is already proven." },
-  { name: "Implementation Retainer", what: "Custom AI tools, automation stacks, digital infrastructure. Recovery Engine, Hygiene Engine, LinkedIn Engine, custom builds.", price: "$15k / mo", time: "rolling 3–6 mo", use: "Mid-market $10M–$50M ready to scale operations." },
-  { name: "Fractional CTO Retainer", what: "Strategic oversight of tech stack, AI roadmap, vendor management, system governance. Monthly calls + async + quarterly reviews.", price: "$5k – $15k / mo", time: "rolling 6–12 mo", use: "Post-project. Builds recurring revenue. Stacks fast." },
-  { name: "Done-For-You Growth Stack", what: "Full engagement: audit + systems build + 90 days of retainer support. White-glove, premium.", price: "$100k – $175k", time: "90–120 days", use: "Serious operators who want one partner, not a patchwork." },
+  { name: "Active Case", what: "Custom AI tools, automation stacks, digital infrastructure. Recovery Engine, Hygiene Engine, LinkedIn Engine, custom builds.", price: "$15k / mo", time: "rolling 3–6 mo", use: "Mid-market $10M–$50M ready to scale operations." },
+  { name: "Fractional CTO Active Case", what: "Strategic oversight of tech stack, AI roadmap, vendor management, system governance. Monthly calls + async + quarterly reviews.", price: "$5k – $15k / mo", time: "rolling 6–12 mo", use: "Post-project. Builds recurring revenue. Stacks fast." },
+  { name: "Done-For-You Growth Stack", what: "Full engagement: audit + systems build + 90 days of active case support. White-glove, premium.", price: "$100k – $175k", time: "90–120 days", use: "Serious operators who want one partner, not a patchwork." },
 ];
 
 export const OfferStackSection: React.FC = () => (
@@ -68,7 +68,7 @@ export const OfferStackSection: React.FC = () => (
           <ul className="text-xs text-muted-foreground space-y-1 list-disc ml-5">
             <li>Diagnostic priced as a no-brainer vs. what they bleed monthly</li>
             <li>Sprints are ROI-positive in 60 days or less</li>
-            <li>Retainers convert because clients won't lose the relationship post-build</li>
+            <li>Active Cases convert because clients won't lose the relationship post-build</li>
             <li>Never discount, offer payment terms instead</li>
             <li>Anchor every conversation to cost of inaction</li>
           </ul>
@@ -117,7 +117,7 @@ const LEAD_SOURCES = [
   { src: "Warm Network (personal/professional)", vol: "15–25 leads", conv: "30–40%", days: "7–14", priority: "FIRST", tone: "border-destructive/50 text-destructive" },
   { src: "LinkedIn Direct Outreach (DMs)", vol: "200–500 / mo", conv: "3–8%", days: "21–45", priority: "HIGH", tone: "border-amber/50 text-amber" },
   { src: "Cold Email (targeted ICP)", vol: "500–2000 / mo", conv: "1–4%", days: "21–30", priority: "HIGH", tone: "border-amber/50 text-amber" },
-  { src: "Strategic Referral Partners (CPAs, attorneys, agencies)", vol: "5–15 / mo active", conv: "25–50%", days: "14–21", priority: "HIGH", tone: "border-amber/50 text-amber" },
+  { src: "Strategic Referral Partners (CPAs, attorneys, legacy shops)", vol: "5–15 / mo active", conv: "25–50%", days: "14–21", priority: "HIGH", tone: "border-amber/50 text-amber" },
   { src: "LinkedIn Content (thought leadership)", vol: "passive / compounds", conv: "2–5% engaged", days: "30–60", priority: "SUPPORT", tone: "border-muted-foreground/50 text-muted-foreground" },
   { src: "Paid Ads (LinkedIn, Meta retargeting)", vol: "scalable", conv: "1–3%", days: "30–60", priority: "PHASE 2+", tone: "border-muted-foreground/50 text-muted-foreground" },
 ];
@@ -218,7 +218,7 @@ Aetheris AI | aetheris.technology` },
 
 We do revenue and operations diagnostics for companies in that zone, specifically finding where they're bleeding money in their systems, marketing, and ops.
 
-It's not a marketing agency play. We find broken things and build tools to fix them. Most engagements recover significantly more than they cost.
+It's not a marketing operator play. We find broken things and build tools to fix them. Most engagements recover significantly more than they cost.
 
 If any of your clients are dealing with stalled growth, chaotic operations, or "we're leaving money on the table" conversations, I'd love to be on your referral list.
 
@@ -324,15 +324,15 @@ const STAGES = [
       "The hard sell is already done, by the audit findings",
       "Proposal scoped to their exact issues, not a generic package",
       'Anchor to ROI: "Recover 20% of what we found and this pays for itself 4x over"',
-      "Offer two paths: Sprint ($25k–$50k) or Implementation Retainer ($15k/mo)",
+      "Offer two paths: Sprint ($25k–$50k) or Active Case ($15k/mo)",
       "Payment terms close fence-sitters: 50% upfront, 50% at delivery",
   ]},
-  { stage: "Stage 5", time: "Retainer Conversion · Day 60–90", title: "Lock in recurring revenue",
+  { stage: "Stage 5", time: "Active Case Conversion · Day 60–90", title: "Lock in recurring revenue",
     bullets: [
-      "At 60–70% completion of any project, introduce the retainer",
+      "At 60–70% completion of any project, introduce the active case",
       'Frame: "Most clients keep us on for strategic oversight, last thing you want is to rebuild these systems in 6 months without anyone watching the architecture"',
       "$5k–$15k/month depending on scope",
-      "Goal: 5 retainer clients by Day 90 = $25k–$75k/month MRR foundation",
+      "Goal: 5 active case clients by Day 90 = $25k–$75k/month MRR foundation",
   ]},
 ];
 
@@ -479,7 +479,7 @@ const KPIS = [
   { kpi: "Discovery → Proposal", target: "50–60%", min: "35%", action: "Audit discovery structure, add qualifying questions" },
   { kpi: "Proposal → Close", target: "30–40%", min: "20%", action: "Review pricing, sharpen proposal, add case study proof" },
   { kpi: "Audit → Sprint upsell", target: "60–70%", min: "40%", action: "Improve audit delivery presentation, sharpen ROI framing" },
-  { kpi: "Client → Retainer conversion", target: "50%", min: "25%", action: "Introduce retainer earlier, improve success milestones" },
+  { kpi: "Client → Active Case conversion", target: "50%", min: "25%", action: "Introduce active case earlier, improve success milestones" },
 ];
 
 export const KpiScoreboardSection: React.FC = () => (
@@ -553,7 +553,7 @@ export const KpiScoreboardSection: React.FC = () => (
             <li>Increase LinkedIn content to 2x per day</li>
             <li>Launch referral partner program with structured commission</li>
             <li>Build case study library for the inbound engine</li>
-            <li>Initiate retainer conversations with ALL active clients</li>
+            <li>Initiate active case conversations with ALL active clients</li>
           </ul>
         </div>
       </div>

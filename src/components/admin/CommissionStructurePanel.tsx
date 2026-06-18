@@ -227,7 +227,7 @@ export const CommissionStructurePanel: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Set how many of each product the rep closes this month. Each product uses its own tier rate. Recurring retainers project over your retention window.
+            Set how many of each product the rep closes this month. Each product uses its own tier rate. Recurring active cases project over your retention window.
           </p>
 
           <div className="grid sm:grid-cols-2 gap-3">

@@ -33,7 +33,7 @@ export const REP_TOOL_TIPS: Record<RepToolKey, RepToolTip> = {
   'leak-audit': {
     useFor: 'Wedge tool — give the URL to a cold prospect so they self-scan and come back curious.',
     pairWith: 'Once they take it, follow up with the Website Scanner on their domain for the deep findings.',
-    proTip: 'This is your "free value" anchor. Never pitch retainer first — pitch the audit.',
+    proTip: 'This is your "free value" anchor. Never pitch active case first — pitch the audit.',
   },
   'scan': {
     useFor: 'Forensic snapshot of any prospect site — score, gaps, dollar leak estimates. Run this before EVERY first touch.',

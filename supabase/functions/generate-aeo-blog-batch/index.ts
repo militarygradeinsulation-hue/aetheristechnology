@@ -28,7 +28,7 @@ const TOPICS: BlogTopic[] = [
     title: "How to Implement AI in Business: 7-Step Framework",
     metaDescription: "A blunt 7-step framework for implementing AI in your business — common pitfalls, 90-day roadmap, and what to ignore. By Aetheris AI.",
     excerpt: "A 7-step framework for implementing AI in business — covering use case selection, data foundations, governance, pilots, scale, and the pitfalls that kill 80% of corporate AI initiatives.",
-    tags: ["AI Strategy", "AI Implementation", "AI Adoption", "Digital Transformation"],
+    tags: ["AI Strategy", "AI Implementation", "AI Adoption", "Revenue Forensics"],
     tldr: "Most AI implementations fail because they start with the model, not the workflow. The 7-step framework: (1) audit revenue-leaking workflows, (2) score use cases by ROI and risk, (3) pick 1–3 pilots with measurable cost lines, (4) build the data foundation, (5) deploy with humans in the loop, (6) measure and govern, (7) scale by quarterly review. Time-to-first-ROI: 90 days when scoped correctly.",
     outline: `# How to Implement AI in Business: 7-Step Framework
 
@@ -78,7 +78,7 @@ End with a sharp single-line punch.`,
     title: "The AI Adoption Roadmap: 5 Maturity Stages",
     metaDescription: "A 5-stage AI adoption roadmap with milestones, KPIs, and the moves that compress each stage. By Aetheris AI.",
     excerpt: "A 5-stage AI adoption roadmap with milestones, KPIs by stage, and the specific moves that compress months off each transition.",
-    tags: ["AI Strategy", "AI Adoption", "AI Roadmap", "Digital Transformation"],
+    tags: ["AI Strategy", "AI Adoption", "AI Roadmap", "Revenue Forensics"],
     tldr: "The 5 AI adoption stages: (1) Ad hoc — random tool experiments, (2) Pilot — first measured deployments, (3) Scaled — multiple production AI workflows, (4) Embedded — AI in core business processes, (5) AI-Native — AI is the operational fabric. Most companies are stuck at Stage 1–2. The fastest path: pick a single P&L-impacting workflow and deploy a measured pilot in 90 days.",
     outline: `# The AI Adoption Roadmap: 5 Maturity Stages
 

@@ -48,7 +48,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
       : "**Sales Coach online.** Ask me anything: how to handle an objection, what to pitch a specific prospect, exact words for a follow-up email, commission math, or how to explain any service.",
     suggestions: isPartner
       ? ['Give me a company summary', 'Show recent leads', 'Coach me through a price objection']
-      : ['Coach me through "too expensive"', 'Write a cold LinkedIn DM', 'What should I pitch a 10-person agency?'],
+      : ['Coach me through "too expensive"', 'Write a cold LinkedIn DM', 'What should I pitch a 10-person operator?'],
   };
 
   const [isOpen, setIsOpen] = useState(embedded);

@@ -90,7 +90,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
       { name: "mqlDef", label: "How is an MQL defined today (if at all)?", type: "textarea", required: true },
       { name: "handoffPain", label: "What breaks at the marketing→sales handoff?", type: "textarea", required: true },
     ])},
-  { priceId: "sales_coaching_retainer_monthly", title: "Sales Coaching Kickoff", tier: "Recurring",
+  { priceId: "sales_coaching_active case_monthly", title: "Sales Coaching Kickoff", tier: "Recurring",
     intake: I([
       { name: "reps", label: "Reps in the program (names + tenure)", type: "textarea", required: true },
       { name: "focusAreas", label: "Top focus areas", type: "textarea", required: true },

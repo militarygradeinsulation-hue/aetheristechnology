@@ -9,7 +9,7 @@ import { DollarSign, Users, Calendar, Megaphone, Copy, Sparkles, Trophy, Target 
  * IncentivePlan, Aetheris Referral & Lead-Gen Incentive Plan
  * Calibrated to the real flagship economics:
  *   • 21-Day Revenue Diagnostic, $18,500  → Rep $5,000 / Partner $3,000 / Company $10,000
- *   • Implementation Retainer , $15,000/mo → Rep $4,000/mo / Partner $3,000/mo / Company $8,000/mo
+ *   • Active Case , $15,000/mo → Rep $4,000/mo / Partner $3,000/mo / Company $8,000/mo
  *   • Existing referral overlay: $500 onboard + $7,000 first-close + $500/sale override 12 months
  *
  * This screen doubles as a content kit, every block has a "Copy as post" button
@@ -64,14 +64,14 @@ export function IncentivePlan() {
   // Sample monthly stack
   const sample = useMemo(() => {
     const directDiag = 5000;       // close 1 Diagnostic
-    const retainerMo = 4000;       // 1 retainer that month
+    const activeCaseMo = 4000;       // 1 active case that month
     const referralFirstClose = 7000; // 1 referred Diagnostic closes
     const referralOverride = 500 * 2; // 2 prior-referred sales tick this month
     const qualifiedRef = 250 * 2;   // 2 qualified referrals (no close yet)
     const aptBonus = 250 * 1;       // 1 booked-and-closed appointment
     const webinarBonus = 400 * 1;   // 1 webinar attendee converted
-    const total = directDiag + retainerMo + referralFirstClose + referralOverride + qualifiedRef + aptBonus + webinarBonus;
-    return { directDiag, retainerMo, referralFirstClose, referralOverride, qualifiedRef, aptBonus, webinarBonus, total };
+    const total = directDiag + activeCaseMo + referralFirstClose + referralOverride + qualifiedRef + aptBonus + webinarBonus;
+    return { directDiag, activeCaseMo, referralFirstClose, referralOverride, qualifiedRef, aptBonus, webinarBonus, total };
   }, []);
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
@@ -108,7 +108,7 @@ export function IncentivePlan() {
             <div className="mt-2 text-sm">Rep: <span className="font-mono text-amber">$5,000</span> · Partner: <span className="font-mono">$3,000</span> · Company: <span className="font-mono">$10,000</span></div>
           </div>
           <div className="rounded-lg border border-border/60 bg-card/50 p-4">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">Implementation Retainer</div>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">Active Case</div>
             <div className="font-mono text-2xl text-foreground mt-1">$15,000 / month</div>
             <div className="mt-2 text-sm">Rep: <span className="font-mono text-amber">$4,000/mo</span> · Partner: <span className="font-mono">$3,000/mo</span> · Company: <span className="font-mono">$8,000/mo</span></div>
             <div className="mt-1 text-xs text-muted-foreground">Paid every month the client stays.</div>
@@ -234,7 +234,7 @@ export function IncentivePlan() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-3">
-              Hit 2 Diagnostic or Retainer closes in a calendar month: <span className="font-mono">+$1,000</span>.
+              Hit 2 Diagnostic or Active Case closes in a calendar month: <span className="font-mono">+$1,000</span>.
               3 in a month: <span className="font-mono">+$2,500</span>. 5 in a month: <span className="font-mono">+$5,000</span>. Resets monthly.
             </p>
           </div>
@@ -251,7 +251,7 @@ export function IncentivePlan() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-3">
-              Your retainer client stays past 3, 6, and 12 months, you get a one-time bonus at each milestone, on top of your monthly $4k.
+              Your active case client stays past 3, 6, and 12 months, you get a one-time bonus at each milestone, on top of your monthly $4k.
             </p>
           </div>
         </CardContent>
@@ -306,7 +306,7 @@ export function IncentivePlan() {
               </thead>
               <tbody className="divide-y divide-border/50">
                 <tr><td className="py-2">Closed 1 Diagnostic herself</td><td className="text-xs">Direct</td><td className="text-right font-mono">{fmt(sample.directDiag)}</td></tr>
-                <tr><td className="py-2">1 Retainer client billing this month</td><td className="text-xs">Recurring</td><td className="text-right font-mono">{fmt(sample.retainerMo)}</td></tr>
+                <tr><td className="py-2">1 Active Case client billing this month</td><td className="text-xs">Recurring</td><td className="text-right font-mono">{fmt(sample.activeCaseMo)}</td></tr>
                 <tr><td className="py-2">1 referred prospect closed Diagnostic</td><td className="text-xs">Tier 1 referral</td><td className="text-right font-mono">{fmt(sample.referralFirstClose)}</td></tr>
                 <tr><td className="py-2">2 prior-referred accounts bought again</td><td className="text-xs">12-mo override</td><td className="text-right font-mono">{fmt(sample.referralOverride)}</td></tr>
                 <tr><td className="py-2">2 qualified referrals (no close yet)</td><td className="text-xs">Tier 2 referral</td><td className="text-right font-mono">{fmt(sample.qualifiedRef)}</td></tr>

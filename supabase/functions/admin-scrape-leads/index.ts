@@ -75,8 +75,8 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
           content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks.
 
 ICP — TWO TRACKS, both valid:
-  TRACK A (B2B / pro services): small-to-mid-market businesses, 10–500 employees, revenue $1M–$50M — HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, B2B in Indianapolis / Indiana / Midwest.
-  TRACK B (LOCAL OPERATOR-LED): owner-operated local businesses with $500k–$15M revenue and a real sales/follow-up problem — Medspas, Auto repair shops, Dental practices, Roofing/HVAC/Plumbing, Law firms, Real estate brokerages, Chiropractors, Insurance agencies, Accounting/CPA firms, Restaurants (multi-unit), Home services. Single-location and multi-location both qualify if owner-run.
+  TRACK A (B2B / pro services): small-to-mid-market businesses, 10–500 employees, revenue $1M–$50M — HubSpot/Salesforce users, legacy shops, professional services, SaaS, e-commerce, B2B in Indianapolis / Indiana / Midwest.
+  TRACK B (LOCAL OPERATOR-LED): owner-operated local businesses with $500k–$15M revenue and a real sales/follow-up problem — Medspas, Auto repair shops, Dental practices, Roofing/HVAC/Plumbing, Law firms, Real estate brokerages, Chiropractors, Insurance legacy shops, Accounting/CPA firms, Restaurants (multi-unit), Home services. Single-location and multi-location both qualify if owner-run.
 
 HARD EXCLUSIONS (apply to BOTH tracks): never return enterprises >$100M revenue, publicly traded Fortune 1000 companies, large national chains (>500 employees), pure freelancers/solopreneurs, tiny shops with <3 staff, or non-business entities (gov, schools, churches, non-profits). If you cannot rule out >$100M revenue, skip the lead. Score is computed in code, do not include it.`,
         },
@@ -175,9 +175,9 @@ serve(async (req) => {
       'law firm': 'law firm OR attorney OR "personal injury"',
       'real estate': 'real estate brokerage OR realtor',
       chiropractor: 'chiropractor OR chiropractic',
-      insurance: 'insurance agency OR insurance broker',
+      insurance: 'insurance operator OR insurance broker',
       accounting: '"accounting firm" OR CPA OR bookkeeping',
-      'marketing agency': 'marketing agency OR digital agency OR creative agency',
+      'marketing operator': 'marketing operator OR digital operator OR creative operator',
       saas: 'B2B SaaS OR software company',
       ecommerce: 'ecommerce brand OR Shopify store OR DTC brand',
       'home services': 'landscaping OR pest control OR cleaning service',

@@ -34,7 +34,7 @@ const OFFERS = [
   { name: 'Revenue Pack',        price: 500_000,   kind: 'Bundle',    payout: '10% of sale' },
   { name: 'Operator Suite',      price: 1_000_000, kind: 'Bundle',    payout: '10% of sale' },
   { name: '21-Day Revenue Diagnostic', price: 1_850_000, kind: 'Flagship', payout: '$3,000 fixed' },
-  { name: 'Implementation Retainer',   price: 1_500_000, kind: 'Flagship (monthly)', payout: '$3,000 / month, every month client stays' },
+  { name: 'Active Case',   price: 1_500_000, kind: 'Flagship (monthly)', payout: '$3,000 / month, every month client stays' },
 ];
 
 const Section: React.FC<{
@@ -148,7 +148,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
           </table>
         </div>
         <p className="text-xs text-muted-foreground">
-          The Diagnostic is the wedge. The Retainer is the recurring revenue. Bundles are the on-ramp.
+          The Diagnostic is the wedge. The Active Case is the recurring revenue. Bundles are the on-ramp.
         </p>
       </Section>
 
@@ -164,7 +164,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
             </ul>
           </div>
           <div className="rounded-md border border-amber/30 bg-amber/5 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">Implementation Retainer · $15,000/mo</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">Active Case · $15,000/mo</div>
             <ul className="mt-2 text-sm text-foreground/90 space-y-1">
               <li>Company: $8,000</li>
               <li>Rep: $4,000</li>

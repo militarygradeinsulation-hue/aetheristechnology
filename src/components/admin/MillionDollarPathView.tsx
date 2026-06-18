@@ -18,7 +18,7 @@ const STORAGE_KEY = "hires.mdp.done";
 
 export const MillionDollarPathView: React.FC = () => {
   const [diagnostics, setDiagnostics] = useState(30);
-  const [retainers, setRetainers] = useState(18);
+  const [activeCases, setActiveCases] = useState(18);
   const [recurringMonths, setRecurringMonths] = useState(14);
   const [done, setDone] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
@@ -27,8 +27,8 @@ export const MillionDollarPathView: React.FC = () => {
     const next = { ...s, [k]: !s[k] }; localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); return next;
   });
 
-  const scenario = useMemo(() => buildScenario({ diagnostics, retainers, recurringMonths }),
-    [diagnostics, retainers, recurringMonths]);
+  const scenario = useMemo(() => buildScenario({ diagnostics, activeCases, recurringMonths }),
+    [diagnostics, activeCases, recurringMonths]);
   const weeks = useMemo(() => buildWeeks(), []);
   const [startDate, setStartDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [pushing, setPushing] = useState(false);
@@ -48,13 +48,13 @@ export const MillionDollarPathView: React.FC = () => {
         date: startDate,
         kind: "goal",
         title: `🎯 $1M in 90 Days, Sprint Begins`,
-        body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${retainers} Retainers (mo1) + ${recurringMonths} recurring retainer-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
+        body: `Target: $1,000,000 gross in 90 days.\nMix: ${diagnostics} Diagnostics + ${activeCases} Active Cases (mo1) + ${recurringMonths} recurring active case-months.\nTeam-wide outbound floor: ${scenario.outboundPerDay}/day. Meetings: ~${scenario.meetingsPerWeek}/week.`,
         pinned: true,
         color: "cat:kickoff_90day",
         ai_plan: {
           summary: "$1M in 90 days operator sprint kickoff.",
-          tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.retainersToClose} closes needed`],
-          kpis: [`$${(MDP_GOAL_CENTS/100000).toFixed(0)}k gross`, `${scenario.diagnosticsToClose} Diagnostics closed`, `${scenario.retainersToClose} Retainers closed`],
+          tactics: [`${scenario.outboundPerDay}/day outbound team-wide`, `${scenario.meetingsPerWeek} meetings/week`, `${scenario.proposalsNeeded} proposals to send`, `${scenario.diagnosticsToClose + scenario.activeCasesToClose} closes needed`],
+          kpis: [`$${(MDP_GOAL_CENTS/100000).toFixed(0)}k gross`, `${scenario.diagnosticsToClose} Diagnostics closed`, `${scenario.activeCasesToClose} Active Cases closed`],
         },
       });
       ok++;
@@ -196,13 +196,13 @@ export const MillionDollarPathView: React.FC = () => {
             <Target className="w-4 h-4 text-amber" /> The Math · Adjust the Mix
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Default: 30 Diagnostics + 18 Retainers (mo1) + 14 retainer-months recurring inside the 90 days. Change anything.
+            Default: 30 Diagnostics + 18 Active Cases (mo1) + 14 active case-months recurring inside the 90 days. Change anything.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-3 gap-3">
             <MixInput label="Diagnostics ($18k each)" value={diagnostics} onChange={setDiagnostics} />
-            <MixInput label="Retainers (mo 1, $15k)"   value={retainers}   onChange={setRetainers} />
+            <MixInput label="Active Cases (mo 1, $15k)"   value={activeCases}   onChange={setActiveCases} />
             <MixInput label="Recurring months ($15k)"  value={recurringMonths} onChange={setRecurringMonths} />
           </div>
 
@@ -219,7 +219,7 @@ export const MillionDollarPathView: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-4 gap-3">
-            <FunnelStat icon={DollarSign} label="Closes needed" value={`${scenario.diagnosticsToClose + scenario.retainersToClose}`} sub="Diagnostic + Retainer" />
+            <FunnelStat icon={DollarSign} label="Closes needed" value={`${scenario.diagnosticsToClose + scenario.activeCasesToClose}`} sub="Diagnostic + Active Case" />
             <FunnelStat icon={FileText}   label="Proposals to send" value={`${scenario.proposalsNeeded}`} sub={`@ ${(FUNNEL.proposalToClose * 100).toFixed(0)}% close`} />
             <FunnelStat icon={Calendar}   label="Meetings to run"   value={`${scenario.meetingsNeeded}`} sub={`~${scenario.meetingsPerWeek}/week`} />
             <FunnelStat icon={Phone}      label="Outbound touches"  value={`${scenario.outboundNeeded.toLocaleString()}`} sub={`~${scenario.outboundPerDay}/day team-wide`} />
@@ -337,9 +337,9 @@ export const MillionDollarPathView: React.FC = () => {
           <TriggerCard when="End of Week 3 < $80k" then="Drop one vertical. Re-target. Braden takes over rep coaching daily." />
           <TriggerCard when="End of Week 7 < $400k" then="Emergency offer-mix call. Discount Diagnostic to $14k for 14 days OR add a $9k self-serve tier." />
           <TriggerCard when="Any rep <$0 closed by Day 30" then="Move them to Team-2 SDR-only role or terminate. Don't carry dead weight 90 days." />
-          <TriggerCard when="MRR not building by Week 8" then="Bundle Diagnostic+3-month retainer for $39k flat. Force the recurring conversion." />
+          <TriggerCard when="MRR not building by Week 8" then="Bundle Diagnostic+3-month active case for $39k flat. Force the recurring conversion." />
           <TriggerCard when="Pipeline <$300k by Week 5" then="Joseph pauses operator work for 5 days, runs outbound himself. Lead from the front." />
-          <TriggerCard when="Churn risk on any retainer" then="Braden does a save call same week. Discount mo+1 by 20% to retain. Never let one cancel quietly." />
+          <TriggerCard when="Churn risk on any active case" then="Braden does a save call same week. Discount mo+1 by 20% to retain. Never let one cancel quietly." />
         </CardContent>
       </Card>
 
@@ -353,7 +353,7 @@ export const MillionDollarPathView: React.FC = () => {
         <CardContent className="space-y-2 text-sm">
           <div className="grid md:grid-cols-3 gap-3">
             <NetCard label="Diagnostics × 30" company={OFFERS.diagnostic.companyNet * 30} rep={OFFERS.diagnostic.repPayout * 30} partner={OFFERS.diagnostic.partnerPayout * 30} />
-            <NetCard label="Retainer mo1 × 18" company={OFFERS.retainer.companyNet * 18} rep={OFFERS.retainer.repPayout * 18} partner={OFFERS.retainer.partnerPayout * 18} />
+            <NetCard label="Active Case mo1 × 18" company={OFFERS.activeCase.companyNet * 18} rep={OFFERS.activeCase.repPayout * 18} partner={OFFERS.activeCase.partnerPayout * 18} />
             <NetCard label="Recurring × 14 mo" company={OFFERS.recurring.companyNet * 14} rep={OFFERS.recurring.repPayout * 14} partner={OFFERS.recurring.partnerPayout * 14} />
           </div>
           <div className="text-xs text-muted-foreground italic">

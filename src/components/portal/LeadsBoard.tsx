@@ -123,7 +123,7 @@ const STATUSES: LeadStatus[] = ['new','outreach','touched','replied','meeting','
 const INDUSTRY_PRESETS = [
   'Roofing', 'HVAC', 'Dental', 'Med Spa', 'Law Firms', 'Accounting',
   'Real Estate Brokerages', 'Auto Dealers', 'Home Services', 'Manufacturing',
-  'SaaS', 'Marketing Agencies',
+  'SaaS', 'Marketing Legacy shops',
 ];
 
 const SAMPLE_CSV = `business_name,contact_name,email,phone,website,industry,location,notes

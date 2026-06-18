@@ -63,7 +63,7 @@ const FLAGSHIPS: Flagship[] = [
     key: 'operator-suite',
     name: 'Operator Suite',
     band: 'bundle',
-    blurb: 'Embedded — 3 weeks of an operator. ~30 hrs. Full stack against the real business. Credits 1:1 toward Retainer.',
+    blurb: 'Embedded — 3 weeks of an operator. ~30 hrs. Full stack against the real business. Credits 1:1 toward Active Case.',
     priceCents: 1_000_000,
     cadence: 'one-time',
     included: [
@@ -71,7 +71,7 @@ const FLAGSHIPS: Flagship[] = [
       'Strategy Blueprint + Social Content Pack + Digital Snapshot',
       'Lead-Nurture Automation + Premium Tech Suite access',
       'Weekly calls + async ops channel',
-      '$10,000 credits 1:1 toward Implementation Retainer',
+      '$10,000 credits 1:1 toward Active Case',
     ],
     // T3 70/20/10: $7,000 / $2,000 / $1,000
     split: { company: 700_000, rep: 200_000, partner: 100_000 },
@@ -94,8 +94,8 @@ const FLAGSHIPS: Flagship[] = [
     split: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   },
   {
-    key: 'retainer',
-    name: 'Implementation Retainer',
+    key: 'activeCase',
+    name: 'Active Case',
     band: 'flagship',
     blurb: '3-month minimum. Diagnostic clients only. Recurring monthly. Rep & partner get paid EVERY month the client stays.',
     priceCents: 1_500_000,
@@ -139,7 +139,7 @@ const BONUSES: Bonus[] = [
     key: 'retention',
     name: 'Retention Bonus',
     icon: Repeat,
-    description: 'Earn more when retainer clients stay subscribed, your residual pays twice.',
+    description: 'Earn more when active case clients stay subscribed, your residual pays twice.',
     unit: 'months client extends',
     tiers: [
       { threshold: '3-month extension', amountCents: 100_000 },
@@ -299,34 +299,34 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
           {/* Combined-deal example — wired to the flagship offers by key, not array index. */}
           {(() => {
             const diag = FLAGSHIPS.find(f => f.key === 'diagnostic')!;
-            const retainer = FLAGSHIPS.find(f => f.key === 'retainer')!;
+            const activeCase = FLAGSHIPS.find(f => f.key === 'activeCase')!;
             return (
               <div className="mt-5 rounded-lg border border-amber/40 bg-amber/10 p-5">
                 <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber mb-2">
                   <TrendingUp className="w-3.5 h-3.5" /> Full-stack close, what one client is worth in {months} {months === 1 ? 'month' : 'months'}
                 </div>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Diagnostic ({fmtUsd(diag.priceCents)} one-time) + Retainer ({fmtUsd(retainer.priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
-                  <span className="text-foreground font-semibold">{fmtUsd(diag.priceCents + retainer.priceCents * months)} in client revenue</span>.
+                  Diagnostic ({fmtUsd(diag.priceCents)} one-time) + Active Case ({fmtUsd(activeCase.priceCents)}/mo × {months} {months === 1 ? 'month' : 'months'}) ={' '}
+                  <span className="text-foreground font-semibold">{fmtUsd(diag.priceCents + activeCase.priceCents * months)} in client revenue</span>.
                 </p>
                 {showFullSplit ? (
                   <div className="grid sm:grid-cols-3 gap-3">
                     <div className="rounded-md border border-border/50 bg-background/60 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Company</div>
                       <div className="text-xl font-bold text-foreground">
-                        {fmtUsd(diag.split.company + retainer.split.company * months)}
+                        {fmtUsd(diag.split.company + activeCase.split.company * months)}
                       </div>
                     </div>
                     <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Rep</div>
                       <div className="text-xl font-bold text-amber">
-                        {fmtUsd(diag.split.rep + retainer.split.rep * months)}
+                        {fmtUsd(diag.split.rep + activeCase.split.rep * months)}
                       </div>
                     </div>
                     <div className="rounded-md border border-amber/40 bg-amber/10 p-3">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">Partner</div>
                       <div className="text-xl font-bold text-amber">
-                        {fmtUsd(diag.split.partner + retainer.split.partner * months)}
+                        {fmtUsd(diag.split.partner + activeCase.split.partner * months)}
                       </div>
                     </div>
                   </div>
@@ -334,7 +334,7 @@ export const FlagshipCommissionPanel: React.FC<Props> = ({ audience = 'rep' }) =
                   <div className="rounded-md border border-amber/40 bg-amber/10 p-4 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">You take home</div>
                     <div className="text-4xl font-bold text-amber leading-tight">
-                      {fmtUsd(diag.split.rep + retainer.split.rep * months)}
+                      {fmtUsd(diag.split.rep + activeCase.split.rep * months)}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       per full-stack client over {months} {months === 1 ? 'month' : 'months'}

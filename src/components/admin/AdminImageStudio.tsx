@@ -38,7 +38,7 @@ export const AdminImageStudio: React.FC = () => {
   const BANNER_PRESETS = [
     { key: 'stop_guessing', headline: 'Stop Guessing.', accent: 'Start Understanding.', sub: 'I break down where your business is leaking money — with real numbers, real costs, real fixes.' },
     { key: 'leak_audit',    headline: 'Your business is leaking.', accent: "You just can't see it from the inside.", sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
-    { key: 'forensics',     headline: 'Business Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No retainers. No fluff.' },
+    { key: 'forensics',     headline: 'Business Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No active cases. No fluff.' },
     { key: 'autopsy',       headline: 'Every dead deal', accent: 'has a cause of death.', sub: 'I run the autopsy. You get the receipts. Then we stop the bleed.' },
     { key: 'silent_bleed',  headline: 'The silent bleed', accent: 'is the expensive one.', sub: 'The leaks you can see are cheap. The ones you can\'t are killing your margin.' },
     { key: 'six_figures',   headline: 'Six figures', accent: 'are walking out the back door.', sub: 'Most owners are within 90 days of finding the leak. They just need someone outside the building.' },
@@ -80,7 +80,7 @@ export const AdminImageStudio: React.FC = () => {
   const SUBLINE_POOL = [
     'I break down where your business is leaking money — with real numbers, real costs, real fixes.',
     'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.',
-    'I find the leak, prove it with math, and plug it. No retainers. No fluff.',
+    'I find the leak, prove it with math, and plug it. No active cases. No fluff.',
     'I run the autopsy. You get the receipts. Then we stop the bleed.',
     "The leaks you can see are cheap. The ones you can't are killing your margin.",
     'Most owners are within 90 days of finding the leak. They just need someone outside the building.',

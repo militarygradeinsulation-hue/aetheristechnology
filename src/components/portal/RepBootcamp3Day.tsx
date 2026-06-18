@@ -52,7 +52,7 @@ const PROGRAM: DayPlan[] = [
             expand: (
               <div className="space-y-3">
                 <Block title="What we are">
-                  Aetheris is a <strong>Business Forensics</strong> firm. We are operators, not consultants, not influencers, not a marketing agency. We diagnose where a business is bleeding money, time, and attention — and then we seal the leaks.
+                  Aetheris is a <strong>Business Forensics</strong> firm. We are operators, not consultants, not influencers, not a marketing operator. We diagnose where a business is bleeding money, time, and attention — and then we seal the leaks.
                 </Block>
                 <Block title="The hook (memorize verbatim)">
                   "Your business is leaking. You just can't see it from the inside."
@@ -95,7 +95,7 @@ const PROGRAM: DayPlan[] = [
                   "We're a business forensics firm — we find the money your business is leaking and seal it shut."
                 </Block>
                 <Block title="30-second pitch">
-                  "Most owners I talk to feel something is off but can't name it. We run a Leak Audit — a 7-step forensic sweep across ops, sales, marketing, and finance — and hand you a 15–30 page report that names every leak in dollars. Flat $2,500, 21 days, applied toward whatever we fix together. No retainer, no scope creep."
+                  "Most owners I talk to feel something is off but can't name it. We run a Leak Audit — a 7-step forensic sweep across ops, sales, marketing, and finance — and hand you a 15–30 page report that names every leak in dollars. Flat $2,500, 21 days, applied toward whatever we fix together. No active case, no scope creep."
                 </Block>
                 <Block title="Drill">
                   Say it out loud 5x without looking. Then say it 3x to a real human. If they ask "what do you do?" and you stumble, repeat the drill.
@@ -114,7 +114,7 @@ const PROGRAM: DayPlan[] = [
                     "'AI Systems Architect' — we are operators, not titles",
                     "'Magic Robot' / 'wizard' / 'guru' — we're forensic, not mystical",
                     "'10x your revenue', 'crush it', 'unlock potential' — influencer noise",
-                    "'Cutting-edge AI-powered solutions' — generic agency filler",
+                    "'Cutting-edge AI-powered solutions' — generic operator filler",
                     "Anything that sounds like a LinkedIn carousel",
                   ]}/>
                 </Block>
@@ -160,14 +160,14 @@ const PROGRAM: DayPlan[] = [
           },
           {
             id: "d1-s2-2",
-            label: "Memorize the $18k Diagnostic + $15k/mo Retainer flagship economics",
+            label: "Memorize the $18k Diagnostic + $15k/mo Active Case flagship economics",
             expand: (
               <div className="space-y-3">
                 <Block title="Flagship Diagnostic — $18,000 fixed">
                   Deep forensic engagement for $5M–$50M operators. Full systems rebuild plan + 90-day execution roadmap.
                   <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $10k / Rep $5k / Partner $3k</div>
                 </Block>
-                <Block title="Flagship Retainer — $15,000 / month">
+                <Block title="Flagship Active Case — $15,000 / month">
                   Ongoing operator partnership. Embedded forensic + execution muscle.
                   <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $8k / Rep $4k / Partner $3k — EVERY month the client stays</div>
                 </Block>
@@ -354,7 +354,7 @@ const PROGRAM: DayPlan[] = [
             label: "Drill: 'We already have a marketing person'",
             expand: (
               <Block title="The reframe">
-                "Perfect — we're not a marketing agency. We're forensics. We tell your marketing person exactly where their work is leaking and what to fix first. Think of us as the audit, not the replacement."
+                "Perfect — we're not a marketing operator. We're forensics. We tell your marketing person exactly where their work is leaking and what to fix first. Think of us as the audit, not the replacement."
               </Block>
             ),
           },
@@ -407,13 +407,13 @@ const PROGRAM: DayPlan[] = [
             label: "Memorize fixed-dollar split: $18k Diagnostic = $5k Rep / $3k Partner / $10k Company",
             expand: (
               <Block title="What this means for you">
-                Every flagship Diagnostic you close puts <strong>$5,000</strong> in your pocket. One close per month = $60k/yr from Diagnostics alone, before retainers stack.
+                Every flagship Diagnostic you close puts <strong>$5,000</strong> in your pocket. One close per month = $60k/yr from Diagnostics alone, before active cases stack.
               </Block>
             ),
           },
           {
             id: "d3-s3-2",
-            label: "Memorize Retainer split: $15k/mo = $4k Rep / $3k Partner / $8k Company EVERY month",
+            label: "Memorize Active Case split: $15k/mo = $4k Rep / $3k Partner / $8k Company EVERY month",
             expand: (
               <Block title="The compounding math">
                 <Bullets items={[

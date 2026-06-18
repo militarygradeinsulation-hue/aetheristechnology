@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
     const systemPrompt = `You are an SEO/AEO research analyst. Your job is to surface high-intent, currently-trending search terms and questions for an AI consulting firm in Indianapolis serving B2B clients.
-Focus on: AI strategy, AI agents, generative AI, automation, AI ROI, digital transformation, AI ethics/governance, AI for specific verticals (healthcare, finance, manufacturing, logistics, construction, SaaS).
+Focus on: AI strategy, AI agents, generative AI, automation, AI ROI, revenue forensics, AI ethics/governance, AI for specific verticals (healthcare, finance, manufacturing, logistics, construction, SaaS).
 Prioritize terms with clear B2B/decision-maker intent (search modifiers like "for business", "consultant", "ROI", "implementation", "cost", "how to").
 Return ONLY a JSON object via the provided tool — no prose.`;
 

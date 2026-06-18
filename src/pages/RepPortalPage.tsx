@@ -181,8 +181,8 @@ const RepPortalPage: React.FC = () => {
                     {[
                       { label: 'Light month', detail: '5 small unlocks + 1 Snapshot', total: '~$40' },
                       { label: 'Solid month', detail: '3 Snapshots + 2 Blueprints + 1 Website Eval', total: '~$164' },
-                      { label: 'Strong month', detail: '1 Diagnostic + 2 Snapshots + 1 Fractional retainer', total: '$910 + $590/mo recurring' },
-                      { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional retainer', total: '$1,170 + $590/mo recurring' },
+                      { label: 'Strong month', detail: '1 Diagnostic + 2 Snapshots + 1 Fractional active case', total: '$910 + $590/mo recurring' },
+                      { label: 'Heavy month', detail: '2 Diagnostics + 1 Fractional active case', total: '$1,170 + $590/mo recurring' },
                     ].map((row) => (
                       <div key={row.label} className="rounded-lg border border-border/50 bg-card/50 p-3">
                         <p className="text-sm text-muted-foreground">{row.label}</p>
