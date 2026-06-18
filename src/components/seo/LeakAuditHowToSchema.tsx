@@ -34,7 +34,7 @@ const STEPS = [
   },
   {
     name: 'Rebuild the broken systems',
-    text: 'Optional follow-on implementation at $15K/month retainer or fixed-fee project. The $2,500 Forensic Diagnostic fee is applied 1:1 toward any engagement.',
+    text: 'Optional follow-on Active Case at $15K/month or fixed-fee project. The case stays open until the leaks on the Register are sealed. The $2,500 Forensic Diagnostic fee is applied 1:1 toward any engagement.',
   },
 ];
 

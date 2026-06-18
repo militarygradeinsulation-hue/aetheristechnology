@@ -80,7 +80,7 @@ export async function renderHomepage(
         <ul>
           <li><strong>Free Self-Scan</strong> — Run The Leak Audit on your own business in ~10 minutes. <a href="${SITE_URL}/leak-audit">Start at /leak-audit</a>.</li>
           <li><strong>Forensic Diagnostic — $2,500 flat</strong> — Operator-led 14-day deep audit. Full leak ledger delivered. Fee applies toward any engagement.</li>
-          <li><strong>Engagement</strong> — We close the leaks. Scoped per engagement, no retainer roulette.</li>
+          <li><strong>Engagement</strong> — We close the leaks. Scoped per engagement, no ongoing-billing roulette.</li>
         </ul>
       </section>
 

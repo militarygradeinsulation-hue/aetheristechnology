@@ -42,7 +42,7 @@ const CATEGORIES: SkillCategory[] = [
   {
     title: 'Operations & Strategy',
     icon: Settings,
-    skills: ['Business Process Automation', 'Operational Systems Design', 'Digital Transformation Strategy', 'Logistics Planning', 'Risk Management', 'Operations Research', 'Business Strategy', 'Management'],
+    skills: ['Business Process Automation', 'Operational Systems Design', 'Forensic Systems Rebuild', 'Logistics Planning', 'Risk Management', 'Operations Research', 'Business Strategy', 'Management'],
   },
   {
     title: 'Executive Tools',

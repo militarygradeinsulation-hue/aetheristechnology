@@ -56,8 +56,8 @@ const tiles: Tile[] = [
     imageAlt: 'Quiet bedroom at sunrise, phone untouched',
   },
   {
-    sold: 'Implementation Retainer',
-    soldDetail: '$15K/mo. We execute the Diagnostic fixes.',
+    sold: 'Active Case',
+    soldDetail: '$15K/mo. The case stays open while we execute the Diagnostic fixes.',
     given: 'Your weekends back.',
     givenShort: 'We take the wrench out of your hand. Saturday is the soccer game, not another "quick sync."',
     Icon: Heart,

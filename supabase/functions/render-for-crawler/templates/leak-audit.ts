@@ -26,7 +26,7 @@ export async function renderLeakAudit(
     { question: "Free vs. paid — what's the difference?", answer: "The free self-scan walks you through the 7 steps with guided questions and produces a directional report you fill out yourself. The operator-led paths run the audit on your business — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($18,500) for full quantified leak ledgers." },
     { question: "How long is the free self-scan?", answer: "About 6 minutes if you have a rough sense of your numbers. 14 questions across 4 categories." },
     { question: "What's in the leak ledger?", answer: "A prioritized list of every leak we identified, each with: a description of the leak, an estimated annual dollar cost, a difficulty-to-close score, a recommended fix, and a projected ROI." },
-    { question: "What comes after the Diagnostic?", answer: "The Implementation Retainer ($15,000/month, 3-month minimum) is available to 21-Day Diagnostic clients to actually seal the leaks the Diagnostic identified." },
+    { question: "What comes after the Diagnostic?", answer: "The Active Case ($15,000/month, 3-month minimum) is the open forensic engagement available to 21-Day Diagnostic clients. The case stays open until the leaks the Diagnostic identified are sealed." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 
@@ -85,8 +85,8 @@ export async function renderLeakAudit(
           <li><strong>Free Self-Scan</strong> (~6 min) — Guided 14-question walkthrough. You answer. You get a directional PDF.</li>
           <li><strong>Signal Pack — $2,500</strong> — Operator-led confirmation of the leaks the self-scan flagged. Website Report + Brand Contradiction Finder + Friction Vocabulary Audit + Leak Findings memo + 30-min walkthrough.</li>
           <li><strong>Revenue Pack — $5,000</strong> — Signal Pack plus Sales Script Pack, Follow-Up Plan, Strategic Question Engine, 30-Day Content Calendar, two 45-min sessions. Most operators pick this.</li>
-          <li><strong>Operator Suite — $10,000</strong> — Revenue Pack plus Strategy Blueprint, Social Content Pack, Digital Snapshot, Lead-Nurture Automation, Tech Suite access. Credits 1:1 toward the Retainer.</li>
-          <li><strong>21-Day Revenue Diagnostic — $18,500</strong> (flagship) — Operator inside the business for 21 days. Full quantified leak ledger. Implementation plan handed off. Required before the Implementation Retainer ($15,000/mo, 3-mo minimum).</li>
+          <li><strong>Operator Suite — $10,000</strong> — Revenue Pack plus Strategy Blueprint, Social Content Pack, Digital Snapshot, Lead-Nurture Automation, Tech Suite access. Credits 1:1 toward the Active Case.</li>
+          <li><strong>21-Day Revenue Diagnostic — $18,500</strong> (flagship) — Operator inside the business for 21 days. Full quantified leak ledger. Implementation plan handed off. Required before opening an Active Case ($15,000/mo, 3-mo minimum).</li>
         </ul>
       </section>
 

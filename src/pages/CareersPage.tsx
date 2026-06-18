@@ -187,7 +187,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       </h2>
       <div className="grid md:grid-cols-2 gap-5">
         {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the Signal Pack as the entry bundle, and the 21-Day Revenue Diagnostic + Implementation Retainer as the flagships. The pitch writes itself.' },
+          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the Signal Pack as the entry bundle, and the 21-Day Revenue Diagnostic + Active Case as the flagships. The pitch writes itself.' },
           { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
           { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
           { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
@@ -244,7 +244,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. You want a commission-driven side lane where results matter more than clocking in.' },
-          { title: 'The Burned-Out Agency Closer', desc: 'You sold marketing, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
+          { title: 'The Burned-Out Vendor Closer', desc: 'You sold marketing software, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
           { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
           { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
           { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence, you bring the voice.' },
@@ -266,7 +266,7 @@ const SignupSection = ({ form, onChange, onSubmit, loading }: {
           Ground floor of a category that didn't exist 12 months ago.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
-          "Business Forensics" is a brand-new lane, operator-led diagnostics with an in-house tech stack behind them. Most agencies are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
+          "Revenue Forensics" is a brand-new category, operator-led diagnostics with an in-house live scanner behind them. Most vendors are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -405,7 +405,7 @@ const PlaybookSection = () => (
               "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
               "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
               "Once they see the leaks, position the 21-Day Revenue Diagnostic as the operator-led version that quantifies the damage.",
-              "After the Diagnostic, the Implementation Retainer sells itself. That's where your recurring commission kicks in.",
+              "After the Diagnostic, the Active Case sells itself. That's where your recurring commission kicks in.",
             ].map((step, i) => (
               <div key={i} className="flex gap-3">
                 <span className="text-primary font-bold shrink-0">{i + 1}.</span>

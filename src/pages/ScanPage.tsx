@@ -20,7 +20,7 @@ const ScanPage = () => {
     ),
     howToSchema(
       'How to Run a Free AI Website Audit',
-      'Get an AI-powered scan of your site in 30 seconds, SEO, conversion, and digital transformation gaps.',
+      'Get an AI-powered forensic scan of your site in 30 seconds. Search-visibility leaks, conversion drop-offs, and system rebuild signals.',
       [
         { name: 'Enter your website URL', text: 'Paste any public URL into the scanner.' },
         { name: 'Run the AI scan', text: 'Our scanner analyzes your site for SEO, CTAs, conversion friction, and AI/automation gaps.' },
@@ -43,9 +43,9 @@ const ScanPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Free AI Website Gap Analysis | Aetheris AI"
-        description="AI website analysis in 30 seconds. SEO, weak CTAs, missed conversions, with digital transformation audit + revenue leak estimates."
+        description="AI website forensics in 30 seconds. Weak CTAs, missed conversions, search-visibility leaks, with system rebuild signals + revenue leak estimates."
         path="/scan"
-        keywords="AI website analysis, digital transformation audit, website SEO scan, conversion optimization audit, AI consulting Indianapolis, revenue leak analysis, performance optimization"
+        keywords="AI website analysis, revenue forensics scan, conversion leak audit, AI consulting Indianapolis, revenue leak analysis, performance forensics"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Website Gap Analysis', path: '/scan' },

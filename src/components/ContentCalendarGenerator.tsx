@@ -119,7 +119,7 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
           </div>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div><Label>Industry *</Label><Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} placeholder="e.g. Fitness, SaaS, Real Estate" /></div>
-            <div><Label>Goals</Label><Input value={form.goals} onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="e.g. Lead gen, brand awareness" /></div>
+            <div><Label>Goals</Label><Input value={form.goals} onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="e.g. Lead gen, surface revenue leaks" /></div>
             <div className="md:col-span-2"><Label>Platforms</Label><Input value={form.platforms} onChange={(e) => setForm({ ...form, platforms: e.target.value })} placeholder="e.g. LinkedIn, Facebook, Instagram" /></div>
           </div>
           <Button onClick={handleGenerate} className="bg-amber hover:bg-amber/90 text-background font-bold px-8" disabled={!form.industry}>Generate Calendar</Button>

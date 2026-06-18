@@ -14,7 +14,7 @@ export const WhyUs: React.FC = () => {
     { tag: 'The Leak Audit™', note: '7-step forensic process' },
     { tag: 'Behavioral stack', note: 'Psychology + Marine + 20yr ops' },
     { tag: 'Sealed case files', note: 'Verifiable, dollar-tied outcomes' },
-    { tag: 'No retainer ransom', note: 'Flat-fee Diagnostic, credited back' },
+    { tag: 'No ongoing-billing ransom', note: 'Flat-fee Diagnostic, credited back' },
   ];
 
   return (
@@ -73,7 +73,7 @@ export const WhyUs: React.FC = () => {
                     <span className="text-amber"> We're an AI-native operator.</span>
                   </h2>
                   <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-5">
-                    Consultants hand you a slide deck. Agencies sell you hours. We deploy AI agents that actually run forensics on your CRM, sales follow-up, and operational systems, at a fraction of the cost, in a fraction of the time.
+                    Consultants hand you a slide deck. Vendors sell you hours. We deploy a live forensic scanner that actually runs on your CRM, sales follow-up, and operational systems, at a fraction of the cost, in a fraction of the time.
                   </p>
                   <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 mb-2">
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">

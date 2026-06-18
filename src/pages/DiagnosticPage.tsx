@@ -127,7 +127,7 @@ const TOOL_BUNDLE: ToolItem[] = [
     finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.',
     inputs: ['Findings from the diagnostic (auto-fed)', 'Founder/CEO voice samples (3–5 posts or articles)', 'Top 3 customer-success stories'],
     process: ['Cluster diagnostic findings into 4–6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
-    deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer or agency'],
+    deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer'],
     exampleLeak: 'Founder posted twice a quarter, randomly. We turned the diagnostic into 90 days of content that pre-sold the next engagement.',
     standalonePrice: '$39',
     standaloneDetail: 'one-time · 90-day calendar',
@@ -149,7 +149,7 @@ const TOOL_BUNDLE: ToolItem[] = [
 
 const NOT_INCLUDED = [
   'Brand strategy, product pricing, or shop-floor operations',
-  'Percentage-of-savings billing or ongoing retainer requirement',
+  'Percentage-of-savings billing or ongoing engagement requirement',
   'Vendor reseller commissions on tools we recommend',
 ];
 
@@ -219,7 +219,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-1.5 text-sm text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
                     <li>• You get a written leak map, not a software login</li>
-                    <li>• One fixed fee. $2,500. No retainer to read the report</li>
+                    <li>• One fixed fee. $2,500. Nothing else owed to read the report</li>
                     <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>• We tell you exactly where the money is leaking and what to fix first</li>
@@ -234,7 +234,7 @@ const DiagnosticPage: React.FC = () => {
             <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
               <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$2,500</div>
-              <p className="text-sm text-muted-foreground mt-2">Operator-led Leak Audit. No retainer required. No percentage-of-savings. Applied toward any engagement.</p>
+              <p className="text-sm text-muted-foreground mt-2">Operator-led Leak Audit. Nothing ongoing required. No percentage-of-savings. Applied toward any engagement.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
                 <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
@@ -265,7 +265,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
 
               <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
-                $2,500 buys you what an agency charges $90K–$240K for, and most agencies still won't touch your CRM data.
+                $2,500 buys you what the alternative shelf charges $90K–$240K for, and most of them still won't touch your CRM data.
               </h3>
 
               <div className="overflow-x-auto mb-6">
@@ -273,7 +273,7 @@ const DiagnosticPage: React.FC = () => {
                   <thead>
                     <tr className="border-b border-amber/30">
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 pr-3">Line item</th>
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">Typical agency / consultancy</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">The alternative shelf</th>
                       <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Leak Audit</th>
                     </tr>
                   </thead>
@@ -288,10 +288,10 @@ const DiagnosticPage: React.FC = () => {
                       ['Operator-graded scorecard + readout', '$10,000 – $30,000', 'Included'],
                       ['Written report w/ ROI projections + roadmap', '$5,000 – $15,000', 'Included'],
                       ['Source-data appendix (every CSV + query)', 'Rarely offered', 'Included'],
-                    ].map(([item, agency, us]) => (
+                    ].map(([item, alt, us]) => (
                       <tr key={item} className="border-b border-border/30">
                         <td className="py-2 pr-3">{item}</td>
-                        <td className="py-2 px-3 text-muted-foreground">{agency}</td>
+                        <td className="py-2 px-3 text-muted-foreground">{alt}</td>
                         <td className="py-2 pl-3 text-amber font-semibold">{us}</td>
                       </tr>
                     ))}
@@ -307,15 +307,15 @@ const DiagnosticPage: React.FC = () => {
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">Fast turnaround</div>
-                  <div className="text-xs text-muted-foreground mt-1">Operator-led. Agencies average 90–120 days to deliver less.</div>
+                  <div className="text-xs text-muted-foreground mt-1">Operator-led. Others average 90–120 days to deliver less.</div>
                 </div>
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
                   <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
                   <div className="text-xs text-muted-foreground mt-1">20+ years running real P&Ls. Not a junior + a GPT wrapper.</div>
                 </div>
                 <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">$0 retainer</div>
-                  <div className="text-xs text-muted-foreground mt-1">Read the report. Walk away. Or hire us to fix it. Your call.</div>
+                  <div className="font-forensic text-3xl font-bold text-amber">$0 ongoing</div>
+                  <div className="text-xs text-muted-foreground mt-1">Read the report. Walk away. Or open a case. Your call.</div>
                 </div>
               </div>
 

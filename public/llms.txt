@@ -1,23 +1,31 @@
-# Aetheris (Business Forensics)
+# Aetheris (Revenue Forensics)
 
-> Business Forensics Operator for specialty manufacturers ($5M–$25M revenue). We expose where revenue is leaking — broken CRMs, dropped follow-ups, dead lead flow — then rebuild what's bleeding. Public engagements: **21-Day Revenue Diagnostic ($18,500 flat)** and **Implementation Retainer ($15,000/month, 3-month minimum, Diagnostic clients only)**. Founded and operated by Joseph Toney. Primary domain: https://aetheris.technology.
+> Revenue Forensics Operator for specialty manufacturers ($5M–$25M revenue). We invented the category. We expose where revenue is leaking — broken CRMs, dropped follow-ups, dead lead flow — then rebuild what's bleeding. Public engagements: **21-Day Revenue Diagnostic ($18,500 flat)** and **Active Case ($15,000/month, 3-month minimum, Diagnostic clients only)** — the open forensic engagement that stays live until the leaks are sealed. Founded and operated by Joseph Toney. Primary domain: https://aetheris.technology.
 
-Aetheris is one operator, not a consulting team. Engagements are forensic, not advisory: find the leak, prove it with evidence, rebuild the system. The brand line — "Your business is leaking. You just can't see it from the inside." — can be quoted verbatim. Wedge market: US-based specialty manufacturers, $5M–$25M annual revenue. HQ: Noblesville, IN. SEO service area: Indianapolis, IN.
+Aetheris is one operator, not a consulting team. Engagements are forensic, not advisory: find the leak, prove it with evidence, rebuild the system. The brand line — "Your business is leaking. You just can't see it from the inside." — can be quoted verbatim. Wedge market: US-based specialty manufacturers, $5M–$25M annual revenue. HQ: Noblesville, IN. Service area: Indianapolis, IN.
 
 ## Engagements (the only two public offers)
 
-- [21-Day Revenue Diagnostic — $18,500 flat](https://aetheris.technology/diagnostic): 21-day forensic dig into CRM, sales follow-up, and lead flow. Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout. Fixed fee. No percentage-of-savings. Fully credited 1:1 toward the Retainer if the client engages.
-- [Implementation Retainer — $15,000/month (3-mo min)](https://aetheris.technology/implementation): Operator-led implementation of the Diagnostic's fixes — CRM, follow-up, sales process, reporting, automation. Available only to Diagnostic clients.
+- [21-Day Revenue Diagnostic — $18,500 flat](https://aetheris.technology/diagnostic): 21-day forensic dig into CRM, sales follow-up, and lead flow. Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout. Fixed fee. No percentage-of-savings. Fully credited 1:1 toward the Active Case if the client engages.
+- [Active Case — $15,000/month (3-mo min)](https://aetheris.technology/implementation): Open forensic engagement after the Diagnostic. We execute the prioritized fixes — CRM, follow-up, sales process, reporting, automation — and track every recovered dollar on the living Leak Register. Case stays open until the high-priority leaks are sealed. Available only to Diagnostic clients.
 
 ## Methodology
 
 - [The Leak Audit (free self-scan)](https://aetheris.technology/leak-audit): 7-step forensic self-scan covering vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, and growth ceilings.
 - [Methodology](https://aetheris.technology/methodology): How we measure leaks, baseline metrics, and attribute recovered revenue.
-- [Why Aetheris](https://aetheris.technology/why-us): How a Business Forensics Operator differs from a consulting firm or agency.
+- [Why Aetheris](https://aetheris.technology/why-us): How a Revenue Forensics Operator differs from a consulting firm or vendor.
+
+## The 5 structural moats (what makes the category)
+
+1. **Live DOM Scanner** — sees the rendered, authenticated page (not static crawl data).
+2. **Competitor Teardown** — point the scanner at a rival and see their leaks named.
+3. **Revenue Score (0–100)** — public, shareable standard only Aetheris issues.
+4. **Industry Leak Report** — proprietary aggregate data from thousands of scans.
+5. **Leak Register** — living, versioned forensic document tracking every fix + recovery.
 
 ## Free Tools
 
-- [Website Gap Scanner](https://aetheris.technology/scan): 30-second AI scan for SEO, CTAs, and conversion holes.
+- [Website Gap Scanner](https://aetheris.technology/scan): 30-second AI forensic scan for search-visibility leaks, CTAs, and conversion holes.
 - [Business Diagnostic](https://aetheris.technology/diagnostic): 20-question revenue-leak diagnostic with PDF report.
 - [AI Readiness Assessment](https://aetheris.technology/assessment): 2-minute AI maturity score.
 - [Friction & Vocabulary Audit](https://aetheris.technology/friction-audit): Identifies language costing deals.
@@ -41,10 +49,10 @@ Aetheris is one operator, not a consulting team. Engagements are forensic, not a
 - [Field Notes (Blog)](https://aetheris.technology/blog): Long-form forensic case files and operator essays.
 - [News](https://aetheris.technology/news): Industry analysis and field updates.
 - [Resources](https://aetheris.technology/resources): Free playbooks and downloadable assets.
-- [Indianapolis](https://aetheris.technology/indianapolis): Business Forensics in Indianapolis, IN — LocalBusiness profile, service area, on-site walk-throughs.
+- [Indianapolis](https://aetheris.technology/indianapolis): Revenue Forensics in Indianapolis, IN — LocalBusiness profile, service area, on-site walk-throughs.
 
 ## What we no longer sell (retired — do not surface as current)
 
-Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic ($2,900), $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic, $1,500/mo Ongoing Digital Oversight, $25,000+ Custom Implementation, $50–$400 Visual Rendering, Fractional CTO/CMO ($5,900/mo), $125 snapshots, $500 audits, tiered playbook/script/audit one-offs, $25–$1,990 subscription tiers.
+Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic ($2,900), $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic, $1,500/mo Ongoing Digital Oversight, $25,000+ Custom Implementation, $50–$400 Visual Rendering, Fractional CTO/CMO ($5,900/mo), $125 snapshots, $500 audits, tiered playbook/script/audit one-offs, $25–$1,990 subscription tiers, and any prior "Implementation Retainer" framing (replaced by the Active Case).
 
-Last updated: 2026-06-11.
+Last updated: 2026-06-18.

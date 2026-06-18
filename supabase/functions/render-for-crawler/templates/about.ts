@@ -71,7 +71,7 @@ export async function renderAbout(
         <h2>How I work</h2>
         <ul>
           <li><strong>No discovery theater.</strong> 14 days, not 90. The first deliverable is a named leak with a dollar figure.</li>
-          <li><strong>No retainer roulette.</strong> Engagements are scoped to specific leaks with specific outcomes.</li>
+          <li><strong>No ongoing-billing roulette.</strong> Engagements are scoped to specific leaks with specific outcomes.</li>
           <li><strong>No "AI guru" gradients.</strong> The methodology is forensic, not aspirational. We look for evidence of bleeding, not opportunities for "transformation."</li>
         </ul>
       </section>

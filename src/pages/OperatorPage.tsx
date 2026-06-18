@@ -76,7 +76,7 @@ const PHASES = [
     range: 'Days 22–60',
     icon: ShieldCheck,
     title: 'Re-measure + hand-off',
-    body: 'We re-run the diagnostics on the fixed systems. Recovered revenue gets attributed. You get a written 15–30 page report and a 60-minute readout. If we keep going, the fee credits 1:1 toward the Implementation Retainer.',
+    body: 'We re-run the diagnostics on the fixed systems. Recovered revenue gets attributed. You get a written 15–30 page report and a 60-minute readout. If we keep going, the fee credits 1:1 toward the Active Case.',
   },
 ];
 
