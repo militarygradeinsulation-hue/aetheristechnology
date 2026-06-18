@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import PillarArticleLayout from '@/components/seo/PillarArticleLayout';
 import { ALL_AUTHORITY_ARTICLES } from '@/content/aiAuthorityContent';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { ContactModal } from '@/components/ContactModal';
 
 /**
  * Single dynamic route that resolves any AI Authority Playbook article from
@@ -12,6 +13,7 @@ import { Footer } from '@/components/Footer';
  */
 const AuthorityArticlePage: React.FC = () => {
   const { '*': rest } = useParams();
+  const [contactOpen, setContactOpen] = useState(false);
   const path = `/${rest ?? ''}`.replace(/\/+$/, '') || '/';
   const article = ALL_AUTHORITY_ARTICLES.find(a => a.path === path);
 
@@ -20,11 +22,13 @@ const AuthorityArticlePage: React.FC = () => {
   const { body, ...props } = article;
   return (
     <>
-      <Navbar />
+      <Navbar onContactClick={() => setContactOpen(true)} />
       <PillarArticleLayout {...props}>{body}</PillarArticleLayout>
       <Footer />
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </>
   );
 };
 
 export default AuthorityArticlePage;
+
