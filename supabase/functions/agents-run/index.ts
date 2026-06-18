@@ -1,14 +1,7 @@
 // One-click AI agents: Detective, Marketer, Consultant, Programmer.
 // Plan → Confirm → Execute. Execute auto-saves to admin_library.
-//
-// Body:
-//   { agent: 'detective'|'marketer'|'consultant'|'programmer',
-//     url?: string, brief?: string, mode: 'plan'|'execute',
-//     plan?: any,            // for execute: the plan to commit
-//     includeHubspot?: boolean }
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,76 +16,65 @@ VOICE RULES (non-negotiable):
 - Forensic operator tone. Blunt, present tense, no hedging.
 - USD only ("$"). No emojis, hashtags, em-dashes, hype words ("unlock", "leverage", "synergy", "delve", "game-changer").
 - Never sell. Never pitch Aetheris, Leak Audit, or any service.
-- Trigger-word ban (will make people shut down): "exclusive offer", "limited time", "guaranteed", "best in class",
+- Trigger-word ban: "exclusive offer", "limited time", "guaranteed", "best in class",
   "revolutionary", "world-class", "innovative solution", "circle back", "touch base", "quick chat", "synergy".
-- Guard-low style: write like you're sharing observations between colleagues, not pitching a product.
+- Guard-low style: write like you're sharing observations between colleagues, not pitching.
 `;
 
-const AGENTS: Record<string, { label: string; toolType: string; system: (b: any) => string }> = {
+const AGENTS: Record<string, { label: string; toolType: string; system: () => string }> = {
   detective: {
     label: "Detective",
     toolType: "agent_detective",
     system: () => `You are the DETECTIVE agent. Forensic analyst.
-Given a URL + page text, deliver a tight case file in STRICT JSON only:
+Return STRICT JSON only:
 {
-  "summary": "one sentence naming the dominant revenue-killing pattern",
+  "summary": "one sentence",
   "verdict": { "grade": "A"|"B"|"C"|"D"|"F", "score": 0-100, "annualLeakUSD": "$X,XXX" },
-  "evidence": ["specific observation 1", "...4 total, quote or measure"],
-  "fixes": [{ "title": "...", "why": "1 sentence", "action": "specific action" }, ... up to 5]
+  "evidence": ["...up to 4"],
+  "fixes": [{ "title": "...", "why": "...", "action": "..." }]
 }
 ${COMMON_VOICE}`,
   },
   marketer: {
     label: "Marketer",
     toolType: "agent_marketer",
-    system: () => `You are the MARKETER agent. You read a page and produce assets that keep buyers' guard low.
-STRICT JSON only:
+    system: () => `You are the MARKETER agent. STRICT JSON only:
 {
-  "summary": "one sentence on the angle you chose and why",
-  "linkedinPosts": [{ "hook": "...", "body": "120-180 words" }, ...3 total],
-  "coldEmails": [{ "subject": "<7 words, lowercase, no caps", "body": "70-110 words, conversational, no CTA stack" }, ...2 total],
-  "replies": ["3 short LinkedIn reply variants for the page topic"]
+  "summary": "...",
+  "linkedinPosts": [{ "hook": "...", "body": "120-180 words" }],
+  "coldEmails": [{ "subject": "...", "body": "70-110 words" }],
+  "replies": ["..."]
 }
-Subject lines must look like a peer wrote them. No "Quick question", no "Re:", no urgency words.
 ${COMMON_VOICE}`,
   },
   consultant: {
     label: "Consultant",
     toolType: "agent_consultant",
-    system: () => `You are the CONSULTANT agent. 90-day operator plan from the page + brief.
-STRICT JSON only:
+    system: () => `You are the CONSULTANT agent. STRICT JSON only:
 {
-  "summary": "the one bet you'd make in the next 90 days and why",
-  "diagnosis": ["3-5 root cause observations"],
+  "summary": "...",
+  "diagnosis": ["..."],
   "ninetyDayPlan": [
     { "phase": "Days 1-30", "focus": "...", "moves": ["..."] },
     { "phase": "Days 31-60", "focus": "...", "moves": ["..."] },
     { "phase": "Days 61-90", "focus": "...", "moves": ["..."] }
   ],
-  "kpis": ["3 specific metrics with target values"],
-  "risks": ["2 risks + mitigation each"]
+  "kpis": ["..."],
+  "risks": ["..."]
 }
 ${COMMON_VOICE}`,
   },
   programmer: {
     label: "Programmer",
     toolType: "agent_programmer",
-    system: () => `You are the PROGRAMMER agent. Read the page, propose copy/structure fixes that are safe to push.
-STRICT JSON only:
+    system: () => `You are the PROGRAMMER agent. STRICT JSON only:
 {
-  "summary": "what you'd change first and why",
+  "summary": "...",
   "fixes": [
-    {
-      "selector": "h1 | .hero-cta | etc (CSS-ish, best guess)",
-      "field": "hero_headline | hero_cta | proof_section | meta_title | ...",
-      "before": "exact current text if you can quote it",
-      "after": "the rewritten copy",
-      "why": "one-sentence reason"
-    }
+    { "selector": "...", "field": "...", "before": "...", "after": "...", "why": "..." }
   ],
-  "safety": "what to test before pushing live"
+  "safety": "..."
 }
-Maximum 6 fixes. Each "after" must be the literal final copy, not instructions.
 ${COMMON_VOICE}`,
   },
 };
@@ -135,15 +117,15 @@ async function callAI(system: string, user: string) {
     }),
   });
   if (r.status === 429) throw new Error("Rate limit. Try again in a minute.");
-  if (r.status === 402) throw new Error("AI credits exhausted. Top up in Lovable Cloud settings.");
+  if (r.status === 402) throw new Error("AI credits exhausted.");
   if (!r.ok) throw new Error(`AI ${r.status}: ${(await r.text()).slice(0, 200)}`);
   const j = await r.json();
   const raw = j?.choices?.[0]?.message?.content || "{}";
   try { return JSON.parse(raw); } catch { return { summary: raw }; }
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const body = await req.json();
     const agent = String(body.agent || "").toLowerCase();
@@ -160,23 +142,17 @@ serve(async (req) => {
         url ? `URL: ${url}` : "URL: (none)",
         page.host ? `HOST: ${page.host}` : "",
         brief ? `OPERATOR BRIEF: ${brief}` : "",
-        body.includeHubspot ? "CONTEXT FLAG: caller has HubSpot connected — reference CRM hygiene if relevant." : "",
+        body.includeHubspot ? "CONTEXT: HubSpot connected — reference CRM hygiene if relevant." : "",
         page.text ? `PAGE TEXT (truncated):\n${page.text}` : "",
       ].filter(Boolean).join("\n\n");
 
-      const result = await callAI(def.system(body), userMsg || "No page provided. Use the brief only.");
+      const result = await callAI(def.system(), userMsg || "No page provided. Use the brief only.");
       return json({
-        agent,
-        label: def.label,
-        mode: "plan",
-        url,
-        host: page.host,
-        plan: result,
-        requiresConfirm: true,
+        agent, label: def.label, mode: "plan", url, host: page.host,
+        plan: result, requiresConfirm: true,
       });
     }
 
-    // EXECUTE: save the (already-reviewed) plan to library
     const plan = body.plan;
     if (!plan) return json({ error: "Missing plan to execute" }, 400);
 
@@ -197,14 +173,10 @@ serve(async (req) => {
       .single();
     if (error) throw error;
 
-    // For Programmer, surface fix payload ready to feed extension-cms-apply
     const extras: any = {};
     if (agent === "programmer" && Array.isArray(plan?.fixes)) {
       extras.cmsFixes = plan.fixes.map((f: any) => ({
-        selector: f.selector,
-        field: f.field,
-        before: f.before,
-        after: f.after,
+        selector: f.selector, field: f.field, before: f.before, after: f.after,
       }));
     }
     return json({ saved: true, item: data, ...extras });
@@ -212,4 +184,3 @@ serve(async (req) => {
     return json({ error: e?.message || String(e) }, 500);
   }
 });
-
