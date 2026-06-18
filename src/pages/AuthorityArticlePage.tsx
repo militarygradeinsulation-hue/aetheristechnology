@@ -2,8 +2,8 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import PillarArticleLayout from '@/components/seo/PillarArticleLayout';
 import { ALL_AUTHORITY_ARTICLES } from '@/content/aiAuthorityContent';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 /**
  * Single dynamic route that resolves any AI Authority Playbook article from
@@ -20,7 +20,7 @@ const AuthorityArticlePage: React.FC = () => {
   const { body, ...props } = article;
   return (
     <>
-      <Header />
+      <Navbar />
       <PillarArticleLayout {...props}>{body}</PillarArticleLayout>
       <Footer />
     </>
