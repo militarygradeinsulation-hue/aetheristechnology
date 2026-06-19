@@ -43,12 +43,19 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex">
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/40 backdrop-blur">
-        <div className="px-6 py-6 border-b border-border">
-          <Link to="/app/dashboard" className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">Revenue Recovery</span>
+        <div className="px-6 py-5 border-b border-border space-y-3">
+          <Link
+            to="/home"
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg bg-amber/10 hover:bg-amber/20 border border-amber/30 text-amber text-sm font-semibold transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Main Website
           </Link>
-          <p className="text-xs text-muted-foreground mt-1">CTOguy Engine</p>
+          <Link to="/app/dashboard" className="flex items-center gap-2">
+            <img src={aetherisLogo} alt="Aetheris" className="h-8 w-auto" />
+            <span className="font-semibold tracking-tight text-sm">Revenue Recovery</span>
+          </Link>
+          <p className="text-xs text-muted-foreground">CTOguy Engine</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           <NavLink to="/app/dashboard" className={navItem} end>
