@@ -196,7 +196,28 @@ const LeakLanderPage: React.FC = () => {
           >
             <a
               href="/downloads/How-Aetheris-Can-Help-You.pdf"
-              download
+              download="How-Aetheris-Can-Help-You.pdf"
+              target="_blank"
+              rel="noopener"
+              onClick={async (e) => {
+                try {
+                  e.preventDefault();
+                  const res = await fetch("/downloads/How-Aetheris-Can-Help-You.pdf", { cache: "no-store" });
+                  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                  const blob = await res.blob();
+                  const blobUrl = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = blobUrl;
+                  a.download = "How-Aetheris-Can-Help-You.pdf";
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                } catch {
+                  // fall back to native navigation (opens PDF inline)
+                  window.open("/downloads/How-Aetheris-Can-Help-You.pdf", "_blank", "noopener");
+                }
+              }}
               className="relative overflow-hidden group flex items-center gap-3 px-5 py-4 rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm hover:border-amber transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
             >
               <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
