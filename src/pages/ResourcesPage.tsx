@@ -28,13 +28,10 @@ const ResourcesPage = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
-  const [unlocked, setUnlocked] = useState<boolean>(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
 
-  useEffect(() => {
-    setUnlocked(Boolean(getStoredAccessCode()));
-  }, []);
+
   
 
   useEffect(() => {
