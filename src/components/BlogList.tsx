@@ -1,22 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, ArrowRight, X, Lock } from 'lucide-react';
+import { BookOpen, ArrowRight, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogCard } from './BlogCard';
 import { Button } from './ui/button';
-import { AccessGate, getStoredAccessCode } from './AccessGate';
 
 const PAGE_SIZE = 12;
-const FREE_PREVIEW_COUNT = 3;
 
 export const BlogList: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [unlocked, setUnlocked] = useState<boolean>(false);
-
-  useEffect(() => {
-    setUnlocked(Boolean(getStoredAccessCode()));
-  }, []);
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['blog-posts-list'],
