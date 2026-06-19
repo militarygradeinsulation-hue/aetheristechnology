@@ -107,23 +107,28 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       </aside>
 
       <main className="flex-1 min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/40">
-          <Link to="/app/dashboard" className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm">Revenue Recovery</span>
+        <header className="md:hidden border-b border-border bg-card/40">
+          <Link
+            to="/home"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-amber/10 border-b border-amber/30 text-amber text-xs font-semibold"
+          >
+            <Home className="h-3.5 w-3.5" />
+            Main Website
           </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/home" className="text-xs text-amber hover:text-amber/80 flex items-center gap-1">
-              <Home className="h-3 w-3" />
-              Home
+          <div className="flex items-center justify-between px-4 py-3">
+            <Link to="/app/dashboard" className="flex items-center gap-2">
+              <img src={aetherisLogo} alt="Aetheris" className="h-6 w-auto" />
+              <span className="font-semibold text-sm">Revenue Recovery</span>
             </Link>
-            <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" />
-              Admin
-            </Link>
-            <button onClick={handleSignOut} className="text-xs text-muted-foreground">
-              Sign out
-            </button>
+            <div className="flex items-center gap-3">
+              <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" />
+                Admin
+              </Link>
+              <button onClick={handleSignOut} className="text-xs text-muted-foreground">
+                Sign out
+              </button>
+            </div>
           </div>
         </header>
         <div className="p-6 md:p-10 max-w-6xl mx-auto">{children}</div>
