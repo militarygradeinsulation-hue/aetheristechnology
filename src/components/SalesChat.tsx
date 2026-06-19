@@ -227,10 +227,10 @@ export const SalesChat: React.FC = () => {
     <>
       {/* Single floating button */}
       {!isOpen && (
-        <PinnableFloater storageKey="floater.saleschat.launcher" defaultCorner="bottom-right" width={64} height={64} zIndex={50}>
+        <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => setIsOpen(true)}
-            className={`w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 ${
+            className={`w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative ${
               showPulse ? 'animate-pulse' : ''
             }`}
             aria-label="Chat with us"
@@ -240,12 +240,12 @@ export const SalesChat: React.FC = () => {
             )}
             <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
           </button>
-        </PinnableFloater>
+        </div>
       )}
 
       {/* Chat window */}
       {isOpen && (
-        <PinnableFloater storageKey="floater.saleschat.panel" defaultCorner="bottom-right" width={380} height={560} zIndex={50}>
+        <div className="fixed bottom-6 right-6 z-50">
         <div className="w-[380px] max-w-[calc(100vw-48px)] h-[560px] max-h-[calc(100vh-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}
           <div className="px-4 py-3 border-b border-border bg-card">
@@ -368,7 +368,7 @@ export const SalesChat: React.FC = () => {
             </div>
           </div>
         </div>
-        </PinnableFloater>
+        </div>
       )}
 
       {/* Mobile sticky bar */}
