@@ -112,6 +112,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <span className="font-semibold text-sm">Revenue Recovery</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link to="/home" className="text-xs text-amber hover:text-amber/80 flex items-center gap-1">
+              <Home className="h-3 w-3" />
+              Home
+            </Link>
             <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" />
               Admin
