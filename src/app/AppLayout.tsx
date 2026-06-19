@@ -81,6 +81,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </nav>
         <div className="p-4 border-t border-border space-y-3">
           <Link
+            to="/home"
+            className="flex items-center gap-2 text-sm text-amber hover:text-amber/80 transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Main Website
+          </Link>
+          <Link
             to="/admin"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
