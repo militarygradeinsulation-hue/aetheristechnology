@@ -4,16 +4,13 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, X, Volume2, VolumeX, Lock } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, X, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
 import Player from '@vimeo/player';
-import { AccessGate, getStoredAccessCode } from '@/components/AccessGate';
-
-const FREE_PREVIEW_COUNT = 2;
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   TrendingUp,
@@ -31,13 +28,10 @@ const ResourcesPage = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
-  const [unlocked, setUnlocked] = useState<boolean>(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
 
-  useEffect(() => {
-    setUnlocked(Boolean(getStoredAccessCode()));
-  }, []);
+
   
 
   useEffect(() => {
@@ -184,66 +178,44 @@ const ResourcesPage = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-amber" />
               </div>
             ) : (() => {
-              const all = playbooks || [];
-              const visible = unlocked ? all : all.slice(0, FREE_PREVIEW_COUNT);
-              const remaining = all.length - visible.length;
+              const visible = playbooks || [];
               return (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {visible.map((resource, index) => {
-                      const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
-                      return (
-                        <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                          <button
-                            type="button"
-                            onClick={() => { setPreviewPlaybook(resource); }}
-                            className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
-                          >
-                            <div className="flex items-start gap-4 mb-4">
-                              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
-                                <IconComp className="w-6 h-6 text-amber" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
-                                  <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
-                                </div>
-                                <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
-                              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {visible.map((resource, index) => {
+                    const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
+                    return (
+                      <RevealOnScroll key={resource.id} delay={index * 0.1}>
+                        <button
+                          type="button"
+                          onClick={() => { setPreviewPlaybook(resource); }}
+                          className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
+                        >
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
+                              <IconComp className="w-6 h-6 text-amber" />
                             </div>
-                            <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
-                            <div className="flex flex-wrap gap-2 mb-5">
-                              {(resource.tags || []).map((tag: string) => (
-                                <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
-                              ))}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                                <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
+                              </div>
+                              <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
                             </div>
-                            <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
-                              Preview what's inside <ArrowRight className="w-4 h-4" />
-                            </span>
-                          </button>
-                        </RevealOnScroll>
-                      );
-                    })}
-                  </div>
-
-                  {!unlocked && remaining > 0 && (
-                    <div className="mt-12">
-                      <div className="text-center mb-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-crimson/40 bg-crimson/5">
-                          <Lock className="w-3.5 h-3.5 text-crimson" />
-                          <span className="font-case text-[10px] uppercase tracking-widest text-crimson">
-                            {remaining} more playbooks locked
+                          </div>
+                          <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-5">
+                            {(resource.tags || []).map((tag: string) => (
+                              <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                            ))}
+                          </div>
+                          <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
+                            Preview what's inside <ArrowRight className="w-4 h-4" />
                           </span>
-                        </div>
-                      </div>
-                      <AccessGate
-                        contentLabel="the playbooks"
-                        remainingCount={remaining}
-                        onUnlocked={() => setUnlocked(true)}
-                      />
-                    </div>
-                  )}
-                </>
+                        </button>
+                      </RevealOnScroll>
+                    );
+                  })}
+                </div>
               );
             })()}
 
