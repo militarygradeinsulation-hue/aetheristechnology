@@ -631,14 +631,21 @@ export default function OperatorAppPage() {
         </div>
 
         <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-amber/25 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              to="/home"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-amber/10 hover:bg-amber/20 border border-amber/40 text-amber font-mono text-[10px] uppercase tracking-widest transition-colors shrink-0"
+              aria-label="Back to main website"
+            >
+              <Home className="w-3 h-3" /> Home
+            </Link>
+            <div className="flex-1 min-w-0">
               <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber flex items-center gap-1.5">
                 <Target className="w-3 h-3" /> Aetheris · Operator
               </div>
               <div className="font-display text-lg font-bold leading-tight">Forensic Cockpit</div>
             </div>
-            <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground border border-amber/25 rounded-sm px-2 py-1 bg-background/60">
+            <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground border border-amber/25 rounded-sm px-2 py-1 bg-background/60 shrink-0">
               <span className="text-amber animate-pulse">●</span> LIVE
             </div>
           </div>
