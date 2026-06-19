@@ -4,6 +4,7 @@ import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, Hear
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AssistantPanel } from "./components/AssistantPanel";
+import aetherisLogo from "@/assets/aetheris-new-logo.png";
 
 interface AppLayoutProps {
   children: ReactNode;
