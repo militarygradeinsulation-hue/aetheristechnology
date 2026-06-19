@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse, Bot, History, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, HeartPulse, Bot, History, ArrowLeft, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AssistantPanel } from "./components/AssistantPanel";
@@ -81,6 +81,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </nav>
         <div className="p-4 border-t border-border space-y-3">
           <Link
+            to="/home"
+            className="flex items-center gap-2 text-sm text-amber hover:text-amber/80 transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Main Website
+          </Link>
+          <Link
             to="/admin"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -105,6 +112,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <span className="font-semibold text-sm">Revenue Recovery</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link to="/home" className="text-xs text-amber hover:text-amber/80 flex items-center gap-1">
+              <Home className="h-3 w-3" />
+              Home
+            </Link>
             <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" />
               Admin
