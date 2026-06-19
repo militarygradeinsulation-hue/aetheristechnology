@@ -4,6 +4,7 @@ import { LayoutDashboard, Settings, LogOut, Activity, FileSearch, Sparkles, Hear
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AssistantPanel } from "./components/AssistantPanel";
+import aetherisLogo from "@/assets/aetheris-new-logo.png";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -42,12 +43,19 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex">
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/40 backdrop-blur">
-        <div className="px-6 py-6 border-b border-border">
-          <Link to="/app/dashboard" className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            <span className="font-semibold tracking-tight">Revenue Recovery</span>
+        <div className="px-6 py-5 border-b border-border space-y-3">
+          <Link
+            to="/home"
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg bg-amber/10 hover:bg-amber/20 border border-amber/30 text-amber text-sm font-semibold transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Main Website
           </Link>
-          <p className="text-xs text-muted-foreground mt-1">CTOguy Engine</p>
+          <Link to="/app/dashboard" className="flex items-center gap-2">
+            <img src={aetherisLogo} alt="Aetheris" className="h-8 w-auto" />
+            <span className="font-semibold tracking-tight text-sm">Revenue Recovery</span>
+          </Link>
+          <p className="text-xs text-muted-foreground">CTOguy Engine</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           <NavLink to="/app/dashboard" className={navItem} end>
@@ -81,13 +89,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </nav>
         <div className="p-4 border-t border-border space-y-3">
           <Link
-            to="/home"
-            className="flex items-center gap-2 text-sm text-amber hover:text-amber/80 transition-colors"
-          >
-            <Home className="h-4 w-4" />
-            Main Website
-          </Link>
-          <Link
             to="/admin"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -106,23 +107,28 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       </aside>
 
       <main className="flex-1 min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/40">
-          <Link to="/app/dashboard" className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm">Revenue Recovery</span>
+        <header className="md:hidden border-b border-border bg-card/40">
+          <Link
+            to="/home"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-amber/10 border-b border-amber/30 text-amber text-xs font-semibold"
+          >
+            <Home className="h-3.5 w-3.5" />
+            Main Website
           </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/home" className="text-xs text-amber hover:text-amber/80 flex items-center gap-1">
-              <Home className="h-3 w-3" />
-              Home
+          <div className="flex items-center justify-between px-4 py-3">
+            <Link to="/app/dashboard" className="flex items-center gap-2">
+              <img src={aetherisLogo} alt="Aetheris" className="h-6 w-auto" />
+              <span className="font-semibold text-sm">Revenue Recovery</span>
             </Link>
-            <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" />
-              Admin
-            </Link>
-            <button onClick={handleSignOut} className="text-xs text-muted-foreground">
-              Sign out
-            </button>
+            <div className="flex items-center gap-3">
+              <Link to="/admin" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                <ArrowLeft className="h-3 w-3" />
+                Admin
+              </Link>
+              <button onClick={handleSignOut} className="text-xs text-muted-foreground">
+                Sign out
+              </button>
+            </div>
           </div>
         </header>
         <div className="p-6 md:p-10 max-w-6xl mx-auto">{children}</div>
