@@ -26,6 +26,21 @@ import industryLogistics from '@/assets/infographics/industry-logistics.jpg';
 import industryHealthcare from '@/assets/infographics/industry-healthcare.jpg';
 import industryFinance from '@/assets/infographics/industry-finance.jpg';
 import industrySaas from '@/assets/infographics/industry-saas.jpg';
+import industryAccounting from '@/assets/infographics/industry-accounting.jpg';
+import industryArchitecture from '@/assets/infographics/industry-architecture.jpg';
+import industryAutomotive from '@/assets/infographics/industry-automotive.jpg';
+import industryEducation from '@/assets/infographics/industry-education.jpg';
+import industryEcommerce from '@/assets/infographics/industry-ecommerce.jpg';
+import industryHomeServices from '@/assets/infographics/industry-home-services.jpg';
+import industryHospitality from '@/assets/infographics/industry-hospitality.jpg';
+import industryLegal from '@/assets/infographics/industry-legal.jpg';
+import industryCreative from '@/assets/infographics/industry-creative.jpg';
+import industryMedicalDental from '@/assets/infographics/industry-medical-dental.jpg';
+import industryProfessional from '@/assets/infographics/industry-professional.jpg';
+import industryRealEstate from '@/assets/infographics/industry-real-estate.jpg';
+import industryItServices from '@/assets/infographics/industry-it-services.jpg';
+import industryTravel from '@/assets/infographics/industry-travel.jpg';
+import industryWellness from '@/assets/infographics/industry-wellness.jpg';
 
 export const INFOGRAPHICS = {
   heroLeakingGauge,
@@ -56,4 +71,19 @@ export const INFOGRAPHICS = {
   industryHealthcare,
   industryFinance,
   industrySaas,
+  industryAccounting,
+  industryArchitecture,
+  industryAutomotive,
+  industryEducation,
+  industryEcommerce,
+  industryHomeServices,
+  industryHospitality,
+  industryLegal,
+  industryCreative,
+  industryMedicalDental,
+  industryProfessional,
+  industryRealEstate,
+  industryItServices,
+  industryTravel,
+  industryWellness,
 };
