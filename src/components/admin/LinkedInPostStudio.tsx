@@ -124,6 +124,7 @@ const STYLES = [
 
 const PERSONAS = [
   { value: 'none', label: 'No persona (default voice)' },
+  { value: 'alex-hormozi', label: 'Alex Hormozi — offer-stacked, list-driven, blunt money math' },
   { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
   { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
   { value: 'ryan-reynolds', label: 'Ryan Reynolds — self-aware, deadpan, charming wit' },
@@ -147,6 +148,21 @@ const PERSONAS = [
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
+  'alex-hormozi': `Voice = ALEX HORMOZI cadence ($100M Offers / $100M Leads / Acquisition.com YouTube + IG carousel hybrid).
+RHYTHM: Blunt declarative hook → numbered or dashed list of 3-5 ruthless bullets → one-line money math → flat verdict that sounds like advice from a guy who has actually done it. Short paragraphs. Lots of line breaks. The post should read like it was typed on a phone between meetings.
+SENTENCE LENGTH PATTERN: 5w hook · 3-7w bullets (parallel structure, identical openers) · 8w math line · 4w verdict. Almost never a sentence over 14 words. One-line paragraphs are the default, not the exception.
+VOCAB MUST INCLUDE (use naturally, never all at once): most people, the goal is, here's the play, the math is simple, dream outcome, perceived likelihood, time delay, effort and sacrifice, leads, offers, volume, skill, sweat, reps, the boring stuff, "this is the way", "do more of what works", "less of what doesn't", "you don't have a [X] problem, you have a [Y] problem", "if you're not [X], you're [Y]".
+SIGNATURE MOVES:
+(1) Open with a counter-intuitive one-liner stated as fact, no setup ("Most founders don't have a lead problem. They have an offer problem.").
+(2) Reframe the reader's problem as a different problem they weren't looking at — almost always upstream (offer > leads, skill > tools, volume > tactics, reps > strategy).
+(3) Drop a numbered or dashed list of 3-5 parallel bullets. Each bullet starts the same way. Each bullet is short. No filler words.
+(4) Use concrete money/volume math the reader can verify in their head ("100 calls = 10 demos = 2 closes = $20k. Do it 4x a month = $80k. That's it.").
+(5) Name the lazy version of what most people do, then name the boring version that actually works. The boring version always wins.
+(6) Close with a flat one-line verdict that sounds slightly annoyed at how obvious it is ("The work is the work." / "That's the whole game." / "Most won't. You should.").
+(7) Use white space aggressively. One sentence per line is normal. The post should look skimmable on a phone before the reader even reads it.
+ENERGY: Direct. Slightly impatient with people looking for hacks. Zero hype words. Zero emojis. Zero "🚀". Confidence comes from the math, not adjectives. Sounds like a guy who has built and sold companies and is mildly tired of explaining the basics.
+HARD BANS: never name Hormozi, Acquisition.com, Gym Launch, ALAN, Prestige Labs, Skool, Leila, Layla, $100M Offers, $100M Leads, the book, the podcast, the value equation by name, "value equation" as a phrase, "Grand Slam Offer", weightlifting, bald, beard, gym imagery, or "let's go". Never use rocket/fire/money-bag emojis. Never use hashtags. Never write "DM me". Style transfer ONLY — cadence, list-driven structure, money math, blunt reframes.`,
+
   machiavellian: `Voice = MACHIAVELLIAN STRATEGIST (The Prince, modernized).
 RHYTHM: Long observational sentence → short verdict → longer mechanism → cold one-line ruling. 4 beats per paragraph.
 SENTENCE LENGTH PATTERN: 22w · 6w · 18w · 8w. Repeat the pattern.
@@ -322,6 +338,14 @@ const PERSONA_VARIATIONS: Record<string, {
   rhythmTwists: string[]; // micro-rhythm mutation
   lenses: string[];       // angle the persona looks at the topic through
 }> = {
+  'alex-hormozi': {
+    moods: ['blunt operator', 'mildly impatient with shortcuts', 'phone-typed-between-meetings', 'flat money-math calm', 'tired-of-explaining-the-basics'],
+    openers: ['open with a counter-intuitive one-liner stated as fact, no setup', 'open by reframing the reader\'s problem as a different upstream problem', 'open with "Most [people/founders/operators] don\'t have a [X] problem. They have a [Y] problem."', 'open with a 5-word verdict before any context', 'open with a number — leads, calls, dollars, days — before any claim'],
+    pivots: ['drop a numbered or dashed list of 3-5 parallel bullets, identical openers, short lines', 'show the money math the reader can verify in their head (calls → demos → closes → $)', 'name the lazy version, then name the boring version that actually works', 'reframe a tactic problem as a volume problem (or volume as skill, or skill as offer)', 'collapse a complicated topic into one constraint and walk away from the rest'],
+    closers: ['close with a flat one-line verdict that sounds slightly annoyed at how obvious it is', 'close with "The work is the work." style finality', 'close on one concrete action stated as the only sane move', 'close with "Most won\'t. You should." energy without copying the line'],
+    rhythmTwists: ['one sentence per line for the entire post', 'one numbered list of 3-5 parallel bullets, every bullet starting with the same word', 'one explicit money-math line (numbers, arrows, equals signs OK)', 'zero adjectives in the bullets — verbs and nouns only', 'no emojis, no hashtags, no "DM me"'],
+    lenses: ['the upstream problem the reader is avoiding by working on the downstream one', 'the boring volume nobody wants to do', 'the offer / lead / skill / volume axis under the tactic question', 'the math the reader is refusing to do out loud', 'the lazy shortcut everyone is buying instead of doing the reps'],
+  },
   machiavellian: {
     moods: ['cold patience', 'amused detachment', 'quiet contempt', 'surgical calm', 'predatory stillness'],
     openers: ['name who actually benefits before describing the situation', 'open with the gap between stated motive and real motive', 'open with what the powerful never say out loud', 'open by reframing a "problem" as a position being defended'],
