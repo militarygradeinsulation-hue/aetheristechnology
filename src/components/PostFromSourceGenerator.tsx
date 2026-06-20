@@ -194,6 +194,8 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
             onClick={() => {
               setPosts([]);
               setIdeaPrompt('');
+              setPersona('none');
+
               setSourceId('');
               setCopiedIdx(null);
               toast({ title: 'Cleared' });
