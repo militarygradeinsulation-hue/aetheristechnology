@@ -83,7 +83,7 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
     setPosts([]);
     try {
       const { data, error } = await supabase.functions.invoke('generate-posts-from-source', {
-        body: { sourceType, sourceId: sourceType === 'idea' ? undefined : sourceId, ideaPrompt: sourceType === 'idea' ? ideaPrompt : undefined, count },
+        body: { sourceType, sourceId: sourceType === 'idea' ? undefined : sourceId, ideaPrompt: sourceType === 'idea' ? ideaPrompt : undefined, count, persona },
       });
       if (error || !data) throw new Error(error?.message || 'Failed');
       if (data.error) throw new Error(data.error);
