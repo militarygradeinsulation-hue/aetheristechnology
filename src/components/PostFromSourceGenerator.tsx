@@ -163,6 +163,23 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
           </div>
         )}
 
+        <div className="mb-4">
+          <Label>Voice / Personality</Label>
+          <select
+            value={persona}
+            onChange={(e) => setPersona(e.target.value)}
+            className="w-full mt-1 bg-background border border-input rounded-md px-3 py-2 text-sm"
+          >
+            {PERSONAS.map(p => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Pick a personality to write in. Same persona library as the comment reply generator — locks cadence, vocab, and rhythm to that voice.
+          </p>
+        </div>
+
+
         <div className="flex items-end gap-3 mb-5 flex-wrap">
           <div className="w-32">
             <Label>How many?</Label>
