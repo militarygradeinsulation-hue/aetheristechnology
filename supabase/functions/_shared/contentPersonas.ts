@@ -414,7 +414,7 @@ export const UNIVERSAL_TEXTURE_MOVES = [
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-const buildPersonaFreshnessBlock = (personaVal: string): string => {
+export const buildPersonaFreshnessBlock = (personaVal: string): string => {
   const v = PERSONA_VARIATIONS[personaVal];
   if (!v) return '';
   const mood = pick(v.moods);
@@ -445,38 +445,6 @@ const buildPersonaFreshnessBlock = (personaVal: string): string => {
   ].join('\n');
 };
 
-
-const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-
-export const buildPersonaFreshnessBlock = (personaVal: string): string => {
-  const v = PERSONA_VARIATIONS[personaVal];
-  if (!v) return '';
-  const mood = pick(v.moods);
-  const opener = pick(v.openers);
-  const pivot = pick(v.pivots);
-  const closer = pick(v.closers);
-  const twist = pick(v.rhythmTwists);
-  const lens = pick(v.lenses);
-  const energy = pick(UNIVERSAL_ENERGY_DIALS);
-  const entry = pick(UNIVERSAL_ENTRY_ANGLES);
-  const texture = pick(UNIVERSAL_TEXTURE_MOVES);
-  const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return [
-    '',
-    `▓▓ LIVE PERSONA FRESHNESS DIAL — variation seed #${seed} (THIS DRAFT ONLY) ▓▓`,
-    'These randomized picks are non-negotiable for this single draft. Treat each as a hard constraint, not a suggestion.',
-    `• MOOD: ${mood}.`,
-    `• LENS: ${lens}.`,
-    `• OPENING GAMBIT: ${opener}.`,
-    `• MID-POST PIVOT: ${pivot}.`,
-    `• CLOSER SHAPE: ${closer}.`,
-    `• RHYTHM TWIST: ${twist}.`,
-    `• ENERGY DIAL: ${energy}.`,
-    `• ENTRY ANGLE: ${entry}.`,
-    `• TEXTURE MOVE: ${texture}.`,
-    '',
-  ].join('\n');
-};
 
 export const buildPersonaDirective = (personaVal?: string | null): string => {
   if (!personaVal || personaVal === 'none') return '';
