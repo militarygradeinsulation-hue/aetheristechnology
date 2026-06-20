@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
+import { buildPersonaDirective, PERSONAS } from "../_shared/contentPersonas.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,7 +65,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { sourceType, sourceId, ideaPrompt, count = 3 } = await req.json();
+    const { sourceType, sourceId, ideaPrompt, count = 3, persona } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("AI not configured");
 
@@ -102,7 +104,13 @@ serve(async (req) => {
 
     const n = Math.max(1, Math.min(10, Number(count) || 3));
 
-    const prompt = `${STYLE_GUIDE}
+    const personaDirective = buildPersonaDirective(persona);
+    const personaLabel = persona && persona !== 'none'
+      ? (PERSONAS.find(p => p.value === persona)?.label ?? persona)
+      : null;
+
+    const prompt = `${personaDirective ? personaDirective + '\n\n' : ''}${STYLE_GUIDE}
+
 
 ═══════════════════════════════════════════════════════════
 SOURCE MATERIAL
@@ -137,7 +145,8 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are the AETHERIS forensic operator. Strictly enforce the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words). No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON.` },
+          { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are the AETHERIS forensic operator${personaLabel ? `, writing this post in the voice of ${personaLabel}. Persona cadence WINS over default voice rules where they conflict; forensic CONTENT (real numbers, real mechanism, real verdict) stays intact` : ''}. ${personaLabel ? 'Follow the PERSONA LOCK directive at the top of the user message verbatim.' : 'Strictly enforce the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words).'} No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON.` },
+
           { role: "user", content: prompt },
         ],
       }),
