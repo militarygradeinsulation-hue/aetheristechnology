@@ -11,12 +11,40 @@ import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 
 type SourceType = 'idea' | 'blog' | 'playbook';
 
+// Mirrors PERSONAS in src/components/admin/LinkedInPostStudio.tsx and
+// supabase/functions/_shared/contentPersonas.ts. Keep in sync.
+const PERSONAS: { value: string; label: string }[] = [
+  { value: 'none', label: 'No persona (default Aetheris forensic voice)' },
+  { value: 'alex-hormozi', label: 'Alex Hormozi — offer-stacked, list-driven, blunt money math' },
+  { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
+  { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
+  { value: 'ryan-reynolds', label: 'Ryan Reynolds — self-aware, deadpan, charming wit' },
+  { value: 'robin-williams', label: 'Robin Williams — rapid-fire, warm, associative riffs' },
+  { value: 'clint-eastwood', label: 'Clint Eastwood — spare, weathered, quiet menace' },
+  { value: 'hemingway', label: 'Hemingway — short, declarative, iceberg restraint' },
+  { value: 'aaron-sorkin', label: 'Aaron Sorkin — walk-and-talk cadence, rhythmic sparring' },
+  { value: 'anthony-bourdain', label: 'Anthony Bourdain — gritty, observational, unfiltered' },
+  { value: 'churchill', label: 'Churchill — gravitas, cadenced, resolve-forward' },
+  { value: 'denzel', label: 'Denzel Washington — measured, magnetic, moral weight' },
+  { value: 'steve-jobs', label: 'Steve Jobs — reductive, reverent, reality-distortion conviction' },
+  { value: 'tony-soprano', label: 'Tony Soprano — blunt, North-Jersey menace, family-first logic' },
+  { value: 'don-draper', label: 'Don Draper — mid-century pitch cadence, controlled gravity' },
+  { value: 'bill-burr', label: 'Bill Burr — frustrated everyman, rant-into-clarity' },
+  { value: 'naval-ravikant', label: 'Naval Ravikant — aphoristic, leverage-aware, calm tech-philosopher' },
+  { value: 'david-goggins', label: 'David Goggins — confrontational, accountability-forward' },
+  { value: 'jocko-willink', label: 'Jocko Willink — disciplined, ownership-first, command voice' },
+  { value: 'mr-rogers', label: 'Mr. Rogers — gentle, deliberate, radically kind clarity' },
+  { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
+  { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
+];
+
 interface GeneratedPost {
   angle: string;
   hook: string;
   caption: string;
   hashtags: string[];
 }
+
 
 export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: boolean }> = ({ adminMode = false, repMode = false }) => {
   const [sourceType, setSourceType] = useState<SourceType>('idea');
@@ -25,6 +53,8 @@ export const PostFromSourceGenerator: React.FC<{ adminMode?: boolean; repMode?: 
   const [blogs, setBlogs] = useState<{ id: string; title: string }[]>([]);
   const [playbooks, setPlaybooks] = useState<{ id: string; title: string }[]>([]);
   const [sourceId, setSourceId] = useState('');
+  const [persona, setPersona] = useState<string>('none');
+
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
