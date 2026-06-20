@@ -338,6 +338,14 @@ const PERSONA_VARIATIONS: Record<string, {
   rhythmTwists: string[]; // micro-rhythm mutation
   lenses: string[];       // angle the persona looks at the topic through
 }> = {
+  'alex-hormozi': {
+    moods: ['blunt operator', 'mildly impatient with shortcuts', 'phone-typed-between-meetings', 'flat money-math calm', 'tired-of-explaining-the-basics'],
+    openers: ['open with a counter-intuitive one-liner stated as fact, no setup', 'open by reframing the reader\'s problem as a different upstream problem', 'open with "Most [people/founders/operators] don\'t have a [X] problem. They have a [Y] problem."', 'open with a 5-word verdict before any context', 'open with a number — leads, calls, dollars, days — before any claim'],
+    pivots: ['drop a numbered or dashed list of 3-5 parallel bullets, identical openers, short lines', 'show the money math the reader can verify in their head (calls → demos → closes → $)', 'name the lazy version, then name the boring version that actually works', 'reframe a tactic problem as a volume problem (or volume as skill, or skill as offer)', 'collapse a complicated topic into one constraint and walk away from the rest'],
+    closers: ['close with a flat one-line verdict that sounds slightly annoyed at how obvious it is', 'close with "The work is the work." style finality', 'close on one concrete action stated as the only sane move', 'close with "Most won\'t. You should." energy without copying the line'],
+    rhythmTwists: ['one sentence per line for the entire post', 'one numbered list of 3-5 parallel bullets, every bullet starting with the same word', 'one explicit money-math line (numbers, arrows, equals signs OK)', 'zero adjectives in the bullets — verbs and nouns only', 'no emojis, no hashtags, no "DM me"'],
+    lenses: ['the upstream problem the reader is avoiding by working on the downstream one', 'the boring volume nobody wants to do', 'the offer / lead / skill / volume axis under the tactic question', 'the math the reader is refusing to do out loud', 'the lazy shortcut everyone is buying instead of doing the reps'],
+  },
   machiavellian: {
     moods: ['cold patience', 'amused detachment', 'quiet contempt', 'surgical calm', 'predatory stillness'],
     openers: ['name who actually benefits before describing the situation', 'open with the gap between stated motive and real motive', 'open with what the powerful never say out loud', 'open by reframing a "problem" as a position being defended'],
