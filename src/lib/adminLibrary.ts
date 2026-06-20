@@ -32,14 +32,14 @@ export async function saveToAdminLibrary(args: {
   return data?.item as AdminLibraryItem;
 }
 
-export async function listAdminLibrary(opts?: { toolType?: string; maxPages?: number }): Promise<AdminLibraryItem[]> {
+export async function listAdminLibrary(opts?: { toolType?: string; maxPages?: number; includeData?: boolean }): Promise<AdminLibraryItem[]> {
   const pageSize = 200; // server caps at 200
   const maxPages = opts?.maxPages ?? 5; // up to 1000 most recent
 
   // First page determines whether more exist
   const fetchPage = async (page: number) => {
     const { data, error } = await supabase.functions.invoke("admin-library", {
-      body: { action: "list", limit: pageSize, offset: page * pageSize, tool_type: opts?.toolType },
+      body: { action: "list", limit: pageSize, offset: page * pageSize, tool_type: opts?.toolType, include_data: opts?.includeData },
       headers: adminHeaders(),
     });
     if (error) throw error;
