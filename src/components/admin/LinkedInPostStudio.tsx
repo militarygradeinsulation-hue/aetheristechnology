@@ -870,8 +870,8 @@ export default function LinkedInPostStudio() {
   const loadResponseLibrary = useCallback(async () => {
     setLibraryLoading(true);
     try {
-      const items = await listAdminLibrary();
-      setResponseLibrary(items.filter(i => i.tool_type === 'linkedin_response'));
+      const items = await listAdminLibrary({ toolType: 'linkedin_response', includeData: true });
+      setResponseLibrary(items);
     } catch (e) {
       // silent
     } finally {
@@ -973,7 +973,7 @@ export default function LinkedInPostStudio() {
   // of tool/persona. Repetition prevention must use the whole archive, not only
   // the currently selected personality or one tool_type.
   const collectAllPastBodies = async (): Promise<Array<{ body: string; personas: string[]; type: string }>> => {
-    const items = await listAdminLibrary();
+    const items = await listAdminLibrary({ includeData: true });
     const textKeys = ['body', 'post', 'content', 'caption', 'draft', 'response', 'comment', 'text', 'generated', 'linkedinPost', 'copy', 'output'];
     const extractBody = (out: unknown): string => {
       if (typeof out === 'string') return out;
