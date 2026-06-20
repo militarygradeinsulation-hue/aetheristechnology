@@ -124,6 +124,7 @@ const STYLES = [
 
 const PERSONAS = [
   { value: 'none', label: 'No persona (default voice)' },
+  { value: 'alex-hormozi', label: 'Alex Hormozi — offer-stacked, list-driven, blunt money math' },
   { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
   { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
   { value: 'ryan-reynolds', label: 'Ryan Reynolds — self-aware, deadpan, charming wit' },
