@@ -367,7 +367,10 @@ serve(async (req) => {
       if (error) throw error;
 
       // Hide leads matching admin blocklist (schools, etc.) from the rep pool/drip.
-      const blockedKw = await loadBlockedKeywords(supabase);
+      // Do NOT apply the blocklist to a rep's own claimed leads ("mine") — once they've
+      // hunted/claimed a lead it belongs to them even if a stray keyword (e.g. "student"
+      // in a property dev's notes) would otherwise trip the school filter.
+      const blockedKw = view === "mine" ? [] : await loadBlockedKeywords(supabase);
       const filtered = (data || []).filter((l: any) => !isLeadBlocked(l, blockedKw));
 
       // Prioritize leads that have a website URL (scannable businesses surface first)
