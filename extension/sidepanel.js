@@ -688,9 +688,27 @@ window.__aetherisReadLeak = (id) => {
 function renderFix() {
   const out = $("fix-list");
   const empty = $("fix-empty");
-  if (!state.lastScan || !state.lastScan.leaks?.length) { empty.classList.remove("hidden"); out.innerHTML = ""; return; }
+  const toolbar = $("fix-toolbar");
+  if (!state.lastScan || !state.lastScan.leaks?.length) {
+    empty.classList.remove("hidden"); out.innerHTML = "";
+    if (toolbar) toolbar.innerHTML = "";
+    return;
+  }
   empty.classList.add("hidden");
   const leaks = state.lastScan.leaks || [];
+  const fixableCount = leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)).length;
+  if (toolbar) {
+    toolbar.innerHTML = `
+      <button id="fix-all-now" class="primary" style="background:var(--amber);color:#000" ${fixableCount ? "" : "disabled"}>
+        ⚡ Fix ALL ${fixableCount ? `(${fixableCount})` : ""} now
+      </button>
+      <button id="fix-read-all" class="ghost">🔊 Read all findings</button>
+      <button id="fix-read-stop" class="ghost">⏹ Stop reading</button>
+    `;
+    $("fix-all-now")?.addEventListener("click", (e) => fixAllNow(e.currentTarget));
+    $("fix-read-all")?.addEventListener("click", () => tts.readAll(leaks));
+    $("fix-read-stop")?.addEventListener("click", () => tts.stop());
+  }
   out.innerHTML = leaks.map((l, i) => {
     const fixable = hasInPageFix(l);
     const revertId = state.revertById.get(l.id);
@@ -700,7 +718,8 @@ function renderFix() {
         <div class="muted" style="margin-bottom:8px">${escapeHtml(l.why || "")}</div>
         <div class="leak-fix" style="margin-bottom:8px"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
         <div class="row" style="flex-wrap:wrap">
-          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
+          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}" title="Snap the live page to this area">📍 Snap to area</button>` : ""}
+          <button class="ghost" data-read="${escapeAttr(l.id)}" title="Read this finding aloud">🔊 Read</button>
           ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>` : ""}
           ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Undo this fix</button><span class="applied">✓ Applied</span>` : ""}
           <button class="ghost" data-copy-fix="${escapeAttr(l.id)}">Copy fix</button>
@@ -710,6 +729,7 @@ function renderFix() {
       </div>`;
   }).join("");
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
     b.disabled = true; b.textContent = "Applying…";
