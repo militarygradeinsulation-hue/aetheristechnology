@@ -61,6 +61,9 @@
     <section class="panel" id="tab-scan">
       <div class="row" style="flex-wrap:wrap;gap:6px">
         <button id="scan-run" class="primary">Run Forensic Scan</button>
+        <button id="scan-fix-all" class="primary" style="background:var(--amber);color:#000" title="Apply every safe in-page fix at once. No review.">⚡ Fix ALL issues</button>
+        <button id="scan-read-all" class="ghost" title="Read every finding aloud">🔊 Read all</button>
+        <button id="scan-read-stop" class="ghost hidden" title="Stop reading">⏹ Stop</button>
         <button id="scan-clear" class="ghost" title="Clear this scan, remove overlays, and undo preview fixes">Clear / Start Over</button>
         <button id="scan-deepen" class="ghost" title="AI dossier on these findings">Deepen (Detective)</button>
         <button id="scan-contradictions" class="ghost" title="Find brand contradictions on this page">Contradictions</button>
@@ -109,6 +112,7 @@
     <!-- FIX -->
     <section class="panel" id="tab-fix">
       <div class="empty" id="fix-empty">Run a scan first. Leaks that can be patched in-page will appear here.</div>
+      <div id="fix-toolbar" class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
       <div id="fix-list"></div>
     </section>
 
