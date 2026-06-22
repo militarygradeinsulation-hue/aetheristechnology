@@ -206,6 +206,7 @@ const App = () => (
                       <Route path="/marketing-audit-vs-revenue-audit" element={<AuthorityArticlePage />} />
                       <Route path="/competitor-analysis" element={<AuthorityArticlePage />} />
                       <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
+                      <Route path="/report/:scanId/ask" element={<ForensicReportAskPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
