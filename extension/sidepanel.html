@@ -277,6 +277,15 @@
       <div class="card">
         <div class="card-title">HubSpot CRM Autopsy</div>
         <div class="muted" style="margin-bottom:8px">No API key needed. Reads the HubSpot tab you have open, or uses your session cookie to pull pipelines directly. Then runs the same leak detectors we use in the operator backend.</div>
+
+        <label class="li-lbl" for="crm-access-code">Access code (rep code or client unlock code)</label>
+        <div class="row" style="gap:6px;align-items:center;margin-bottom:8px">
+          <input id="crm-access-code" type="text" placeholder="e.g. JOSEPH-OPS or client unlock code" autocomplete="off" spellcheck="false" style="flex:1;text-transform:uppercase" />
+          <button id="crm-code-save" class="ghost" type="button" title="Save this code for future sessions">Save</button>
+          <button id="crm-code-clear" class="ghost" type="button" title="Forget the saved code">Forget</button>
+        </div>
+        <div id="crm-code-status" class="muted" style="font-size:11px;margin-bottom:8px"></div>
+
         <div class="row" style="flex-wrap:wrap;gap:6px">
           <button id="crm-scrape" class="primary" title="Read what's on the open HubSpot tab">Scan visible HubSpot tab</button>
           <button id="crm-pull-deals" class="ghost" title="Pull deal pipeline via your HubSpot session">Pull deals (session)</button>
