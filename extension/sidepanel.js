@@ -1333,13 +1333,57 @@ $("scan-contacts")?.addEventListener("click", runFindContacts);
 const SB_FN = (name) => `${SUPABASE_URL}/functions/v1/${name}`;
 
 async function getAccessCode() {
+  // 1) Prefer whatever is currently typed in the always-visible CRM input
+  const input = $("crm-access-code");
+  const typed = (input?.value || "").trim().toUpperCase();
+  if (typed) {
+    await chrome.storage.local.set({ aetherisAccessCode: typed });
+    return typed;
+  }
+  // 2) Fall back to saved code
   const { aetherisAccessCode } = await chrome.storage.local.get("aetherisAccessCode");
-  if (aetherisAccessCode) return aetherisAccessCode;
-  const code = (prompt("Enter your rep code or client unlock code to use HubSpot reader + Auto-Fix:") || "").trim().toUpperCase();
-  if (!code) return null;
+  if (aetherisAccessCode) {
+    if (input && !input.value) input.value = aetherisAccessCode;
+    return aetherisAccessCode;
+  }
+  // 3) Last resort: prompt + focus the input so they can change it later
+  const code = (prompt("Enter your rep code or client unlock code:") || "").trim().toUpperCase();
+  if (!code) { input?.focus(); return null; }
   await chrome.storage.local.set({ aetherisAccessCode: code });
+  if (input) input.value = code;
+  setCrmCodeStatus(`Saved code: ${code}`);
   return code;
 }
+
+function setCrmCodeStatus(msg) {
+  const el = $("crm-code-status"); if (el) el.textContent = msg || "";
+}
+
+// Hydrate the CRM code input on load and wire Save / Forget
+(async () => {
+  const input = $("crm-access-code"); if (!input) return;
+  const { aetherisAccessCode } = await chrome.storage.local.get("aetherisAccessCode");
+  if (aetherisAccessCode) { input.value = aetherisAccessCode; setCrmCodeStatus(`Using saved code: ${aetherisAccessCode}`); }
+  else { setCrmCodeStatus("No code saved yet. Type one above to use the HubSpot tools."); }
+  input.addEventListener("input", () => {
+    input.value = input.value.toUpperCase();
+    setCrmCodeStatus(input.value ? `Code ready: ${input.value} (not saved yet)` : "No code entered.");
+  });
+  $("crm-code-save")?.addEventListener("click", async () => {
+    const v = (input.value || "").trim().toUpperCase();
+    if (!v) { setCrmCodeStatus("Type a code first."); return; }
+    await chrome.storage.local.set({ aetherisAccessCode: v });
+    input.value = v;
+    setCrmCodeStatus(`Saved code: ${v}`);
+    toast("Access code saved.");
+  });
+  $("crm-code-clear")?.addEventListener("click", async () => {
+    await chrome.storage.local.remove("aetherisAccessCode");
+    input.value = "";
+    setCrmCodeStatus("Saved code cleared.");
+    toast("Forgotten.");
+  });
+})();
 
 async function callBridge(payload) {
   const r = await fetch(SB_FN("extension-hubspot-bridge"), {
