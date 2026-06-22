@@ -75,6 +75,8 @@ const StrategicQuestionEngine = lazy(() =>
   import("@/components/StrategicQuestionEngine").then(m => ({ default: m.StrategicQuestionEngine })));
 const DetectiveModeStandalone = lazy(() =>
   import("@/components/DetectiveModeStandalone").then(m => ({ default: m.DetectiveModeStandalone })));
+const ForensicScanAllPanel = lazy(() =>
+  import("@/components/ForensicScanAllPanel").then(m => ({ default: m.ForensicScanAllPanel })));
 
 const AllInOneGenerator = lazy(() =>
   import("@/components/AllInOneGenerator").then(m => ({ default: m.AllInOneGenerator })));
