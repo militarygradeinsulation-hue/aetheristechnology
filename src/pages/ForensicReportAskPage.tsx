@@ -46,7 +46,7 @@ export default function ForensicReportAskPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SEOHead title="Ask this report — Aetheris Business Forensics" description="Conversational AI over your forensic audit." noindex />
+      <SEOHead title="Ask this report — Aetheris Business Forensics" description="Conversational AI over your forensic audit."/>
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-4">
           <div className="text-xs uppercase tracking-widest text-amber-500">Aetheris · Smart PDF Chat</div>
