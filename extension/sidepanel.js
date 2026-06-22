@@ -600,6 +600,90 @@ function appendBubble(role, text) {
 
 renderOperatorLiveActions();
 
+// ---------------- Read Aloud (Web Speech) ----------------
+const tts = {
+  queue: [],
+  speaking: false,
+  pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    return vs.find((v) => /en[-_]US/i.test(v.lang) && /Google|Natural|Neural|Samantha|Daniel/i.test(v.name))
+      || vs.find((v) => /^en/i.test(v.lang)) || vs[0] || null;
+  },
+  speak(text, onEnd) {
+    if (!text) { onEnd && onEnd(); return; }
+    try {
+      const u = new SpeechSynthesisUtterance(String(text));
+      const v = this.pickVoice(); if (v) u.voice = v;
+      u.rate = 1.05; u.pitch = 1; u.volume = 1;
+      u.onend = () => { this.speaking = false; onEnd && onEnd(); };
+      u.onerror = () => { this.speaking = false; onEnd && onEnd(); };
+      this.speaking = true;
+      speechSynthesis.speak(u);
+    } catch { onEnd && onEnd(); }
+  },
+  stop() {
+    try { speechSynthesis.cancel(); } catch {}
+    this.queue = []; this.speaking = false;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.add("hidden");
+  },
+  readLeak(leak) {
+    this.stop();
+    const line = `${leak.title}. ${leak.why || ""}. Fix: ${leak.fix || ""}.`;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.remove("hidden");
+    this.speak(line, () => { if (stopBtn) stopBtn.classList.add("hidden"); });
+  },
+  readAll(leaks) {
+    this.stop();
+    if (!leaks?.length) return;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.remove("hidden");
+    let i = 0;
+    const next = () => {
+      if (i >= leaks.length) { if (stopBtn) stopBtn.classList.add("hidden"); return; }
+      const l = leaks[i++];
+      const line = `Finding ${i}. ${l.title}. ${l.why || ""}. Fix: ${l.fix || ""}.`;
+      this.speak(line, next);
+    };
+    next();
+  },
+};
+// Warm up voices list (Chrome lazy-loads them)
+try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch {}
+
+// ---------------- Fix ALL ----------------
+async function fixAllNow(btn) {
+  if (!state.lastScan?.leaks?.length) { toast("Run a scan first."); return; }
+  const targets = state.lastScan.leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id));
+  if (!targets.length) { toast("Nothing left to auto-fix."); return; }
+  const orig = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = `Fixing 0 / ${targets.length}…`; }
+  let done = 0, ok = 0;
+  for (const leak of targets) {
+    const r = await applyLeakFix(leak.id, { silent: true, skipRender: true });
+    done++; if (r?.ok) ok++;
+    if (btn) btn.textContent = `Fixing ${done} / ${targets.length}…`;
+    await new Promise((res) => setTimeout(res, 120));
+  }
+  renderScan(); renderFix(); renderOperatorLiveActions();
+  toast(`Auto-fix complete: ${ok} / ${targets.length} applied.`);
+  if (btn) { btn.disabled = false; btn.textContent = orig || "⚡ Fix ALL issues"; }
+}
+
+// Wire scan-tab toolbar buttons (Fix All / Read All / Stop)
+(() => {
+  const fixAllBtn = $("scan-fix-all");
+  const readAllBtn = $("scan-read-all");
+  const stopBtn = $("scan-read-stop");
+  fixAllBtn && fixAllBtn.addEventListener("click", () => fixAllNow(fixAllBtn));
+  readAllBtn && readAllBtn.addEventListener("click", () => tts.readAll(state.lastScan?.leaks || []));
+  stopBtn && stopBtn.addEventListener("click", () => tts.stop());
+})();
+
+// Expose for inline handlers
+window.__aetherisReadLeak = (id) => {
+  const l = state.lastScan?.leaks?.find((x) => x.id === id);
+  if (l) tts.readLeak(l);
+};
+
 // ---------------- FIX tab ----------------
 function renderFix() {
   const out = $("fix-list");
