@@ -297,8 +297,9 @@ function renderScan() {
       <div class="leak-why">${escapeHtml(l.why || "")}</div>
       <div class="leak-fix"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
       <div class="leak-actions">
-        ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
-        ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
+        ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}" title="Snap the live page to this area">📍 Snap to area</button>` : ""}
+        <button class="ghost" data-read="${escapeAttr(l.id)}" title="Read this finding aloud">🔊 Read</button>
+        ${hasInPageFix(l) && !state.revertById.get(l.id) ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
         ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
         ${!fixable ? `<span class="fix-unavailable">Manual fix</span>` : ""}
         <button class="ghost" data-fix-tab="${escapeAttr(l.id)}">View fix buttons</button>
@@ -314,6 +315,7 @@ function renderScan() {
 function wireScanActions() {
   const out = $("scan-results");
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
     b.disabled = true; b.textContent = "Applying…";
@@ -344,16 +346,17 @@ function wireScanActions() {
   }));
 }
 
-async function applyLeakFix(id) {
+async function applyLeakFix(id, opts = {}) {
   const leak = state.lastScan?.leaks?.find((x) => x.id === id);
   if (!leak) return { ok: false, error: "Leak not found." };
+  // Snap the live page to the area we're about to change so the user sees it happen
+  const sel = leak.selectors?.[0];
+  if (sel) { try { await relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: sel }); } catch {} }
   const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
   if (r?.ok) {
     state.revertById.set(id, r.revertId);
-    toast(r.message || "Fix applied to live page.");
-    renderScan();
-    renderFix();
-    renderOperatorLiveActions();
+    if (!opts.silent) toast(r.message || "Fix applied to live page.");
+    if (!opts.skipRender) { renderScan(); renderFix(); renderOperatorLiveActions(); }
   }
   return r;
 }
@@ -599,13 +602,115 @@ function appendBubble(role, text) {
 
 renderOperatorLiveActions();
 
+// ---------------- Read Aloud (Web Speech) ----------------
+const tts = {
+  queue: [],
+  speaking: false,
+  pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    return vs.find((v) => /en[-_]US/i.test(v.lang) && /Google|Natural|Neural|Samantha|Daniel/i.test(v.name))
+      || vs.find((v) => /^en/i.test(v.lang)) || vs[0] || null;
+  },
+  speak(text, onEnd) {
+    if (!text) { onEnd && onEnd(); return; }
+    try {
+      const u = new SpeechSynthesisUtterance(String(text));
+      const v = this.pickVoice(); if (v) u.voice = v;
+      u.rate = 1.05; u.pitch = 1; u.volume = 1;
+      u.onend = () => { this.speaking = false; onEnd && onEnd(); };
+      u.onerror = () => { this.speaking = false; onEnd && onEnd(); };
+      this.speaking = true;
+      speechSynthesis.speak(u);
+    } catch { onEnd && onEnd(); }
+  },
+  stop() {
+    try { speechSynthesis.cancel(); } catch {}
+    this.queue = []; this.speaking = false;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.add("hidden");
+  },
+  readLeak(leak) {
+    this.stop();
+    const line = `${leak.title}. ${leak.why || ""}. Fix: ${leak.fix || ""}.`;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.remove("hidden");
+    this.speak(line, () => { if (stopBtn) stopBtn.classList.add("hidden"); });
+  },
+  readAll(leaks) {
+    this.stop();
+    if (!leaks?.length) return;
+    const stopBtn = $("scan-read-stop"); if (stopBtn) stopBtn.classList.remove("hidden");
+    let i = 0;
+    const next = () => {
+      if (i >= leaks.length) { if (stopBtn) stopBtn.classList.add("hidden"); return; }
+      const l = leaks[i++];
+      const line = `Finding ${i}. ${l.title}. ${l.why || ""}. Fix: ${l.fix || ""}.`;
+      this.speak(line, next);
+    };
+    next();
+  },
+};
+// Warm up voices list (Chrome lazy-loads them)
+try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch {}
+
+// ---------------- Fix ALL ----------------
+async function fixAllNow(btn) {
+  if (!state.lastScan?.leaks?.length) { toast("Run a scan first."); return; }
+  const targets = state.lastScan.leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id));
+  if (!targets.length) { toast("Nothing left to auto-fix."); return; }
+  const orig = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = `Fixing 0 / ${targets.length}…`; }
+  let done = 0, ok = 0;
+  for (const leak of targets) {
+    const r = await applyLeakFix(leak.id, { silent: true, skipRender: true });
+    done++; if (r?.ok) ok++;
+    if (btn) btn.textContent = `Fixing ${done} / ${targets.length}…`;
+    await new Promise((res) => setTimeout(res, 120));
+  }
+  renderScan(); renderFix(); renderOperatorLiveActions();
+  toast(`Auto-fix complete: ${ok} / ${targets.length} applied.`);
+  if (btn) { btn.disabled = false; btn.textContent = orig || "⚡ Fix ALL issues"; }
+}
+
+// Wire scan-tab toolbar buttons (Fix All / Read All / Stop)
+(() => {
+  const fixAllBtn = $("scan-fix-all");
+  const readAllBtn = $("scan-read-all");
+  const stopBtn = $("scan-read-stop");
+  fixAllBtn && fixAllBtn.addEventListener("click", () => fixAllNow(fixAllBtn));
+  readAllBtn && readAllBtn.addEventListener("click", () => tts.readAll(state.lastScan?.leaks || []));
+  stopBtn && stopBtn.addEventListener("click", () => tts.stop());
+})();
+
+// Expose for inline handlers
+window.__aetherisReadLeak = (id) => {
+  const l = state.lastScan?.leaks?.find((x) => x.id === id);
+  if (l) tts.readLeak(l);
+};
+
 // ---------------- FIX tab ----------------
 function renderFix() {
   const out = $("fix-list");
   const empty = $("fix-empty");
-  if (!state.lastScan || !state.lastScan.leaks?.length) { empty.classList.remove("hidden"); out.innerHTML = ""; return; }
+  const toolbar = $("fix-toolbar");
+  if (!state.lastScan || !state.lastScan.leaks?.length) {
+    empty.classList.remove("hidden"); out.innerHTML = "";
+    if (toolbar) toolbar.innerHTML = "";
+    return;
+  }
   empty.classList.add("hidden");
   const leaks = state.lastScan.leaks || [];
+  const fixableCount = leaks.filter((l) => hasInPageFix(l) && !state.revertById.has(l.id)).length;
+  if (toolbar) {
+    toolbar.innerHTML = `
+      <button id="fix-all-now" class="primary" style="background:var(--amber);color:#000" ${fixableCount ? "" : "disabled"}>
+        ⚡ Fix ALL ${fixableCount ? `(${fixableCount})` : ""} now
+      </button>
+      <button id="fix-read-all" class="ghost">🔊 Read all findings</button>
+      <button id="fix-read-stop" class="ghost">⏹ Stop reading</button>
+    `;
+    $("fix-all-now")?.addEventListener("click", (e) => fixAllNow(e.currentTarget));
+    $("fix-read-all")?.addEventListener("click", () => tts.readAll(leaks));
+    $("fix-read-stop")?.addEventListener("click", () => tts.stop());
+  }
   out.innerHTML = leaks.map((l, i) => {
     const fixable = hasInPageFix(l);
     const revertId = state.revertById.get(l.id);
@@ -615,7 +720,8 @@ function renderFix() {
         <div class="muted" style="margin-bottom:8px">${escapeHtml(l.why || "")}</div>
         <div class="leak-fix" style="margin-bottom:8px"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
         <div class="row" style="flex-wrap:wrap">
-          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
+          ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}" title="Snap the live page to this area">📍 Snap to area</button>` : ""}
+          <button class="ghost" data-read="${escapeAttr(l.id)}" title="Read this finding aloud">🔊 Read</button>
           ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Apply in-page fix</button>` : ""}
           ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">Undo this fix</button><span class="applied">✓ Applied</span>` : ""}
           <button class="ghost" data-copy-fix="${escapeAttr(l.id)}">Copy fix</button>
@@ -625,6 +731,7 @@ function renderFix() {
       </div>`;
   }).join("");
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
     b.disabled = true; b.textContent = "Applying…";
