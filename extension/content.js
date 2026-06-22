@@ -995,8 +995,10 @@
             .slice(0, 40).map((h) => h.textContent.trim()).filter(Boolean);
           const cards = Array.from(document.querySelectorAll("[data-test-id*='card'],[data-selenium-test*='card'],[class*='Card']"))
             .slice(0, 80).map((c) => (c.textContent || "").replace(/\s+/g, " ").trim().slice(0, 400)).filter(Boolean);
+          const portalId = (location.pathname.match(/^\/(?:contacts|objects|reports-list|crm|workflows|deals|companies|tickets|sales)\/(\d+)/) || [])[1] || null;
           sendResponse({
             url: location.href, title: document.title,
+            portalId,
             screen: location.pathname.split("/").filter(Boolean).slice(0, 3).join("/"),
             headings, rows: grabRows(document).slice(0, 200), cards: cards.slice(0, 60),
             visibleText: (document.body.innerText || "").slice(0, 8000),
