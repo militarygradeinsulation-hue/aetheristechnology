@@ -203,3 +203,9 @@ verify_jwt = false
 
 
 
+
+[functions.forensic-scan-all]
+verify_jwt = false
+
+[functions.forensic-report-chat]
+verify_jwt = false
