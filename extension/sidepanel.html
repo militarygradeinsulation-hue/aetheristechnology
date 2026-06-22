@@ -29,6 +29,7 @@
     <button class="tab" data-tab="autofix">Auto-Fix Site</button>
     <button class="tab" data-tab="growth">Growth</button>
     <button class="tab" data-tab="case">Case File</button>
+    <button class="tab" data-tab="golden">Golden Report</button>
   </nav>
 
   <main>
@@ -311,7 +312,29 @@
       <span class="dot"></span><span id="autopsy-status">Recording funnel autopsy…</span>
       <button id="autopsy-stop" class="primary">Stop</button>
     </div>
+
+    <!-- GOLDEN REPORT -->
+    <section class="panel" id="tab-golden">
+      <div class="card">
+        <div class="card-title">Forensic Scan All — Golden Report</div>
+        <div class="muted" style="margin-bottom:8px">
+          Runs every diagnostic against the current tab and builds the 14-chapter Smart PDF you can search or ask questions of.
+        </div>
+        <label class="li-lbl">Target URL</label>
+        <input id="golden-url" type="text" placeholder="https://example.com" />
+        <label class="li-lbl">Company (optional)</label>
+        <input id="golden-company" type="text" placeholder="Acme Inc." />
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button id="golden-run" class="primary">Run Scan All</button>
+          <button id="golden-open" class="ghost" disabled>Open Smart PDF Chat</button>
+        </div>
+        <div id="golden-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <div id="golden-progress" class="out" style="margin-top:8px"></div>
+        <div id="golden-report" class="out" style="margin-top:10px;max-height:60vh;overflow-y:auto"></div>
+      </div>
+    </section>
   </main>
+
 
   <footer class="cockpit-footer">
     <button id="autopsy-start" class="ghost">REC · Funnel Autopsy</button>

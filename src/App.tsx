@@ -77,6 +77,7 @@ const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
+const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -206,6 +207,7 @@ const App = () => (
                       <Route path="/marketing-audit-vs-revenue-audit" element={<AuthorityArticlePage />} />
                       <Route path="/competitor-analysis" element={<AuthorityArticlePage />} />
                       <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
+                      <Route path="/report/:scanId/ask" element={<ForensicReportAskPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

@@ -75,6 +75,8 @@ const StrategicQuestionEngine = lazy(() =>
   import("@/components/StrategicQuestionEngine").then(m => ({ default: m.StrategicQuestionEngine })));
 const DetectiveModeStandalone = lazy(() =>
   import("@/components/DetectiveModeStandalone").then(m => ({ default: m.DetectiveModeStandalone })));
+const ForensicScanAllPanel = lazy(() =>
+  import("@/components/ForensicScanAllPanel").then(m => ({ default: m.ForensicScanAllPanel })));
 
 const AllInOneGenerator = lazy(() =>
   import("@/components/AllInOneGenerator").then(m => ({ default: m.AllInOneGenerator })));
@@ -156,6 +158,11 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "detective", label: "Detective Mode", group: "Diagnostics", icon: Eye,
     accent: "320 70% 60%",
     render: () => wrap(<DetectiveModeStandalone />) },
+  { id: "forensic-scan-all", label: "Forensic Scan All (Golden Report)", group: "Diagnostics", icon: ScrollText,
+    accent: "0 78% 62%",
+    render: () => wrap(<ForensicScanAllPanel />) },
+
+
 
   // Content (cool spectrum — violet/cyan/teal/green)
   { id: "all-in-one", label: "All-In-One Generator", group: "Content", icon: Sparkles, fullPagePath: "/content-generator",

@@ -1560,3 +1560,129 @@ $("af-apply")?.addEventListener("click", async () => {
     setStatus("");
   });
 })();
+
+// ───────────────────────── GOLDEN REPORT (Scan All) ─────────────────────────
+(function () {
+  const tab = document.getElementById("tab-golden");
+  if (!tab) return;
+  const urlInput = document.getElementById("golden-url");
+  const companyInput = document.getElementById("golden-company");
+  const runBtn = document.getElementById("golden-run");
+  const openBtn = document.getElementById("golden-open");
+  const statusEl = document.getElementById("golden-status");
+  const progEl = document.getElementById("golden-progress");
+  const reportEl = document.getElementById("golden-report");
+  let currentScanId = null;
+  let pollTimer = null;
+
+  // Prefill from active tab
+  try {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs?.[0]?.url && !urlInput.value) urlInput.value = tabs[0].url;
+    });
+  } catch (_) {}
+
+  const STAGES = [
+    ["queued",       "Queued"],
+    ["site",         "Site crawl + branding"],
+    ["scan_website", "Website forensics"],
+    ["friction",     "Brand contradictions + friction audit"],
+    ["crm",          "CRM / pipeline forensics"],
+    ["synth",        "Synthesizing 14-chapter report"],
+  ];
+
+  function renderProgress(stageStatus) {
+    progEl.innerHTML = STAGES.map(([k, label]) => {
+      const st = stageStatus?.[k]?.state || "pending";
+      const dot = st === "done" ? "✓" : st === "running" ? "…" : st === "skipped" ? "—" : "·";
+      const color = st === "done" ? "#4ade80" : st === "running" ? "#f59e0b" : "#666";
+      return `<div style="font-size:11px;color:${color};font-family:monospace">${dot} ${label}</div>`;
+    }).join("");
+  }
+
+  function renderReport(row) {
+    const r = row.report;
+    if (!r) { reportEl.innerHTML = ""; return; }
+    const chapters = r.chapters || [];
+    const top = (r.top_leaks || []).map((l) =>
+      `<li><b>#${l.rank}</b> ${escapeHtml(l.name)} <span style="color:#888">$${(l.dollars_low||0).toLocaleString()}–$${(l.dollars_high||0).toLocaleString()}</span></li>`
+    ).join("");
+    const chs = chapters.map((c) => `
+      <details style="border:1px solid #2a2a35;border-radius:4px;margin:4px 0;padding:6px 8px">
+        <summary style="cursor:pointer"><b style="color:#f59e0b;font-family:monospace">CH${String(c.no).padStart(2,"0")}</b> ${escapeHtml(c.title)}</summary>
+        <div style="margin-top:6px;font-size:12px;line-height:1.5">
+          ${c.verdict ? `<div style="color:#dc4646;font-style:italic">${escapeHtml(c.verdict)}</div>` : ""}
+          ${c.what_we_found ? `<div style="margin-top:4px"><b style="color:#f59e0b;font-size:10px">WHAT WE FOUND</b><div>${escapeHtml(c.what_we_found)}</div></div>` : ""}
+          ${c.why_its_leaking ? `<div style="margin-top:4px"><b style="color:#f59e0b;font-size:10px">WHY IT'S LEAKING</b><div>${escapeHtml(c.why_its_leaking)}</div></div>` : ""}
+          ${c.what_its_costing ? `<div style="margin-top:4px"><b style="color:#f59e0b;font-size:10px">COST (USD)</b><div>${escapeHtml(c.what_its_costing)}</div></div>` : ""}
+        </div>
+      </details>
+    `).join("");
+    reportEl.innerHTML = `
+      <h3 style="margin:8px 0 4px">${escapeHtml(row.company_name || row.target_url)}</h3>
+      <div style="font-size:11px;color:#aaa;margin-bottom:8px">Executive Summary</div>
+      <div style="white-space:pre-wrap;font-size:12px;line-height:1.5">${escapeHtml(r.executive_summary || "")}</div>
+      ${top ? `<div style="margin-top:10px"><b style="color:#f59e0b;font-size:11px">TOP LEAKS</b><ol style="font-size:12px">${top}</ol></div>` : ""}
+      <div style="margin-top:10px"><b style="color:#f59e0b;font-size:11px">INDEX — 14 CHAPTERS</b>${chs}</div>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  async function pollOnce() {
+    if (!currentScanId) return;
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${currentScanId}`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+    });
+    const row = await r.json();
+    if (row?.id) {
+      renderProgress(row.stage_status);
+      statusEl.textContent = `Status: ${row.status}`;
+      if (row.status === "completed") {
+        renderReport(row);
+        openBtn.disabled = false;
+        if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+        return;
+      }
+      if (row.status === "failed") {
+        statusEl.textContent = `Failed: ${row.error_message || "unknown"}`;
+        if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+        return;
+      }
+    }
+    pollTimer = setTimeout(pollOnce, 3000);
+  }
+
+  runBtn?.addEventListener("click", async () => {
+    const url = urlInput.value.trim();
+    if (!url) { statusEl.textContent = "Enter a URL first."; return; }
+    runBtn.disabled = true;
+    openBtn.disabled = true;
+    reportEl.innerHTML = "";
+    progEl.innerHTML = "";
+    statusEl.textContent = "Starting…";
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+        body: JSON.stringify({ url, company: companyInput.value.trim() || undefined }),
+      });
+      const j = await r.json();
+      if (!j?.scan_id) throw new Error(j?.error || "no scan id");
+      currentScanId = j.scan_id;
+      statusEl.textContent = `Started. Scan ${currentScanId.slice(0, 8)}…`;
+      pollOnce();
+    } catch (e) {
+      statusEl.textContent = `Error: ${e.message || e}`;
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+
+  openBtn?.addEventListener("click", () => {
+    if (!currentScanId) return;
+    chrome.tabs.create({ url: `https://aetheris.technology/report/${currentScanId}/ask` });
+  });
+})();

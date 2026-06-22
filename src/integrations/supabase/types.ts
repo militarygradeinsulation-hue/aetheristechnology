@@ -2487,6 +2487,60 @@ export type Database = {
         }
         Relationships: []
       }
+      forensic_scans: {
+        Row: {
+          company_name: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          hubspot_account_id: string | null
+          id: string
+          raw_findings: Json
+          rep_code: string | null
+          report: Json | null
+          requested_by: string | null
+          requester_kind: string
+          stage_status: Json
+          status: string
+          target_url: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          hubspot_account_id?: string | null
+          id?: string
+          raw_findings?: Json
+          rep_code?: string | null
+          report?: Json | null
+          requested_by?: string | null
+          requester_kind?: string
+          stage_status?: Json
+          status?: string
+          target_url: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          hubspot_account_id?: string | null
+          id?: string
+          raw_findings?: Json
+          rep_code?: string | null
+          report?: Json | null
+          requested_by?: string | null
+          requester_kind?: string
+          stage_status?: Json
+          status?: string
+          target_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generated_playbooks: {
         Row: {
           created_at: string
