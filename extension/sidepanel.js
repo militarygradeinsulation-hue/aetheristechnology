@@ -1410,10 +1410,21 @@ function renderCrmResult(data) {
   if (data?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(data.error)}</div>`; return; }
   const leaks = Array.isArray(data?.leaks) ? data.leaks : [];
   const total = data?.totalExposureUSD ? `$${Number(data.totalExposureUSD).toLocaleString()}` : "—";
+  if (data?.portalId) state.hsPortalId = data.portalId;
   out.innerHTML = `
     <div class="meta"><b>${escapeHtml(data?.summary || "")}</b><br/>
-      <span class="muted">Total exposure: ${total} · ${leaks.length} leak${leaks.length === 1 ? "" : "s"} found · Access: ${escapeHtml(data?.accessKind || "")}</span></div>
-    ${leaks.map((l) => `
+      <span class="muted">Total exposure: ${total} · ${leaks.length} leak${leaks.length === 1 ? "" : "s"} found · Access: ${escapeHtml(data?.accessKind || "")}${state.hsPortalId ? " · Portal " + escapeHtml(state.hsPortalId) : ""}</span></div>
+    ${leaks.map((l, i) => {
+      const objType = (l.objectType && HS_OBJ_TYPE_ID[l.objectType]) ? l.objectType : "contacts";
+      const ids = Array.isArray(l.recordIds) ? l.recordIds.filter(Boolean).slice(0, 10) : [];
+      const presetPatch = l.fixAction?.op === "patch" && l.fixAction?.patch ? JSON.stringify(l.fixAction.patch) : "";
+      const idChips = ids.map((id) => `
+        <span class="chip" style="display:inline-flex;gap:4px;align-items:center;margin:2px 4px 2px 0;padding:2px 6px;border:1px solid #444;border-radius:6px;font-size:11px">
+          <code>${escapeHtml(String(id))}</code>
+          <a href="#" onclick="event.preventDefault();crmOpenRecord('${escapeHtml(objType)}','${escapeHtml(String(id))}')">view</a>
+          <a href="#" onclick="event.preventDefault();crmEditRecord('${escapeHtml(objType)}','${escapeHtml(String(id))}'${presetPatch ? `, ${presetPatch.replace(/'/g, "\\'")}` : ""})">edit</a>
+        </span>`).join("");
+      return `
       <div class="bubble">
         <div style="display:flex;justify-content:space-between;gap:8px">
           <b>${escapeHtml(l.title || "")}</b>
@@ -1421,7 +1432,10 @@ function renderCrmResult(data) {
         </div>
         <div class="muted" style="font-size:11px;margin-top:4px">${escapeHtml(l.evidence || "")}</div>
         <div style="margin-top:4px"><b>Fix:</b> ${escapeHtml(l.fix || "")}</div>
-      </div>`).join("")}
+        ${ids.length ? `<div style="margin-top:6px"><span class="muted" style="font-size:11px">Records (${objType}):</span><br/>${idChips}</div>` : `<div class="muted" style="font-size:11px;margin-top:6px">No specific record IDs returned. Pull deals/contacts via session to enable per-record view/edit.</div>`}
+        ${presetPatch ? `<div style="margin-top:6px"><button class="btn small" onclick='crmEditRecord("${escapeHtml(objType)}","${escapeHtml(String(ids[0]||""))}", ${presetPatch})'>Apply fix to ${escapeHtml(String(ids[0]||"first"))}</button></div>` : ""}
+      </div>`;
+    }).join("")}
     ${data?.repScript ? `
       <div class="bubble">
         <b>Rep script</b>
