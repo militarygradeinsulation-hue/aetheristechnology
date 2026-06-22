@@ -297,8 +297,9 @@ function renderScan() {
       <div class="leak-why">${escapeHtml(l.why || "")}</div>
       <div class="leak-fix"><b>FIX:</b> ${escapeHtml(l.fix || "")}</div>
       <div class="leak-actions">
-        ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}">Show on page</button>` : ""}
-        ${fixable && !revertId ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
+        ${l.selectors?.length ? `<button class="ghost" data-focus="${escapeAttr(l.selectors[0])}" title="Snap the live page to this area">📍 Snap to area</button>` : ""}
+        <button class="ghost" data-read="${escapeAttr(l.id)}" title="Read this finding aloud">🔊 Read</button>
+        ${hasInPageFix(l) && !state.revertById.get(l.id) ? `<button class="primary" data-apply="${escapeAttr(l.id)}">Fix in-page</button>` : ""}
         ${revertId ? `<button class="ghost" data-revert="${escapeAttr(l.id)}">↶ Undo</button><span class="applied">✓ Applied</span>` : ""}
         ${!fixable ? `<span class="fix-unavailable">Manual fix</span>` : ""}
         <button class="ghost" data-fix-tab="${escapeAttr(l.id)}">View fix buttons</button>
@@ -314,6 +315,7 @@ function renderScan() {
 function wireScanActions() {
   const out = $("scan-results");
   out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
     b.disabled = true; b.textContent = "Applying…";
