@@ -77,6 +77,7 @@ const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
+const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
