@@ -344,16 +344,17 @@ function wireScanActions() {
   }));
 }
 
-async function applyLeakFix(id) {
+async function applyLeakFix(id, opts = {}) {
   const leak = state.lastScan?.leaks?.find((x) => x.id === id);
   if (!leak) return { ok: false, error: "Leak not found." };
+  // Snap the live page to the area we're about to change so the user sees it happen
+  const sel = leak.selectors?.[0];
+  if (sel) { try { await relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: sel }); } catch {} }
   const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
   if (r?.ok) {
     state.revertById.set(id, r.revertId);
-    toast(r.message || "Fix applied to live page.");
-    renderScan();
-    renderFix();
-    renderOperatorLiveActions();
+    if (!opts.silent) toast(r.message || "Fix applied to live page.");
+    if (!opts.skipRender) { renderScan(); renderFix(); renderOperatorLiveActions(); }
   }
   return r;
 }
