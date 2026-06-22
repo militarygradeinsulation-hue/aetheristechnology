@@ -132,7 +132,8 @@ serve(async (req) => {
     let parsed: any = {};
     try { parsed = JSON.parse(raw); } catch { parsed = { summary: raw, leaks: [] }; }
     if (!Array.isArray(parsed.leaks)) parsed.leaks = [];
-    return json({ ...parsed, accessKind: access.kind });
+    const portalId = String(body?.portalId || "").replace(/[^0-9]/g, "") || null;
+    return json({ ...parsed, accessKind: access.kind, portalId });
   } catch (e) {
     console.error("extension-hubspot-bridge error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown" }, 500);
