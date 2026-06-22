@@ -995,8 +995,10 @@
             .slice(0, 40).map((h) => h.textContent.trim()).filter(Boolean);
           const cards = Array.from(document.querySelectorAll("[data-test-id*='card'],[data-selenium-test*='card'],[class*='Card']"))
             .slice(0, 80).map((c) => (c.textContent || "").replace(/\s+/g, " ").trim().slice(0, 400)).filter(Boolean);
+          const portalId = (location.pathname.match(/^\/(?:contacts|objects|reports-list|crm|workflows|deals|companies|tickets|sales)\/(\d+)/) || [])[1] || null;
           sendResponse({
             url: location.href, title: document.title,
+            portalId,
             screen: location.pathname.split("/").filter(Boolean).slice(0, 3).join("/"),
             headings, rows: grabRows(document).slice(0, 200), cards: cards.slice(0, 60),
             visibleText: (document.body.innerText || "").slice(0, 8000),
@@ -1015,7 +1017,16 @@
             }
             const path = String(msg.path || "");
             if (!path.startsWith("/")) { sendResponse({ error: "path must start with /" }); return; }
-            const r = await fetch(`https://api.hubapi.com${path}`, { credentials: "include", headers: { Accept: "application/json" } });
+            const method = String(msg.method || "GET").toUpperCase();
+            const init = {
+              method,
+              credentials: "include",
+              headers: { Accept: "application/json", "Content-Type": "application/json" },
+            };
+            if (msg.body && method !== "GET" && method !== "HEAD") {
+              init.body = typeof msg.body === "string" ? msg.body : JSON.stringify(msg.body);
+            }
+            const r = await fetch(`https://api.hubapi.com${path}`, init);
             const text = await r.text();
             let json = null; try { json = JSON.parse(text); } catch {}
             sendResponse({ status: r.status, ok: r.ok, json, text: json ? null : text.slice(0, 4000) });

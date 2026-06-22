@@ -1410,10 +1410,21 @@ function renderCrmResult(data) {
   if (data?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(data.error)}</div>`; return; }
   const leaks = Array.isArray(data?.leaks) ? data.leaks : [];
   const total = data?.totalExposureUSD ? `$${Number(data.totalExposureUSD).toLocaleString()}` : "—";
+  if (data?.portalId) state.hsPortalId = data.portalId;
   out.innerHTML = `
     <div class="meta"><b>${escapeHtml(data?.summary || "")}</b><br/>
-      <span class="muted">Total exposure: ${total} · ${leaks.length} leak${leaks.length === 1 ? "" : "s"} found · Access: ${escapeHtml(data?.accessKind || "")}</span></div>
-    ${leaks.map((l) => `
+      <span class="muted">Total exposure: ${total} · ${leaks.length} leak${leaks.length === 1 ? "" : "s"} found · Access: ${escapeHtml(data?.accessKind || "")}${state.hsPortalId ? " · Portal " + escapeHtml(state.hsPortalId) : ""}</span></div>
+    ${leaks.map((l, i) => {
+      const objType = (l.objectType && HS_OBJ_TYPE_ID[l.objectType]) ? l.objectType : "contacts";
+      const ids = Array.isArray(l.recordIds) ? l.recordIds.filter(Boolean).slice(0, 10) : [];
+      const presetPatch = l.fixAction?.op === "patch" && l.fixAction?.patch ? JSON.stringify(l.fixAction.patch) : "";
+      const idChips = ids.map((id) => `
+        <span class="chip" style="display:inline-flex;gap:4px;align-items:center;margin:2px 4px 2px 0;padding:2px 6px;border:1px solid #444;border-radius:6px;font-size:11px">
+          <code>${escapeHtml(String(id))}</code>
+          <a href="#" onclick="event.preventDefault();crmOpenRecord('${escapeHtml(objType)}','${escapeHtml(String(id))}')">view</a>
+          <a href="#" onclick="event.preventDefault();crmEditRecord('${escapeHtml(objType)}','${escapeHtml(String(id))}'${presetPatch ? `, ${presetPatch.replace(/'/g, "\\'")}` : ""})">edit</a>
+        </span>`).join("");
+      return `
       <div class="bubble">
         <div style="display:flex;justify-content:space-between;gap:8px">
           <b>${escapeHtml(l.title || "")}</b>
@@ -1421,7 +1432,10 @@ function renderCrmResult(data) {
         </div>
         <div class="muted" style="font-size:11px;margin-top:4px">${escapeHtml(l.evidence || "")}</div>
         <div style="margin-top:4px"><b>Fix:</b> ${escapeHtml(l.fix || "")}</div>
-      </div>`).join("")}
+        ${ids.length ? `<div style="margin-top:6px"><span class="muted" style="font-size:11px">Records (${objType}):</span><br/>${idChips}</div>` : `<div class="muted" style="font-size:11px;margin-top:6px">No specific record IDs returned. Pull deals/contacts via session to enable per-record view/edit.</div>`}
+        ${presetPatch ? `<div style="margin-top:6px"><button class="btn small" onclick='crmEditRecord("${escapeHtml(objType)}","${escapeHtml(String(ids[0]||""))}", ${presetPatch})'>Apply fix to ${escapeHtml(String(ids[0]||"first"))}</button></div>` : ""}
+      </div>`;
+    }).join("")}
     ${data?.repScript ? `
       <div class="bubble">
         <b>Rep script</b>
@@ -1439,8 +1453,10 @@ async function crmScrape() {
   const accessCode = await getAccessCode(); if (!accessCode) { out.innerHTML = ""; return; }
   const scrape = await relayToTab({ type: "AETHERIS_HUBSPOT_SCRAPE" });
   if (scrape?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(scrape.error)}</div>`; return; }
+  state.hsPortalId = scrape.portalId || state.hsPortalId || null;
   out.innerHTML = `<div class="empty">Analyzing CRM leaks…</div>`;
-  const data = await callBridge({ accessCode, mode: "dom", url: scrape.url, payload: scrape });
+  const data = await callBridge({ accessCode, mode: "dom", url: scrape.url, portalId: state.hsPortalId, payload: scrape });
+  state.lastCrm = data;
   renderCrmResult(data);
 }
 
@@ -1454,9 +1470,41 @@ async function crmPullViaSession(kind) {
   if (res?.error) { out.innerHTML = `<div class="bubble err">${escapeHtml(res.error)}<br/><span class="muted">Tip: switch to a hubspot.com or app.hubspot.com tab first so the session cookie is available.</span></div>`; return; }
   if (!res?.ok) { out.innerHTML = `<div class="bubble err">HubSpot returned ${res?.status || "error"}. ${res?.json ? escapeHtml(JSON.stringify(res.json).slice(0,300)) : ""}</div>`; return; }
   out.innerHTML = `<div class="empty">Running forensic detectors on ${res.json?.results?.length || 0} ${kind}…</div>`;
-  const data = await callBridge({ accessCode, mode: "api", url: `hubapi.com${path}`, payload: { kind, results: res.json?.results || [], paging: res.json?.paging } });
+  // Try to grab portalId from the tab if we don't have it
+  if (!state.hsPortalId) {
+    const sc = await relayToTab({ type: "AETHERIS_HUBSPOT_SCRAPE" }).catch(() => null);
+    if (sc?.portalId) state.hsPortalId = sc.portalId;
+  }
+  const data = await callBridge({ accessCode, mode: "api", url: `hubapi.com${path}`, portalId: state.hsPortalId, payload: { kind, results: res.json?.results || [], paging: res.json?.paging } });
+  state.lastCrm = data;
   renderCrmResult(data);
 }
+
+// ---------- HubSpot view / edit helpers ----------
+const HS_OBJ_TYPE_ID = { contacts: "0-1", companies: "0-2", deals: "0-3", tickets: "0-5" };
+function hsRecordUrl(portalId, objectType, recordId) {
+  const typeId = HS_OBJ_TYPE_ID[objectType] || "0-1";
+  if (!portalId) return `https://app.hubspot.com/contacts/_/record/${typeId}/${recordId}`;
+  return `https://app.hubspot.com/contacts/${portalId}/record/${typeId}/${recordId}`;
+}
+window.crmOpenRecord = function (objectType, recordId) {
+  const url = hsRecordUrl(state.hsPortalId, objectType, recordId);
+  chrome.tabs.create({ url });
+};
+window.crmEditRecord = async function (objectType, recordId, presetPatch) {
+  const accessCode = await getAccessCode(); if (!accessCode) return;
+  let patch = presetPatch || null;
+  if (!patch) {
+    const raw = prompt(`Edit ${objectType} ${recordId}\nEnter JSON of properties to write, e.g.\n{"lifecyclestage":"opportunity"}`);
+    if (!raw) return;
+    try { patch = JSON.parse(raw); } catch { toast("Invalid JSON."); return; }
+  }
+  const path = `/crm/v3/objects/${objectType}/${recordId}`;
+  const res = await relayToTab({ type: "AETHERIS_HUBSPOT_API_FETCH", path, method: "PATCH", body: { properties: patch } });
+  if (res?.error) { toast(res.error); return; }
+  if (!res?.ok) { toast(`HubSpot ${res?.status || "error"}: ${res?.json?.message || res?.text || ""}`); return; }
+  toast(`Updated ${objectType} ${recordId}`);
+};
 
 $("crm-scrape")?.addEventListener("click", crmScrape);
 $("crm-pull-deals")?.addEventListener("click", () => crmPullViaSession("deals"));

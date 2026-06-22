@@ -36,14 +36,17 @@ OUTPUT STRICT JSON:
     "title": "string",
     "severity": "critical|warning|info",
     "category": "stalled|dead|followup|reactivation|missing_info|workflow|overload|proposal|other",
+    "objectType": "contacts|companies|deals|tickets|other",
+    "recordIds": ["hubspot record ids cited from the evidence (max 10 strings)"],
     "count": <integer or null>,
     "exposureUSD": <integer>,
     "evidence": "1-2 sentence quote/measurement from the data",
     "fix": "1 sentence: the exact next action",
     "fixAction": {
-      "op": "click|note|workflow|export|reassign|null",
+      "op": "click|note|workflow|export|reassign|patch|null",
       "target": "selector or HubSpot screen name",
-      "value": "what to do"
+      "value": "what to do",
+      "patch": { "property": "value to write back if op=patch" }
     } | null
   }],
   "repScript": {
@@ -129,7 +132,8 @@ serve(async (req) => {
     let parsed: any = {};
     try { parsed = JSON.parse(raw); } catch { parsed = { summary: raw, leaks: [] }; }
     if (!Array.isArray(parsed.leaks)) parsed.leaks = [];
-    return json({ ...parsed, accessKind: access.kind });
+    const portalId = String(body?.portalId || "").replace(/[^0-9]/g, "") || null;
+    return json({ ...parsed, accessKind: access.kind, portalId });
   } catch (e) {
     console.error("extension-hubspot-bridge error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown" }, 500);
