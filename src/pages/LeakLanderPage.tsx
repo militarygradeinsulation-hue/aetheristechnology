@@ -366,12 +366,12 @@ const LeakLanderPage: React.FC = () => {
                 <span className="h-4 w-px bg-white/15 hidden sm:block" />
                 <span className="inline-flex items-center gap-2 text-foreground">
                   <MapPin className="w-5 h-5 text-amber" />
-                  <span className="font-semibold">Indianapolis, IN</span>
+                  <span className="font-semibold">Noblesville, Indiana</span>
                 </span>
               </div>
             </div>
             <p className="mt-4 text-center text-xs font-mono tracking-[0.25em] text-muted-foreground uppercase">
-              Aetheris · Business Forensics
+              Aetheris · Business Forensics · aetheris.technology
             </p>
           </section>
         </div>
