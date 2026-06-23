@@ -30,6 +30,8 @@ Hard rules:
 - Respond to the author's specific point. Do not redirect to Joseph, Aetheris, business forensics, audits, diagnostics, leaks, operators, services, offers, or a website.
 - Do not mention Aetheris, businessforensics.tech, aetheris.technology, Joseph's company, what Joseph sells, or any CTA link.
 - Avoid canned openers and formulas: "What looks like", "The part people miss", "I see this in audits", "In my audits", "Diagnosis", "Most companies", "Strip the surface off", "forensic read".
+- Never open with generic crowd framing like "Most people", "Most founders", "Most operators", "Most companies", "People think", or "Everyone thinks". Start from the specific post, thread, object, claim, number, or contradiction in front of you.
+- Never close with canned endings like "That is the whole game", "That is the game", "The work is the work", "Most won't. You should", or any obvious mic-drop line you could have written before reading the post.
 - No empty compliment openers: "Great post", "Love this", "I agree", "Well said", "Spot on", "100%".
 - No emojis, hashtags, em dashes, bullets, markdown, labels, or quote marks.
 - Sound conversational, present, and specific. If the source is simple, keep the response simple.
@@ -48,7 +50,15 @@ const BANNED_OUTPUT_PATTERNS = [
   /\bwhat looks like\b/i,
   /\bthe part people miss\b/i,
   /\bmost companies\b/i,
+  /^\s*most\s+(people|founders|operators|businesses|companies|marketers|creators|teams)\b/i,
+  /^\s*people\s+(think|see|believe|assume)\b/i,
+  /^\s*everyone\s+(thinks|sees|believes|assumes)\b/i,
   /\bstrip the surface off\b/i,
+  /\bthat is the whole game\b/i,
+  /\bthat'?s the whole game\b/i,
+  /\bthat is the game\b/i,
+  /\bthe work is the work\b/i,
+  /\bmost won'?t\.\s*you should\b/i,
   /^\s*diagnosis\s*:/i,
   /great post/i,
   /love this/i,
@@ -103,6 +113,57 @@ function findViolation(text: string) {
   return BANNED_OUTPUT_PATTERNS.find((pattern) => pattern.test(text))?.toString() || null;
 }
 
+function sentenceList(text: string) {
+  return text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 3);
+}
+
+function normalizedWords(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^a-z0-9\s']/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function firstWords(text: string, n: number) {
+  return normalizedWords(sentenceList(text)[0] || text).slice(0, n).join(" ");
+}
+
+function lastWords(text: string, n: number) {
+  const sentences = sentenceList(text);
+  const final = sentences[sentences.length - 1] || text;
+  const words = normalizedWords(final);
+  return words.slice(Math.max(0, words.length - n)).join(" ");
+}
+
+function sharedNgram(a: string, b: string, n = 5) {
+  const aw = normalizedWords(a);
+  const bw = normalizedWords(b);
+  if (aw.length < n || bw.length < n) return "";
+  const grams = new Set<string>();
+  for (let i = 0; i <= aw.length - n; i++) grams.add(aw.slice(i, i + n).join(" "));
+  for (let i = 0; i <= bw.length - n; i++) {
+    const gram = bw.slice(i, i + n).join(" ");
+    if (grams.has(gram)) return gram;
+  }
+  return "";
+}
+
+function findStyleViolation(text: string, recentDrafts: string[]) {
+  const opener = firstWords(text, 4);
+  const closer = lastWords(text, 6);
+  for (const draft of recentDrafts.slice(0, 18)) {
+    if (opener && opener === firstWords(draft, 4)) return `repeated opener starter "${opener}"`;
+    if (closer && closer === lastWords(draft, 6)) return `repeated closing words "${closer}"`;
+    const overlap = sharedNgram(text, draft, 6);
+    if (overlap) return `reused phrase "${overlap}"`;
+  }
+  return null;
+}
+
 async function callAI({
   apiKey,
   system,
@@ -120,6 +181,8 @@ async function callAI({
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "google/gemini-3-flash-preview",
+        temperature: 1.08,
+        top_p: 0.97,
       messages: [
         { role: "system", content: system },
         { role: "user", content },
@@ -149,7 +212,7 @@ serve(async (req) => {
     const body = await req.json();
     const imageDataUrl = clean(body?.imageDataUrl, 10_000_000);
     const postText = clean(body?.postText);
-    const extraContext = clean(body?.extraContext, 4000);
+    const extraContext = clean(body?.extraContext || body?.direction, 4000);
     const mode = modeFrom(body?.mode);
     const isReplyToReply = body?.conversationKind === "reply_to_reply";
     const maxChars = capFor(mode, body?.maxChars, isReplyToReply);
@@ -187,12 +250,16 @@ serve(async (req) => {
           .map((s: string) => s.replace(/https?:\/\/\S+/gi, "").trim().slice(0, 1200))
       : [];
 
-    const personaKeys = Array.isArray(body?.personaKeys) ? body.personaKeys.filter(Boolean).join(" + ") : "";
-    const personaBlock = body?.personaActive || personaKeys
-      ? `\n\nPersonality/style selected: ${personaKeys || "custom"}. Use that only for rhythm and tone, not for canned content.`
+    const personaKeysArray = Array.isArray(body?.personaKeys) ? body.personaKeys.filter(Boolean).map(String) : [];
+    const personaKeys = personaKeysArray.join(" + ");
+    const alexRequested = personaKeysArray.includes("alex-hormozi") || /ALEX HORMOZI|alex-hormozi|Hormozi/i.test(extraContext);
+    const personaBlock = alexRequested
+      ? `\n\nLIVE STYLE LOCK: Alex Hormozi style transfer only. Never name him or his companies. This is NOT a template and NOT a rotating opener bank. Read the source and react to its exact claim. Use blunt arithmetic, compression, and operator impatience only where the source earns it. HARD OVERRIDE: do not begin with "Most people", "Most founders", "Most operators", "People think", or any generic crowd opener. Do not end with "That is the whole game", "The work is the work", or any repeated mic-drop closer. The first sentence must contain a specific noun, claim, number, acronym, or contradiction from the source. The last sentence must be newly written for this source, not reusable.`
+      : body?.personaActive || personaKeys
+      ? `\n\nPersonality/style selected: ${personaKeys || "custom"}. Use that only for rhythm and tone, not for canned content. Do not reuse any persona opener or closer from prior drafts.`
       : "";
     const memoryBlock = recentDrafts.length
-      ? `\n\nRecent saved drafts to avoid copying. Treat them as forbidden style memory, not examples:\n${recentDrafts.map((d, i) => `[${i + 1}] ${d}`).join("\n")}`
+      ? `\n\nRecent saved drafts to avoid copying. Treat them as forbidden style memory, not examples. You must not reuse their first 4 words, final 6 words, or any 6-word phrase:\n${recentDrafts.map((d, i) => `[${i + 1}] ${d}`).join("\n")}`
       : "";
     const directionBlock = extraContext ? `\n\nUser direction for this exact response:\n${extraContext}` : "";
 
@@ -201,7 +268,7 @@ serve(async (req) => {
       : `${hasImage ? "The attached image is a screenshot of someone's LinkedIn post." : `LinkedIn post to respond to:\n${postText}`}\n\n${MODE_SPECS[mode].instruction} Hard cap: ${maxChars} characters. Respond to the specific point in the post. Return only the response.`;
 
     const content: string | ChatContentPart[] = (() => {
-      const prompt = `${instruction}${personaBlock}${memoryBlock}${directionBlock}\n\nBefore final output, reject and rewrite if it sounds like an Aetheris pitch, a canned script, or a generic template.`;
+      const prompt = `${instruction}${personaBlock}${memoryBlock}${directionBlock}\n\nBefore final output, reject and rewrite if it sounds like an Aetheris pitch, a canned script, a generic template, or the same opener/closer used in the recent drafts. The opening and ending must be source-specific.`;
       if (isReplyToReply && (hasOriginalImg || hasMyCommentImg || hasTheirReplyImg)) {
         const parts: ChatContentPart[] = [{ type: "text", text: prompt }];
         if (hasOriginalImg) parts.push({ type: "text", text: "Original post screenshot:" }, { type: "image_url", image_url: { url: originalPostImageDataUrl } });
@@ -217,18 +284,21 @@ serve(async (req) => {
     const timeoutId = setTimeout(() => controller.abort(), 120000);
     let post = "";
     try {
-      post = await callAI({ apiKey: LOVABLE_API_KEY, system: SYSTEM, content, signal: controller.signal });
-      post = trimToCap(stripBadFormatting(post), maxChars);
-
-      const violation = findViolation(post);
-      if (violation) {
+      const repairNotes: string[] = [];
+      for (let attempt = 0; attempt < 3; attempt++) {
         post = await callAI({
           apiKey: LOVABLE_API_KEY,
-          system: `${SYSTEM}\n\nYour previous draft violated this forbidden pattern: ${violation}. Rewrite from scratch without any banned language, brand language, links, or canned opener.`,
+          system: repairNotes.length
+            ? `${SYSTEM}\n\nREWRITE FROM SCRATCH. Previous attempt failed because: ${repairNotes.join("; ")}. Open with a different source-specific noun/claim/number. End with a different source-specific consequence. Do not preserve sentence order from the failed attempt.`
+            : SYSTEM,
           content,
           signal: controller.signal,
         });
         post = trimToCap(stripBadFormatting(post), maxChars);
+
+        const violation = findViolation(post) || findStyleViolation(post, recentDrafts);
+        if (!violation) break;
+        repairNotes.push(violation);
       }
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
@@ -243,7 +313,7 @@ serve(async (req) => {
     }
 
     if (!post) throw new Error("Empty response from AI");
-    const finalViolation = findViolation(post);
+    const finalViolation = findViolation(post) || findStyleViolation(post, recentDrafts);
     if (finalViolation) throw new Error("AI response failed the no-template/no-pitch filter. Regenerate with more source context.");
 
     return new Response(JSON.stringify({ post }), {

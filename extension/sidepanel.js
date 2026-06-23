@@ -782,6 +782,27 @@ const liState = {
   lastDraftPayload: null,
 };
 
+const LI_DRAFT_MEMORY_KEY = "aetherisLinkedInDraftMemory";
+
+async function getLinkedInDraftMemory() {
+  try {
+    const stored = await chrome.storage.local.get(LI_DRAFT_MEMORY_KEY);
+    return Array.isArray(stored[LI_DRAFT_MEMORY_KEY])
+      ? stored[LI_DRAFT_MEMORY_KEY].filter((s) => typeof s === "string" && s.trim().length > 20).slice(0, 40)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+async function rememberLinkedInDraft(draft) {
+  const cleaned = String(draft || "").replace(/\s+/g, " ").trim();
+  if (cleaned.length < 20) return;
+  const current = await getLinkedInDraftMemory();
+  const next = [cleaned, ...current.filter((x) => x !== cleaned)].slice(0, 40);
+  try { await chrome.storage.local.set({ [LI_DRAFT_MEMORY_KEY]: next }); } catch {}
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
@@ -851,7 +872,7 @@ async function draftLinkedInReply() {
   let body = {
     mode,
     extraContext: direction,
-    recentDrafts: [],
+    recentDrafts: await getLinkedInDraftMemory(),
   };
 
   if (liState.source === "image") {
@@ -891,6 +912,7 @@ async function draftLinkedInReply() {
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
     liState.lastDraft = data.post || "(empty)";
+    await rememberLinkedInDraft(liState.lastDraft);
     out.textContent = liState.lastDraft;
   } catch (e) {
     out.textContent = `Failed: ${e.message}`;
