@@ -189,18 +189,6 @@ A persona lock has been declared in the user prompt below${personaKeys.length ? 
       ? `LIVE CHECK BEFORE OUTPUT: (a) Does the persona's voice dominate every paragraph? (b) Is there a concrete number? (c) Did I avoid every phrase, opener, and leak label that appears in the LIVE ANTI-REPETITION AUDIT above? (d) Could this draft be confused with any of my recent drafts? If yes to (d) — rewrite from a new angle.`
       : `LEXICON CHECK BEFORE OUTPUT: (a) Did I name a specific leak category from the Aetheris Lexicon (Follow-Up Failure / System Disconnect / Conversion Drop-Off / Brand Contradiction / Vocabulary Friction / Operational Waste / Growth Ceiling)? (b) Did I anchor a concrete number inside Cost of the Leak / COI framing? (c) Did I close on Revenue Recovery or Revenue Loop language, not generic 'growth'? (d) Did I avoid all forbidden substitutions (consulting / funnel / strategy / mindset / tip / hack / hustle / grind / unlock)? Rewrite before returning if any answer is no.`;
 
-    // Per-draft jitter — random seed forces the model off any cached/templated
-    // path so the same topic + persona never collapses to the same draft twice.
-    const jitterSeed = Math.random().toString(36).slice(2, 10).toUpperCase();
-    const jitterPick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-    const draftJitter = `\n\n═══════════════════════════════════════════════════════════
-DRAFT JITTER (random per generation — DO NOT echo back, just obey)
-═══════════════════════════════════════════════════════════
-Draft seed: ${jitterSeed}
-Open the post on a "${jitterPick(['cold-observation', 'reframe-equation', 'one-number', 'mini-anecdote', 'flat-disagreement', 'blunt-question', 'lazy-vs-boring', 'one-constraint'])}" beat.
-Land the close on a "${jitterPick(['flat-verdict', 'invented-noun-verb', 'one-line-dare', 'tired-truth', 'mechanism-summary'])}" beat.
-If a persona is locked above, pick its rotating shape with this seed in mind so successive drafts never collapse to the same shape.`;
-
     const userPrompt = `Write a LinkedIn post for Aetheris.technology with the following parameters:
 
 TOPIC: ${topic}
@@ -210,9 +198,8 @@ CREATOR TAG INSTRUCTION: ${creatorInstruction}
 ${extraPrompt ? `\nADDITIONAL DIRECTION: ${extraPrompt}` : ""}
 ${personaLedClause}
 ${liveAntiRepetitionBlock}
-${draftJitter}
 
-Follow all brand voice, structure, hashtag, and tone rules from your instructions${personaActive ? " EXCEPT where the active persona's rhythm overrides them — persona wins every conflict" : ""}. Output only the post — no commentary, no labels, no quotation marks around the post.
+Read the topic above and write a genuine reaction to it in the locked voice. Do not reach for a template, a shape menu, or a pre-baked opener/closer. Whatever you write should obviously be a response to THIS specific topic — if a reader compared your post to the topic, every line should look like it came from reading the topic. Follow all brand voice, hashtag, and tone rules from your instructions${personaActive ? " EXCEPT where the active persona's rhythm overrides them — persona wins every conflict" : ""}. Output only the post — no commentary, no labels, no quotation marks around the post.
 
 ${lexiconCheck}`;
 
