@@ -456,10 +456,11 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>, we'll read your
-          site, infer your business profile, then run all 9 tools fully in parallel (~30–60 seconds). If a tool gets
-          rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
+          Paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>. We read your site,
+          infer your business profile, then run all 9 tools 3-at-a-time (~60–90 seconds) so the AI gateway doesn't
+          rate-limit the batch. Each tool auto-retries up to 4 times on transient failures and saves independently.
         </p>
+
       </div>
 
       {(running || Object.keys(states).length > 0) && (
