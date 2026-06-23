@@ -217,8 +217,7 @@ HARD BANS: never mention Twain, Clemens, Huck, Tom Sawyer, the Mississippi, rive
 // ============================================================
 // LIVE PERSONA ENGINE — randomized freshness module
 // Each generation pulls one item from each axis so the same persona
-// never produces the same shape twice. AI is told to commit to these
-// picks as hard constraints for THIS draft only.
+// keeps stale wording out while the AI still reacts to the actual source.
 // ============================================================
 export const PERSONA_VARIATIONS: Record<string, {
   moods: string[];        // emotional weather for this draft
@@ -230,9 +229,9 @@ export const PERSONA_VARIATIONS: Record<string, {
 }> = {
   'alex-hormozi': {
     moods: ['blunt operator', 'mildly impatient with shortcuts', 'phone typed between meetings', 'flat money math calm', 'tired of explaining the basics'],
-    openers: ['open with a counter intuitive one liner stated as fact, no setup', 'open by reframing the reader\'s problem as a different upstream problem', 'open with "Most [people/founders/operators] don\'t have a [X] problem. They have a [Y] problem."', 'open with a 5 word verdict before any context', 'open with a number (leads, calls, dollars, days) before any claim'],
+    openers: ['open by naming the exact claim, acronym, metric, or example in the source', 'open with the specific contradiction inside the source, stated flat', 'open with the cost or consequence implied by the source before any setup', 'open with a 5 word verdict tied to this source only', 'open with a number from the source, or skip the number if the source does not support one'],
     pivots: ['drop a numbered list of 3 to 5 parallel bullets, identical openers, short lines (NEVER use a dash to start a bullet)', 'show the money math the reader can verify in their head (calls to demos to closes to $)', 'name the lazy version, then name the boring version that actually works', 'reframe a tactic problem as a volume problem (or volume as skill, or skill as offer)', 'collapse a complicated topic into one constraint and walk away from the rest'],
-    closers: ['close with a flat one line verdict that sounds slightly annoyed at how obvious it is', 'close with "The work is the work." style finality', 'close on one concrete action stated as the only sane move', 'close with "Most won\'t. You should." energy without copying the line'],
+    closers: ['close with one source-specific consequence, not a reusable mic drop', 'close with the cost of ignoring this exact point', 'close on one concrete action stated as the only sane move', 'close with a line that could not make sense without the source'],
     rhythmTwists: ['one sentence per line for the entire post', 'one numbered list of 3 to 5 parallel bullets, every bullet starting with the same word (numbered only, never dashed)', 'one explicit money math line (numbers, arrows, equals signs OK)', 'zero adjectives in the bullets, verbs and nouns only', 'no emojis, no hashtags, no "DM me", and absolutely no dash characters anywhere (no —, no –, no -)'],
     lenses: ['the upstream problem the reader is avoiding by working on the downstream one', 'the boring volume nobody wants to do', 'the offer / lead / skill / volume axis under the tactic question', 'the math the reader is refusing to do out loud', 'the lazy shortcut everyone is buying instead of doing the reps'],
   },
@@ -437,7 +436,7 @@ export const buildPersonaFreshnessBlock = (personaVal: string): string => {
   return [
     '',
     `▓▓ LIVE PERSONA FRESHNESS DIAL — variation seed #${seed} (THIS DRAFT ONLY) ▓▓`,
-    'These randomized picks are non-negotiable for this single draft. They keep the persona alive, prevent repetition across generations, and force a unique shape every time. Treat each pick as a hard constraint, not a suggestion. Do not substitute.',
+    'Read the source first. These guardrails only keep the persona from falling into stale wording. If a guardrail fights the source, follow the source and keep the opener and closer specific.',
     `• MOOD for this draft: ${mood}.`,
     `• LENS — look at the topic through: ${lens}.`,
     `• OPENING GAMBIT: ${opener}.`,
@@ -447,7 +446,7 @@ export const buildPersonaFreshnessBlock = (personaVal: string): string => {
     `• ENERGY DIAL: ${energy}.`,
     `• ENTRY ANGLE: ${entry}.`,
     `• TEXTURE MOVE: ${texture}.`,
-    'FRESHNESS RULE: If this draft could be confused with the last 3 drafts of this same persona, you have failed. Vary the sentence shapes, vary the opening word, vary the closing image. The persona stays — the surface mutates.',
+    'FRESHNESS RULE: If this draft could be confused with the last 3 drafts of this same persona, you have failed. Vary the sentence shapes, opening word, and closing consequence. The source controls the substance.',
     '',
   ].join('\n');
 };
