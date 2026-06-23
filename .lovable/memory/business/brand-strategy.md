@@ -20,9 +20,12 @@ Aetheris is a **Business Forensics Operator** for **growth-minded businesses run
 ## Methodology
 **True Cost Forensics** — show the business exactly what is broken and what it is costing them. Then build the systems to fix it. The public-facing process is **The Leak Audit™**, a 7-step forensic diagnostic.
 
-## Two public offers — only two
-1. **Forensic Diagnostic — $2,500 flat.** Operator-led investigation into every revenue-bleeding surface. Deliverable: written findings, prioritized fixes, ROI projections, implementation roadmap. Credited 1:1 toward implementation.
-2. **Implementation Retainer — custom monthly, 3-month minimum.** Available only to Diagnostic clients.
+## Public paths
+- **Forensic Diagnostic** — operator-led flat-fee investigation into every revenue-bleeding surface. Deliverable: written findings, prioritized fixes, ROI projections, implementation roadmap. Credited toward implementation if the client proceeds.
+- **Implementation Retainer** — monthly operator-led rebuild of the Diagnostic's fixes. Diagnostic clients only, 3-month minimum.
+- **Operator-led bundles** at `/catalog` — self-serve entry points that discount toward a Diagnostic.
+
+For exact pricing, commission splits, and offer mechanics, see [Pricing & Business Model](mem://business/pricing).
 
 ## Tone
 - Blunt. Operator. Non-corporate.
