@@ -2118,3 +2118,136 @@ $("af-apply")?.addEventListener("click", async () => {
     obs.observe(reportEl, { childList: true, subtree: true });
   })();
 })();
+
+// ============================================================
+// v0.9.6 — ACTIVE LEAD CONTEXT
+// Reps stamp every auto-save with a live "active lead" so the
+// portal Library is grouped/searchable by lead. Adds a one-click
+// "Log to Portal Now" for ad-hoc notes / complaints / objections.
+// ============================================================
+(function initActiveLead() {
+  const nameEl = document.getElementById("portal-lead-name");
+  const contactEl = document.getElementById("portal-lead-contact");
+  const kindEl = document.getElementById("portal-lead-kind");
+  const notesEl = document.getElementById("portal-lead-notes");
+  const logBtn = document.getElementById("portal-lead-log");
+  const clearBtn = document.getElementById("portal-lead-clear");
+  const statusEl = document.getElementById("portal-sync-status");
+  if (!nameEl) return;
+
+  const KIND_LABELS = {
+    lead: "Lead",
+    complaint: "Complaint",
+    objection: "Objection",
+    follow_up: "Follow-up",
+    note: "Note",
+    meeting: "Meeting",
+  };
+
+  function setStatus(msg, color) {
+    if (!statusEl) return;
+    statusEl.textContent = msg || "";
+    statusEl.style.color = color || "#aaa";
+  }
+
+  // Persist as you type so a refresh / panel close doesn't wipe it
+  async function persist() {
+    await chrome.storage.local.set({
+      aetherisActiveLead: {
+        name: nameEl.value.trim(),
+        contact: contactEl.value.trim(),
+        kind: kindEl.value,
+        // notes intentionally NOT persisted — they're per-entry, not standing context
+      },
+    });
+  }
+  [nameEl, contactEl, kindEl].forEach((el) => el.addEventListener("change", persist));
+  [nameEl, contactEl].forEach((el) => el.addEventListener("input", persist));
+
+  // Hydrate on load
+  (async () => {
+    const { aetherisActiveLead } = await chrome.storage.local.get("aetherisActiveLead");
+    if (aetherisActiveLead) {
+      nameEl.value = aetherisActiveLead.name || "";
+      contactEl.value = aetherisActiveLead.contact || "";
+      if (aetherisActiveLead.kind) kindEl.value = aetherisActiveLead.kind;
+    }
+  })();
+
+  function currentLead() {
+    return {
+      name: nameEl.value.trim(),
+      contact: contactEl.value.trim(),
+      kind: kindEl.value,
+      kindLabel: KIND_LABELS[kindEl.value] || kindEl.value,
+    };
+  }
+
+  // Expose so the portal-sync helper can pull live values
+  window.aetherisGetActiveLead = currentLead;
+
+  clearBtn?.addEventListener("click", async () => {
+    nameEl.value = ""; contactEl.value = ""; notesEl.value = ""; kindEl.value = "lead";
+    await chrome.storage.local.remove("aetherisActiveLead");
+    setStatus("Active lead cleared.");
+  });
+
+  logBtn?.addEventListener("click", async () => {
+    const lead = currentLead();
+    const notes = notesEl.value.trim();
+    if (!lead.name && !lead.contact && !notes) {
+      setStatus("Add a lead name, contact, or note first.", "#f87171");
+      return;
+    }
+    if (!window.aetherisSaveToPortal) {
+      setStatus("Portal sync not ready yet.", "#f87171");
+      return;
+    }
+    logBtn.disabled = true; const orig = logBtn.textContent; logBtn.textContent = "Logging…";
+    const item = await window.aetherisSaveToPortal({
+      tool_type: "extension_misc",
+      title: `${lead.kindLabel} · ${lead.name || lead.contact || "Quick note"}`,
+      input_data: {
+        kind: lead.kind,
+        lead: { name: lead.name, contact: lead.contact },
+        page: { url: (state && state.activeUrl) || "", host: (state && state.activeHost) || "" },
+        logged_at: new Date().toISOString(),
+      },
+      output_data: {
+        kind: lead.kind,
+        kind_label: lead.kindLabel,
+        lead_name: lead.name,
+        lead_contact: lead.contact,
+        notes,
+      },
+    });
+    logBtn.disabled = false; logBtn.textContent = orig;
+    if (item) {
+      notesEl.value = "";
+      setStatus(`✓ Logged "${item.title}" to your portal.`, "#a3e635");
+    }
+  });
+
+  // ----- Stamp every auto-save with the active lead -----
+  // We wrap window.aetherisSaveToPortal so any caller (scan, fix, agent,
+  // LinkedIn, CRM, golden, manual) gets the same lead context attached.
+  const _origSave = window.aetherisSaveToPortal;
+  if (typeof _origSave === "function") {
+    window.aetherisSaveToPortal = async function (payload = {}) {
+      const lead = currentLead();
+      const enriched = { ...payload };
+      const hasLead = !!(lead.name || lead.contact);
+      if (hasLead) {
+        // Prefix title with lead so the portal Library groups visually
+        if (!/^\[/.test(enriched.title || "")) {
+          enriched.title = `[${lead.name || lead.contact}] ${enriched.title || "Capture"}`;
+        }
+        enriched.input_data = {
+          ...(enriched.input_data || {}),
+          activeLead: { name: lead.name, contact: lead.contact, kind: lead.kind },
+        };
+      }
+      return _origSave(enriched);
+    };
+  }
+})();
