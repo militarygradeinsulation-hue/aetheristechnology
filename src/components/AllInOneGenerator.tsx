@@ -223,7 +223,7 @@ export const AllInOneGenerator: React.FC = () => {
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 3) => {
+  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 4) => {
     let lastErr: any = null;
     const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
     const portalToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_portal_token') : null;
@@ -235,30 +235,32 @@ export const AllInOneGenerator: React.FC = () => {
       try {
         const { data, error } = await supabase.functions.invoke(fn, invokeOpts);
         if (error) {
-          // Try to read response body for a real error message
           const ctx: any = (error as any).context;
           let detail = error.message || '';
+          let status = ctx?.status;
           if (ctx && typeof ctx.json === 'function') {
             try { const j = await ctx.json(); detail = j?.error || detail; } catch { /* ignore */ }
           }
-          // Retry transient errors (429 rate-limit, 5xx)
-          const isTransient = /rate.?limit|429|timeout|503|502|504|non-2xx/i.test(detail) || ctx?.status === 429 || (ctx?.status >= 500 && ctx?.status < 600);
+          const isTransient =
+            status === 429 || (status >= 500 && status < 600) ||
+            /rate.?limit|429|timeout|503|502|504|non-2xx|fetch|network|context canceled/i.test(detail);
           if (isTransient && attempt < maxAttempts) {
-            await sleep(1500 * attempt + Math.random() * 1000);
+            await sleep(2000 * attempt + Math.random() * 1500);
             continue;
           }
-          throw new Error(detail || 'Edge function error');
+          throw new Error(detail || `Edge function ${fn} error`);
         }
         if (!data) throw new Error('No data returned');
+        if ((data as any)?.error) throw new Error(String((data as any).error));
         return data;
       } catch (e: any) {
         lastErr = e;
         const msg = String(e?.message || '');
-        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx/i.test(msg)) {
-          await sleep(1500 * attempt + Math.random() * 1000);
+        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx|context canceled|abort/i.test(msg)) {
+          await sleep(2000 * attempt + Math.random() * 1500);
           continue;
         }
-        throw e;
+        if (attempt === maxAttempts) throw e;
       }
     }
     throw lastErr || new Error('Failed after retries');
@@ -270,7 +272,6 @@ export const AllInOneGenerator: React.FC = () => {
     const started = Date.now();
     try {
       const data = await invokeWithRetry(job.fn, job.body());
-      // Save to the right library (rep_library for portal sessions, admin_library for admins)
       await saveToolRun({
         tool_type: job.toolType,
         title: `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`,
@@ -290,13 +291,11 @@ export const AllInOneGenerator: React.FC = () => {
       return;
     }
 
-    // Auto-infer business profile if user hasn't filled details
     let workingForm = form;
     const needsInference = !form.businessName && !form.industry && !form.product && !form.targetCustomer;
     if (needsInference) {
       const inferred = await inferFromUrl(form.url);
       if (inferred) workingForm = inferred;
-      // continue even if inference fails, tools will fall back to URL-only
     }
 
     setRunning(true);
@@ -312,11 +311,15 @@ export const AllInOneGenerator: React.FC = () => {
     let skipped = 0;
     const total = allJobs.length;
 
-    // Run all tools fully in parallel, retry logic handles transient 429s.
-    // Tiny stagger (50ms each) avoids a thundering-herd against the AI gateway.
-    await Promise.all(
-      allJobs.map(async (job, idx) => {
-        await sleep(idx * 50);
+    // Concurrency pool of 3 — running 9 long AI calls in parallel reliably hits
+    // gateway rate limits and times out the whole batch. 3-at-a-time keeps every
+    // tool inside its budget while still finishing in ~60–90s.
+    const POOL_SIZE = 3;
+    const queue = [...allJobs];
+    const workers = Array.from({ length: Math.min(POOL_SIZE, queue.length) }, async () => {
+      while (queue.length) {
+        const job = queue.shift();
+        if (!job) break;
         const result = await runOne(job);
         completed++;
         if (result.status === 'success') succeeded++;
@@ -324,8 +327,9 @@ export const AllInOneGenerator: React.FC = () => {
         else if (result.status === 'skipped') skipped++;
         setProgress(Math.round((completed / total) * 100));
         setStates((prev) => ({ ...prev, [job.key]: result }));
-      }),
-    );
+      }
+    });
+    await Promise.all(workers);
 
     setRunning(false);
     setProgress(100);
@@ -334,6 +338,7 @@ export const AllInOneGenerator: React.FC = () => {
       description: `${succeeded} saved · ${failed} failed · ${skipped} skipped (of ${total} tools). Check My Library.`,
     });
   };
+
 
   const reset = () => {
     setStates({});
@@ -451,10 +456,11 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>, we'll read your
-          site, infer your business profile, then run all 9 tools fully in parallel (~30–60 seconds). If a tool gets
-          rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
+          Paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>. We read your site,
+          infer your business profile, then run all 9 tools 3-at-a-time (~60–90 seconds) so the AI gateway doesn't
+          rate-limit the batch. Each tool auto-retries up to 4 times on transient failures and saves independently.
         </p>
+
       </div>
 
       {(running || Object.keys(states).length > 0) && (
