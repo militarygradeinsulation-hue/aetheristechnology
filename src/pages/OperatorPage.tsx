@@ -161,17 +161,18 @@ const OperatorPage: React.FC = () => {
                 Definition
               </div>
               <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground italic mb-4">
-                An operator is <span className="text-amber not-italic">not</span> a consultant.
+                An operator is <span className="text-amber not-italic">not</span> an agency.
               </h2>
               <div className="space-y-3 text-muted-foreground text-[15px] leading-relaxed">
                 <p>
-                  A consultant hands you a deck. We sit in the chair next to yours, open your CRM with you,
-                  and tell you in plain English exactly where the money is bleeding out.
+                  A consultant hands you a deck. An agency pitches you activity. I sit in the chair
+                  next to yours, open your CRM with you, and tell you in plain English exactly where
+                  the money is bleeding out.
                 </p>
                 <p>
-                  Then we <span className="text-amber font-semibold">fix it ourselves</span>, using a stack of
-                  12+ proprietary tools built specifically for plugging revenue leaks. You don't learn the
-                  tools. You don't run anything.
+                  Then I <span className="text-amber font-semibold">fix it myself</span>, using AI,
+                  automation, strategy, and digital systems built specifically for closing leaks. You
+                  don't learn the tools. You don't run anything. You get the leak found and sealed.
                 </p>
               </div>
             </div>

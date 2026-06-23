@@ -82,8 +82,8 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 <MapPin className="w-8 h-8 text-amber" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2 font-display">Based In</h3>
-              <p className="text-lg text-foreground mb-2">Indianapolis, Indiana</p>
-              <p className="text-sm text-muted-foreground">Serving businesses nationwide. Remote-first operations.</p>
+              <p className="text-lg text-foreground mb-2">Noblesville, Indiana</p>
+              <p className="text-sm text-muted-foreground">Indianapolis area. Serving businesses nationwide.</p>
             </div>
           </RevealOnScroll>
         </div>

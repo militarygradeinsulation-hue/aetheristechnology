@@ -69,22 +69,26 @@ export const OperatorBio: React.FC = () => {
                 </button>
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                Architect Profile
+                Operator Profile
               </div>
               <div className="font-forensic text-xl text-foreground mb-1">Joseph Toney</div>
               <div className="text-sm text-muted-foreground mb-4">Founder · Aetheris</div>
               <div className="space-y-2 text-xs font-case uppercase tracking-wider">
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
                   <span className="text-muted-foreground">Background</span>
-                  <span className="text-foreground">Marine · Operator</span>
+                  <span className="text-foreground">Marine Corps veteran · Operator</span>
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
-                  <span className="text-muted-foreground">Discipline</span>
-                  <span className="text-foreground">Psychology · Systems</span>
+                  <span className="text-muted-foreground">Education</span>
+                  <span className="text-foreground">MS Marketing, Liberty University, 4.0 GPA</span>
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
-                  <span className="text-muted-foreground">Marines Led</span>
-                  <span className="text-amber">200+</span>
+                  <span className="text-muted-foreground">Research</span>
+                  <span className="text-foreground">Doctorate in Digital Forensics</span>
+                </div>
+                <div className="flex justify-between border-b border-border/40 pb-1.5">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-amber">Noblesville, Indiana</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Revenue Diagnosed</span>
@@ -99,6 +103,12 @@ export const OperatorBio: React.FC = () => {
               <p className="font-forensic text-2xl md:text-3xl text-foreground leading-snug">
                 "What started as <span className="text-crimson">survival</span> eventually became{' '}
                 <span className="text-amber">purpose</span>."
+              </p>
+              <p className="text-base md:text-lg text-foreground/90 leading-relaxed">
+                I work with growth-minded businesses running $5M to $50M that know they should be further along.
+                Marine Corps veteran. MS Marketing, Liberty University, 4.0 GPA. This year I begin my doctorate
+                in Digital Forensics — formally defining Revenue Forensics as a new field. Based in Noblesville,
+                Indiana.
               </p>
 
               <div className="space-y-4 text-muted-foreground leading-relaxed">
