@@ -29,12 +29,15 @@ export const OperatorBio: React.FC = () => {
         <RevealOnScroll>
           <div className="text-center mb-12 max-w-3xl mx-auto">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-              The Architect
+              The Operator
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Joseph Toney , {' '}
-              <span className="text-amber">Business Forensics Architect</span>
+              Joseph Toney,{" "}
+              <span className="text-amber">Business Forensics Operator</span>
             </h2>
+            <p className="mt-3 text-base text-muted-foreground max-w-2xl mx-auto">
+              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            </p>
           </div>
         </RevealOnScroll>
 

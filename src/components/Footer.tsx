@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-3">
             <img src={aetherisLogo} alt="Aetheris AI Logo" className="w-14 h-14 object-contain" />
-            <span className="text-sm text-muted-foreground">© {currentYear} Aetheris AI</span>
+            <span className="text-sm text-muted-foreground">© {currentYear} Aetheris · Business Forensics</span>
           </div>
         </div>
       </div>

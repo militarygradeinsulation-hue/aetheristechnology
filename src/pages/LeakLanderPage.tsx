@@ -130,9 +130,9 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Catch phrase */}
+          {/* Position statement */}
           <section
-            className="mt-5 text-center animate-fade-in"
+            className="mt-5 max-w-5xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
           >
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -141,15 +141,54 @@ const LeakLanderPage: React.FC = () => {
               <span className="h-px w-8 bg-amber/50" />
             </div>
             <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-              I can find{" "}
-              <span className="bg-gradient-to-r from-amber via-amber/90 to-amber/60 bg-clip-text text-transparent italic">instantly</span>{" "}
-              where your leads are{" "}
-              <span className="text-crimson italic">leaking</span>
-              {" "}— and how to get them <span className="text-amber italic">all back</span>.
-              <span className="block mt-3 text-lg sm:text-2xl md:text-3xl text-foreground/85">
-                Without <span className="text-amber">extra marketing</span>, <span className="text-amber">extra costs</span>, or <span className="text-amber">new systems</span>.
-              </span>
+              Most growth-stage businesses are bleeding{" "}
+              <span className="text-crimson italic">time</span>,{" "}
+              <span className="text-crimson italic">leads</span>, and{" "}
+              <span className="text-crimson italic">revenue</span>{" "}
+              — without knowing where.
             </h1>
+            <p className="mt-5 text-base sm:text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto leading-relaxed">
+              I help established businesses uncover what is actually broken beneath the surface.
+              Not just your marketing.{" "}
+              <span className="text-amber font-semibold">Your entire business.</span>
+            </p>
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
+              {[
+                "Lead flow",
+                "Website performance",
+                "Trust signals",
+                "Sales process",
+                "Follow-up",
+                "Internal systems",
+                "Customer experience",
+                "Operational gaps",
+              ].map((item) => (
+                <div key={item} className="rounded-sm border border-amber/20 bg-background/40 px-3 py-2">
+                  <span className="text-[12px] sm:text-sm text-foreground/90 font-case uppercase tracking-wider">{item}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Where are you <span className="text-crimson italic">leaking</span>. What is it costing you. Why is growth stalling.
+              Then I build custom solutions using AI, automation, strategy, and digital systems that fix those gaps.
+            </p>
+            <p className="mt-4 text-base sm:text-lg text-foreground/90 max-w-3xl mx-auto leading-relaxed">
+              The goal is simple: help you operate smarter, convert better, respond faster, and scale with less waste.
+            </p>
+            <div className="mt-6 inline-block rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 text-left max-w-3xl">
+              <p className="text-foreground/90 text-[15px] leading-relaxed italic">
+                “I run True Cost Forensics on your business. I show you exactly what is broken and what it is costing you.
+                Then we build the systems to fix it. I am not an agency pitching you activity. I am an operator who finds
+                the leak and closes it. No hidden timelines. No retainers. No cliché solutions. Just honest work.”
+              </p>
+            </div>
+            <p className="mt-5 text-sm text-muted-foreground max-w-2xl mx-auto">
+              I work with growth-minded businesses running $5M to $50M that know they should be further along.
+              If something is wrong, I find it. If it needs fixing, I build it.
+            </p>
+            <p className="mt-4 text-xs font-mono uppercase tracking-widest text-amber/80">
+              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            </p>
           </section>
           
           {/* Buttons. primary CTAs, larger */}

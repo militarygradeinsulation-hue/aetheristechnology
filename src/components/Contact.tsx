@@ -18,10 +18,13 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
               Open a Case
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Let's find where you're <span className="text-crimson">leaking</span>.
+              Most growth-stage businesses are bleeding time, leads, and revenue —{" "}
+              <span className="text-crimson">without knowing where.</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              No pitch decks. No funnels. Pick the channel that's easiest, and we'll start the autopsy.
+              I help established businesses uncover what is actually broken beneath the surface. Not
+              just your marketing. Your entire business. Then I run True Cost Forensics and build the
+              systems to fix it.
             </p>
           </div>
         </RevealOnScroll>

@@ -31,13 +31,18 @@ export const WhyUs: React.FC = () => {
                 </div>
                 <div>
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                    We know what you're thinking
+                    The real problem
                   </div>
                   <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-                    There's a ton of AI gurus out there. <span className="text-amber">Hard to trust any of them.</span>
+                    Most growth-stage businesses are bleeding time, leads, and revenue —{" "}
+                    <span className="text-crimson">without knowing where.</span>
                   </h2>
                   <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                    We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it, go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
+                    I help established businesses uncover what is actually broken beneath the surface.
+                    Not just your marketing. Your entire business: lead flow, website performance, trust
+                    signals, sales process, follow-up, internal systems, customer experience, and
+                    operational gaps. I run True Cost Forensics, show you exactly what is broken and
+                    what it is costing you, then build the systems to fix it.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link to="/leak-audit">
@@ -45,9 +50,9 @@ export const WhyUs: React.FC = () => {
                         Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
-                    <Link to="/catalog">
+                    <Link to="/operator">
                       <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
-                        Browse the tool catalog <ArrowRight className="w-4 h-4 ml-2" />
+                        Meet the operator <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
                   </div>
