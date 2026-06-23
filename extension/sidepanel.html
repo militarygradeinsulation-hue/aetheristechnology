@@ -20,6 +20,15 @@
     </div>
   </header>
 
+  <div id="portal-sync-bar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 10px;background:rgba(255,176,32,0.08);border-bottom:1px solid rgba(255,176,32,0.25);font-size:11px">
+    <span style="color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Portal Sync</span>
+    <input id="portal-sync-code" type="text" placeholder="Your rep code" autocomplete="off" spellcheck="false" style="flex:1;min-width:120px;text-transform:uppercase;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+    <button id="portal-sync-save" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Save</button>
+    <button id="portal-sync-clear" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Forget</button>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto"><input id="portal-sync-auto" type="checkbox" checked />Auto-save to my portal</label>
+    <div id="portal-sync-status" style="width:100%;color:#aaa;font-size:10.5px"></div>
+  </div>
+
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="agents">Agents</button>
     <button class="tab" data-tab="scan">Scan</button>
@@ -351,7 +360,7 @@
 
   <footer class="cockpit-footer">
     <button id="autopsy-start" class="ghost">REC · Funnel Autopsy</button>
-    <span class="muted">v0.8.5 · Forensic Cockpit</span>
+    <span class="muted">v0.9.5 · Portal Sync</span>
   </footer>
 
   <script type="module" src="sidepanel.js"></script>

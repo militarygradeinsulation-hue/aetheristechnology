@@ -43,6 +43,13 @@ const TOOL_LABELS: Record<string, string> = {
   outreach_email_analysis: 'Outreach Email Analysis',
   outreach_subjects: 'Subject-Line Hooks',
   whats_wrong: "What's Wrong Diagnosis",
+  extension_scan: 'Chrome Extension · Forensic Scan',
+  extension_fix_all: 'Chrome Extension · Fix-All Run',
+  extension_agent: 'Chrome Extension · Agent Plan',
+  extension_linkedin: 'Chrome Extension · LinkedIn Draft',
+  extension_crm: 'Chrome Extension · HubSpot Autopsy',
+  extension_golden: 'Chrome Extension · Golden Report',
+  extension_misc: 'Chrome Extension · Capture',
 };
 
 type Block =

@@ -1885,3 +1885,236 @@ $("af-apply")?.addEventListener("click", async () => {
     chrome.tabs.create({ url: `https://aetheris.technology/report/${currentScanId}/ask` });
   });
 })();
+
+// ============================================================
+// v0.9.5 — PORTAL SYNC
+// Saves anything the extension generates into the rep/partner's
+// portal Library (rep_library) so it lives alongside their other
+// Aetheris-branded work and can be downloaded as a PDF.
+// ============================================================
+(function initPortalSync() {
+  const codeInput = document.getElementById("portal-sync-code");
+  const saveBtn = document.getElementById("portal-sync-save");
+  const clearBtn = document.getElementById("portal-sync-clear");
+  const autoChk = document.getElementById("portal-sync-auto");
+  const statusEl = document.getElementById("portal-sync-status");
+  if (!codeInput) return;
+
+  function setStatus(msg, color) {
+    if (!statusEl) return;
+    statusEl.textContent = msg || "";
+    statusEl.style.color = color || "#aaa";
+  }
+
+  // Hydrate from storage (single source of truth: aetherisAccessCode)
+  (async () => {
+    const { aetherisAccessCode, aetherisSyncAuto } = await chrome.storage.local.get(["aetherisAccessCode", "aetherisSyncAuto"]);
+    if (aetherisAccessCode) {
+      codeInput.value = aetherisAccessCode;
+      setStatus(`Signed in as ${aetherisAccessCode}. Saves go to your Portal → Workspace History.`);
+    } else {
+      setStatus("Enter your rep code (or client unlock code) to mirror your work into your portal.");
+    }
+    if (aetherisSyncAuto === false) autoChk.checked = false;
+  })();
+
+  codeInput.addEventListener("input", () => {
+    codeInput.value = codeInput.value.toUpperCase();
+    // mirror into the CRM tab's input so both stay in sync
+    const mirror = document.getElementById("crm-access-code");
+    if (mirror) mirror.value = codeInput.value;
+  });
+
+  saveBtn?.addEventListener("click", async () => {
+    const v = (codeInput.value || "").trim().toUpperCase();
+    if (!v) { setStatus("Type a code first.", "#f87171"); return; }
+    await chrome.storage.local.set({ aetherisAccessCode: v });
+    const mirror = document.getElementById("crm-access-code");
+    if (mirror) mirror.value = v;
+    setStatus(`Saved · everything you do will sync to ${v}'s portal.`, "#a3e635");
+  });
+
+  clearBtn?.addEventListener("click", async () => {
+    await chrome.storage.local.remove("aetherisAccessCode");
+    codeInput.value = "";
+    const mirror = document.getElementById("crm-access-code");
+    if (mirror) mirror.value = "";
+    setStatus("Forgotten. Auto-sync is off until you re-enter a code.");
+  });
+
+  autoChk?.addEventListener("change", async () => {
+    await chrome.storage.local.set({ aetherisSyncAuto: autoChk.checked });
+  });
+
+  async function getCode() {
+    const v = (codeInput.value || "").trim().toUpperCase();
+    if (v) return v;
+    const { aetherisAccessCode } = await chrome.storage.local.get("aetherisAccessCode");
+    return (aetherisAccessCode || "").trim().toUpperCase();
+  }
+
+  async function isAutoOn() {
+    if (autoChk && !autoChk.checked) return false;
+    const { aetherisSyncAuto } = await chrome.storage.local.get("aetherisSyncAuto");
+    return aetherisSyncAuto !== false;
+  }
+
+  // Public helper. Returns the inserted item or null. Never throws.
+  window.aetherisSaveToPortal = async function saveToPortal({ tool_type, title, input_data, output_data, file_url, lead_id, silent } = {}) {
+    try {
+      const accessCode = await getCode();
+      if (!accessCode) {
+        if (!silent) setStatus("No rep code set — open the Portal Sync bar at the top and paste your code.", "#f59e0b");
+        return null;
+      }
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/extension-portal-save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+        body: JSON.stringify({
+          accessCode,
+          tool_type: tool_type || "extension_misc",
+          title: (title || "Extension capture").slice(0, 240),
+          input_data: input_data || {},
+          output_data: output_data || {},
+          file_url: file_url || null,
+          lead_id: lead_id || null,
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || data?.error) {
+        if (!silent) setStatus(`Portal save failed: ${data?.error || r.status}`, "#f87171");
+        return null;
+      }
+      if (!silent) setStatus(`✓ Saved to portal · ${data?.item?.title || "Library item"}`, "#a3e635");
+      return data?.item || null;
+    } catch (e) {
+      if (!silent) setStatus(`Portal save error: ${e.message}`, "#f87171");
+      return null;
+    }
+  };
+
+  // --------- Auto-save hooks (non-blocking, fire-and-forget) ---------
+  // 1) Scan
+  if (typeof runScanFlow === "function") {
+    const _origScan = runScanFlow;
+    runScanFlow = async function (...args) {
+      const res = await _origScan.apply(this, args);
+      if (res && !res.error && (await isAutoOn())) {
+        window.aetherisSaveToPortal({
+          tool_type: "extension_scan",
+          title: `Forensic scan · ${res.host || state.activeHost || res.url || "current page"}`,
+          input_data: { url: res.url, host: res.host, scannedAt: res.scannedAt },
+          output_data: res,
+          silent: true,
+        }).then((it) => { if (it) setStatus(`✓ Scan synced to portal · ${it.title}`, "#a3e635"); });
+      }
+      return res;
+    };
+  }
+
+  // 2) Fix All
+  if (typeof fixAllNow === "function") {
+    const _origFix = fixAllNow;
+    fixAllNow = async function (...args) {
+      const res = await _origFix.apply(this, args);
+      if (await isAutoOn()) {
+        window.aetherisSaveToPortal({
+          tool_type: "extension_fix_all",
+          title: `Fix-All run · ${state.activeHost || state.activeUrl || "current page"}`,
+          input_data: { url: state.activeUrl, leaks: (state.lastScan?.leaks || []).map(l => ({ id: l.id, title: l.title })) },
+          output_data: { result: res, scan: state.lastScan },
+          silent: true,
+        });
+      }
+      return res;
+    };
+  }
+
+  // 3) LinkedIn drafter
+  if (typeof draftLinkedInReply === "function") {
+    const _origLi = draftLinkedInReply;
+    draftLinkedInReply = async function (...args) {
+      const res = await _origLi.apply(this, args);
+      const draft = (typeof liState !== "undefined" && liState?.lastDraft) || "";
+      if (draft && (await isAutoOn())) {
+        window.aetherisSaveToPortal({
+          tool_type: "extension_linkedin",
+          title: `LinkedIn draft · ${draft.slice(0, 60).replace(/\s+/g, " ")}…`,
+          input_data: liState?.lastDraftPayload || {},
+          output_data: { draft },
+          silent: true,
+        });
+      }
+      return res;
+    };
+  }
+
+  // 4) CRM scrape
+  if (typeof crmScrape === "function") {
+    const _origCrm = crmScrape;
+    crmScrape = async function (...args) {
+      const res = await _origCrm.apply(this, args);
+      if (await isAutoOn()) {
+        const out = document.getElementById("crm-out");
+        window.aetherisSaveToPortal({
+          tool_type: "extension_crm",
+          title: `HubSpot autopsy · ${state.activeHost || state.activeUrl || "session"}`,
+          input_data: { url: state.activeUrl, portalId: state.hsPortalId || null },
+          output_data: { html: out?.innerHTML?.slice(0, 80000) || "" },
+          silent: true,
+        });
+      }
+      return res;
+    };
+  }
+
+  // 5) Agent confirm — observe the agents tab and save when the success status appears
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest?.("#ag-confirm");
+    if (!btn) return;
+    // Let the existing handler run, then sync the rendered plan.
+    setTimeout(async () => {
+      if (!(await isAutoOn())) return;
+      const out = document.getElementById("ag-out");
+      const status = document.getElementById("ag-status");
+      const ok = (status?.textContent || "").toLowerCase().includes("saved");
+      if (!ok) return;
+      window.aetherisSaveToPortal({
+        tool_type: "extension_agent",
+        title: `Agent plan · ${state.activeHost || state.activeUrl || "current page"}`,
+        input_data: { url: state.activeUrl, brief: document.getElementById("ag-brief")?.value || "" },
+        output_data: { html: out?.innerHTML?.slice(0, 120000) || "" },
+        silent: true,
+      });
+    }, 1200);
+  });
+
+  // 6) Golden report — watch its report container and save once per completion
+  (function watchGolden() {
+    const reportEl = document.getElementById("golden-report");
+    if (!reportEl) return;
+    let lastSavedHtml = "";
+    const obs = new MutationObserver(async () => {
+      if (!(await isAutoOn())) return;
+      const html = reportEl.innerHTML || "";
+      // Only save when fully populated and changed
+      if (html.length < 200 || html === lastSavedHtml) return;
+      // Wait for stability — re-check after 800ms
+      lastSavedHtml = html;
+      setTimeout(async () => {
+        if (reportEl.innerHTML !== html) return;
+        window.aetherisSaveToPortal({
+          tool_type: "extension_golden",
+          title: `Golden report · ${document.getElementById("golden-company")?.value?.trim() || document.getElementById("golden-url")?.value?.trim() || "scan"}`,
+          input_data: {
+            url: document.getElementById("golden-url")?.value || "",
+            company: document.getElementById("golden-company")?.value || "",
+          },
+          output_data: { html: html.slice(0, 200000) },
+          silent: true,
+        });
+      }, 800);
+    });
+    obs.observe(reportEl, { childList: true, subtree: true });
+  })();
+})();
