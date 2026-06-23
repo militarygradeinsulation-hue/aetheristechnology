@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Aetheris Operator — Forensic Cockpit",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Forensic operator: scans any page for leaks, audits HubSpot CRM via the live tab, and pushes fixes back to WordPress without an API key.",
   "permissions": ["activeTab", "storage", "scripting", "tabs", "sidePanel", "webNavigation", "cookies", "alarms"],
   "optional_permissions": ["debugger"],

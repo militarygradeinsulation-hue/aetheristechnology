@@ -22,10 +22,28 @@
 
   <div id="portal-sync-bar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 10px;background:rgba(255,176,32,0.08);border-bottom:1px solid rgba(255,176,32,0.25);font-size:11px">
     <span style="color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Portal Sync</span>
-    <input id="portal-sync-code" type="text" placeholder="Your rep code" autocomplete="off" spellcheck="false" style="flex:1;min-width:120px;text-transform:uppercase;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+    <input id="portal-sync-code" type="text" placeholder="Your rep code" autocomplete="off" spellcheck="false" style="flex:1;min-width:110px;text-transform:uppercase;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
     <button id="portal-sync-save" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Save</button>
     <button id="portal-sync-clear" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Forget</button>
-    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto"><input id="portal-sync-auto" type="checkbox" checked />Auto-save to my portal</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto"><input id="portal-sync-auto" type="checkbox" checked />Auto-save</label>
+
+    <div style="width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">
+      <span style="color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:10px">Active Lead</span>
+      <input id="portal-lead-name" type="text" placeholder="Lead / company" autocomplete="off" spellcheck="false" style="flex:2;min-width:120px;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+      <input id="portal-lead-contact" type="text" placeholder="Email / phone" autocomplete="off" spellcheck="false" style="flex:2;min-width:120px;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+      <select id="portal-lead-kind" style="background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px">
+        <option value="lead">Lead</option>
+        <option value="complaint">Complaint</option>
+        <option value="objection">Objection</option>
+        <option value="follow_up">Follow-up</option>
+        <option value="note">Note</option>
+        <option value="meeting">Meeting</option>
+      </select>
+      <textarea id="portal-lead-notes" rows="1" placeholder="Quick notes — what happened, what they said, what you need" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px;resize:vertical"></textarea>
+      <button id="portal-lead-log" class="primary" type="button" style="padding:4px 10px;font-size:11px;background:var(--amber);color:#000">⚡ Log to Portal Now</button>
+      <button id="portal-lead-clear" class="ghost" type="button" style="padding:4px 8px;font-size:11px">Clear</button>
+    </div>
+
     <div id="portal-sync-status" style="width:100%;color:#aaa;font-size:10.5px"></div>
   </div>
 
@@ -360,7 +378,7 @@
 
   <footer class="cockpit-footer">
     <button id="autopsy-start" class="ghost">REC · Funnel Autopsy</button>
-    <span class="muted">v0.9.5 · Portal Sync</span>
+    <span class="muted">v0.9.6 · Portal Sync</span>
   </footer>
 
   <script type="module" src="sidepanel.js"></script>
