@@ -100,20 +100,39 @@ const OperatorPage: React.FC = () => {
 
           {/* Hero — simplified */}
           <section className="px-4 max-w-5xl mx-auto mb-20">
-            <div className="max-w-2xl">
+            <div className="max-w-3xl">
               <div className="inline-flex items-center gap-3 mb-6">
                 <div className="h-px w-8 bg-amber" />
                 <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
-                  The operator is the product
+                  Business Forensics Operator
                 </span>
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05]">
-                You don't need more tools. <br className="hidden md:block" />
-                You need an <span className="text-amber italic">operator</span> running them.
+                Most growth-stage businesses are bleeding{" "}
+                <span className="text-crimson italic">time</span>,{" "}
+                <span className="text-crimson italic">leads</span>, and{" "}
+                <span className="text-crimson italic">revenue</span> without knowing where.
               </h1>
               <p className="text-base md:text-lg text-muted-foreground mt-6 leading-relaxed">
-                We pair you with a Business Forensics Operator who sits down with you, finds every leak,
-                and rebuilds the systems causing them. You skip 18 months of hiring and tool selection.
+                I help established businesses uncover what is actually broken beneath the surface.
+                Not just your marketing.{" "}
+                <span className="text-amber font-semibold">Your entire business.</span> Lead flow,
+                website performance, trust signals, sales process, follow-up, internal systems,
+                customer experience, operational gaps.
+              </p>
+              <p className="text-base md:text-lg text-muted-foreground mt-4 leading-relaxed">
+                I run True Cost Forensics on your business. I show you exactly what is broken and what
+                it is costing you. Then we build the systems to fix it.
+              </p>
+              <div className="mt-6 rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4">
+                <p className="text-foreground/90 text-[15px] leading-relaxed italic">
+                  “I am not an agency pitching you activity. I am an operator who finds the leak and
+                  closes it. No hidden timelines. No retainers. No cliché solutions. Just honest work.”
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital
+                Forensics · Based in Noblesville, Indiana
               </p>
               <div className="flex flex-wrap items-center gap-3 mt-8">
                 <a
@@ -142,17 +161,18 @@ const OperatorPage: React.FC = () => {
                 Definition
               </div>
               <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground italic mb-4">
-                An operator is <span className="text-amber not-italic">not</span> a consultant.
+                An operator is <span className="text-amber not-italic">not</span> an agency.
               </h2>
               <div className="space-y-3 text-muted-foreground text-[15px] leading-relaxed">
                 <p>
-                  A consultant hands you a deck. We sit in the chair next to yours, open your CRM with you,
-                  and tell you in plain English exactly where the money is bleeding out.
+                  A consultant hands you a deck. An agency pitches you activity. I sit in the chair
+                  next to yours, open your CRM with you, and tell you in plain English exactly where
+                  the money is bleeding out.
                 </p>
                 <p>
-                  Then we <span className="text-amber font-semibold">fix it ourselves</span>, using a stack of
-                  12+ proprietary tools built specifically for plugging revenue leaks. You don't learn the
-                  tools. You don't run anything.
+                  Then I <span className="text-amber font-semibold">fix it myself</span>, using AI,
+                  automation, strategy, and digital systems built specifically for closing leaks. You
+                  don't learn the tools. You don't run anything. You get the leak found and sealed.
                 </p>
               </div>
             </div>

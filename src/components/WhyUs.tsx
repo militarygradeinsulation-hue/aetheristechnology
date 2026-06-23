@@ -12,7 +12,7 @@ export const WhyUs: React.FC = () => {
     { tag: 'Operator-led', note: 'No account managers, no juniors' },
     { tag: 'Diagnosis first', note: 'Every leak named in dollars' },
     { tag: 'The Leak Audit™', note: '7-step forensic process' },
-    { tag: 'Behavioral stack', note: 'Psychology + Marine + 20yr ops' },
+    { tag: 'Behavioral stack', note: 'Psychology + Marine + Digital Forensics' },
     { tag: 'Sealed case files', note: 'Verifiable, dollar-tied outcomes' },
     { tag: 'No ongoing-billing ransom', note: 'Flat-fee Diagnostic, credited back' },
   ];
@@ -31,13 +31,18 @@ export const WhyUs: React.FC = () => {
                 </div>
                 <div>
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                    We know what you're thinking
+                    The real problem
                   </div>
                   <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-3">
-                    There's a ton of AI gurus out there. <span className="text-amber">Hard to trust any of them.</span>
+                    Most growth-stage businesses are bleeding time, leads, and revenue —{" "}
+                    <span className="text-crimson">without knowing where.</span>
                   </h2>
                   <p className="text-base text-muted-foreground leading-relaxed mb-5">
-                    We get it. Everyone with a laptop is selling AI snake oil. So don't take our word for it, go run our tools yourself. They're live, they work, and they cost a fraction of an engagement. Whatever you spend on a tool or smaller package <span className="text-amber font-semibold">automatically discounts off a bigger package</span> any time you decide to step up.
+                    I help established businesses uncover what is actually broken beneath the surface.
+                    Not just your marketing. Your entire business: lead flow, website performance, trust
+                    signals, sales process, follow-up, internal systems, customer experience, and
+                    operational gaps. I run True Cost Forensics, show you exactly what is broken and
+                    what it is costing you, then build the systems to fix it.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link to="/leak-audit">
@@ -45,9 +50,9 @@ export const WhyUs: React.FC = () => {
                         Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
-                    <Link to="/catalog">
+                    <Link to="/operator">
                       <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
-                        Browse the tool catalog <ArrowRight className="w-4 h-4 ml-2" />
+                        Meet the operator <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
                   </div>
@@ -69,18 +74,22 @@ export const WhyUs: React.FC = () => {
                     What makes us different
                   </div>
                   <h2 className="font-forensic text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-5">
-                    Everyone else is selling you advice.<br className="hidden md:block" />
-                    <span className="text-amber"> We're an AI-native operator.</span>
+                    I am not an agency pitching you activity.<br className="hidden md:block" />
+                    <span className="text-amber"> I am an operator who finds the leak and closes it.</span>
                   </h2>
                   <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-5">
-                    Consultants hand you a slide deck. Vendors sell you hours. We deploy a live forensic scanner that actually runs on your CRM, sales follow-up, and operational systems, at a fraction of the cost, in a fraction of the time.
+                    I don't sell advice, slide decks, or cliché solutions. I run True Cost Forensics on
+                    your entire business, quantify the bleed in dollars, then rebuild the systems that
+                    close it — using AI, automation, strategy, and digital systems.
                   </p>
                   <div className="rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 mb-2">
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
                       Why this matters
                     </div>
                     <p className="text-foreground/85 text-[15px] leading-relaxed italic">
-                      I've sat across the desk from the consultants. I've cut the checks. I watched them walk out with a binder and leave me with the same problems and a lighter bank account. I built Aetheris so you'd never feel that twice. You don't hire me to think about your business, you hire me to actually go inside it, find the bleed, and either hand you the wrench or pick it up myself.
+                      No hidden timelines. No retainers. No generic AI-guru fluff. Just honest work
+                      with growth-minded businesses running $5M–$50M that know they should be further
+                      along. If something is wrong, I find it. If it needs fixing, I build it.
                     </p>
                   </div>
                 </div>

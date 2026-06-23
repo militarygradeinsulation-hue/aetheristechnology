@@ -1,42 +1,41 @@
 ---
-name: Brand Strategy — Specialty Manufacturer Revenue Systems
-description: Credentials-first positioning for specialty manufacturers $5M–$25M, two-offer surface, 21-Day Revenue Diagnostic
-type: feature
+name: Brand Strategy — Business Forensics Operator
+description: Credentials-first positioning for growth-minded businesses $5M–$50M, True Cost Forensics, Leak Audit methodology
 ---
 
 ## Positioning (public site)
-Aetheris helps **specialty manufacturers ($5M–$25M revenue, US-based)** find the **$200K–$2M** they're losing to broken CRM, sales follow-up, and operational systems — and fix it.
+Aetheris is a **Business Forensics Operator** for **growth-minded businesses running $5M–$50M** that know they should be further along. We uncover what is actually broken beneath the surface — lead flow, website performance, trust signals, sales process, follow-up, internal systems, customer experience, operational gaps — and build custom AI, automation, strategy, and digital systems to fix those gaps.
 
-## Wedge
-Internally: commercial playground equipment manufacturers. Publicly: "specialty manufacturers" — broader phrase, same wedge.
+## Hook
+“Most growth-stage businesses are bleeding time, leads, and revenue — without knowing where.”
 
 ## Credentials-first hook (not metaphors)
-- 20 years building revenue systems for manufacturers
+- 20 years building revenue systems for businesses
 - Marine Corps veteran
-- Former Director of Strategy at a $25M aerospace firm with SpaceX accounts
-- Certifications: IBM, Harvard, Google, HubSpot
+- MS Marketing, Liberty University, 4.0 GPA
+- Doctorate in Digital Forensics (formally defining Revenue Forensics as a new field)
+- Former operator / Director of Strategy experience with high-growth firms
+- Based in Noblesville, Indiana (Indianapolis area)
 
-## Two public offers — only two
-1. **21-Day Revenue Diagnostic — $18,500 fixed fee.** Map where CRM, sales follow-up, and lead flow are losing money. Deliverable: written report, prioritized fixes, ROI projections, implementation roadmap. Fixed fee — no percentage-of-savings, no retainer required. CRM-agnostic (runs on a CSV export). HubSpot/Salesforce live integration is an upsell.
-2. **Implementation Retainer — $15K/month, 3-month minimum.** Available only to Diagnostic clients.
+## Methodology
+**True Cost Forensics** — show the business exactly what is broken and what it is costing them. Then build the systems to fix it. The public-facing process is **The Leak Audit™**, a 7-step forensic diagnostic.
 
-## Methodology doc
-Two-page measurement methodology lives at `/methodology` and PDF download. Goes to every prospect before pricing is discussed. Sections: how we define a leak, how we baseline, how we attribute recovery, scope, audit verification, deliverables.
+## Public paths
+- **Forensic Diagnostic** — operator-led flat-fee investigation into every revenue-bleeding surface. Deliverable: written findings, prioritized fixes, ROI projections, implementation roadmap. Credited toward implementation if the client proceeds.
+- **Implementation Retainer** — monthly operator-led rebuild of the Diagnostic's fixes. Diagnostic clients only, 3-month minimum.
+- **Operator-led bundles** at `/catalog` — self-serve entry points that discount toward a Diagnostic.
 
-## Credentials sheet
-One-page PDF at `/credentials`: bio, military service, prior operator roles, certs, formation date, structure, business-continuity plan. Attached to every proposal.
-
-## Sales mechanics (not visible on site)
-- Pilot pricing: $9,500 for first three signed by hard deadline. Full case study + video testimonial + named reference required. Lives in outreach scripts only — never on the public site.
-- Rep program is intact in code but not publicly promoted until 3 case studies + documented playbook exist.
+For exact pricing, commission splits, and offer mechanics, see [Pricing & Business Model](mem://business/pricing).
 
 ## Tone
-- Blunt. Operator. Specialty-manufacturer-literate.
-- "Revenue leak" / "Leak Audit™" language survives in `/blog`, `/leak-audit`, and downloadable content. It does not lead the homepage, hero, or services page.
+- Blunt. Operator. Non-corporate.
+- “Revenue leak” / “Leak Audit™” language is primary across homepage, tools, and downloadable content.
+- No agency-speak, no activity-pitching, no cliché AI-guru language.
 
 ## Forbidden
 - Public pilot pricing or discount banners
 - Tool-pack mega-menus / 40-tool roadmap surfaces
 - Social proof popups, testimonials carousels
-- "AI Systems Architect" title, generic AI-guru gradients
+- “AI Systems Architect” title, generic AI-guru gradients
 - 10-industry keyword stacks above the fold
+- Retainers or hidden timelines marketed as the main path

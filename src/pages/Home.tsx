@@ -22,10 +22,10 @@ const Home = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Find Where Your Leads Went | Aetheris"
-        description="One scan. Find where your leads leaked out — and exactly how to get them back."
+        title="Business Forensics Operator | Aetheris"
+        description="Most growth-stage businesses are bleeding time, leads, and revenue without knowing where. I help established businesses uncover what is actually broken beneath the surface and build the systems to fix it."
         path="/home"
-        keywords="lead leak scan, revenue recovery, business forensics, Indianapolis"
+        keywords="business forensics, revenue leak audit, True Cost Forensics, Indianapolis, operator"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         speakable={['h1']}
       />
@@ -35,7 +35,8 @@ const Home = () => {
         <main>
           <section className="px-4 pt-28 md:pt-36 pb-6">
             <h1 className="sr-only">
-              One button finds where your leads are leaking and instantly begins getting them back.
+              Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
+              Aetheris Business Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
             </h1>
             <div className="max-w-6xl mx-auto">
               <img
@@ -46,6 +47,23 @@ const Home = () => {
                 fetchPriority="high"
               />
             </div>
+          </section>
+
+          <section className="px-4 py-10 max-w-4xl mx-auto text-center">
+            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
+              Most growth-stage businesses are bleeding{" "}
+              <span className="text-crimson italic">time</span>,{" "}
+              <span className="text-crimson italic">leads</span>, and{" "}
+              <span className="text-crimson italic">revenue</span> without knowing where.
+            </h2>
+            <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              I help established businesses uncover what is actually broken beneath the surface.
+              Not just your marketing. Your entire business. I run True Cost Forensics, show you
+              exactly what is broken and what it is costing you, then build the systems to fix it.
+            </p>
+            <p className="mt-4 text-sm text-amber font-case uppercase tracking-widest">
+              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            </p>
           </section>
 
           <PublicLeakScan />
