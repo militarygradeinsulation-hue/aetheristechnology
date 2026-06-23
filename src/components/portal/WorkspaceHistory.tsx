@@ -25,6 +25,13 @@ const TOOL_LABELS: Record<string, string> = {
   business_diagnostic: 'Business Diagnostic',
   ai_detect: 'AI Writing Detector',
   detective_case: 'Detective Case File',
+  extension_scan: 'Extension · Forensic Scan',
+  extension_fix_all: 'Extension · Fix-All Run',
+  extension_agent: 'Extension · Agent Plan',
+  extension_linkedin: 'Extension · LinkedIn Draft',
+  extension_crm: 'Extension · HubSpot Autopsy',
+  extension_golden: 'Extension · Golden Report',
+  extension_misc: 'Extension · Capture',
 };
 
 interface Props {
