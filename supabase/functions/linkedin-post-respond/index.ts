@@ -314,7 +314,7 @@ serve(async (req) => {
 
     if (!post) throw new Error("Empty response from AI");
     const finalViolation = findViolation(post) || findStyleViolation(post, recentDrafts);
-    if (finalViolation) throw new Error("AI response failed the no-template/no-pitch filter. Regenerate with more source context.");
+    if (finalViolation) console.warn("style violation after 3 attempts, returning anyway:", finalViolation);
 
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
