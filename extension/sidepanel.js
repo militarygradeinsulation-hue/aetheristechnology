@@ -1864,6 +1864,31 @@ $("af-apply")?.addEventListener("click", async () => {
       if (row.status === "completed") {
         renderReport(row);
         openBtn.disabled = false;
+        // ALWAYS save golden reports to the rep's portal + lead history.
+        // Bypasses the auto-sync toggle on purpose — golden reports are
+        // operator deliverables and must never be lost.
+        try {
+          if (typeof window.aetherisSaveToPortal === "function" && !row.__savedToPortal) {
+            row.__savedToPortal = true;
+            window.aetherisSaveToPortal({
+              tool_type: "extension_golden",
+              title: `Golden report · ${row.company_name || companyInput?.value?.trim() || urlInput?.value?.trim() || "scan"}`,
+              input_data: {
+                url: row.target_url || urlInput?.value || "",
+                company: row.company_name || companyInput?.value || "",
+                scan_id: row.id,
+              },
+              output_data: {
+                scan_id: row.id,
+                report: row.report || null,
+                report_url: `https://aetheris.technology/report/${row.id}/ask`,
+                html: reportEl.innerHTML?.slice(0, 200000) || "",
+              },
+              silent: false,
+              force: true,
+            });
+          }
+        } catch (_) {}
         if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
         return;
       }
@@ -2117,7 +2142,7 @@ $("af-apply")?.addEventListener("click", async () => {
     if (!reportEl) return;
     let lastSavedHtml = "";
     const obs = new MutationObserver(async () => {
-      if (!(await isAutoOn())) return;
+      // Golden reports always save — do NOT gate on isAutoOn().
       const html = reportEl.innerHTML || "";
       // Only save when fully populated and changed
       if (html.length < 200 || html === lastSavedHtml) return;
