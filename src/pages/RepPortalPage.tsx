@@ -5,10 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat } from 'lucide-react';
+import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat, Download, Chrome, AlertCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
+import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
+import {
+  CURRENT_EXTENSION_VERSION,
+  getDownloadedExtensionVersion,
+  markExtensionDownloaded,
+  isExtensionOutdated,
+} from '@/lib/extensionVersion';
+import { useEffect } from 'react';
 
 interface RepData {
   rep_name: string;
@@ -24,7 +32,40 @@ const RepPortalPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [repData, setRepData] = useState<RepData | null>(null);
+  const [extVersion, setExtVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
   const { toast } = useToast();
+
+  useEffect(() => {
+    const refresh = () => setExtVersion(getDownloadedExtensionVersion());
+    window.addEventListener('aetheris:extension-downloaded', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('aetheris:extension-downloaded', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  const extOutdated = isExtensionOutdated();
+
+  const downloadExtension = async () => {
+    try {
+      const res = await fetch('/aetheris-extension.zip');
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aetheris-extension-${CURRENT_EXTENSION_VERSION}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      markExtensionDownloaded();
+      toast({ title: 'Extension downloaded', description: `v${CURRENT_EXTENSION_VERSION} ready. Unzip and load it in chrome://extensions.` });
+    } catch (e: any) {
+      toast({ title: 'Download failed', description: e?.message || 'Try again.', variant: 'destructive' });
+    }
+  };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +158,47 @@ const RepPortalPage: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* TOOLS — Chrome extension + Android APK */}
+            <Card className={extOutdated ? 'border-red-500/60' : undefined}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display">
+                  <Chrome className="w-5 h-5 text-primary" /> Aetheris Operator — Chrome Extension
+                  {extOutdated && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 text-red-500 text-xs px-2 py-0.5 font-semibold">
+                      <AlertCircle className="w-3 h-3" /> Update available
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="text-muted-foreground">Latest version:</span>
+                  <span className="font-semibold text-foreground">v{CURRENT_EXTENSION_VERSION}</span>
+                  {extVersion && (
+                    <>
+                      <span className="text-muted-foreground">· You have:</span>
+                      <span className={`font-semibold ${extOutdated ? 'text-red-500' : 'text-primary'}`}>v{extVersion}</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Scanner, AI Operator chat, LinkedIn drafter, Golden Report, recordings — all live in your Chrome side panel.
+                  Recordings auto-save to your history and the lead they belong to.
+                </p>
+                <Button onClick={downloadExtension} className={extOutdated ? 'bg-red-500 hover:bg-red-600 text-white' : undefined}>
+                  <Download className="w-4 h-4 mr-2" />
+                  {extOutdated ? 'Download update' : 'Download extension (.zip)'}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Unzip → open <code className="text-amber">chrome://extensions</code> → enable Developer mode → click <strong>Load unpacked</strong> → select the folder.
+                </p>
+              </CardContent>
+            </Card>
+
+            <AndroidApkDownloadCard />
+
+
 
             {/* COMMISSION STRUCTURE */}
             <Card>
