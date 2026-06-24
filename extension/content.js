@@ -14,6 +14,15 @@
   // ============================================================
   // DOM extraction
   // ============================================================
+  function safeQuerySelector(selector) {
+    try { return document.querySelector(selector); } catch { return null; }
+  }
+  function safeQuerySelectorAll(selector) {
+    try { return document.querySelectorAll(selector); } catch { return null; }
+  }
+  function isValidSelector(selector) {
+    try { document.querySelector(selector); return true; } catch { return false; }
+  }
   function extractPageText(max = 9000) {
     const clone = document.body?.cloneNode(true);
     if (!clone) return "";
