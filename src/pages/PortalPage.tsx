@@ -477,6 +477,23 @@ const PortalPage: React.FC = () => {
 
   const isPartner = profile.role === 'partner';
 
+  // Track whether THIS user has downloaded the current Chrome extension build.
+  // If not, the Extension button in the top bar turns red with an "Update" badge.
+  const [extDownloadedVersion, setExtDownloadedVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
+  useEffect(() => {
+    const refresh = () => setExtDownloadedVersion(getDownloadedExtensionVersion());
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('aetheris:extension-downloaded', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('aetheris:extension-downloaded', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  const extensionOutdated = extDownloadedVersion !== CURRENT_EXTENSION_VERSION;
+
   // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
   const isOwnerAdminEarly = hasValidAdminToken();
   useEffect(() => {
