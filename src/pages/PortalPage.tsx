@@ -32,7 +32,7 @@ import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
-import { Newspaper } from 'lucide-react';
+import { Newspaper, ArrowDownToLine } from 'lucide-react';
 
 import { EasyModeBar, EasyModeWrapper } from '@/components/EasyModeBar';
 
