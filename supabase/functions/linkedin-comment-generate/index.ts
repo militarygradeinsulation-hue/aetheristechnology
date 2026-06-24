@@ -229,7 +229,15 @@ serve(async (req) => {
       }
     }
 
-    if (!validated) validated = validateDistinctVariants(args, drafts);
+    if (!validated) {
+      // 3 attempts failed strict de-dupe. Return raw drafts anyway so the UI never goes blank.
+      console.warn("comment-generate: returning unvalidated drafts after 3 attempts", repairNotes);
+      validated = {
+        short: validateComment(args.short),
+        medium: validateComment(args.medium),
+        sharp_question: validateComment(args.sharp_question),
+      };
+    }
 
     return new Response(JSON.stringify({
       short: validated.short,
