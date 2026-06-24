@@ -32,7 +32,40 @@ const RepPortalPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [repData, setRepData] = useState<RepData | null>(null);
+  const [extVersion, setExtVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
   const { toast } = useToast();
+
+  useEffect(() => {
+    const refresh = () => setExtVersion(getDownloadedExtensionVersion());
+    window.addEventListener('aetheris:extension-downloaded', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('aetheris:extension-downloaded', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  const extOutdated = isExtensionOutdated();
+
+  const downloadExtension = async () => {
+    try {
+      const res = await fetch('/aetheris-extension.zip');
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aetheris-extension-${CURRENT_EXTENSION_VERSION}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      markExtensionDownloaded();
+      toast({ title: 'Extension downloaded', description: `v${CURRENT_EXTENSION_VERSION} ready. Unzip and load it in chrome://extensions.` });
+    } catch (e: any) {
+      toast({ title: 'Download failed', description: e?.message || 'Try again.', variant: 'destructive' });
+    }
+  };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
