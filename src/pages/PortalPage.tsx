@@ -52,6 +52,7 @@ import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
+import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
@@ -630,7 +631,8 @@ const PortalPage: React.FC = () => {
               <CardTitle className="font-display">Sales Tools</CardTitle>
               <p className="text-sm text-muted-foreground">Click any tool to use it free, right here inside the portal.</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <AndroidApkDownloadCard />
               <div className="grid sm:grid-cols-2 gap-3">
                 {REP_TOOLS.map((t) => {
                   const tip = REP_TOOL_TIPS[t.key];
