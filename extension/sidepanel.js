@@ -1868,8 +1868,10 @@ $("af-apply")?.addEventListener("click", async () => {
         // Bypasses the auto-sync toggle on purpose — golden reports are
         // operator deliverables and must never be lost.
         try {
-          if (typeof window.aetherisSaveToPortal === "function" && !row.__savedToPortal) {
-            row.__savedToPortal = true;
+          const dedupeKey = `scan:${row.id}`;
+          const seen = (window.__aetherisGoldenSaved = window.__aetherisGoldenSaved || new Set());
+          if (typeof window.aetherisSaveToPortal === "function" && !seen.has(dedupeKey)) {
+            seen.add(dedupeKey);
             window.aetherisSaveToPortal({
               tool_type: "extension_golden",
               title: `Golden report · ${row.company_name || companyInput?.value?.trim() || urlInput?.value?.trim() || "scan"}`,
