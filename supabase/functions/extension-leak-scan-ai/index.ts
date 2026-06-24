@@ -164,8 +164,9 @@ serve(async (req) => {
     // Normalize
     if (!Array.isArray(parsed.leaks)) parsed.leaks = [];
     parsed.leaks = parsed.leaks.slice(0, 6).map((l: any, i: number) => {
+      const isBadSel = (s: string) => /:(contains|has-text|eq|first|last|even|odd|gt|lt|parent|hidden|visible)\(/i.test(s);
       const sel = Array.isArray(l.selectors)
-        ? l.selectors.filter((s: any) => typeof s === "string" && s.trim() && !JQUERY_ONLY_PSEUDOS.test(s)).slice(0, 3)
+        ? l.selectors.filter((s: any) => typeof s === "string" && s.trim() && !isBadSel(s)).slice(0, 3)
         : [];
       let fa: any = null;
       if (l.fixAction && typeof l.fixAction === "object") {
@@ -178,7 +179,7 @@ serve(async (req) => {
             value: l.fixAction.value ?? null,
             where: ["top","bottom"].includes(l.fixAction.where) ? l.fixAction.where : "top",
           };
-          if (!fa.selector || JQUERY_ONLY_PSEUDOS.test(fa.selector)) {
+          if (!fa.selector || isBadSel(fa.selector)) {
             if (["injectBanner","injectCTA"].includes(op)) fa.selector = "";
             else fa = null;
           }
