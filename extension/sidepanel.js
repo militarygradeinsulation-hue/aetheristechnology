@@ -1884,7 +1884,7 @@ $("af-apply")?.addEventListener("click", async () => {
                 report_url: `https://aetheris.technology/report/${row.id}/ask`,
                 html: reportEl.innerHTML?.slice(0, 200000) || "",
               },
-              silent: true,
+              silent: false,
               force: true,
             });
           }
