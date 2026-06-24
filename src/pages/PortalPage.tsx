@@ -52,6 +52,7 @@ import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
+import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
 import { WhatsWrongDiagnostic } from '@/components/WhatsWrongDiagnostic';
 import { WebsiteScanner } from '@/components/WebsiteScanner';
 import { BusinessDiagnostic } from '@/components/BusinessDiagnostic';
