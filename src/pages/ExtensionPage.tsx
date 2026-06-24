@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
+import { markExtensionDownloaded, CURRENT_EXTENSION_VERSION } from "@/lib/extensionVersion";
 
 export default function ExtensionPage() {
   const download = () => {
@@ -11,12 +12,14 @@ export default function ExtensionPage() {
       .then((blob) => {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "aetheris-extension.zip";
+        a.download = `aetheris-extension-${CURRENT_EXTENSION_VERSION}.zip`;
         a.click();
         URL.revokeObjectURL(a.href);
+        markExtensionDownloaded();
       })
       .catch((err) => alert(err.message));
   };
+
 
   useEffect(() => {
     document.title = "Aetheris Operator · Chrome Extension";
