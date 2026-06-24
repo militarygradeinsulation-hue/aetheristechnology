@@ -981,12 +981,17 @@ export type Database = {
           id: string
           lead_business: string | null
           lead_id: string | null
+          mime_type: string | null
           mode: string
           outcome: string | null
           rep_code: string
           rep_notes: string | null
+          size_bytes: number | null
+          source: string
           started_at: string
+          title: string | null
           transcript: Json
+          video_path: string | null
         }
         Insert: {
           ai_messages?: Json
@@ -997,12 +1002,17 @@ export type Database = {
           id?: string
           lead_business?: string | null
           lead_id?: string | null
+          mime_type?: string | null
           mode?: string
           outcome?: string | null
           rep_code: string
           rep_notes?: string | null
+          size_bytes?: number | null
+          source?: string
           started_at?: string
+          title?: string | null
           transcript?: Json
+          video_path?: string | null
         }
         Update: {
           ai_messages?: Json
@@ -1013,12 +1023,17 @@ export type Database = {
           id?: string
           lead_business?: string | null
           lead_id?: string | null
+          mime_type?: string | null
           mode?: string
           outcome?: string | null
           rep_code?: string
           rep_notes?: string | null
+          size_bytes?: number | null
+          source?: string
           started_at?: string
+          title?: string | null
           transcript?: Json
+          video_path?: string | null
         }
         Relationships: [
           {

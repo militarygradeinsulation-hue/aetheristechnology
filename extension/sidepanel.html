@@ -57,6 +57,7 @@
     <button class="tab" data-tab="growth">Growth</button>
     <button class="tab" data-tab="case">Case File</button>
     <button class="tab" data-tab="golden">Golden Report</button>
+    <button class="tab" data-tab="record">Record</button>
   </nav>
 
   <main>
@@ -373,7 +374,41 @@
         <div id="golden-report" class="out" style="margin-top:10px;max-height:60vh;overflow-y:auto"></div>
       </div>
     </section>
+
+    <section class="panel" id="tab-record">
+      <div class="card">
+        <div class="card-title">Screen / Audio Recorder</div>
+        <div class="muted" style="margin-bottom:8px">
+          Capture screen + mic + system audio. The video auto-uploads to <strong>your Rep History</strong>
+          and — if an Active Lead is set above — also to that <strong>lead's history</strong> for download.
+        </div>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-include-mic" checked /> Mic
+          </label>
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-include-system" checked /> System audio
+          </label>
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-audio-only" /> Audio only
+          </label>
+        </div>
+        <label class="li-lbl" style="margin-top:8px">Title (optional)</label>
+        <input id="rec-title" type="text" placeholder="Discovery call — Acme" />
+        <label class="li-lbl">Outcome / notes (optional)</label>
+        <textarea id="rec-notes" rows="2" placeholder="What happened, next step…"></textarea>
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button id="rec-start" class="primary">● Start Recording</button>
+          <button id="rec-stop" class="ghost" disabled>■ Stop &amp; Save</button>
+          <span id="rec-timer" class="muted" style="margin-left:auto;font-family:'JetBrains Mono',monospace">00:00</span>
+        </div>
+        <div id="rec-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <video id="rec-preview" controls style="display:none;width:100%;margin-top:10px;border:1px solid #333;border-radius:4px;background:#000"></video>
+      </div>
+    </section>
   </main>
+
+
 
 
   <footer class="cockpit-footer">

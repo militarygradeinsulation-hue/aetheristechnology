@@ -10,6 +10,8 @@ import {
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { formatLibraryItemAsText, downloadText } from '@/lib/adminLibrary';
+import { RecordingsHistoryPanel } from '@/components/portal/RecordingsHistoryPanel';
+import { getPortalProfile } from '@/lib/portalAuth';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -78,8 +80,17 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
 
   const types = Array.from(new Set(items.map(i => i.tool_type)));
 
+  const repCode = getPortalProfile()?.code;
+
   return (
     <div className="space-y-4">
+      {repCode && (
+        <RecordingsHistoryPanel
+          repCode={repCode}
+          title="Call & screen recordings"
+          allowDelete
+        />
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="text-sm text-muted-foreground">
           {items.length} saved item{items.length === 1 ? '' : 's'}

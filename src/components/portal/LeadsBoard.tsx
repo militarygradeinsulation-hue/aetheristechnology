@@ -23,6 +23,7 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
 import { LeadActionChecklist } from './LeadActionChecklist';
+import { RecordingsHistoryPanel } from './RecordingsHistoryPanel';
 import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { LeadScoreBadge } from '@/components/LeadScoreBadge';
 import { leadClues } from '@/lib/leadClues';
@@ -1621,6 +1622,15 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               />
             </div>
           </div>
+
+          {/* Recordings attached to this lead — saved automatically by extension/app */}
+          <RecordingsHistoryPanel
+            leadId={lead.id}
+            strictLead
+            title={`Recordings for ${lead.business_name || lead.website || 'this lead'}`}
+            allowDelete
+            maxHeightClass="max-h-[45vh]"
+          />
 
           {/* Per-lead Action Checklist (touch steps + auto-generated follow-up sequence) */}
           <LeadActionChecklist leadId={lead.id} leadLabel={lead.business_name || lead.website || undefined} />

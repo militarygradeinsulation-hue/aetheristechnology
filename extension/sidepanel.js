@@ -2273,3 +2273,200 @@ $("af-apply")?.addEventListener("click", async () => {
     };
   }
 })();
+
+/* =====================================================================
+ *  REC TAB — Screen / Audio recorder
+ *  Captures via getDisplayMedia (+ optional mic) → MediaRecorder → POSTs
+ *  the blob to /functions/v1/save-recording so it lands in both the rep's
+ *  history and the active lead's history.
+ * ===================================================================== */
+(function () {
+  const $$ = (id) => document.getElementById(id);
+  let mediaRec = null;
+  let chunks = [];
+  let stream = null;
+  let micStream = null;
+  let startedAt = 0;
+  let timerId = null;
+  let lastBlob = null;
+  let lastMime = "video/webm";
+
+  function setStatus(msg, color) {
+    const el = $$("rec-status");
+    if (el) { el.textContent = msg || ""; el.style.color = color || ""; }
+  }
+  function fmtTimer(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, "0");
+    const s = String(sec % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  }
+  function tick() {
+    const el = $$("rec-timer");
+    if (el) el.textContent = fmtTimer(Math.floor((Date.now() - startedAt) / 1000));
+  }
+  function pickMime(audioOnly) {
+    const candidates = audioOnly
+      ? ["audio/webm;codecs=opus", "audio/webm", "audio/ogg"]
+      : ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"];
+    for (const m of candidates) {
+      try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch {}
+    }
+    return audioOnly ? "audio/webm" : "video/webm";
+  }
+
+  async function startRec() {
+    if (mediaRec) return;
+    const audioOnly = !!$$("rec-audio-only")?.checked;
+    const wantMic = !!$$("rec-include-mic")?.checked;
+    const wantSystem = !!$$("rec-include-system")?.checked;
+
+    try {
+      if (audioOnly) {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } else {
+        // Screen video + optional system audio
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { frameRate: 24 },
+          audio: wantSystem,
+        });
+        if (wantMic) {
+          try {
+            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Mix mic into the recording stream
+            const ctx = new AudioContext();
+            const dest = ctx.createMediaStreamDestination();
+            if (wantSystem && stream.getAudioTracks().length) {
+              ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks())).connect(dest);
+            }
+            ctx.createMediaStreamSource(micStream).connect(dest);
+            // Replace audio tracks on the main stream
+            stream.getAudioTracks().forEach((t) => stream.removeTrack(t));
+            dest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+          } catch (e) {
+            console.warn("mic capture failed", e);
+            setStatus("Mic blocked — recording without microphone.", "#f4a261");
+          }
+        }
+      }
+
+      // Auto-stop when user clicks "stop sharing" in the browser UI
+      stream.getVideoTracks().forEach((t) => t.addEventListener("ended", () => { if (mediaRec) stopRec(); }));
+
+      lastMime = pickMime(audioOnly);
+      chunks = [];
+      mediaRec = new MediaRecorder(stream, { mimeType: lastMime });
+      mediaRec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+      mediaRec.onstop = onStopped;
+      mediaRec.start(1000);
+
+      startedAt = Date.now();
+      timerId = setInterval(tick, 500);
+      $$("rec-start").disabled = true;
+      $$("rec-stop").disabled = false;
+      setStatus(`Recording… (${lastMime})`, "var(--amber)");
+    } catch (e) {
+      setStatus(`Couldn't start: ${e?.message || e}`, "#ff6b6b");
+      cleanupStreams();
+    }
+  }
+
+  function cleanupStreams() {
+    try { stream?.getTracks().forEach((t) => t.stop()); } catch {}
+    try { micStream?.getTracks().forEach((t) => t.stop()); } catch {}
+    stream = null; micStream = null;
+  }
+
+  async function stopRec() {
+    if (!mediaRec) return;
+    try { mediaRec.stop(); } catch {}
+    $$("rec-stop").disabled = true;
+  }
+
+  async function onStopped() {
+    clearInterval(timerId); timerId = null;
+    const durationSec = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
+    const blob = new Blob(chunks, { type: lastMime });
+    lastBlob = blob;
+    cleanupStreams();
+
+    // Preview
+    try {
+      const preview = $$("rec-preview");
+      if (preview) {
+        preview.src = URL.createObjectURL(blob);
+        preview.style.display = "block";
+      }
+    } catch {}
+
+    mediaRec = null;
+    $$("rec-start").disabled = false;
+
+    // Upload
+    setStatus("Uploading to your portal…");
+    try {
+      const accessCode = await getAccessCode();
+      if (!accessCode) {
+        setStatus("Saved locally — enter a rep code above to upload to your portal.", "#f4a261");
+        return;
+      }
+      const leadName = ($$("portal-lead-name")?.value || "").trim();
+      const leadContact = ($$("portal-lead-contact")?.value || "").trim();
+      const title = ($$("rec-title")?.value || "").trim();
+      const notes = ($$("rec-notes")?.value || "").trim();
+
+      // Best-effort: resolve a real lead_id via existing portal-save flow
+      let leadId = null;
+      try {
+        if (leadName) {
+          const ensure = await fetch(`${SUPABASE_URL}/functions/v1/extension-portal-save`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accessCode,
+              activeLead: { name: leadName, contact: leadContact, kind: "lead" },
+              source: "extension-recorder-ensure",
+              payload: { recording_pending: true },
+            }),
+          }).then((r) => r.ok ? r.json() : null).catch(() => null);
+          leadId = ensure?.leadId || ensure?.lead_id || null;
+        }
+      } catch (e) { console.warn("ensure lead failed", e); }
+
+      const isAudio = lastMime.startsWith("audio/");
+      const ext = (lastMime.split("/")[1] || "webm").split(";")[0];
+      const fd = new FormData();
+      fd.append("file", blob, `aetheris-${Date.now()}.${ext}`);
+      fd.append("rep_code", accessCode);
+      if (leadId) fd.append("lead_id", leadId);
+      if (leadName) fd.append("lead_business", leadName);
+      fd.append("source", "extension");
+      fd.append("mode", isAudio ? "audio" : "screen");
+      fd.append("duration_sec", String(durationSec));
+      fd.append("mime_type", lastMime);
+      if (title) fd.append("title", title);
+      if (notes) fd.append("rep_notes", notes);
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/save-recording`, { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`upload ${res.status}: ${await res.text().catch(() => "")}`);
+      const data = await res.json();
+      setStatus(
+        `✓ Saved to ${leadId ? "rep + lead history" : "rep history"} · ${(blob.size / 1024 / 1024).toFixed(1)} MB · ${fmtTimer(durationSec)}`,
+        "var(--amber)",
+      );
+      // Notify any open portal tabs
+      try { window.opener?.dispatchEvent?.(new Event("aetheris:recording-saved")); } catch {}
+    } catch (e) {
+      console.error("rec upload failed", e);
+      setStatus(`Upload failed: ${e?.message || e}. The video is still in the preview — right-click → Save As.`, "#ff6b6b");
+    }
+  }
+
+  function init() {
+    const start = $$("rec-start"); const stop = $$("rec-stop");
+    if (!start || !stop) return;
+    start.addEventListener("click", startRec);
+    stop.addEventListener("click", stopRec);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
