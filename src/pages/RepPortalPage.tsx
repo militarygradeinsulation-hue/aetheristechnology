@@ -5,10 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat } from 'lucide-react';
+import { ArrowLeft, Loader2, DollarSign, TrendingUp, Percent, Shield, Repeat, Download, Chrome, AlertCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
+import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
+import {
+  CURRENT_EXTENSION_VERSION,
+  getDownloadedExtensionVersion,
+  markExtensionDownloaded,
+  isExtensionOutdated,
+} from '@/lib/extensionVersion';
+import { useEffect } from 'react';
 
 interface RepData {
   rep_name: string;
