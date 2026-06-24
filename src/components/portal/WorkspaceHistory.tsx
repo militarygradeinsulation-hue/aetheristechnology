@@ -80,8 +80,17 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
 
   const types = Array.from(new Set(items.map(i => i.tool_type)));
 
+  const repCode = getPortalProfile()?.code;
+
   return (
     <div className="space-y-4">
+      {repCode && (
+        <RecordingsHistoryPanel
+          repCode={repCode}
+          title="Call & screen recordings"
+          allowDelete
+        />
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="text-sm text-muted-foreground">
           {items.length} saved item{items.length === 1 ? '' : 's'}
