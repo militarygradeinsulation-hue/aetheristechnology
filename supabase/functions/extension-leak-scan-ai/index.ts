@@ -86,6 +86,8 @@ RULES:
 - REP_SCRIPT is MANDATORY. Every script must cite at least one specific leak title from above, the dollar leak range, AND the recoverable leads/mo. Use the actual company/brand name from the page if present. No generic templates.
 - SELECTOR RULE: use ONLY valid standard CSS selectors that work in document.querySelector(). NEVER use jQuery pseudo-classes like :contains(), :has-text, or positional :eq(). If an element must be matched by its text, prefer a stable structural selector or set fixAction to null.`,
 
+const JQUERY_ONLY_PSEUDOS = /:(contains|has-text|eq|first|last|even|odd|gt|lt|parent|hidden|visible)\(/i;
+
 const ipBuckets = new Map<string, { count: number; reset: number }>();
 function rateLimited(ip: string, limit = 20, windowMs = 3600_000): boolean {
   const now = Date.now();
