@@ -145,7 +145,7 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: userContent }],
+        messages: [{ role: "system", content: SYSTEM + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` }, { role: "user", content: userContent }],
         response_format: { type: "json_object" },
       }),
     });
