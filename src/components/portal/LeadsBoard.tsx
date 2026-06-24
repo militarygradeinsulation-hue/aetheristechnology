@@ -23,6 +23,7 @@ import { LeadGamePlan } from './LeadGamePlan';
 import { DetectiveMode } from './DetectiveMode';
 import { LeadCluesTrail } from './LeadCluesTrail';
 import { LeadActionChecklist } from './LeadActionChecklist';
+import { RecordingsHistoryPanel } from './RecordingsHistoryPanel';
 import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
 import { LeadScoreBadge } from '@/components/LeadScoreBadge';
 import { leadClues } from '@/lib/leadClues';
