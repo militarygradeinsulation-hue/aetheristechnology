@@ -116,6 +116,45 @@ const RepPortalPage: React.FC = () => {
               <p className="text-muted-foreground text-sm mt-1">Code: {repData.code}</p>
             </div>
 
+            {/* TOOLS — Chrome extension + Android APK (TOP for fast access) */}
+            <Card className={extOutdated ? 'border-red-500/60' : undefined}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display">
+                  <Chrome className="w-5 h-5 text-primary" /> Aetheris Operator — Chrome Extension
+                  {extOutdated && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 text-red-500 text-xs px-2 py-0.5 font-semibold">
+                      <AlertCircle className="w-3 h-3" /> Update available
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="text-muted-foreground">Latest version:</span>
+                  <span className="font-semibold text-foreground">v{CURRENT_EXTENSION_VERSION}</span>
+                  {extVersion && (
+                    <>
+                      <span className="text-muted-foreground">· You have:</span>
+                      <span className={`font-semibold ${extOutdated ? 'text-red-500' : 'text-primary'}`}>v{extVersion}</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Scanner, AI Operator chat, LinkedIn drafter, Golden Report, recordings — all live in your Chrome side panel.
+                  Recordings auto-save to your history and the lead they belong to.
+                </p>
+                <Button onClick={downloadExtension} className={extOutdated ? 'bg-red-500 hover:bg-red-600 text-white' : undefined}>
+                  <Download className="w-4 h-4 mr-2" />
+                  {extOutdated ? 'Download update' : 'Download extension (.zip)'}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Unzip → open <code className="text-amber">chrome://extensions</code> → enable Developer mode → click <strong>Load unpacked</strong> → select the folder.
+                </p>
+              </CardContent>
+            </Card>
+
+            <AndroidApkDownloadCard />
+
             <div className="grid grid-cols-2 gap-4">
               <Card>
                 <CardHeader className="pb-2">
@@ -159,44 +198,7 @@ const RepPortalPage: React.FC = () => {
               </Card>
             </div>
 
-            {/* TOOLS — Chrome extension + Android APK */}
-            <Card className={extOutdated ? 'border-red-500/60' : undefined}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-display">
-                  <Chrome className="w-5 h-5 text-primary" /> Aetheris Operator — Chrome Extension
-                  {extOutdated && (
-                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 text-red-500 text-xs px-2 py-0.5 font-semibold">
-                      <AlertCircle className="w-3 h-3" /> Update available
-                    </span>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="text-muted-foreground">Latest version:</span>
-                  <span className="font-semibold text-foreground">v{CURRENT_EXTENSION_VERSION}</span>
-                  {extVersion && (
-                    <>
-                      <span className="text-muted-foreground">· You have:</span>
-                      <span className={`font-semibold ${extOutdated ? 'text-red-500' : 'text-primary'}`}>v{extVersion}</span>
-                    </>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Scanner, AI Operator chat, LinkedIn drafter, Golden Report, recordings — all live in your Chrome side panel.
-                  Recordings auto-save to your history and the lead they belong to.
-                </p>
-                <Button onClick={downloadExtension} className={extOutdated ? 'bg-red-500 hover:bg-red-600 text-white' : undefined}>
-                  <Download className="w-4 h-4 mr-2" />
-                  {extOutdated ? 'Download update' : 'Download extension (.zip)'}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  Unzip → open <code className="text-amber">chrome://extensions</code> → enable Developer mode → click <strong>Load unpacked</strong> → select the folder.
-                </p>
-              </CardContent>
-            </Card>
 
-            <AndroidApkDownloadCard />
 
 
 

@@ -101,7 +101,9 @@ serve(async (req) => {
       userContent.push({ type: "image_url", image_url: { url: screenshot } });
     }
 
-    const messages: any[] = [{ role: "system", content: SYSTEM_PROMPT }];
+    const todayStr = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const dateNote = `\n\nCURRENT DATE: ${todayStr}. The current year is ${new Date().getUTCFullYear()}. Do NOT reference 2024 or any earlier year as "this year" or "current" — use the actual current date above.`;
+    const messages: any[] = [{ role: "system", content: SYSTEM_PROMPT + dateNote }];
     for (const m of history) {
       if (m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string") {
         messages.push({ role: m.role, content: m.content.slice(0, 2000) });

@@ -184,7 +184,7 @@ Respond ONLY with valid JSON of shape:
     body: JSON.stringify({
       model: "google/gemini-2.5-pro",
       messages: [
-        { role: "system", content: SYSTEM_VOICE },
+        { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
