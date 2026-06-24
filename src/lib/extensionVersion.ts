@@ -3,7 +3,7 @@
 // "last downloaded" version is older will see the portal's Extension button
 // turn red with an "Update" badge until they re-download from /extension.
 
-export const CURRENT_EXTENSION_VERSION = "2026.06.24d";
+export const CURRENT_EXTENSION_VERSION = "2026.06.24e";
 
 const KEY = "aetheris.extensionDownloadedVersion";
 

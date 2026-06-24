@@ -1868,8 +1868,10 @@ $("af-apply")?.addEventListener("click", async () => {
         // Bypasses the auto-sync toggle on purpose — golden reports are
         // operator deliverables and must never be lost.
         try {
-          if (typeof window.aetherisSaveToPortal === "function" && !row.__savedToPortal) {
-            row.__savedToPortal = true;
+          const dedupeKey = `scan:${row.id}`;
+          const seen = (window.__aetherisGoldenSaved = window.__aetherisGoldenSaved || new Set());
+          if (typeof window.aetherisSaveToPortal === "function" && !seen.has(dedupeKey)) {
+            seen.add(dedupeKey);
             window.aetherisSaveToPortal({
               tool_type: "extension_golden",
               title: `Golden report · ${row.company_name || companyInput?.value?.trim() || urlInput?.value?.trim() || "scan"}`,
@@ -2137,19 +2139,26 @@ $("af-apply")?.addEventListener("click", async () => {
   });
 
   // 6) Golden report — watch its report container and save once per completion
+  // Module-level dedupe: pollOnce() AND the mutation observer below both
+  // save the golden report. Without this guard we save it twice per run.
+  window.__aetherisGoldenSaved = window.__aetherisGoldenSaved || new Set();
+
   (function watchGolden() {
     const reportEl = document.getElementById("golden-report");
     if (!reportEl) return;
-    let lastSavedHtml = "";
-    const obs = new MutationObserver(async () => {
-      // Golden reports always save — do NOT gate on isAutoOn().
+    let debounceTimer = null;
+    let lastLen = 0;
+    const obs = new MutationObserver(() => {
       const html = reportEl.innerHTML || "";
-      // Only save when fully populated and changed
-      if (html.length < 200 || html === lastSavedHtml) return;
-      // Wait for stability — re-check after 800ms
-      lastSavedHtml = html;
-      setTimeout(async () => {
-        if (reportEl.innerHTML !== html) return;
+      if (html.length < 200 || html.length === lastLen) return;
+      lastLen = html.length;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      // One debounced save 1.2s after the last mutation — covers final paint
+      debounceTimer = setTimeout(() => {
+        const finalHtml = reportEl.innerHTML || "";
+        const key = `dom:${finalHtml.length}:${finalHtml.slice(0, 64)}`;
+        if (window.__aetherisGoldenSaved.has(key)) return;
+        window.__aetherisGoldenSaved.add(key);
         window.aetherisSaveToPortal({
           tool_type: "extension_golden",
           title: `Golden report · ${document.getElementById("golden-company")?.value?.trim() || document.getElementById("golden-url")?.value?.trim() || "scan"}`,
@@ -2157,10 +2166,10 @@ $("af-apply")?.addEventListener("click", async () => {
             url: document.getElementById("golden-url")?.value || "",
             company: document.getElementById("golden-company")?.value || "",
           },
-          output_data: { html: html.slice(0, 200000) },
+          output_data: { html: finalHtml.slice(0, 200000) },
           silent: true,
         });
-      }, 800);
+      }, 1200);
     });
     obs.observe(reportEl, { childList: true, subtree: true });
   })();
