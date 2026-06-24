@@ -33,6 +33,7 @@ import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPan
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Newspaper, ArrowDownToLine } from 'lucide-react';
+import { CURRENT_EXTENSION_VERSION, getDownloadedExtensionVersion } from '@/lib/extensionVersion';
 
 import { EasyModeBar, EasyModeWrapper } from '@/components/EasyModeBar';
 
@@ -476,6 +477,37 @@ const PortalPage: React.FC = () => {
 
   const isPartner = profile.role === 'partner';
 
+  // Track whether THIS user has downloaded the current Chrome extension build.
+  // If not, the Extension button in the top bar turns red with an "Update" badge.
+  const [extDownloadedVersion, setExtDownloadedVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
+  useEffect(() => {
+    const refresh = () => setExtDownloadedVersion(getDownloadedExtensionVersion());
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('aetheris:extension-downloaded', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('aetheris:extension-downloaded', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  const extensionOutdated = extDownloadedVersion !== CURRENT_EXTENSION_VERSION;
+
+  // Nag once per session per version when outdated.
+  useEffect(() => {
+    if (!extensionOutdated || !profile?.code) return;
+    const flagKey = `aetheris.extensionNagShown.${profile.code}.${CURRENT_EXTENSION_VERSION}`;
+    try {
+      if (sessionStorage.getItem(flagKey)) return;
+      sessionStorage.setItem(flagKey, '1');
+    } catch { /* ignore */ }
+    sonnerToast.error('New Chrome extension build available', {
+      description: `You're behind on v${CURRENT_EXTENSION_VERSION}. Click Extension in the top bar to download and reload it.`,
+      duration: 10000,
+    });
+  }, [extensionOutdated, profile?.code]);
+
   // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
   const isOwnerAdminEarly = hasValidAdminToken();
   useEffect(() => {
@@ -827,8 +859,30 @@ const PortalPage: React.FC = () => {
               <Users className="w-4 h-4" /> Leads
             </Button>
             {(isPartner || isAdmin) && (
-              <Button asChild variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10" title="Download the latest Aetheris Chrome extension">
-                <Link to="/extension"><ArrowDownToLine className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Extension</span></Link>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className={
+                  extensionOutdated
+                    ? 'relative border-red-500/70 text-red-400 bg-red-500/10 hover:bg-red-500/20 animate-pulse'
+                    : 'relative border-amber/40 text-amber hover:bg-amber/10'
+                }
+                title={
+                  extensionOutdated
+                    ? `New extension build available (v${CURRENT_EXTENSION_VERSION}). Click to download and reload.`
+                    : 'Chrome extension is up to date'
+                }
+              >
+                <Link to="/extension">
+                  <ArrowDownToLine className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Extension</span>
+                  {extensionOutdated && (
+                    <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                      Update
+                    </span>
+                  )}
+                </Link>
               </Button>
             )}
             {isPartner && (
