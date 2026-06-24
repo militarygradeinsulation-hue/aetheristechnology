@@ -826,6 +826,11 @@ const PortalPage: React.FC = () => {
             <Button variant="outline" size="sm" onClick={() => { setTab('leads'); setActiveTool(null); }} className="gap-1.5 hidden lg:inline-flex border-amber/40 text-amber hover:bg-amber/10">
               <Users className="w-4 h-4" /> Leads
             </Button>
+            {(isPartner || isAdmin) && (
+              <Button asChild variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10" title="Download the latest Aetheris Chrome extension">
+                <Link to="/extension"><ArrowDownToLine className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Extension</span></Link>
+              </Button>
+            )}
             {isPartner && (
               <Button asChild variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10">
                 <Link to="/admin"><Shield className="w-4 h-4 mr-1" /> Admin</Link>
