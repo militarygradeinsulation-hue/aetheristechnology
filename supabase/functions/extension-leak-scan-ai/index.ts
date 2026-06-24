@@ -83,7 +83,8 @@ RULES:
 - "replaceText" = swap the textContent. "setHTML" = swap innerHTML (use sparingly). "hide" = display:none. "setStyle" value must be a JSON object of CSS props. "injectBanner" inserts a top/bottom amber banner with value as the message. "injectCTA" inserts a floating CTA button labeled value.
 - leakValueUSD low/high should reflect the company's apparent size and the severity of leaks combined. Use integers, no commas.
 - LEAD COUNTS (leadImpact + per-leak leadsLostPerMonth/leadsRecoverablePerMonth) are MANDATORY. Base them on observable traffic/scale signals + industry conversion benchmarks. Per-leak counts should sum loosely to the leadImpact totals.
-- REP_SCRIPT is MANDATORY. Every script must cite at least one specific leak title from above, the dollar leak range, AND the recoverable leads/mo. Use the actual company/brand name from the page if present. No generic templates.`;
+- REP_SCRIPT is MANDATORY. Every script must cite at least one specific leak title from above, the dollar leak range, AND the recoverable leads/mo. Use the actual company/brand name from the page if present. No generic templates.
+- SELECTOR RULE: use ONLY valid standard CSS selectors that work in document.querySelector(). NEVER use jQuery pseudo-classes like :contains(), :has-text, or positional :eq(). If an element must be matched by its text, prefer a stable structural selector or set fixAction to null.`,
 
 const ipBuckets = new Map<string, { count: number; reset: number }>();
 function rateLimited(ip: string, limit = 20, windowMs = 3600_000): boolean {
