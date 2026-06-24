@@ -33,6 +33,7 @@ import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPan
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Newspaper, ArrowDownToLine } from 'lucide-react';
+import { CURRENT_EXTENSION_VERSION, getDownloadedExtensionVersion } from '@/lib/extensionVersion';
 
 import { EasyModeBar, EasyModeWrapper } from '@/components/EasyModeBar';
 
