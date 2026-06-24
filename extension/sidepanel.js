@@ -2142,7 +2142,7 @@ $("af-apply")?.addEventListener("click", async () => {
     if (!reportEl) return;
     let lastSavedHtml = "";
     const obs = new MutationObserver(async () => {
-      if (!(await isAutoOn())) return;
+      // Golden reports always save — do NOT gate on isAutoOn().
       const html = reportEl.innerHTML || "";
       // Only save when fully populated and changed
       if (html.length < 200 || html === lastSavedHtml) return;
