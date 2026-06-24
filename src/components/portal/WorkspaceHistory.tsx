@@ -10,6 +10,8 @@ import {
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { formatLibraryItemAsText, downloadText } from '@/lib/adminLibrary';
+import { RecordingsHistoryPanel } from '@/components/portal/RecordingsHistoryPanel';
+import { getPortalProfile } from '@/lib/portalAuth';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
