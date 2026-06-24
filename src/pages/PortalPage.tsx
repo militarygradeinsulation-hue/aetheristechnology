@@ -845,8 +845,30 @@ const PortalPage: React.FC = () => {
               <Users className="w-4 h-4" /> Leads
             </Button>
             {(isPartner || isAdmin) && (
-              <Button asChild variant="outline" size="sm" className="border-amber/40 text-amber hover:bg-amber/10" title="Download the latest Aetheris Chrome extension">
-                <Link to="/extension"><ArrowDownToLine className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Extension</span></Link>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className={
+                  extensionOutdated
+                    ? 'relative border-red-500/70 text-red-400 bg-red-500/10 hover:bg-red-500/20 animate-pulse'
+                    : 'relative border-amber/40 text-amber hover:bg-amber/10'
+                }
+                title={
+                  extensionOutdated
+                    ? `New extension build available (v${CURRENT_EXTENSION_VERSION}). Click to download and reload.`
+                    : 'Chrome extension is up to date'
+                }
+              >
+                <Link to="/extension">
+                  <ArrowDownToLine className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Extension</span>
+                  {extensionOutdated && (
+                    <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                      Update
+                    </span>
+                  )}
+                </Link>
               </Button>
             )}
             {isPartner && (
