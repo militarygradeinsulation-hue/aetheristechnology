@@ -736,8 +736,8 @@
       return { revertId: id, message: `Flagged ${touched.length} dead links with a dashed outline.` };
     },
     form_too_long(leak) {
-      const form = document.querySelector((leak.selectors || [])[0]);
-      if (!form) return { error: "Form not found." };
+      const form = safeQuerySelector((leak.selectors || [])[0]);
+      if (!form) return { error: "Form not found or selector invalid." };
       const fields = Array.from(form.querySelectorAll("input:not([type=hidden]):not([type=submit]),select,textarea"));
       const extras = fields.slice(3); // keep first 3
       const touched = [];
@@ -840,8 +840,8 @@
           const id = recordRevert(() => cta.remove());
           return { revertId: id, message: `Floated AI CTA: "${cta.textContent}"` };
         }
-        const el = document.querySelector(fa.selector);
-        if (!el) return { error: `Selector "${fa.selector}" not found on page.` };
+        const el = safeQuerySelector(fa.selector);
+        if (!el) return { error: `Selector not found or invalid. Snap the area manually or run a fresh scan.` };
         if (op === "replaceText") {
           const orig = el.textContent;
           el.textContent = String(fa.value ?? "");
