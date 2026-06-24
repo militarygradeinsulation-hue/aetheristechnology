@@ -494,6 +494,20 @@ const PortalPage: React.FC = () => {
   }, []);
   const extensionOutdated = extDownloadedVersion !== CURRENT_EXTENSION_VERSION;
 
+  // Nag once per session per version when outdated.
+  useEffect(() => {
+    if (!extensionOutdated || !profile?.code) return;
+    const flagKey = `aetheris.extensionNagShown.${profile.code}.${CURRENT_EXTENSION_VERSION}`;
+    try {
+      if (sessionStorage.getItem(flagKey)) return;
+      sessionStorage.setItem(flagKey, '1');
+    } catch { /* ignore */ }
+    sonnerToast.error('New Chrome extension build available', {
+      description: `You're behind on v${CURRENT_EXTENSION_VERSION}. Click Extension in the top bar to download and reload it.`,
+      duration: 10000,
+    });
+  }, [extensionOutdated, profile?.code]);
+
   // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
   const isOwnerAdminEarly = hasValidAdminToken();
   useEffect(() => {
