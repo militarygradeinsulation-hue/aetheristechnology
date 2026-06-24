@@ -630,7 +630,8 @@ const PortalPage: React.FC = () => {
               <CardTitle className="font-display">Sales Tools</CardTitle>
               <p className="text-sm text-muted-foreground">Click any tool to use it free, right here inside the portal.</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <AndroidApkDownloadCard />
               <div className="grid sm:grid-cols-2 gap-3">
                 {REP_TOOLS.map((t) => {
                   const tip = REP_TOOL_TIPS[t.key];
