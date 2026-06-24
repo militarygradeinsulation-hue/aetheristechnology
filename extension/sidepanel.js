@@ -2189,6 +2189,51 @@ $("af-apply")?.addEventListener("click", async () => {
   const logBtn = document.getElementById("portal-lead-log");
   const clearBtn = document.getElementById("portal-lead-clear");
   const statusEl = document.getElementById("portal-sync-status");
+
+  // ---- Collapsible Portal Sync panel ----
+  (function initCollapse() {
+    const toggleBtn = document.getElementById("portal-sync-toggle");
+    const body = document.getElementById("portal-sync-collapsible");
+    const summary = document.getElementById("portal-sync-summary");
+    if (!toggleBtn || !body || !summary) return;
+
+    function renderSummary() {
+      const code = (document.getElementById("portal-sync-code")?.value || "").trim().toUpperCase();
+      const name = (nameEl?.value || "").trim();
+      const contact = (contactEl?.value || "").trim();
+      const parts = [];
+      if (code) parts.push(`Synced as ${code}`);
+      if (name || contact) parts.push(`Lead: ${name || contact}`);
+      else parts.push("No active lead");
+      summary.textContent = parts.join(" · ");
+    }
+
+    function apply(collapsed) {
+      body.style.display = collapsed ? "none" : "flex";
+      summary.style.display = collapsed ? "block" : "none";
+      toggleBtn.textContent = collapsed ? "▸" : "▾";
+      toggleBtn.title = collapsed ? "Show active lead" : "Hide active lead";
+      if (collapsed) renderSummary();
+    }
+
+    chrome.storage.local.get("aetherisSyncCollapsed").then(({ aetherisSyncCollapsed }) => {
+      apply(aetherisSyncCollapsed === true);
+    });
+
+    toggleBtn.addEventListener("click", async () => {
+      const { aetherisSyncCollapsed } = await chrome.storage.local.get("aetherisSyncCollapsed");
+      const next = !(aetherisSyncCollapsed === true);
+      await chrome.storage.local.set({ aetherisSyncCollapsed: next });
+      apply(next);
+    });
+
+    // Keep summary fresh while user edits
+    [nameEl, contactEl, document.getElementById("portal-sync-code")].forEach((el) => {
+      el?.addEventListener("input", () => {
+        if (summary.style.display !== "none") renderSummary();
+      });
+    });
+  })();
   if (!nameEl) return;
 
   const KIND_LABELS = {
