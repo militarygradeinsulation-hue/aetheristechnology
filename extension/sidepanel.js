@@ -322,7 +322,7 @@ function wireScanActions() {
     const r = await applyLeakFix(id);
     if (!r?.ok) {
       b.disabled = false; b.textContent = "Fix in-page";
-      alert(r?.error || "Fix failed.");
+      toast(r?.error || "Fix failed.");
     }
   }));
   out.querySelectorAll("[data-revert]").forEach((b) => b.addEventListener("click", async () => {
@@ -331,7 +331,7 @@ function wireScanActions() {
     if (!revertId) return;
     const r = await relayToTab({ type: "AETHERIS_REVERT_FIX", revertId });
     if (r?.ok) { state.revertById.delete(id); toast("Reverted."); renderScan(); }
-    else alert(r?.error || "Revert failed.");
+    else toast(r?.error || "Revert failed.");
   }));
   out.querySelectorAll("[data-fix-tab]").forEach((b) => b.addEventListener("click", () => {
     switchTab("fix");
@@ -379,7 +379,7 @@ async function undoLastFix() {
   const lastId = Array.from(state.revertById.keys()).pop();
   if (!lastId) return toast("No applied fix to undo.");
   const r = await revertLeakFix(lastId);
-  if (!r?.ok) alert(r?.error || "Undo failed.");
+  if (!r?.ok) toast(r?.error || "Undo failed.");
 }
 
 function openMoreMenu(anchor, leak) {
