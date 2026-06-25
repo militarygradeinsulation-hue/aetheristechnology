@@ -33,7 +33,7 @@ import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPan
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
 import { NewsFeedPanel } from '@/components/portal/NewsFeedPanel';
 import { Newspaper, ArrowDownToLine } from 'lucide-react';
-import { CURRENT_EXTENSION_VERSION, getDownloadedExtensionVersion } from '@/lib/extensionVersion';
+import { CURRENT_EXTENSION_VERSION, getDownloadedExtensionVersion, markExtensionDownloaded } from '@/lib/extensionVersion';
 
 import { EasyModeBar, EasyModeWrapper } from '@/components/EasyModeBar';
 
@@ -429,6 +429,58 @@ const PortalPage: React.FC = () => {
   const { unread: unreadChat } = useUnreadTeamMessages(profile?.code || '', !!profile && tab === 'team');
   const { className: cursorClassName } = usePortalCursor();
 
+  // Track whether THIS user has downloaded the current Chrome extension build.
+  // If not, every portal user gets a direct download prompt instead of only a small partner/admin link.
+  const [extDownloadedVersion, setExtDownloadedVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
+  useEffect(() => {
+    const refresh = () => setExtDownloadedVersion(getDownloadedExtensionVersion());
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('aetheris:extension-downloaded', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('aetheris:extension-downloaded', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  const extensionOutdated = extDownloadedVersion !== CURRENT_EXTENSION_VERSION;
+
+  // Nag once per session per version when outdated.
+  useEffect(() => {
+    if (!profile?.code || !extensionOutdated) return;
+    const flagKey = `aetheris.extensionNagShown.${profile.code}.${CURRENT_EXTENSION_VERSION}`;
+    try {
+      if (sessionStorage.getItem(flagKey)) return;
+      sessionStorage.setItem(flagKey, '1');
+    } catch { /* ignore */ }
+    sonnerToast.error('Chrome extension download is ready', {
+      description: `Download v${CURRENT_EXTENSION_VERSION} from the top of this portal, then reload it in Chrome.`,
+      duration: 10000,
+    });
+  }, [extensionOutdated, profile?.code]);
+
+  const downloadChromeExtension = async () => {
+    try {
+      const res = await fetch('/aetheris-extension.zip');
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aetheris-extension-${CURRENT_EXTENSION_VERSION}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      markExtensionDownloaded();
+      setExtDownloadedVersion(CURRENT_EXTENSION_VERSION);
+      toast({ title: 'Chrome extension downloaded', description: 'Unzip it, open chrome://extensions, then Load unpacked.' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Try again.';
+      toast({ title: 'Download failed', description: msg, variant: 'destructive' });
+    }
+  };
+
   // ============ LOGIN VIEW ============
   if (!profile) {
     return (
@@ -477,37 +529,6 @@ const PortalPage: React.FC = () => {
   }
 
   const isPartner = profile.role === 'partner';
-
-  // Track whether THIS user has downloaded the current Chrome extension build.
-  // If not, the Extension button in the top bar turns red with an "Update" badge.
-  const [extDownloadedVersion, setExtDownloadedVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
-  useEffect(() => {
-    const refresh = () => setExtDownloadedVersion(getDownloadedExtensionVersion());
-    refresh();
-    window.addEventListener('storage', refresh);
-    window.addEventListener('aetheris:extension-downloaded', refresh);
-    window.addEventListener('focus', refresh);
-    return () => {
-      window.removeEventListener('storage', refresh);
-      window.removeEventListener('aetheris:extension-downloaded', refresh);
-      window.removeEventListener('focus', refresh);
-    };
-  }, []);
-  const extensionOutdated = extDownloadedVersion !== CURRENT_EXTENSION_VERSION;
-
-  // Nag once per session per version when outdated.
-  useEffect(() => {
-    if (!extensionOutdated || !profile?.code) return;
-    const flagKey = `aetheris.extensionNagShown.${profile.code}.${CURRENT_EXTENSION_VERSION}`;
-    try {
-      if (sessionStorage.getItem(flagKey)) return;
-      sessionStorage.setItem(flagKey, '1');
-    } catch { /* ignore */ }
-    sonnerToast.error('New Chrome extension build available', {
-      description: `You're behind on v${CURRENT_EXTENSION_VERSION}. Click Extension in the top bar to download and reload it.`,
-      duration: 10000,
-    });
-  }, [extensionOutdated, profile?.code]);
 
   // Partner (Braden, non-admin) ALWAYS opens to the Partner Hub — never to admin/owner tabs.
   const isOwnerAdminEarly = hasValidAdminToken();
