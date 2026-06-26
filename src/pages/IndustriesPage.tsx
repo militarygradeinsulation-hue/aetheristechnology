@@ -338,7 +338,7 @@ const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () 
             <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
           </div>
           <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
-            <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you get back</div>
+            <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">How the Leak Audit fixes it</div>
             <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
           </div>
 
