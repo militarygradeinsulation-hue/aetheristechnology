@@ -439,8 +439,11 @@ const IndustriesPage: React.FC = () => {
               Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
               Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-              Tap any industry to open the case file. Type your niche below if you don't see it. the methodology travels.
+            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
+              Tap any industry to open the case file. Type your niche below if you don't see it &mdash; the methodology travels.
+            </p>
+            <p className="text-sm md:text-base text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
+              One offer fixes every industry on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
             </p>
 
             <div className="max-w-xl mx-auto relative">
