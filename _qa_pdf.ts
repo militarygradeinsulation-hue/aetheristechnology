@@ -1,0 +1,9 @@
+import { generateFullReport } from '/dev-server/src/lib/generateScanReport';
+import { generateLeakAuditPdf } from '/dev-server/src/lib/generateLeakAuditPdf';
+import jsPDFMod from 'jspdf';
+import fs from 'fs';
+const JsPDF: any = (jsPDFMod as any).default ?? jsPDFMod;
+JsPDF.prototype.save = function(name: string){ fs.writeFileSync('/tmp/qa/'+name, Buffer.from(this.output('arraybuffer'))); };
+generateFullReport({score:42,grade:'D',companyName:'Acme Plumbing',executiveSummary:'Your operation is leaking revenue across three primary channels.',gaps:[{category:'Tracking',severity:'critical',title:'Visitor signal is dark',description:'Only 1 marketing pixel detected.',annualCost:'$48,000',recommendedFix:'Install GA4 + Meta Pixel.',projectedROI:'$120,000'},{category:'Conversion',severity:'critical',title:'No primary CTA above the fold',description:'Visitors land on a wall of text.',recommendedFix:'Add a single high-contrast CTA in the hero band.'},{category:'Trust',severity:'warning',title:'No social proof on the page',description:'No testimonial, case study, client logo.',recommendedFix:'Add 2-3 outcome-specific testimonials.'}],roadmap:[{month:'M1',action:'Install pixel stack and rebuild hero with a single CTA.',estimatedCost:'$3K',projectedRecovery:'$24K'}],roiTable:[{category:'Lost retargeting',currentWaste:'$48,000',projectedRecovery:'$120,000'}],nextSteps:['Book the 21-day Forensic Diagnostic.','Approve remediation.'],competitiveBrief:'Two of your three closest competitors run full retargeting stacks.'} as any);
+generateLeakAuditPdf({name:'Joseph',company:'Acme Plumbing',email:'joseph@acme.com',revenueBand:'$1M-$5M',estimatedAnnualLeak:185000,severity:'CRITICAL',totalScore:38,maxScore:100,categories:[{key:'vocab',label:'Vocabulary Friction',score:4,max:10,pct:40,diagnosis:'The words on your site create doubt.',topLeaks:['Homepage opens with jargon.','Pricing page hedges.']}]} as any);
+console.log('done');
