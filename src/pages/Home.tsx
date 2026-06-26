@@ -69,6 +69,57 @@ const Home = () => {
             </p>
           </section>
 
+          {/* One offer · The Leak Audit */}
+          <section id="the-leak-audit" className="px-4 pb-12 scroll-mt-24">
+            <div className="max-w-5xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10 relative overflow-hidden">
+              <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
+                Active case
+              </div>
+              <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-amber mb-3">
+                One offer · One operator · $2,500 flat
+              </div>
+              <h2 className="font-forensic text-3xl md:text-5xl font-bold leading-tight mb-4">
+                The Leak Audit. <span className="text-crimson italic">That's the whole offer.</span>
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-6 leading-relaxed">
+                No tiers. No upsell ladder. No à la carte tools. One operator-led forensic diagnostic that runs every
+                instrument we have against your business, names the leaks, prices the bleed, and hands you a fix plan.
+                The $2,500 applies 1:1 toward any engagement that follows.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                {[
+                  { icon: FileSearch, label: 'Forensic scan', body: 'Website, sales process, follow-up, brand, and revenue surfaces audited end-to-end.' },
+                  { icon: Gauge, label: 'Priced bleed', body: 'Every leak quantified in dollars per year so you know what each one is actually costing.' },
+                  { icon: CheckCircle2, label: 'Fix plan', body: 'A prioritized leak ledger you can hand to your team or hand back to us to execute.' },
+                ].map((c) => (
+                  <div key={c.label} className="rounded-sm border border-border/60 bg-background/40 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <c.icon className="w-4 h-4 text-amber" />
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber">{c.label}</div>
+                    </div>
+                    <p className="text-xs text-foreground/85 leading-snug">{c.body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to="/leak-audit">
+                  <Button className="bg-amber text-background hover:bg-amber/90 font-semibold w-full sm:w-auto">
+                    See the Leak Audit <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('public-leak-scan')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10"
+                >
+                  <Search className="w-4 h-4" /> Run the free pre-scan first
+                </button>
+              </div>
+            </div>
+          </section>
+
           <PublicLeakScan />
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
