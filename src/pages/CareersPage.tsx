@@ -85,12 +85,12 @@ const CareersPage = () => {
                   <Lock className="w-3.5 h-3.5" /> One door in
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
-                  $20 access fee. Then the test. Then your application.
+                  $40 access fee. Then the test. Then your application.
                 </h2>
                 <div className="grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
-                    <p className="font-semibold text-foreground">Pay $20</p>
+                    <p className="font-semibold text-foreground">Pay $40</p>
                     <p className="text-muted-foreground text-xs mt-1">Filters tire-kickers. Credited toward your 1099 contractor expenses if hired.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
@@ -110,7 +110,7 @@ const CareersPage = () => {
                 </div>
                 <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
                   <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Pay $20 & start the test →
+                    Pay $40 & start the test →
                   </Button>
                 </a>
               </CardContent>
@@ -173,7 +173,7 @@ const CareersPage = () => {
                       'You won\'t pick up the phone or message a stranger on LinkedIn.',
                       'You won\'t send a real follow-up after the first "not right now."',
                       'You want to coast. There\'s no coasting in commission.',
-                      'You can\'t — or won\'t — pay $20 to prove you\'re serious.',
+                      'You can\'t — or won\'t — pay $40 to prove you\'re serious.',
                     ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
                   </ul>
                 </CardContent>
@@ -198,14 +198,14 @@ const CareersPage = () => {
                   <Clock className="w-3.5 h-3.5" /> 10 minutes to apply
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground">
-                  Pay the $20. Pass the test. Send the resume.
+                  Pay the $40. Pass the test. Send the resume.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
                   That's the only path in. There is no contact form on this page on purpose.
                 </p>
                 <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Start the $20 access test →
+                    Start the $40 access test →
                   </Button>
                 </a>
               </CardContent>

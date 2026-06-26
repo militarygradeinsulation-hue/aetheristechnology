@@ -87,7 +87,7 @@ const CareersTestPage = () => {
       // Clean session_id from URL
       searchParams.delete('session_id');
       setSearchParams(searchParams, { replace: true });
-      toast({ title: 'Payment confirmed', description: 'Your $20 test access is unlocked.' });
+      toast({ title: 'Payment confirmed', description: 'Your $40 test access is unlocked.' });
       setPhase('intro');
     } catch (e) {
       toast({ title: 'Could not verify payment', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -98,7 +98,7 @@ const CareersTestPage = () => {
   const fetchClientSecret = async (): Promise<string> => {
     const { data, error } = await supabase.functions.invoke('create-checkout', {
       body: {
-        priceId: 'careers_test_fee',
+        priceId: 'careers_test_fee_v2',
         customerEmail: payerEmail || undefined,
         returnUrl: `${window.location.origin}/careers/test?session_id={CHECKOUT_SESSION_ID}`,
         environment: getStripeEnvironment(),
@@ -215,7 +215,7 @@ const CareersTestPage = () => {
 
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Careers Test, Aetheris AI" description="Pay the $20 access fee and take the qualifying knowledge test for the Aetheris sales rep role." path="/careers/test" />
+      <SEOHead title="Careers Test, Aetheris AI" description="Pay the $40 access fee and take the qualifying knowledge test for the Aetheris sales rep role." path="/careers/test" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
@@ -227,16 +227,16 @@ const CareersTestPage = () => {
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
                   <Lock className="w-3.5 h-3.5" /> Step 1 of 3 · Test Access Fee
                 </div>
-                <CardTitle className="font-display text-3xl mt-2">Pay $20 to unlock the test</CardTitle>
+                <CardTitle className="font-display text-3xl mt-2">Pay $40 to unlock the test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  We get a lot of curious clicks. The $20 access fee filters out tire-kickers and confirms you're serious enough to read the site and take a real test.
+                  We get a lot of curious clicks. The $40 access fee filters out tire-kickers and confirms you're serious enough to read the site and take a real test.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-sm space-y-2">
                   <div className="flex items-start gap-2">
                     <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                    <span><strong className="text-foreground">Credited toward your 1099.</strong> If you're hired, the $20 is recorded as a business expense against your 1099 contractor income — your money, just routed through the test gate first.</span>
+                    <span><strong className="text-foreground">Credited toward your 1099.</strong> If you're hired, the $40 is recorded as a business expense against your 1099 contractor income — your money, just routed through the test gate first.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
@@ -264,7 +264,7 @@ const CareersTestPage = () => {
                     setPhase('checkout');
                   }}
                 >
-                  Continue to payment — $20 →
+                  Continue to payment — $40 →
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
                   Secure checkout by Stripe. No exceptions, no comp codes.
@@ -278,7 +278,7 @@ const CareersTestPage = () => {
               <Card className="bg-card/60 backdrop-blur border-border/50">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
-                    <p className="font-display text-lg">Careers Test Access — $20</p>
+                    <p className="font-display text-lg">Careers Test Access — $40</p>
                     <p className="text-xs text-muted-foreground">Paying as {payerEmail}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setPhase('pay')}>Change</Button>
@@ -464,7 +464,7 @@ const CareersTestPage = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 80%.</p>
-                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it. (Your $20 access fee covers all retries.)</p>
+                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it. (Your $40 access fee covers all retries.)</p>
                 <Button variant="outline" onClick={() => { setPhase('intro'); setResult(null); setAnswers({}); setNotes(''); }}>Go back to intro</Button>
               </CardContent>
             </Card>
