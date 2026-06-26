@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import careersHero from '@/assets/careers-hero.jpg';
 import careersIntroVideo from '@/assets/careers-intro.mp4';
+import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
 
 const trackCareersCta = (cta: string) => {
   try {
@@ -73,6 +74,9 @@ const CareersPage = () => {
                 Message from the Architect · Tap to unmute
               </p>
             </div>
+
+            {/* LIVE PRESSURE — applicant count + pass/fail ticker + spots */}
+            <ApplicantPressure />
 
             {/* GATE — PAID TEST */}
             <Card className="bg-amber/10 border-amber/40">
