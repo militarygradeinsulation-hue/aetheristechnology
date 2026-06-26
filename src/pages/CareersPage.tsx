@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import {
+  Target, CheckCircle, XCircle, Shield, Rocket, Users, Clock, Brain, Headphones, DollarSign, Lock,
+} from 'lucide-react';
+import careersHero from '@/assets/careers-hero.jpg';
+import careersIntroVideo from '@/assets/careers-intro.mp4';
 
 const trackCareersCta = (cta: string) => {
   try {
@@ -26,93 +25,189 @@ const trackCareersCta = (cta: string) => {
     }]);
   } catch {}
 };
-import {
-  Target, Zap, CheckCircle, XCircle, Phone, Mail, Share2,
-  Shield, Rocket, GraduationCap, Users, Clock, Brain, MapPin, Headphones,
-} from 'lucide-react';
-import careersHero from '@/assets/careers-hero.jpg';
-import careersIntroVideo from '@/assets/careers-intro.mp4';
 
+const WHY = [
+  { icon: Target, title: 'Universal pain, easy pitch', desc: 'Every business leaks revenue. The free Leak Audit is the wedge, the operator-led Forensic Diagnostic is the close.' },
+  { icon: Brain, title: 'Operator-led delivery', desc: 'You sell the diagnosis. Joseph and the engineering team do the surgery. No implementation, no babysitting.' },
+  { icon: Rocket, title: 'Full operator stack', desc: 'Forecast Center, Lead Pool, scripts, follow-up playbooks, training, and a private portal — all included.' },
+  { icon: Users, title: 'Partner track', desc: 'Hit numbers → recruit reps under your code, earn an override on every sale they close, get a seat at the table.' },
+  { icon: Headphones, title: 'Direct line to the operator', desc: 'You text Joseph. You call him. No managers, no HR. That\'s the whole org chart.' },
+  { icon: Shield, title: 'No cold-call quotas', desc: 'Sell how you sell — LinkedIn, email, in-person, referrals. Results matter, not the calendar. Remote-first, Indy-loved.' },
+];
 
 const CareersPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    linkedin_url: '',
-    experience: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.email.trim()) {
-      toast({ title: "Name and email are required.", variant: "destructive" });
-      return;
-    }
-    setLoading(true);
-    const id = crypto.randomUUID();
-    const trimmedEmail = form.email.trim();
-    const trimmedName = form.name.trim();
-    const { error } = await supabase.from('rep_signups').insert([{
-      id,
-      name: trimmedName,
-      email: trimmedEmail,
-      phone: form.phone.trim() || null,
-      linkedin_url: form.linkedin_url.trim() || null,
-      experience: form.experience.trim() || null,
-    }]);
-    setLoading(false);
-    if (error) {
-      toast({ title: "Something went wrong. Try again.", variant: "destructive" });
-      return;
-    }
-    // Send welcome email with playbook
-    supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'rep-welcome',
-        recipientEmail: trimmedEmail,
-        idempotencyKey: `rep-welcome-${id}`,
-        templateData: { name: trimmedName },
-      },
-    });
-    // Notify joseph@ about the new application
-    supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'rep-application-notification',
-        recipientEmail: 'aetheris.technology@outlook.com',
-        idempotencyKey: `rep-app-notify-${id}`,
-        templateData: {
-          name: trimmedName,
-          email: trimmedEmail,
-          phone: form.phone.trim() || undefined,
-          linkedin_url: form.linkedin_url.trim() || undefined,
-          experience: form.experience.trim() || undefined,
-        },
-      },
-    });
-    setSubmitted(true);
-    toast({ title: "You're in. Welcome to the team. Check your email for the playbook." });
-  };
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
         title="Independent Sales Rep | Aetheris AI"
-        description="Join Aetheris as an independent, commission-based sales rep. Sell forensic business diagnostics to SMB owners, work remotely, and grow with a founder-led operator team."
+        description="Join Aetheris as an independent, commission-based 1099 sales rep. Sell forensic business diagnostics, work remotely, direct line to the operator."
         path="/careers"
       />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+
         <div className="pt-24 pb-16">
-          {!submitted ? <SignupSection form={form} onChange={handleChange} onSubmit={handleSubmit} loading={loading} /> : <PlaybookSection />}
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-12">
+
+            {/* INTRO VIDEO */}
+            <div>
+              <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
+                <video
+                  src={careersIntroVideo}
+                  poster={careersHero}
+                  controls
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onEnded={(e) => {
+                    const v = e.currentTarget;
+                    v.pause(); v.currentTime = 0; v.load();
+                  }}
+                  className="w-full h-auto block"
+                />
+              </div>
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
+                Message from the Architect · Tap to unmute
+              </p>
+            </div>
+
+            {/* GATE — PAID TEST */}
+            <Card className="bg-amber/10 border-amber/40">
+              <CardContent className="p-6 sm:p-7 space-y-4">
+                <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
+                  <Lock className="w-3.5 h-3.5" /> One door in
+                </div>
+                <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
+                  $20 access fee. Then the test. Then your application.
+                </h2>
+                <div className="grid sm:grid-cols-3 gap-3 text-sm">
+                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
+                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
+                    <p className="font-semibold text-foreground">Pay $20</p>
+                    <p className="text-muted-foreground text-xs mt-1">Filters tire-kickers. Credited toward your 1099 contractor expenses if hired.</p>
+                  </div>
+                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
+                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 2</p>
+                    <p className="font-semibold text-foreground">Take the test</p>
+                    <p className="text-muted-foreground text-xs mt-1">25 of 60 randomized questions · 50 min · 80% to pass · 5 attempts/day.</p>
+                  </div>
+                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
+                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 3</p>
+                    <p className="font-semibold text-foreground">Submit application</p>
+                    <p className="text-muted-foreground text-xs mt-1">Resume + 150-word pitch. Joseph reviews every passing app within 48 hours.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
+                  <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">No exceptions.</strong> No comp codes, no "I'll pay later." The fee is the commitment signal. Random apps without a paid test go in the trash.</span>
+                </div>
+                <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
+                  <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
+                    Pay $20 & start the test →
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+
+            {/* WHY + PERKS (merged) */}
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
+              <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
+                We don't sell software. We sell <span className="text-amber">forensic clarity</span>.
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {WHY.map(({ icon: Icon, title, desc }, i) => (
+                  <div key={title} className="forensic-tile rounded-xl p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber/15 border border-amber/40 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-amber" />
+                      </div>
+                      <div>
+                        <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-1">// pt_{String(i+1).padStart(2,'0')}</p>
+                        <h3 className="font-semibold text-foreground font-display">{title}</h3>
+                        <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FIT — THRIVE vs DON'T APPLY */}
+            <div className="grid md:grid-cols-2 gap-5">
+              <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
+                <CardHeader>
+                  <CardTitle className="font-display text-foreground flex items-center gap-2">
+                    <CheckCircle className="text-emerald-500 w-5 h-5" /> You'll thrive here if
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {[
+                      'You\'re self-driven and don\'t need a manager checking on you.',
+                      'You can hold a real conversation with a business owner without sounding like a script.',
+                      'You believe most businesses are leaking money (because they are).',
+                      'You want commission upside, not a salary safety net.',
+                      'You can take rejection like a forensic — clinical, not personal.',
+                    ].map((t) => <li key={t} className="flex gap-2"><span className="text-emerald-500">✓</span>{t}</li>)}
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card className="bg-card/60 backdrop-blur border-crimson/20">
+                <CardHeader>
+                  <CardTitle className="font-display text-foreground flex items-center gap-2">
+                    <XCircle className="text-crimson w-5 h-5" /> Don't apply if
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {[
+                      'You need a base salary to feel safe.',
+                      'You won\'t pick up the phone or message a stranger on LinkedIn.',
+                      'You won\'t send a real follow-up after the first "not right now."',
+                      'You want to coast. There\'s no coasting in commission.',
+                      'You can\'t — or won\'t — pay $20 to prove you\'re serious.',
+                    ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* REALITY CHECK */}
+            <div className="forensic-tile rounded-2xl border border-crimson/40 p-6 md:p-8">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Reality check</div>
+              <h2 className="text-2xl md:text-3xl font-bold font-display text-crimson leading-tight mb-3">
+                If you need a paycheck next week, this isn't for you.
+              </h2>
+              <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
+                We're looking for people who can absorb the vision and build with us. A lot of people talk the talk and don't last two weeks. If you're here to fake it, you'll be gone before onboarding finishes.
+              </p>
+            </div>
+
+            {/* FINAL CTA */}
+            <Card className="bg-card/60 backdrop-blur border-amber/40">
+              <CardContent className="p-6 sm:p-8 text-center space-y-4">
+                <div className="flex items-center justify-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
+                  <Clock className="w-3.5 h-3.5" /> 10 minutes to apply
+                </div>
+                <h2 className="font-display text-2xl sm:text-3xl text-foreground">
+                  Pay the $20. Pass the test. Send the resume.
+                </h2>
+                <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                  That's the only path in. There is no contact form on this page on purpose.
+                </p>
+                <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
+                  <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                    Start the $20 access test →
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+
+          </div>
         </div>
         <Footer />
       </div>
@@ -120,370 +215,5 @@ const CareersPage = () => {
     </div>
   );
 };
-
-const SignupSection = ({ form, onChange, onSubmit, loading }: {
-  form: { name: string; email: string; phone: string; linkedin_url: string; experience: string };
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  loading: boolean;
-}) => (
-  <div className="max-w-6xl mx-auto px-4 sm:px-6">
-
-    {/* OPERATOR INTRO VIDEO. larger, sits right under the hero image */}
-    <div className="mb-12">
-      <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
-        <video
-          src={careersIntroVideo}
-          poster={careersHero}
-          controls
-          muted
-          playsInline
-          preload="metadata"
-          onEnded={(e) => {
-            const v = e.currentTarget;
-            v.pause();
-            v.currentTime = 0;
-            v.load(); // revert to poster (careersHero) when playback ends
-          }}
-          className="w-full h-auto block"
-        >
-          Your browser does not support the video tag.
-        </video>
-      </div>
-      <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
-        Message from the Architect · Tap to unmute
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-center">
-        <a href="/careers/test" onClick={() => trackCareersCta('hero_take_test')}>
-          <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
-            Take the Qualifying Test →
-          </Button>
-        </a>
-        <a href="#why-us">
-          <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-            Why Join Aetheris
-          </Button>
-        </a>
-      </div>
-    </div>
-
-    {/* GATE */}
-    <Card className="bg-amber/10 border-amber/40 mb-12">
-      <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-        <div>
-          <p className="font-display text-lg text-foreground">Applications are gated. Pass the test first.</p>
-          <p className="text-sm text-muted-foreground">25 questions pulled from a 60-question bank · 50 minutes · 80% to pass · 5 attempts/day. No test = no application. Random apps go in the trash.</p>
-        </div>
-        <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')}><Button size="lg" className="bg-amber text-background hover:bg-amber/90">Take the Test →</Button></a>
-      </CardContent>
-    </Card>
-
-
-    {/* WHY OPERATORS CHOOSE US */}
-    <div id="why-us" className="mb-14">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
-      <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
-        We don't sell software. We sell <span className="text-amber">forensic clarity</span>.
-      </h2>
-      <div className="grid md:grid-cols-2 gap-5">
-        {[
-          { icon: Target, title: 'Universal Pain, Easy Pitch', desc: 'Every business leaks revenue. We hand you a free Leak Audit tool to break the ice, the Signal Pack as the entry bundle, and the 21-Day Revenue Diagnostic + Active Case as the flagships. The pitch writes itself.' },
-          { icon: Brain, title: 'Operator-Led, You Don\'t Deliver', desc: 'You sell the diagnosis; Joseph and the engineering team do the surgery. You don\'t implement, you don\'t support, you don\'t babysit. Stay in your lane and earn.' },
-          { icon: Rocket, title: 'Operator Stack, Included', desc: 'Forecast Center, Lead Pool, sales scripts, follow-up playbooks, share-link tools, training modules, and a private portal, all built in. Nothing to buy. Nothing to bolt on.' },
-          { icon: Users, title: 'Partner Track, Build a Team', desc: 'Hit consistent numbers and get promoted. Partner status = recruit reps under your code, earn an override on every sale they close, and get a seat at the strategy table.' },
-          { icon: Headphones, title: 'Direct Line to the Operator', desc: 'You text Joseph. You call him. No layers, no managers, no HR. If you can sell, you have his cell. That\'s the whole org chart.' },
-          { icon: GraduationCap, title: 'Real Ramp, Not "Watch This Webinar"', desc: 'Onboarding playbook, daily hustle goals, in-portal training with scoring, and direct coaching, all aimed at your first close in week 1. We invest in winners.' },
-        ].map(({ icon: Icon, title, desc }, i) => (
-          <div key={title} className="forensic-tile rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-lg bg-amber/15 border border-amber/40 flex items-center justify-center flex-shrink-0">
-                <Icon className="w-5 h-5 text-amber" />
-              </div>
-              <div>
-                <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-1">// pt_{String(i+1).padStart(2,'0')}</p>
-                <h3 className="font-semibold text-foreground font-display text-lg">{title}</h3>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* PERKS */}
-    <div className="mb-14">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">The Perks</p>
-      <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
-        Built for closers. Run on your terms.
-      </h2>
-      <div className="grid sm:grid-cols-3 gap-4">
-        {[
-          { icon: Clock, title: 'Set Your Own Hours', desc: 'Built-in time clock if you want to track. Otherwise you\'re your own boss. Results matter, not the calendar.' },
-          { icon: MapPin, title: 'Remote-First, Indy-Loved', desc: 'Headquartered in Indianapolis. Reps welcome anywhere in the US. Boots-on-ground in Indy = priority lead routing.' },
-          { icon: Shield, title: 'No Cold-Call Quotas', desc: 'No "smile and dial" KPIs. Sell how you sell, LinkedIn, email, in-person, referrals. Whatever works.' },
-        ].map(({ icon: Icon, title, desc }, i) => (
-          <div key={title} className="forensic-tile rounded-xl p-5">
-            <p className="font-mono text-[9px] tracking-[0.28em] text-amber/70 uppercase mb-2">// perk_{String(i+1).padStart(2,'0')}</p>
-            <Icon className="w-5 h-5 text-amber mb-3" />
-            <p className="font-semibold text-foreground font-display">{title}</p>
-            <p className="text-sm text-muted-foreground mt-1.5">{desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* PERFECT FOR */}
-    <div className="mb-14">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Who This Is Perfect For</p>
-      <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-3">
-        If you see yourself here, you're already half-hired.
-      </h2>
-      <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto mb-8">
-        We're not looking for resumes, we're looking for operators. These are the people who tend to print here.
-      </p>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { title: 'The Side-Hustler', desc: 'You have a 9-to-5 but your nights and weekends are wide open. You want a commission-driven side lane where results matter more than clocking in.' },
-          { title: 'The Burned-Out Vendor Closer', desc: 'You sold marketing software, SaaS, or "growth" and watched clients churn in 90 days. Selling forensic diagnostics that actually fix the leak feels different.' },
-          { title: 'The Ex-Operator', desc: 'You ran or managed a small business. You know exactly where the money bleeds, because it bled out of yours. That insight closes deals fast.' },
-          { title: 'The Indy Local Connector', desc: 'You know Indianapolis owners, chambers, BNI, and the local scene. We route Indy leads to Indy reps first, your rolodex is an unfair advantage.' },
-          { title: 'The LinkedIn Native', desc: 'You actually like posting, DMing, and building a personal brand. We give you the scripts, the hooks, and a tested content cadence, you bring the voice.' },
-        ].map(({ title, desc }, i) => (
-          <div key={title} className="forensic-tile rounded-xl p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-2">PROFILE · {String(i+1).padStart(2,'0')}</p>
-            <p className="font-semibold text-foreground font-display">{title}</p>
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* WHY NOW, GROUND FLOOR */}
-    <div className="mb-14 rounded-2xl border border-amber/30 bg-gradient-to-br from-amber/[0.06] via-card/40 to-card/40 p-8 md:p-10 backdrop-blur">
-      <div className="text-center mb-8">
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Why Now</p>
-        <h2 className="text-3xl md:text-4xl font-bold font-display text-foreground mt-2">
-          Ground floor of a category that didn't exist 12 months ago.
-        </h2>
-        <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-3 leading-relaxed">
-          "Revenue Forensics" is a brand-new category, operator-led diagnostics with an in-house live scanner behind them. Most vendors are still selling 2019 marketing playbooks. We're selling x-ray vision into a business owner's P&amp;L. The early reps own the territory.
-        </p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { tag: '01', title: 'Untapped Lane', desc: 'Nobody else is leading with forensics + operator. You\'re not competing against 50 other "growth consultants" in the inbox.' },
-          { tag: '02', title: 'First-Mover Territory', desc: 'Owners are tired of marketing pitches and growth jargon. A forensic diagnostic is the wedge nobody else is using, you walk in already different.' },
-          { tag: '03', title: 'Founder Access', desc: 'Direct line to Joseph. No sales VP, no middle layer. You ping, he responds. Strategy meetings, deal coaching, product requests, all open.' },
-          { tag: '04', title: 'Residual That Compounds', desc: 'Recurring commissions for the life of the account, plus a clear path to Partner overrides. Early reps build a residual book that compounds for years.' },
-        ].map(({ tag, title, desc }) => (
-          <div key={tag} className="forensic-tile rounded-xl p-5">
-            <p className="font-mono text-[10px] tracking-[0.3em] text-amber">// {tag}</p>
-            <p className="font-semibold text-foreground font-display mt-2">{title}</p>
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* WHO WE'RE LOOKING FOR */}
-    <div className="grid md:grid-cols-2 gap-6 mb-12">
-      <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
-        <CardHeader>
-          <CardTitle className="font-display text-foreground flex items-center gap-2">
-            <CheckCircle className="text-emerald-500 w-5 h-5" /> You'll Thrive Here If
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2.5 text-sm text-muted-foreground">
-            {[
-              'You\'re self-driven and don\'t need a manager checking on you.',
-              'You can hold a real conversation with a business owner without sounding like a script.',
-              'You actually believe most businesses are leaking money (because they are).',
-              'You want commission upside, not a salary safety net.',
-              'You can take rejection like a forensic, clinical, not personal.',
-            ].map((t) => <li key={t} className="flex gap-2"><span className="text-emerald-500">✓</span>{t}</li>)}
-          </ul>
-        </CardContent>
-      </Card>
-      <Card className="bg-card/60 backdrop-blur border-crimson/20">
-        <CardHeader>
-          <CardTitle className="font-display text-foreground flex items-center gap-2">
-            <XCircle className="text-crimson w-5 h-5" /> Don't Apply If
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2.5 text-sm text-muted-foreground">
-            {[
-              'You need a base salary to feel safe.',
-              'You won\'t pick up the phone or message a stranger on LinkedIn.',
-              'You won\'t pick up the phone or send a real follow-up after the first "not right now."',
-              'You want to coast. There\'s no coasting in commission.',
-              'You can\'t pass a 20-question reading-comprehension test.',
-            ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
-
-    {/* REALITY CHECK */}
-    <div className="mb-12">
-      <div className="forensic-tile rounded-2xl border border-crimson/40 p-6 md:p-8">
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">
-          Reality Check
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold font-display text-crimson leading-tight mb-4">
-          If you need a paycheck next week, this isn't for you.
-        </h2>
-        <p className="text-sm md:text-base text-foreground/90 leading-relaxed mb-3">
-          We are looking for people who are not desperate for a paycheck. People who can be patient, absorb the vision, and build with us.
-        </p>
-        <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
-          A lot of people talk the talk. They don't last two weeks because our systems are too advanced for them. If you're here to fake it until you make it, you'll be gone before the onboarding finishes.
-        </p>
-      </div>
-    </div>
-
-    {/* GATE, FINAL */}
-    <Card className="bg-card/60 backdrop-blur border-amber/40">
-      <CardHeader>
-        <CardTitle className="text-2xl text-foreground font-display">One Door In: The Test</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-muted-foreground">
-          We don't accept blind applications. If you can't be bothered to read the site and pass a 20-question knowledge test,
-          you won't be bothered to follow up with prospects. Pass the test → application unlocks → we review every passing app personally.
-        </p>
-        <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-5">
-          <li>Read the site, especially <a href="/leak-audit" className="text-amber hover:underline">/leak-audit</a> and <a href="/services" className="text-amber hover:underline">/services</a>.</li>
-          <li>Take the 20-question test (45 min, 70% to pass).</li>
-          <li>Pass it → application form unlocks instantly with your share code.</li>
-          <li>Joseph personally reviews every passing application within 48 hours.</li>
-        </ol>
-        <a href="/careers/test" onClick={() => trackCareersCta('how_in_start_test')} className="block">
-          <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-            Start the Test →
-          </Button>
-        </a>
-        <p className="text-xs text-center text-muted-foreground">There is no application form on this page. The test is the only way in.</p>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-const PlaybookSection = () => (
-  <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-12">
-    <div className="text-center">
-      <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-        Welcome to <span className="text-primary">Aetheris AI</span>
-      </h1>
-      <p className="text-xl text-muted-foreground mb-6">Your sales playbook is below. Read it. Learn it. Start closing.</p>
-      <a
-        href="https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/playbooks/rep_playbook.pdf"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Button size="lg" className="gap-2">
-          <Download className="w-5 h-5" /> Download Playbook PDF
-        </Button>
-      </a>
-    </div>
-
-
-
-    {/* HOW TO SELL */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Target className="text-primary" /> How to Sell</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground mb-3">The Outreach Sequence</h3>
-          <p className="text-muted-foreground mb-4">Lead with observation, not pitch. You're pointing out a problem they already feel.</p>
-          <div className="space-y-3">
-            {[
-              "Visit their website. Find 2-3 obvious leaks (slow load, no mobile, outdated photos, dead CTAs, broken follow-up).",
-              "Send a short email or LinkedIn message: 'I looked at your site, you're leaving money on the table. Want me to show you where?'",
-              "Send them to the free Leak Audit at aetheris.technology/leak-audit. Their result is your wedge.",
-              "Once they see the leaks, position the 21-Day Revenue Diagnostic as the operator-led version that quantifies the damage.",
-              "After the Diagnostic, the Active Case sells itself. That's where your recurring commission kicks in.",
-            ].map((step, i) => (
-              <div key={i} className="flex gap-3">
-                <span className="text-primary font-bold shrink-0">{i + 1}.</span>
-                <p className="text-muted-foreground">{step}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-              <CheckCircle className="text-green-500" /> What to Do
-            </h3>
-            <ul className="space-y-2 text-muted-foreground">
-              {[
-                "Be direct. These are business owners, not babies.",
-                "Use specific numbers from their website.",
-                "Reference competitors who look better online.",
-                "Follow up 3 times minimum. Most close on follow-up 2 or 3.",
-                "Ask questions. Let them talk about their frustrations.",
-              ].map((item, i) => (
-                <li key={i} className="flex gap-2"><span className="text-green-500">✓</span> {item}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-              <XCircle className="text-destructive" /> What NOT to Do
-            </h3>
-            <ul className="space-y-2 text-muted-foreground">
-              {[
-                "Don't lead with price. Lead with the problem.",
-                "Don't oversell. The Snapshot does the selling for you.",
-                "Don't trash-talk their current vendor. Just show the gaps.",
-                "Don't promise timelines you can't control.",
-                "Don't disappear after the first 'no.' It's rarely final.",
-              ].map((item, i) => (
-                <li key={i} className="flex gap-2"><span className="text-destructive">✗</span> {item}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-
-    {/* HOW TO GET STARTED */}
-    <Card className="bg-card/60 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Zap className="text-primary" /> How to Get Started, Today</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {[
-            { icon: Share2, title: "Share Our LinkedIn Posts", desc: "Reshare Aetheris content to your network. Tag SMB owners. Start conversations." },
-            { icon: Mail, title: "Email Owners Directly", desc: "Find local SMBs leaking revenue. Send 10 emails a day with one specific observation from their site." },
-            { icon: Phone, title: "Call Prospects", desc: "Pick up the phone. Ask for the owner. 'I noticed something on your site, I think you're losing 8–15% of revenue silently. Want to see where?'" },
-            { icon: Target, title: "Use the Free Leak Audit", desc: "Send them to aetheris.technology/leak-audit. Their result is your wedge into the 21-Day Revenue Diagnostic." },
-          ].map(({ icon: Icon, title, desc }) => (
-            <Card key={title} className="bg-background/50 border-border/30">
-              <CardContent className="p-5 flex items-start gap-3">
-                <Icon className="w-6 h-6 text-primary shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1">{title}</h4>
-                  <p className="text-sm text-muted-foreground">{desc}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="mt-8 p-6 rounded-lg bg-primary/10 border border-primary/20 text-center">
-          <p className="text-lg font-semibold text-foreground mb-2">Questions? Need help with a prospect?</p>
-          <p className="text-muted-foreground">Email <a href="mailto:aetheris.technology@outlook.com" className="text-primary hover:underline">aetheris.technology@outlook.com</a> or call <a href="tel:+13173762110" className="text-primary hover:underline">(317) 376-2110</a></p>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
 
 export default CareersPage;
