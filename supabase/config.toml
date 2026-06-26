@@ -209,3 +209,6 @@ verify_jwt = false
 
 [functions.forensic-report-chat]
 verify_jwt = false
+
+[functions.verify-careers-test-payment]
+verify_jwt = false
