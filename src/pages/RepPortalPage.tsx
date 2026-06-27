@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
+import { RepToolLinks } from '@/components/portal/RepToolLinks';
 import {
   CURRENT_EXTENSION_VERSION,
   getDownloadedExtensionVersion,
@@ -154,6 +155,8 @@ const RepPortalPage: React.FC = () => {
             </Card>
 
             <AndroidApkDownloadCard />
+
+            <RepToolLinks repCode={repData.code} />
 
             <div className="grid grid-cols-2 gap-4">
               <Card>
