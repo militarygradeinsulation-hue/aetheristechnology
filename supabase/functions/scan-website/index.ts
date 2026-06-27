@@ -444,7 +444,7 @@ Description: ${metadata.description || "None found"}
 Number of links found: ${links.length}
 
 Page content (markdown):
-${markdown.slice(0, 10000)}
+${markdown.slice(0, 6000)}
 
 Return a comprehensive analysis using the website_diagnostic_report function. Be extremely specific — reference actual page elements, missing sections, weak copy, and real business impact. Every gap needs a dollar estimate for annual revenue leak and projected recovery.
 
