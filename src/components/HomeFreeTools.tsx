@@ -14,6 +14,7 @@ import {
   Workflow,
   Lock,
   Unlock,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ const TOOLS: Tool[] = [
   { title: "Sales Scripts", blurb: "Short, blunt scripts for cold, warm, and dead-lead revival.", to: "/sales-scripts", icon: PhoneIcon, tag: "Sales" },
   { title: "Content Calendar", blurb: "30-day publishing plan mapped to your offer and audience.", to: "/content-calendar", icon: CalendarDays, tag: "Marketing" },
   { title: "Follow-Up Plan", blurb: "Multi-touch sequence to stop letting warm leads die in your inbox.", to: "/follow-up-plan", icon: Workflow, tag: "Follow-up" },
+  { title: "Nexus IQ — 5M Strategist", blurb: "Upload your architecture. The 5M IQ engine finds the fractures you missed.", to: "/nexus-iq", icon: Sparkles, tag: "Strategist" },
 ];
 
 const UNLOCK_KEY = "aetheris.freeToolsUnlock.v1";

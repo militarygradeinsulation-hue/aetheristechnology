@@ -78,6 +78,7 @@ const AppRouter = lazy(() => import("./app/AppRouter"));
 const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
+const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -159,6 +160,7 @@ const App = () => (
                       <Route path="/strategic-questions" element={<StrategicQuestionsPage />} />
                       <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
                       <Route path="/friction-audit" element={<FrictionAuditPage />} />
+                      <Route path="/nexus-iq" element={<NexusIQPage />} />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/signup" element={<SignupPage />} />
                       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
