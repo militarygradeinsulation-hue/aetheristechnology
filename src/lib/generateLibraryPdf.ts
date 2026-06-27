@@ -111,14 +111,23 @@ class PdfWriter {
   }
 
   h1(text: string) {
-    this.ensure(22);
+    // Helvetica scales tighter than Courier — fits long tool/report titles
+    // without horizontal clipping while keeping the brief's amber accent rule.
+    const clean = sanitize(text);
+    let size = 22;
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setFontSize(size);
+    let wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    while (wrapped.length > 3 && size > 14) {
+      size -= 2;
+      this.doc.setFontSize(size);
+      wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    }
+    const lh = size * 0.5;
+    this.ensure(lh * wrapped.length + 10);
     this.y += 4;
-    this.doc.setFont('courier', 'bold');
-    this.doc.setFontSize(22);
-    const wrapped = this.doc.splitTextToSize(sanitize(text), CONTENT_W) as string[];
     for (let i = 0; i < wrapped.length; i++) {
-      this.ensure(11);
-      this.y += 9;
+      this.y += lh + 1;
       this.doc.setTextColor(...(i === wrapped.length - 1 ? BRIEF.amber : BRIEF.paper));
       this.doc.text(wrapped[i], MARGIN, this.y);
     }
@@ -127,6 +136,7 @@ class PdfWriter {
     this.doc.line(MARGIN, this.y + 3, MARGIN + 36, this.y + 3);
     this.y += 9;
   }
+
 
   h2(text: string, count?: number) {
     this.ensure(14);
