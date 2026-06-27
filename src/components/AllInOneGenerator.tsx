@@ -226,10 +226,14 @@ export const AllInOneGenerator: React.FC = () => {
   const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 4) => {
     let lastErr: any = null;
     const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
-    const portalToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_portal_token') : null;
     const headers: Record<string, string> = {};
-    if (adminToken) headers['x-admin-token'] = adminToken;
-    if (portalToken) headers['x-portal-token'] = portalToken;
+
+    // Most tools in this batch are public edge functions. Sending admin/portal
+    // headers to those functions triggers browser CORS preflight failures before
+    // the request ever reaches the backend. Only send the admin token to the one
+    // generator that explicitly requires it.
+    if (fn === 'generate-social-content' && adminToken) headers['x-admin-token'] = adminToken;
+
     const invokeOpts: any = Object.keys(headers).length ? { body, headers } : { body };
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
