@@ -202,7 +202,68 @@ export const PublicLeakScan = () => {
           <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
             Drop your email and company URL. The AI detective audits seven operational surfaces — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
+          <p className="text-[12px] md:text-sm text-amber/90 mt-3 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 font-mono">
+            <Bookmark className="w-3.5 h-3.5" />
+            Use your email — we save your scans so you don't lose them when you come back.
+          </p>
         </div>
+
+        {savedForEmail.length > 0 && !loading && !teaser && (
+          <div className="mb-4 rounded-md border border-amber/30 bg-amber/5 p-3">
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 text-left"
+            >
+              <span className="font-mono text-[11px] uppercase tracking-widest text-amber flex items-center gap-2">
+                <History className="w-3.5 h-3.5" />
+                {savedForEmail.length} saved scan{savedForEmail.length === 1 ? '' : 's'} for {email}
+              </span>
+              <span className="text-[11px] text-amber/80 underline">{showHistory ? 'Hide' : 'Show'}</span>
+            </button>
+            {showHistory && (
+              <ul className="mt-3 space-y-2">
+                {savedForEmail.map((s) => (
+                  <li
+                    key={`${s.url}-${s.ts}`}
+                    className="flex items-center justify-between gap-3 rounded border border-amber/20 bg-background/50 px-3 py-2"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUrl(s.url);
+                        setTeaser(s.teaser);
+                        toast.success("Loaded your saved scan.");
+                      }}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div className="truncate text-sm text-foreground font-display">{s.url}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                        Saved {new Date(s.ts).toLocaleDateString()} · tap to reopen
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Remove saved scan"
+                      onClick={() => {
+                        const key = emailKey(email);
+                        const next = { ...loadStore() };
+                        next[key] = (next[key] || []).filter((x) => !(x.url === s.url && x.ts === s.ts));
+                        if (next[key].length === 0) delete next[key];
+                        persistStore(next);
+                        setStore(next);
+                      }}
+                      className="text-muted-foreground hover:text-crimson transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
 
         <div className="rounded-md border border-amber/30 p-5 md:p-8 bg-background/40 backdrop-blur">
           <AnimatePresence mode="wait">
