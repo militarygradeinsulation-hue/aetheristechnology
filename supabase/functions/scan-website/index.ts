@@ -419,9 +419,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
 
-    const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const callAi = async (model: string, timeoutMs: number) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
@@ -667,22 +667,26 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     // 429s and 503s most often. Each model gets up to 3 attempts with backoff.
     // Prefer the faster preview model first; fall back to 2.5-flash once if needed.
     // Single attempt per model keeps total AI budget ≤ 120s under the edge wall-clock.
-    const models = ["google/gemini-3-flash-preview", "google/gemini-2.5-flash"];
+    const models: Array<{ id: string; timeoutMs: number }> = [
+      { id: "google/gemini-3.5-flash", timeoutMs: 35000 },
+      { id: "google/gemini-3-flash-preview", timeoutMs: 35000 },
+      { id: "google/gemini-2.5-flash", timeoutMs: 30000 },
+    ];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     let hardStopStatus = 0; // 402 = credits exhausted, stop everything
     outer: for (const m of models) {
       try {
-        aiResponse = await callAi(m);
+        aiResponse = await callAi(m.id, m.timeoutMs);
       } catch (err: any) {
         lastErrText = err instanceof Error ? err.message : String(err);
-        console.error(`AI gateway request failed (model=${m}):`, lastErrText);
+        console.error(`AI gateway request failed (model=${m.id}):`, lastErrText);
         aiResponse = null;
         continue;
       }
       if (aiResponse!.ok) break outer;
       lastErrText = await aiResponse!.clone().text();
-      console.error(`AI gateway error (model=${m}):`, aiResponse!.status, lastErrText);
+      console.error(`AI gateway error (model=${m.id}):`, aiResponse!.status, lastErrText);
       if (aiResponse!.status === 402) { hardStopStatus = 402; break outer; }
       // 429/5xx/etc — try the next model immediately
     }
