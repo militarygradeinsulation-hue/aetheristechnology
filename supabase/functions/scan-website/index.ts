@@ -663,14 +663,11 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     });
 
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    // Lead with the fastest reliable model; pro is the last resort because it
-    // 429s and 503s most often. Each model gets up to 3 attempts with backoff.
-    // Prefer the faster preview model first; fall back to 2.5-flash once if needed.
-    // Single attempt per model keeps total AI budget ≤ 120s under the edge wall-clock.
+    // Keep total AI budget below the edge wall-clock. If the gateway is slow,
+    // return the deterministic scan instead of letting the tool hang/fail.
     const models: Array<{ id: string; timeoutMs: number }> = [
-      { id: "google/gemini-3.5-flash", timeoutMs: 35000 },
-      { id: "google/gemini-3-flash-preview", timeoutMs: 35000 },
-      { id: "google/gemini-2.5-flash", timeoutMs: 30000 },
+      { id: "google/gemini-3-flash-preview", timeoutMs: 14_000 },
+      { id: "google/gemini-2.5-flash", timeoutMs: 12_000 },
     ];
     let aiResponse: Response | null = null;
     let lastErrText = "";
