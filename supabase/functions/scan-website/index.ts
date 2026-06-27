@@ -419,9 +419,9 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
 
-    const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const callAi = async (model: string, timeoutMs: number) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
