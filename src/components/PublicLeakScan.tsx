@@ -1,11 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download } from "lucide-react";
+import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download, Bookmark, History, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from "@/lib/generateLeakAuditPdf";
+
+const SAVED_KEY = "aetheris.publicScans.v1";
+const LAST_EMAIL_KEY = "aetheris.publicScans.lastEmail";
+
+type SavedScan = { url: string; ts: number; teaser: Teaser };
+type SavedStore = Record<string, SavedScan[]>;
+
+function loadStore(): SavedStore {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    return raw ? (JSON.parse(raw) as SavedStore) : {};
+  } catch { return {}; }
+}
+function persistStore(s: SavedStore) {
+  try { localStorage.setItem(SAVED_KEY, JSON.stringify(s)); } catch { /* ignore */ }
+}
+function emailKey(e: string) { return e.trim().toLowerCase(); }
 
 type TopIssue = { category: string; severity: string; title: string; hint: string; annualCost?: string };
 type ReportCategory = LeakAuditCategoryResult;
