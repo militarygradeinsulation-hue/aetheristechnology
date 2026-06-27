@@ -1,11 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download } from "lucide-react";
+import { Loader2, Globe, AlertTriangle, AlertCircle, CheckCircle2, ShieldCheck, Search, Brain, FileSearch, Download, Bookmark, History, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from "@/lib/generateLeakAuditPdf";
+
+const SAVED_KEY = "aetheris.publicScans.v1";
+const LAST_EMAIL_KEY = "aetheris.publicScans.lastEmail";
+
+type SavedScan = { url: string; ts: number; teaser: Teaser };
+type SavedStore = Record<string, SavedScan[]>;
+
+function loadStore(): SavedStore {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    return raw ? (JSON.parse(raw) as SavedStore) : {};
+  } catch { return {}; }
+}
+function persistStore(s: SavedStore) {
+  try { localStorage.setItem(SAVED_KEY, JSON.stringify(s)); } catch { /* ignore */ }
+}
+function emailKey(e: string) { return e.trim().toLowerCase(); }
 
 type TopIssue = { category: string; severity: string; title: string; hint: string; annualCost?: string };
 type ReportCategory = LeakAuditCategoryResult;
@@ -72,7 +89,22 @@ export const PublicLeakScan = () => {
   const [teaser, setTeaser] = useState<Teaser | null>(null);
   const [prep, setPrep] = useState<Prep[]>(PREP_INIT);
   const [selfTalk, setSelfTalk] = useState<string[]>([]);
+  const [store, setStore] = useState<SavedStore>(() => loadStore());
+  const [showHistory, setShowHistory] = useState(false);
   const talkRef = useRef<HTMLDivElement>(null);
+
+  // Restore last-used email so returning visitors see their saved scans immediately.
+  useEffect(() => {
+    try {
+      const last = localStorage.getItem(LAST_EMAIL_KEY);
+      if (last) setEmail(last);
+    } catch { /* ignore */ }
+  }, []);
+
+  const savedForEmail = useMemo<SavedScan[]>(() => {
+    if (!email.trim()) return [];
+    return store[emailKey(email)] || [];
+  }, [email, store]);
 
   // Step + monologue progression while loading
   useEffect(() => {
@@ -128,7 +160,25 @@ export const PublicLeakScan = () => {
       if (!res.ok) throw new Error(data?.error || "Scan failed");
       setPrep((prev) => prev.map((p) => ({ ...p, status: 'done' })));
       setTeaser(data.teaser);
-      toast.success("Scan complete. We've logged your leaks.");
+      // Save the scan locally so the visitor can pull it back up next time.
+      try {
+        const key = emailKey(email);
+        const next: SavedStore = { ...loadStore() };
+        const list = next[key] ? [...next[key]] : [];
+        list.unshift({ url: url.trim(), ts: Date.now(), teaser: data.teaser });
+        // Keep last 10 per email, drop duplicates of same URL
+        const seen = new Set<string>();
+        next[key] = list.filter((s) => {
+          const k = s.url.toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        }).slice(0, 10);
+        persistStore(next);
+        setStore(next);
+        localStorage.setItem(LAST_EMAIL_KEY, email.trim());
+      } catch { /* ignore */ }
+      toast.success("Scan saved to your email. Come back anytime to pull it up.");
     } catch (err: any) {
       toast.error(err?.message || "Something went wrong");
     } finally {
@@ -152,7 +202,68 @@ export const PublicLeakScan = () => {
           <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
             Drop your email and company URL. The AI detective audits seven operational surfaces — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
+          <p className="text-[12px] md:text-sm text-amber/90 mt-3 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 font-mono">
+            <Bookmark className="w-3.5 h-3.5" />
+            Use your email — we save your scans so you don't lose them when you come back.
+          </p>
         </div>
+
+        {savedForEmail.length > 0 && !loading && !teaser && (
+          <div className="mb-4 rounded-md border border-amber/30 bg-amber/5 p-3">
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 text-left"
+            >
+              <span className="font-mono text-[11px] uppercase tracking-widest text-amber flex items-center gap-2">
+                <History className="w-3.5 h-3.5" />
+                {savedForEmail.length} saved scan{savedForEmail.length === 1 ? '' : 's'} for {email}
+              </span>
+              <span className="text-[11px] text-amber/80 underline">{showHistory ? 'Hide' : 'Show'}</span>
+            </button>
+            {showHistory && (
+              <ul className="mt-3 space-y-2">
+                {savedForEmail.map((s) => (
+                  <li
+                    key={`${s.url}-${s.ts}`}
+                    className="flex items-center justify-between gap-3 rounded border border-amber/20 bg-background/50 px-3 py-2"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUrl(s.url);
+                        setTeaser(s.teaser);
+                        toast.success("Loaded your saved scan.");
+                      }}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div className="truncate text-sm text-foreground font-display">{s.url}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                        Saved {new Date(s.ts).toLocaleDateString()} · tap to reopen
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Remove saved scan"
+                      onClick={() => {
+                        const key = emailKey(email);
+                        const next = { ...loadStore() };
+                        next[key] = (next[key] || []).filter((x) => !(x.url === s.url && x.ts === s.ts));
+                        if (next[key].length === 0) delete next[key];
+                        persistStore(next);
+                        setStore(next);
+                      }}
+                      className="text-muted-foreground hover:text-crimson transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
 
         <div className="rounded-md border border-amber/30 p-5 md:p-8 bg-background/40 backdrop-blur">
           <AnimatePresence mode="wait">
@@ -338,7 +449,7 @@ export const PublicLeakScan = () => {
 
                 <p className="text-[11px] text-muted-foreground flex items-center gap-2">
                   <ShieldCheck className="w-3 h-3" />
-                  No spam. Your scan is logged so we can follow up only if you want help fixing it.
+                  No spam. We save your scans by email so you can come back later and pick up right where you left off.
                 </p>
               </motion.form>
             ) : (
