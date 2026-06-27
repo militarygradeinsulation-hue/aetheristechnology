@@ -354,8 +354,83 @@ export const AllInOneGenerator: React.FC = () => {
 
   const reset = () => {
     setStates({});
+    setOutputs({});
     setProgress(0);
   };
+
+  const renderValue = (val: any, depth = 0): string => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+      return val.map((v) => {
+        if (v && typeof v === 'object') return renderValue(v, depth + 1);
+        return `- ${String(v)}`;
+      }).join('\n');
+    }
+    if (typeof val === 'object') {
+      return Object.entries(val)
+        .map(([k, v]) => {
+          const label = k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+          const inner = renderValue(v, depth + 1);
+          if (!inner) return '';
+          if (inner.includes('\n') || inner.length > 80) {
+            return `${'#'.repeat(Math.min(depth + 3, 6))} ${label}\n\n${inner}`;
+          }
+          return `**${label}:** ${inner}`;
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+    return String(val);
+  };
+
+  const buildReportMarkdown = () => {
+    const lines: string[] = [];
+    lines.push(`# Forensic Tools Report`);
+    lines.push(`**Website:** ${form.url}`);
+    if (form.businessName) lines.push(`**Business:** ${form.businessName}`);
+    if (form.industry) lines.push(`**Industry:** ${form.industry}`);
+    lines.push(`**Generated:** ${new Date().toLocaleString()}`);
+    lines.push('\n---\n');
+    jobs().forEach((job) => {
+      const out = outputs[job.key];
+      const state = states[job.key];
+      lines.push(`## ${job.label}`);
+      if (!out) {
+        lines.push(`_${state?.status === 'error' ? 'Failed: ' + (state.message || 'unknown error') : state?.status === 'skipped' ? 'Skipped: ' + (state.message || '') : 'No output'}_`);
+      } else {
+        lines.push(renderValue(out.data));
+      }
+      lines.push('\n---\n');
+    });
+    return lines.join('\n');
+  };
+
+  const downloadReport = () => {
+    const md = buildReportMarkdown();
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Forensic Tools Report</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:860px;margin:40px auto;padding:0 24px;color:#1a1a1a;line-height:1.6;}
+  h1{font-size:2rem;border-bottom:3px solid #d97706;padding-bottom:.5rem;}
+  h2{color:#92400e;margin-top:2.5rem;border-bottom:1px solid #e5e5e5;padding-bottom:.25rem;}
+  h3{color:#1a1a1a;margin-top:1.5rem;}
+  hr{border:none;border-top:1px solid #ddd;margin:2rem 0;}
+  pre,code{background:#f5f5f5;padding:2px 6px;border-radius:4px;font-size:.9rem;}
+  pre{padding:12px;overflow:auto;}
+</style></head><body><pre style="white-space:pre-wrap;font-family:inherit;background:transparent;padding:0;">${md.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]!))}</pre></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (form.businessName || form.url || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    a.download = `forensic-report-${safeName}-${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const successCount = Object.values(states).filter((s) => s.status === 'success').length;
   const errorCount = Object.values(states).filter((s) => s.status === 'error').length;
