@@ -6381,6 +6381,60 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_leads: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          first_seen: string
+          id: string
+          last_seen: string
+          name: string | null
+          phone: string | null
+          rep_code: string | null
+          source: string | null
+          tool_slug: string
+          tool_title: string | null
+          updated_at: string
+          user_agent: string | null
+          visit_count: number
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          name?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          source?: string | null
+          tool_slug: string
+          tool_title?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          visit_count?: number
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          name?: string | null
+          phone?: string | null
+          rep_code?: string | null
+          source?: string | null
+          tool_slug?: string
+          tool_title?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          visit_count?: number
+        }
+        Relationships: []
+      }
       training_attempts: {
         Row: {
           ai_feedback: string | null
