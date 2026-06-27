@@ -89,7 +89,22 @@ export const PublicLeakScan = () => {
   const [teaser, setTeaser] = useState<Teaser | null>(null);
   const [prep, setPrep] = useState<Prep[]>(PREP_INIT);
   const [selfTalk, setSelfTalk] = useState<string[]>([]);
+  const [store, setStore] = useState<SavedStore>(() => loadStore());
+  const [showHistory, setShowHistory] = useState(false);
   const talkRef = useRef<HTMLDivElement>(null);
+
+  // Restore last-used email so returning visitors see their saved scans immediately.
+  useEffect(() => {
+    try {
+      const last = localStorage.getItem(LAST_EMAIL_KEY);
+      if (last) setEmail(last);
+    } catch { /* ignore */ }
+  }, []);
+
+  const savedForEmail = useMemo<SavedScan[]>(() => {
+    if (!email.trim()) return [];
+    return store[emailKey(email)] || [];
+  }, [email, store]);
 
   // Step + monologue progression while loading
   useEffect(() => {
