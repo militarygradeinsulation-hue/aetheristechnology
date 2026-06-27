@@ -140,9 +140,10 @@ OUTPUT JSON SCHEMA
 
 Return ONLY the JSON. No markdown fences. No commentary.`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await Promise.race([
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(12_000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -158,7 +159,9 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
           { role: "user", content: prompt },
         ],
       }),
-    });
+      }),
+      new Promise<Response>((_, reject) => setTimeout(() => reject(new Error("AI request timed out")), 12_500)),
+    ]);
 
     if (!aiRes.ok) {
       const status = aiRes.status;
