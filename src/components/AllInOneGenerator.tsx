@@ -280,18 +280,21 @@ export const AllInOneGenerator: React.FC = () => {
     const started = Date.now();
     try {
       const data = await invokeWithRetry(job.fn, job.body());
+      const title = `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`;
       await saveToolRun({
         tool_type: job.toolType,
-        title: `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`,
+        title,
         input_data: { source: 'all-in-one', ...form, ...job.body() },
         output_data: data,
       });
+      setOutputs((prev) => ({ ...prev, [job.key]: { label: job.label, title, data } }));
       return { status: 'success', durationMs: Date.now() - started };
     } catch (err: any) {
       console.error(`[all-in-one] ${job.key} failed:`, err);
       return { status: 'error', message: err.message || 'Unknown error', durationMs: Date.now() - started };
     }
   };
+
 
   const handleRun = async () => {
     if (!form.url.trim()) {
