@@ -311,6 +311,7 @@ export const AllInOneGenerator: React.FC = () => {
 
     setRunning(true);
     setProgress(0);
+    setOutputs({});
     const allJobs = jobs(workingForm);
     const initial: Record<string, RunState> = {};
     allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
