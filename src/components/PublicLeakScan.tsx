@@ -449,7 +449,7 @@ export const PublicLeakScan = () => {
 
                 <p className="text-[11px] text-muted-foreground flex items-center gap-2">
                   <ShieldCheck className="w-3 h-3" />
-                  No spam. Your scan is logged so we can follow up only if you want help fixing it.
+                  No spam. We save your scans by email so you can come back later and pick up right where you left off.
                 </p>
               </motion.form>
             ) : (
