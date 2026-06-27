@@ -12,6 +12,7 @@ import landingOneButtonInfographic from "@/assets/landing-one-button-infographic
 import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
+import { HomeFreeTools } from "@/components/HomeFreeTools";
 import { Navbar } from "@/components/Navbar";
 
 const LeakLanderPage: React.FC = () => {
@@ -215,6 +216,9 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Public website leak scan — email + URL only */}
           <PublicLeakScan />
+
+          {/* Free tools suite — email + phone unlocks everything */}
+          <HomeFreeTools />
 
           {/* One-button leak finder infographic */}
           <section
