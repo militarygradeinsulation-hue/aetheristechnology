@@ -71,9 +71,9 @@ async function firecrawlMap(url: string) {
   }
 }
 
-async function invokeFn(name: string, body: unknown) {
+async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 45_000);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
       method: "POST",
@@ -218,7 +218,7 @@ Respond ONLY with valid JSON of shape:
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(55_000),
+    signal: AbortSignal.timeout(30_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
@@ -256,22 +256,26 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     await setStage(id, "site", "done");
 
     await setStage(id, "scan_website", "running");
-    findings.scan_website = await invokeFn("scan-website", { url, company });
+    findings.scan_website = await invokeFn("scan-website", { url, company }, 35_000);
     await setStage(id, "scan_website", "done");
 
     await setStage(id, "friction", "running");
-    findings.friction_audit = await invokeFn("generate-friction-audit", {
-      url,
-      desiredTone: ["direct", "credible", "trustworthy"],
-      industry: company || "business services",
-      targetCustomer: "business owner or decision-maker evaluating the company online",
-    });
-    findings.brand_contradictions = await invokeFn("generate-brand-contradictions", {
-      url,
-      socialLinks: "Not provided",
-      idealCustomer: "business owner or decision-maker evaluating the company online",
-      desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-    });
+    const [frictionAudit, brandContradictions] = await Promise.all([
+      invokeFn("generate-friction-audit", {
+        url,
+        desiredTone: ["direct", "credible", "trustworthy"],
+        industry: company || "business services",
+        targetCustomer: "business owner or decision-maker evaluating the company online",
+      }, 25_000),
+      invokeFn("generate-brand-contradictions", {
+        url,
+        socialLinks: "Not provided",
+        idealCustomer: "business owner or decision-maker evaluating the company online",
+        desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
+      }, 25_000),
+    ]);
+    findings.friction_audit = frictionAudit;
+    findings.brand_contradictions = brandContradictions;
     await setStage(id, "friction", "done");
 
     if (accountId) {
