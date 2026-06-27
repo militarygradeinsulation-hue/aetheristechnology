@@ -216,11 +216,30 @@ class PdfWriter {
   drawCover(title: string) {
     briefCoverHeader(this.doc, `${this.toolLabel}  ·  Confidential Asset`);
 
-    const wrapped = this.doc.splitTextToSize(sanitize(title), CONTENT_W) as string[];
+    // Wrap at the same font/size briefDisplayTitle renders with (Courier 30pt).
+    // Shrink the headline progressively until it fits in <=3 lines without clipping.
+    const clean = sanitize(title);
+    let displaySize = 30;
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(displaySize);
+    let wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    while (wrapped.length > 3 && displaySize > 16) {
+      displaySize -= 2;
+      this.doc.setFontSize(displaySize);
+      wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    }
     const head = wrapped.slice(0, 3);
-    briefDisplayTitle(this.doc, head, 86, true);
+    // Manual render so we control the size (briefDisplayTitle hardcodes 30pt).
+    let ty = 86;
+    const dlh = displaySize * 0.45;
+    head.forEach((ln, i) => {
+      this.doc.setTextColor(...(i === head.length - 1 ? BRIEF.amber : BRIEF.paper));
+      this.doc.text(ln, MARGIN, ty);
+      ty += dlh + 2;
+    });
 
-    let y = 86 + head.length * 13 + 6;
+    let y = ty + 4;
+
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(11);
     this.doc.setTextColor(...BRIEF.muted);
