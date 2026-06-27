@@ -372,11 +372,11 @@ serve(async (req) => {
       return { ok: res.ok && data?.success !== false, data };
     }
 
-    let attempt = await firecrawlScrape({ onlyMainContent: false, waitFor: 2000, timeout: 45000 });
+    let attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 20000 });
 
     if (!attempt.ok) {
-      console.warn("Firecrawl first attempt failed, retrying lighter:", attempt.data?.code || attempt.data?.error);
-      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
+      console.warn("Firecrawl first attempt failed, retrying:", attempt.data?.code || attempt.data?.error);
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 15000 });
     }
 
     // DNS fallback: toggle www. prefix and retry once
@@ -421,7 +421,7 @@ serve(async (req) => {
 
     const callAi = async (model: string) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(35000),
       headers: {
         "Lovable-API-Key": LOVABLE_API_KEY,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
@@ -444,7 +444,7 @@ Description: ${metadata.description || "None found"}
 Number of links found: ${links.length}
 
 Page content (markdown):
-${markdown.slice(0, 10000)}
+${markdown.slice(0, 6000)}
 
 Return a comprehensive analysis using the website_diagnostic_report function. Be extremely specific — reference actual page elements, missing sections, weak copy, and real business impact. Every gap needs a dollar estimate for annual revenue leak and projected recovery.
 
