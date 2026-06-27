@@ -44,6 +44,7 @@ const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').th
 const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
 const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
 const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
+const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
 const AdminCareersTest = lazy(() => import('@/components/admin/AdminCareersTest').then(m => ({ default: m.AdminCareersTest })));
 const AdminCareersPanel = lazy(() => import('@/components/admin/AdminCareersPanel').then(m => ({ default: m.AdminCareersPanel })));
 const AdminHiresOnboardingPanel = lazy(() => import('@/components/admin/AdminHiresOnboardingPanel'));
@@ -256,6 +257,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'training', label: 'Training', icon: GraduationCap },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'ideas', label: 'Idea Room', icon: Lightbulb },
+    { key: 'toolleads', label: 'Tool Leads', icon: Wrench },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring']; // newly added tabs auto-show even if user has saved prefs
@@ -620,6 +622,7 @@ const AdminDashboard: React.FC = () => {
       case 'insights': return <InsightsBody recommendations={recommendations} loadingInsights={loadingInsights} fetchInsights={fetchInsights} />;
       case 'tools': return <ToolsBody activeTool={activeTool} setActiveTool={setActiveTool} />;
       case 'outlook': return <OutlookBody syncingOutlook={syncingOutlook} syncResults={syncResults} postingSchedule={postingSchedule} handleOutlookSync={handleOutlookSync} />;
+      case 'toolleads': return <Suspense fallback={<PanelFallback />}><ToolLeadsPanel /></Suspense>;
       default: return null;
     }
   };
