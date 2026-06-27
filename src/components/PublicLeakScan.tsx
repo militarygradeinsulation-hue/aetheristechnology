@@ -160,7 +160,25 @@ export const PublicLeakScan = () => {
       if (!res.ok) throw new Error(data?.error || "Scan failed");
       setPrep((prev) => prev.map((p) => ({ ...p, status: 'done' })));
       setTeaser(data.teaser);
-      toast.success("Scan complete. We've logged your leaks.");
+      // Save the scan locally so the visitor can pull it back up next time.
+      try {
+        const key = emailKey(email);
+        const next: SavedStore = { ...loadStore() };
+        const list = next[key] ? [...next[key]] : [];
+        list.unshift({ url: url.trim(), ts: Date.now(), teaser: data.teaser });
+        // Keep last 10 per email, drop duplicates of same URL
+        const seen = new Set<string>();
+        next[key] = list.filter((s) => {
+          const k = s.url.toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        }).slice(0, 10);
+        persistStore(next);
+        setStore(next);
+        localStorage.setItem(LAST_EMAIL_KEY, email.trim());
+      } catch { /* ignore */ }
+      toast.success("Scan saved to your email. Come back anytime to pull it up.");
     } catch (err: any) {
       toast.error(err?.message || "Something went wrong");
     } finally {
