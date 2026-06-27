@@ -372,11 +372,11 @@ serve(async (req) => {
       return { ok: res.ok && data?.success !== false, data };
     }
 
-    let attempt = await firecrawlScrape({ onlyMainContent: false, waitFor: 2000, timeout: 45000 });
+    let attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 20000 });
 
     if (!attempt.ok) {
-      console.warn("Firecrawl first attempt failed, retrying lighter:", attempt.data?.code || attempt.data?.error);
-      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
+      console.warn("Firecrawl first attempt failed, retrying:", attempt.data?.code || attempt.data?.error);
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 15000 });
     }
 
     // DNS fallback: toggle www. prefix and retry once
