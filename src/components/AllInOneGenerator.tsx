@@ -59,6 +59,8 @@ export const AllInOneGenerator: React.FC = () => {
   const [inferring, setInferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [states, setStates] = useState<Record<string, RunState>>({});
+  const [outputs, setOutputs] = useState<Record<string, { label: string; title: string; data: any }>>({});
+
 
   const inferFromUrl = async (urlOverride?: string): Promise<typeof form | null> => {
     const targetUrl = (urlOverride ?? form.url).trim();
