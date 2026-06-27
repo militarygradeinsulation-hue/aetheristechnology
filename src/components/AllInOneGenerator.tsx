@@ -19,6 +19,8 @@ import {
   Library as LibraryIcon,
   Globe,
   Stethoscope,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -57,6 +59,8 @@ export const AllInOneGenerator: React.FC = () => {
   const [inferring, setInferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [states, setStates] = useState<Record<string, RunState>>({});
+  const [outputs, setOutputs] = useState<Record<string, { label: string; title: string; data: any }>>({});
+
 
   const inferFromUrl = async (urlOverride?: string): Promise<typeof form | null> => {
     const targetUrl = (urlOverride ?? form.url).trim();
@@ -276,18 +280,21 @@ export const AllInOneGenerator: React.FC = () => {
     const started = Date.now();
     try {
       const data = await invokeWithRetry(job.fn, job.body());
+      const title = `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`;
       await saveToolRun({
         tool_type: job.toolType,
-        title: `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`,
+        title,
         input_data: { source: 'all-in-one', ...form, ...job.body() },
         output_data: data,
       });
+      setOutputs((prev) => ({ ...prev, [job.key]: { label: job.label, title, data } }));
       return { status: 'success', durationMs: Date.now() - started };
     } catch (err: any) {
       console.error(`[all-in-one] ${job.key} failed:`, err);
       return { status: 'error', message: err.message || 'Unknown error', durationMs: Date.now() - started };
     }
   };
+
 
   const handleRun = async () => {
     if (!form.url.trim()) {
@@ -304,6 +311,7 @@ export const AllInOneGenerator: React.FC = () => {
 
     setRunning(true);
     setProgress(0);
+    setOutputs({});
     const allJobs = jobs(workingForm);
     const initial: Record<string, RunState> = {};
     allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
@@ -346,8 +354,83 @@ export const AllInOneGenerator: React.FC = () => {
 
   const reset = () => {
     setStates({});
+    setOutputs({});
     setProgress(0);
   };
+
+  const renderValue = (val: any, depth = 0): string => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+      return val.map((v) => {
+        if (v && typeof v === 'object') return renderValue(v, depth + 1);
+        return `- ${String(v)}`;
+      }).join('\n');
+    }
+    if (typeof val === 'object') {
+      return Object.entries(val)
+        .map(([k, v]) => {
+          const label = k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+          const inner = renderValue(v, depth + 1);
+          if (!inner) return '';
+          if (inner.includes('\n') || inner.length > 80) {
+            return `${'#'.repeat(Math.min(depth + 3, 6))} ${label}\n\n${inner}`;
+          }
+          return `**${label}:** ${inner}`;
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+    return String(val);
+  };
+
+  const buildReportMarkdown = () => {
+    const lines: string[] = [];
+    lines.push(`# Forensic Tools Report`);
+    lines.push(`**Website:** ${form.url}`);
+    if (form.businessName) lines.push(`**Business:** ${form.businessName}`);
+    if (form.industry) lines.push(`**Industry:** ${form.industry}`);
+    lines.push(`**Generated:** ${new Date().toLocaleString()}`);
+    lines.push('\n---\n');
+    jobs().forEach((job) => {
+      const out = outputs[job.key];
+      const state = states[job.key];
+      lines.push(`## ${job.label}`);
+      if (!out) {
+        lines.push(`_${state?.status === 'error' ? 'Failed: ' + (state.message || 'unknown error') : state?.status === 'skipped' ? 'Skipped: ' + (state.message || '') : 'No output'}_`);
+      } else {
+        lines.push(renderValue(out.data));
+      }
+      lines.push('\n---\n');
+    });
+    return lines.join('\n');
+  };
+
+  const downloadReport = () => {
+    const md = buildReportMarkdown();
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Forensic Tools Report</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:860px;margin:40px auto;padding:0 24px;color:#1a1a1a;line-height:1.6;}
+  h1{font-size:2rem;border-bottom:3px solid #d97706;padding-bottom:.5rem;}
+  h2{color:#92400e;margin-top:2.5rem;border-bottom:1px solid #e5e5e5;padding-bottom:.25rem;}
+  h3{color:#1a1a1a;margin-top:1.5rem;}
+  hr{border:none;border-top:1px solid #ddd;margin:2rem 0;}
+  pre,code{background:#f5f5f5;padding:2px 6px;border-radius:4px;font-size:.9rem;}
+  pre{padding:12px;overflow:auto;}
+</style></head><body><pre style="white-space:pre-wrap;font-family:inherit;background:transparent;padding:0;">${md.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]!))}</pre></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (form.businessName || form.url || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    a.download = `forensic-report-${safeName}-${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const successCount = Object.values(states).filter((s) => s.status === 'success').length;
   const errorCount = Object.values(states).filter((s) => s.status === 'error').length;
@@ -532,15 +615,57 @@ export const AllInOneGenerator: React.FC = () => {
           </div>
 
           {!running && successCount > 0 && (
-            <div className="mt-5 p-4 rounded-lg bg-amber/5 border border-amber/30 flex items-start gap-3">
-              <LibraryIcon className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">All results are in your Library</p>
-                <p className="text-xs text-muted-foreground">
-                  Switch to the <span className="text-amber font-semibold">My Library</span> tab to view, download as
-                  PDF, or copy any result.
-                </p>
+            <div className="mt-5 space-y-4">
+              <div className="p-4 rounded-lg bg-amber/5 border border-amber/30 flex flex-wrap items-center gap-3">
+                <FileText className="w-5 h-5 text-amber flex-shrink-0" />
+                <div className="flex-1 min-w-[200px]">
+                  <p className="text-sm font-bold text-foreground">Full Report Ready</p>
+                  <p className="text-xs text-muted-foreground">
+                    View every tool's output below or download the consolidated report.
+                  </p>
+                </div>
+                <Button
+                  onClick={downloadReport}
+                  className="bg-amber hover:bg-amber/90 text-background font-bold"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4 mr-2" /> Download Report
+                </Button>
               </div>
+
+              <div className="rounded-xl border border-border bg-background/40 p-5 space-y-6 max-h-[600px] overflow-y-auto">
+                <div className="pb-3 border-b border-border">
+                  <h3 className="text-xl font-bold font-display text-foreground">Forensic Tools Report</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {form.url} · {new Date().toLocaleString()}
+                  </p>
+                </div>
+                {jobs().map((job) => {
+                  const out = outputs[job.key];
+                  const state = states[job.key];
+                  if (!out && state?.status !== 'error' && state?.status !== 'skipped') return null;
+                  return (
+                    <section key={job.key} className="space-y-2">
+                      <h4 className="text-base font-bold text-amber flex items-center gap-2">
+                        <job.icon className="w-4 h-4" /> {job.label}
+                      </h4>
+                      {out ? (
+                        <pre className="whitespace-pre-wrap text-xs text-foreground/90 leading-relaxed font-mono bg-card/40 p-3 rounded border border-border/50">
+{renderValue(out.data)}
+                        </pre>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          {state?.status === 'error' ? `Failed: ${state.message}` : `Skipped: ${state?.message || ''}`}
+                        </p>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Individual results are also saved to <span className="text-amber font-semibold">My Library</span> for later access.
+              </p>
             </div>
           )}
         </div>
