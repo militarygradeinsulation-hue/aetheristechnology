@@ -72,19 +72,60 @@ async function firecrawlMap(url: string) {
 }
 
 async function invokeFn(name: string, body: unknown) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 45_000);
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       },
       body: JSON.stringify(body),
     });
-    return await r.json();
+    const text = await r.text();
+    const json = text ? JSON.parse(text) : {};
+    return r.ok ? json : { error: json?.error || `Function ${name} failed with ${r.status}`, status: r.status };
   } catch (e) {
-    return { error: String(e) };
+    const message = e instanceof Error && e.name === "AbortError"
+      ? `Function ${name} timed out and was skipped so Scan All could continue.`
+      : String(e);
+    return { error: message };
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+function fallbackReport(findings: Record<string, unknown>, target: string, company: string) {
+  const name = company || target;
+  const evidence = [
+    { label: "Target", value: target },
+    { label: "Website scan", value: JSON.stringify(findings.scan_website || {}).slice(0, 240) },
+    { label: "Friction audit", value: JSON.stringify(findings.friction_audit || {}).slice(0, 240) },
+    { label: "Brand contradictions", value: JSON.stringify(findings.brand_contradictions || {}).slice(0, 240) },
+  ];
+  const chapters = CHAPTERS.map((chapter) => ({
+    ...chapter,
+    verdict: `${name} has visible leak signals that need operator review.`,
+    what_we_found: "The automated scan completed with available evidence. Any tool that timed out or could not extract enough content was preserved in the appendix instead of failing the full audit.",
+    why_its_leaking: "The risk is not one isolated issue. The leak pattern comes from public-site friction, messaging gaps, trust signals, and disconnected follow-up paths being interpreted together.",
+    what_its_costing: "Estimated exposure requires operator validation. Treat this report as a triage file until CRM, pipeline, and close-rate data are connected.",
+    what_to_do: {
+      this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signals found in the scan."],
+      this_month: ["Connect pipeline data so website leaks can be tied to real lead loss."],
+      this_quarter: ["Run the operator-led Leak Audit to price exposure and sequence fixes."],
+    },
+    evidence,
+  }));
+  return {
+    executive_summary: `${name} was scanned across the available forensic tools. The scan-all worker preserved partial findings instead of failing when an upstream analyzer timed out or returned incomplete data.\n\nUse this as the first-pass leak file: website, message, brand, and friction signals are collected separately, then connected into one diagnosis for operator review.`,
+    top_leaks: [
+      { rank: 1, name: "Disconnected leak signals", dollars_low: null, dollars_high: null, chapter_slug: "top-10-leaks", summary: "Individual tool outputs need to be connected to identify the real leak pattern." },
+      { rank: 2, name: "Unverified conversion path", dollars_low: null, dollars_high: null, chapter_slug: "site-autopsy", summary: "Public-site signals should be checked against lead and follow-up data." },
+    ],
+    chapters,
+  };
 }
 
 async function runCrmDetectors(accountId: string) {
@@ -177,12 +218,13 @@ Respond ONLY with valid JSON of shape:
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
+    signal: AbortSignal.timeout(55_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+        model: "google/gemini-3-flash-preview",
       messages: [
         { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
         { role: "user", content: prompt },
@@ -218,8 +260,18 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     await setStage(id, "scan_website", "done");
 
     await setStage(id, "friction", "running");
-    findings.friction_audit = await invokeFn("generate-friction-audit", { url, company });
-    findings.brand_contradictions = await invokeFn("generate-brand-contradictions", { url, company });
+    findings.friction_audit = await invokeFn("generate-friction-audit", {
+      url,
+      desiredTone: ["direct", "credible", "trustworthy"],
+      industry: company || "business services",
+      targetCustomer: "business owner or decision-maker evaluating the company online",
+    });
+    findings.brand_contradictions = await invokeFn("generate-brand-contradictions", {
+      url,
+      socialLinks: "Not provided",
+      idealCustomer: "business owner or decision-maker evaluating the company online",
+      desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
+    });
     await setStage(id, "friction", "done");
 
     if (accountId) {
@@ -231,7 +283,13 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }
 
     await setStage(id, "synth", "running");
-    const report = await synthesizeReport(findings, url, company);
+    let report;
+    try {
+      report = await synthesizeReport(findings, url, company);
+    } catch (e) {
+      findings.synthesis_error = e instanceof Error ? e.message : String(e);
+      report = fallbackReport(findings, url, company);
+    }
     await setStage(id, "synth", "done");
 
     await sb.from("forensic_scans").update({
