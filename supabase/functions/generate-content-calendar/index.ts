@@ -6,6 +6,36 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function fallbackCalendar(industry: string, goals = "Lead generation and authority building", platforms = "LinkedIn primary") {
+  const angles = [
+    "where leads disappear after first contact",
+    "why busy pipelines still leak revenue",
+    "the hidden cost of vague positioning",
+    "how follow-up gaps become margin loss",
+    "why more traffic does not fix a broken offer",
+    "the proof signals buyers need before they call",
+  ];
+
+  return {
+    _fallback: true,
+    _fallbackReason: "AI calendar generation timed out, so a safe operator calendar was returned instead.",
+    days: Array.from({ length: 30 }, (_, i) => {
+      const angle = angles[i % angles.length];
+      const day = i + 1;
+      return {
+        day,
+        topic: `${industry}: ${angle}`,
+        hook: day % 3 === 0 ? "Busy is not proof." : day % 3 === 1 ? "Your pipeline is leaking." : "More leads will not save this.",
+        platform: platforms.includes("Facebook") && day % 7 === 5 ? "Facebook" : "LinkedIn",
+        contentType: day % 7 === 0 ? "carousel" : day % 5 === 0 ? "poll" : "post",
+        bestTime: day % 2 === 0 ? "8:15 AM ET" : "4:30 PM ET",
+        caption: `${industry} teams do not usually lose revenue in one dramatic failure.\n\nThey lose it in tiny handoffs nobody owns.\n\n${angle}.\n\nThat is the leak.\n\n${goals}.\n\nRun the Leak Audit before you buy another tool.`,
+        hashtags: ["#businessforensics", "#revenueleaks", "#operations"],
+      };
+    }),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -112,6 +142,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -133,7 +164,9 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       const status = aiRes.status;
       if (status === 429) return new Response(JSON.stringify({ error: "Rate limited." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error("AI request failed");
+      return new Response(JSON.stringify(fallbackCalendar(industry, goals, platforms)), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiData = await aiRes.json();
@@ -168,6 +201,11 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
   } catch (error) {
     console.error("generate-content-calendar error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate calendar";
+    if (/abort|timeout|timed out|context canceled|AI request failed/i.test(message)) {
+      return new Response(JSON.stringify(fallbackCalendar("general business")), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
