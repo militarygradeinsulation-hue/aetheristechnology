@@ -615,15 +615,57 @@ export const AllInOneGenerator: React.FC = () => {
           </div>
 
           {!running && successCount > 0 && (
-            <div className="mt-5 p-4 rounded-lg bg-amber/5 border border-amber/30 flex items-start gap-3">
-              <LibraryIcon className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">All results are in your Library</p>
-                <p className="text-xs text-muted-foreground">
-                  Switch to the <span className="text-amber font-semibold">My Library</span> tab to view, download as
-                  PDF, or copy any result.
-                </p>
+            <div className="mt-5 space-y-4">
+              <div className="p-4 rounded-lg bg-amber/5 border border-amber/30 flex flex-wrap items-center gap-3">
+                <FileText className="w-5 h-5 text-amber flex-shrink-0" />
+                <div className="flex-1 min-w-[200px]">
+                  <p className="text-sm font-bold text-foreground">Full Report Ready</p>
+                  <p className="text-xs text-muted-foreground">
+                    View every tool's output below or download the consolidated report.
+                  </p>
+                </div>
+                <Button
+                  onClick={downloadReport}
+                  className="bg-amber hover:bg-amber/90 text-background font-bold"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4 mr-2" /> Download Report
+                </Button>
               </div>
+
+              <div className="rounded-xl border border-border bg-background/40 p-5 space-y-6 max-h-[600px] overflow-y-auto">
+                <div className="pb-3 border-b border-border">
+                  <h3 className="text-xl font-bold font-display text-foreground">Forensic Tools Report</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {form.url} · {new Date().toLocaleString()}
+                  </p>
+                </div>
+                {jobs().map((job) => {
+                  const out = outputs[job.key];
+                  const state = states[job.key];
+                  if (!out && state?.status !== 'error' && state?.status !== 'skipped') return null;
+                  return (
+                    <section key={job.key} className="space-y-2">
+                      <h4 className="text-base font-bold text-amber flex items-center gap-2">
+                        <job.icon className="w-4 h-4" /> {job.label}
+                      </h4>
+                      {out ? (
+                        <pre className="whitespace-pre-wrap text-xs text-foreground/90 leading-relaxed font-mono bg-card/40 p-3 rounded border border-border/50">
+{renderValue(out.data)}
+                        </pre>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          {state?.status === 'error' ? `Failed: ${state.message}` : `Skipped: ${state?.message || ''}`}
+                        </p>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Individual results are also saved to <span className="text-amber font-semibold">My Library</span> for later access.
+              </p>
             </div>
           )}
         </div>
