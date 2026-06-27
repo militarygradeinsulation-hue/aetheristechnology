@@ -217,6 +217,9 @@ const LeakLanderPage: React.FC = () => {
           {/* Public website leak scan — email + URL only */}
           <PublicLeakScan />
 
+          {/* Free tools suite — email + phone unlocks everything */}
+          <HomeFreeTools />
+
           {/* One-button leak finder infographic */}
           <section
             className="mt-12 max-w-5xl mx-auto animate-fade-in"
