@@ -665,19 +665,19 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     // Lead with the fastest reliable model; pro is the last resort because it
     // 429s and 503s most often. Each model gets up to 3 attempts with backoff.
-    const models = ["google/gemini-2.5-flash", "google/gemini-3-flash-preview", "google/gemini-2.5-pro"];
+    const models = ["google/gemini-2.5-flash", "google/gemini-3-flash-preview"];
     let aiResponse: Response | null = null;
     let lastErrText = "";
     let hardStopStatus = 0; // 402 = credits exhausted, stop everything
     outer: for (const m of models) {
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 2; attempt++) {
         try {
           aiResponse = await callAi(m);
         } catch (err: any) {
           lastErrText = err instanceof Error ? err.message : String(err);
           console.error(`AI gateway request failed (model=${m}, attempt=${attempt + 1}):`, lastErrText);
           aiResponse = null;
-          await sleep(1000 * (attempt + 1));
+          await sleep(500 * (attempt + 1));
           continue;
         }
         if (aiResponse!.ok) break outer;
@@ -685,7 +685,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
         console.error(`AI gateway error (model=${m}, attempt=${attempt + 1}):`, aiResponse!.status, lastErrText);
         if (aiResponse!.status === 402) { hardStopStatus = 402; break outer; }
         if (aiResponse!.status === 429 || aiResponse!.status === 503 || aiResponse!.status >= 500) {
-          await sleep(1200 * (attempt + 1) + Math.random() * 800);
+          await sleep(800 * (attempt + 1) + Math.random() * 400);
           continue;
         }
         // 4xx other than 429 — model-specific problem, try next model
