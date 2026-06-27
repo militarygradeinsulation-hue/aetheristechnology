@@ -77,7 +77,9 @@ export const HomeFreeTools: React.FC = () => {
     try {
       const cleanEmail = email.trim().toLowerCase().slice(0, 255);
       const cleanPhone = phone.trim().slice(0, 40);
+      const submissionId = crypto.randomUUID();
       const { error } = await supabase.from("contact_submissions").insert({
+        id: submissionId,
         name: "Free Tools Unlock",
         email: cleanEmail,
         phone: cleanPhone,
@@ -85,6 +87,24 @@ export const HomeFreeTools: React.FC = () => {
         service_interest: "free-tools-unlock",
       });
       if (error) throw error;
+
+      // Push admin notification so Joseph sees every new tool email immediately.
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "contact-notification",
+          recipientEmail: cleanEmail,
+          idempotencyKey: `free-tools-unlock-${submissionId}`,
+          templateData: {
+            name: "Free Tools Unlock",
+            email: cleanEmail,
+            phone: cleanPhone,
+            company: null,
+            message: "Unlocked the free tools suite from the home page.",
+            service_interest: "free-tools-unlock",
+          },
+        },
+      });
+
       const record: Unlock = { email: cleanEmail, phone: cleanPhone, ts: Date.now() };
       localStorage.setItem(UNLOCK_KEY, JSON.stringify(record));
       setUnlock(record);
