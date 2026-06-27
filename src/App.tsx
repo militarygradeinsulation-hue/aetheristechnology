@@ -79,6 +79,7 @@ const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
+const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -161,6 +162,7 @@ const App = () => (
                       <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
                       <Route path="/friction-audit" element={<FrictionAuditPage />} />
                       <Route path="/nexus-iq" element={<NexusIQPage />} />
+                      <Route path="/t/:repCode/:toolSlug" element={<RepToolLinkPage />} />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/signup" element={<SignupPage />} />
                       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
