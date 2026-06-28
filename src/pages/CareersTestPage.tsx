@@ -142,10 +142,22 @@ const CareersTestPage = () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
     }
+    if (!paidSessionId) {
+      toast({ title: 'Payment required', description: 'The $40 access fee is required to take the test.', variant: 'destructive' });
+      setPhase('pay');
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'start', name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() },
+        body: {
+          action: 'start',
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          payment_session_id: paidSessionId,
+          environment: getStripeEnvironment(),
+        },
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
