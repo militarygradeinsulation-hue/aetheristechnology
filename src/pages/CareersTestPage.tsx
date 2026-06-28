@@ -33,6 +33,7 @@ const CareersTestPage = () => {
   const [contactOpen, setContactOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('pay');
   const [paidEmail, setPaidEmail] = useState<string | null>(null);
+  const [paidSessionId, setPaidSessionId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [payerEmail, setPayerEmail] = useState('');
   const [loading, setLoading] = useState(false);
