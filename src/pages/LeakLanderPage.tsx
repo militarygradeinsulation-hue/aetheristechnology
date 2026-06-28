@@ -225,6 +225,15 @@ const LeakLanderPage: React.FC = () => {
             className="mt-12 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
           >
+            <div className="text-center mb-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Built by hand, not by hype
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground inline-flex items-center justify-center gap-2 flex-wrap">
+                <Users className="w-5 h-5 text-amber" />
+                Made by Real People, for real Humans.
+              </h2>
+            </div>
             <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
               <img
                 src={landingOneButtonInfographic.url}
