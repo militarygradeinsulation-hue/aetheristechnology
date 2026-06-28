@@ -218,13 +218,13 @@ Respond ONLY with valid JSON of shape:
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(120_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
         { role: "user", content: prompt },
