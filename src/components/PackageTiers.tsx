@@ -2,7 +2,6 @@ import React from 'react';
 import { Check, ShieldCheck, Crown, Zap, ArrowRight, Clock } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
 import tierDoors from '@/assets/editorial/tier-doors.jpg';
-import flagshipSplit from '@/assets/editorial/flagship-split.jpg';
 
 interface Tier {
   id: string;
@@ -180,75 +179,6 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
           })}
         </div>
 
-        {/* Flagships sit ABOVE the bundles in price + scope */}
-        <div className="mt-14">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center mb-8">
-            <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
-              <img src={flagshipSplit} alt="Split editorial: autopsy table on the left, wall of surveillance monitors on the right" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
-              <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
-            </div>
-            <div>
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Flagships · Sales-led only
-              </div>
-              <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-tight">
-                When the bundles aren't enough.
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Diagnostic, then surveillance. 15-min fit call required.
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="forensic-tile rounded-sm border border-amber/40 p-6">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
-                Flagship · One-time
-              </div>
-              <h4 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2">
-                21-Day Revenue Diagnostic
-              </h4>
-              <div className="font-forensic text-3xl font-bold text-foreground mb-1">$18,500</div>
-              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
-                fixed fee · 21-day forensic engagement
-              </div>
-              <p className="text-sm text-foreground/80 leading-relaxed mb-4">
-                The operator runs a full revenue-system autopsy on your CRM, sales follow-up, and ops.
-                Output: a written 15–30 page report, prioritized fixes, ROI projections, source-data
-                appendix, and a 60-minute readout.
-              </p>
-              <button
-                type="button"
-                onClick={onRequest}
-                className="inline-flex items-center gap-2 text-amber font-bold hover:text-amber/80 transition-colors"
-              >
-                Talk to an operator <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="forensic-tile rounded-sm border border-amber/40 p-6">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
-                Flagship · Monthly
-              </div>
-              <h4 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-2">
-                Active Case
-              </h4>
-              <div className="font-forensic text-3xl font-bold text-foreground mb-1">$15,000<span className="text-base text-muted-foreground">/mo</span></div>
-              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
-                3-month minimum · Diagnostic clients only
-              </div>
-              <p className="text-sm text-foreground/80 leading-relaxed mb-4">
-                After the Diagnostic, the operator executes the prioritized fixes themselves and
-                re-measures recovered revenue every month. You stop guessing whether it worked.
-              </p>
-              <button
-                type="button"
-                onClick={onRequest}
-                className="inline-flex items-center gap-2 text-amber font-bold hover:text-amber/80 transition-colors"
-              >
-                Talk to an operator <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

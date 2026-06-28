@@ -177,12 +177,6 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 operator who sits down with you, finds every leak, and crafts the solutions — so you don't
                 have to.
               </p>
-              <Link
-                to="/operator"
-                className="inline-flex items-center gap-2 mt-3 text-amber font-bold hover:text-amber/80 transition-colors"
-              >
-                Meet your operator →
-              </Link>
             </div>
           </div>
 
