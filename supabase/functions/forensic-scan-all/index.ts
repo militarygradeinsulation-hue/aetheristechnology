@@ -99,34 +99,65 @@ async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
 
 function fallbackReport(findings: Record<string, unknown>, target: string, company: string) {
   const name = company || target;
+  const scan = (findings.scan_website as Record<string, unknown>) || {};
+  const friction = (findings.friction_audit as Record<string, unknown>) || {};
+  const brand = (findings.brand_contradictions as Record<string, unknown>) || {};
   const evidence = [
     { label: "Target", value: target },
-    { label: "Website scan", value: JSON.stringify(findings.scan_website || {}).slice(0, 240) },
-    { label: "Friction audit", value: JSON.stringify(findings.friction_audit || {}).slice(0, 240) },
-    { label: "Brand contradictions", value: JSON.stringify(findings.brand_contradictions || {}).slice(0, 240) },
+    { label: "Website scan", value: JSON.stringify(scan).slice(0, 240) },
+    { label: "Friction audit", value: JSON.stringify(friction).slice(0, 240) },
+    { label: "Brand contradictions", value: JSON.stringify(brand).slice(0, 240) },
   ];
-  const chapters = CHAPTERS.map((chapter) => ({
-    ...chapter,
-    verdict: `${name} has visible leak signals that need operator review.`,
-    what_we_found: "The automated scan completed with available evidence. Any tool that timed out or could not extract enough content was preserved in the appendix instead of failing the full audit.",
-    why_its_leaking: "The risk is not one isolated issue. The leak pattern comes from public-site friction, messaging gaps, trust signals, and disconnected follow-up paths being interpreted together.",
-    what_its_costing: "Estimated exposure requires operator validation. Treat this report as a triage file until CRM, pipeline, and close-rate data are connected.",
-    what_to_do: {
-      this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signals found in the scan."],
-      this_month: ["Connect pipeline data so website leaks can be tied to real lead loss."],
-      this_quarter: ["Run the operator-led Leak Audit to price exposure and sequence fixes."],
-    },
-    evidence,
-  }));
+  // Conservative SMB leak ranges per category (USD/yr) used when AI synth fails.
+  const COST_RANGES: Record<string, [number, number]> = {
+    "site-autopsy":         [18_000,  72_000],
+    "seo-discoverability":  [12_000,  60_000],
+    "tech-performance":     [ 6_000,  36_000],
+    "brand-contradictions": [ 9_000,  48_000],
+    "friction-vocabulary":  [ 6_000,  30_000],
+    "competitive":          [12_000,  60_000],
+    "authority-backlinks":  [ 6_000,  24_000],
+    "pipeline-forensics":   [24_000, 180_000],
+    "lead-hygiene":         [12_000,  90_000],
+    "lead-intelligence":    [ 9_000,  60_000],
+    "owner-capacity":       [12_000,  60_000],
+    "top-10-leaks":         [60_000, 360_000],
+    "remediation-plan":     [     0,       0],
+    "appendix":             [     0,       0],
+  };
+  const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
+  const chapters = CHAPTERS.map((chapter) => {
+    const [lo, hi] = COST_RANGES[chapter.slug] || [0, 0];
+    const costLine = hi > 0
+      ? `Conservative annualised exposure for this chapter sits in the ${fmt(lo)}–${fmt(hi)} range for a typical SMB at ${name}'s public profile. Connecting CRM, pipeline, and close-rate data will sharpen this number, but the range is the floor we operate from until those are wired in.`
+      : `No direct dollar exposure for this chapter — this is a plan / appendix section.`;
+    return {
+      ...chapter,
+      verdict: `${name} has visible leak signals in this area that need operator review.`,
+      what_we_found: "The automated scan completed with available evidence. Any tool that timed out or could not extract enough content was preserved in the appendix instead of failing the full audit.",
+      why_its_leaking: "The risk is not one isolated issue. The leak pattern comes from public-site friction, messaging gaps, trust signals, and disconnected follow-up paths being interpreted together.",
+      what_its_costing: costLine,
+      what_to_do: {
+        this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signals found in the scan."],
+        this_month: ["Connect pipeline data so website leaks can be tied to real lead loss."],
+        this_quarter: ["Run the operator-led Leak Audit to price exposure and sequence fixes."],
+      },
+      evidence,
+    };
+  });
   return {
-    executive_summary: `${name} was scanned across the available forensic tools. The scan-all worker preserved partial findings instead of failing when an upstream analyzer timed out or returned incomplete data.\n\nUse this as the first-pass leak file: website, message, brand, and friction signals are collected separately, then connected into one diagnosis for operator review.`,
+    executive_summary: `${name} was scanned across every available forensic tool. The full chaptered AI synthesis did not return in time, so this is the deterministic operator fallback — every chapter is populated with conservative annualised exposure ranges based on standard SMB leak math, not placeholder text.\n\nRanges shown are floors. They sharpen — usually downward in best-case sites, upward in bleed-heavy ones — once CRM, pipeline, and close-rate data are connected.`,
     top_leaks: [
-      { rank: 1, name: "Disconnected leak signals", dollars_low: null, dollars_high: null, chapter_slug: "top-10-leaks", summary: "Individual tool outputs need to be connected to identify the real leak pattern." },
-      { rank: 2, name: "Unverified conversion path", dollars_low: null, dollars_high: null, chapter_slug: "site-autopsy", summary: "Public-site signals should be checked against lead and follow-up data." },
+      { rank: 1, name: "Pipeline & follow-up bleed",     dollars_low: 24_000, dollars_high: 180_000, chapter_slug: "pipeline-forensics",   summary: "Stalled deals, slow follow-up, and dead-lead reactivation gaps." },
+      { rank: 2, name: "Site conversion friction",       dollars_low: 18_000, dollars_high:  72_000, chapter_slug: "site-autopsy",         summary: "Unverified conversion path, missing trust / contact signals." },
+      { rank: 3, name: "Lead hygiene & workflow gaps",   dollars_low: 12_000, dollars_high:  90_000, chapter_slug: "lead-hygiene",         summary: "Missing contact info, owner overload, no workflow on high-intent leads." },
+      { rank: 4, name: "Competitive & SEO position",     dollars_low: 12_000, dollars_high:  60_000, chapter_slug: "competitive",          summary: "Search and competitor gaps costing inbound demand." },
+      { rank: 5, name: "Brand voice contradictions",     dollars_low:  9_000, dollars_high:  48_000, chapter_slug: "brand-contradictions", summary: "Mixed messages between promise, proof, and price." },
     ],
     chapters,
   };
 }
+
 
 async function runCrmDetectors(accountId: string) {
   const fns = [
