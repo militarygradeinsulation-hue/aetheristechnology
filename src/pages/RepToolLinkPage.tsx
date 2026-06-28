@@ -85,6 +85,20 @@ const RepToolLinkPage: React.FC = () => {
     if (!valid || submitting) return;
     setSubmitting(true);
     try {
+      // Staff bypass — PIN 9822 unlocks without lead capture.
+      if (email.trim() === "9822") {
+        try {
+          if (repCode) localStorage.setItem('aetheris_rep_code', repCode);
+          localStorage.setItem('aetheris.freeToolsUnlock.v1', JSON.stringify({
+            email: 'staff@aetheris.technology',
+            phone: '9822',
+            ts: Date.now(),
+          }));
+        } catch {}
+        toast.success('Staff access — loading your tool…');
+        navigate(tool.path, { replace: true });
+        return;
+      }
       const cleanEmail = email.trim().toLowerCase().slice(0, 255);
       const cleanName = name.trim().slice(0, 120) || undefined;
       const cleanPhone = phone.trim().slice(0, 40) || undefined;
