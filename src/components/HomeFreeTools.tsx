@@ -79,6 +79,14 @@ export const HomeFreeTools: React.FC = () => {
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!valid || submitting) return;
+    // Staff bypass — PIN 9822 unlocks without lead capture.
+    if (isStaffPin(email) || isStaffPin(phone)) {
+      const record: Unlock = { email: "staff@aetheris.technology", phone: "9822", ts: Date.now() };
+      localStorage.setItem(UNLOCK_KEY, JSON.stringify(record));
+      setUnlock(record);
+      toast.success("Staff access — tools unlocked.");
+      return;
+    }
     setSubmitting(true);
     try {
       const cleanEmail = email.trim().toLowerCase().slice(0, 255);
