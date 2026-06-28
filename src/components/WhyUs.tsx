@@ -50,11 +50,6 @@ export const WhyUs: React.FC = () => {
                         Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
-                    <Link to="/operator">
-                      <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
-                        Meet the operator <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </div>

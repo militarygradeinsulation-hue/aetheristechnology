@@ -69,7 +69,6 @@ const NewsPostPage = lazy(() => import("./pages/NewsPostPage"));
 const CredentialsPage = lazy(() => import("./pages/CredentialsPage"));
 const ImplementationPage = lazy(() => import("./pages/ImplementationPage"));
 const CatalogPage = lazy(() => import("./pages/CatalogPage"));
-const OperatorPage = lazy(() => import("./pages/OperatorPage"));
 const LocationPage = lazy(() => import("./pages/LocationPage"));
 const ExtensionPage = lazy(() => import("./pages/ExtensionPage"));
 const OperatorAppPage = lazy(() => import("./pages/OperatorAppPage"));
@@ -134,7 +133,6 @@ const App = () => (
                       <Route path="/home" element={<Navigate to="/" replace />} />
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
-                      <Route path="/operator" element={<OperatorPage />} />
                       <Route path="/bundles" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/why-us" element={<WhyUsPage />} />
                       <Route path="/about" element={<Navigate to="/" replace />} />
