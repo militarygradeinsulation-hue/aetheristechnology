@@ -169,10 +169,9 @@ const RepToolLinkPage: React.FC = () => {
               <input
                 type="text"
                 inputMode="email"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                placeholder="you@company.com  (or staff PIN)"
                 className="w-full rounded-sm border border-amber/30 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber"
                 autoComplete="email"
                 maxLength={255}
