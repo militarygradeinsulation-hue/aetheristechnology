@@ -59,10 +59,11 @@ const CareersTestPage = () => {
     try {
       const raw = localStorage.getItem(PAID_LS_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as { email?: string; ts?: number };
+        const parsed = JSON.parse(raw) as { email?: string; ts?: number; session_id?: string };
         // Treat as valid for 30 days
-        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30) {
+        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30 && parsed?.session_id) {
           setPaidEmail(parsed.email || null);
+          setPaidSessionId(parsed.session_id);
           if (parsed.email) {
             setForm(f => ({ ...f, email: parsed.email! }));
           }
