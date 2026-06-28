@@ -33,6 +33,7 @@ const CareersTestPage = () => {
   const [contactOpen, setContactOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('pay');
   const [paidEmail, setPaidEmail] = useState<string | null>(null);
+  const [paidSessionId, setPaidSessionId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [payerEmail, setPayerEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,10 +60,11 @@ const CareersTestPage = () => {
     try {
       const raw = localStorage.getItem(PAID_LS_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as { email?: string; ts?: number };
+        const parsed = JSON.parse(raw) as { email?: string; ts?: number; session_id?: string };
         // Treat as valid for 30 days
-        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30) {
+        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30 && parsed?.session_id) {
           setPaidEmail(parsed.email || null);
+          setPaidSessionId(parsed.session_id);
           if (parsed.email) {
             setForm(f => ({ ...f, email: parsed.email! }));
           }
@@ -83,6 +85,7 @@ const CareersTestPage = () => {
       const email = (data as any).email as string | undefined;
       localStorage.setItem(PAID_LS_KEY, JSON.stringify({ email, ts: Date.now(), session_id: sessionId }));
       setPaidEmail(email || null);
+      setPaidSessionId(sessionId);
       if (email) setForm(f => ({ ...f, email }));
       // Clean session_id from URL
       searchParams.delete('session_id');
@@ -139,10 +142,22 @@ const CareersTestPage = () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
     }
+    if (!paidSessionId) {
+      toast({ title: 'Payment required', description: 'The $40 access fee is required to take the test.', variant: 'destructive' });
+      setPhase('pay');
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'start', name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() },
+        body: {
+          action: 'start',
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          payment_session_id: paidSessionId,
+          environment: getStripeEnvironment(),
+        },
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);

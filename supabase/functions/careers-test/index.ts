@@ -6,6 +6,25 @@ import pdfParse from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
+import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
+
+// Verify a Stripe Checkout session was actually paid for the careers test fee.
+// Returns the verified payer email when ok.
+async function verifyCareersPayment(sessionId: string, environment: StripeEnv): Promise<{ ok: boolean; email: string | null; error?: string }> {
+  if (!sessionId || !/^cs_[a-zA-Z0-9_]+$/.test(sessionId)) {
+    return { ok: false, email: null, error: "Invalid payment session" };
+  }
+  try {
+    const stripe = createStripeClient(environment);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== "paid") return { ok: false, email: null, error: "Payment not completed" };
+    if (session.metadata?.purpose !== "careers_test_fee") return { ok: false, email: null, error: "Payment is not for the careers test" };
+    const email = session.customer_details?.email || session.customer_email || null;
+    return { ok: true, email: email ? String(email).toLowerCase() : null };
+  } catch (e) {
+    return { ok: false, email: null, error: e instanceof Error ? e.message : "Could not verify payment" };
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -448,6 +467,22 @@ serve(async (req) => {
       const phone = String(body.phone || "").trim() || null;
       if (!email || !name) return json({ error: "Name and email required" }, 400);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
+
+      // ---- REQUIRED: paid Stripe checkout session for the careers test fee ----
+      const paymentSessionId = String(body.payment_session_id || "").trim();
+      const rawEnv = String(body.environment || "sandbox");
+      const env: StripeEnv = rawEnv === "live" ? "live" : "sandbox";
+      if (!paymentSessionId) {
+        return json({ error: "Payment required. Please complete the $40 access fee to take the test." }, 402);
+      }
+      const pay = await verifyCareersPayment(paymentSessionId, env);
+      if (!pay.ok) {
+        return json({ error: pay.error || "Payment could not be verified." }, 402);
+      }
+      // Tie the payment to the candidate email — no sharing a paid session across accounts.
+      if (pay.email && pay.email !== email) {
+        return json({ error: `This payment was made by ${pay.email}. Use the same email to take the test.` }, 403);
+      }
 
       // Only count *submitted* attempts toward the daily limit so abandoned/lost
       // sessions and quick mis-clicks don't lock candidates out.
