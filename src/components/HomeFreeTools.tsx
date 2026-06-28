@@ -76,6 +76,17 @@ export const HomeFreeTools: React.FC = () => {
     [email, phone]
   );
 
+  // Staff PIN auto-unlocks the moment it's typed — no button click needed.
+  useEffect(() => {
+    if (unlock) return;
+    if (isStaffPin(email) || isStaffPin(phone)) {
+      const record: Unlock = { email: "staff@aetheris.technology", phone: "9822", ts: Date.now() };
+      localStorage.setItem(UNLOCK_KEY, JSON.stringify(record));
+      setUnlock(record);
+      toast.success("Staff access — tools unlocked.");
+    }
+  }, [email, phone, unlock]);
+
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!valid || submitting) return;
