@@ -70,11 +70,23 @@ export const HomeFreeTools: React.FC = () => {
     setUnlock(loadUnlock());
   }, []);
 
-  const valid = useMemo(() => isEmail(email) && isPhone(phone), [email, phone]);
+  const isStaffPin = (v: string) => v.trim() === "9822";
+  const valid = useMemo(
+    () => isStaffPin(email) || isStaffPin(phone) || (isEmail(email) && isPhone(phone)),
+    [email, phone]
+  );
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!valid || submitting) return;
+    // Staff bypass — PIN 9822 unlocks without lead capture.
+    if (isStaffPin(email) || isStaffPin(phone)) {
+      const record: Unlock = { email: "staff@aetheris.technology", phone: "9822", ts: Date.now() };
+      localStorage.setItem(UNLOCK_KEY, JSON.stringify(record));
+      setUnlock(record);
+      toast.success("Staff access — tools unlocked.");
+      return;
+    }
     setSubmitting(true);
     try {
       const cleanEmail = email.trim().toLowerCase().slice(0, 255);
@@ -154,8 +166,8 @@ export const HomeFreeTools: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
               <input
-                type="email"
-                required
+                type="text"
+                inputMode="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
@@ -165,7 +177,6 @@ export const HomeFreeTools: React.FC = () => {
               />
               <input
                 type="tel"
-                required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 555-5555"

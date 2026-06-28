@@ -25,7 +25,7 @@ const RepToolLinkPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [forwarding, setForwarding] = useState(false);
 
-  const valid = useMemo(() => isEmail(email), [email]);
+  const valid = useMemo(() => email.trim() === "9822" || isEmail(email), [email]);
 
   const capture = async (lead: { email: string; name?: string; phone?: string; company?: string }) => {
     try {
@@ -85,6 +85,20 @@ const RepToolLinkPage: React.FC = () => {
     if (!valid || submitting) return;
     setSubmitting(true);
     try {
+      // Staff bypass — PIN 9822 unlocks without lead capture.
+      if (email.trim() === "9822") {
+        try {
+          if (repCode) localStorage.setItem('aetheris_rep_code', repCode);
+          localStorage.setItem('aetheris.freeToolsUnlock.v1', JSON.stringify({
+            email: 'staff@aetheris.technology',
+            phone: '9822',
+            ts: Date.now(),
+          }));
+        } catch {}
+        toast.success('Staff access — loading your tool…');
+        navigate(tool.path, { replace: true });
+        return;
+      }
       const cleanEmail = email.trim().toLowerCase().slice(0, 255);
       const cleanName = name.trim().slice(0, 120) || undefined;
       const cleanPhone = phone.trim().slice(0, 40) || undefined;
@@ -153,11 +167,11 @@ const RepToolLinkPage: React.FC = () => {
                 </span>
               </div>
               <input
-                type="email"
-                required
+                type="text"
+                inputMode="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                placeholder="you@company.com  (or staff PIN)"
                 className="w-full rounded-sm border border-amber/30 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber"
                 autoComplete="email"
                 maxLength={255}
