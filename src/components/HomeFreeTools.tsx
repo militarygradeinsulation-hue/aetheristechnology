@@ -166,7 +166,8 @@ export const HomeFreeTools: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
               <input
-                type="email"
+                type="text"
+                inputMode="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
