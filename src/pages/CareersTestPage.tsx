@@ -85,6 +85,7 @@ const CareersTestPage = () => {
       const email = (data as any).email as string | undefined;
       localStorage.setItem(PAID_LS_KEY, JSON.stringify({ email, ts: Date.now(), session_id: sessionId }));
       setPaidEmail(email || null);
+      setPaidSessionId(sessionId);
       if (email) setForm(f => ({ ...f, email }));
       // Clean session_id from URL
       searchParams.delete('session_id');
