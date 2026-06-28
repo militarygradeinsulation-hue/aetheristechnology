@@ -6,6 +6,25 @@ import pdfParse from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
+import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
+
+// Verify a Stripe Checkout session was actually paid for the careers test fee.
+// Returns the verified payer email when ok.
+async function verifyCareersPayment(sessionId: string, environment: StripeEnv): Promise<{ ok: boolean; email: string | null; error?: string }> {
+  if (!sessionId || !/^cs_[a-zA-Z0-9_]+$/.test(sessionId)) {
+    return { ok: false, email: null, error: "Invalid payment session" };
+  }
+  try {
+    const stripe = createStripeClient(environment);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== "paid") return { ok: false, email: null, error: "Payment not completed" };
+    if (session.metadata?.purpose !== "careers_test_fee") return { ok: false, email: null, error: "Payment is not for the careers test" };
+    const email = session.customer_details?.email || session.customer_email || null;
+    return { ok: true, email: email ? String(email).toLowerCase() : null };
+  } catch (e) {
+    return { ok: false, email: null, error: e instanceof Error ? e.message : "Could not verify payment" };
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
