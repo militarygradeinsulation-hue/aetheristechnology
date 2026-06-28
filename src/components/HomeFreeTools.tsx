@@ -168,7 +168,6 @@ export const HomeFreeTools: React.FC = () => {
               <input
                 type="text"
                 inputMode="email"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
@@ -178,7 +177,6 @@ export const HomeFreeTools: React.FC = () => {
               />
               <input
                 type="tel"
-                required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 555-5555"
