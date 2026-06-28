@@ -133,9 +133,9 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Position statement */}
+          {/* Punch headline */}
           <section
-            className="mt-5 max-w-5xl mx-auto text-center animate-fade-in"
+            className="mt-5 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
           >
             <div className="flex items-center justify-center gap-2 mb-3">
@@ -143,69 +143,30 @@ const LeakLanderPage: React.FC = () => {
               <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Indianapolis · US-Wide</span>
               <span className="h-px w-8 bg-amber/50" />
             </div>
-            <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-              Most growth-stage businesses are bleeding{" "}
-              <span className="text-crimson italic">time</span>,{" "}
-              <span className="text-crimson italic">leads</span>, and{" "}
-              <span className="text-crimson italic">revenue</span>{" "}
-              — without knowing where.
+            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+              Your business is{" "}
+              <span className="text-crimson italic">leaking</span>.
+              <br className="hidden sm:block" />
+              <span className="text-foreground/85"> One button finds it. We fix it.</span>
             </h1>
-            <p className="mt-5 text-base sm:text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto leading-relaxed">
-              I help established businesses uncover what is actually broken beneath the surface.
-              Not just your marketing.{" "}
-              <span className="text-amber font-semibold">Your entire business.</span>
-            </p>
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
-              {[
-                "Lead flow",
-                "Website performance",
-                "Trust signals",
-                "Sales process",
-                "Follow-up",
-                "Internal systems",
-                "Customer experience",
-                "Operational gaps",
-              ].map((item) => (
-                <div key={item} className="rounded-sm border border-amber/20 bg-background/40 px-3 py-2">
-                  <span className="text-[12px] sm:text-sm text-foreground/90 font-case uppercase tracking-wider">{item}</span>
-                </div>
-              ))}
-            </div>
-            <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Where are you <span className="text-crimson italic">leaking</span>. What is it costing you. Why is growth stalling.
-              Then I build custom solutions using AI, automation, strategy, and digital systems that fix those gaps.
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground/90 max-w-3xl mx-auto leading-relaxed">
-              The goal is simple: help you operate smarter, convert better, respond faster, and scale with less waste.
-            </p>
-            <div className="mt-6 inline-block rounded-sm border-l-2 border-amber/60 bg-amber/5 px-5 py-4 text-left max-w-3xl">
-              <p className="text-foreground/90 text-[15px] leading-relaxed italic">
-                “I run True Cost Forensics on your business. I show you exactly what is broken and what it is costing you.
-                Then we build the systems to fix it. I am not an agency pitching you activity. I am an operator who finds
-                the leak and closes it. No hidden timelines. No retainers. No cliché solutions. Just honest work.”
-              </p>
-            </div>
-            <p className="mt-5 text-sm text-muted-foreground max-w-2xl mx-auto">
-              I work with growth-minded businesses running $5M to $50M that know they should be further along.
-              If something is wrong, I find it. If it needs fixing, I build it.
-            </p>
-            <p className="mt-4 text-xs font-mono uppercase tracking-widest text-amber/80">
-              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            <p className="mt-5 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto leading-relaxed">
+              Press the button. Real operators — not a chatbot — find where you're bleeding leads,
+              time, and revenue. Then we seal it.
             </p>
           </section>
-          
+
           {/* Buttons. primary CTAs, larger */}
           <section
-            className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
-            style={{ animationDelay: "220ms", animationFillMode: "both" }}
+            className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 animate-fade-in"
+            style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:pointer-events-none">
+            <Button asChild variant="outline" size="lg" className="relative overflow-hidden h-14 px-8 text-base border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all">
               <Link to="/contact">
                 <FileText className="w-5 h-5 mr-2 text-amber relative" />
                 <span className="relative">Intake Form</span>
               </Link>
             </Button>
-            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all before:absolute before:inset-x-0 before:top-0 before:h-1/2 before:bg-gradient-to-b before:from-white/35 before:to-transparent before:pointer-events-none">
+            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all">
               <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
                 <Calendar className="w-5 h-5 mr-2 relative" />
                 <span className="relative">Book the Diagnostic</span>
@@ -214,16 +175,10 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
-          {/* Public website leak scan — email + URL only */}
-          <PublicLeakScan />
-
-          {/* Free tools suite — email + phone unlocks everything */}
-          <HomeFreeTools />
-
-          {/* One-button leak finder infographic */}
+          {/* One-button leak finder infographic — the focal point */}
           <section
-            className="mt-12 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+            className="mt-10 max-w-5xl mx-auto animate-fade-in"
+            style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
             <div className="text-center mb-5">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
@@ -237,12 +192,42 @@ const LeakLanderPage: React.FC = () => {
             <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-3 sm:p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
               <img
                 src={landingOneButtonInfographic.url}
-                alt="Aetheris Business Forensics: One button finds where your leads are leaking and instantly begins getting them back. 4 steps: press, find leaks, recover leads, see the return."
+                alt="Aetheris Business Forensics: One button finds where your leads are leaking and instantly begins getting them back."
                 className="w-full h-auto rounded-xl"
                 loading="lazy"
               />
             </div>
           </section>
+
+          {/* Meet the operator — short, merged from /operator */}
+          <section
+            className="mt-10 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "260ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 sm:p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+              <div className="font-case text-[10px] uppercase tracking-[0.3em] text-amber mb-3">
+                The operator behind the button
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight mb-4">
+                An operator — <span className="text-amber italic">not an agency</span>, not a chatbot.
+              </h2>
+              <p className="text-foreground/90 text-[15px] leading-relaxed italic border-l-2 border-amber/60 pl-4">
+                "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks. You don't run anything. You get the leak sealed."
+              </p>
+              <p className="mt-4 text-xs font-mono uppercase tracking-widest text-amber/80">
+                Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
+              </p>
+            </div>
+          </section>
+
+          {/* Public website leak scan — email + URL only */}
+          <div className="mt-10">
+            <PublicLeakScan />
+          </div>
+
+          {/* Free tools suite — email + phone unlocks everything */}
+          <HomeFreeTools />
+
 
           <section
             className="mt-10 max-w-4xl mx-auto animate-fade-in"
