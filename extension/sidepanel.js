@@ -873,6 +873,33 @@ document.querySelectorAll('[data-li-img]').forEach((input) => {
   });
 });
 
+// CLEAR buttons (post + comment boxes)
+function clearPreviewSlot(slot) {
+  if (!slot) return;
+  if (liState.replyImgs) delete liState.replyImgs[slot];
+  document.querySelectorAll(`[data-li-prev="${slot}"]`).forEach((img) => { img.src = ""; img.classList.add("hidden"); });
+  document.querySelectorAll(`input[type="file"][data-li-img="${slot}"]`).forEach((inp) => { inp.value = ""; });
+}
+$("li-post-clear")?.addEventListener("click", () => {
+  $("li-post").value = "";
+  $("li-post").focus();
+  toast("Post cleared.");
+});
+document.querySelectorAll("[data-li-clear]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.liClear;
+    const el = id && $(id);
+    if (el) el.value = "";
+    if (btn.dataset.liClearImg) clearPreviewSlot(btn.dataset.liClearImg);
+  });
+});
+$("li-reply-clear-all")?.addEventListener("click", () => {
+  ["li-r-orig", "li-r-mine", "li-r-theirs"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
+  clearPreviewSlot("myComment");
+  clearPreviewSlot("theirReply");
+  toast("Comments cleared.");
+});
+
 async function draftLinkedInReply() {
   const out = $("li-out");
   const mode = $("li-length").value || "brief";
