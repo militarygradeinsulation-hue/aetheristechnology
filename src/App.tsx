@@ -78,6 +78,7 @@ const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
+const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 
 const queryClient = new QueryClient({
