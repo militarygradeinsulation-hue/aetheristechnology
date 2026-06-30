@@ -366,6 +366,11 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
     }));
   }
 
+  if (name === "get_live_traffic") {
+    const hours = Math.min(Math.max(Number(args.hours) || 24, 1), 720);
+    return await buildLiveTraffic(sb, hours);
+  }
+
   if (name === "get_site_events") {
     const lim = limit(args.limit, 50, 200);
     const hours = limit(args.hours, 24, 720);
