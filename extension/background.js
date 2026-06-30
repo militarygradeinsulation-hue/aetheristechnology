@@ -78,6 +78,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
     return true;
   }
+
+  // 5) Focus the active tab + its window so the user actually sees the snap happen.
+  if (msg?.type === "AETHERIS_FOCUS_ACTIVE_TAB") {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      const t = tabs?.[0];
+      if (!t?.id) { sendResponse({ ok: false }); return; }
+      chrome.windows.update(t.windowId, { focused: true, state: "normal" }, () => {
+        chrome.tabs.update(t.id, { active: true }, () => sendResponse({ ok: true, tabId: t.id }));
+      });
+    });
+    return true;
+  }
 });
 
 // Re-broadcast tab updates so the panel can refresh its header + auto-Observe.
