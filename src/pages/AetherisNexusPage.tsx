@@ -544,9 +544,9 @@ export default function AetherisNexusPage() {
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 text-xs text-zinc-500">
-            <span className="px-2 py-1 rounded bg-zinc-800/50">Gemini 2.5 Pro</span>
-            <span className="px-2 py-1 rounded bg-zinc-800/50">GPT-Image-2</span>
+            <span className="px-2 py-1 rounded bg-zinc-800/50 border border-amber-500/20 text-amber-400/80">Aetheris 3.5</span>
           </div>
+
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
