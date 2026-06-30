@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
   const incoming = Array.isArray(body.messages) ? body.messages : [];
   if (incoming.length === 0) return json({ error: "messages required" }, 400);
 
-  const model = body.model || "google/gemini-2.5-pro";
+  const model = body.model || "google/gemini-3-flash-preview";
   const adminToken = req.headers.get("x-admin-token") || undefined;
 
   // Build message list with system prompt
