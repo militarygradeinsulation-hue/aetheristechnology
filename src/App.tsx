@@ -160,6 +160,8 @@ const App = () => (
                       <Route path="/brand-contradictions" element={<BrandContradictionsPage />} />
                       <Route path="/friction-audit" element={<FrictionAuditPage />} />
                       <Route path="/nexus-iq" element={<NexusIQPage />} />
+                      <Route path="/aetheris-ai" element={<AetherisNexusPage />} />
+                      <Route path="/aetheris-ai/:threadId" element={<AetherisNexusPage />} />
                       <Route path="/t/:repCode/:toolSlug" element={<RepToolLinkPage />} />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/signup" element={<SignupPage />} />
