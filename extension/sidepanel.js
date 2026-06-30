@@ -323,7 +323,7 @@ function renderScan() {
 
 function wireScanActions() {
   const out = $("scan-results");
-  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
   out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
@@ -360,7 +360,7 @@ async function applyLeakFix(id, opts = {}) {
   if (!leak) return { ok: false, error: "Leak not found." };
   // Snap the live page to the area we're about to change so the user sees it happen
   const sel = leak.selectors?.[0];
-  if (sel) { try { await relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: sel }); } catch {} }
+  if (sel) { try { await snapToSelector(sel); } catch {} }
   const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
   if (r?.ok) {
     state.revertById.set(id, r.revertId);
@@ -501,7 +501,7 @@ function wireOperatorActionButtons(root = document) {
     const r = await applyLeakFix(b.dataset.apply);
     if (!r?.ok) { b.disabled = false; b.textContent = "Fix in-page"; alert(r?.error || "Fix failed."); }
   }));
-  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
 }
 
 function decorateOperatorBubble(bubble, reply = "") {
@@ -739,7 +739,7 @@ function renderFix() {
         </div>
       </div>`;
   }).join("");
-  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
   out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
