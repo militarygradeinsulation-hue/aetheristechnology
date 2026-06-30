@@ -16,6 +16,13 @@ const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const PLAN_MODEL = "google/gemini-2.5-flash";
 const SCRIPT_MODEL = "google/gemini-2.5-pro";
 
+const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
+const signCaption = (cap: unknown): string => {
+  const s = typeof cap === "string" ? cap.trimEnd() : "";
+  if (!s) return AETHERIS_SIGNATURE;
+  return s.includes("Aetheris.Technology") ? s : `${s}\n\n${AETHERIS_SIGNATURE}`;
+};
+
 type Strategy = {
   business_description: string;
   niche: string;
