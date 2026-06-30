@@ -963,13 +963,15 @@ $("li-copy").addEventListener("click", async () => {
 });
 
 // Post from page
+const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
 $("gp-go").addEventListener("click", async () => {
   const tone = $("gp-tone").value;
   const out = $("gp-out"); out.textContent = "Drafting…";
   try {
-    const reply = await callOperator(
+    let reply = await callOperator(
       `Draft a LinkedIn post in the "${tone}" voice based on what is on the current tab. 4-7 short lines. Lead with a pattern-claim hook. No emojis, no hashtags, no em dashes. End with one sharp question or a one-line CTA.`
     );
+    if (reply && !reply.includes("Aetheris.Technology")) reply = `${reply.trimEnd()}\n\n${AETHERIS_SIGNATURE}`;
     out.textContent = reply;
   } catch (e) { out.textContent = `Failed: ${e.message}`; }
 });
