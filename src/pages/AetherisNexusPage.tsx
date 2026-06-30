@@ -694,15 +694,15 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
 }) {
   if (msg.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] bg-amber-500 text-zinc-900 rounded-2xl rounded-tr-sm px-4 py-2.5 text-[15px] whitespace-pre-wrap">
+      <div className="flex justify-end animate-fade-in">
+        <div className="max-w-[85%] bg-gradient-to-br from-amber-400 to-orange-500 text-zinc-950 rounded-2xl rounded-tr-sm px-4 py-2.5 text-[15px] whitespace-pre-wrap shadow-[0_8px_24px_-12px_rgba(245,158,11,0.6)]">
           {msg.attachments && msg.attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {msg.attachments.map((a, i) =>
                 a.type.startsWith("image/") ? (
-                  <img key={i} src={a.dataUrl} alt={a.name} className="max-h-32 rounded-lg border border-amber-700" />
+                  <img key={i} src={a.dataUrl} alt={a.name} className="max-h-32 rounded-lg border border-amber-800/40" />
                 ) : (
-                  <div key={i} className="flex items-center gap-1 bg-amber-600/30 px-2 py-1 rounded text-xs">
+                  <div key={i} className="flex items-center gap-1 bg-zinc-950/20 px-2 py-1 rounded text-xs">
                     <FileText size={12} /> {a.name}
                   </div>
                 ),
@@ -715,9 +715,9 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
     );
   }
   return (
-    <div className="group flex gap-3">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
-        <Sparkles size={16} className="text-zinc-900" />
+    <div className="group flex gap-3 animate-fade-in">
+      <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center ring-1 ring-amber-500/40 shadow-[0_0_18px_-2px_rgba(245,158,11,0.5)]">
+        <Sparkles size={16} className="text-zinc-950" />
       </div>
       <div className="flex-1 min-w-0">
         {msg.tools && msg.tools.length > 0 && (
