@@ -492,18 +492,27 @@ export default function AetherisNexusPage() {
   ];
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0c] text-zinc-100 flex">
+    <div className="fixed inset-0 bg-[#07070a] text-zinc-100 flex font-sans antialiased">
+      {/* Ambient backdrop */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-[40rem] h-[40rem] rounded-full bg-amber-500/10 blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 w-[36rem] h-[36rem] rounded-full bg-orange-600/[0.07] blur-[140px]" />
+        <div className="absolute bottom-0 left-1/3 w-[30rem] h-[30rem] rounded-full bg-amber-400/[0.05] blur-[120px]" />
+        <div className="absolute inset-0 opacity-[0.025] mix-blend-overlay" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      </div>
+
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static z-40 w-72 h-full bg-[#0f0f12] border-r border-zinc-800/80 flex flex-col transition-transform`}>
-        <div className="p-3 border-b border-zinc-800/80">
-          <button onClick={createThread} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-900 font-semibold rounded-lg py-2.5 transition">
+      <aside className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static z-40 w-72 h-full bg-[#0b0b0f]/90 backdrop-blur-xl border-r border-white/[0.06] flex flex-col transition-transform`}>
+        <div className="p-3 border-b border-white/[0.06]">
+          <button onClick={createThread} className="group relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:via-amber-400 hover:to-orange-400 text-zinc-950 font-semibold rounded-xl py-2.5 transition shadow-[0_8px_24px_-8px_rgba(245,158,11,0.55)] hover:shadow-[0_10px_30px_-6px_rgba(245,158,11,0.7)]">
             <Plus size={18} /> New chat
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
           {threads.length === 0 && <div className="text-zinc-500 text-sm px-3 py-4">No conversations yet.</div>}
           {threads.map((t) => (
-            <div key={t.id} className={`group flex items-center gap-1 rounded-lg ${t.id === threadId ? "bg-zinc-800/80" : "hover:bg-zinc-800/50"}`}>
+            <div key={t.id} className={`group relative flex items-center gap-1 rounded-lg transition ${t.id === threadId ? "bg-gradient-to-r from-amber-500/15 to-transparent ring-1 ring-amber-500/20" : "hover:bg-white/[0.04]"}`}>
+              {t.id === threadId && <span className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full bg-amber-500" />}
               <button
                 onClick={() => { navigate(`/aetheris-ai/${t.id}`); setSidebarOpen(false); }}
                 className="flex-1 text-left px-3 py-2 text-sm truncate"
@@ -512,7 +521,7 @@ export default function AetherisNexusPage() {
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); deleteThread(t.id); }}
-                className="opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-red-400"
+                className="opacity-0 group-hover:opacity-100 p-2 text-zinc-500 hover:text-red-400 transition"
                 aria-label="Delete"
               >
                 <Trash2 size={14} />
@@ -520,44 +529,58 @@ export default function AetherisNexusPage() {
             </div>
           ))}
         </div>
-        <div className="p-3 border-t border-zinc-800/80 text-xs text-zinc-500 flex items-center gap-2">
-          <img src={aetherisLogo} alt="Aetheris" className="h-5 w-auto" />
-          <span>Nexus AI · v1</span>
+        <div className="p-3 border-t border-white/[0.06] text-xs text-zinc-500 flex items-center gap-2">
+          <img src={aetherisLogo} alt="Aetheris" className="h-5 w-auto opacity-80" />
+          <span className="tracking-wide">Nexus AI · v1</span>
+          <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-emerald-400/80">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> live
+          </span>
         </div>
       </aside>
 
       {sidebarOpen && (
-        <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-zinc-800/80 bg-[#0a0a0c]/80 backdrop-blur">
+      <main className="relative flex-1 flex flex-col min-w-0">
+        <header className="relative flex items-center justify-between px-4 lg:px-6 py-3 border-b border-white/[0.06] bg-[#07070a]/60 backdrop-blur-xl">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 rounded hover:bg-zinc-800">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 rounded hover:bg-white/[0.06]">
               <Menu size={20} />
             </button>
-            <img src={aetherisLogo} alt="Aetheris" className="h-7 w-auto" />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-amber-500/30 blur-md" />
+              <img src={aetherisLogo} alt="Aetheris" className="relative h-8 w-auto" />
+            </div>
             <div>
-              <div className="font-semibold tracking-tight">Aetheris Nexus</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-amber-500/80">Forensic AI Operator</div>
+              <div className="font-semibold tracking-tight text-[15px]">Aetheris Nexus</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-amber-500/80">Forensic AI Operator</div>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-xs text-zinc-500">
-            <span className="px-2 py-1 rounded bg-zinc-800/50 border border-amber-500/20 text-amber-400/80">Aetheris 3.5</span>
+          <div className="hidden md:flex items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/10 border border-amber-500/30 text-amber-300 backdrop-blur">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.9)]" />
+              Aetheris 3.5
+            </span>
           </div>
-
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            <div className="max-w-3xl mx-auto px-6 py-16 lg:py-24">
+            <div className="max-w-3xl mx-auto px-6 py-16 lg:py-20 animate-fade-in">
               <div className="text-center mb-12">
-                <img src={aetherisLogo} alt="Aetheris" className="h-16 w-auto mx-auto mb-6 opacity-90" />
-                <h1 className="text-3xl lg:text-4xl font-serif font-semibold tracking-tight mb-3">
-                  What is your business <span className="text-amber-500">leaking</span> today?
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 rounded-full bg-amber-500/40 blur-2xl animate-pulse" />
+                  <img src={aetherisLogo} alt="Aetheris" className="relative h-20 w-auto mx-auto drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]" />
+                </div>
+                <h1 className="font-serif text-4xl lg:text-5xl font-semibold tracking-tight mb-4 leading-tight">
+                  What is your business{" "}
+                  <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-transparent">leaking</span>{" "}
+                  today?
                 </h1>
-                <p className="text-zinc-400 max-w-xl mx-auto">
+                <p className="text-zinc-400 max-w-xl mx-auto leading-relaxed">
                   The Aetheris Nexus operator. Scan companies, search the web, generate images, analyze documents — all from one premium AI surface.
                 </p>
               </div>
@@ -566,10 +589,12 @@ export default function AetherisNexusPage() {
                   <button
                     key={q.label}
                     onClick={() => { setInput(q.text); if (q.imageMode) setImageMode(true); textareaRef.current?.focus(); }}
-                    className="group text-left p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-amber-500/40 hover:bg-zinc-900/80 transition"
+                    className="group relative text-left p-4 rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.03] to-white/[0.01] hover:border-amber-500/40 hover:from-amber-500/[0.06] hover:to-transparent transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-12px_rgba(245,158,11,0.35)]"
                   >
-                    <q.icon className="text-amber-500 mb-2" size={18} />
-                    <div className="font-medium">{q.label}</div>
+                    <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 mb-3 group-hover:scale-110 transition">
+                      <q.icon className="text-amber-400" size={16} />
+                    </div>
+                    <div className="font-medium text-zinc-100">{q.label}</div>
                     <div className="text-xs text-zinc-500 mt-1 truncate">{q.text || "Switch composer to image mode"}</div>
                   </button>
                 ))}
@@ -582,7 +607,11 @@ export default function AetherisNexusPage() {
               ))}
               {streaming && (
                 <div className="flex items-center gap-2 text-zinc-500 text-sm px-2">
-                  <Loader2 size={14} className="animate-spin" /> Thinking…
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                  </span>
+                  Thinking…
                 </div>
               )}
             </div>
@@ -590,22 +619,23 @@ export default function AetherisNexusPage() {
         </div>
 
         {/* Composer */}
-        <div className="border-t border-zinc-800/80 bg-[#0a0a0c]/95 backdrop-blur px-4 lg:px-6 py-4">
+        <div className="relative border-t border-white/[0.06] bg-[#07070a]/80 backdrop-blur-xl px-4 lg:px-6 py-4">
+          <div className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
           <div className="max-w-3xl mx-auto">
             {pendingAttachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {pendingAttachments.map((a, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-zinc-800/80 rounded-lg pl-2 pr-1 py-1 text-xs">
-                    {a.type.startsWith("image/") ? <ImageIcon size={12} /> : <FileText size={12} />}
+                  <div key={i} className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg pl-2 pr-1 py-1 text-xs backdrop-blur">
+                    {a.type.startsWith("image/") ? <ImageIcon size={12} className="text-amber-400" /> : <FileText size={12} className="text-amber-400" />}
                     <span className="max-w-[140px] truncate">{a.name}</span>
-                    <button onClick={() => setPendingAttachments((p) => p.filter((_, idx) => idx !== i))} className="p-1 hover:text-red-400">
+                    <button onClick={() => setPendingAttachments((p) => p.filter((_, idx) => idx !== i))} className="p-1 hover:text-red-400 transition">
                       <X size={12} />
                     </button>
                   </div>
                 ))}
               </div>
             )}
-            <div className={`relative rounded-2xl border ${imageMode ? "border-amber-500/60 bg-amber-500/5" : "border-zinc-700 bg-zinc-900/60"} focus-within:border-amber-500/60 transition`}>
+            <div className={`relative rounded-2xl border transition-all ${imageMode ? "border-amber-500/60 bg-amber-500/[0.04] shadow-[0_0_0_3px_rgba(245,158,11,0.08)]" : "border-white/[0.08] bg-white/[0.03]"} focus-within:border-amber-500/60 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,0.12)] backdrop-blur-xl`}>
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -621,32 +651,32 @@ export default function AetherisNexusPage() {
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   <input ref={fileInputRef} type="file" hidden multiple accept="image/*,application/pdf,.txt,.md,.csv,.docx" onChange={(e) => handleFiles(e.target.files)} />
-                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400" title="Attach files">
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-amber-400 transition" title="Attach files">
                     <Paperclip size={18} />
                   </button>
                   <button
                     onClick={() => setImageMode((v) => !v)}
-                    className={`p-2 rounded-lg transition flex items-center gap-1.5 text-xs ${imageMode ? "bg-amber-500 text-zinc-900 font-semibold" : "hover:bg-zinc-800 text-zinc-400"}`}
+                    className={`px-2.5 py-2 rounded-lg transition flex items-center gap-1.5 text-xs font-medium ${imageMode ? "bg-gradient-to-r from-amber-400 to-orange-500 text-zinc-950 shadow-[0_4px_14px_-4px_rgba(245,158,11,0.6)]" : "hover:bg-white/[0.06] text-zinc-400 hover:text-amber-400"}`}
                     title="Image generation mode"
                   >
-                    <ImageIcon size={18} />
+                    <ImageIcon size={16} />
                     {imageMode && <span>Image</span>}
                   </button>
                 </div>
                 {streaming ? (
-                  <button onClick={stopStream} className="px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-sm">Stop</button>
+                  <button onClick={stopStream} className="px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 text-sm transition">Stop</button>
                 ) : (
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() && pendingAttachments.length === 0}
-                    className="p-2 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-900 transition"
+                    className="p-2 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-950 transition shadow-[0_4px_14px_-4px_rgba(245,158,11,0.6)]"
                   >
                     <Send size={18} />
                   </button>
                 )}
               </div>
             </div>
-            <div className="text-[10px] text-zinc-600 text-center mt-2">
+            <div className="text-[10px] text-zinc-600 text-center mt-2 tracking-wide">
               Aetheris Nexus can search the web, scan companies, and generate watermarked imagery. Verify critical outputs.
             </div>
           </div>
@@ -664,15 +694,15 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
 }) {
   if (msg.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] bg-amber-500 text-zinc-900 rounded-2xl rounded-tr-sm px-4 py-2.5 text-[15px] whitespace-pre-wrap">
+      <div className="flex justify-end animate-fade-in">
+        <div className="max-w-[85%] bg-gradient-to-br from-amber-400 to-orange-500 text-zinc-950 rounded-2xl rounded-tr-sm px-4 py-2.5 text-[15px] whitespace-pre-wrap shadow-[0_8px_24px_-12px_rgba(245,158,11,0.6)]">
           {msg.attachments && msg.attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {msg.attachments.map((a, i) =>
                 a.type.startsWith("image/") ? (
-                  <img key={i} src={a.dataUrl} alt={a.name} className="max-h-32 rounded-lg border border-amber-700" />
+                  <img key={i} src={a.dataUrl} alt={a.name} className="max-h-32 rounded-lg border border-amber-800/40" />
                 ) : (
-                  <div key={i} className="flex items-center gap-1 bg-amber-600/30 px-2 py-1 rounded text-xs">
+                  <div key={i} className="flex items-center gap-1 bg-zinc-950/20 px-2 py-1 rounded text-xs">
                     <FileText size={12} /> {a.name}
                   </div>
                 ),
@@ -685,9 +715,9 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
     );
   }
   return (
-    <div className="group flex gap-3">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
-        <Sparkles size={16} className="text-zinc-900" />
+    <div className="group flex gap-3 animate-fade-in">
+      <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center ring-1 ring-amber-500/40 shadow-[0_0_18px_-2px_rgba(245,158,11,0.5)]">
+        <Sparkles size={16} className="text-zinc-950" />
       </div>
       <div className="flex-1 min-w-0">
         {msg.tools && msg.tools.length > 0 && (
