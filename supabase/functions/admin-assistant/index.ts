@@ -5,7 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
-import { buildLiveTraffic } from "../admin-live-traffic/index.ts";
+import { buildLiveTraffic } from "../_shared/live-traffic.ts";
 import {
   SHARED_TOOL_SCHEMAS,
   webSearch,
