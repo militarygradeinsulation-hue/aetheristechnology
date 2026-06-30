@@ -169,6 +169,18 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "get_live_traffic",
+      description:
+        "REAL-TIME site traffic snapshot: active visitors now (last 5 min), unique visitors in window, total page views, clicks, searches/scans, and the top pages, top clicks, top search terms, and top referrers. Use for ANY question about who's on the site right now, what people are viewing, clicking, or searching for.",
+      parameters: {
+        type: "object",
+        properties: { hours: { type: "integer", default: 24, maximum: 720, description: "Lookback window in hours" } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "search_crm",
       description: "Fuzzy ILIKE search across crm_contacts and crm_companies (name/email/company).",
       parameters: {
