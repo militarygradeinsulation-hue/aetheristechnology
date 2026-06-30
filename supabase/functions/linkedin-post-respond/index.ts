@@ -316,6 +316,12 @@ serve(async (req) => {
     const finalViolation = findViolation(post) || findStyleViolation(post, recentDrafts);
     if (finalViolation) console.warn("style violation after 3 attempts, returning anyway:", finalViolation);
 
+    // Append Joseph's signature to every post/reply, idempotent.
+    const SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
+    if (!post.includes("Aetheris.Technology")) {
+      post = post.trimEnd() + "\n\n" + SIGNATURE;
+    }
+
     return new Response(JSON.stringify({ post }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

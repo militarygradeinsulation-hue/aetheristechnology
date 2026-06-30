@@ -16,6 +16,13 @@ const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const PLAN_MODEL = "google/gemini-2.5-flash";
 const SCRIPT_MODEL = "google/gemini-2.5-pro";
 
+const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
+const signCaption = (cap: unknown): string => {
+  const s = typeof cap === "string" ? cap.trimEnd() : "";
+  if (!s) return AETHERIS_SIGNATURE;
+  return s.includes("Aetheris.Technology") ? s : `${s}\n\n${AETHERIS_SIGNATURE}`;
+};
+
 type Strategy = {
   business_description: string;
   niche: string;
@@ -300,7 +307,7 @@ serve(async (req) => {
           target_emotion: post.target_emotion,
           hook: post.hook,
           script: post.script,
-          caption: post.caption,
+          caption: signCaption(post.caption),
           hashtags: post.hashtags,
           status: "draft",
         })
@@ -336,7 +343,7 @@ serve(async (req) => {
         .update({
           hook: result.hook,
           script: result.script,
-          caption: result.caption,
+          caption: signCaption(result.caption),
           hashtags: result.hashtags || [],
           generated_at: new Date().toISOString(),
         })
@@ -439,7 +446,7 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
             target_emotion: r.planSlot.targetEmotion,
             hook: r.script.hook,
             script: r.script.script,
-            caption: r.script.caption,
+            caption: signCaption(r.script.caption),
             hashtags: r.script.hashtags || [],
             status: "draft",
           };
