@@ -29,6 +29,15 @@ function relayToTab(payload) {
 }
 function getActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_GET_ACTIVE_TAB" }, (x) => r(x || {}))); }
 function captureViewport() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_CAPTURE_VIEWPORT" }, (x) => r(x || {}))); }
+function focusActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_FOCUS_ACTIVE_TAB" }, (x) => r(x || {}))); }
+// Snap = focus the tab first, then ask the page to spotlight the area.
+async function snapToSelector(selector) {
+  if (!selector) return;
+  await focusActiveTab();
+  // Tiny delay so the window finishes focusing before the spotlight draws
+  await new Promise((r) => setTimeout(r, 120));
+  await relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector });
+}
 
 // ---------------- Tabs ----------------
 document.querySelectorAll(".tab").forEach((btn) => {
@@ -314,7 +323,7 @@ function renderScan() {
 
 function wireScanActions() {
   const out = $("scan-results");
-  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
   out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
@@ -351,7 +360,7 @@ async function applyLeakFix(id, opts = {}) {
   if (!leak) return { ok: false, error: "Leak not found." };
   // Snap the live page to the area we're about to change so the user sees it happen
   const sel = leak.selectors?.[0];
-  if (sel) { try { await relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: sel }); } catch {} }
+  if (sel) { try { await snapToSelector(sel); } catch {} }
   const r = await relayToTab({ type: "AETHERIS_APPLY_FIX", leak });
   if (r?.ok) {
     state.revertById.set(id, r.revertId);
@@ -492,7 +501,7 @@ function wireOperatorActionButtons(root = document) {
     const r = await applyLeakFix(b.dataset.apply);
     if (!r?.ok) { b.disabled = false; b.textContent = "Fix in-page"; alert(r?.error || "Fix failed."); }
   }));
-  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  root.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
 }
 
 function decorateOperatorBubble(bubble, reply = "") {
@@ -730,7 +739,7 @@ function renderFix() {
         </div>
       </div>`;
   }).join("");
-  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => relayToTab({ type: "AETHERIS_OVERLAY_FOCUS", selector: b.dataset.focus })));
+  out.querySelectorAll("[data-focus]").forEach((b) => b.addEventListener("click", () => snapToSelector(b.dataset.focus)));
   out.querySelectorAll("[data-read]").forEach((b) => b.addEventListener("click", () => window.__aetherisReadLeak(b.dataset.read)));
   out.querySelectorAll("[data-apply]").forEach((b) => b.addEventListener("click", async () => {
     const id = b.dataset.apply;
@@ -862,6 +871,33 @@ document.querySelectorAll('[data-li-img]').forEach((input) => {
       if (prev) { prev.src = url; prev.classList.remove("hidden"); }
     } catch (err) { toast(err.message); }
   });
+});
+
+// CLEAR buttons (post + comment boxes)
+function clearPreviewSlot(slot) {
+  if (!slot) return;
+  if (liState.replyImgs) delete liState.replyImgs[slot];
+  document.querySelectorAll(`[data-li-prev="${slot}"]`).forEach((img) => { img.src = ""; img.classList.add("hidden"); });
+  document.querySelectorAll(`input[type="file"][data-li-img="${slot}"]`).forEach((inp) => { inp.value = ""; });
+}
+$("li-post-clear")?.addEventListener("click", () => {
+  $("li-post").value = "";
+  $("li-post").focus();
+  toast("Post cleared.");
+});
+document.querySelectorAll("[data-li-clear]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.liClear;
+    const el = id && $(id);
+    if (el) el.value = "";
+    if (btn.dataset.liClearImg) clearPreviewSlot(btn.dataset.liClearImg);
+  });
+});
+$("li-reply-clear-all")?.addEventListener("click", () => {
+  ["li-r-orig", "li-r-mine", "li-r-theirs"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
+  clearPreviewSlot("myComment");
+  clearPreviewSlot("theirReply");
+  toast("Comments cleared.");
 });
 
 async function draftLinkedInReply() {

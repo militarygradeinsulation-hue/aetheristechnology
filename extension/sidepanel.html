@@ -207,28 +207,42 @@
           <!-- TEXT source -->
           <div class="li-src hidden" id="li-src-text">
             <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to, or click 'Grab selection' to pull text from the current page."></textarea>
-            <div class="row" style="margin-top:6px">
+            <div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap">
               <button id="li-grab" class="ghost">Grab selection</button>
+              <button id="li-post-clear" class="ghost" type="button" title="Clear the post box">Clear post</button>
             </div>
           </div>
 
           <!-- REPLY-TO-REPLY source -->
           <div class="li-src hidden" id="li-src-reply">
-            <label class="li-lbl">Original post (optional context)</label>
+            <div class="li-lbl-row">
+              <span class="li-lbl">Original post (optional context)</span>
+              <button class="link-btn" type="button" data-li-clear="li-r-orig">Clear</button>
+            </div>
             <textarea id="li-r-orig" rows="2" placeholder="Optional: paste the original post you commented on."></textarea>
             <label class="li-lbl-row">
               <span class="li-lbl">Your prior comment</span>
-              <label class="link-btn">Attach image<input type="file" data-li-img="myComment" accept="image/*" hidden /></label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <label class="link-btn">Attach image<input type="file" data-li-img="myComment" accept="image/*" hidden /></label>
+                <button class="link-btn" type="button" data-li-clear="li-r-mine" data-li-clear-img="myComment">Clear</button>
+              </span>
             </label>
             <textarea id="li-r-mine" rows="3" placeholder="Paste the comment YOU wrote."></textarea>
             <img class="li-thumb hidden" data-li-prev="myComment" alt="" />
 
             <label class="li-lbl-row">
               <span class="li-lbl">Their reply to you</span>
-              <label class="link-btn">Attach image<input type="file" data-li-img="theirReply" accept="image/*" hidden /></label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <label class="link-btn">Attach image<input type="file" data-li-img="theirReply" accept="image/*" hidden /></label>
+                <button class="link-btn" type="button" data-li-clear="li-r-theirs" data-li-clear-img="theirReply">Clear</button>
+              </span>
             </label>
             <textarea id="li-r-theirs" rows="3" placeholder="Paste their reply to your comment. This is what you're answering."></textarea>
             <img class="li-thumb hidden" data-li-prev="theirReply" alt="" />
+
+            <div class="row" style="margin-top:8px">
+              <button id="li-reply-clear-all" class="ghost" type="button" title="Clear all comment boxes">Clear all comments</button>
+            </div>
           </div>
 
           <!-- Controls -->

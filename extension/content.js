@@ -499,14 +499,86 @@
     });
   }
   function scrollToLeak(selector) {
-    try { const el = document.querySelector(selector); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); flash(el); } } catch {}
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      // Wait for scroll to land before drawing spotlight (smooth scroll ≈ 450ms)
+      setTimeout(() => spotlight(el, selector), 520);
+    } catch {}
   }
+
+  function spotlight(el, label) {
+    // Remove any previous spotlight
+    document.querySelectorAll("[data-aetheris-spotlight]").forEach((n) => n.remove());
+
+    const rect = el.getBoundingClientRect();
+    const pad = 10;
+    const x = Math.max(0, rect.left - pad);
+    const y = Math.max(0, rect.top - pad);
+    const w = rect.width + pad * 2;
+    const h = rect.height + pad * 2;
+
+    // Dim overlay with a cut-out using SVG mask so the target stays bright
+    const overlay = document.createElement("div");
+    overlay.setAttribute("data-aetheris-spotlight", "1");
+    Object.assign(overlay.style, {
+      position: "fixed", inset: "0", zIndex: "2147483646", pointerEvents: "auto",
+      cursor: "pointer", transition: "opacity .25s ease", opacity: "0",
+    });
+    overlay.innerHTML = `
+      <svg width="100%" height="100%" style="position:absolute;inset:0;display:block">
+        <defs>
+          <mask id="aetheris-spot-mask">
+            <rect width="100%" height="100%" fill="white"/>
+            <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" ry="8" fill="black"/>
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="rgba(8,8,12,0.72)" mask="url(#aetheris-spot-mask)"/>
+        <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" ry="8"
+              fill="none" stroke="#f59e0b" stroke-width="3"
+              style="filter:drop-shadow(0 0 12px rgba(245,158,11,.9))">
+          <animate attributeName="stroke-opacity" values="1;.35;1" dur="1.6s" repeatCount="indefinite"/>
+        </rect>
+      </svg>
+    `;
+
+    // Caption pill
+    const cap = document.createElement("div");
+    const captionTop = y + h + 12 > window.innerHeight - 48 ? y - 44 : y + h + 12;
+    Object.assign(cap.style, {
+      position: "fixed", left: `${Math.max(12, x)}px`, top: `${Math.max(12, captionTop)}px`,
+      zIndex: "2147483647", background: "#0a0a0c", color: "#f59e0b",
+      border: "1px solid rgba(245,158,11,.5)", padding: "6px 12px", borderRadius: "999px",
+      font: "600 11px/1 ui-monospace,Menlo,monospace", letterSpacing: ".12em",
+      textTransform: "uppercase", boxShadow: "0 8px 24px rgba(0,0,0,.55)",
+      pointerEvents: "none", whiteSpace: "nowrap", maxWidth: "60vw", overflow: "hidden", textOverflow: "ellipsis",
+    });
+    cap.textContent = `📍 Aetheris · ${(label || "snapped area").slice(0, 80)}  ·  click anywhere to dismiss`;
+    overlay.appendChild(cap);
+
+    document.documentElement.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = "1"; });
+
+    const dismiss = () => {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 260);
+      window.removeEventListener("keydown", onKey, true);
+    };
+    const onKey = (e) => { if (e.key === "Escape") dismiss(); };
+    overlay.addEventListener("click", dismiss);
+    window.addEventListener("keydown", onKey, true);
+    // Auto-dismiss after 6s
+    setTimeout(dismiss, 6000);
+  }
+
   function flash(el) {
     const orig = el.style.outline;
     el.style.outline = "3px solid #f59e0b";
     el.style.outlineOffset = "4px";
     setTimeout(() => { el.style.outline = orig; }, 1800);
   }
+
 
   // ============================================================
   // IN-PAGE FIX REGISTRY (real DOM patches, all reversible)
