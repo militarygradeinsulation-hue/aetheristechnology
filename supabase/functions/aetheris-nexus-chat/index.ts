@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
   const incoming = Array.isArray(body.messages) ? body.messages : [];
   if (incoming.length === 0) return json({ error: "messages required" }, 400);
 
-  const model = body.model || "google/gemini-2.5-pro";
+  const model = body.model || "google/gemini-3-flash-preview";
   const adminToken = req.headers.get("x-admin-token") || undefined;
 
   // Build message list with system prompt
@@ -158,6 +158,8 @@ Deno.serve(async (req) => {
       try {
         // Loop until model returns a non-tool response (max 5 rounds)
         for (let round = 0; round < 5; round++) {
+          const isFinalRound = round === 4;
+          // Use streaming on every call so the user sees tokens immediately.
           const res = await fetch(AI_URL, {
             method: "POST",
             headers: {
@@ -168,47 +170,77 @@ Deno.serve(async (req) => {
               model,
               messages,
               tools: TOOLS,
-              stream: false,
+              stream: true,
             }),
           });
 
-          if (!res.ok) {
-            const txt = await res.text();
+          if (!res.ok || !res.body) {
+            const txt = await res.text().catch(() => "");
             send({ type: "error", error: `Gateway ${res.status}: ${txt}` });
             controller.close();
             return;
           }
 
-          const data = await res.json();
-          const choice = data.choices?.[0];
-          const msg = choice?.message;
-          if (!msg) {
-            send({ type: "error", error: "No message in response" });
-            controller.close();
-            return;
+          // Parse SSE deltas, accumulating tool calls and streaming text.
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buf = "";
+          let started = false;
+          let finalContent = "";
+          const toolCallsAcc: any[] = []; // index -> { id, function:{name, arguments} }
+
+          outer: while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split("\n");
+            buf = lines.pop() || "";
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith("data:")) continue;
+              const payload = trimmed.slice(5).trim();
+              if (payload === "[DONE]") break outer;
+              let evt: any;
+              try { evt = JSON.parse(payload); } catch { continue; }
+              const delta = evt.choices?.[0]?.delta;
+              if (!delta) continue;
+              if (typeof delta.content === "string" && delta.content.length > 0) {
+                if (!started) { send({ type: "message_start" }); started = true; }
+                finalContent += delta.content;
+                send({ type: "delta", text: delta.content });
+              }
+              if (Array.isArray(delta.tool_calls)) {
+                for (const tc of delta.tool_calls) {
+                  const idx = tc.index ?? 0;
+                  if (!toolCallsAcc[idx]) {
+                    toolCallsAcc[idx] = { id: tc.id || `call_${idx}`, type: "function", function: { name: "", arguments: "" } };
+                  }
+                  if (tc.id) toolCallsAcc[idx].id = tc.id;
+                  if (tc.function?.name) toolCallsAcc[idx].function.name = tc.function.name;
+                  if (tc.function?.arguments) toolCallsAcc[idx].function.arguments += tc.function.arguments;
+                }
+              }
+            }
           }
 
-          const toolCalls = msg.tool_calls || [];
-          if (toolCalls.length === 0) {
-            // Final answer — stream it word-by-word for UX
-            const content = msg.content || "";
-            send({ type: "message_start" });
-            // Chunk in ~30 char pieces for smooth typing
-            const chunkSize = 40;
-            for (let i = 0; i < content.length; i += chunkSize) {
-              send({ type: "delta", text: content.slice(i, i + chunkSize) });
-              await new Promise((r) => setTimeout(r, 15));
-            }
+          // If model produced text and no tool calls → done.
+          if (toolCallsAcc.length === 0) {
+            if (!started) { send({ type: "message_start" }); send({ type: "delta", text: finalContent }); }
             send({ type: "done" });
             controller.close();
             return;
           }
 
-          // Append assistant message with tool calls
-          messages.push(msg);
+          if (isFinalRound) {
+            send({ type: "error", error: "Max tool rounds exceeded" });
+            controller.close();
+            return;
+          }
 
-          // Execute each tool call
-          for (const tc of toolCalls) {
+          // Append assistant tool-call message and execute tools.
+          messages.push({ role: "assistant", content: finalContent || null, tool_calls: toolCallsAcc });
+
+          for (const tc of toolCallsAcc) {
             const name = tc.function?.name;
             let args: any = {};
             try { args = JSON.parse(tc.function?.arguments || "{}"); } catch {}
@@ -232,6 +264,7 @@ Deno.serve(async (req) => {
             });
           }
         }
+
 
         send({ type: "error", error: "Max tool rounds exceeded" });
         controller.close();
