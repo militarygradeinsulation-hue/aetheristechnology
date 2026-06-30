@@ -148,86 +148,119 @@ export const HomeFreeTools: React.FC = () => {
       className="mt-14 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="rounded-sm border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-5 sm:p-7 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="h-px w-8 bg-amber/60" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-            Free Tools · Email + Phone Unlocks Everything
+      <div className="relative rounded-sm border border-amber/30 bg-card/95 backdrop-blur-sm overflow-hidden shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+        {/* Technical accent line */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent" />
+
+        {/* Corner labels */}
+        <div className="absolute top-2 left-3 sm:left-4">
+          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60">
+            Section // 004-Tools
           </span>
         </div>
-        <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-          Try the instruments. <span className="text-amber italic">On the house.</span>
-        </h2>
-        <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Each tool below is one slice of the forensic stack. Run any of them solo — they're free. The Leak Audit
-          is where they stop being slices and start being a diagnosis: every signal cross-referenced, every leak
-          priced, every fix sequenced. <span className="text-foreground/90">The puzzle only solves when an operator connects the pieces.</span>
-        </p>
+        <div className="absolute top-2 right-3 sm:right-4">
+          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-amber/60">
+            Status: Ready
+          </span>
+        </div>
 
-        {!unlock ? (
-          <form
-            onSubmit={handleUnlock}
-            className="mt-5 rounded-sm border border-amber/30 bg-background/60 p-4"
-          >
+        <div className="p-5 sm:p-7 pt-11 sm:pt-12">
+          {/* Header lockup */}
+          <header className="space-y-4">
             <div className="flex items-center gap-2 mb-3">
-              <Lock className="w-4 h-4 text-amber" />
-              <span className="font-mono text-[11px] uppercase tracking-widest text-amber">
-                Drop your email + phone to unlock all 10 tools
+              <span className="h-px w-8 bg-amber/60" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+                Free Tools · Email + Phone Unlocks Everything
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
-              <input
-                type="text"
-                inputMode="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                className="rounded-sm border border-amber/30 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber"
-                autoComplete="email"
-                maxLength={255}
-              />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(555) 555-5555"
-                className="rounded-sm border border-amber/30 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-amber"
-                autoComplete="tel"
-                maxLength={40}
-              />
+            <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-light text-foreground leading-tight">
+              Try the instruments.
+              <span className="block italic text-amber mt-1">On the house.</span>
+            </h2>
+            <div className="flex items-start gap-3">
+              <div className="w-px h-12 bg-amber/40 mt-1" />
+              <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
+                Access a restricted slice of the forensic stack. These tools detect financial drift before it becomes a leak — and they're free.
+              </p>
+            </div>
+          </header>
+
+          {!unlock ? (
+            <form
+              onSubmit={handleUnlock}
+              className="mt-8 sm:mt-10 rounded-sm border border-amber/20 bg-background/60 p-4 sm:p-5"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Lock className="w-3.5 h-3.5 text-amber" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+                  Unlock Access
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3">
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
+                    Email Identification
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    autoComplete="email"
+                    maxLength={255}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
+                    Secure Contact
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="(555) 555-5555"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    autoComplete="tel"
+                    maxLength={40}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!valid || submitting}
+                  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background font-mono uppercase tracking-[0.15em] text-xs px-6 py-2.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed group self-end sm:mt-5"
+                >
+                  <span className="relative z-10">{submitting ? "Unlocking…" : "Unlock Access"}</span>
+                  <div className="absolute inset-0 bg-background/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                </button>
+              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground/70 text-center sm:text-left">
+                We use your email + phone so you can come back without losing your work — and so we can send the Leak Audit summary if you run the full diagnosis. No spam.
+              </p>
+            </form>
+          ) : (
+            <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-3 rounded-sm border border-amber/20 bg-amber/5 px-4 py-3">
+              <Unlock className="w-4 h-4 text-amber" />
+              <span className="font-mono text-[11px] uppercase tracking-widest text-amber">
+                Unlocked for {unlock.email}
+              </span>
               <button
-                type="submit"
-                disabled={!valid || submitting}
-                className="inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background font-mono uppercase tracking-wider text-xs px-5 py-2.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem(UNLOCK_KEY);
+                  setUnlock(null);
+                  setEmail("");
+                  setPhone("");
+                }}
+                className="ml-auto text-[11px] text-muted-foreground hover:text-amber underline underline-offset-2"
               >
-                {submitting ? "Unlocking…" : (<>Unlock <Unlock className="w-4 h-4" /></>)}
+                Use a different email
               </button>
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              We use your email + phone so you can come back without losing your work — and so we can send the
-              Leak Audit summary if you run the full diagnosis. No spam.
-            </p>
-          </form>
-        ) : (
-          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-sm border border-amber/30 bg-amber/5 px-4 py-3">
-            <Unlock className="w-4 h-4 text-amber" />
-            <span className="font-mono text-[11px] uppercase tracking-widest text-amber">
-              Unlocked for {unlock.email}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                localStorage.removeItem(UNLOCK_KEY);
-                setUnlock(null);
-                setEmail("");
-                setPhone("");
-              }}
-              className="ml-auto text-[11px] text-muted-foreground hover:text-amber underline underline-offset-2"
-            >
-              Use a different email
-            </button>
-          </div>
-        )}
+          )}
+
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {TOOLS.map((t) => {
