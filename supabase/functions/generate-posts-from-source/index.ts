@@ -173,11 +173,13 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
     }
 
     const CTA_LINK = "https://businessforensics.tech/";
+    const SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
     if (Array.isArray(result?.posts)) {
       result.posts = result.posts.map((p: any) => {
         let caption = typeof p.caption === "string" ? p.caption.replace(/[—–]/g, ".") : p.caption;
         if (typeof caption === "string") {
           caption = caption.replace(/https?:\/\/\S+/gi, "").replace(/[ \t]{2,}/g, " ").trimEnd();
+          if (!caption.includes("Aetheris.Technology")) caption = `${caption}\n\n${SIGNATURE}`;
           caption = `${caption}\n\n${CTA_LINK}`;
         }
         return {
