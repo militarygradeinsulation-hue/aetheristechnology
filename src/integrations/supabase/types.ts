@@ -6805,6 +6805,7 @@ export type Database = {
         Args: { _account_id: string; _days?: number }
         Returns: Json
       }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       encrypt_token: {
         Args: { _key: string; _plaintext: string }
         Returns: string
