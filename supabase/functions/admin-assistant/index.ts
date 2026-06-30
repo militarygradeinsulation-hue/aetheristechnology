@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
+import { buildLiveTraffic } from "../_shared/live-traffic.ts";
 import {
   SHARED_TOOL_SCHEMAS,
   webSearch,
@@ -162,6 +163,18 @@ const TOOLS = [
           hours: { type: "integer", default: 24, maximum: 720 },
           limit: { type: "integer", default: 50, maximum: 200 },
         },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_live_traffic",
+      description:
+        "REAL-TIME site traffic snapshot: active visitors now (last 5 min), unique visitors in window, total page views, clicks, searches/scans, and the top pages, top clicks, top search terms, and top referrers. Use for ANY question about who's on the site right now, what people are viewing, clicking, or searching for.",
+      parameters: {
+        type: "object",
+        properties: { hours: { type: "integer", default: 24, maximum: 720, description: "Lookback window in hours" } },
       },
     },
   },
@@ -351,6 +364,11 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
       ...r,
       total_exposure_usd: ((r.total_exposure_cents || 0) / 100).toFixed(2),
     }));
+  }
+
+  if (name === "get_live_traffic") {
+    const hours = Math.min(Math.max(Number(args.hours) || 24, 1), 720);
+    return await buildLiveTraffic(sb, hours);
   }
 
   if (name === "get_site_events") {

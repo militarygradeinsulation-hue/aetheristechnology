@@ -41,6 +41,7 @@ const AdminCrm = lazy(() => import('@/components/crm/AdminCrm').then(m => ({ def
 const CampaignControlCenter = lazy(() => import('@/components/admin/CampaignControlCenter').then(m => ({ default: m.CampaignControlCenter })));
 const SEOOptimizer = lazy(() => import('@/components/admin/SEOOptimizer').then(m => ({ default: m.SEOOptimizer })));
 const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').then(m => ({ default: m.AdminAssistant })));
+const AdminLiveTrafficBar = lazy(() => import('@/components/admin/AdminLiveTrafficBar').then(m => ({ default: m.AdminLiveTrafficBar })));
 const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
 const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
 const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
@@ -719,6 +720,7 @@ const AdminDashboard: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
         <OperatorIdentityBar />
+        <Suspense fallback={null}><AdminLiveTrafficBar /></Suspense>
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <CustomViewSelector
