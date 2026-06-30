@@ -721,6 +721,16 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
         <OperatorIdentityBar />
         <Suspense fallback={null}><AdminLiveTrafficBar /></Suspense>
+        <a href="/aetheris-ai" target="_blank" rel="noopener noreferrer" className="block w-full rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:border-amber-500 transition p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em] text-amber-400 font-mono">Premium AI · New</div>
+              <div className="text-lg font-semibold text-zinc-100 mt-1">Open Aetheris Nexus</div>
+              <div className="text-sm text-zinc-400">ChatGPT-class operator with web search, company scans, image gen, and document analysis.</div>
+            </div>
+            <div className="text-amber-400 text-2xl">→</div>
+          </div>
+        </a>
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <CustomViewSelector
