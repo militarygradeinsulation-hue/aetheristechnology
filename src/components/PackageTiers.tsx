@@ -15,6 +15,7 @@ interface Tier {
   pairingRationale: string;
   included: string[];
   cta: string;
+  because: string;
   highlight?: boolean;
   ribbon?: string;
 }
