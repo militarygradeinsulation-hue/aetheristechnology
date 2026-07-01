@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Send, Plus, Trash2, Search, Image as ImageIcon, Paperclip,
-  Loader2, Sparkles, Globe, FileText, X, Download, Copy, Check, Menu,
+  Loader2, Sparkles, Globe, FileText, X, Download, Copy, Check, Menu, Home,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
