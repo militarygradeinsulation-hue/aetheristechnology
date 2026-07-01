@@ -58,7 +58,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
         >
           <div className="w-full max-w-5xl mx-auto text-center space-y-2 pb-1">
             <p className="font-forensic text-lg md:text-2xl lg:text-3xl text-foreground leading-tight">
-              I see you on my site. <span className="text-amber italic">Actually do something about your problem</span>. Instead of losing money and just leaving.
+              Your business is <span className="text-crimson italic">leaking</span>. One button finds it. We fix it.
             </p>
             <p className="font-forensic text-base md:text-lg lg:text-xl text-foreground/85 leading-snug">
               I can find your leaks. <span className="text-amber">no risk, no commitment, no contract, no hidden fees</span>. Money back if I can't. <span className="text-crimson font-bold italic">Period.</span>
