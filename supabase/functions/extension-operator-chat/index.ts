@@ -3,6 +3,7 @@
 // a viewport screenshot (data URL) so the model can comment on what it sees.
 // Non-streaming JSON response — keeps the content-script integration simple.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { INFLUENCE_BLUEPRINT_COMPACT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SYSTEM_PROMPT = `You are the Aetheris Forensic Operator — Joseph's AI co-pilot for finding business leaks on any website the user is looking at.
+const SYSTEM_PROMPT = INFLUENCE_BLUEPRINT_COMPACT + "\n\n" + RECIPROCITY_OPENING_RULE + "\n\n" + `You are the Aetheris Forensic Operator — Joseph's AI co-pilot for finding business leaks on any website the user is looking at.
 
 VOICE:
 - Blunt, forensic, operator-grade. You are NOT a brand voice, NOT a coach, NOT a guru.

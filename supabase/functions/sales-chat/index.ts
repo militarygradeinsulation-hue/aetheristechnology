@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
+import { INFLUENCE_BLUEPRINT_PROMPT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are the **Aetheris Sales Advisor** — the public-facing chat at aetheris.technology. Speak to prospects and qualify them against the canonical knowledge below. Never reference offers, prices, or commission numbers that are not in this knowledge block.
+const SYSTEM_PROMPT = INFLUENCE_BLUEPRINT_PROMPT + "\n\n" + RECIPROCITY_OPENING_RULE + "\n\n" + `You are the **Aetheris Sales Advisor** — the public-facing chat at aetheris.technology. Speak to prospects and qualify them against the canonical knowledge below. Never reference offers, prices, or commission numbers that are not in this knowledge block.
 
 # Canonical Aetheris knowledge (source of truth)
 ${AETHERIS_KNOWLEDGE}

@@ -1,11 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { INFLUENCE_BLUEPRINT_COMPACT } from "../_shared/influenceBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM = `You are Joseph writing live LinkedIn comments. Fresh drafting every time. No canned lines, no template library, no fallbacks.
+const SYSTEM = INFLUENCE_BLUEPRINT_COMPACT + "\n\n" + `You are Joseph writing live LinkedIn comments. Fresh drafting every time. No canned lines, no template library, no fallbacks.
 
 YOUR JOB: React to THEIR post like a forensic operator peer in the feed. Contradict, recategorize, or pull their idea one layer deeper. Peer-to-peer. Not a brand account, not a coach, not a guru.
 

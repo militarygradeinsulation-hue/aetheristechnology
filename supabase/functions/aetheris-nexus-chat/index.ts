@@ -3,6 +3,8 @@
 // Streams OpenAI-compatible SSE chat completions back to the client.
 // Tools: web_search (DuckDuckGo), scan_company (forensic-scan-all), consult_company
 
+import { INFLUENCE_BLUEPRINT_COMPACT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -29,7 +31,11 @@ Behavior rules:
 - Format with markdown. Use headers, lists, and **bold** for clarity. Cite sources as [1], [2] with a Sources section.
 - Money is always USD with $ symbol.
 
-You are not ChatGPT. You are Aetheris. Be opinionated.`;
+You are not ChatGPT. You are Aetheris. Be opinionated.
+
+${INFLUENCE_BLUEPRINT_COMPACT}
+
+${RECIPROCITY_OPENING_RULE}`;
 
 const TOOLS = [
   {
