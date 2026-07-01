@@ -29,7 +29,9 @@ function relayToTab(payload) {
 }
 function getActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_GET_ACTIVE_TAB" }, (x) => r(x || {}))); }
 function captureViewport() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_CAPTURE_VIEWPORT" }, (x) => r(x || {}))); }
+function captureArea() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_CAPTURE_AREA" }, (x) => r(x || {}))); }
 function focusActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_FOCUS_ACTIVE_TAB" }, (x) => r(x || {}))); }
+
 // Snap = focus the tab first, then ask the page to spotlight the area.
 async function snapToSelector(selector) {
   if (!selector) return;
