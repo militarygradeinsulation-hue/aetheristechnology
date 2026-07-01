@@ -227,7 +227,7 @@ export const SYSTEM_SPECS: Record<string, SystemSpec> = {
   },
 
   // ───────────── Recurring (active cases) ─────────────
-  sales_coaching_active case_monthly: {
+  "sales_coaching_active case_monthly": {
     priceId: "sales_coaching_active case_monthly",
     toolType: "sales_coaching_kickoff",
     title: "Sales Coaching Kickoff",
