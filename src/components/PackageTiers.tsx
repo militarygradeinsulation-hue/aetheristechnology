@@ -166,6 +166,15 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
                     ))}
                   </ul>
 
+                  <div className="mb-3 rounded-sm border-l-2 border-amber/60 bg-amber/[0.04] px-3 py-2">
+                    <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-0.5">
+                      Why now
+                    </div>
+                    <p className="text-[13px] leading-snug text-foreground/90 italic">
+                      {tier.because}
+                    </p>
+                  </div>
+
                   <button
                     type="button"
                     onClick={onRequest}
