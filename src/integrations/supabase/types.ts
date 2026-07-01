@@ -1765,6 +1765,9 @@ export type Database = {
           created_at: string
           id: string
           industry: string | null
+          latest_forensic_at: string | null
+          latest_forensic_report: Json | null
+          latest_forensic_scan_id: string | null
           location: string | null
           name: string
           notes: string | null
@@ -1776,6 +1779,9 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          latest_forensic_at?: string | null
+          latest_forensic_report?: Json | null
+          latest_forensic_scan_id?: string | null
           location?: string | null
           name: string
           notes?: string | null
@@ -1787,6 +1793,9 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          latest_forensic_at?: string | null
+          latest_forensic_report?: Json | null
+          latest_forensic_scan_id?: string | null
           location?: string | null
           name?: string
           notes?: string | null
