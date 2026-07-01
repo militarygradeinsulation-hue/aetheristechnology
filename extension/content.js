@@ -1057,6 +1057,8 @@
       case "AETHERIS_APPLY_FIX": sendResponse(applyFix(msg.leak)); return;
       case "AETHERIS_REVERT_FIX": sendResponse(revertFix(msg.revertId)); return;
       case "AETHERIS_EXEC": sendResponse(execAction(msg.action || {})); return;
+      case "AETHERIS_SNIP_AREA": { snipArea().then((r) => sendResponse(r)); return true; }
+
 
       // ---------- HubSpot bridge ----------
       case "AETHERIS_HUBSPOT_SCRAPE": {
