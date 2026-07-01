@@ -36,6 +36,7 @@ const TIERS: Tier[] = [
       '30-min operator walkthrough',
     ],
     cta: 'Talk to an operator',
+    because: 'Because you already suspect where the leak is — you just need an operator to name it in writing.',
   },
   {
     id: 'revenue-pack',
@@ -56,6 +57,7 @@ const TIERS: Tier[] = [
       'Two 45-min working sessions',
     ],
     cta: 'Talk to an operator',
+    because: 'Because every 30 days you wait, the follow-up leak compounds — the same leads cost more to reheat later.',
   },
   {
     id: 'operator-suite',
@@ -75,6 +77,7 @@ const TIERS: Tier[] = [
       '$10k credit toward Active Case',
     ],
     cta: 'Talk to an operator',
+    because: 'Because you\'re running the company AND the fix — embedding an operator for 3 weeks buys back the time.',
   },
 ];
 
