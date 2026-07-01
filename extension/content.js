@@ -1041,6 +1041,77 @@
   }
 
   // ============================================================
+  // Area snip — drag-to-select overlay, returns viewport-space rect
+  // ============================================================
+  function snipArea() {
+    return new Promise((resolve) => {
+      // Kill any existing overlay first
+      document.getElementById("ae-snip-overlay")?.remove();
+      const overlay = document.createElement("div");
+      overlay.id = "ae-snip-overlay";
+      const hint = document.createElement("div");
+      hint.className = "ae-snip-hint";
+      hint.textContent = "DRAG TO SELECT · ESC TO CANCEL";
+      const rect = document.createElement("div");
+      rect.className = "ae-snip-rect";
+      rect.style.display = "none";
+      overlay.appendChild(hint);
+      overlay.appendChild(rect);
+      document.documentElement.appendChild(overlay);
+
+      let startX = 0, startY = 0, endX = 0, endY = 0, dragging = false;
+      const cleanup = () => {
+        overlay.remove();
+        window.removeEventListener("keydown", onKey, true);
+      };
+      const onKey = (e) => {
+        if (e.key === "Escape") { cleanup(); resolve({ ok: false, cancelled: true }); }
+      };
+      window.addEventListener("keydown", onKey, true);
+
+      overlay.addEventListener("mousedown", (e) => {
+        dragging = true;
+        startX = e.clientX; startY = e.clientY;
+        endX = e.clientX; endY = e.clientY;
+        rect.style.display = "block";
+        updateRect();
+      });
+      overlay.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        endX = e.clientX; endY = e.clientY;
+        updateRect();
+      });
+      overlay.addEventListener("mouseup", () => {
+        if (!dragging) return;
+        dragging = false;
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+        const w = Math.abs(endX - startX);
+        const h = Math.abs(endY - startY);
+        cleanup();
+        if (w < 6 || h < 6) { resolve({ ok: false, cancelled: true }); return; }
+        resolve({
+          ok: true,
+          rect: { x, y, w, h },
+          dpr: window.devicePixelRatio || 1,
+          viewport: { w: window.innerWidth, h: window.innerHeight },
+        });
+      });
+      function updateRect() {
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+        const w = Math.abs(endX - startX);
+        const h = Math.abs(endY - startY);
+        rect.style.left = x + "px";
+        rect.style.top = y + "px";
+        rect.style.width = w + "px";
+        rect.style.height = h + "px";
+      }
+    });
+  }
+
+
+  // ============================================================
   // Message router
   // ============================================================
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
