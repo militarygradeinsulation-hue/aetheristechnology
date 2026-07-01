@@ -22,7 +22,7 @@ const MODE_SPECS: Record<Mode, { cap: number; instruction: string }> = {
   full: { cap: 2800, instruction: "Write 180-260 words as an original standalone post inspired by the source. Do not address the author directly." },
 };
 
-const SYSTEM = `You are an AI writing a fresh LinkedIn response for Joseph.
+const SYSTEM = INFLUENCE_BLUEPRINT_COMPACT + "\n\n" + `You are an AI writing a fresh LinkedIn response for Joseph.
 
 This is live AI drafting, not a template engine. There are no premade scripts, no signature opener libraries, no brand lexicon, and no canned fallback responses.
 
