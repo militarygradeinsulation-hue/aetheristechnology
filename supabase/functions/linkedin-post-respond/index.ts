@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { INFLUENCE_BLUEPRINT_COMPACT } from "../_shared/influenceBlueprint.ts";
+
 
 type ChatContentPart =
   | { type: "text"; text: string }
