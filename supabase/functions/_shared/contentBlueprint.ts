@@ -249,7 +249,7 @@ DIAGNOSTIC SEQUENCE (apply across every content arc):
  * Compact version for tight prompts (e.g., short-form video, drip emails)
  * where the full blueprint would dominate the context window.
  */
-export const FORENSIC_BLUEPRINT_COMPACT = `
+export const FORENSIC_BLUEPRINT_COMPACT = INFLUENCE_BLUEPRINT_COMPACT + "\n\n" + `
 FORENSIC CONTENT BLUEPRINT (mandatory):
 
 PHASE 1 HOOK — Open with: [Dream outcome] + [Relatable character] − [Constraints].
