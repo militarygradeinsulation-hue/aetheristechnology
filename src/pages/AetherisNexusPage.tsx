@@ -564,6 +564,14 @@ export default function AetherisNexusPage() {
               Aetheris 3.5
             </span>
           </div>
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+            title="Back to website"
+          >
+            <Home size={14} />
+            <span className="hidden sm:inline">Home</span>
+          </button>
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
         </header>
 
