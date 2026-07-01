@@ -67,6 +67,16 @@ export function ForensicScanAllPanel() {
       const { data, error } = await supabase.from("forensic_scans").select("*").eq("id", scanId).single();
       if (!error && data && !stopped) {
         setRow(data as unknown as Row);
+        // Auto-expand every chapter as soon as the report lands
+        const r = (data as unknown as Row).report;
+        if (r?.chapters?.length) {
+          setOpen((prev) => {
+            if (Object.keys(prev).length >= r.chapters!.length) return prev;
+            const next: Record<number, boolean> = {};
+            for (const c of r.chapters!) next[c.no] = true;
+            return next;
+          });
+        }
         if (data.status === "completed" || data.status === "failed") return;
       }
       pollRef.current = window.setTimeout(tick, 3000) as unknown as number;
@@ -77,6 +87,7 @@ export function ForensicScanAllPanel() {
       if (pollRef.current) window.clearTimeout(pollRef.current);
     };
   }, [scanId]);
+
 
   const stageState = (key: string) => row?.stage_status?.[key]?.state || (scanId ? "pending" : "");
   const report = row?.report || null;
