@@ -5,13 +5,28 @@
 // Edit here, propagate everywhere.
 // ═══════════════════════════════════════════════════════════════════════════
 
+import {
+  INFLUENCE_BLUEPRINT_PROMPT,
+  INFLUENCE_BLUEPRINT_COMPACT,
+} from "./influenceBlueprint.ts";
+
+export {
+  INFLUENCE_BLUEPRINT_PROMPT,
+  INFLUENCE_BLUEPRINT_COMPACT,
+  RECIPROCITY_OPENING_RULE,
+} from "./influenceBlueprint.ts";
+
 /**
  * The canonical blueprint prompt fragment. Inject this into the system
  * message of any content generator. ~1,200 words. Encodes the 3 phases,
  * 6 Story Locks, Diagnostic Sequence, Operator Persona, and template bank
  * from "The Content Architect's Blueprint."
+ *
+ * Automatically prepended with the INFLUENCE BLUEPRINT (Cialdini's 6
+ * weapons of influence) so every generator inherits the persuasion
+ * baseline without a separate import.
  */
-export const FORENSIC_BLUEPRINT_PROMPT = `
+export const FORENSIC_BLUEPRINT_PROMPT = INFLUENCE_BLUEPRINT_PROMPT + "\n\n" + `
 ═══════════════════════════════════════════════════════════════════
 THE FORENSIC CONTENT BLUEPRINT  (mandatory structural rules)
 ═══════════════════════════════════════════════════════════════════
