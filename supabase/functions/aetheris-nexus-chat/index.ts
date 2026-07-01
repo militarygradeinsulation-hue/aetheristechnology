@@ -3,6 +3,8 @@
 // Streams OpenAI-compatible SSE chat completions back to the client.
 // Tools: web_search (DuckDuckGo), scan_company (forensic-scan-all), consult_company
 
+import { INFLUENCE_BLUEPRINT_COMPACT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
