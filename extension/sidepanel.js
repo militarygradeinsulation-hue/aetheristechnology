@@ -29,7 +29,9 @@ function relayToTab(payload) {
 }
 function getActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_GET_ACTIVE_TAB" }, (x) => r(x || {}))); }
 function captureViewport() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_CAPTURE_VIEWPORT" }, (x) => r(x || {}))); }
+function captureArea() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_CAPTURE_AREA" }, (x) => r(x || {}))); }
 function focusActiveTab() { return new Promise((r) => chrome.runtime.sendMessage({ type: "AETHERIS_FOCUS_ACTIVE_TAB" }, (x) => r(x || {}))); }
+
 // Snap = focus the tab first, then ask the page to spotlight the area.
 async function snapToSelector(selector) {
   if (!selector) return;
@@ -839,13 +841,29 @@ $("li-img-file").addEventListener("change", async (e) => {
     const p = $("li-img-preview"); p.src = liState.imageDataUrl; p.classList.remove("hidden");
   } catch (err) { toast(err.message); }
 });
-// IMAGE: capture current tab viewport
+// IMAGE: capture current tab viewport (full visible area)
 $("li-img-capture").addEventListener("click", async () => {
+  await focusActiveTab();
+  await new Promise((r) => setTimeout(r, 150));
   const cap = await captureViewport();
-  if (!cap?.dataUrl) return toast("Capture failed.");
+  if (cap?.error) return toast("Capture failed: " + cap.error);
+  if (!cap?.dataUrl) return toast("Capture failed. Open a normal web page (not chrome:// or the extension store), then try again.");
   liState.imageDataUrl = cap.dataUrl;
   const p = $("li-img-preview"); p.src = cap.dataUrl; p.classList.remove("hidden");
+  toast("Captured full viewport.");
 });
+// IMAGE: drag-to-select area on the page
+$("li-img-snip")?.addEventListener("click", async () => {
+  toast("Switch to the tab and drag a rectangle. ESC to cancel.");
+  const cap = await captureArea();
+  if (cap?.cancelled) return;
+  if (cap?.error) return toast("Snip failed: " + cap.error);
+  if (!cap?.dataUrl) return toast("Snip failed.");
+  liState.imageDataUrl = cap.dataUrl;
+  const p = $("li-img-preview"); p.src = cap.dataUrl; p.classList.remove("hidden");
+  toast("Area captured.");
+});
+
 $("li-img-clear").addEventListener("click", () => {
   liState.imageDataUrl = null;
   $("li-img-file").value = "";

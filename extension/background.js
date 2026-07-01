@@ -27,6 +27,56 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
+  // 1b) Area capture: focus tab → ask content script to draw snip overlay →
+  //     capture visible tab → crop to selected rect. Returns { dataUrl }.
+  if (msg?.type === "AETHERIS_CAPTURE_AREA") {
+    (async () => {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        if (!tab?.id) { sendResponse({ error: "no active tab" }); return; }
+        // Focus the tab so the overlay is visible to the user
+        await chrome.windows.update(tab.windowId, { focused: true, state: "normal" }).catch(() => {});
+        await chrome.tabs.update(tab.id, { active: true }).catch(() => {});
+
+        // Ensure content script is present
+        const ping = await chrome.tabs.sendMessage(tab.id, { type: "AETHERIS_PING" }).catch(() => null);
+        if (!ping) {
+          await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+          await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["panel.css"] }).catch(() => {});
+        }
+
+        const sel = await chrome.tabs.sendMessage(tab.id, { type: "AETHERIS_SNIP_AREA" });
+        if (!sel?.ok) { sendResponse({ cancelled: true }); return; }
+
+        const dataUrl = await new Promise((res, rej) =>
+          chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }, (u) =>
+            chrome.runtime.lastError ? rej(chrome.runtime.lastError) : res(u)));
+
+        // Crop with OffscreenCanvas
+        const blob = await (await fetch(dataUrl)).blob();
+        const bmp = await createImageBitmap(blob);
+        const { x, y, w, h } = sel.rect;
+        const dpr = sel.dpr || 1;
+        const cx = Math.max(0, Math.round(x * dpr));
+        const cy = Math.max(0, Math.round(y * dpr));
+        const cw = Math.min(bmp.width - cx, Math.round(w * dpr));
+        const ch = Math.min(bmp.height - cy, Math.round(h * dpr));
+        const canvas = new OffscreenCanvas(cw, ch);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bmp, cx, cy, cw, ch, 0, 0, cw, ch);
+        const outBlob = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.9 });
+        const reader = new FileReader();
+        reader.onload = () => sendResponse({ dataUrl: reader.result });
+        reader.onerror = () => sendResponse({ error: "encode failed" });
+        reader.readAsDataURL(outBlob);
+      } catch (e) {
+        sendResponse({ error: String(e?.message || e) });
+      }
+    })();
+    return true;
+  }
+
+
   // 2) Side-panel → active tab relay. Side panel does not have a tab id of its own,
   //    so it asks the background to forward messages to the current tab's content script.
   if (msg?.type === "AETHERIS_RELAY_TO_TAB") {
