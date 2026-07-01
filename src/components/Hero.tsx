@@ -177,6 +177,9 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
                 operator who sits down with you, finds every leak, and crafts the solutions — so you don't
                 have to.
               </p>
+              <p className="mt-3 text-[15px] md:text-base leading-snug text-foreground/85 border-l-2 border-crimson/60 pl-3 italic">
+                Start with the scan below <span className="text-amber font-semibold not-italic">because</span> every 30 days you wait, the leak compounds — the same leads cost more to reheat later, and 7 out of 10 audits find the fix pays for itself in the first quarter.
+              </p>
             </div>
           </div>
 

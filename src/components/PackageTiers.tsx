@@ -15,6 +15,7 @@ interface Tier {
   pairingRationale: string;
   included: string[];
   cta: string;
+  because: string;
   highlight?: boolean;
   ribbon?: string;
 }
@@ -36,6 +37,7 @@ const TIERS: Tier[] = [
       '30-min operator walkthrough',
     ],
     cta: 'Talk to an operator',
+    because: 'Because you already suspect where the leak is — you just need an operator to name it in writing.',
   },
   {
     id: 'revenue-pack',
@@ -56,6 +58,7 @@ const TIERS: Tier[] = [
       'Two 45-min working sessions',
     ],
     cta: 'Talk to an operator',
+    because: 'Because every 30 days you wait, the follow-up leak compounds — the same leads cost more to reheat later.',
   },
   {
     id: 'operator-suite',
@@ -75,6 +78,7 @@ const TIERS: Tier[] = [
       '$10k credit toward Active Case',
     ],
     cta: 'Talk to an operator',
+    because: 'Because you\'re running the company AND the fix — embedding an operator for 3 weeks buys back the time.',
   },
 ];
 
@@ -161,6 +165,15 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
                       </li>
                     ))}
                   </ul>
+
+                  <div className="mb-3 rounded-sm border-l-2 border-amber/60 bg-amber/[0.04] px-3 py-2">
+                    <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-0.5">
+                      Why now
+                    </div>
+                    <p className="text-[13px] leading-snug text-foreground/90 italic">
+                      {tier.because}
+                    </p>
+                  </div>
 
                   <button
                     type="button"
