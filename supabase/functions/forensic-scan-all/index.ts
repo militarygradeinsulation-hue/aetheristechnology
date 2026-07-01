@@ -333,6 +333,37 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       status: "completed",
       completed_at: new Date().toISOString(),
     }).eq("id", id);
+
+    // Attach the Golden Report to the matching CRM company (upsert by website host).
+    try {
+      const host = new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
+      if (host) {
+        const { data: match } = await sb
+          .from("crm_companies")
+          .select("id,name,website")
+          .or(`website.ilike.%${host}%,name.ilike.${(company || host).replace(/[%,]/g, "")}%`)
+          .limit(1)
+          .maybeSingle();
+        const patch = {
+          latest_forensic_scan_id: id,
+          latest_forensic_report: report,
+          latest_forensic_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        if (match?.id) {
+          await sb.from("crm_companies").update(patch).eq("id", match.id);
+        } else {
+          await sb.from("crm_companies").insert({
+            name: company || host,
+            website: url,
+            ...patch,
+          });
+        }
+      }
+    } catch (attachErr) {
+      console.error("attach-to-company failed:", (attachErr as Error).message);
+    }
+
   } catch (e) {
     await sb.from("forensic_scans").update({
       status: "failed",
