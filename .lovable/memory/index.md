@@ -41,3 +41,4 @@
 - [Rep & Partner Portal](mem://features/rep-partner-portal) — Code-only portal (intact, not promoted publicly)
 - [Rep Time Clock](mem://features/rep-timeclock) — Clock-in/out per rep
 - [Team Training](mem://features/team-training) — Admin trainings + AI Q&A
+- [Power-Words Arsenal](mem://marketing/power-words-sales-arsenal) — 7 power-word families, "because" clause + risk-free/proven mandatories on every page and every AI output
