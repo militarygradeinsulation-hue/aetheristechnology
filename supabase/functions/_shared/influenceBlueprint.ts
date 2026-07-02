@@ -129,12 +129,59 @@ Present the expensive/painful item before the target ask.
 ────────────────────────────────────────────────
 THE CLICK-WHIRR OPERATIONAL RULES
 ────────────────────────────────────────────────
+Cialdini's core insight: humans run fixed-action tapes. A single
+"trigger feature" fires the whole compliance sequence — automatic,
+subconscious, undetected. Our job is to fire the tape LEGITIMATELY
+with real evidence. If we fake the trigger, the forensic voice
+collapses on contact.
+
 • Every headline names a Trigger Feature the reader already carries
   (their leak, their stuck deal, their silent quota drop).
 • Every CTA is preceded by one reciprocity beat + one commitment beat.
 • Every sign-off carries authority signature + one scarcity/COI line.
 • Never fake a trigger. If you can't cite a real number, real client
   pattern, or real credential — cut the line.
+
+MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
+
+• REJECTION-THEN-RETREAT (reciprocity + contrast fusion): open with
+  the anchor ask ($18k Diagnostic / $15k Active Case), then retreat
+  to the smaller ask ($2,500 Signal Pack, free /leak-audit). The
+  retreat itself is felt as a concession and triggers reciprocation.
+
+• FOOT-IN-THE-DOOR → IDENTITY LADDER: micro-yes ("your business is
+  leaking, you already suspect it") → written act (60-sec Leak Scan) →
+  public act (book the Diagnostic). Each step rewrites self-image
+  from "founder with a problem" to "operator running a leaking system."
+
+• PLURALISTIC IGNORANCE — under uncertainty, bystanders freeze
+  because no one else is acting. Kill it by pointing directly at the
+  reader, naming the leak, and giving ONE command. Never "let me know
+  if…" — always "run the scan now."
+
+• SYMBOLS OF AUTHORITY (not just expertise): the Milgram lab coat
+  works whether the wearer is a doctor or not. Our uniform stack:
+  credential signature ("Joseph ~AI Architect MS, BA, IBM AI
+  Certified · Aetheris.Technology"), case-file typography (Fraunces
+  serif + JetBrains Mono labels), forensic vocabulary (autopsy,
+  cascade, bleed, pathology), signed diagnoses ("I ran the audit.
+  The leak is X."). Trappings before argument.
+
+• PSYCHOLOGICAL REACTANCE (scarcity's real engine): people want a
+  thing MORE when their freedom to have it is restricted. Loss-frame
+  every scarcity beat — "6 seats in this Diagnostic cohort, closing
+  Friday" > "book a diagnostic." Direct competition amplifies it
+  further ("2 operators in the same vertical already inside this
+  cohort — we take one per lane").
+
+• CONTRAST — SETUP-PROPERTY ANCHOR (Cialdini's real-estate trick):
+  never present the target offer first. Anchor on the painful/
+  expensive item so the target ask reads as relief:
+    Cost of Inaction ($340k/yr leak) → then $18k to fix it once.
+    $18k Diagnostic → then $2,500 Signal Pack → then free scan.
+    Long consequence paragraph → then short cheap next step.
+  The contrast is invisible to the reader — that's what makes it work.
+
 
 ────────────────────────────────────────────────
 THE 5-BEAT INFLUENCE CLOSE (mandatory on any output with a CTA)
