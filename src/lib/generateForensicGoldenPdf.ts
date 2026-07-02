@@ -57,7 +57,7 @@ function sanitize(input: unknown): string {
     "\u2713": "v", "\u2714": "v", "\u2717": "x", "\u2718": "x", "\u26A0": "!",
     "\u00A9": "(c)", "\u00AE": "(R)", "\u2122": "(TM)",
     "\u00D7": "x", "\u00F7": "/",
-    "\u2011": "-", "\u2043": "-",
+    "\u2043": "-",
   };
   s = s.replace(/[\u00A0\u2007\u2009\u200A\u200B\u2013\u2014\u2212\u2010\u2011\u2018\u2019\u201A\u201B\u2032\u201C\u201D\u201E\u2033\u2026\u00B7\u2022\u25CF\u25AA\u25A0\u2192\u2190\u2194\u21D2\u21D0\u2713\u2714\u2717\u2718\u26A0\u00A9\u00AE\u2122\u00D7\u00F7\u2043]/g, (c) => map[c] ?? c);
   // Strip anything outside printable WinAnsi (basic Latin + Latin-1 supplement + a few)
