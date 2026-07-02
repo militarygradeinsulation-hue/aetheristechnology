@@ -1292,11 +1292,19 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
   const isEmpty = !data || typeof data !== 'object' || Object.keys(data).length === 0;
   if (isEmpty) {
     return (
-      <div className="glass rounded-lg p-6 border border-amber/30 text-center">
-        <p className="text-sm text-foreground font-bold mb-1">No saved content for this entry.</p>
-        <p className="text-xs text-muted-foreground">
-          The record exists but its output payload is empty. This usually means the original generation failed to persist. You can safely delete this entry.
-        </p>
+      <div className="glass rounded-lg p-6 border border-amber/30 space-y-3">
+        <div>
+          <p className="text-sm text-foreground font-bold mb-1">No saved content for this entry.</p>
+          <p className="text-xs text-muted-foreground">
+            The record exists but its output payload is empty — the original generation didn't persist (usually a provider timeout or a rate limit). You can safely delete this entry and re-run the tool.
+          </p>
+        </div>
+        <div className="border-t border-border pt-3">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">Try the Golden Report instead</p>
+          <p className="text-xs text-muted-foreground">
+            One URL → full forensic case file (14 chapters, verdicts, dollar leaks, Smart PDF). Tools → <span className="text-foreground font-semibold">Golden Report</span>.
+          </p>
+        </div>
       </div>
     );
   }
