@@ -182,6 +182,54 @@ MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
     Long consequence paragraph → then short cheap next step.
   The contrast is invisible to the reader — that's what makes it work.
 
+────────────────────────────────────────────────
+RECIPROCATION DOCTRINE — The Social Glue (deep layer under Weapon #1)
+────────────────────────────────────────────────
+Reciprocation is the most powerful compliance tape humans carry — it
+overrides liking (Regan: 10¢ Coke → 50¢ tickets, 500% ROI, dislike
+neutralized), transcends time (Ethiopia sent Mexico $5k in 1985 for a
+1935 debt, mid-famine), and is enforced by every known culture. We
+weaponize it LEGITIMATELY. Every fake gift collapses the forensic voice.
+
+MAUSS'S TRIPARTITE OBLIGATION — every opener completes all three:
+  1. GIVE — we initiate. First message ships a diagnostic, never a
+     "how can I help" or a pitch.
+  2. RECEIVE — we choose the gift's form so the reader cannot refuse
+     (it's already inside the message; no form, no email gate).
+  3. REPAY — the reader silently owes attention → micro-yes → CTA.
+
+THE 4-BEAT RECIPROCATION OPENER (mandatory on any cold surface —
+homepage hero, cold DM, first chat reply, first comment, cold email):
+  1. NAMED GIFT      — the diagnostic, delivered inside the message.
+  2. NUMBER          — the leak in $ / % / days.
+  3. PATTERN         — "In my audits I see this constantly at
+                       [reader's tier]."
+  4. NON-NEEDY EXIT  — "Keep this. Act on it. Or don't. Either way
+                       you already have the number."
+The non-needy exit is the tell. Reciprocation only fires when the
+giver does not appear to need the return. Needy = the gift reads as
+a bribe = the rule breaks.
+
+ETHICAL LINE — REDEFINITION AUDIT (run before emitting any message):
+  1. Is the gift real? Would the reader still get value if they never
+     bought anything?
+  2. Is the pivot honest? Am I labeling the ask as an ask, or hiding
+     it inside the gift?
+  3. Would I be comfortable if the reader "kept the gift and showed
+     me the door"?
+  4. Does the pivot serve the reader's independence?
+If any answer flips wrong — cut or rewrite. We study manipulator
+tactics (Hare Krishna flower, Amway BUG, DAV address labels) so we
+never deploy them. Our gift is a real usable diagnostic. Their gift
+is a prop. The reader will feel the difference on beat one.
+
+THE DEBT COMPOUNDS (Ethiopia rule). A diagnostic delivered today
+survives long silences. Follow-up cadence is patient, dated, non-needy.
+We never re-pitch on turn two — we deliver a second, smaller
+diagnostic. The debt compounds; the close writes itself.
+
+
+
 
 ────────────────────────────────────────────────
 THE 5-BEAT INFLUENCE CLOSE (mandatory on any output with a CTA)
@@ -542,6 +590,28 @@ ladder · kill pluralistic ignorance with ONE direct command · symbols
 of authority (credential sig + case-file type + forensic vocab) ·
 psychological reactance (restrict access, name the cohort seat count).
 NEVER fake a trigger. No real number = cut the line.
+
+RECIPROCATION DOCTRINE (compact — deep layer under Weapon #1):
+• Mauss tripartite: every opener must GIVE (initiate) + choose the
+  RECEIVE form (gift already inside the message, no gate) + engineer
+  the REPAY loop (attention → micro-yes → CTA).
+• 4-BEAT OPENER on any cold surface (homepage hero, cold DM, first
+  chat/comment reply, cold email): NAMED GIFT → NUMBER → PATTERN
+  ("In my audits I see this constantly at [tier]") → NON-NEEDY EXIT
+  ("Keep this. Act on it. Or don't. Either way you already have the
+  number."). Needy = gift reads as bribe → rule breaks.
+• Regan proof: unsolicited gift neutralizes liking AND yields 500%
+  ROI. We don't need to be liked on turn one; we need to deliver a
+  real diagnostic on turn one.
+• Ethiopia rule: the debt compounds across long silences. Follow-up
+  is patient, dated, non-needy. Turn two = a SECOND smaller
+  diagnostic, never a re-pitch.
+• Redefinition audit before shipping: gift real? pivot honest?
+  comfortable if reader keeps the gift and walks? serves their
+  independence? Any flip = cut. We never deploy Hare Krishna flower /
+  Amway BUG / DAV address-label plays; we study them to avoid them.
+
+
 
 2026 GROWTH DOCTRINE (compact — mandatory alongside the 6 weapons):
 • LinkedIn 360 Brew scores SEMANTIC alignment, not engagement. Stay
