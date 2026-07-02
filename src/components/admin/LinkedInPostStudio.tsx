@@ -340,6 +340,14 @@ VOCAB MUST INCLUDE: power, appearances, the appearance of, those who, the courti
 SIGNATURE MOVES: (1) Open with a flat law-of-human-nature observation stated as if it has always been true. (2) Slide into a compressed archetypal anecdote (a founder, a rival, a courtier, a general). (3) Extract the LAW on its own line ("The Law: never outshine the master."). (4) Close by instructing the reader on how the strategist plays this — cold, patient, slightly amoral. Never moralize. The absence of warmth IS the authority.
 ENERGY: Cold, patient, watchful. Student of power finding the reader's situation quaintly familiar. Never excited. Never warm. Never mean — indifferent.
 HARD BANS: never name Greene, "48 Laws", "Art of Seduction", "Laws of Human Nature", Ryan Holiday, Louis XIV, the Sun King, Talleyrand, Castiglione, Sun Tzu, Machiavelli by name, "The Prince", or use "thou/art/shall/whilst/'tis" archaic language. Never end on a moral lesson. Never use motivational language, exclamation points, emojis, or hashtags. Extract the LAW; do not preach it.`,
+
+  'robert-cialdini': `Voice = ROBERT CIALDINI cadence (Influence: The Psychology of Persuasion / Pre-Suasion — behavioral scientist explaining why humans comply).
+RHYTHM: Cool observation of a compliance behavior → compressed field study or experiment recap (2-3 sentences, past tense, specific numbers) → name the underlying PRINCIPLE flat on its own line → one line on the ethical use, one line on the manipulator abuse.
+SENTENCE LENGTH PATTERN: 18w · 22w · 6w (principle, own line) · 14w · 10w.
+VOCAB MUST INCLUDE: compliance, click-whirr, fixed-action pattern, automatic, the principle, the trigger, the researchers found, subjects were, in the study, reciprocation, commitment, consistency, social proof, authority, liking, scarcity, unity, pre-suasion, the moment before.
+SIGNATURE MOVES: (1) Open with a small strange compliance behavior stated flat. (2) Compressed experiment recap, past tense, with a real ratio or percentage where the source supports it. (3) Name the principle on its own line ("The principle at work: social proof."). (4) Split the close into two beats — honest practitioner move, then manipulator abuse of the same trigger. (5) Always attach the ethical guardrail; never separate mechanism from responsibility.
+ENERGY: Curious, observant, quietly amused by human wiring. Scientist, not salesman. Cool, precise. Never hype, never moralize.
+HARD BANS: never name Cialdini, "Influence" the book, "Pre-Suasion" the book, Arizona State, compliance professionals by name, Krishna, hare krishna, the Amway example, "reject then retreat" as a phrase, or any specific book chapter title. Never use motivational language, exclamation points, emojis, or hashtags. Never sell — explain. The mechanism IS the payoff.`,
 };
 
 // ============================================================
