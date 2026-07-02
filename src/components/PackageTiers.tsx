@@ -36,7 +36,8 @@ const TIERS: Tier[] = [
       'Single Leak Findings memo',
       '30-min operator walkthrough',
     ],
-    cta: 'Talk to an operator',
+    cta: 'Reserve Your Audit',
+
     because: 'Because you already suspect where the leak is — you just need an operator to name it in writing.',
   },
   {
@@ -49,7 +50,7 @@ const TIERS: Tier[] = [
     priceNote: 'one-time · operator-led',
     operatorHours: '~14 hours operator time',
     highlight: true,
-    ribbon: 'Most operators pick this',
+    ribbon: 'Operators Pick This · Proven',
     pairingRationale: 'Scripts, follow-up, and content built as one system so today\'s lead closes in 90 days.',
     included: [
       'Everything in Signal Pack',
@@ -57,7 +58,8 @@ const TIERS: Tier[] = [
       '30-Day Content Calendar',
       'Two 45-min working sessions',
     ],
-    cta: 'Talk to an operator',
+    cta: 'Claim Your Revenue Fix',
+
     because: 'Because every 30 days you wait, the follow-up leak compounds — the same leads cost more to reheat later.',
   },
   {
@@ -77,7 +79,7 @@ const TIERS: Tier[] = [
       'Weekly calls + async ops channel',
       '$10k credit toward Active Case',
     ],
-    cta: 'Talk to an operator',
+    cta: 'Embed an Operator',
     because: 'Because you\'re running the company AND the fix — embedding an operator for 3 weeks buys back the time.',
   },
 ];
@@ -97,14 +99,15 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
           </div>
           <div>
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-              Three doors · Operator-led bundles
+              Three doors · Operator-led · Proven · Risk-Free
             </div>
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
               You don't buy tools. You buy the <span className="text-amber italic">operator</span> who runs them.
             </h2>
             <p className="text-sm md:text-base text-muted-foreground mt-3">
-              Sealed pairings. No à la carte. No download-and-pray.
+              Sealed pairings. Guaranteed diagnosis. No à la carte. No download-and-pray — <span className="text-amber">because tools without an operator is exactly how your business started leaking.</span>
             </p>
+
           </div>
         </div>
 
