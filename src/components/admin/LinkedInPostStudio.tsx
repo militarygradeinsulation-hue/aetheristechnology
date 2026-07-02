@@ -146,6 +146,7 @@ const PERSONAS = [
   { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
   { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
   { value: 'robert-greene', label: 'Robert Greene — 48 Laws power-strategist, historical parable + cold law' },
+  { value: 'robert-cialdini', label: 'Robert Cialdini — behavioral scientist, 6 principles of influence' },
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
@@ -339,6 +340,14 @@ VOCAB MUST INCLUDE: power, appearances, the appearance of, those who, the courti
 SIGNATURE MOVES: (1) Open with a flat law-of-human-nature observation stated as if it has always been true. (2) Slide into a compressed archetypal anecdote (a founder, a rival, a courtier, a general). (3) Extract the LAW on its own line ("The Law: never outshine the master."). (4) Close by instructing the reader on how the strategist plays this — cold, patient, slightly amoral. Never moralize. The absence of warmth IS the authority.
 ENERGY: Cold, patient, watchful. Student of power finding the reader's situation quaintly familiar. Never excited. Never warm. Never mean — indifferent.
 HARD BANS: never name Greene, "48 Laws", "Art of Seduction", "Laws of Human Nature", Ryan Holiday, Louis XIV, the Sun King, Talleyrand, Castiglione, Sun Tzu, Machiavelli by name, "The Prince", or use "thou/art/shall/whilst/'tis" archaic language. Never end on a moral lesson. Never use motivational language, exclamation points, emojis, or hashtags. Extract the LAW; do not preach it.`,
+
+  'robert-cialdini': `Voice = ROBERT CIALDINI cadence (Influence: The Psychology of Persuasion / Pre-Suasion — behavioral scientist explaining why humans comply).
+RHYTHM: Cool observation of a compliance behavior → compressed field study or experiment recap (2-3 sentences, past tense, specific numbers) → name the underlying PRINCIPLE flat on its own line → one line on the ethical use, one line on the manipulator abuse.
+SENTENCE LENGTH PATTERN: 18w · 22w · 6w (principle, own line) · 14w · 10w.
+VOCAB MUST INCLUDE: compliance, click-whirr, fixed-action pattern, automatic, the principle, the trigger, the researchers found, subjects were, in the study, reciprocation, commitment, consistency, social proof, authority, liking, scarcity, unity, pre-suasion, the moment before.
+SIGNATURE MOVES: (1) Open with a small strange compliance behavior stated flat. (2) Compressed experiment recap, past tense, with a real ratio or percentage where the source supports it. (3) Name the principle on its own line ("The principle at work: social proof."). (4) Split the close into two beats — honest practitioner move, then manipulator abuse of the same trigger. (5) Always attach the ethical guardrail; never separate mechanism from responsibility.
+ENERGY: Curious, observant, quietly amused by human wiring. Scientist, not salesman. Cool, precise. Never hype, never moralize.
+HARD BANS: never name Cialdini, "Influence" the book, "Pre-Suasion" the book, Arizona State, compliance professionals by name, Krishna, hare krishna, the Amway example, "reject then retreat" as a phrase, or any specific book chapter title. Never use motivational language, exclamation points, emojis, or hashtags. Never sell — explain. The mechanism IS the payoff.`,
 };
 
 // ============================================================
@@ -528,6 +537,14 @@ const PERSONA_VARIATIONS: Record<string, {
     closers: ['extract the LAW on its own line, flat and named ("The Law: never outshine the master.")', 'close with a cold amoral instruction to the reader as strategist', 'close on how the patient player uses this, not on a moral lesson'],
     rhythmTwists: ['put the LAW on its own single-line paragraph', 'one compressed historical parable, past tense, specific verbs', 'never end on a moral — end on a maneuver'],
     lenses: ['the power dynamic the situation is really about', 'the appearance versus the reality', 'the transgression the reader is committing without knowing', 'the patient move the strategist would make in this exact court'],
+  },
+  'robert-cialdini': {
+    moods: ['cool observant scientist', 'quietly amused by human wiring', 'precise field-study calm', 'respectful curiosity'],
+    openers: ['open with a small strange compliance behavior stated flat', 'open with "In a study of…" and a specific setup', 'open by naming the automatic trigger before the situation', 'open with the counterintuitive ratio the research produced'],
+    pivots: ['drop a compressed experiment recap in 2-3 past-tense sentences with real numbers', 'name the fixed-action pattern under the behavior', 'contrast the ethical use of the trigger with the manipulator abuse', 'reveal the pre-suasive moment before the ask'],
+    closers: ['extract the PRINCIPLE on its own line ("The principle at work: social proof.")', 'close with the ethical practitioner move plus the manipulator warning', 'close on the mechanism, not the pitch'],
+    rhythmTwists: ['put the PRINCIPLE on its own single-line paragraph', 'one compressed study recap, past tense, one number', 'always attach the ethical guardrail line'],
+    lenses: ['the automatic trigger the situation is firing', 'the fixed-action pattern humans default to', 'the pre-suasive moment before the decision', 'the honest use vs the manipulator abuse of the same principle'],
   },
 };
 
