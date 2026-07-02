@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText } from 'lucide-react';
+const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
 import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
@@ -92,7 +93,7 @@ const PanelFallback = () => (
   </div>
 );
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
+type ToolKey = 'allinone' | 'golden' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
@@ -107,6 +108,7 @@ const CATEGORY_STYLE: Record<ToolCategory, { label: string; ring: string; bg: st
 };
 
 const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean; category: ToolCategory }[] = [
+  { key: 'golden', label: 'Golden Report — One URL, Full Forensic Case File', description: 'Drop in one URL. Aetheris runs the full stack — site crawl, brand contradictions, friction, SEO, pipeline signals — then synthesizes a 14-chapter Golden Report in the forensic case-file style. Verdicts, dollar leaks, evidence, and a Smart PDF you can ask questions of.', icon: ScrollText, featured: true, category: 'forensics' },
   { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true, category: 'core' },
   { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search, category: 'forensics' },
   { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone, category: 'content' },
@@ -1221,6 +1223,11 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
             <Clock className="w-4 h-4 mr-1" /> Tool History
           </Button>
         </div>
+        {activeTool === 'golden' && (
+          <Suspense fallback={<PanelFallback />}>
+            <ForensicScanAllPanel />
+          </Suspense>
+        )}
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
