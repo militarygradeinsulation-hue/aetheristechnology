@@ -104,7 +104,7 @@ function ensureSpace(doc: jsPDF, y: number, need: number, page: { n: number }, a
 }
 
 function wrap(doc: jsPDF, text: string, w: number): string[] {
-  return doc.splitTextToSize(text || "", w) as string[];
+  return doc.splitTextToSize(sanitize(text), w) as string[];
 }
 
 function renderMarkdown(doc: jsPDF, md: string, x: number, y: number, page: { n: number }, askUrl: string): number {
@@ -138,6 +138,20 @@ export function generateForensicGoldenPdf(opts: {
   const askUrl = `https://aetheris.technology/report/${scanId}/ask`;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const page = { n: 1 };
+
+  // Monkey-patch text writers so every string flowing to the PDF is WinAnsi-safe.
+  // jsPDF's built-in fonts render non-WinAnsi glyphs as garbage (><#%^ etc.).
+  const _text = doc.text.bind(doc);
+  (doc as unknown as { text: typeof doc.text }).text = ((t: unknown, ...rest: unknown[]) => {
+    const clean = Array.isArray(t) ? t.map(sanitize) : sanitize(t);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (_text as any)(clean, ...rest);
+  }) as typeof doc.text;
+  const _twl = doc.textWithLink.bind(doc);
+  (doc as unknown as { textWithLink: typeof doc.textWithLink }).textWithLink = ((t: string, x: number, y: number, o: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (_twl as any)(sanitize(t), x, y, o);
+  }) as typeof doc.textWithLink;
 
   // ───────── COVER ─────────
   bg(doc);
