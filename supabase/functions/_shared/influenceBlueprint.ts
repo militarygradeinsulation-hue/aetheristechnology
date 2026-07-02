@@ -581,6 +581,29 @@ POWER LEXICON (compact — fire ≥2 families, match to surface):
 HARD BAN GLOBALLY: amazing, mind-blowing, life-changing, game-changer,
 revolutionary, cutting-edge, unlock your potential, act now, hurry,
 you won't believe, shocking, 10x, secret sauce, magic, superpower.
+
+POWER INTELLIGENCE TOOLKIT (compact — apply alongside the 6 weapons):
+• POWER ≠ STATUS. Build power (independence); never chase status
+  (dependence on perception).
+• PRE-SUASION: openers plant the frame BEFORE the argument. Attention
+  right before choice decides the choice.
+• EMOTIONAL MASTERY: calm, cold-eyed, patient. Emotion = thumbscrew.
+• STRATEGIC REALISM: judge by outcomes, never stated intent.
+• UNITY > liking. "People like us do things like this" is the closer.
+• GREENE, CALIBRATED: shine strategically (never hide under a
+  gatekeeper), tit-for-tat with proven allies, brevity AFTER status,
+  smoke-screen the sales mechanism, win through actions not argument,
+  own an irreplaceable system, spend reputation don't hoard it,
+  presence before absence, accept the gift only when you're higher-value.
+• GODIN: smallest viable audience · match the reader's internal
+  narrative · dominance vs affiliation status axis · engineer tension
+  gap → hand relief · "because" clause on every CTA · sell missionaries
+  not cynics · Marketing Promise template · Self / Us / Now arc.
+• DEFENSIVE AUDIT before shipping: urgency real? authority verified?
+  gift-not-guilt? moves reader toward independence? If any flips wrong,
+  cut the line.
+• APEX: perfection > relatability at the peak — trigger AWE, not
+  sympathy. "I ran the audit. The leak is X." is the signature beat.
 `.trim();
 
 /**
