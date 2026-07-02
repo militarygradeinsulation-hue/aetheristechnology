@@ -214,18 +214,63 @@ export function ForensicScanAllPanel() {
               <div className="space-y-2">
                 {chapters.map((c) => {
                   const isOpen = !!open[c.no];
+                  const chapterMd = () => {
+                    const lines: string[] = [];
+                    lines.push(`# CH${String(c.no).padStart(2, "0")} — ${c.title}`);
+                    lines.push("");
+                    if (c.verdict) { lines.push(`> ${c.verdict}`); lines.push(""); }
+                    if (c.what_we_found) { lines.push(`## What we found\n\n${c.what_we_found}\n`); }
+                    if (c.why_its_leaking) { lines.push(`## Why it's leaking\n\n${c.why_its_leaking}\n`); }
+                    if (c.what_its_costing) { lines.push(`## Cost (USD)\n\n${c.what_its_costing}\n`); }
+                    if (c.what_to_do) {
+                      lines.push(`## What to do\n`);
+                      (["this_week","this_month","this_quarter"] as const).forEach(k => {
+                        if (c.what_to_do?.[k]?.length) {
+                          lines.push(`### ${k.replace("_"," ")}`);
+                          for (const a of c.what_to_do![k]!) lines.push(`- ${a}`);
+                          lines.push("");
+                        }
+                      });
+                    }
+                    if (c.evidence?.length) {
+                      lines.push(`## Evidence`);
+                      for (const e of c.evidence) lines.push(`- **${e.label}:** ${e.value}`);
+                    }
+                    return lines.join("\n");
+                  };
+                  const downloadChapter = () => {
+                    const md = chapterMd();
+                    const stamp = new Date().toISOString().slice(0, 10);
+                    const safe = c.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || `chapter-${c.no}`;
+                    const blob = new Blob([md], { type: "text/markdown" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `golden-ch${String(c.no).padStart(2, "0")}-${safe}-${stamp}.md`;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  };
                   return (
                     <div key={c.no} className="border border-border rounded-md bg-muted/10 overflow-hidden">
-                      <button
-                        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-muted/30 transition-colors"
-                        onClick={() => setOpen((p) => ({ ...p, [c.no]: !isOpen }))}
-                      >
-                        <span className="flex items-center gap-3 min-w-0">
+                      <div className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-muted/30 transition-colors">
+                        <button
+                          className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                          onClick={() => setOpen((p) => ({ ...p, [c.no]: !isOpen }))}
+                        >
                           <span className="font-mono text-amber-500 text-[10px] shrink-0">CH{String(c.no).padStart(2, "0")}</span>
                           <span className="font-serif font-semibold truncate">{c.title}</span>
-                        </span>
-                        {isOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
-                      </button>
+                        </button>
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); downloadChapter(); }}
+                            title="Download this chapter"
+                            className="p-1.5 rounded hover:bg-amber-500/10 text-muted-foreground hover:text-amber-500 transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </div>
+                      </div>
                       {isOpen && (
                         <div className="px-4 py-3 border-t border-border text-sm space-y-3 bg-background/40">
                           {c.verdict && (
