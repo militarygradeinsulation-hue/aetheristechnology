@@ -27,6 +27,7 @@ export const PERSONAS = [
   { value: 'mr-rogers', label: 'Mr. Rogers — gentle, deliberate, radically kind clarity' },
   { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
   { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
+  { value: 'robert-greene', label: 'Robert Greene — 48 Laws power-strategist, historical parable + cold law' },
 ];
 
 export const PERSONA_DIRECTIVES: Record<string, string> = {
