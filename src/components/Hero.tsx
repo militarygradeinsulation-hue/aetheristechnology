@@ -147,9 +147,10 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
 
           <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
             <span className="font-case text-xs uppercase tracking-widest text-amber">
-              For exhausted business owners · Indianapolis · US-wide
+              Reserved for exhausted owners · Indianapolis · US-wide · Risk-Free
             </span>
           </div>
+
 
           <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-[1500px] mx-auto">
             <span className="text-foreground">I can find </span>

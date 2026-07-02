@@ -15,17 +15,16 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
         <RevealOnScroll>
           <div className="text-center mb-12">
             <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-              Open a Case
+              Open a Case · Operator-Only · Risk-Free
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold mb-4 text-foreground">
-              Most growth-stage businesses are bleeding time, leads, and revenue —{" "}
-              <span className="text-crimson">without knowing where.</span>
+              Your business is bleeding time, leads, and revenue —{" "}
+              <span className="text-crimson">and you can't see where from the inside.</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              I help established businesses uncover what is actually broken beneath the surface. Not
-              just your marketing. Your entire business. Then I run True Cost Forensics and build the
-              systems to fix it.
+              You get a forensic operator, not a consultant. Every leak <span className="text-amber font-semibold">named, quantified, and documented</span> — because guessing is what got the bleed here in the first place. Proven method. Guaranteed diagnosis. Zero obligation to continue.
             </p>
+
           </div>
         </RevealOnScroll>
 
@@ -95,15 +94,15 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
             
             <div className="relative z-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                Operator-Led Investigation · $2,500 Flat
+                Operator-Led · $2,500 Flat · Risk-Free · Credited Back
               </div>
               <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
                 The Forensic Diagnostic
               </h3>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-                14 days inside your operation, CRM, inboxes, sales pipeline, team workflows. 
-                Every leak named, traced, and dollar-quantified in a sealed case file. Applied toward engagement if you proceed.
+                14 days inside your operation — CRM, inboxes, pipeline, workflows. Every leak <span className="text-amber font-semibold">named, traced, and dollar-quantified</span> in a sealed case file. <span className="text-foreground">Guaranteed diagnosis</span> because you shouldn't pay for a "maybe." Every dollar credits toward the fix if you proceed.
               </p>
+
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 <div className="glass p-4 rounded-sm border border-border/40">
@@ -127,7 +126,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-amber hover:bg-amber/90 text-background">
                     <Calendar className="mr-2 w-5 h-5" />
-                    Book the Diagnostic
+                    Reserve Your Diagnostic
                   </Button>
                 </a>
                 <a href="/leak-audit">
@@ -136,6 +135,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </a>
+
                 <a href="tel:+13173762110">
                   <Button size="lg" variant="outline" className="glass-hover border-border">
                     <Phone className="mr-2 w-5 h-5" />

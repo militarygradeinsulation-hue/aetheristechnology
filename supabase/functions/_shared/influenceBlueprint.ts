@@ -444,11 +444,44 @@ SURFACE MATCH MAP (which family fires where):
 • Comment verdicts (<15 words) → CURIOSITY or TRUST, one only
 • Cold DMs / extension replies → CURIOSITY + RECIPROCITY, never URGENCY
 
+6) PERSONAL CONNECTION — the reader-centered close (every CTA, every
+   hero sub-line, every email body).
+   Words: you, your, imagine, because, save, together, we, protect,
+   keep, own. "You" > "we" on hooks; "we" > "you" on close (Unity).
+   MANDATORY: every CTA button, every hero sub-copy, every email body
+   must contain the word "because" + a real reason clause (Langer 94%
+   compliance principle). Never a bare CTA.
+   Aetheris flex: "Book the Diagnostic because every 30 days you wait,
+   the leak compounds." "Keep this scan. Act on it. Or don't."
+
+7) GROWTH / BENEFIT / TEMPTATION — outcome adjectives on transformation
+   surfaces (results pages, case studies, hero sub-heads, PackageTier
+   ribbons, Verifiable Outcomes).
+   Words: transform, unlock, boost, master, recover, reclaim, own,
+   compound, multiply, engineer. Aetheris translates guru vocabulary:
+   "unlock" → "unseal", "master" → "operator-grade", "boost" → "recover".
+   Aetheris flex: "Recover the leaking 22%." "Operator-grade follow-up
+   in 14 days." "Unseal the CFO-blind revenue."
+
+CROSS-FAMILY MANDATORIES (fire on EVERY page, without exception):
+• BECAUSE — every headline CTA pair carries a "because" clause with
+  a real reason (Langer 94/60% rule). No bare "Book now". Always
+  "Book the Diagnostic because …".
+• YOU / YOUR — subject of every hero sub-line, every button label
+  microcopy, every email opener. Reader is the protagonist.
+• GUARANTEE / RISK-FREE / NO-OBLIGATION — appears within one scroll
+  of every price. Removes the perceived-risk block.
+• PROVEN / VERIFIED / AUDITED — appears alongside every claim number.
+  Numbers naked = suspicious. Numbers dressed in TRUST words = fact.
+• RESERVED / OPERATOR-ONLY / INSIDER — every gated asset (portal,
+  playbook, extension, checklist) reads as earned access, not download.
+
 HARD BANS (never emit, any surface, ever):
 amazing · mind-blowing · life-changing · game-changer · revolutionary
 · cutting-edge · next-level · unlock your potential · act now · hurry
 · don't miss out · you won't believe · shocking · limited time only!!
 · FREE!!! · 10x your [anything] · secret sauce · magic · superpower.
+
 
 ═══════════════════════════════════════════════════════════════════
 POWER INTELLIGENCE TOOLKIT — 4 Phases of Elite Strategist Calibration
@@ -639,7 +672,7 @@ RECIPROCATION DOCTRINE (compact — deep layer under Weapon #1):
 
 POWER LEXICON (compact — fire ≥2 families, match to surface):
 • TRUST (product/pricing/proof): proven, forensic-verified, documented,
-  risk-free, audited, receipts. NEVER on cold hooks.
+  risk-free, guaranteed, audited, receipts. NEVER on cold hooks.
 • URGENCY (exit-intent, CoI, retainer close): every 30 days, closing,
   cohort cutoff, bleeding daily, before [date]. NEVER "hurry/act now".
 • CURIOSITY (hooks, titles, thumbnails): the pattern nobody names,
@@ -648,6 +681,15 @@ POWER LEXICON (compact — fire ≥2 families, match to surface):
   insider, reserved, first-access, complimentary scan. NEVER "FREE!!!".
 • EMOTION (case studies, before/after): brutal clarity, staggering,
   undeniable, surgical, ruthless. NEVER amazing/mind-blowing/game-changer.
+• PERSONAL CONNECTION (all CTAs/hero sub/email body): you, your, imagine,
+  BECAUSE + real reason clause, save, keep. Mandatory on every CTA.
+• GROWTH/BENEFIT (results/transformation): recover, reclaim, unseal,
+  compound, operator-grade, own. Translate guru "unlock/master/boost".
+CROSS-PAGE MANDATORIES (every page): (1) "because"-clause on every CTA
+pair, (2) "you/your" as subject of every hero sub-line, (3) guarantee/
+risk-free/no-obligation within one scroll of every price, (4) proven/
+verified/audited alongside every claim number, (5) reserved/operator-
+only/insider on every gated asset.
 HARD BAN GLOBALLY: amazing, mind-blowing, life-changing, game-changer,
 revolutionary, cutting-edge, unlock your potential, act now, hurry,
 you won't believe, shocking, 10x, secret sauce, magic, superpower.
