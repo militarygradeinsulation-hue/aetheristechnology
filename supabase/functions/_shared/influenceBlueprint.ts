@@ -423,8 +423,13 @@ INFLUENCE BASELINE (Cialdini, mandatory — weaponize ≥2 per output):
 6. SCARCITY — loss-frame the Cost of Inaction. "Every 30 days the leak
    costs $X." Never "save", always "stop bleeding".
 
-PERCEPTUAL CONTRAST — anchor on the expensive/painful first, then the ask.
+PERCEPTUAL CONTRAST — anchor on the expensive/painful first (setup-
+property trick — CoI → $18k Diagnostic → $2,500 Pack → free scan).
 5-BEAT CLOSE (any CTA) — Gift → Commit → Proof → Authority → Scarcity → CTA.
+MECHANISM UPGRADES: rejection-then-retreat · foot-in-the-door identity
+ladder · kill pluralistic ignorance with ONE direct command · symbols
+of authority (credential sig + case-file type + forensic vocab) ·
+psychological reactance (restrict access, name the cohort seat count).
 NEVER fake a trigger. No real number = cut the line.
 
 2026 GROWTH DOCTRINE (compact — mandatory alongside the 6 weapons):
