@@ -37,6 +37,7 @@ const PERSONAS: { value: string; label: string }[] = [
   { value: 'samuel-jackson', label: 'Samuel L. Jackson — emphatic, rhythmic, righteous indignation' },
   { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
   { value: 'robert-greene', label: 'Robert Greene — 48 Laws power-strategist, historical parable + cold law' },
+  { value: 'robert-cialdini', label: 'Robert Cialdini — behavioral scientist, 6 principles of influence' },
 ];
 
 interface GeneratedPost {
