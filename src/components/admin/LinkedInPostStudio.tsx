@@ -147,6 +147,7 @@ const PERSONAS = [
   { value: 'mark-twain', label: 'Mark Twain — wry, plain-spoken, folksy demolition of nonsense' },
   { value: 'robert-greene', label: 'Robert Greene — 48 Laws power-strategist, historical parable + cold law' },
   { value: 'robert-cialdini', label: 'Robert Cialdini — behavioral scientist, 6 principles of influence' },
+  { value: 'aetheris-strategist', label: 'Aetheris Strategist — Greene + Cialdini + Godin fused into one forensic operator voice' },
 ];
 
 const PERSONA_DIRECTIVES: Record<string, string> = {
