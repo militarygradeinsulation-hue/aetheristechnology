@@ -792,8 +792,31 @@ const PortalPage: React.FC = () => {
     }
   };
 
+  const showTopAppBanner = profile.code === '963169' || profile.code === '482917';
+
   return (
     <div className={`min-h-screen bg-background ${cursorClassName}`}>
+      {showTopAppBanner && (
+        <div className="w-full bg-amber text-background border-b border-amber/60">
+          <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <ArrowDownToLine className="w-4 h-4 flex-shrink-0" />
+              <p className="text-sm font-semibold truncate">
+                Aetheris App · v{CURRENT_EXTENSION_VERSION} {extensionOutdated ? '— new build ready' : '— installed'}
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              onClick={downloadChromeExtension}
+              className="bg-background text-amber hover:bg-background/90 font-bold h-8"
+            >
+              <ArrowDownToLine className="w-4 h-4 mr-1.5" />
+              Download the App
+            </Button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="border-b border-border/50 bg-card/40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
