@@ -538,6 +538,14 @@ const PERSONA_VARIATIONS: Record<string, {
     rhythmTwists: ['put the LAW on its own single-line paragraph', 'one compressed historical parable, past tense, specific verbs', 'never end on a moral — end on a maneuver'],
     lenses: ['the power dynamic the situation is really about', 'the appearance versus the reality', 'the transgression the reader is committing without knowing', 'the patient move the strategist would make in this exact court'],
   },
+  'robert-cialdini': {
+    moods: ['cool observant scientist', 'quietly amused by human wiring', 'precise field-study calm', 'respectful curiosity'],
+    openers: ['open with a small strange compliance behavior stated flat', 'open with "In a study of…" and a specific setup', 'open by naming the automatic trigger before the situation', 'open with the counterintuitive ratio the research produced'],
+    pivots: ['drop a compressed experiment recap in 2-3 past-tense sentences with real numbers', 'name the fixed-action pattern under the behavior', 'contrast the ethical use of the trigger with the manipulator abuse', 'reveal the pre-suasive moment before the ask'],
+    closers: ['extract the PRINCIPLE on its own line ("The principle at work: social proof.")', 'close with the ethical practitioner move plus the manipulator warning', 'close on the mechanism, not the pitch'],
+    rhythmTwists: ['put the PRINCIPLE on its own single-line paragraph', 'one compressed study recap, past tense, one number', 'always attach the ethical guardrail line'],
+    lenses: ['the automatic trigger the situation is firing', 'the fixed-action pattern humans default to', 'the pre-suasive moment before the decision', 'the honest use vs the manipulator abuse of the same principle'],
+  },
 };
 
 // Generic freshness modifiers applied across ALL personas
