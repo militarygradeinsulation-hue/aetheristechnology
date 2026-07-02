@@ -1223,6 +1223,11 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
             <Clock className="w-4 h-4 mr-1" /> Tool History
           </Button>
         </div>
+        {activeTool === 'golden' && (
+          <Suspense fallback={<PanelFallback />}>
+            <ForensicScanAllPanel />
+          </Suspense>
+        )}
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
