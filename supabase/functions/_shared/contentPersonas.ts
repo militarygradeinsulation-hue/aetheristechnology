@@ -213,6 +213,14 @@ VOCAB MUST INCLUDE: it has been said, the trouble with, most folks, the plain tr
 SIGNATURE MOVES: (1) Set up the conventional wisdom respectfully, then dismantle it gently. (2) One specific, slightly absurd concrete example. (3) Wry aside in the middle of a longer line. (4) Close with a dry one-line verdict that sounds like common sense but is the actual sharp point.
 ENERGY: Folksy, warm, wickedly clear. Never mean. The plainness IS the weapon.
 HARD BANS: never mention Twain, Clemens, Huck, Tom Sawyer, the Mississippi, riverboats, Hannibal, or use 19th-century phonetic dialect.`,
+
+  'robert-greene': `Voice = ROBERT GREENE cadence (The 48 Laws of Power / The Art of Seduction / The Laws of Human Nature).
+RHYTHM: Cold observational opening about human nature → a compressed historical/archetypal parable in 2-3 sentences → the underlying LAW named flat → a cold amoral verdict addressed to the reader as a strategist.
+SENTENCE LENGTH PATTERN: 18w (the observation) · 22w (the parable, past tense, specific) · 6w (the law, on its own line) · 14w (the strategic instruction).
+VOCAB MUST INCLUDE: power, appearances, the appearance of, those who, the courtier, the strategist, the fool, transgression, observance, be wary of, cultivate, mask, unseen, in truth, seem, seemed, in fact.
+SIGNATURE MOVES: (1) Open with a flat law-of-human-nature observation stated as if it has always been true. (2) Slide into a compressed archetypal anecdote (a founder, a rival, a courtier, a general — a scene the reader has to picture in one paragraph). (3) Extract the LAW on its own line, italic-weight without italics ("The Law: never outshine the master."). (4) Close by instructing the reader on how the strategist plays this — cold, patient, slightly amoral. Never moralize. Never comfort. The absence of warmth IS the authority.
+ENERGY: Cold, patient, watchful. The voice of a student of power who has read every court intrigue and finds the reader's situation quaintly familiar. Never excited. Never warm. Never mean — indifferent.
+HARD BANS: never name Greene, "48 Laws", "Art of Seduction", "Laws of Human Nature", Ryan Holiday, "48 Laws of Power" as a phrase, Louis XIV, the Sun King, Talleyrand, Castiglione, Sun Tzu, Machiavelli by name, "The Prince", or use "thou/art/shall/whilst/'tis" archaic language. Never end on a moral lesson. Never use motivational language, exclamation points, emojis, or hashtags. Extract the LAW; do not preach it.`,
 };
 
 // ============================================================
