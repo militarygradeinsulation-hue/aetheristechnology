@@ -1321,6 +1321,58 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'website_scan': return <WebsiteScanView {...props} />;
     case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
+    case 'reciprocation_tactics': {
+      const tactics: any[] = Array.isArray(data?.tactics) ? data.tactics : [];
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber border-b border-amber/20 pb-2">
+            <span>Reciprocation Tactics · Mauss / Regan / Mexico–Ethiopia</span>
+          </div>
+          {data?.scenario_summary && (
+            <p className="text-sm text-foreground/85 italic border-l-2 border-amber/50 pl-3">{String(data.scenario_summary)}</p>
+          )}
+          {tactics.map((t: any, i: number) => (
+            <div key={t?.id || i} className="border border-border rounded-md bg-muted/10 p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="font-serif font-semibold text-sm text-foreground">
+                  <span className="font-mono text-[10px] text-amber mr-2">T{String(i + 1).padStart(2, '0')}</span>
+                  {t?.concept || 'Tactic'}
+                </div>
+                <div className="flex gap-1">
+                  {(Array.isArray(t?.citation_keys) ? t.citation_keys : []).map((k: string) => (
+                    <span key={k} className="text-[9px] font-mono uppercase tracking-widest bg-amber/10 border border-amber/30 text-amber px-1.5 py-0.5 rounded-sm">{k}</span>
+                  ))}
+                </div>
+              </div>
+              {t?.tactic && <p className="text-sm text-foreground/90 whitespace-pre-wrap">{t.tactic}</p>}
+              {t?.script_line && (
+                <div className="text-xs font-mono bg-background/40 border border-border rounded p-2 text-foreground/90">"{t.script_line}"</div>
+              )}
+              <div className="grid md:grid-cols-2 gap-2">
+                {t?.ethical_use && (
+                  <div className="border border-emerald-500/30 bg-emerald-500/5 rounded p-2">
+                    <div className="text-[10px] font-mono uppercase text-emerald-400 mb-1">Ethical use</div>
+                    <div className="text-xs text-foreground/85 whitespace-pre-wrap">{t.ethical_use}</div>
+                  </div>
+                )}
+                {t?.manipulator_abuse && (
+                  <div className="border border-crimson/40 bg-crimson/5 rounded p-2">
+                    <div className="text-[10px] font-mono uppercase text-crimson mb-1">Manipulator abuse</div>
+                    <div className="text-xs text-foreground/85 whitespace-pre-wrap">{t.manipulator_abuse}</div>
+                  </div>
+                )}
+              </div>
+              {t?.defense_signal && (
+                <div className="border-l-2 border-amber/60 pl-3 py-1 bg-amber/5 rounded-r text-xs">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber mr-1">Defense signal:</span>
+                  {t.defense_signal}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
     case 'detective_case': return <DetectiveCaseView data={data} input={(item as any).input_data} copiedId={copiedId} setCopiedId={setCopiedId} />;
     case 'lead_deep_scan': {
       const person = data?.person || {};
