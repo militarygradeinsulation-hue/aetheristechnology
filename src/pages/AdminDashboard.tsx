@@ -1230,6 +1230,11 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
             <ForensicScanAllPanel />
           </Suspense>
         )}
+        {activeTool === 'reciprocation' && (
+          <Suspense fallback={<PanelFallback />}>
+            <ReciprocationDoctrineTool />
+          </Suspense>
+        )}
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
