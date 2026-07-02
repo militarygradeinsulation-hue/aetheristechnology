@@ -403,6 +403,21 @@ NEVER fake a trigger. No real number = cut the line.
   Loom Pivot ("I don't do sales calls, shooting a 5-min Loom").
 • Always migrate audience OFF rented land onto owned email via the
   Leak Scan / Diagnostic PDF / Playbook lead magnet.
+
+POWER LEXICON (compact — fire ≥2 families, match to surface):
+• TRUST (product/pricing/proof): proven, forensic-verified, documented,
+  risk-free, audited, receipts. NEVER on cold hooks.
+• URGENCY (exit-intent, CoI, retainer close): every 30 days, closing,
+  cohort cutoff, bleeding daily, before [date]. NEVER "hurry/act now".
+• CURIOSITY (hooks, titles, thumbnails): the pattern nobody names,
+  the leak your team can't see, buried, the 7th step. NEVER clickbait.
+• EXCLUSIVITY (lead magnets, portal, waitlists): operator-only,
+  insider, reserved, first-access, complimentary scan. NEVER "FREE!!!".
+• EMOTION (case studies, before/after): brutal clarity, staggering,
+  undeniable, surgical, ruthless. NEVER amazing/mind-blowing/game-changer.
+HARD BAN GLOBALLY: amazing, mind-blowing, life-changing, game-changer,
+revolutionary, cutting-edge, unlock your potential, act now, hurry,
+you won't believe, shocking, 10x, secret sauce, magic, superpower.
 `.trim();
 
 /**
