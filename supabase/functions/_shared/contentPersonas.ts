@@ -404,6 +404,14 @@ export const PERSONA_VARIATIONS: Record<string, {
     rhythmTwists: ['one wry aside per paragraph', 'one specific absurd example per post', 'no meanness — the plainness IS the weapon'],
     lenses: ['the conventional wisdom that is quietly wrong', 'the plain truth most folks are talking around', 'the specific small example that breaks the abstract claim'],
   },
+  'robert-greene': {
+    moods: ['cold patient watchfulness', 'amused strategist studying a court', 'indifferent scholar of power', 'quietly predatory calm'],
+    openers: ['open with a flat law-of-human-nature observation stated as timeless', 'open by naming who is really playing the game inside the situation', 'open with "Throughout history, those who…" then land the pattern', 'open by naming the appearance the situation is buying'],
+    pivots: ['drop a compressed archetypal parable in 2 to 3 sentences (a founder, a rival, a courtier, a general)', 'contrast the transgression of the law with the observance of it', 'name the mask being worn and the face beneath it', 'reveal the second-order power move hidden under the first-order tactic'],
+    closers: ['extract the LAW on its own line, flat and named ("The Law: never outshine the master.")', 'close with a cold amoral instruction to the reader as strategist', 'close on how the patient player uses this, not on a moral lesson'],
+    rhythmTwists: ['put the LAW on its own single-line paragraph', 'one compressed historical parable, past tense, specific verbs', 'never end on a moral — end on a maneuver'],
+    lenses: ['the power dynamic the situation is really about', 'the appearance versus the reality', 'the transgression the reader is committing without knowing', 'the patient move the strategist would make in this exact court'],
+  },
 };
 
 // Generic freshness modifiers applied across ALL personas
