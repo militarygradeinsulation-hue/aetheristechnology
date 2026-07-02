@@ -36,6 +36,35 @@ const PAGE_H = 297;
 const M = 20;
 const CW = PAGE_W - M * 2;
 
+/**
+ * jsPDF built-in fonts (helvetica/times/courier) only support WinAnsi encoding.
+ * Any character outside that range renders as garbage boxes/symbols (e.g. ><#%^).
+ * We aggressively map smart-punctuation, dashes, arrows, bullets, and other
+ * common unicode into ASCII equivalents, then strip everything else.
+ */
+function sanitize(input: unknown): string {
+  if (input == null) return "";
+  let s = String(input);
+  // Normalize compatibility forms (e.g., ligatures)
+  try { s = s.normalize("NFKC"); } catch { /* noop */ }
+  const map: Record<string, string> = {
+    "\u00A0": " ", "\u2007": " ", "\u2009": " ", "\u200A": " ", "\u200B": "",
+    "\u2013": "-", "\u2014": "-", "\u2212": "-", "\u2010": "-", "\u2011": "-",
+    "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201B": "'", "\u2032": "'",
+    "\u201C": '"', "\u201D": '"', "\u201E": '"', "\u2033": '"',
+    "\u2026": "...", "\u00B7": "-", "\u2022": "-", "\u25CF": "-", "\u25AA": "-", "\u25A0": "-",
+    "\u2192": "->", "\u2190": "<-", "\u2194": "<->", "\u21D2": "=>", "\u21D0": "<=",
+    "\u2713": "v", "\u2714": "v", "\u2717": "x", "\u2718": "x", "\u26A0": "!",
+    "\u00A9": "(c)", "\u00AE": "(R)", "\u2122": "(TM)",
+    "\u00D7": "x", "\u00F7": "/",
+    "\u2043": "-",
+  };
+  s = s.replace(/[\u00A0\u2007\u2009\u200A\u200B\u2013\u2014\u2212\u2010\u2011\u2018\u2019\u201A\u201B\u2032\u201C\u201D\u201E\u2033\u2026\u00B7\u2022\u25CF\u25AA\u25A0\u2192\u2190\u2194\u21D2\u21D0\u2713\u2714\u2717\u2718\u26A0\u00A9\u00AE\u2122\u00D7\u00F7\u2043]/g, (c) => map[c] ?? c);
+  // Strip anything outside printable WinAnsi (basic Latin + Latin-1 supplement + a few)
+  s = s.replace(/[^\x09\x0A\x0D\x20-\x7E\xA1-\xFF]/g, "");
+  return s;
+}
+
 function bg(doc: jsPDF) {
   doc.setFillColor(...BG);
   doc.rect(0, 0, PAGE_W, PAGE_H, "F");
@@ -75,7 +104,7 @@ function ensureSpace(doc: jsPDF, y: number, need: number, page: { n: number }, a
 }
 
 function wrap(doc: jsPDF, text: string, w: number): string[] {
-  return doc.splitTextToSize(text || "", w) as string[];
+  return doc.splitTextToSize(sanitize(text), w) as string[];
 }
 
 function renderMarkdown(doc: jsPDF, md: string, x: number, y: number, page: { n: number }, askUrl: string): number {
@@ -109,6 +138,20 @@ export function generateForensicGoldenPdf(opts: {
   const askUrl = `https://aetheris.technology/report/${scanId}/ask`;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const page = { n: 1 };
+
+  // Monkey-patch text writers so every string flowing to the PDF is WinAnsi-safe.
+  // jsPDF's built-in fonts render non-WinAnsi glyphs as garbage (><#%^ etc.).
+  const _text = doc.text.bind(doc);
+  (doc as unknown as { text: typeof doc.text }).text = ((t: unknown, ...rest: unknown[]) => {
+    const clean = Array.isArray(t) ? t.map(sanitize) : sanitize(t);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (_text as any)(clean, ...rest);
+  }) as typeof doc.text;
+  const _twl = doc.textWithLink.bind(doc);
+  (doc as unknown as { textWithLink: typeof doc.textWithLink }).textWithLink = ((t: string, x: number, y: number, o: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (_twl as any)(sanitize(t), x, y, o);
+  }) as typeof doc.textWithLink;
 
   // ───────── COVER ─────────
   bg(doc);

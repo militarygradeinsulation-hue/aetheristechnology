@@ -67,6 +67,7 @@ import { AllInOneGenerator } from '@/components/AllInOneGenerator';
 import { ScamCheckCard } from '@/components/admin/ScamCheckCard';
 import { AiWritingDetectorCard } from '@/components/admin/AiWritingDetectorCard';
 import { DetectiveModeStandalone } from '@/components/DetectiveModeStandalone';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { ExternalLink } from 'lucide-react';
 import {
   getPortalProfile, setPortalSession, clearPortalSession,
@@ -107,10 +108,12 @@ type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
   | 'outreach-email'
+  | 'golden-report'
   | 'leak-audit' | 'scan' | 'scam-check' | 'detective' | 'ai-detect' | 'business-diagnostic' | 'sales-scripts'
   | 'follow-up-plan' | 'strategic-questions' | 'brand-contradictions' | 'friction-audit';
 
 const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; external?: boolean }[] = [
+  { key: 'golden-report',       name: 'Golden Report (Forensic Scan All)',   href: '#',                     desc: 'Drop a URL, get the full 14-chapter forensic case file with dollar-quantified leaks and a Smart PDF.' },
   { key: 'all-in-one',          name: 'All-In-One: Run Every Tool',          href: '#',                     desc: 'Drop a website URL, runs every prospect tool at once.' },
   { key: 'outreach-email',      name: 'Outreach Email Creator',              href: '#',                     desc: 'Bold, direct emails in the Aetheris voice. Paste, upload a screenshot, or describe the lead.' },
   { key: 'business-post-analyst', name: 'Business Post Analyst',               href: '#',                     desc: 'Analyze any LinkedIn/social post, instant prospect ammo.' },
@@ -130,6 +133,7 @@ const REP_TOOLS: { key: ToolKey; name: string; href: string; desc: string; exter
 const renderEmbeddedTool = (key: ToolKey, noop: () => void, profile: PortalProfile | null): React.ReactNode => {
   switch (key) {
     case 'business-post-analyst': return <BusinessPostAnalyst authMode="rep" token={getPortalToken()} />;
+    case 'golden-report':        return <ForensicScanAllPanel />;
     case 'all-in-one':           return <AllInOneGenerator />;
     case 'outreach-email':       return <OutreachEmailCreator authMode="rep" token={getPortalToken()} defaultSenderName={profile?.rep_name} />;
     case 'leak-audit':           return <WhatsWrongDiagnostic />;
@@ -347,7 +351,7 @@ const PortalPage: React.FC = () => {
     const tabParam = params.get('tab');
     const toolParam = params.get('tool');
     const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas'];
-    const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
+    const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','golden-report','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
     if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
       setTab(tabParam as Tab);
       if (tabParam === 'tools' && toolParam && (VALID_TOOLS as string[]).includes(toolParam)) {
