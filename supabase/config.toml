@@ -222,3 +222,6 @@ verify_jwt = false
 [functions.admin-live-traffic]
 verify_jwt = false
 
+
+[functions.reciprocation-tactics]
+verify_jwt = false
