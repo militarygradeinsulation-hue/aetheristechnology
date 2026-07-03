@@ -4,8 +4,23 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Send, Image as ImageIcon, ScanSearch, X, Linkedin, Trash2, RefreshCw, Clock, CheckCircle2, Save,
+  Send, Image as ImageIcon, ScanSearch, X, Linkedin, Trash2, RefreshCw, Clock, CheckCircle2, Save, Sparkles,
 } from "lucide-react";
+
+const TONES = [
+  { id: "forensic", label: "Forensic operator" },
+  { id: "story", label: "Mini case study" },
+  { id: "contrarian", label: "Contrarian take" },
+  { id: "teaching", label: "Teaching / how-to" },
+  { id: "hook-stack", label: "Hook stack (5 lines)" },
+];
+const PERSONAS = [
+  { id: "aetheris-strategist", label: "Aetheris Strategist (Cialdini + Greene + Godin)" },
+  { id: "cialdini", label: "Robert Cialdini (mechanism)" },
+  { id: "greene", label: "Robert Greene (strategic verdict)" },
+  { id: "godin", label: "Seth Godin (short paragraph)" },
+  { id: "joseph", label: "Joseph — raw operator voice" },
+];
 import { useScreenCapture } from "../lib/useScreenCapture";
 import { ScreenCaptureOverlay } from "../components/ScreenCaptureOverlay";
 
@@ -32,6 +47,10 @@ const AppComposer = () => {
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [loadingQueue, setLoadingQueue] = useState(false);
   const [scheduleAt, setScheduleAt] = useState<string>("");
+  const [tone, setTone] = useState(TONES[0].id);
+  const [persona, setPersona] = useState(PERSONAS[0].id);
+  const [topic, setTopic] = useState("");
+  const [drafting, setDrafting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const capture = useScreenCapture();
 
@@ -112,6 +131,40 @@ const AppComposer = () => {
     setQueue((q) => q.filter((r) => r.id !== id));
   };
 
+  const draftWithAI = async () => {
+    if (!topic.trim() && !text.trim()) {
+      return toast.error("Enter a topic, angle, or paste rough notes first.");
+    }
+    setDrafting(true);
+    try {
+      const toneLabel = TONES.find((t) => t.id === tone)?.label || tone;
+      const personaLabel = PERSONAS.find((p) => p.id === persona)?.label || persona;
+      const seed = topic.trim() || text.trim();
+      const userText = `Draft a LinkedIn post in the "${toneLabel}" voice, written in the persona of ${personaLabel}. Topic / rough notes:\n\n${seed}\n\nRules: 4-7 short lines, pattern-claim hook, no emojis, no hashtags, no em dashes, end with one sharp question or a one-line CTA. Do not append any signature — the app appends it automatically.`;
+      const { data, error } = await supabase.functions.invoke("extension-operator-chat", {
+        body: {
+          userText,
+          pageUrl: "app://composer",
+          pageText: seed,
+          screenshot: null,
+          history: [],
+          mode: "growth",
+          persona,
+          tone,
+        },
+      });
+      if (error) throw error;
+      const reply = (data as any)?.reply?.trim();
+      if (!reply) throw new Error("Empty reply");
+      setText(reply);
+      toast.success("Draft ready — edit, attach image, then queue.");
+    } catch (e: any) {
+      toast.error(e.message || "Draft failed");
+    } finally {
+      setDrafting(false);
+    }
+  };
+
   return (
     <AppLayout>
       {capture.capturing && <ScreenCaptureOverlay onComplete={handleOverlayDone} />}
@@ -127,6 +180,46 @@ const AppComposer = () => {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         {/* Composer */}
         <section className="bg-card border border-border rounded-xl p-5 flex flex-col">
+          <div className="grid gap-2 sm:grid-cols-2 mb-3">
+            <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex flex-col gap-1">
+              Personality
+              <select
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground"
+              >
+                {PERSONAS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex flex-col gap-1">
+              Tone
+              <select
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground"
+              >
+                {TONES.map((t) => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Topic, angle, or paste rough notes for AI draft…"
+            className="w-full bg-background border border-border rounded-md px-3 py-2 text-xs mb-2 focus:outline-none focus:border-primary"
+          />
+          <div className="mb-3">
+            <Button size="sm" onClick={draftWithAI} disabled={drafting || saving} className="w-full sm:w-auto">
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              {drafting ? "Drafting…" : "Draft with AI"}
+            </Button>
+          </div>
+
           <textarea
             className="w-full bg-background border border-border rounded-md p-3 text-sm min-h-[220px] focus:outline-none focus:border-primary resize-y"
             placeholder="Write your post… (signature auto-appends)"
