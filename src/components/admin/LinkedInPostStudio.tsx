@@ -14,6 +14,8 @@ import { saveToAdminLibrary, listAdminLibrary, deleteFromAdminLibrary, type Admi
 import { scanRepetition, reportToDirective } from '@/lib/repetitionScan';
 import { RepetitionLockBar } from './RepetitionLockBar';
 import { AiWritingDetectorCard } from './AiWritingDetectorCard';
+import { BookWriterPanel } from './BookWriterPanel';
+
 
 const PILLARS = [
   'Revenue Leak Diagnosis',
@@ -1766,7 +1768,10 @@ export default function LinkedInPostStudio() {
             </div>
           )}
         </div>
+
+        <BookWriterPanel library={responseLibrary} />
       </Card>
+
 
       {viewItem && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setViewItem(null)}>
