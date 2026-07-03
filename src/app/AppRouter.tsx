@@ -12,6 +12,7 @@ import AppHygieneHistory from "./pages/AppHygieneHistory";
 import AppAuditHealth from "./pages/AppAuditHealth";
 import AppAssistant from "./pages/AppAssistant";
 import AppChanges from "./pages/AppChanges";
+import AppComposer from "./pages/AppComposer";
 
 export const AppRouter = () => (
   <AuthProvider>
