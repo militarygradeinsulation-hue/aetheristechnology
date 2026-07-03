@@ -604,6 +604,12 @@ const PortalPage: React.FC = () => {
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const isAdmin = isOwnerAdmin;
+  // Newly onboarded reps — locked out of advanced studios/docs until enabled.
+  const NEW_REP_CODES = new Set<string>([
+    '204871','315982','427193','538204','649315','750426','861537','972648','183759',
+  ]);
+  const LOCKED_FOR_NEW_REPS = new Set<Tab>(['video','poststudio','documents','incentives','playbook']);
+  const isNewRep = !isPartner && !isAdmin && !!profile && NEW_REP_CODES.has(profile.code);
   // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -617,11 +623,12 @@ const PortalPage: React.FC = () => {
     && (t.id !== 'interviews' || sharedWsUnlocked)
     && (t.id !== 'briefing' || sharedWsUnlocked)
     && (!HIDDEN_FOR_REPS.has(t.id as Tab) || isPartner || isAdmin)
-  );
+  ).map(t => ({ ...t, locked: isNewRep && LOCKED_FOR_NEW_REPS.has(t.id as Tab) }));
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
     ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
     : availableTabs.map(t => t.id);
+
 
   const renderTabBody = (key: Tab): React.ReactNode => {
     switch (key) {
