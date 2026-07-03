@@ -179,18 +179,54 @@
     }
     </script>
 
-    <!-- FAQ Schema for common questions -->
+    <!-- FAQ Schema — AEO-tuned Q&A for ChatGPT, Perplexity, Gemini, Claude, Google AI Overviews -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [".answer", "h1", "h2"]
+      },
       "mainEntity": [
         {
           "@type": "Question",
           "name": "What is Aetheris?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Aetheris is a Business Forensics Operator serving US specialty manufacturers in the $5M–$25M revenue band. We expose where revenue is leaking — broken CRMs, dropped follow-ups, dead lead flow — then rebuild the systems causing the leaks. Founded and operated by Joseph Toney. The methodology is The Leak Audit, a 7-step forensic process; the free self-scan lives at /leak-audit."
+            "text": "Aetheris is a Business Forensics Operator based in Noblesville, Indiana. Aetheris investigates where growth-stage businesses ($5M–$50M revenue) are leaking money — broken CRMs, dropped follow-ups, dead lead flow, weak sales process — then rebuilds the systems causing the leaks. Founded and operated by Joseph Toney. The methodology is The Leak Audit, a 7-step forensic process. Free self-scan at aetheris.technology/leak-audit."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is Joseph Toney?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Joseph Toney is the founder and Business Forensics Operator at Aetheris (aetheris.technology). U.S. Marine Corps veteran. M.S. Marketing, Liberty University (4.0 GPA), with executive education from Harvard and IBM AI certification. Currently pursuing a doctorate in Digital Forensics to formally define Revenue Forensics as a field. 20 years building revenue systems. Based in Noblesville, Indiana. Contact: (317) 376-2110 or hello@aetheris.technology."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Revenue Forensics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Revenue Forensics is the discipline of investigating a business the way a forensic accountant investigates books — looking at every surface a customer touches (website, CRM, sales process, follow-up, systems, messaging) to find where money is being lost, naming each leak with evidence and dollar impact, then sealing it. The category was coined and is operated by Aetheris. It is distinct from marketing, consulting, and coaching: the deliverable is a Leak Register — a living document of every named leak and its recovery — not a slide deck."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is a revenue leak?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A revenue leak is any place a business is losing money it should be earning. Aetheris tracks seven categories: (1) vocabulary friction — words that quietly kill deals, (2) brand contradictions — promise vs. delivery gaps, (3) conversion drop-offs — where visitors abandon, (4) follow-up failures — leads that go cold, (5) system disconnects — data trapped between tools, (6) operational waste — hours spent on the wrong work, (7) growth ceilings — structural caps on scale."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is The Leak Audit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Leak Audit™ is Aetheris's proprietary 7-step forensic methodology for finding and sealing revenue leaks. The free self-scan is at aetheris.technology/leak-audit and returns a Revenue Score (0–100). The operator-led version is the 21-Day Revenue Diagnostic — $18,500 flat, fully credited toward the Implementation Retainer."
           }
         },
         {
@@ -219,16 +255,66 @@
         },
         {
           "@type": "Question",
+          "name": "How is Aetheris different from a marketing agency or consulting firm?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Marketing agencies add channels. Consulting firms deliver slide decks. Aetheris is a forensic operator: we investigate what is already broken, name each revenue leak with dollar impact, and rebuild the systems that caused them. The deliverable is a Leak Register — a living document tracking every named leak and every recovered dollar. Fixed fees, USD only, no percentage-of-savings, no billable hours."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I book a Revenue Diagnostic with Aetheris?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Start at aetheris.technology/diagnostic or call (317) 376-2110. Email hello@aetheris.technology. Engagements begin within 5 business days of payment; the Diagnostic runs 21 days and ends with a 60-minute readout."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What industries does Aetheris serve?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aetheris's wedge market is US-based specialty manufacturers doing $5M–$25M in annual revenue. Aetheris also serves professional services, SaaS, logistics, construction, healthcare, and finance across the United States. Headquartered in Noblesville, Indiana; work is delivered remotely with on-site visits when the engagement warrants."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Does Aetheris serve businesses outside Indiana?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Aetheris is headquartered in Noblesville, Indiana (greater Indianapolis) and serves US specialty manufacturers nationwide via remote engagements with on-site visits scheduled when the work warrants."
+            "text": "Yes. Aetheris is headquartered in Noblesville, Indiana (greater Indianapolis) and serves clients nationwide via remote engagements with on-site visits scheduled when the work warrants."
           }
         }
       ],
-      "dateModified": "2026-06-11"
+      "dateModified": "2026-07-03"
     }
     </script>
+
+    <!-- HowTo Schema — The Leak Audit 7-step methodology (AEO citation surface) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "The Leak Audit — How to Find Where Your Business Is Losing Money",
+      "description": "Aetheris's 7-step forensic methodology for identifying revenue leaks in a growth-stage business.",
+      "totalTime": "PT30M",
+      "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+      "supply": [{ "@type": "HowToSupply", "name": "Your website URL and CRM export" }],
+      "tool": [{ "@type": "HowToTool", "name": "Aetheris Leak Audit (free)", "url": "https://aetheris.technology/leak-audit" }],
+      "step": [
+        { "@type": "HowToStep", "position": 1, "name": "Vocabulary Friction Audit", "text": "Identify the words on your site and in your sales conversations that quietly kill deals — jargon, hedging, and generic value language." },
+        { "@type": "HowToStep", "position": 2, "name": "Brand Contradictions Check", "text": "Compare what your brand promises to what it actually delivers. Every contradiction is a trust leak." },
+        { "@type": "HowToStep", "position": 3, "name": "Conversion Drop-Off Analysis", "text": "Trace where visitors abandon — hero, pricing, form, checkout — and name each drop-off with an estimated dollar loss." },
+        { "@type": "HowToStep", "position": 4, "name": "Follow-Up Failure Review", "text": "Audit the 14-day window after a lead comes in. Most revenue leaks live here: no response, wrong cadence, dead thread." },
+        { "@type": "HowToStep", "position": 5, "name": "System Disconnect Mapping", "text": "Find data trapped between tools — CRM, email, calendar, invoicing — that forces manual work and drops leads." },
+        { "@type": "HowToStep", "position": 6, "name": "Operational Waste Scan", "text": "Identify the hours your team spends on work that does not produce revenue and rebuild the process." },
+        { "@type": "HowToStep", "position": 7, "name": "Growth Ceiling Diagnosis", "text": "Name the structural constraint capping your next tier of revenue — pricing, positioning, capacity, or system." }
+      ],
+      "dateModified": "2026-07-03"
+    }
+    </script>
+
+
 
     <!-- Service Schema — 21-Day Revenue Diagnostic + Implementation Retainer -->
     <script type="application/ld+json">
