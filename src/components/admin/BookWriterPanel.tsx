@@ -48,7 +48,55 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
   const [buildingOutline, setBuildingOutline] = useState(false);
   const [openChapter, setOpenChapter] = useState<number | null>(null);
 
+  const [autoWriting, setAutoWriting] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+
   const entries = useMemo(() => entriesFromLibrary(library), [library]);
+
+  const draftChapterInternal = async (
+    idx: number,
+    chapters: Chapter[],
+  ): Promise<Chapter[]> => {
+    const ch = chapters[idx];
+    try {
+      const data = await invokeBook({
+        action: 'chapter',
+        bookTitle, audience, styleNotes,
+        chapterNumber: ch.number,
+        chapterTitle: ch.title,
+        beats: ch.beats || [],
+        brief: ch.hook || '',
+        wordTarget: 1800,
+        entries: entries.slice(0, 40),
+      });
+      const body = String((data as { chapter?: string }).chapter || '');
+      const next = chapters.map((c, i) => i === idx ? { ...c, body, generating: false } : c);
+      setOutline((prev) => prev ? ({ ...prev, chapters: next }) : prev);
+      return next;
+    } catch (e) {
+      toast({ title: `Chapter ${ch.number} failed`, description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
+      const next = chapters.map((c, i) => i === idx ? { ...c, generating: false } : c);
+      setOutline((prev) => prev ? ({ ...prev, chapters: next }) : prev);
+      return next;
+    }
+  };
+
+  const autoWriteAll = async (o: Outline) => {
+    setAutoWriting(true);
+    let chapters = o.chapters;
+    setProgress({ done: 0, total: chapters.length });
+    for (let i = 0; i < chapters.length; i++) {
+      if (chapters[i].body) { setProgress({ done: i + 1, total: chapters.length }); continue; }
+      setOpenChapter(i);
+      chapters = chapters.map((c, ci) => ci === i ? { ...c, generating: true } : c);
+      setOutline({ ...o, chapters });
+      // eslint-disable-next-line no-await-in-loop
+      chapters = await draftChapterInternal(i, chapters);
+      setProgress({ done: i + 1, total: chapters.length });
+    }
+    setAutoWriting(false);
+    toast({ title: 'Manuscript complete', description: `${chapters.length} chapters drafted.` });
+  };
 
   const generateOutline = async () => {
     if (entries.length === 0) {
@@ -64,7 +112,9 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
       });
       const o = (data as { outline: Outline }).outline;
       setOutline(o);
-      toast({ title: 'Outline drafted', description: `${o.chapters?.length || 0} chapters from ${entries.length} library entries.` });
+      toast({ title: 'Outline drafted — writing now', description: `${o.chapters?.length || 0} chapters queued.` });
+      // Auto-start writing the full book, chapter by chapter.
+      void autoWriteAll(o);
     } catch (e) {
       toast({ title: 'Outline failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     } finally {
@@ -74,37 +124,16 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
 
   const generateChapter = async (idx: number) => {
     if (!outline) return;
-    const ch = outline.chapters[idx];
     setOutline({ ...outline, chapters: outline.chapters.map((c, i) => i === idx ? { ...c, generating: true } : c) });
-    try {
-      const data = await invokeBook({
-        action: 'chapter',
-        bookTitle, audience, styleNotes,
-        chapterNumber: ch.number,
-        chapterTitle: ch.title,
-        beats: ch.beats || [],
-        brief: ch.hook || '',
-        wordTarget: 1800,
-        entries: entries.slice(0, 40),
-      });
-      const body = String((data as { chapter?: string }).chapter || '');
-      setOutline((prev) => prev ? ({ ...prev, chapters: prev.chapters.map((c, i) => i === idx ? { ...c, body, generating: false } : c) }) : prev);
-      setOpenChapter(idx);
-    } catch (e) {
-      setOutline((prev) => prev ? ({ ...prev, chapters: prev.chapters.map((c, i) => i === idx ? { ...c, generating: false } : c) }) : prev);
-      toast({ title: 'Chapter failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
-    }
+    await draftChapterInternal(idx, outline.chapters.map((c, i) => i === idx ? { ...c, generating: true } : c));
+    setOpenChapter(idx);
   };
 
   const generateAll = async () => {
     if (!outline) return;
-    for (let i = 0; i < outline.chapters.length; i++) {
-      if (!outline.chapters[i].body) {
-        // eslint-disable-next-line no-await-in-loop
-        await generateChapter(i);
-      }
-    }
+    await autoWriteAll(outline);
   };
+
 
   const buildManuscript = (): string => {
     if (!outline) return '';
