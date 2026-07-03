@@ -4,8 +4,23 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Send, Image as ImageIcon, ScanSearch, X, Linkedin, Trash2, RefreshCw, Clock, CheckCircle2, Save,
+  Send, Image as ImageIcon, ScanSearch, X, Linkedin, Trash2, RefreshCw, Clock, CheckCircle2, Save, Sparkles,
 } from "lucide-react";
+
+const TONES = [
+  { id: "forensic", label: "Forensic operator" },
+  { id: "story", label: "Mini case study" },
+  { id: "contrarian", label: "Contrarian take" },
+  { id: "teaching", label: "Teaching / how-to" },
+  { id: "hook-stack", label: "Hook stack (5 lines)" },
+];
+const PERSONAS = [
+  { id: "aetheris-strategist", label: "Aetheris Strategist (Cialdini + Greene + Godin)" },
+  { id: "cialdini", label: "Robert Cialdini (mechanism)" },
+  { id: "greene", label: "Robert Greene (strategic verdict)" },
+  { id: "godin", label: "Seth Godin (short paragraph)" },
+  { id: "joseph", label: "Joseph — raw operator voice" },
+];
 import { useScreenCapture } from "../lib/useScreenCapture";
 import { ScreenCaptureOverlay } from "../components/ScreenCaptureOverlay";
 
