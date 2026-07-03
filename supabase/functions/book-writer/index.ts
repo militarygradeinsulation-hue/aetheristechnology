@@ -1,7 +1,7 @@
 // Book Writer — turns Response Library entries + topics into book outline/chapters.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
-import { INFLUENCE_BLUEPRINT } from "../_shared/influenceBlueprint.ts";
+import { INFLUENCE_BLUEPRINT_PROMPT } from "../_shared/influenceBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,7 +80,7 @@ Voice: blunt, forensic, operator. No corporate hedging. No influencer fluff.
 Use "because"-clause reasoning. Use power lexicon (leaking, autopsy, evidence, exposure, receipts).
 Every claim ends in a receipt or a next action.
 
-${INFLUENCE_BLUEPRINT}
+${INFLUENCE_BLUEPRINT_PROMPT}
 
 BOOK: "${bookTitle}"
 AUDIENCE: ${audience}
