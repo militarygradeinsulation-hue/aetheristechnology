@@ -131,6 +131,40 @@ const AppComposer = () => {
     setQueue((q) => q.filter((r) => r.id !== id));
   };
 
+  const draftWithAI = async () => {
+    if (!topic.trim() && !text.trim()) {
+      return toast.error("Enter a topic, angle, or paste rough notes first.");
+    }
+    setDrafting(true);
+    try {
+      const toneLabel = TONES.find((t) => t.id === tone)?.label || tone;
+      const personaLabel = PERSONAS.find((p) => p.id === persona)?.label || persona;
+      const seed = topic.trim() || text.trim();
+      const userText = `Draft a LinkedIn post in the "${toneLabel}" voice, written in the persona of ${personaLabel}. Topic / rough notes:\n\n${seed}\n\nRules: 4-7 short lines, pattern-claim hook, no emojis, no hashtags, no em dashes, end with one sharp question or a one-line CTA. Do not append any signature — the app appends it automatically.`;
+      const { data, error } = await supabase.functions.invoke("extension-operator-chat", {
+        body: {
+          userText,
+          pageUrl: "app://composer",
+          pageText: seed,
+          screenshot: null,
+          history: [],
+          mode: "growth",
+          persona,
+          tone,
+        },
+      });
+      if (error) throw error;
+      const reply = (data as any)?.reply?.trim();
+      if (!reply) throw new Error("Empty reply");
+      setText(reply);
+      toast.success("Draft ready — edit, attach image, then queue.");
+    } catch (e: any) {
+      toast.error(e.message || "Draft failed");
+    } finally {
+      setDrafting(false);
+    }
+  };
+
   return (
     <AppLayout>
       {capture.capturing && <ScreenCaptureOverlay onComplete={handleOverlayDone} />}
