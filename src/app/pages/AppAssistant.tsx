@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, RotateCcw, Bot, ScanSearch, X } from "lucide-react";
+import { Send, RotateCcw, Bot, ScanSearch, X, Paperclip } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AppLayout } from "../AppLayout";
 import { Button } from "@/components/ui/button";
