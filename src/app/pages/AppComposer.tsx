@@ -180,6 +180,46 @@ const AppComposer = () => {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         {/* Composer */}
         <section className="bg-card border border-border rounded-xl p-5 flex flex-col">
+          <div className="grid gap-2 sm:grid-cols-2 mb-3">
+            <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex flex-col gap-1">
+              Personality
+              <select
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground"
+              >
+                {PERSONAS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex flex-col gap-1">
+              Tone
+              <select
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground"
+              >
+                {TONES.map((t) => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Topic, angle, or paste rough notes for AI draft…"
+            className="w-full bg-background border border-border rounded-md px-3 py-2 text-xs mb-2 focus:outline-none focus:border-primary"
+          />
+          <div className="mb-3">
+            <Button size="sm" onClick={draftWithAI} disabled={drafting || saving} className="w-full sm:w-auto">
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              {drafting ? "Drafting…" : "Draft with AI"}
+            </Button>
+          </div>
+
           <textarea
             className="w-full bg-background border border-border rounded-md p-3 text-sm min-h-[220px] focus:outline-none focus:border-primary resize-y"
             placeholder="Write your post… (signature auto-appends)"
