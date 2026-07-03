@@ -202,15 +202,17 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={generateOutline} disabled={buildingOutline} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 h-8 text-xs">
-              {buildingOutline ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand2 className="w-3 h-3 mr-1" />}
-              {outline ? 'Regenerate outline' : 'Generate outline from library'}
+            <Button size="sm" onClick={generateOutline} disabled={buildingOutline || autoWriting} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 h-8 text-xs">
+              {(buildingOutline || autoWriting) ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand2 className="w-3 h-3 mr-1" />}
+              {outline ? 'Regenerate & rewrite book' : 'Write the book from my library'}
             </Button>
             {outline && (
               <>
-                <Button size="sm" variant="outline" onClick={generateAll} className="h-8 text-xs">
-                  <Wand2 className="w-3 h-3 mr-1" /> Draft all chapters
+                <Button size="sm" variant="outline" onClick={generateAll} disabled={autoWriting} className="h-8 text-xs">
+                  {autoWriting ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand2 className="w-3 h-3 mr-1" />}
+                  {autoWriting && progress ? `Writing ${progress.done}/${progress.total}` : 'Draft all chapters'}
                 </Button>
+
                 <Button size="sm" variant="outline" onClick={downloadManuscript} className="h-8 text-xs">
                   <Download className="w-3 h-3 mr-1" /> Download .md
                 </Button>
