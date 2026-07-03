@@ -25,30 +25,33 @@ function formatEntries(entries: Entry[], max = 40): string {
     .join("\n\n");
 }
 
-async function callLLM(system: string, user: string): Promise<string> {
+async function callLLM(system: string, user: string, opts: { json?: boolean } = {}): Promise<string> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY missing");
+  const body: Record<string, unknown> = {
+    model: "google/gemini-3-flash-preview",
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+  };
+  if (opts.json) body.response_format = { type: "json_object" };
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": key,
+      Authorization: `Bearer ${key}`,
     },
-    body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`AI ${res.status}: ${t.slice(0, 300)}`);
+    throw new Error(`AI ${res.status}: ${t.slice(0, 400)}`);
   }
   const data = await res.json();
   return String(data?.choices?.[0]?.message?.content || "").trim();
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
