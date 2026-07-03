@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, RotateCcw, Bot, ScanSearch, X } from "lucide-react";
+import { Send, RotateCcw, Bot, ScanSearch, X, Paperclip } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { AppLayout } from "../AppLayout";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ const AppAssistant = () => {
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const capture = useScreenCapture();
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
 
   const handleSend = () => {
@@ -56,6 +57,18 @@ const AppAssistant = () => {
       setAttachedImage(dataUrl);
       if (!input.trim()) setInput("Explain what's in this screenshot.");
     }
+  };
+
+  const handleFilePick = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      if (dataUrl) {
+        setAttachedImage(dataUrl);
+        if (!input.trim()) setInput("Explain what's in this image.");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -124,12 +137,32 @@ const AppAssistant = () => {
         )}
 
         <div className="p-4 border-t border-border flex gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFilePick(f);
+              e.target.value = "";
+            }}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fileRef.current?.click()}
+            disabled={sending}
+            title="Upload an image"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => capture.start()}
             disabled={capture.busy || sending}
-            title="Scan an area of the screen"
+            title="Snip an area of the screen"
           >
             <ScanSearch className="h-4 w-4" />
           </Button>
