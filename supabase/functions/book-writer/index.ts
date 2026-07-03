@@ -105,7 +105,7 @@ Return strict JSON only, no prose, no fences:
   ]
 }
 Produce 10-14 chapters. Order them as a narrative arc: diagnosis → mechanism → autopsy → fix → doctrine.`;
-      const raw = await callLLM(voiceLock, user);
+      const raw = await callLLM(voiceLock, user, { json: true });
       const json = raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
       let parsed: unknown = null;
       try { parsed = JSON.parse(json); }
