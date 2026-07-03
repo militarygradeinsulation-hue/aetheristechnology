@@ -225,3 +225,7 @@ verify_jwt = false
 
 [functions.reciprocation-tactics]
 verify_jwt = false
+
+[functions.book-writer]
+verify_jwt = false
+
