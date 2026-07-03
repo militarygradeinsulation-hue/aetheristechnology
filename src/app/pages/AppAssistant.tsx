@@ -41,6 +41,7 @@ const AppAssistant = () => {
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const capture = useScreenCapture();
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, sending]);
 
   const handleSend = () => {
