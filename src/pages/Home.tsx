@@ -76,12 +76,11 @@ const Home = () => {
                 One offer · One operator · $2,500 flat
               </div>
               <h2 className="font-forensic text-3xl md:text-5xl font-bold leading-tight mb-4">
-                The Leak Audit. <span className="text-crimson italic">That's the whole offer.</span>
+                The Leak Audit.
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-3xl mb-6 leading-relaxed">
-                No tiers. No upsell ladder. No à la carte tools. One operator-led forensic diagnostic that runs every
-                instrument we have against your business, names the leaks, prices the bleed, and hands you a fix plan.
-                The $2,500 applies 1:1 toward any engagement that follows.
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-6 leading-relaxed">
+                One operator. One diagnostic. Every leak named, priced, and prioritized.
+                The $2,500 applies toward whatever we build to close them.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
