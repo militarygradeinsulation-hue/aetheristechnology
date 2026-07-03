@@ -47,6 +47,10 @@ const AppComposer = () => {
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [loadingQueue, setLoadingQueue] = useState(false);
   const [scheduleAt, setScheduleAt] = useState<string>("");
+  const [tone, setTone] = useState(TONES[0].id);
+  const [persona, setPersona] = useState(PERSONAS[0].id);
+  const [topic, setTopic] = useState("");
+  const [drafting, setDrafting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const capture = useScreenCapture();
 
