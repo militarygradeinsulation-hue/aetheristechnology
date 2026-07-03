@@ -604,6 +604,12 @@ const PortalPage: React.FC = () => {
 
   const careersUnlocked = !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const isAdmin = isOwnerAdmin;
+  // Newly onboarded reps — locked out of advanced studios/docs until enabled.
+  const NEW_REP_CODES = new Set<string>([
+    '204871','315982','427193','538204','649315','750426','861537','972648','183759',
+  ]);
+  const LOCKED_FOR_NEW_REPS = new Set<Tab>(['video','poststudio','documents','incentives','playbook']);
+  const isNewRep = !isPartner && !isAdmin && !!profile && NEW_REP_CODES.has(profile.code);
   // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
@@ -617,14 +623,30 @@ const PortalPage: React.FC = () => {
     && (t.id !== 'interviews' || sharedWsUnlocked)
     && (t.id !== 'briefing' || sharedWsUnlocked)
     && (!HIDDEN_FOR_REPS.has(t.id as Tab) || isPartner || isAdmin)
-  );
+  ).map(t => ({ ...t, locked: isNewRep && LOCKED_FOR_NEW_REPS.has(t.id as Tab) }));
   const allTabsForSelector = availableTabs.map(t => ({ key: t.id, label: t.label, icon: t.iconCmp }));
   const effectiveVisible = visibleTabs.length > 0
     ? visibleTabs.filter(k => availableTabs.some(t => t.id === k))
     : availableTabs.map(t => t.id);
 
+
   const renderTabBody = (key: Tab): React.ReactNode => {
+    if (isNewRep && LOCKED_FOR_NEW_REPS.has(key)) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display">🔒 Locked</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              This tab isn't enabled for your portal yet. Ask your partner to unlock it when you're ready.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
     switch (key) {
+
       case 'overview':
         return (
           <div className="space-y-6">
@@ -977,12 +999,19 @@ const PortalPage: React.FC = () => {
 
                    // Braden / partner Sales Coach highlight, glowing amber so it's always front-and-center
                    const isPartnerCoach = t.id === 'coach' && isPartner;
+                   const locked = (t as any).locked as boolean | undefined;
                    return (
                      <Button
                        key={t.id}
                        id={`portal-tab-btn-${t.id}`}
                        type="button"
+                       disabled={locked}
+                       title={locked ? 'Locked — ask your partner to enable this tab for your portal.' : undefined}
                        onClick={() => {
+                         if (locked) {
+                           sonnerToast('This tab is locked for your portal', { description: 'Ask your partner to enable it when you are ready.' });
+                           return;
+                         }
                          if (t.href) { window.location.href = t.href; return; }
                          if (t.id === 'workbench') { window.dispatchEvent(new Event('workbench:toggle')); return; }
                          setTab(t.id);
@@ -992,7 +1021,9 @@ const PortalPage: React.FC = () => {
                        variant={active ? 'default' : 'outline'}
                        style={(isStevenInbox || isPartnerCoach) ? undefined : tabButtonStyle(tabScale)}
                        className={
-                         isStevenInbox
+                         locked
+                           ? 'gap-2 whitespace-nowrap font-medium opacity-40 grayscale cursor-not-allowed border-dashed'
+                           : isStevenInbox
                            ? `h-14 px-6 gap-2.5 whitespace-nowrap text-base font-bold uppercase tracking-wide rounded-xl shadow-[0_0_24px_rgba(56,189,248,0.45)] ring-2 ring-sky-400/60 transition-transform hover:scale-[1.03] ${
                                active
                                  ? 'bg-sky-500 text-white hover:bg-sky-500/90 border-sky-400'
@@ -1010,7 +1041,7 @@ const PortalPage: React.FC = () => {
                        {(isStevenInbox || isPartnerCoach)
                          ? <Icon className="w-5 h-5" />
                          : <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />}
-                       <span>{isStevenInbox ? "Steven's Inbox" : isPartnerCoach ? 'AI Sales Coach' : t.label}</span>
+                       <span>{isStevenInbox ? "Steven's Inbox" : isPartnerCoach ? 'AI Sales Coach' : t.label}{locked ? ' 🔒' : ''}</span>
                       {t.badge && t.badge > 0 ? (
                         <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-crimson text-white text-[10px] font-bold animate-pulse">
                           {t.badge > 99 ? '99+' : t.badge}
@@ -1018,6 +1049,7 @@ const PortalPage: React.FC = () => {
                       ) : null}
                     </Button>
                   );
+
                 })}
               </div>
             )}
