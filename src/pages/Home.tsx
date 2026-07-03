@@ -52,20 +52,17 @@ const Home = () => {
             </div>
           </section>
 
-          <section className="px-4 py-10 max-w-4xl mx-auto text-center">
+          <section className="px-4 py-10 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              Most growth-stage businesses are bleeding{" "}
-              <span className="text-crimson italic">time</span>,{" "}
-              <span className="text-crimson italic">leads</span>, and{" "}
-              <span className="text-crimson italic">revenue</span> without knowing where.
+              Your business is bleeding{" "}
+              <span className="text-crimson italic">revenue</span>.
+              <br className="hidden md:block" /> You just can't see it from the inside.
             </h2>
-            <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              I help established businesses uncover what is actually broken beneath the surface.
-              Not just your marketing. Your entire business. I run True Cost Forensics, show you
-              exactly what is broken and what it is costing you, then build the systems to fix it.
+            <p className="mt-5 text-base md:text-lg text-muted-foreground leading-relaxed">
+              I find the leaks, price the bleed, and build the systems that close them.
             </p>
-            <p className="mt-4 text-sm text-amber font-case uppercase tracking-widest">
-              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            <p className="mt-4 text-xs text-amber font-case uppercase tracking-widest">
+              Marine veteran · MS Marketing · Noblesville, Indiana
             </p>
           </section>
 
