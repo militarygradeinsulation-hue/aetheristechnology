@@ -137,12 +137,32 @@ const AppAssistant = () => {
         )}
 
         <div className="p-4 border-t border-border flex gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFilePick(f);
+              e.target.value = "";
+            }}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fileRef.current?.click()}
+            disabled={sending}
+            title="Upload an image"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => capture.start()}
             disabled={capture.busy || sending}
-            title="Scan an area of the screen"
+            title="Snip an area of the screen"
           >
             <ScanSearch className="h-4 w-4" />
           </Button>
