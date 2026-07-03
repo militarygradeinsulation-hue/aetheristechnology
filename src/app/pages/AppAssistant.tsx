@@ -59,6 +59,18 @@ const AppAssistant = () => {
     }
   };
 
+  const handleFilePick = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      if (dataUrl) {
+        setAttachedImage(dataUrl);
+        if (!input.trim()) setInput("Explain what's in this image.");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <AppLayout>
       {capture.capturing && <ScreenCaptureOverlay onComplete={handleOverlayDone} />}
