@@ -609,7 +609,9 @@ const PortalPage: React.FC = () => {
     '204871','315982','427193','538204','649315','750426','861537','972648','183759',
   ]);
   const LOCKED_FOR_NEW_REPS = new Set<Tab>(['video','poststudio','documents','incentives','playbook']);
-  const isNewRep = !isPartner && !isAdmin && !!profile && NEW_REP_CODES.has(profile.code);
+  // Lock applies purely by rep code so admin/preview iframes also see the block.
+  const isNewRep = !!profile && NEW_REP_CODES.has(profile.code);
+
   // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
