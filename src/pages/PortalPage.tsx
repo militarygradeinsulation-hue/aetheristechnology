@@ -631,7 +631,22 @@ const PortalPage: React.FC = () => {
 
 
   const renderTabBody = (key: Tab): React.ReactNode => {
+    if (isNewRep && LOCKED_FOR_NEW_REPS.has(key)) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display">🔒 Locked</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              This tab isn't enabled for your portal yet. Ask your partner to unlock it when you're ready.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
     switch (key) {
+
       case 'overview':
         return (
           <div className="space-y-6">
