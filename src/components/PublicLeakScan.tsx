@@ -539,40 +539,40 @@ export const PublicLeakScan = () => {
                 )}
 
                 {teaser.report && teaser.report.categories.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {/* Total bleed banner */}
-                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="rounded-md border border-crimson/40 bg-crimson/5 p-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <div>
-                        <div className="font-mono text-[9px] uppercase tracking-widest text-crimson mb-1">
+                        <div className="font-mono text-[8px] uppercase tracking-widest text-crimson mb-0.5">
                           Estimated Annual Leak · 7-Surface Forensic Total
                         </div>
-                        <div className="font-forensic text-2xl md:text-3xl font-bold text-crimson">
+                        <div className="font-forensic text-xl md:text-2xl font-bold text-crimson">
                           ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-xs font-mono text-crimson/70">/ yr</span>
                         </div>
                       </div>
-                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-crimson bg-background/60">
+                      <div className="rotate-[-2deg] border border-crimson px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-crimson bg-background/60">
                         Severity · {teaser.report.severity}
                       </div>
                     </div>
 
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber">
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-amber">
                       Forensic Read · 7 Operational Surfaces
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {teaser.report.categories.map((c) => {
                         const tone =
-                          c.pct < 50 ? 'border-crimson/50 bg-crimson/5'
-                          : c.pct < 70 ? 'border-amber/40 bg-amber/5'
-                          : 'border-emerald-500/30 bg-emerald-500/5';
+                          c.pct < 50 ? 'border-crimson/40 bg-crimson/5'
+                          : c.pct < 70 ? 'border-amber/30 bg-amber/5'
+                          : 'border-emerald-500/25 bg-emerald-500/5';
                         const barColor =
                           c.pct < 50 ? 'bg-crimson'
                           : c.pct < 70 ? 'bg-amber'
                           : 'bg-emerald-500';
                         return (
-                          <div key={c.key} className={`rounded-md border p-3 ${tone} space-y-2`}>
+                          <div key={c.key} className={`rounded-md border p-2.5 ${tone} space-y-1.5`}>
                             <div className="flex items-baseline justify-between gap-2">
                               <div className="font-display font-semibold text-sm text-foreground leading-tight">{c.label}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                              <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                                 {c.score}/{c.max}
                               </div>
                             </div>
@@ -583,7 +583,7 @@ export const PublicLeakScan = () => {
                               <p className="text-xs text-foreground/80 leading-relaxed">{c.diagnosis}</p>
                             )}
                             {c.topLeaks.length > 0 && (
-                              <ul className="space-y-1 pt-1">
+                              <ul className="space-y-0.5 pt-0.5">
                                 {c.topLeaks.slice(0, 3).map((leak, i) => (
                                   <li key={i} className="flex items-start gap-1.5 text-[11px] text-foreground/75">
                                     <span className="text-crimson mt-1 shrink-0">›</span>
