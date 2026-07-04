@@ -171,15 +171,15 @@ const LeakLanderPage: React.FC = () => {
 
           {/* One-button leak finder infographic — the focal point */}
           <section
-            className="mt-6 max-w-5xl mx-auto animate-fade-in"
+            className="mt-5 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
-            <div className="text-center mb-3">
+            <div className="text-center mb-2">
               <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
                 Built by hand, not by hype
               </div>
-              <h2 className="font-forensic text-xl md:text-2xl font-bold text-foreground inline-flex items-center justify-center gap-2 flex-wrap">
-                <Users className="w-4 h-4 text-amber" />
+              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center justify-center gap-2 flex-wrap">
+                <Users className="w-3.5 h-3.5 text-amber" />
                 Made by Real People, for real Humans.
               </h2>
             </div>
