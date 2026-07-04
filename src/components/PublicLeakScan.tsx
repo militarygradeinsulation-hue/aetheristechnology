@@ -482,29 +482,29 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3"
               >
                 <div>
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1">Leak Snapshot</div>
-                  <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground">
+                  <div className="font-mono text-[8px] uppercase tracking-widest text-amber mb-0.5">Leak Snapshot</div>
+                  <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground">
                     {teaser.companyName || url}
                   </h3>
                 </div>
 
                 <LeakChart gaps={teaser.chartGaps || []} />
 
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2">
-                    <div className="font-forensic text-xl font-bold text-destructive">{teaser.criticalCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Critical</div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-md border border-destructive/25 bg-destructive/5 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-destructive">{teaser.criticalCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Critical</div>
                   </div>
-                  <div className="rounded-md border border-amber/30 bg-amber/5 p-2">
-                    <div className="font-forensic text-xl font-bold text-amber">{teaser.warningCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Warnings</div>
+                  <div className="rounded-md border border-amber/25 bg-amber/5 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-amber">{teaser.warningCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Warnings</div>
                   </div>
-                  <div className="rounded-md border border-border bg-muted/20 p-2">
-                    <div className="font-forensic text-xl font-bold text-foreground">{teaser.gapCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Total Findings</div>
+                  <div className="rounded-md border border-border/70 bg-muted/20 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-foreground">{teaser.gapCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Total Findings</div>
                   </div>
                 </div>
 
