@@ -145,64 +145,50 @@ export const HomeFreeTools: React.FC = () => {
   return (
     <section
       id="free-tools"
-      className="mt-8 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
+      className="mt-4 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="relative rounded-sm border border-amber/20 bg-card/95 backdrop-blur-sm overflow-hidden">
+      <div className="relative rounded-sm border border-amber/10 bg-card/80 backdrop-blur-sm overflow-hidden">
         {/* Technical accent line */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber/30 to-transparent" />
 
-        <div className="p-4 sm:p-5">
+        <div className="p-3 sm:p-4">
           {/* Header lockup */}
-          <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="h-px w-6 bg-amber/60" />
-                <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/80">
-                  Free Tools
-                </span>
-              </div>
-              <h2 className="font-forensic text-lg sm:text-xl md:text-2xl font-light text-foreground leading-tight">
-                Try the instruments.
-                <span className="italic text-amber/80 ml-1">On the house.</span>
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed sm:text-right">
-              A restricted slice of the forensic stack. Detect leaks before they cost you.
+          <header className="flex items-center justify-between gap-3">
+            <h2 className="font-forensic text-sm sm:text-base md:text-lg font-light text-foreground leading-tight">
+              Try the instruments.
+              <span className="italic text-amber/80 ml-1">On the house.</span>
+            </h2>
+            <p className="hidden sm:block text-xs text-muted-foreground max-w-xs leading-snug text-right">
+              Free forensic tools. Unlock with email + phone.
             </p>
           </header>
 
           {!unlock ? (
             <form
               onSubmit={handleUnlock}
-              className="mt-4 sm:mt-5 rounded-sm border border-amber/20 bg-background/60 p-3 sm:p-4"
+              className="mt-3 rounded-sm border border-amber/10 bg-background/50 p-2.5 sm:p-3"
             >
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
                 <div className="space-y-1">
-                  <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
-                    Email
-                  </label>
                   <input
                     type="text"
                     inputMode="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    placeholder="Email"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                     autoComplete="email"
                     maxLength={255}
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
-                    Phone
-                  </label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(555) 555-5555"
-                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    placeholder="Phone"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                     autoComplete="tel"
                     maxLength={40}
                   />
@@ -210,20 +196,20 @@ export const HomeFreeTools: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!valid || submitting}
-                  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background font-mono uppercase tracking-[0.12em] text-[11px] px-5 py-2 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="relative overflow-hidden inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[10px] px-4 py-1.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  <span className="relative z-10">{submitting ? "Unlocking…" : "Unlock"}</span>
+                  <span className="relative z-10">{submitting ? "…" : "Unlock"}</span>
                   <div className="absolute inset-0 bg-background/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                 </button>
               </div>
-              <p className="mt-2 text-[11px] text-muted-foreground/70">
-                We use this so you can return without losing work — and so we can send your Leak Audit summary. No spam.
+              <p className="mt-1.5 text-[10px] text-muted-foreground/60">
+                Unlock so you can return without losing work. No spam.
               </p>
             </form>
           ) : (
-            <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3 rounded-sm border border-amber/20 bg-amber/5 px-3 py-2">
-              <Unlock className="w-3.5 h-3.5 text-amber" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-amber">
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-sm border border-amber/10 bg-amber/5 px-3 py-1.5">
+              <Unlock className="w-3 h-3 text-amber" />
+              <span className="font-mono text-[9px] uppercase tracking-widest text-amber">
                 Unlocked for {unlock.email}
               </span>
               <button
@@ -234,35 +220,35 @@ export const HomeFreeTools: React.FC = () => {
                   setEmail("");
                   setPhone("");
                 }}
-                className="ml-auto text-[11px] text-muted-foreground hover:text-amber underline underline-offset-2"
+                className="ml-auto text-[10px] text-muted-foreground hover:text-amber underline underline-offset-2"
               >
-                Use a different email
+                Switch
               </button>
             </div>
           )}
 
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
           {TOOLS.map((t) => {
             const Icon = t.icon;
             const locked = !unlock;
             const Card = (
               <div
-                className={`relative h-full rounded-sm border p-3 transition-colors ${
+                className={`relative h-full rounded-sm border p-2.5 transition-colors ${
                   locked
                     ? "border-border/60 bg-background/40 opacity-80"
-                    : "border-amber/30 bg-background/60 hover:border-amber/60 hover:bg-amber/[0.04]"
+                    : "border-amber/20 bg-background/50 hover:border-amber/50 hover:bg-amber/[0.04]"
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Icon className="w-3.5 h-3.5 text-amber" />
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-amber">{t.tag}</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className="w-3 h-3 text-amber" />
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-amber">{t.tag}</span>
                   {locked && <Lock className="w-3 h-3 text-muted-foreground ml-auto" />}
                 </div>
-                <div className="font-forensic text-sm font-bold text-foreground leading-snug">{t.title}</div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground leading-snug">{t.blurb}</p>
+                <div className="font-forensic text-xs font-bold text-foreground leading-snug">{t.title}</div>
+                <p className="mt-0.5 text-[10px] text-muted-foreground leading-snug">{t.blurb}</p>
                 {!locked && (
-                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber">
+                  <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber">
                     Open <ArrowRight className="w-3 h-3" />
                   </div>
                 )}
@@ -274,7 +260,7 @@ export const HomeFreeTools: React.FC = () => {
                 type="button"
                 onClick={() => {
                   document.getElementById("free-tools")?.scrollIntoView({ behavior: "smooth" });
-                  toast.message("Drop email + phone above to unlock all 10 tools — free.");
+                  toast.message("Unlock above to use the tools — free.");
                 }}
                 className="text-left"
               >
@@ -288,11 +274,11 @@ export const HomeFreeTools: React.FC = () => {
           })}
         </div>
 
-        <div className="mt-4 rounded-sm border-l-2 border-crimson/70 bg-crimson/5 px-3 py-2">
-          <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
-            <span className="font-forensic font-bold text-foreground">The tools show pieces. </span>
+        <div className="mt-3 rounded-sm border-l-2 border-crimson/50 bg-crimson/5 px-3 py-2">
+          <p className="text-xs text-foreground/90 leading-relaxed">
+            <span className="font-forensic font-bold text-foreground">Pieces vs. puzzle. </span>
             <span className="text-muted-foreground">
-              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects them — cross-references every signal and tells you what's actually leaking. That's the puzzle solved.
+              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects every signal and tells you what's actually leaking.
             </span>
           </p>
         </div>
