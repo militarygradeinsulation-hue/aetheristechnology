@@ -195,27 +195,27 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Meet the operator — short, merged from /operator */}
           <section
-            className="mt-10 max-w-4xl mx-auto animate-fade-in"
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
-            <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-6 sm:p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-              <div className="font-case text-[10px] uppercase tracking-[0.3em] text-amber mb-3">
+            <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-4 sm:p-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+              <div className="font-case text-[9px] uppercase tracking-[0.3em] text-amber mb-2">
                 The operator behind the button
               </div>
-              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight mb-4">
+              <h2 className="font-forensic text-xl md:text-2xl font-bold text-foreground leading-tight mb-3">
                 An operator — <span className="text-amber italic">not an agency</span>, not a chatbot.
               </h2>
-              <p className="text-foreground/90 text-[15px] leading-relaxed italic border-l-2 border-amber/60 pl-4">
+              <p className="text-foreground/90 text-sm leading-relaxed italic border-l-2 border-amber/60 pl-4">
                 "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks. You don't run anything. You get the leak sealed."
               </p>
-              <p className="mt-4 text-xs font-mono uppercase tracking-widest text-amber/80">
+              <p className="mt-3 text-[11px] font-mono uppercase tracking-widest text-amber/80">
                 Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
               </p>
             </div>
           </section>
 
           {/* Public website leak scan — email + URL only */}
-          <div className="mt-10">
+          <div className="mt-6">
             <PublicLeakScan />
           </div>
 
@@ -224,7 +224,7 @@ const LeakLanderPage: React.FC = () => {
 
 
           <section
-            className="mt-10 max-w-4xl mx-auto animate-fade-in"
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
             <a
@@ -251,19 +251,19 @@ const LeakLanderPage: React.FC = () => {
                   window.open("/downloads/How-Aetheris-Can-Help-You.pdf", "_blank", "noopener");
                 }
               }}
-              className="relative overflow-hidden group flex items-center gap-3 px-5 py-4 rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm hover:border-amber transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
+              className="relative overflow-hidden group flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm hover:border-amber transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
             >
-              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
-                <Download className="w-6 h-6 text-amber" />
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
+                <Download className="w-5 h-5 text-amber" />
               </div>
               <div className="relative flex-1 text-left">
-                <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
-                <div className="font-forensic text-lg sm:text-xl font-bold text-foreground leading-tight">
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
+                <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
                   How Aetheris Can Help You
                 </div>
-                <div className="text-sm text-muted-foreground">No email required. Tap to download.</div>
+                <div className="text-xs text-muted-foreground">No email required. Tap to download.</div>
               </div>
-              <ArrowRight className="relative w-5 h-5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="relative w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
             </a>
           </section>
 
@@ -272,43 +272,43 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Forensic Revenue Recovery deck. standalone toggle */}
           <section
-            className="mt-12 max-w-6xl mx-auto animate-fade-in"
+            className="mt-8 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
             <button
               type="button"
               onClick={() => setDeckOpen((v) => !v)}
-              className="group w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-5 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
+              className="group w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-4 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
               aria-expanded={deckOpen}
             >
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
+              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-amber">
                 Case File · Deck
               </div>
-              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center gap-2">
+              <h2 className="font-forensic text-base md:text-lg font-bold text-foreground inline-flex items-center gap-2">
                 Forensic Revenue Recovery
                 <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
               </h2>
             </button>
 
             {deckOpen && (
-              <div className="mt-6 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in">
-                <div className="px-5 py-4 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
+              <div className="mt-4 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in">
+                <div className="px-4 py-3 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
                   <a
                     href="/downloads/Forensic-Revenue-Recovery.pdf"
                     download
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
                   >
                     <Download className="w-4 h-4" /> Download PDF
                   </a>
                   <a
                     href="/downloads/Forensic-Revenue-Recovery.pptx"
                     download
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
                   >
                     <Download className="w-4 h-4" /> Download PPTX
                   </a>
                 </div>
-                <div className="p-4">
+                <div className="p-3">
                   <ForensicDeckCarousel />
                 </div>
               </div>
@@ -319,28 +319,28 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Contact info. compact glass row */}
           <section
-            className="relative mt-12 animate-fade-in"
+            className="relative mt-8 animate-fade-in"
             style={{ animationDelay: "340ms", animationFillMode: "both" }}
           >
-            <div className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm px-5 py-5 sm:px-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base">
+            <div className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm px-4 py-4 sm:px-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
                 <a href="tel:+13173762110" className="group inline-flex items-center gap-2 hover:text-amber transition-colors">
-                  <Phone className="w-5 h-5 text-amber" />
+                  <Phone className="w-4 h-4 text-amber" />
                   <span className="font-semibold">(317) 376-2110</span>
                 </a>
                 <span className="h-4 w-px bg-white/15 hidden sm:block" />
                 <a href="mailto:Aetheris.technology@outlook.com" className="group inline-flex items-center gap-2 hover:text-amber transition-colors">
-                  <Mail className="w-5 h-5 text-amber" />
+                  <Mail className="w-4 h-4 text-amber" />
                   <span className="font-semibold break-all">Aetheris.technology@outlook.com</span>
                 </a>
                 <span className="h-4 w-px bg-white/15 hidden sm:block" />
                 <span className="inline-flex items-center gap-2 text-foreground">
-                  <MapPin className="w-5 h-5 text-amber" />
+                  <MapPin className="w-4 h-4 text-amber" />
                   <span className="font-semibold">Noblesville, Indiana</span>
                 </span>
               </div>
             </div>
-            <p className="mt-4 text-center text-xs font-mono tracking-[0.25em] text-muted-foreground uppercase">
+            <p className="mt-3 text-center text-[11px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
               Aetheris · Business Forensics · aetheris.technology
             </p>
           </section>
