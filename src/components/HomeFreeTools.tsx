@@ -207,9 +207,9 @@ export const HomeFreeTools: React.FC = () => {
               </p>
             </form>
           ) : (
-            <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3 rounded-sm border border-amber/20 bg-amber/5 px-3 py-2">
-              <Unlock className="w-3.5 h-3.5 text-amber" />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-amber">
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-sm border border-amber/10 bg-amber/5 px-3 py-1.5">
+              <Unlock className="w-3 h-3 text-amber" />
+              <span className="font-mono text-[9px] uppercase tracking-widest text-amber">
                 Unlocked for {unlock.email}
               </span>
               <button
@@ -220,35 +220,35 @@ export const HomeFreeTools: React.FC = () => {
                   setEmail("");
                   setPhone("");
                 }}
-                className="ml-auto text-[11px] text-muted-foreground hover:text-amber underline underline-offset-2"
+                className="ml-auto text-[10px] text-muted-foreground hover:text-amber underline underline-offset-2"
               >
-                Use a different email
+                Switch
               </button>
             </div>
           )}
 
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
           {TOOLS.map((t) => {
             const Icon = t.icon;
             const locked = !unlock;
             const Card = (
               <div
-                className={`relative h-full rounded-sm border p-3 transition-colors ${
+                className={`relative h-full rounded-sm border p-2.5 transition-colors ${
                   locked
                     ? "border-border/60 bg-background/40 opacity-80"
-                    : "border-amber/30 bg-background/60 hover:border-amber/60 hover:bg-amber/[0.04]"
+                    : "border-amber/20 bg-background/50 hover:border-amber/50 hover:bg-amber/[0.04]"
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Icon className="w-3.5 h-3.5 text-amber" />
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-amber">{t.tag}</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className="w-3 h-3 text-amber" />
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-amber">{t.tag}</span>
                   {locked && <Lock className="w-3 h-3 text-muted-foreground ml-auto" />}
                 </div>
-                <div className="font-forensic text-sm font-bold text-foreground leading-snug">{t.title}</div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground leading-snug">{t.blurb}</p>
+                <div className="font-forensic text-xs font-bold text-foreground leading-snug">{t.title}</div>
+                <p className="mt-0.5 text-[10px] text-muted-foreground leading-snug">{t.blurb}</p>
                 {!locked && (
-                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber">
+                  <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber">
                     Open <ArrowRight className="w-3 h-3" />
                   </div>
                 )}
@@ -260,7 +260,7 @@ export const HomeFreeTools: React.FC = () => {
                 type="button"
                 onClick={() => {
                   document.getElementById("free-tools")?.scrollIntoView({ behavior: "smooth" });
-                  toast.message("Drop email + phone above to unlock all 10 tools — free.");
+                  toast.message("Unlock above to use the tools — free.");
                 }}
                 className="text-left"
               >
@@ -274,11 +274,11 @@ export const HomeFreeTools: React.FC = () => {
           })}
         </div>
 
-        <div className="mt-4 rounded-sm border-l-2 border-crimson/70 bg-crimson/5 px-3 py-2">
-          <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
-            <span className="font-forensic font-bold text-foreground">The tools show pieces. </span>
+        <div className="mt-3 rounded-sm border-l-2 border-crimson/50 bg-crimson/5 px-3 py-2">
+          <p className="text-xs text-foreground/90 leading-relaxed">
+            <span className="font-forensic font-bold text-foreground">Pieces vs. puzzle. </span>
             <span className="text-muted-foreground">
-              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects them — cross-references every signal and tells you what's actually leaking. That's the puzzle solved.
+              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects every signal and tells you what's actually leaking.
             </span>
           </p>
         </div>
