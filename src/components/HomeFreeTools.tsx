@@ -159,9 +159,9 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
           {!unlock ? (
             <form
               onSubmit={handleUnlock}
-              className="mt-1.5 rounded-sm border border-amber/10 bg-background/50 p-1.5"
+              className="mt-1 rounded-sm border border-amber/10 bg-background/50 p-1"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-1.5 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-1 items-end">
                 <input
                   type="text"
                   inputMode="email"
@@ -184,17 +184,17 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                 <button
                   type="submit"
                   disabled={!valid || submitting}
-                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[9px] px-2.5 py-1 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[9px] px-2 py-1 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "…" : "Unlock"}
                 </button>
               </div>
-              <p className="mt-1 text-[8px] text-muted-foreground/60">
+              <p className="mt-0.5 text-[8px] text-muted-foreground/60">
                 Unlock so you can return without losing work. No spam.
               </p>
             </form>
           ) : (
-            <div className="mt-1.5 flex items-center gap-1.5 rounded-sm border border-amber/10 bg-amber/5 px-2 py-1">
+            <div className="mt-1 flex items-center gap-1.5 rounded-sm border border-amber/10 bg-amber/5 px-2 py-0.5">
               <Unlock className="w-2.5 h-2.5 text-amber" />
               <span className="font-mono text-[8px] uppercase tracking-widest text-amber truncate">
                 Unlocked for {unlock.email}
@@ -214,7 +214,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             </div>
           )}
 
-          <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+          <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const locked = !unlock;
@@ -258,7 +258,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             })}
           </div>
 
-          <div className="mt-1.5 text-[9px] text-muted-foreground/80 leading-snug">
+          <div className="mt-1 text-[9px] text-muted-foreground/80 leading-snug">
             <span className="text-foreground/90 font-forensic">Pieces vs. puzzle.</span>{" "}
             The{" "}
             <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">
@@ -271,7 +271,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
 
   if (embedded) {
     return (
-      <div id="free-tools" className="mt-4 pt-3 border-t border-amber/20 scroll-mt-24">
+      <div id="free-tools" className="mt-3 pt-2 border-t border-amber/20 scroll-mt-24">
         {body}
       </div>
     );

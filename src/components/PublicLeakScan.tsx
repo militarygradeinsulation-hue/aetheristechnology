@@ -191,14 +191,10 @@ export const PublicLeakScan = () => {
   const thoughtWords = ['scan', 'leaks', 'gaps', 'CTAs', 'forms', 'meta', 'bleed', 'angle', 'verdict'];
 
   return (
-    <section id="public-leak-scan" className="relative px-4 py-10 scroll-mt-24">
-      {/* Ambient spotlight to pull the eye */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-10">
-        <div className="w-[560px] h-[560px] max-w-full rounded-full bg-amber/10 blur-3xl" />
-      </div>
+    <section id="public-leak-scan" className="relative px-4 py-8 scroll-mt-24">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber/40 bg-amber/10 px-3 py-1 mb-2">
+        <div className="text-center mb-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-3 py-1 mb-1.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson" />
@@ -207,16 +203,16 @@ export const PublicLeakScan = () => {
               Live Forensic Scan · Free · No Code Required
             </span>
           </div>
-          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
+          <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-[1.05]">
             Scan your business.<br /><span className="text-crimson italic">See every leak.</span>
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-muted-foreground mt-1.5 max-w-2xl mx-auto leading-relaxed">
             The AI detective audits <span className="text-foreground font-semibold">seven operational surfaces</span> — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
 
         {savedForEmail.length > 0 && !loading && !teaser && (
-          <div className="mb-4 rounded-md border border-amber/30 bg-amber/5 p-3">
+          <div className="mb-3 rounded-md border border-amber/25 bg-amber/5 p-2.5">
             <button
               type="button"
               onClick={() => setShowHistory((v) => !v)}
@@ -272,12 +268,12 @@ export const PublicLeakScan = () => {
         )}
 
 
-        <div className="relative rounded-2xl border-2 border-amber/50 p-4 md:p-6 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--amber)/0.35)]">
+        <div className="relative rounded-xl border border-amber/30 p-3 md:p-4 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-sm shadow-[0_0_40px_-12px_hsl(var(--amber)/0.25)]">
           {/* Corner brackets — case-file styling */}
-          <div className="pointer-events-none absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-amber rounded-tl-2xl" />
-          <div className="pointer-events-none absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-amber rounded-tr-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-amber rounded-bl-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -right-px w-4 h-4 border-b-2 border-r-2 border-amber rounded-br-2xl" />
+          <div className="pointer-events-none absolute -top-px -left-px w-3.5 h-3.5 border-t border-l border-amber rounded-tl-xl" />
+          <div className="pointer-events-none absolute -top-px -right-px w-3.5 h-3.5 border-t border-r border-amber rounded-tr-xl" />
+          <div className="pointer-events-none absolute -bottom-px -left-px w-3.5 h-3.5 border-b border-l border-amber rounded-bl-xl" />
+          <div className="pointer-events-none absolute -bottom-px -right-px w-3.5 h-3.5 border-b border-r border-amber rounded-br-xl" />
 
           <AnimatePresence mode="wait">
             {loading ? (
@@ -286,7 +282,7 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-3 space-y-3 overflow-hidden"
+                className="rounded-md border border-amber/25 bg-gradient-to-br from-amber/10 to-transparent p-2.5 space-y-2.5 overflow-hidden"
               >
                 {/* Animated brain visualization */}
                 <div className="relative h-24 rounded-md bg-background/40 border border-amber/20 overflow-hidden">
@@ -418,15 +414,15 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber block mb-1.5">
+                    <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber block mb-1">
                       Your Email
                     </label>
                     <div className="relative group">
-                      <Bookmark className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
+                      <Bookmark className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
                       <Input
                         type="email"
                         value={email}
@@ -434,21 +430,21 @@ export const PublicLeakScan = () => {
                         placeholder="you@company.com"
                         maxLength={255}
                         required
-                        className="pl-11 h-12 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
+                        className="pl-10 h-11 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber block mb-1.5">
+                    <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber block mb-1">
                       Company Website
                     </label>
                     <div className="relative group">
-                      <Globe className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
+                      <Globe className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
                       <Input
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://yourcompany.com"
-                        className="pl-11 h-12 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
+                        className="pl-10 h-11 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
                         maxLength={500}
                         required
                       />
@@ -459,22 +455,22 @@ export const PublicLeakScan = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 md:h-14 text-sm md:text-base bg-gradient-to-r from-amber via-amber to-orange-500 text-background hover:from-amber/90 hover:to-orange-500/90 font-bold tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--amber)/0.6)] hover:shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.8)] transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full h-11 md:h-12 text-sm md:text-base bg-gradient-to-r from-amber via-amber to-orange-500 text-background hover:from-amber/90 hover:to-orange-500/90 font-bold tracking-wide shadow-[0_8px_24px_-8px_hsl(var(--amber)/0.5)] hover:shadow-[0_12px_32px_-10px_hsl(var(--amber)/0.7)] transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Search className="w-4 h-4 mr-2" /> Show Me My Leaks
                   <span className="ml-2 opacity-70">→</span>
                 </Button>
 
-                <div className="grid grid-cols-3 gap-3 pt-1">
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">No spam</span>
                   </div>
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <FileSearch className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">PDF report</span>
                   </div>
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <History className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Auto-saved</span>
                   </div>
@@ -486,53 +482,53 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3"
               >
                 <div>
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1">Leak Snapshot</div>
-                  <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground">
+                  <div className="font-mono text-[8px] uppercase tracking-widest text-amber mb-0.5">Leak Snapshot</div>
+                  <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground">
                     {teaser.companyName || url}
                   </h3>
                 </div>
 
                 <LeakChart gaps={teaser.chartGaps || []} />
 
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2">
-                    <div className="font-forensic text-xl font-bold text-destructive">{teaser.criticalCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Critical</div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-md border border-destructive/25 bg-destructive/5 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-destructive">{teaser.criticalCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Critical</div>
                   </div>
-                  <div className="rounded-md border border-amber/30 bg-amber/5 p-2">
-                    <div className="font-forensic text-xl font-bold text-amber">{teaser.warningCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Warnings</div>
+                  <div className="rounded-md border border-amber/25 bg-amber/5 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-amber">{teaser.warningCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Warnings</div>
                   </div>
-                  <div className="rounded-md border border-border bg-muted/20 p-2">
-                    <div className="font-forensic text-xl font-bold text-foreground">{teaser.gapCount}</div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Total Findings</div>
+                  <div className="rounded-md border border-border/70 bg-muted/20 p-1.5">
+                    <div className="font-forensic text-lg font-bold text-foreground">{teaser.gapCount}</div>
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground mt-0.5">Total Findings</div>
                   </div>
                 </div>
 
                 {teaser.executiveSummary && (
-                  <p className="text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-4">
+                  <p className="text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-3">
                     {teaser.executiveSummary}
                   </p>
                 )}
 
                 {teaser.topIssues.length > 0 && (
                   <div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1.5">Top Leaks</div>
-                    <ul className="space-y-1.5">
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-amber mb-1">Top Leaks</div>
+                    <ul className="space-y-1">
                       {teaser.topIssues.map((g, i) => {
                         const cfg = SEV_STYLE[g.severity] || SEV_STYLE.info;
                         const Icon = cfg.icon;
                         return (
-                          <li key={i} className={`rounded-md border p-2.5 ${cfg.cls}`}>
+                          <li key={i} className={`rounded-md border p-2 ${cfg.cls}`}>
                             <div className="flex items-start gap-2">
-                              <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+                              <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <div className="min-w-0">
                                 <div className="font-semibold text-sm text-foreground">{g.title}</div>
                                 <div className="text-xs text-muted-foreground mt-0.5">{g.category} · {cfg.label}</div>
-                                {g.hint && <p className="text-xs text-foreground/80 mt-1">{g.hint}</p>}
+                                {g.hint && <p className="text-xs text-foreground/80 mt-0.5">{g.hint}</p>}
                               </div>
                             </div>
                           </li>
@@ -543,40 +539,40 @@ export const PublicLeakScan = () => {
                 )}
 
                 {teaser.report && teaser.report.categories.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {/* Total bleed banner */}
-                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="rounded-md border border-crimson/40 bg-crimson/5 p-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <div>
-                        <div className="font-mono text-[9px] uppercase tracking-widest text-crimson mb-1">
+                        <div className="font-mono text-[8px] uppercase tracking-widest text-crimson mb-0.5">
                           Estimated Annual Leak · 7-Surface Forensic Total
                         </div>
-                        <div className="font-forensic text-2xl md:text-3xl font-bold text-crimson">
+                        <div className="font-forensic text-xl md:text-2xl font-bold text-crimson">
                           ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-xs font-mono text-crimson/70">/ yr</span>
                         </div>
                       </div>
-                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-crimson bg-background/60">
+                      <div className="rotate-[-2deg] border border-crimson px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-crimson bg-background/60">
                         Severity · {teaser.report.severity}
                       </div>
                     </div>
 
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber">
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-amber">
                       Forensic Read · 7 Operational Surfaces
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {teaser.report.categories.map((c) => {
                         const tone =
-                          c.pct < 50 ? 'border-crimson/50 bg-crimson/5'
-                          : c.pct < 70 ? 'border-amber/40 bg-amber/5'
-                          : 'border-emerald-500/30 bg-emerald-500/5';
+                          c.pct < 50 ? 'border-crimson/40 bg-crimson/5'
+                          : c.pct < 70 ? 'border-amber/30 bg-amber/5'
+                          : 'border-emerald-500/25 bg-emerald-500/5';
                         const barColor =
                           c.pct < 50 ? 'bg-crimson'
                           : c.pct < 70 ? 'bg-amber'
                           : 'bg-emerald-500';
                         return (
-                          <div key={c.key} className={`rounded-md border p-3 ${tone} space-y-2`}>
+                          <div key={c.key} className={`rounded-md border p-2.5 ${tone} space-y-1.5`}>
                             <div className="flex items-baseline justify-between gap-2">
                               <div className="font-display font-semibold text-sm text-foreground leading-tight">{c.label}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                              <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                                 {c.score}/{c.max}
                               </div>
                             </div>
@@ -587,7 +583,7 @@ export const PublicLeakScan = () => {
                               <p className="text-xs text-foreground/80 leading-relaxed">{c.diagnosis}</p>
                             )}
                             {c.topLeaks.length > 0 && (
-                              <ul className="space-y-1 pt-1">
+                              <ul className="space-y-0.5 pt-0.5">
                                 {c.topLeaks.slice(0, 3).map((leak, i) => (
                                   <li key={i} className="flex items-start gap-1.5 text-[11px] text-foreground/75">
                                     <span className="text-crimson mt-1 shrink-0">›</span>
