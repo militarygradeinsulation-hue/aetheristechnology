@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play, Download, Users } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play, Download, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
@@ -14,9 +14,11 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 import { HomeFreeTools } from "@/components/HomeFreeTools";
 import { Navbar } from "@/components/Navbar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const LeakLanderPage: React.FC = () => {
   const [deckOpen, setDeckOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
   const tapCountRef = useRef(0);
