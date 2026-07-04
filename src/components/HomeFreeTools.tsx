@@ -60,7 +60,7 @@ const loadUnlock = (): Unlock | null => {
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const isPhone = (v: string) => v.replace(/\D/g, "").length >= 10;
 
-export const HomeFreeTools: React.FC = () => {
+export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const [unlock, setUnlock] = useState<Unlock | null>(null);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
