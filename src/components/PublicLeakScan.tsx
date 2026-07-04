@@ -485,11 +485,11 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-6"
+                className="space-y-4"
               >
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Leak Snapshot</div>
-                  <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground">
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1">Leak Snapshot</div>
+                  <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground">
                     {teaser.companyName || url}
                   </h3>
                 </div>
@@ -497,35 +497,35 @@ export const PublicLeakScan = () => {
                 <LeakChart gaps={teaser.chartGaps || []} />
 
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3">
-                    <div className="font-forensic text-2xl font-bold text-destructive">{teaser.criticalCount}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Critical</div>
+                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2">
+                    <div className="font-forensic text-xl font-bold text-destructive">{teaser.criticalCount}</div>
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Critical</div>
                   </div>
-                  <div className="rounded-md border border-amber/30 bg-amber/5 p-3">
-                    <div className="font-forensic text-2xl font-bold text-amber">{teaser.warningCount}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Warnings</div>
+                  <div className="rounded-md border border-amber/30 bg-amber/5 p-2">
+                    <div className="font-forensic text-xl font-bold text-amber">{teaser.warningCount}</div>
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Warnings</div>
                   </div>
-                  <div className="rounded-md border border-border bg-muted/20 p-3">
-                    <div className="font-forensic text-2xl font-bold text-foreground">{teaser.gapCount}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Total Findings</div>
+                  <div className="rounded-md border border-border bg-muted/20 p-2">
+                    <div className="font-forensic text-xl font-bold text-foreground">{teaser.gapCount}</div>
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mt-1">Total Findings</div>
                   </div>
                 </div>
 
                 {teaser.executiveSummary && (
-                  <p className="text-sm md:text-base text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-4">
+                  <p className="text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-4">
                     {teaser.executiveSummary}
                   </p>
                 )}
 
                 {teaser.topIssues.length > 0 && (
                   <div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">Top Leaks</div>
-                    <ul className="space-y-2">
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1.5">Top Leaks</div>
+                    <ul className="space-y-1.5">
                       {teaser.topIssues.map((g, i) => {
                         const cfg = SEV_STYLE[g.severity] || SEV_STYLE.info;
                         const Icon = cfg.icon;
                         return (
-                          <li key={i} className={`rounded-md border p-3 ${cfg.cls}`}>
+                          <li key={i} className={`rounded-md border p-2.5 ${cfg.cls}`}>
                             <div className="flex items-start gap-2">
                               <Icon className="w-4 h-4 mt-0.5 shrink-0" />
                               <div className="min-w-0">
@@ -542,23 +542,23 @@ export const PublicLeakScan = () => {
                 )}
 
                 {teaser.report && teaser.report.categories.length > 0 && (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {/* Total bleed banner */}
-                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="rounded-md border-2 border-crimson/50 bg-crimson/5 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
-                        <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">
+                        <div className="font-mono text-[9px] uppercase tracking-widest text-crimson mb-1">
                           Estimated Annual Leak · 7-Surface Forensic Total
                         </div>
-                        <div className="font-forensic text-3xl md:text-4xl font-bold text-crimson">
-                          ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-sm font-mono text-crimson/70">/ yr</span>
+                        <div className="font-forensic text-2xl md:text-3xl font-bold text-crimson">
+                          ${teaser.report.estimatedAnnualLeak.toLocaleString('en-US')} <span className="text-xs font-mono text-crimson/70">/ yr</span>
                         </div>
                       </div>
-                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-xs uppercase tracking-widest text-crimson bg-background/60">
+                      <div className="rotate-[-2deg] border-2 border-crimson px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-crimson bg-background/60">
                         Severity · {teaser.report.severity}
                       </div>
                     </div>
 
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-amber">
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber">
                       Forensic Read · 7 Operational Surfaces
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -572,10 +572,10 @@ export const PublicLeakScan = () => {
                           : c.pct < 70 ? 'bg-amber'
                           : 'bg-emerald-500';
                         return (
-                          <div key={c.key} className={`rounded-md border p-4 ${tone} space-y-2`}>
+                          <div key={c.key} className={`rounded-md border p-3 ${tone} space-y-2`}>
                             <div className="flex items-baseline justify-between gap-2">
                               <div className="font-display font-semibold text-sm text-foreground leading-tight">{c.label}</div>
-                              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                              <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                                 {c.score}/{c.max}
                               </div>
                             </div>
