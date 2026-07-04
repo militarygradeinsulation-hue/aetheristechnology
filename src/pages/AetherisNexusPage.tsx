@@ -8,9 +8,17 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+async function getUserAuthHeader(): Promise<string> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Please sign in to use Aetheris Nexus.");
+  return `Bearer ${token}`;
+}
 
 const STORAGE_KEY = "aetheris-nexus-threads-v1";
 
