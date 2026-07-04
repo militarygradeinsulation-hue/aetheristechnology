@@ -271,7 +271,13 @@ export const PublicLeakScan = () => {
         )}
 
 
-        <div className="rounded-md border border-amber/30 p-5 md:p-8 bg-background/40 backdrop-blur">
+        <div className="relative rounded-2xl border-2 border-amber/50 p-6 md:p-10 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--amber)/0.35)]">
+          {/* Corner brackets — case-file styling */}
+          <div className="pointer-events-none absolute -top-px -left-px w-6 h-6 border-t-2 border-l-2 border-amber rounded-tl-2xl" />
+          <div className="pointer-events-none absolute -top-px -right-px w-6 h-6 border-t-2 border-r-2 border-amber rounded-tr-2xl" />
+          <div className="pointer-events-none absolute -bottom-px -left-px w-6 h-6 border-b-2 border-l-2 border-amber rounded-bl-2xl" />
+          <div className="pointer-events-none absolute -bottom-px -right-px w-6 h-6 border-b-2 border-r-2 border-amber rounded-br-2xl" />
+
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div
