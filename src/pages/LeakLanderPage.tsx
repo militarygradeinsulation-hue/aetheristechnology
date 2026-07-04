@@ -193,29 +193,86 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Meet the operator — short, merged from /operator */}
+          {/* Signature nameplate — engraved atelier card */}
           <section
             className="mt-5 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
-            <div className="rounded-lg border border-amber/30 bg-card/80 backdrop-blur-sm p-3 sm:p-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
-              <div className="font-case text-[9px] uppercase tracking-[0.3em] text-amber mb-1.5">
-                The operator behind the button
+            <div className="relative rounded-sm bg-black/90 border border-[#C5A059]/20 shadow-[0_20px_60px_-20px_rgba(197,160,89,0.25)] overflow-hidden">
+              {/* Decorative corner brackets */}
+              <div className="pointer-events-none absolute top-3 left-3 w-6 h-6 border-t border-l border-[#C5A059]/30" />
+              <div className="pointer-events-none absolute top-3 right-3 w-6 h-6 border-t border-r border-[#C5A059]/30" />
+              <div className="pointer-events-none absolute bottom-3 left-3 w-6 h-6 border-b border-l border-[#C5A059]/30" />
+              <div className="pointer-events-none absolute bottom-3 right-3 w-6 h-6 border-b border-r border-[#C5A059]/30" />
+
+              <div className="px-6 py-8 sm:py-10 flex flex-col items-center text-center">
+                {/* Metallic A monogram with float */}
+                <div className="relative mb-6 flex justify-center items-center animate-gold-float">
+                  <div className="absolute w-24 h-24 bg-[#C5A059] opacity-10 blur-3xl" />
+                  <svg width="88" height="104" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-[0_0_15px_rgba(197,160,89,0.35)]">
+                    <defs>
+                      <linearGradient id="signGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#8E6E37" />
+                        <stop offset="50%" stopColor="#D4AF37" />
+                        <stop offset="100%" stopColor="#6B4F1D" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M50 10 L85 110 H75 L50 35 L25 110 H15 L50 10Z" fill="url(#signGoldGrad)" />
+                    <path d="M10 95 C 30 75, 70 75, 90 95" stroke="url(#signGoldGrad)" strokeWidth="4" fill="none" strokeLinecap="round" />
+                    <path d="M85 105 L95 110 L85 115 Z" fill="url(#signGoldGrad)" opacity="0.6" />
+                  </svg>
+                </div>
+
+                {/* Script name */}
+                <h2 className="font-script text-5xl sm:text-6xl leading-none text-[#E5E7EB]/95">
+                  Joseph Toney
+                </h2>
+
+                {/* Arched hairline */}
+                <div className="mt-4 w-52 h-[1px] relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent" />
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-32 h-2 border-t border-[#C5A059]/30 rounded-[100%]" />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-engraved text-[11px] sm:text-xs tracking-[0.4em] font-light uppercase mt-3 text-[#C5A059]">
+                  AI Architect
+                </h3>
+
+                {/* Credentials row */}
+                <div className="mt-6 flex items-center space-x-4 text-[10px] text-gray-400 tracking-widest uppercase font-light font-atelier">
+                  <span>MS, BA</span>
+                  <span className="h-3 w-[1px] bg-gray-700" />
+                  <div className="flex items-center space-x-2">
+                    <span className="font-black text-gray-100 border-b border-gray-600 pb-0.5">IBM</span>
+                    <span className="opacity-80">AI Certified</span>
+                  </div>
+                </div>
+
+                {/* Bottom hairline */}
+                <div className="mt-4 w-64 h-[1px] bg-gradient-to-r from-transparent via-gray-800 to-transparent" />
+
+                {/* Domain footer */}
+                <div className="mt-6 flex items-center space-x-3">
+                  <div className="w-6 h-6 border border-[#C5A059]/30 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-[#C5A059] rounded-full opacity-40 blur-[2px]" />
+                  </div>
+                  <span className="text-[11px] tracking-[0.3em] text-gray-300 font-light font-atelier">
+                    AETHERIS.<span className="text-[#C5A059] opacity-90">TECHNOLOGY</span>
+                  </span>
+                </div>
+
+                {/* Operator quote */}
+                <p className="mt-8 max-w-xl text-foreground/85 text-sm leading-relaxed italic border-l-2 border-[#C5A059]/50 pl-4 text-left">
+                  "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks."
+                </p>
+                <p className="mt-3 text-[10px] font-atelier uppercase tracking-widest text-[#C5A059]/70">
+                  Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
+                </p>
               </div>
-              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground leading-tight mb-2">
-                An operator — <span className="text-amber italic">not an agency</span>, not a chatbot.
-              </h2>
-              <p className="text-foreground/90 text-sm leading-relaxed italic border-l-2 border-amber/60 pl-3">
-                "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks. You don't run anything. You get the leak sealed."
-              </p>
-              <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-amber/80">
-                Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
-              </p>
-              <p className="mt-1 text-[10px] font-mono uppercase tracking-[0.2em] text-foreground/80">
-                Joseph ~AI Architect · MS, BA · IBM AI Certified · Aetheris.Technology
-              </p>
             </div>
           </section>
+
 
           {/* Public website leak scan + free tools suite — combined */}
           <div className="mt-5">
