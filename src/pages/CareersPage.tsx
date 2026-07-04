@@ -53,6 +53,20 @@ const CareersPage = () => {
         <div className="pt-24 pb-16">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-12">
 
+            {/* RAW HERO */}
+            <div className="text-center space-y-4">
+              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Careers · Independent Rep</div>
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
+                2,500 applied. <span className="text-crimson">Most got a hard no.</span>
+              </h1>
+              <p className="text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto leading-relaxed">
+                We want people who want to change their lives. We don't want people who need quick cash, expect to skate by, or complain that $40 is "too expensive" when the state requires it for a 1099 role.
+              </p>
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                If you can't take our test, ask questions, or see the vision — leave. If you can, one spot is left.
+              </p>
+            </div>
+
             {/* INTRO VIDEO */}
             <div>
               <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
