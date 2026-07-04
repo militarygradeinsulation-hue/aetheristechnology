@@ -195,7 +195,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Meet the operator — short, merged from /operator */}
           <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            className="mt-5 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
             <div className="rounded-lg border border-amber/30 bg-card/80 backdrop-blur-sm p-3 sm:p-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
