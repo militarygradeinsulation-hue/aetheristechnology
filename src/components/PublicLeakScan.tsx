@@ -282,7 +282,7 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-3 space-y-3 overflow-hidden"
+                className="rounded-md border border-amber/25 bg-gradient-to-br from-amber/10 to-transparent p-2.5 space-y-2.5 overflow-hidden"
               >
                 {/* Animated brain visualization */}
                 <div className="relative h-24 rounded-md bg-background/40 border border-amber/20 overflow-hidden">
