@@ -25,16 +25,6 @@ const LeakLanderPage: React.FC = () => {
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-    const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
-
   const handleLogoTap = () => {
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
