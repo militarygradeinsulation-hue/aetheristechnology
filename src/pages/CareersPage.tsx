@@ -28,12 +28,12 @@ const trackCareersCta = (cta: string) => {
 };
 
 const WHY = [
-  { icon: Target, title: 'Universal pain, easy pitch', desc: 'Every business leaks revenue. The free Leak Audit is the wedge, the operator-led Forensic Diagnostic is the close.' },
-  { icon: Brain, title: 'Operator-led delivery', desc: 'You sell the diagnosis. Joseph and the engineering team do the surgery. No implementation, no babysitting.' },
-  { icon: Rocket, title: 'Full operator stack', desc: 'Forecast Center, Lead Pool, scripts, follow-up playbooks, training, and a private portal — all included.' },
-  { icon: Users, title: 'Partner track', desc: 'Hit numbers → recruit reps under your code, earn an override on every sale they close, get a seat at the table.' },
-  { icon: Headphones, title: 'Direct line to the operator', desc: 'You text Joseph. You call him. No managers, no HR. That\'s the whole org chart.' },
-  { icon: Shield, title: 'No cold-call quotas', desc: 'Sell how you sell — LinkedIn, email, in-person, referrals. Results matter, not the calendar. Remote-first, Indy-loved.' },
+  { icon: Target, title: 'Every business leaks', desc: "Owners feel it. They just can't name it. You learn the Leak Audit, then sell the diagnosis. Simple." },
+  { icon: Brain, title: 'Operator-led delivery', desc: 'You sell. Joseph and the team build, fix, and ship. No implementation, no babysitting, no micromanagement.' },
+  { icon: Rocket, title: 'The stack is built', desc: 'Forecast Center, Lead Pool, scripts, follow-ups, portal, training. You plug in and sell.' },
+  { icon: Users, title: 'Partner track is real', desc: 'Recruit reps under your code, earn overrides, and earn a seat at the table. Numbers first.' },
+  { icon: Headphones, title: 'Direct line', desc: "Text Joseph. Call him. No middle managers. That's the whole org chart." },
+  { icon: Shield, title: 'No cold-call quotas', desc: 'Sell however you sell. LinkedIn, referrals, in-person, email. Results only. Remote-first, Indy-loved.' },
 ];
 
 const CareersPage = () => {
@@ -42,8 +42,8 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Independent Sales Rep | Aetheris AI"
-        description="Join Aetheris as an independent, commission-based 1099 sales rep. Sell forensic business diagnostics, work remotely, direct line to the operator."
+        title="Independent Rep | Aetheris Business Forensics"
+        description="2,500+ applications. Most turned down. One spot left. If you can't take a test, ask questions, or pay a $40 access fee, don't apply."
         path="/careers"
       />
       <Background />
@@ -52,6 +52,20 @@ const CareersPage = () => {
 
         <div className="pt-24 pb-16">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-12">
+
+            {/* RAW HERO */}
+            <div className="text-center space-y-4">
+              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Careers · Independent Rep</div>
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
+                2,500 applied. <span className="text-crimson">Most got a hard no.</span>
+              </h1>
+              <p className="text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto leading-relaxed">
+                We want people who want to change their lives. We don't want people who need quick cash, expect to skate by, or complain that $40 is "too expensive" when the state requires it for a 1099 role.
+              </p>
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                If you can't take our test, ask questions, or see the vision — leave. If you can, one spot is left.
+              </p>
+            </div>
 
             {/* INTRO VIDEO */}
             <div>
@@ -71,7 +85,7 @@ const CareersPage = () => {
                 />
               </div>
               <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
-                Message from the Architect · Tap to unmute
+                Watch this. Or don't — and move on.
               </p>
             </div>
 
@@ -85,13 +99,16 @@ const CareersPage = () => {
                   <Lock className="w-3.5 h-3.5" /> One door in
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
-                  $40 access fee. Then the test. Then your application.
+                  $40. A test. Then we talk.
                 </h2>
+                <p className="text-sm text-foreground/85">
+                  We don't read resumes from people who skip the test. We don't interview people who won't spend 10 minutes learning what we do. The $40 access fee is the cheapest filter we have — and the state wants it for a 1099 role. If that offends you, this isn't the place.
+                </p>
                 <div className="grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
                     <p className="font-semibold text-foreground">Pay $40</p>
-                    <p className="text-muted-foreground text-xs mt-1">Filters tire-kickers. Credited toward your 1099 contractor expenses if hired.</p>
+                    <p className="text-muted-foreground text-xs mt-1">No exceptions. No "I'll pay later." No comp codes.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 2</p>
@@ -100,17 +117,17 @@ const CareersPage = () => {
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 3</p>
-                    <p className="font-semibold text-foreground">Submit application</p>
-                    <p className="text-muted-foreground text-xs mt-1">Resume + 150-word pitch. Joseph reviews every passing app within 48 hours.</p>
+                    <p className="font-semibold text-foreground">Show us you care</p>
+                    <p className="text-muted-foreground text-xs mt-1">Resume + short pitch. Joseph reviews every passing app. Most don't pass.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
                   <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span><strong className="text-foreground">No exceptions.</strong> No comp codes, no "I'll pay later." The fee is the commitment signal. Random apps without a paid test go in the trash.</span>
+                  <span><strong className="text-foreground">The fee isn't the problem. You are.</strong> $40 is less than one decent meal. If you can't commit that, you won't commit to building anything real.</span>
                 </div>
                 <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
                   <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Pay $40 & start the test →
+                    Pay $40 & take the test →
                   </Button>
                 </a>
               </CardContent>
@@ -118,9 +135,9 @@ const CareersPage = () => {
 
             {/* WHY + PERKS (merged) */}
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">What this actually is</p>
               <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
-                We don't sell software. We sell <span className="text-amber">forensic clarity</span>.
+                We're not hiring. We're <span className="text-amber">selecting</span>.
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {WHY.map(({ icon: Icon, title, desc }, i) => (
@@ -145,17 +162,17 @@ const CareersPage = () => {
               <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
                 <CardHeader>
                   <CardTitle className="font-display text-foreground flex items-center gap-2">
-                    <CheckCircle className="text-emerald-500 w-5 h-5" /> You'll thrive here if
+                    <CheckCircle className="text-emerald-500 w-5 h-5" /> You belong here if
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {[
-                      'You\'re self-driven and don\'t need a manager checking on you.',
-                      'You can hold a real conversation with a business owner without sounding like a script.',
-                      'You believe most businesses are leaking money (because they are).',
-                      'You want commission upside, not a salary safety net.',
-                      'You can take rejection like a forensic — clinical, not personal.',
+                      "You want to change your life, not just collect a check.",
+                      "You have common sense and you know how to use it.",
+                      "You can talk to a business owner like a human, not a script.",
+                      "You see what we're building and want in before everyone else does.",
+                      "You can handle rejection without falling apart.",
                     ].map((t) => <li key={t} className="flex gap-2"><span className="text-emerald-500">✓</span>{t}</li>)}
                   </ul>
                 </CardContent>
@@ -163,17 +180,17 @@ const CareersPage = () => {
               <Card className="bg-card/60 backdrop-blur border-crimson/20">
                 <CardHeader>
                   <CardTitle className="font-display text-foreground flex items-center gap-2">
-                    <XCircle className="text-crimson w-5 h-5" /> Don't apply if
+                    <XCircle className="text-crimson w-5 h-5" /> Don't waste your time if
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {[
-                      'You need a base salary to feel safe.',
-                      'You won\'t pick up the phone or message a stranger on LinkedIn.',
-                      'You won\'t send a real follow-up after the first "not right now."',
-                      'You want to coast. There\'s no coasting in commission.',
-                      'You can\'t — or won\'t — pay $40 to prove you\'re serious.',
+                      "You need quick cash or a paycheck next week.",
+                      "You think $40 is too expensive to prove you're serious.",
+                      "You won't take a test or ask questions about our business.",
+                      "You're just looking to skate by and coast on others.",
+                      "You expect to be managed, pushed, or babysat.",
                     ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
                   </ul>
                 </CardContent>
@@ -184,10 +201,10 @@ const CareersPage = () => {
             <div className="forensic-tile rounded-2xl border border-crimson/40 p-6 md:p-8">
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Reality check</div>
               <h2 className="text-2xl md:text-3xl font-bold font-display text-crimson leading-tight mb-3">
-                If you need a paycheck next week, this isn't for you.
+                2,500 applied. Most were a hard no. One spot is left.
               </h2>
               <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
-                We're looking for people who can absorb the vision and build with us. A lot of people talk the talk and don't last two weeks. If you're here to fake it, you'll be gone before onboarding finishes.
+                This company is pure innovation happening in front of you. If you can't take the test, ask questions, or see the vision, leave. We don't need more bodies. We need intelligent people with common sense who want to build something real.
               </p>
             </div>
 
@@ -195,13 +212,13 @@ const CareersPage = () => {
             <Card className="bg-card/60 backdrop-blur border-amber/40">
               <CardContent className="p-6 sm:p-8 text-center space-y-4">
                 <div className="flex items-center justify-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Clock className="w-3.5 h-3.5" /> 10 minutes to apply
+                  <Clock className="w-3.5 h-3.5" /> 10 minutes to prove it
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground">
-                  Pay the $40. Pass the test. Send the resume.
+                  Pay $40. Pass the test. Make your pitch.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  That's the only path in. There is no contact form on this page on purpose.
+                  That's the only way in. No contact form. No shortcuts. No exceptions.
                 </p>
                 <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Users, CheckCircle2, XCircle, Flame } from 'lucide-react';
 
-const STORAGE_KEY = 'aetheris_applicant_count_v1';
-const START = 150;
+const STORAGE_KEY = 'aetheris_applicant_count_v2';
+const START = 2473;
 const TOTAL_SPOTS = 12;
-const FILLED_SPOTS = 7; // visual pressure — most already taken
+const FILLED_SPOTS = 11; // one left, heavy pressure
 
 // Curated rolling feed — first names + last initial only
 const NAMES = [
@@ -148,8 +148,7 @@ export const ApplicantPressure: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Only <span className="text-foreground font-semibold">{spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'}</span> left this cycle.
-          Once they're gone, the test closes until the next opening.
+          <span className="text-foreground font-semibold">2,500+ applied. Most were a hard no.</span> Only {spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'} left this cycle. Once it closes, it closes.
         </p>
       </div>
     </div>
