@@ -166,12 +166,13 @@ async function streamChat(
 
 // ─── Streaming image gen ──────────────────────────────────────────────────
 async function streamImage(prompt: string, onFrame: (dataUrl: string, isFinal: boolean) => void, signal: AbortSignal) {
+  const authHeader = await getUserAuthHeader();
   const res = await fetch(`${SUPABASE_URL}/functions/v1/aetheris-nexus-image`, {
     method: "POST",
     signal,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${ANON_KEY}`,
+      Authorization: authHeader,
       apikey: ANON_KEY,
     },
     body: JSON.stringify({ prompt }),
