@@ -509,26 +509,26 @@ export const PublicLeakScan = () => {
                 </div>
 
                 {teaser.executiveSummary && (
-                  <p className="text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-4">
+                  <p className="text-sm text-foreground/90 leading-relaxed border-l-2 border-amber/50 pl-3">
                     {teaser.executiveSummary}
                   </p>
                 )}
 
                 {teaser.topIssues.length > 0 && (
                   <div>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-amber mb-1.5">Top Leaks</div>
-                    <ul className="space-y-1.5">
+                    <div className="font-mono text-[8px] uppercase tracking-widest text-amber mb-1">Top Leaks</div>
+                    <ul className="space-y-1">
                       {teaser.topIssues.map((g, i) => {
                         const cfg = SEV_STYLE[g.severity] || SEV_STYLE.info;
                         const Icon = cfg.icon;
                         return (
-                          <li key={i} className={`rounded-md border p-2.5 ${cfg.cls}`}>
+                          <li key={i} className={`rounded-md border p-2 ${cfg.cls}`}>
                             <div className="flex items-start gap-2">
-                              <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+                              <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                               <div className="min-w-0">
                                 <div className="font-semibold text-sm text-foreground">{g.title}</div>
                                 <div className="text-xs text-muted-foreground mt-0.5">{g.category} · {cfg.label}</div>
-                                {g.hint && <p className="text-xs text-foreground/80 mt-1">{g.hint}</p>}
+                                {g.hint && <p className="text-xs text-foreground/80 mt-0.5">{g.hint}</p>}
                               </div>
                             </div>
                           </li>
