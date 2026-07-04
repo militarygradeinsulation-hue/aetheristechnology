@@ -58,8 +58,8 @@ const LeakLanderPage: React.FC = () => {
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
-        title="Your Business Is Leaking. Aetheris Business Forensics"
-        description="78% of leaks we find, the owner already felt. they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
+        title="Your business is bleeding money. Aetheris Business Forensics."
+        description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
         path="/"
       />
 
