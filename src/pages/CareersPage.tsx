@@ -42,8 +42,8 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Independent Sales Rep | Aetheris AI"
-        description="Join Aetheris as an independent, commission-based 1099 sales rep. Sell forensic business diagnostics, work remotely, direct line to the operator."
+        title="Independent Rep | Aetheris Business Forensics"
+        description="2,500+ applications. Most turned down. One spot left. If you can't take a test, ask questions, or pay a $40 access fee, don't apply."
         path="/careers"
       />
       <Background />
