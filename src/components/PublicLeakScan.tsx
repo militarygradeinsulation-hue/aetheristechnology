@@ -190,26 +190,26 @@ export const PublicLeakScan = () => {
   const thoughtWords = ['scan', 'leaks', 'gaps', 'CTAs', 'forms', 'meta', 'bleed', 'angle', 'verdict'];
 
   return (
-    <section id="public-leak-scan" className="relative px-4 py-20 scroll-mt-24">
+    <section id="public-leak-scan" className="relative px-4 py-10 scroll-mt-24">
       {/* Ambient spotlight to pull the eye */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-10">
-        <div className="w-[720px] h-[720px] max-w-full rounded-full bg-amber/10 blur-3xl" />
+        <div className="w-[560px] h-[560px] max-w-full rounded-full bg-amber/10 blur-3xl" />
       </div>
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber/40 bg-amber/10 px-3 py-1 mb-4">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber/40 bg-amber/10 px-3 py-1 mb-2">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson" />
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber">
               Live Forensic Scan · Free · No Code Required
             </span>
           </div>
-          <h2 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
             Scan your business.<br /><span className="text-crimson italic">See every leak.</span>
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto leading-relaxed">
             The AI detective audits <span className="text-foreground font-semibold">seven operational surfaces</span> — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
@@ -271,12 +271,12 @@ export const PublicLeakScan = () => {
         )}
 
 
-        <div className="relative rounded-2xl border-2 border-amber/50 p-6 md:p-10 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--amber)/0.35)]">
+        <div className="relative rounded-2xl border-2 border-amber/50 p-4 md:p-6 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--amber)/0.35)]">
           {/* Corner brackets — case-file styling */}
-          <div className="pointer-events-none absolute -top-px -left-px w-6 h-6 border-t-2 border-l-2 border-amber rounded-tl-2xl" />
-          <div className="pointer-events-none absolute -top-px -right-px w-6 h-6 border-t-2 border-r-2 border-amber rounded-tr-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -left-px w-6 h-6 border-b-2 border-l-2 border-amber rounded-bl-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -right-px w-6 h-6 border-b-2 border-r-2 border-amber rounded-br-2xl" />
+          <div className="pointer-events-none absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-amber rounded-tl-2xl" />
+          <div className="pointer-events-none absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-amber rounded-tr-2xl" />
+          <div className="pointer-events-none absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-amber rounded-bl-2xl" />
+          <div className="pointer-events-none absolute -bottom-px -right-px w-4 h-4 border-b-2 border-r-2 border-amber rounded-br-2xl" />
 
           <AnimatePresence mode="wait">
             {loading ? (
