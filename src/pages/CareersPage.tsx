@@ -28,11 +28,11 @@ const trackCareersCta = (cta: string) => {
 };
 
 const WHY = [
-  { icon: Target, title: 'Every business leaks', desc: 'Owners feel it. They just can't name it. You learn the Leak Audit, then sell the diagnosis. Simple.' },
+  { icon: Target, title: 'Every business leaks', desc: "Owners feel it. They just can't name it. You learn the Leak Audit, then sell the diagnosis. Simple." },
   { icon: Brain, title: 'Operator-led delivery', desc: 'You sell. Joseph and the team build, fix, and ship. No implementation, no babysitting, no micromanagement.' },
   { icon: Rocket, title: 'The stack is built', desc: 'Forecast Center, Lead Pool, scripts, follow-ups, portal, training. You plug in and sell.' },
   { icon: Users, title: 'Partner track is real', desc: 'Recruit reps under your code, earn overrides, and earn a seat at the table. Numbers first.' },
-  { icon: Headphones, title: 'Direct line', desc: 'Text Joseph. Call him. No middle managers. That's the whole org chart.' },
+  { icon: Headphones, title: 'Direct line', desc: "Text Joseph. Call him. No middle managers. That's the whole org chart." },
   { icon: Shield, title: 'No cold-call quotas', desc: 'Sell however you sell. LinkedIn, referrals, in-person, email. Results only. Remote-first, Indy-loved.' },
 ];
 
