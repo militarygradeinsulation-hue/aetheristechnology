@@ -183,11 +183,11 @@ const LeakLanderPage: React.FC = () => {
                 Made by Real People, for real Humans.
               </h2>
             </div>
-            <div className="rounded-2xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm p-2 sm:p-3 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
+            <div className="rounded-xl border border-amber/30 bg-card/80 backdrop-blur-sm p-1.5 sm:p-2 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
               <img
                 src={landingOneButtonInfographic.url}
                 alt="Aetheris Business Forensics: One button finds where your leads are leaking and instantly begins getting them back."
-                className="w-full h-auto rounded-xl"
+                className="w-full h-auto rounded-lg"
                 loading="lazy"
               />
             </div>
