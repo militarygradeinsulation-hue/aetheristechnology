@@ -71,7 +71,7 @@ const CareersPage = () => {
                 />
               </div>
               <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
-                Message from the Architect · Tap to unmute
+                Watch this. Or don't — and move on.
               </p>
             </div>
 
