@@ -272,18 +272,18 @@ const LeakLanderPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDeckOpen((v) => !v)}
-                className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-amber/[0.04] transition-colors text-left"
+                className="group w-full flex items-center gap-3 px-3 py-2.5 hover:bg-amber/[0.04] transition-colors text-left"
                 aria-expanded={deckOpen}
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/10 ring-1 ring-amber/40">
-                  <ChevronDown className={`w-5 h-5 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-amber/10 ring-1 ring-amber/30">
+                  <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Case File · Deck</div>
-                  <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber">Case File · Deck</div>
+                  <div className="font-forensic text-sm sm:text-base font-bold text-foreground leading-tight">
                     Forensic Revenue Recovery
                   </div>
-                  <div className="text-xs text-muted-foreground">{deckOpen ? "Tap to collapse." : "Tap to open the deck."}</div>
+                  <div className="text-[11px] text-muted-foreground">{deckOpen ? "Tap to collapse." : "Tap to open the deck."}</div>
                 </div>
               </button>
 
