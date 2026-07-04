@@ -318,28 +318,28 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Contact info. compact glass row */}
           <section
-            className="relative mt-8 animate-fade-in"
+            className="relative mt-6 animate-fade-in"
             style={{ animationDelay: "340ms", animationFillMode: "both" }}
           >
-            <div className="rounded-xl border-2 border-amber/30 bg-card/95 backdrop-blur-sm px-4 py-4 sm:px-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-                <a href="tel:+13173762110" className="group inline-flex items-center gap-2 hover:text-amber transition-colors">
-                  <Phone className="w-4 h-4 text-amber" />
+            <div className="rounded-lg border border-amber/25 bg-card/80 backdrop-blur-sm px-3 py-3 sm:px-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm">
+                <a href="tel:+13173762110" className="group inline-flex items-center gap-1.5 hover:text-amber transition-colors">
+                  <Phone className="w-3.5 h-3.5 text-amber" />
                   <span className="font-semibold">(317) 376-2110</span>
                 </a>
-                <span className="h-4 w-px bg-white/15 hidden sm:block" />
-                <a href="mailto:Aetheris.technology@outlook.com" className="group inline-flex items-center gap-2 hover:text-amber transition-colors">
-                  <Mail className="w-4 h-4 text-amber" />
+                <span className="h-3.5 w-px bg-white/15 hidden sm:block" />
+                <a href="mailto:Aetheris.technology@outlook.com" className="group inline-flex items-center gap-1.5 hover:text-amber transition-colors">
+                  <Mail className="w-3.5 h-3.5 text-amber" />
                   <span className="font-semibold break-all">Aetheris.technology@outlook.com</span>
                 </a>
-                <span className="h-4 w-px bg-white/15 hidden sm:block" />
-                <span className="inline-flex items-center gap-2 text-foreground">
-                  <MapPin className="w-4 h-4 text-amber" />
+                <span className="h-3.5 w-px bg-white/15 hidden sm:block" />
+                <span className="inline-flex items-center gap-1.5 text-foreground">
+                  <MapPin className="w-3.5 h-3.5 text-amber" />
                   <span className="font-semibold">Noblesville, Indiana</span>
                 </span>
               </div>
             </div>
-            <p className="mt-3 text-center text-[11px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
+            <p className="mt-2 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
               Aetheris · Business Forensics · aetheris.technology
             </p>
           </section>
