@@ -222,10 +222,10 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Downloads + Deck — combined case-file card */}
           <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            className="mt-5 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
-            <div className="rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] overflow-hidden">
+            <div className="rounded-lg border border-amber/30 bg-card/80 backdrop-blur-sm shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
               {/* Row 1: One-tap PDF */}
               <a
                 href="/downloads/How-Aetheris-Can-Help-You.pdf"
