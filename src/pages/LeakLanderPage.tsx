@@ -58,8 +58,8 @@ const LeakLanderPage: React.FC = () => {
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
       <SEOHead
-        title="Your Business Is Leaking. Aetheris Business Forensics"
-        description="78% of leaks we find, the owner already felt. they just couldn't name them. Book a Forensic Diagnostic with Aetheris in Indianapolis."
+        title="Your business is bleeding money. Aetheris Business Forensics."
+        description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
         path="/"
       />
 
@@ -125,7 +125,7 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Punch headline */}
+          {/* HERO — raw rewrite */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
@@ -136,26 +136,27 @@ const LeakLanderPage: React.FC = () => {
               <span className="h-px w-8 bg-amber/50" />
             </div>
             <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-              Your business is{" "}
-              <span className="text-crimson italic">leaking</span>.
+              Your business is <span className="text-crimson italic">bleeding money</span>.
               <br className="hidden sm:block" />
-              <span className="text-foreground/85"> One button finds it. We fix it.</span>
+              <span className="text-foreground/85"> You just haven't found the wound yet.</span>
             </h1>
-            <p className="mt-3 text-sm sm:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-              Press the button. Real operators — not a chatbot — find where you're bleeding leads,
-              time, and revenue. Then we seal it.
+            <p className="mt-4 text-sm sm:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
+              We find it. We show you the number. Then we fix it — or we tell you you're not fixable and walk.
+            </p>
+            <p className="mt-3 text-sm text-foreground/70 max-w-2xl mx-auto leading-relaxed">
+              We are not a marketing agency. We are not consultants who bill you to agree with you. We run forensics on your entire operation — lead flow, sales process, follow-up, systems, brand, ops — and we put the evidence on the table whether you like what it says or not.
             </p>
           </section>
 
-          {/* Buttons. primary CTAs, larger */}
+          {/* CTAs */}
           <section
             className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 animate-fade-in"
             style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
             <Button asChild variant="outline" size="default" className="relative overflow-hidden h-11 px-6 text-sm border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all">
-              <Link to="/contact">
+              <Link to="/leak-audit">
                 <FileText className="w-4 h-4 mr-2 text-amber relative" />
-                <span className="relative">Intake Form</span>
+                <span className="relative">Run the Free Leak Audit</span>
               </Link>
             </Button>
             <Button
@@ -164,9 +165,217 @@ const LeakLanderPage: React.FC = () => {
               className="relative overflow-hidden h-11 px-6 text-sm bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all"
             >
               <Calendar className="w-4 h-4 mr-2 relative" />
-              <span className="relative">Book the Diagnostic</span>
+              <span className="relative">Open a Case — $18,500</span>
               <ArrowRight className="ml-2 w-4 h-4 relative" />
             </Button>
+          </section>
+
+          {/* THE FILTER — unmissable */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "200ms", animationFillMode: "both" }}
+          >
+            <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-5 sm:p-6 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)]">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Read this before you contact us</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
+                The Filter.
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
+                If <span className="text-crimson font-semibold">$18,500</span> to find out exactly where your company is hemorrhaging revenue sounds "expensive," you are not our client. Close this tab. No hard feelings — we just don't waste each other's time.
+              </p>
+              <p className="mt-3 text-sm text-foreground/70 leading-relaxed">
+                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span>, every year, compounding while they "think about it."
+              </p>
+            </div>
+          </section>
+
+          {/* WHO WE DON'T / DO WORK WITH */}
+          <section
+            className="mt-6 max-w-4xl mx-auto grid md:grid-cols-2 gap-4 animate-fade-in"
+            style={{ animationDelay: "220ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-crimson/40 bg-card/60 backdrop-blur-sm p-5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">We turn down more than we take</div>
+              <h3 className="font-forensic text-lg font-bold mb-3">We don't work with you if:</h3>
+              <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
+                <li>— You want to be told your marketing is fine and the problem is "the economy."</li>
+                <li>— You shop consultants by price instead of by findings.</li>
+                <li>— You need six stakeholders and a committee to approve fixing your own business.</li>
+                <li>— You want a cheerleader. We're the coroner.</li>
+                <li>— You'll argue with the evidence. The data doesn't care how long you've done it your way.</li>
+              </ul>
+            </div>
+            <div className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Deliberately</div>
+              <h3 className="font-forensic text-lg font-bold mb-3">We work with you if:</h3>
+              <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
+                <li>— You run a real business — $5M to $50M — and you know something's broken but can't name it.</li>
+                <li>— You'd rather hear the ugly truth once than a comfortable lie every quarter.</li>
+                <li>— You can make a decision without a permission slip.</li>
+                <li>— You measure us on one thing: recovered revenue.</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* WHAT WE ACTUALLY DO */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "240ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">What we actually do</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
+                Revenue Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
+              </h2>
+              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+                Every business over $5M has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
+              </p>
+              <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
+                You can't see them because you built them. We can, because we didn't.
+              </p>
+
+              <div className="mt-5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">The Leak Audit™ — 7-point forensic protocol</div>
+                <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-foreground/85">
+                  {[
+                    "Vocabulary friction — the words costing you deals",
+                    "Brand contradictions — what you promise vs. what you deliver",
+                    "Conversion drop-offs — where buyers quietly exit",
+                    "Follow-up failures — the leads you paid for and then ignored",
+                    "System disconnects — tools that don't talk, data that dies",
+                    "Operational waste — headcount solving software problems",
+                    "Growth ceilings — the structural reason you're stuck at this number",
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="font-mono text-amber text-xs pt-0.5 shrink-0">0{i + 1}</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-4 text-xs text-foreground/60 italic">We don't guess. We document. Every finding comes with a dollar figure attached.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* THE OFFER */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "260ms", animationFillMode: "both" }}
+          >
+            <div className="text-center mb-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Offer</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">No menus. No packages. No negotiation.</h2>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 01</div>
+                <div className="font-forensic text-lg font-bold mt-1">Free Leak Audit</div>
+                <div className="font-mono text-2xl text-foreground mt-2">$0</div>
+                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">Self-scan. Thirty seconds. It will sting. That's the point.</p>
+                <Link to="/leak-audit" className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline">
+                  Run it now <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="rounded-sm border-2 border-amber/60 bg-amber/[0.06] backdrop-blur-sm p-5 flex flex-col shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.4)]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 02 · Flagship</div>
+                <div className="font-forensic text-lg font-bold mt-1">21-Day Revenue Diagnostic</div>
+                <div className="font-mono text-2xl text-amber mt-2">$18,500 <span className="text-xs text-foreground/60">flat</span></div>
+                <p className="text-sm text-foreground/80 mt-3 leading-relaxed flex-1">
+                  We open a case on your business. 21 days. Full forensic workup. You get the evidence file: what's broken, what it costs you annually, and the fix sequence — whether you hire us to execute or not. <span className="text-amber">Every dollar credits 1:1 toward implementation.</span>
+                </p>
+                <button onClick={() => setBookingOpen(true)} className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline text-left">
+                  Open a case <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 03</div>
+                <div className="font-forensic text-lg font-bold mt-1">Active Case</div>
+                <div className="font-mono text-2xl text-foreground mt-2">$15,000<span className="text-xs text-foreground/60">/mo</span></div>
+                <div className="font-mono text-[10px] text-foreground/60 mt-1">3-month minimum · Diagnostic clients only</div>
+                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">We don't implement blind, and you can't skip the autopsy. We build the systems — AI, automation, CRM, follow-up infrastructure — accountable to the numbers in your evidence file.</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-sm text-foreground/70 leading-relaxed max-w-2xl mx-auto">
+              That's it. There is no fourth option, no "lite" tier, no payment plan. If the math doesn't work for you, the leak isn't big enough to matter yet — <span className="text-amber">come back when it is</span>.
+            </p>
+          </section>
+
+          {/* WHY WE'RE LIKE THIS */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Why we're like this</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold">Because polite consulting is why you're stuck.</h2>
+              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+                Every agency you've hired told you what you wanted to hear, billed you monthly, and called stagnation "brand building." We'd rather lose the sale than join the pile of invoices that changed nothing.
+              </p>
+              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+                Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
+              </p>
+              <p className="mt-4 font-forensic text-lg font-bold text-amber">Business Forensics. Real Findings. No Sugar.</p>
+            </div>
+          </section>
+
+          {/* FAQ — the honest version */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "300ms", animationFillMode: "both" }}
+          >
+            <div className="text-center mb-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FAQ · The honest version</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">Screenshot at your own risk.</h2>
+            </div>
+            <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm divide-y divide-amber/15">
+              {[
+                { q: "Can you work with our budget?", a: "No. The fee is fixed because the work is fixed. Budgets flex; forensics don't." },
+                { q: "Can we get a discount if we commit longer?", a: "You're asking the coroner for a coupon. No." },
+                { q: "What if we don't like the findings?", a: "Irrelevant. The findings are true either way. What you do with them is your call." },
+                { q: "How do we know it'll work?", a: "You don't, and anyone who guarantees outcomes is selling you a feeling. What we guarantee: you'll know exactly what's broken, exactly what it costs, and exactly what to fix first. Most clients have never had that. That's why they're leaking." },
+                { q: "Why should we trust you?", a: "You shouldn't — yet. Run the free audit. If the free version doesn't surface something that bothers you, we're not your firm and that's fine." },
+              ].map((item, i) => (
+                <div key={i} className="p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle className="w-4 h-4 text-amber mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-forensic font-bold text-sm sm:text-base">"{item.q}"</div>
+                      <p className="mt-1.5 text-sm text-foreground/80 leading-relaxed">{item.a}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* FINAL CTA — Two Doors */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "320ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border-2 border-amber/50 bg-gradient-to-br from-amber/[0.08] via-transparent to-crimson/[0.05] p-6 sm:p-8 text-center">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Two doors</div>
+              <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight">
+                <span className="text-foreground/60">Door one:</span> keep doing what you're doing. The leak keeps its schedule.
+                <br />
+                <span className="text-amber">Door two:</span> open a case.
+              </h2>
+              <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild variant="outline" size="default" className="h-11 px-6 border-white/20 bg-white/[0.06] hover:bg-amber/10 hover:border-amber/50 font-mono uppercase tracking-wider">
+                  <Link to="/leak-audit">Free Leak Audit</Link>
+                </Button>
+                <Button size="default" onClick={() => setBookingOpen(true)} className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
+                  Open a Case — $18,500 <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+              <p className="mt-4 text-xs text-foreground/60 italic">
+                No newsletter. No "book a friendly chat." No drip sequence begging you to reconsider. We don't chase. We investigate.
+              </p>
+            </div>
           </section>
 
 
