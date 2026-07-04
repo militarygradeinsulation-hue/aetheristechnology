@@ -60,7 +60,7 @@ const loadUnlock = (): Unlock | null => {
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const isPhone = (v: string) => v.replace(/\D/g, "").length >= 10;
 
-export const HomeFreeTools: React.FC = () => {
+export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const [unlock, setUnlock] = useState<Unlock | null>(null);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -142,14 +142,8 @@ export const HomeFreeTools: React.FC = () => {
     }
   };
 
-  return (
-    <section
-      id="free-tools"
-      className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
-      style={{ animationDelay: "260ms", animationFillMode: "both" }}
-    >
-      <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
-        <div className="p-1.5 sm:p-2">
+  const body = (
+    <>
           {/* Header lockup */}
           <header className="flex items-center justify-between gap-2">
             <h2 className="font-forensic text-[10px] sm:text-xs font-light text-foreground leading-tight">
@@ -272,6 +266,26 @@ export const HomeFreeTools: React.FC = () => {
             </Link>{" "}
             connects every signal.
           </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div id="free-tools" className="mt-4 pt-3 border-t border-amber/20 scroll-mt-24">
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <section
+      id="free-tools"
+      className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
+      style={{ animationDelay: "260ms", animationFillMode: "both" }}
+    >
+      <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
+        <div className="p-1.5 sm:p-2">
+          {body}
         </div>
       </div>
     </section>
@@ -279,3 +293,4 @@ export const HomeFreeTools: React.FC = () => {
 };
 
 export default HomeFreeTools;
+
