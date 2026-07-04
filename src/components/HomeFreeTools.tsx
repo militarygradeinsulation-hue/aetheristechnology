@@ -145,44 +145,31 @@ export const HomeFreeTools: React.FC = () => {
   return (
     <section
       id="free-tools"
-      className="mt-14 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
+      className="mt-8 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="relative rounded-sm border border-amber/30 bg-card/95 backdrop-blur-sm overflow-hidden shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+      <div className="relative rounded-sm border border-amber/20 bg-card/95 backdrop-blur-sm overflow-hidden">
         {/* Technical accent line */}
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber/40 to-transparent" />
 
-        {/* Corner labels */}
-        <div className="absolute top-2 left-3 sm:left-4">
-          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60">
-            Section // 004-Tools
-          </span>
-        </div>
-        <div className="absolute top-2 right-3 sm:right-4">
-          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-amber/60">
-            Status: Ready
-          </span>
-        </div>
-
-        <div className="p-5 sm:p-7 pt-11 sm:pt-12">
+        <div className="p-4 sm:p-5">
           {/* Header lockup */}
-          <header className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="h-px w-8 bg-amber/60" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">
-                Free Tools · Email + Phone Unlocks Everything
-              </span>
+          <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="h-px w-6 bg-amber/60" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/80">
+                  Free Tools
+                </span>
+              </div>
+              <h2 className="font-forensic text-lg sm:text-xl md:text-2xl font-light text-foreground leading-tight">
+                Try the instruments.
+                <span className="italic text-amber/80 ml-1">On the house.</span>
+              </h2>
             </div>
-            <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-light text-foreground leading-tight">
-              Try the instruments.
-              <span className="block italic text-amber mt-1">On the house.</span>
-            </h2>
-            <div className="flex items-start gap-3">
-              <div className="w-px h-12 bg-amber/40 mt-1" />
-              <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
-                Access a restricted slice of the forensic stack. These tools detect financial drift before it becomes a leak — and they're free.
-              </p>
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed sm:text-right">
+              A restricted slice of the forensic stack. Detect leaks before they cost you.
+            </p>
           </header>
 
           {!unlock ? (
