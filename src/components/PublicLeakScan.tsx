@@ -191,14 +191,10 @@ export const PublicLeakScan = () => {
   const thoughtWords = ['scan', 'leaks', 'gaps', 'CTAs', 'forms', 'meta', 'bleed', 'angle', 'verdict'];
 
   return (
-    <section id="public-leak-scan" className="relative px-4 py-10 scroll-mt-24">
-      {/* Ambient spotlight to pull the eye */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-10">
-        <div className="w-[560px] h-[560px] max-w-full rounded-full bg-amber/10 blur-3xl" />
-      </div>
+    <section id="public-leak-scan" className="relative px-4 py-8 scroll-mt-24">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber/40 bg-amber/10 px-3 py-1 mb-2">
+        <div className="text-center mb-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-3 py-1 mb-1.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson" />
@@ -207,10 +203,10 @@ export const PublicLeakScan = () => {
               Live Forensic Scan · Free · No Code Required
             </span>
           </div>
-          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
+          <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground leading-[1.05]">
             Scan your business.<br /><span className="text-crimson italic">See every leak.</span>
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-muted-foreground mt-1.5 max-w-2xl mx-auto leading-relaxed">
             The AI detective audits <span className="text-foreground font-semibold">seven operational surfaces</span> — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
