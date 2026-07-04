@@ -417,33 +417,37 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-5"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground block mb-1">
+                    <label className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber block mb-2">
                       Your Email
                     </label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      maxLength={255}
-                      required
-                    />
+                    <div className="relative group">
+                      <Bookmark className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@company.com"
+                        maxLength={255}
+                        required
+                        className="pl-11 h-14 text-base bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground block mb-1">
+                    <label className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber block mb-2">
                       Company Website
                     </label>
-                    <div className="relative">
-                      <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <div className="relative group">
+                      <Globe className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
                       <Input
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://yourcompany.com"
-                        className="pl-9"
+                        className="pl-11 h-14 text-base bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
                         maxLength={500}
                         required
                       />
@@ -454,15 +458,26 @@ export const PublicLeakScan = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full md:w-auto bg-amber text-background hover:bg-amber/90 font-semibold"
+                  className="w-full h-14 md:h-16 text-base md:text-lg bg-gradient-to-r from-amber via-amber to-orange-500 text-background hover:from-amber/90 hover:to-orange-500/90 font-bold tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--amber)/0.6)] hover:shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.8)] transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  <Search className="w-4 h-4 mr-2" /> Show me my leaks
+                  <Search className="w-5 h-5 mr-2" /> Show Me My Leaks
+                  <span className="ml-2 opacity-70">→</span>
                 </Button>
 
-                <p className="text-[11px] text-muted-foreground flex items-center gap-2">
-                  <ShieldCheck className="w-3 h-3" />
-                  No spam. We save your scans by email so you can come back later and pick up right where you left off.
-                </p>
+                <div className="grid grid-cols-3 gap-3 pt-2">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-3">
+                    <ShieldCheck className="w-4 h-4 text-amber" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">No spam</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-3">
+                    <FileSearch className="w-4 h-4 text-amber" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">PDF report</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-3">
+                    <History className="w-4 h-4 text-amber" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Auto-saved</span>
+                  </div>
+                </div>
               </motion.form>
             ) : (
               <motion.div
