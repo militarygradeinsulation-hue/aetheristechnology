@@ -214,13 +214,11 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Public website leak scan — email + URL only */}
+          {/* Public website leak scan + free tools suite — combined */}
           <div className="mt-6">
             <PublicLeakScan />
           </div>
 
-          {/* Free tools suite — email + phone unlocks everything */}
-          <HomeFreeTools />
 
 
           <section

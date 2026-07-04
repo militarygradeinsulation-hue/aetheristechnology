@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LeakChart, type LeakChartGap } from "@/components/LeakChart";
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from "@/lib/generateLeakAuditPdf";
+import { HomeFreeTools } from "@/components/HomeFreeTools";
 
 const SAVED_KEY = "aetheris.publicScans.v1";
 const LAST_EMAIL_KEY = "aetheris.publicScans.lastEmail";
@@ -641,6 +642,8 @@ export const PublicLeakScan = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          <HomeFreeTools embedded />
         </div>
       </div>
     </section>
