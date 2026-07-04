@@ -289,23 +289,23 @@ const LeakLanderPage: React.FC = () => {
 
               {deckOpen && (
                 <div className="border-t border-amber/20 animate-fade-in">
-                  <div className="px-4 py-3 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
+                  <div className="px-3 py-2 flex flex-wrap items-center justify-center gap-2 border-b border-amber/20">
                     <a
                       href="/downloads/Forensic-Revenue-Recovery.pdf"
                       download
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-amber/40 bg-amber/10 hover:bg-amber/20 text-amber font-mono text-[10px] uppercase tracking-wider transition-colors"
                     >
-                      <Download className="w-4 h-4" /> Download PDF
+                      <Download className="w-3.5 h-3.5" /> Download PDF
                     </a>
                     <a
                       href="/downloads/Forensic-Revenue-Recovery.pptx"
                       download
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-white/15 bg-white/[0.04] hover:bg-white/[0.10] text-foreground font-mono text-[10px] uppercase tracking-wider transition-colors"
                     >
-                      <Download className="w-4 h-4" /> Download PPTX
+                      <Download className="w-3.5 h-3.5" /> Download PPTX
                     </a>
                   </div>
-                  <div className="p-3">
+                  <div className="p-2">
                     <ForensicDeckCarousel />
                   </div>
                 </div>
