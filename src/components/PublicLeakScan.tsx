@@ -212,7 +212,7 @@ export const PublicLeakScan = () => {
         </div>
 
         {savedForEmail.length > 0 && !loading && !teaser && (
-          <div className="mb-4 rounded-md border border-amber/30 bg-amber/5 p-3">
+          <div className="mb-3 rounded-md border border-amber/25 bg-amber/5 p-2.5">
             <button
               type="button"
               onClick={() => setShowHistory((v) => !v)}
