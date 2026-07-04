@@ -221,9 +221,9 @@ export const HomeFreeTools: React.FC = () => {
               </p>
             </form>
           ) : (
-            <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-3 rounded-sm border border-amber/20 bg-amber/5 px-4 py-3">
-              <Unlock className="w-4 h-4 text-amber" />
-              <span className="font-mono text-[11px] uppercase tracking-widest text-amber">
+            <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3 rounded-sm border border-amber/20 bg-amber/5 px-3 py-2">
+              <Unlock className="w-3.5 h-3.5 text-amber" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber">
                 Unlocked for {unlock.email}
               </span>
               <button
@@ -242,28 +242,28 @@ export const HomeFreeTools: React.FC = () => {
           )}
 
 
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {TOOLS.map((t) => {
             const Icon = t.icon;
             const locked = !unlock;
             const Card = (
               <div
-                className={`relative h-full rounded-sm border p-4 transition-colors ${
+                className={`relative h-full rounded-sm border p-3 transition-colors ${
                   locked
                     ? "border-border/60 bg-background/40 opacity-80"
                     : "border-amber/30 bg-background/60 hover:border-amber/60 hover:bg-amber/[0.04]"
                 }`}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <Icon className="w-4 h-4 text-amber" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-amber">{t.tag}</span>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Icon className="w-3.5 h-3.5 text-amber" />
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-amber">{t.tag}</span>
                   {locked && <Lock className="w-3 h-3 text-muted-foreground ml-auto" />}
                 </div>
-                <div className="font-forensic text-base font-bold text-foreground leading-snug">{t.title}</div>
-                <p className="mt-1 text-xs text-muted-foreground leading-snug">{t.blurb}</p>
+                <div className="font-forensic text-sm font-bold text-foreground leading-snug">{t.title}</div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground leading-snug">{t.blurb}</p>
                 {!locked && (
-                  <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-amber">
-                    Open tool <ArrowRight className="w-3 h-3" />
+                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-amber">
+                    Open <ArrowRight className="w-3 h-3" />
                   </div>
                 )}
               </div>
@@ -288,13 +288,11 @@ export const HomeFreeTools: React.FC = () => {
           })}
         </div>
 
-        <div className="mt-6 rounded-sm border-l-2 border-crimson/70 bg-crimson/5 px-4 py-3">
-          <p className="text-sm text-foreground/90 leading-relaxed">
-            <span className="font-forensic font-bold text-foreground">The tools show you pieces. </span>
+        <div className="mt-4 rounded-sm border-l-2 border-crimson/70 bg-crimson/5 px-3 py-2">
+          <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
+            <span className="font-forensic font-bold text-foreground">The tools show pieces. </span>
             <span className="text-muted-foreground">
-              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects them — it
-              runs every instrument against your business at once, cross-references the signals, and tells you what's
-              actually leaking, what it's costing, and what to fix first. That's the puzzle solved.
+              The <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">Leak Audit</Link> connects them — cross-references every signal and tells you what's actually leaking. That's the puzzle solved.
             </span>
           </p>
         </div>
