@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download, Users } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
@@ -8,7 +8,6 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
-import landingOneButtonInfographic from "@/assets/landing-one-button-infographic.jpg.asset.json";
 import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
 import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
@@ -170,29 +169,6 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
-          {/* One-button leak finder infographic — the focal point */}
-          <section
-            className="mt-5 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "220ms", animationFillMode: "both" }}
-          >
-            <div className="text-center mb-2">
-              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">
-                Built by hand, not by hype
-              </div>
-              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground inline-flex items-center justify-center gap-2 flex-wrap">
-                <Users className="w-3.5 h-3.5 text-amber" />
-                Made by Real People, for real Humans.
-              </h2>
-            </div>
-            <div className="rounded-xl border border-amber/30 bg-card/80 backdrop-blur-sm p-1.5 sm:p-2 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
-              <img
-                src={landingOneButtonInfographic.url}
-                alt="Aetheris Business Forensics: One button finds where your leads are leaking and instantly begins getting them back."
-                className="w-full h-auto rounded-lg"
-                loading="lazy"
-              />
-            </div>
-          </section>
 
           {/* Signature nameplate — official Joseph Toney signature card */}
           <section
