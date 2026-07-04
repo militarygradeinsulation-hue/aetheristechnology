@@ -271,7 +271,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
 
   if (embedded) {
     return (
-      <div id="free-tools" className="mt-4 pt-3 border-t border-amber/20 scroll-mt-24">
+      <div id="free-tools" className="mt-3 pt-2 border-t border-amber/20 scroll-mt-24">
         {body}
       </div>
     );
