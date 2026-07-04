@@ -142,14 +142,20 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
     }
   };
 
-  return (
-    <section
-      id="free-tools"
-      className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
-      style={{ animationDelay: "260ms", animationFillMode: "both" }}
-    >
-      <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
-        <div className="p-1.5 sm:p-2">
+  const body = (
+    <>
+          {/* Header lockup */}
+          <header className="flex items-center justify-between gap-2">
+            <h2 className="font-forensic text-[10px] sm:text-xs font-light text-foreground leading-tight">
+              Free instruments. <span className="italic text-amber/80">On the house.</span>
+            </h2>
+            {!unlock && (
+              <p className="hidden sm:block text-[9px] text-muted-foreground/70 leading-snug text-right">
+                Unlock with email + phone.
+              </p>
+            )}
+          </header>
+
           {/* Header lockup */}
           <header className="flex items-center justify-between gap-2">
             <h2 className="font-forensic text-[10px] sm:text-xs font-light text-foreground leading-tight">
