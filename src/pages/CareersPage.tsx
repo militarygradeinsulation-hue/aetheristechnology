@@ -148,17 +148,17 @@ const CareersPage = () => {
               <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
                 <CardHeader>
                   <CardTitle className="font-display text-foreground flex items-center gap-2">
-                    <CheckCircle className="text-emerald-500 w-5 h-5" /> You'll thrive here if
+                    <CheckCircle className="text-emerald-500 w-5 h-5" /> You belong here if
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {[
-                      'You\'re self-driven and don\'t need a manager checking on you.',
-                      'You can hold a real conversation with a business owner without sounding like a script.',
-                      'You believe most businesses are leaking money (because they are).',
-                      'You want commission upside, not a salary safety net.',
-                      'You can take rejection like a forensic — clinical, not personal.',
+                      "You want to change your life, not just collect a check.",
+                      "You have common sense and you know how to use it.",
+                      "You can talk to a business owner like a human, not a script.",
+                      "You see what we're building and want in before everyone else does.",
+                      "You can handle rejection without falling apart.",
                     ].map((t) => <li key={t} className="flex gap-2"><span className="text-emerald-500">✓</span>{t}</li>)}
                   </ul>
                 </CardContent>
@@ -166,17 +166,17 @@ const CareersPage = () => {
               <Card className="bg-card/60 backdrop-blur border-crimson/20">
                 <CardHeader>
                   <CardTitle className="font-display text-foreground flex items-center gap-2">
-                    <XCircle className="text-crimson w-5 h-5" /> Don't apply if
+                    <XCircle className="text-crimson w-5 h-5" /> Don't waste your time if
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {[
-                      'You need a base salary to feel safe.',
-                      'You won\'t pick up the phone or message a stranger on LinkedIn.',
-                      'You won\'t send a real follow-up after the first "not right now."',
-                      'You want to coast. There\'s no coasting in commission.',
-                      'You can\'t — or won\'t — pay $40 to prove you\'re serious.',
+                      "You need quick cash or a paycheck next week.",
+                      "You think $40 is too expensive to prove you're serious.",
+                      "You won't take a test or ask questions about our business.",
+                      "You're just looking to skate by and coast on others.",
+                      "You expect to be managed, pushed, or babysat.",
                     ].map((t) => <li key={t} className="flex gap-2"><span className="text-crimson">✗</span>{t}</li>)}
                   </ul>
                 </CardContent>
@@ -187,10 +187,10 @@ const CareersPage = () => {
             <div className="forensic-tile rounded-2xl border border-crimson/40 p-6 md:p-8">
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Reality check</div>
               <h2 className="text-2xl md:text-3xl font-bold font-display text-crimson leading-tight mb-3">
-                If you need a paycheck next week, this isn't for you.
+                2,500 applied. Most were a hard no. One spot is left.
               </h2>
               <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
-                We're looking for people who can absorb the vision and build with us. A lot of people talk the talk and don't last two weeks. If you're here to fake it, you'll be gone before onboarding finishes.
+                This company is pure innovation happening in front of you. If you can't take the test, ask questions, or see the vision, leave. We don't need more bodies. We need intelligent people with common sense who want to build something real.
               </p>
             </div>
 
