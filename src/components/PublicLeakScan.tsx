@@ -285,10 +285,10 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-3 overflow-hidden"
+                className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-3 space-y-3 overflow-hidden"
               >
                 {/* Animated brain visualization */}
-                <div className="relative h-32 rounded-md bg-background/40 border border-amber/20 overflow-hidden">
+                <div className="relative h-24 rounded-md bg-background/40 border border-amber/20 overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-px bg-amber/60 shadow-[0_0_8px_hsl(var(--amber))] animate-[detective-scan_2.4s_linear_infinite]" />
                   <div
                     className="absolute inset-0 opacity-20"
@@ -368,25 +368,25 @@ export const PublicLeakScan = () => {
                   <FileSearch className="w-4 h-4 text-amber flex-shrink-0" />
                   <div>
                     <p className="text-sm font-display font-semibold text-foreground">Working the case on {(() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return url; } })()}…</p>
-                    <p className="text-[11px] text-muted-foreground">Detective is muttering to itself while it works.</p>
+                    <p className="text-[10px] text-muted-foreground">Detective is muttering to itself while it works.</p>
                   </div>
                 </div>
 
                 {/* Live self-talk */}
-                <div className="rounded-md border border-amber/25 bg-background/60 p-2.5">
-                  <div className="flex items-center justify-between mb-1.5">
+                <div className="rounded-md border border-amber/25 bg-background/60 p-2">
+                  <div className="flex items-center justify-between mb-1">
                     <p className="text-[9px] font-mono uppercase tracking-wider text-amber/80 flex items-center gap-1">
                       <Brain className="w-3 h-3" /> internal monologue · live
                     </p>
                     <span className="text-[9px] font-mono text-muted-foreground">{selfTalk.length} thoughts</span>
                   </div>
-                  <div ref={talkRef} className="max-h-36 overflow-y-auto space-y-1 pr-1">
+                  <div ref={talkRef} className="max-h-28 overflow-y-auto space-y-1 pr-1">
                     {selfTalk.map((line, i) => {
                       const isLast = i === selfTalk.length - 1;
                       return (
                         <p
                           key={`${i}-${line.slice(0, 8)}`}
-                          className={`text-[11.5px] leading-snug font-case italic animate-fade-in ${
+                          className={`text-[11px] leading-snug font-case italic animate-fade-in ${
                             isLast ? 'text-amber' : 'text-muted-foreground'
                           }`}
                         >
