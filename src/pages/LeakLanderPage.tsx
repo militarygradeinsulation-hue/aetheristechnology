@@ -250,19 +250,19 @@ const LeakLanderPage: React.FC = () => {
                     window.open("/downloads/How-Aetheris-Can-Help-You.pdf", "_blank", "noopener");
                   }
                 }}
-                className="group flex items-center gap-3 px-4 py-3 hover:bg-amber/[0.04] transition-colors"
+                className="group flex items-center gap-3 px-3 py-2.5 hover:bg-amber/[0.04] transition-colors"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
-                  <Download className="w-5 h-5 text-amber" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-amber/15 ring-1 ring-amber/40">
+                  <Download className="w-4 h-4 text-amber" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
-                  <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
+                  <div className="font-forensic text-sm sm:text-base font-bold text-foreground leading-tight">
                     How Aetheris Can Help You
                   </div>
-                  <div className="text-xs text-muted-foreground">No email required. Tap to download.</div>
+                  <div className="text-[11px] text-muted-foreground">No email required. Tap to download.</div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
               </a>
 
               {/* Divider */}
