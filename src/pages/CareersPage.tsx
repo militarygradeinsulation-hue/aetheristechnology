@@ -121,9 +121,9 @@ const CareersPage = () => {
 
             {/* WHY + PERKS (merged) */}
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">Why Operators Choose Aetheris</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber text-center">What this actually is</p>
               <h2 className="text-3xl md:text-4xl font-bold font-display text-center text-foreground mt-2 mb-8">
-                We don't sell software. We sell <span className="text-amber">forensic clarity</span>.
+                We're not hiring. We're <span className="text-amber">selecting</span>.
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {WHY.map(({ icon: Icon, title, desc }, i) => (
