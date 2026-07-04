@@ -169,20 +169,20 @@ const DiagnosticPage: React.FC = () => {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
-        <main className="px-4 pt-28 pb-16">
+        <main className="px-4 pt-24 pb-10">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+            <div className="text-center mb-6">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                 Specialty manufacturers · $5M–$25M
               </div>
-              <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+              <h1 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
                 <span className="leak-audit-glow text-amber">The Leak Audit™.</span>
               </h1>
-              <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap, for $2,500 flat.
+              <p className="text-base md:text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                We map where your CRM, sales follow-up, and lead flow are losing you money. Written report with prioritized fixes, ROI projections, and an implementation roadmap — $2,500 flat.
               </p>
-              <div className="mt-8 max-w-3xl mx-auto">
-                <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
+              <div className="mt-4 max-w-3xl mx-auto">
+                <div className="relative w-full rounded-lg overflow-hidden shadow-xl border border-amber/20" style={{ paddingTop: '56.25%' }}>
                   <iframe
                     src="https://player.vimeo.com/video/1191299864?badge=0&autopause=0&player_id=0&app_id=58479"
                     loading="lazy"
@@ -195,28 +195,28 @@ const DiagnosticPage: React.FC = () => {
               </div>
             </div>
 
-            <section className="forensic-tile rounded-sm border border-crimson/40 p-6 mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
+            <section className="forensic-tile rounded-sm border border-crimson/40 p-4 mb-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
                 Why we're not another AI company
               </div>
-              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-4 leading-tight">
+              <h2 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-3 leading-tight">
                 Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
               </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="forensic-tile rounded-sm border border-border/60 p-4">
+              <div className="grid md:grid-cols-2 gap-3">
+                <div className="forensic-tile rounded-sm border border-border/60 p-3">
                   <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
-                  <ul className="space-y-1.5 text-sm text-foreground/65">
-                    <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
+                  <ul className="space-y-1 text-xs text-foreground/65">
+                    <li>• Sell a chatbot, dashboard, or "AI platform" license</li>
                     <li>• Hand you software and walk away</li>
                     <li>• Charge per seat, per token, per month, forever</li>
                     <li>• Pitch "AI transformation" with no operator on the floor</li>
-                    <li>• Generic playbooks from a junior consultant + GPT wrapper</li>
+                    <li>• Generic playbooks from a junior + GPT wrapper</li>
                     <li>• You do the work of finding what's broken</li>
                   </ul>
                 </div>
-                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-3">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
-                  <ul className="space-y-1.5 text-sm text-foreground/90">
+                  <ul className="space-y-1 text-xs text-foreground/90">
                     <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
                     <li>• You get a written leak map, not a software login</li>
                     <li>• One fixed fee. $2,500. Nothing else owed to read the report</li>
@@ -226,130 +226,121 @@ const DiagnosticPage: React.FC = () => {
                   </ul>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground italic mt-4 text-center">
-                AI is the microscope. The operator is the one holding it. That's the difference.
+              <p className="text-[11px] text-muted-foreground italic mt-2 text-center">
+                AI is the microscope. The operator holds it. That's the difference.
               </p>
             </section>
 
-            <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
-              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$2,500</div>
-              <p className="text-sm text-muted-foreground mt-2">Operator-led Leak Audit. Nothing ongoing required. No percentage-of-savings. Applied toward any engagement.</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+            <div className="forensic-tile rounded-sm border border-amber/40 p-5 mb-5 text-center">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Fixed fee</div>
+              <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground">$2,500</div>
+              <p className="text-xs text-muted-foreground mt-1.5">Operator-led. Nothing ongoing. No percentage-of-savings. Applied toward any engagement.</p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center mt-3">
                 <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                  <Button size="default" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                     Book a 15-min call <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </a>
                 <Link to="/methodology">
-                  <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
+                  <Button size="default" variant="outline" className="glass-hover border-amber/40 text-amber">
                     Read the methodology first
                   </Button>
                 </Link>
               </div>
-              <p className="text-xs text-muted-foreground mt-4">
-                Methodology document goes to every prospect before pricing.
-              </p>
             </div>
 
             {/* Objection / rebuttal */}
-            <section className="forensic-tile rounded-sm border border-crimson/50 p-6 md:p-8 mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
+            <section className="forensic-tile rounded-sm border border-crimson/50 p-4 md:p-5 mb-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
                 The objection we hear every time
               </div>
-              <blockquote className="font-forensic text-3xl md:text-4xl font-bold text-crimson leading-tight mb-2">
+              <blockquote className="font-forensic text-2xl md:text-3xl font-bold text-crimson leading-tight mb-1">
                 "That's just too expensive!"
               </blockquote>
-              <p className="text-sm text-muted-foreground italic mb-6">
-                Said by every CFO who hasn't done the math yet. Here's the math.
+              <p className="text-xs text-muted-foreground italic mb-4">
+                Said by every CFO who hasn't done the math. Here's the math.
               </p>
 
-              <h3 className="font-forensic text-xl md:text-2xl font-bold text-foreground mb-4">
-                $2,500 buys you what the alternative shelf charges $90K–$240K for, and most of them still won't touch your CRM data.
+              <h3 className="font-forensic text-base md:text-lg font-bold text-foreground mb-3">
+                $2,500 buys what the alternative shelf charges $90K–$240K for — and most still won't touch your CRM data.
               </h3>
 
-              <div className="overflow-x-auto mb-6">
-                <table className="w-full text-sm border-collapse">
+              <div className="overflow-x-auto mb-4">
+                <table className="w-full text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-amber/30">
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 pr-3">Line item</th>
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-2 px-3">The alternative shelf</th>
-                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-2 pl-3">Aetheris Leak Audit</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-1.5 pr-2">Line item</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-muted-foreground py-1.5 px-2">Alternative</th>
+                      <th className="text-left font-case text-[10px] uppercase tracking-widest text-amber py-1.5 pl-2">Aetheris</th>
                     </tr>
                   </thead>
                   <tbody className="text-foreground/85">
                     {[
-                      ['CRM audit + cleanup (HubSpot/Salesforce)', '$15,000 – $40,000', 'Included'],
-                      ['Sales process + pipeline diagnostic', '$20,000 – $50,000', 'Included'],
-                      ['Website + SEO/GEO + AI-visibility audit', '$8,000 – $25,000', 'Included'],
-                      ['Brand/messaging contradiction audit', '$10,000 – $20,000', 'Included'],
-                      ['Sales script + 7-touch follow-up build', '$6,000 – $15,000', 'Included'],
-                      ['90-day content calendar + first 14 drafts', '$8,000 – $20,000', 'Included'],
-                      ['Operator-graded scorecard + readout', '$10,000 – $30,000', 'Included'],
-                      ['Written report w/ ROI projections + roadmap', '$5,000 – $15,000', 'Included'],
-                      ['Source-data appendix (every CSV + query)', 'Rarely offered', 'Included'],
+                      ['CRM audit + cleanup (HubSpot/Salesforce)', '$15K – $40K', 'Included'],
+                      ['Sales process + pipeline diagnostic', '$20K – $50K', 'Included'],
+                      ['Website + SEO/GEO + AI-visibility audit', '$8K – $25K', 'Included'],
+                      ['Brand/messaging contradiction audit', '$10K – $20K', 'Included'],
+                      ['Sales script + 7-touch follow-up build', '$6K – $15K', 'Included'],
+                      ['90-day content calendar + first 14 drafts', '$8K – $20K', 'Included'],
+                      ['Operator-graded scorecard + readout', '$10K – $30K', 'Included'],
+                      ['Written report w/ ROI + roadmap', '$5K – $15K', 'Included'],
+                      ['Source-data appendix (CSVs + queries)', 'Rare', 'Included'],
                     ].map(([item, alt, us]) => (
                       <tr key={item} className="border-b border-border/30">
-                        <td className="py-2 pr-3">{item}</td>
-                        <td className="py-2 px-3 text-muted-foreground">{alt}</td>
-                        <td className="py-2 pl-3 text-amber font-semibold">{us}</td>
+                        <td className="py-1.5 pr-2">{item}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{alt}</td>
+                        <td className="py-1.5 pl-2 text-amber font-semibold">{us}</td>
                       </tr>
                     ))}
                     <tr className="border-t-2 border-amber/50">
-                      <td className="py-3 pr-3 font-bold text-foreground">TOTAL</td>
-                      <td className="py-3 px-3 font-bold text-muted-foreground">$82,000 – $215,000</td>
-                      <td className="py-3 pl-3 font-bold text-amber text-lg">$2,500 flat</td>
+                      <td className="py-2 pr-2 font-bold text-foreground">TOTAL</td>
+                      <td className="py-2 px-2 font-bold text-muted-foreground">$82K – $215K</td>
+                      <td className="py-2 pl-2 font-bold text-amber">$2,500 flat</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-4 mb-6">
-                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">Fast turnaround</div>
-                  <div className="text-xs text-muted-foreground mt-1">Operator-led. Others average 90–120 days to deliver less.</div>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="forensic-tile rounded-sm border border-amber/40 p-2.5 text-center">
+                  <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">Fast</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">vs. 90–120 days</div>
                 </div>
-                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">1 operator</div>
-                  <div className="text-xs text-muted-foreground mt-1">20+ years running real P&Ls. Not a junior + a GPT wrapper.</div>
+                <div className="forensic-tile rounded-sm border border-amber/40 p-2.5 text-center">
+                  <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">1 operator</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">20+ yrs · not a GPT wrapper</div>
                 </div>
-                <div className="forensic-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-forensic text-3xl font-bold text-amber">$0 ongoing</div>
-                  <div className="text-xs text-muted-foreground mt-1">Read the report. Walk away. Or open a case. Your call.</div>
+                <div className="forensic-tile rounded-sm border border-amber/40 p-2.5 text-center">
+                  <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">$0 ongoing</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">Read, walk, or open a case</div>
                 </div>
               </div>
 
-              <div className="forensic-tile rounded-sm border border-crimson/40 p-5">
-                <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-2">
-                  The real math
-                </div>
-                <p className="text-foreground/90 text-sm md:text-base leading-relaxed">
-                  The average $5M–$25M manufacturer we audit is leaking <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find the leak is a rounding error against what it's costing you to ignore it.</span> One recovered deal usually pays for the audit 100x over.
-                </p>
-                <p className="text-xs text-muted-foreground italic mt-3">
-                  If after the readout you don't see at least 3x the fee in identified, recoverable revenue, we'll tell you ourselves, before you sign anything else.
+              <div className="forensic-tile rounded-sm border border-crimson/40 p-3">
+                <p className="text-foreground/90 text-xs md:text-sm leading-relaxed">
+                  Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find it is a rounding error.</span> One recovered deal usually pays 100x.
                 </p>
               </div>
             </section>
 
-            <div className="grid md:grid-cols-2 gap-4 mb-10">
-              <section className="forensic-tile rounded-sm border border-border/60 p-6">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What you get</div>
-                <ul className="space-y-2.5">
+            <div className="grid md:grid-cols-2 gap-3 mb-5">
+              <section className="forensic-tile rounded-sm border border-border/60 p-4">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">What you get</div>
+                <ul className="space-y-1.5">
                   {INCLUDES.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/85">
-                      <Check className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                    <li key={i} className="flex gap-2 text-xs text-foreground/85">
+                      <Check className="w-3.5 h-3.5 text-amber shrink-0 mt-0.5" />
                       <span>{i}</span>
                     </li>
                   ))}
                 </ul>
               </section>
-              <section className="forensic-tile rounded-sm border border-border/60 p-6">
-                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">What it isn't</div>
-                <ul className="space-y-2.5">
+              <section className="forensic-tile rounded-sm border border-border/60 p-4">
+                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-2">What it isn't</div>
+                <ul className="space-y-1.5">
                   {NOT_INCLUDED.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/85">
-                      <X className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <li key={i} className="flex gap-2 text-xs text-foreground/85">
+                      <X className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                       <span>{i}</span>
                     </li>
                   ))}
@@ -358,13 +349,14 @@ const DiagnosticPage: React.FC = () => {
             </div>
 
 
-            <section className="forensic-tile rounded-sm border border-border/60 p-6 mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
-              <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
-              <p className="text-sm text-foreground/80">
-                You don't need to be on HubSpot or Salesforce. We work from a CSV export of contacts, deals, and activity. If you want us to run it live in your CRM, that's a paid upsell, not a prerequisite.
+            <section className="forensic-tile rounded-sm border border-border/60 p-4 mb-6">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">CRM-agnostic</div>
+              <h2 className="font-forensic text-lg font-bold text-foreground mb-1">Runs on a CSV export.</h2>
+              <p className="text-xs text-foreground/80">
+                No HubSpot or Salesforce required. We work from a CSV export of contacts, deals, and activity. Running it live in your CRM is a paid upsell, not a prerequisite.
               </p>
             </section>
+
 
           </div>
 
