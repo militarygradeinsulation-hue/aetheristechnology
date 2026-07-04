@@ -158,12 +158,14 @@ const LeakLanderPage: React.FC = () => {
                 <span className="relative">Intake Form</span>
               </Link>
             </Button>
-            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all">
-              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Calendar className="w-5 h-5 mr-2 relative" />
-                <span className="relative">Book the Diagnostic</span>
-                <ArrowRight className="ml-2 w-5 h-5 relative" />
-              </a>
+            <Button
+              size="lg"
+              onClick={() => setBookingOpen(true)}
+              className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all"
+            >
+              <Calendar className="w-5 h-5 mr-2 relative" />
+              <span className="relative">Book the Diagnostic</span>
+              <ArrowRight className="ml-2 w-5 h-5 relative" />
             </Button>
           </section>
 
