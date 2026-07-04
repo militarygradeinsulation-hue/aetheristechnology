@@ -190,21 +190,27 @@ export const PublicLeakScan = () => {
   const thoughtWords = ['scan', 'leaks', 'gaps', 'CTAs', 'forms', 'meta', 'bleed', 'angle', 'verdict'];
 
   return (
-    <section id="public-leak-scan" className="relative px-4 py-16 scroll-mt-24">
-      <div className="max-w-4xl mx-auto">
+    <section id="public-leak-scan" className="relative px-4 py-20 scroll-mt-24">
+      {/* Ambient spotlight to pull the eye */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-10">
+        <div className="w-[720px] h-[720px] max-w-full rounded-full bg-amber/10 blur-3xl" />
+      </div>
+      <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-            Free · No operator code required
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber/40 bg-amber/10 px-3 py-1 mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson" />
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+              Live Forensic Scan · Free · No Code Required
+            </span>
           </div>
-          <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground">
-            Scan your business. <span className="text-crimson italic">See every leak.</span>
+          <h2 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+            Scan your business.<br /><span className="text-crimson italic">See every leak.</span>
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Drop your email and company URL. The AI detective audits seven operational surfaces — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
-          </p>
-          <p className="text-[12px] md:text-sm text-amber/90 mt-3 max-w-2xl mx-auto inline-flex items-center justify-center gap-2 font-mono">
-            <Bookmark className="w-3.5 h-3.5" />
-            Use your email — we save your scans so you don't lose them when you come back.
+          <p className="text-base md:text-lg text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+            The AI detective audits <span className="text-foreground font-semibold">seven operational surfaces</span> — website, lead capture, sales process, follow-up speed, reputation, local visibility, and brand messaging — then hands you a downloadable forensic PDF.
           </p>
         </div>
 
