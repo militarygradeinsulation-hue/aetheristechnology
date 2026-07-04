@@ -214,7 +214,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             </div>
           )}
 
-          <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+          <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const locked = !unlock;
@@ -258,7 +258,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             })}
           </div>
 
-          <div className="mt-1.5 text-[9px] text-muted-foreground/80 leading-snug">
+          <div className="mt-1 text-[9px] text-muted-foreground/80 leading-snug">
             <span className="text-foreground/90 font-forensic">Pieces vs. puzzle.</span>{" "}
             The{" "}
             <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">
