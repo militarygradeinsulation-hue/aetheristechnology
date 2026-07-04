@@ -132,12 +132,13 @@ async function streamChat(
     return { role: m.role, content: m.content };
   });
 
+  const authHeader = await getUserAuthHeader();
   const res = await fetch(`${SUPABASE_URL}/functions/v1/aetheris-nexus-chat`, {
     method: "POST",
     signal,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${ANON_KEY}`,
+      Authorization: authHeader,
       apikey: ANON_KEY,
     },
     body: JSON.stringify({ messages: apiMessages }),
