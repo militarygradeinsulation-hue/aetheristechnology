@@ -414,15 +414,15 @@ export const PublicLeakScan = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber block mb-1.5">
+                    <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber block mb-1">
                       Your Email
                     </label>
                     <div className="relative group">
-                      <Bookmark className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
+                      <Bookmark className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
                       <Input
                         type="email"
                         value={email}
@@ -430,21 +430,21 @@ export const PublicLeakScan = () => {
                         placeholder="you@company.com"
                         maxLength={255}
                         required
-                        className="pl-11 h-12 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
+                        className="pl-10 h-11 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber block mb-1.5">
+                    <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber block mb-1">
                       Company Website
                     </label>
                     <div className="relative group">
-                      <Globe className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
+                      <Globe className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber/70 group-focus-within:text-amber transition-colors" />
                       <Input
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://yourcompany.com"
-                        className="pl-11 h-12 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
+                        className="pl-10 h-11 text-sm bg-background/80 border-amber/30 focus-visible:border-amber focus-visible:ring-2 focus-visible:ring-amber/40"
                         maxLength={500}
                         required
                       />
@@ -455,22 +455,22 @@ export const PublicLeakScan = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 md:h-14 text-sm md:text-base bg-gradient-to-r from-amber via-amber to-orange-500 text-background hover:from-amber/90 hover:to-orange-500/90 font-bold tracking-wide shadow-[0_10px_30px_-10px_hsl(var(--amber)/0.6)] hover:shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.8)] transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  className="w-full h-11 md:h-12 text-sm md:text-base bg-gradient-to-r from-amber via-amber to-orange-500 text-background hover:from-amber/90 hover:to-orange-500/90 font-bold tracking-wide shadow-[0_8px_24px_-8px_hsl(var(--amber)/0.5)] hover:shadow-[0_12px_32px_-10px_hsl(var(--amber)/0.7)] transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Search className="w-4 h-4 mr-2" /> Show Me My Leaks
                   <span className="ml-2 opacity-70">→</span>
                 </Button>
 
-                <div className="grid grid-cols-3 gap-3 pt-1">
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">No spam</span>
                   </div>
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <FileSearch className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">PDF report</span>
                   </div>
-                  <div className="flex flex-col items-center text-center gap-1 rounded-lg border border-amber/20 bg-background/40 p-2">
+                  <div className="flex flex-col items-center text-center gap-1 rounded-md border border-amber/20 bg-background/40 p-1.5">
                     <History className="w-3.5 h-3.5 text-amber" />
                     <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">Auto-saved</span>
                   </div>
