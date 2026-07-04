@@ -52,45 +52,37 @@ const Home = () => {
             </div>
           </section>
 
-          <section className="px-4 py-10 max-w-3xl mx-auto text-center">
+          <section className="px-4 py-8 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              Your business is bleeding{" "}
-              <span className="text-crimson italic">revenue</span>.
-              <br className="hidden md:block" /> You just can't see it from the inside.
+              We find where your business is{" "}
+              <span className="text-crimson italic">leaking money</span>.
             </h2>
-            <p className="mt-5 text-base md:text-lg text-muted-foreground leading-relaxed">
-              I find the leaks, price the bleed, and build the systems that close them.
-            </p>
-            <p className="mt-4 text-xs text-amber font-case uppercase tracking-widest">
-              Marine veteran · MS Marketing · Noblesville, Indiana
+            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+              Then we close it. $2,500 flat.
             </p>
           </section>
 
           {/* One offer · The Leak Audit */}
-          <section id="the-leak-audit" className="px-4 pb-12 scroll-mt-24">
-            <div className="max-w-5xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-10 relative overflow-hidden">
+          <section id="the-leak-audit" className="px-4 pb-10 scroll-mt-24">
+            <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
                 Active case
               </div>
-              <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-amber mb-3">
-                One offer · One operator · $2,500 flat
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                The offer
               </div>
-              <h2 className="font-forensic text-3xl md:text-5xl font-bold leading-tight mb-4">
-                The Leak Audit.
+              <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-6">
+                The Leak Audit — $2,500 flat.
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-6 leading-relaxed">
-                One operator. One diagnostic. Every leak named, priced, and prioritized.
-                The $2,500 applies toward whatever we build to close them.
-              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                 {[
-                  { icon: FileSearch, label: 'Forensic scan', body: 'Website, sales process, follow-up, brand, and revenue surfaces audited end-to-end.' },
-                  { icon: Gauge, label: 'Priced bleed', body: 'Every leak quantified in dollars per year so you know what each one is actually costing.' },
-                  { icon: CheckCircle2, label: 'Fix plan', body: 'A prioritized leak ledger you can hand to your team or hand back to us to execute.' },
+                  { icon: FileSearch, label: 'Scan', body: 'Website, sales, follow-up, ops — audited end-to-end.' },
+                  { icon: Gauge, label: 'Price', body: 'Every leak quantified in dollars per year.' },
+                  { icon: CheckCircle2, label: 'Fix', body: 'Prioritized ledger. Fee credits toward the build.' },
                 ].map((c) => (
                   <div key={c.label} className="rounded-sm border border-border/60 bg-background/40 p-4">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       <c.icon className="w-4 h-4 text-amber" />
                       <div className="font-case text-[10px] uppercase tracking-widest text-amber">{c.label}</div>
                     </div>
@@ -100,9 +92,9 @@ const Home = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link to="/leak-audit">
-                  <Button className="bg-amber text-background hover:bg-amber/90 font-semibold w-full sm:w-auto">
-                    See the Leak Audit <ArrowRight className="w-4 h-4 ml-1" />
+                <Link to="/leak-audit" className="w-full sm:w-auto">
+                  <Button className="bg-amber text-background hover:bg-amber/90 font-semibold w-full">
+                    Start the Leak Audit <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
                 <button
@@ -110,7 +102,7 @@ const Home = () => {
                   onClick={() => document.getElementById('public-leak-scan')?.scrollIntoView({ behavior: 'smooth' })}
                   className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10"
                 >
-                  <Search className="w-4 h-4" /> Run the free pre-scan first
+                  <Search className="w-4 h-4" /> Free 60-second pre-scan
                 </button>
               </div>
             </div>
@@ -121,7 +113,7 @@ const Home = () => {
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
             <div className="max-w-3xl mx-auto text-center">
               <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">
-                Or skip the scan — talk to the operator
+                Or talk to the operator
               </p>
               <button
                 onClick={() => {
