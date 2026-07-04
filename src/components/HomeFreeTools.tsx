@@ -175,19 +175,12 @@ export const HomeFreeTools: React.FC = () => {
           {!unlock ? (
             <form
               onSubmit={handleUnlock}
-              className="mt-8 sm:mt-10 rounded-sm border border-amber/20 bg-background/60 p-4 sm:p-5"
+              className="mt-4 sm:mt-5 rounded-sm border border-amber/20 bg-background/60 p-3 sm:p-4"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <Lock className="w-3.5 h-3.5 text-amber" />
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
-                  Unlock Access
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
+                <div className="space-y-1">
                   <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
-                    Email Identification
+                    Email
                   </label>
                   <input
                     type="text"
@@ -195,21 +188,21 @@ export const HomeFreeTools: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                     autoComplete="email"
                     maxLength={255}
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">
-                    Secure Contact
+                    Phone
                   </label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 555-5555"
-                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                    className="rounded-sm border border-border/60 bg-background/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                     autoComplete="tel"
                     maxLength={40}
                   />
@@ -217,14 +210,14 @@ export const HomeFreeTools: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!valid || submitting}
-                  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background font-mono uppercase tracking-[0.15em] text-xs px-6 py-2.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed group self-end sm:mt-5"
+                  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background font-mono uppercase tracking-[0.12em] text-[11px] px-5 py-2 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  <span className="relative z-10">{submitting ? "Unlocking…" : "Unlock Access"}</span>
+                  <span className="relative z-10">{submitting ? "Unlocking…" : "Unlock"}</span>
                   <div className="absolute inset-0 bg-background/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                 </button>
               </div>
-              <p className="mt-3 text-[11px] text-muted-foreground/70 text-center sm:text-left">
-                We use your email + phone so you can come back without losing your work — and so we can send the Leak Audit summary if you run the full diagnosis. No spam.
+              <p className="mt-2 text-[11px] text-muted-foreground/70">
+                We use this so you can return without losing work — and so we can send your Leak Audit summary. No spam.
               </p>
             </form>
           ) : (
