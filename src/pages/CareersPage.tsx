@@ -85,13 +85,16 @@ const CareersPage = () => {
                   <Lock className="w-3.5 h-3.5" /> One door in
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
-                  $40 access fee. Then the test. Then your application.
+                  $40. A test. Then we talk.
                 </h2>
+                <p className="text-sm text-foreground/85">
+                  We don't read resumes from people who skip the test. We don't interview people who won't spend 10 minutes learning what we do. The $40 access fee is the cheapest filter we have — and the state wants it for a 1099 role. If that offends you, this isn't the place.
+                </p>
                 <div className="grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
                     <p className="font-semibold text-foreground">Pay $40</p>
-                    <p className="text-muted-foreground text-xs mt-1">Filters tire-kickers. Credited toward your 1099 contractor expenses if hired.</p>
+                    <p className="text-muted-foreground text-xs mt-1">No exceptions. No "I'll pay later." No comp codes.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 2</p>
@@ -100,17 +103,17 @@ const CareersPage = () => {
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 3</p>
-                    <p className="font-semibold text-foreground">Submit application</p>
-                    <p className="text-muted-foreground text-xs mt-1">Resume + 150-word pitch. Joseph reviews every passing app within 48 hours.</p>
+                    <p className="font-semibold text-foreground">Show us you care</p>
+                    <p className="text-muted-foreground text-xs mt-1">Resume + short pitch. Joseph reviews every passing app. Most don't pass.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
                   <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span><strong className="text-foreground">No exceptions.</strong> No comp codes, no "I'll pay later." The fee is the commitment signal. Random apps without a paid test go in the trash.</span>
+                  <span><strong className="text-foreground">The fee isn't the problem. You are.</strong> $40 is less than one decent meal. If you can't commit that, you won't commit to building anything real.</span>
                 </div>
                 <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
                   <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Pay $40 & start the test →
+                    Pay $40 & take the test →
                   </Button>
                 </a>
               </CardContent>
