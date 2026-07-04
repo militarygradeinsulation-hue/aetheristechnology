@@ -148,8 +148,7 @@ export const ApplicantPressure: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Only <span className="text-foreground font-semibold">{spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'}</span> left this cycle.
-          Once they're gone, the test closes until the next opening.
+          <span className="text-foreground font-semibold">2,500+ applied. Most were a hard no.</span> Only {spotsLeft} {spotsLeft === 1 ? 'spot' : 'spots'} left this cycle. Once it closes, it closes.
         </p>
       </div>
     </div>
