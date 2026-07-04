@@ -220,30 +220,27 @@ export const HomeFreeTools: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+          <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const locked = !unlock;
               const Card = (
                 <div
-                  className={`relative h-full rounded-sm border p-1.5 transition-colors ${
+                  className={`relative h-full rounded-sm border px-1.5 py-1 transition-colors ${
                     locked
                       ? "border-border/60 bg-background/40 opacity-80"
                       : "border-amber/20 bg-background/50 hover:border-amber/50 hover:bg-amber/[0.04]"
                   }`}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     <Icon className="w-2.5 h-2.5 text-amber shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-forensic text-[10px] font-bold text-foreground leading-tight truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-forensic text-[9px] font-bold text-foreground leading-tight truncate">
                         {t.title}
                       </div>
-                      <div className="font-mono text-[7px] uppercase tracking-widest text-amber/80">
-                        {t.tag}
-                      </div>
                     </div>
-                    {locked && <Lock className="w-2.5 h-2.5 text-muted-foreground ml-auto shrink-0" />}
-                    {!locked && <ArrowRight className="w-2.5 h-2.5 text-amber ml-auto shrink-0" />}
+                    {locked && <Lock className="w-2 h-2 text-muted-foreground shrink-0" />}
+                    {!locked && <ArrowRight className="w-2 h-2 text-amber shrink-0" />}
                   </div>
                 </div>
               );
