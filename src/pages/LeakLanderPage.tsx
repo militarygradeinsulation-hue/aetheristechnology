@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ExternalLink, HelpCircle, ChevronDown, Play, Download, Users } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
@@ -14,24 +14,16 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 import { HomeFreeTools } from "@/components/HomeFreeTools";
 import { Navbar } from "@/components/Navbar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const LeakLanderPage: React.FC = () => {
   const [deckOpen, setDeckOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const navigate = useNavigate();
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.src = 'https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
 
   const handleLogoTap = () => {
     tapCountRef.current += 1;
@@ -166,12 +158,14 @@ const LeakLanderPage: React.FC = () => {
                 <span className="relative">Intake Form</span>
               </Link>
             </Button>
-            <Button asChild size="lg" className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all">
-              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Calendar className="w-5 h-5 mr-2 relative" />
-                <span className="relative">Book the Diagnostic</span>
-                <ArrowRight className="ml-2 w-5 h-5 relative" />
-              </a>
+            <Button
+              size="lg"
+              onClick={() => setBookingOpen(true)}
+              className="relative overflow-hidden h-14 px-8 text-base bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all"
+            >
+              <Calendar className="w-5 h-5 mr-2 relative" />
+              <span className="relative">Book the Diagnostic</span>
+              <ArrowRight className="ml-2 w-5 h-5 relative" />
             </Button>
           </section>
 
@@ -323,30 +317,6 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Booking embed. merged from /home */}
-          <section
-            id="book"
-            className="mt-12 max-w-3xl mx-auto scroll-mt-24 animate-fade-in"
-            style={{ animationDelay: "340ms", animationFillMode: "both" }}
-          >
-            <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3 text-center">
-              Or skip the scan — talk to the operator
-            </p>
-            <div className="mb-4 rounded-sm border border-amber/40 bg-background/60 px-4 py-3 text-sm leading-relaxed text-foreground/90">
-              <p className="font-semibold text-amber mb-1">Only schedule a meeting if I can help you.</p>
-              <p>I don't sell, and I don't entertain sales offers from people.</p>
-              <p className="mt-2 text-foreground/75">
-                Applicants must go through the <Link to="/careers" className="text-amber underline underline-offset-2 hover:text-amber/80">careers page</Link> only — not here.
-              </p>
-            </div>
-            <div className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4">
-              <div
-                className="meetings-iframe-container"
-                data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
-              />
-            </div>
-          </section>
-
           {/* Contact info. compact glass row */}
           <section
             className="relative mt-12 animate-fade-in"
@@ -376,6 +346,23 @@ const LeakLanderPage: React.FC = () => {
           </section>
         </div>
       </main>
+
+      <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+        <DialogContent className="max-w-3xl w-[95vw] p-0 border border-amber/30 bg-card/95 backdrop-blur-xl overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Book the Diagnostic</DialogTitle>
+            <DialogDescription>Pick a time to talk through your business leaks.</DialogDescription>
+          </DialogHeader>
+          <div className="p-2 md:p-4">
+            <iframe
+              src={`${BOOK_MEETING_URL}?embed=true`}
+              title="Book the Diagnostic"
+              className="w-full h-[70vh] min-h-[500px] rounded-sm border-0"
+              loading="lazy"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
