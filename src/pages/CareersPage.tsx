@@ -198,13 +198,13 @@ const CareersPage = () => {
             <Card className="bg-card/60 backdrop-blur border-amber/40">
               <CardContent className="p-6 sm:p-8 text-center space-y-4">
                 <div className="flex items-center justify-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Clock className="w-3.5 h-3.5" /> 10 minutes to apply
+                  <Clock className="w-3.5 h-3.5" /> 10 minutes to prove it
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground">
-                  Pay the $40. Pass the test. Send the resume.
+                  Pay $40. Pass the test. Make your pitch.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  That's the only path in. There is no contact form on this page on purpose.
+                  That's the only way in. No contact form. No shortcuts. No exceptions.
                 </p>
                 <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
