@@ -220,98 +220,99 @@ const LeakLanderPage: React.FC = () => {
           </div>
 
 
-
+          {/* Downloads + Deck — combined case-file card */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
-            <a
-              href="/downloads/How-Aetheris-Can-Help-You.pdf"
-              download="How-Aetheris-Can-Help-You.pdf"
-              target="_blank"
-              rel="noopener"
-              onClick={async (e) => {
-                try {
-                  e.preventDefault();
-                  const res = await fetch("/downloads/How-Aetheris-Can-Help-You.pdf", { cache: "no-store" });
-                  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                  const blob = await res.blob();
-                  const blobUrl = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = blobUrl;
-                  a.download = "How-Aetheris-Can-Help-You.pdf";
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-                } catch {
-                  // fall back to native navigation (opens PDF inline)
-                  window.open("/downloads/How-Aetheris-Can-Help-You.pdf", "_blank", "noopener");
-                }
-              }}
-              className="relative overflow-hidden group flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm hover:border-amber transition-all shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]"
-            >
-              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
-                <Download className="w-5 h-5 text-amber" />
-              </div>
-              <div className="relative flex-1 text-left">
-                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
-                <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
-                  How Aetheris Can Help You
+            <div className="rounded-xl border-2 border-amber/50 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] overflow-hidden">
+              {/* Row 1: One-tap PDF */}
+              <a
+                href="/downloads/How-Aetheris-Can-Help-You.pdf"
+                download="How-Aetheris-Can-Help-You.pdf"
+                target="_blank"
+                rel="noopener"
+                onClick={async (e) => {
+                  try {
+                    e.preventDefault();
+                    const res = await fetch("/downloads/How-Aetheris-Can-Help-You.pdf", { cache: "no-store" });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = blobUrl;
+                    a.download = "How-Aetheris-Can-Help-You.pdf";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                  } catch {
+                    window.open("/downloads/How-Aetheris-Can-Help-You.pdf", "_blank", "noopener");
+                  }
+                }}
+                className="group flex items-center gap-3 px-4 py-3 hover:bg-amber/[0.04] transition-colors"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/20 ring-1 ring-amber/50">
+                  <Download className="w-5 h-5 text-amber" />
                 </div>
-                <div className="text-xs text-muted-foreground">No email required. Tap to download.</div>
-              </div>
-              <ArrowRight className="relative w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
-            </a>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Free Download · PDF</div>
+                  <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                    How Aetheris Can Help You
+                  </div>
+                  <div className="text-xs text-muted-foreground">No email required. Tap to download.</div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              {/* Divider */}
+              <div className="h-px bg-amber/20" />
+
+              {/* Row 2: Deck toggle */}
+              <button
+                type="button"
+                onClick={() => setDeckOpen((v) => !v)}
+                className="group w-full flex items-center gap-3 px-4 py-3 hover:bg-amber/[0.04] transition-colors text-left"
+                aria-expanded={deckOpen}
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber/10 ring-1 ring-amber/40">
+                  <ChevronDown className={`w-5 h-5 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">Case File · Deck</div>
+                  <div className="font-forensic text-base sm:text-lg font-bold text-foreground leading-tight">
+                    Forensic Revenue Recovery
+                  </div>
+                  <div className="text-xs text-muted-foreground">{deckOpen ? "Tap to collapse." : "Tap to open the deck."}</div>
+                </div>
+              </button>
+
+              {deckOpen && (
+                <div className="border-t border-amber/20 animate-fade-in">
+                  <div className="px-4 py-3 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
+                    <a
+                      href="/downloads/Forensic-Revenue-Recovery.pdf"
+                      download
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
+                    >
+                      <Download className="w-4 h-4" /> Download PDF
+                    </a>
+                    <a
+                      href="/downloads/Forensic-Revenue-Recovery.pptx"
+                      download
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
+                    >
+                      <Download className="w-4 h-4" /> Download PPTX
+                    </a>
+                  </div>
+                  <div className="p-3">
+                    <ForensicDeckCarousel />
+                  </div>
+                </div>
+              )}
+            </div>
           </section>
 
-
-
-
-          {/* Forensic Revenue Recovery deck. standalone toggle */}
-          <section
-            className="mt-8 max-w-6xl mx-auto animate-fade-in"
-            style={{ animationDelay: "320ms", animationFillMode: "both" }}
-          >
-            <button
-              type="button"
-              onClick={() => setDeckOpen((v) => !v)}
-              className="group w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm px-5 py-4 hover:border-amber/70 transition-colors shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] text-center"
-              aria-expanded={deckOpen}
-            >
-              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-amber">
-                Case File · Deck
-              </div>
-              <h2 className="font-forensic text-base md:text-lg font-bold text-foreground inline-flex items-center gap-2">
-                Forensic Revenue Recovery
-                <ChevronDown className={`w-4 h-4 text-amber transition-transform ${deckOpen ? "rotate-180" : ""}`} />
-              </h2>
-            </button>
-
-            {deckOpen && (
-              <div className="mt-4 rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)] animate-fade-in">
-                <div className="px-4 py-3 flex flex-wrap items-center justify-center gap-3 border-b border-amber/20">
-                  <a
-                    href="/downloads/Forensic-Revenue-Recovery.pdf"
-                    download
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-amber/50 bg-amber/15 hover:bg-amber/25 text-amber font-mono text-xs uppercase tracking-wider transition-colors"
-                  >
-                    <Download className="w-4 h-4" /> Download PDF
-                  </a>
-                  <a
-                    href="/downloads/Forensic-Revenue-Recovery.pptx"
-                    download
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-white/20 bg-white/[0.06] hover:bg-white/[0.12] text-foreground font-mono text-xs uppercase tracking-wider transition-colors"
-                  >
-                    <Download className="w-4 h-4" /> Download PPTX
-                  </a>
-                </div>
-                <div className="p-3">
-                  <ForensicDeckCarousel />
-                </div>
-              </div>
-            )}
-          </section>
 
 
 
