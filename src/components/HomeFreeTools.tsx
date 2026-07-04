@@ -145,34 +145,36 @@ export const HomeFreeTools: React.FC = () => {
   return (
     <section
       id="free-tools"
-      className="mt-2 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
+      className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
       <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
-        <div className="p-2 sm:p-3">
+        <div className="p-1.5 sm:p-2">
           {/* Header lockup */}
-          <header className="flex items-center justify-between gap-3">
-            <h2 className="font-forensic text-xs sm:text-sm font-light text-foreground leading-tight">
+          <header className="flex items-center justify-between gap-2">
+            <h2 className="font-forensic text-[10px] sm:text-xs font-light text-foreground leading-tight">
               Free instruments. <span className="italic text-amber/80">On the house.</span>
             </h2>
-            <p className="hidden sm:block text-[10px] text-muted-foreground leading-snug text-right">
-              Unlock with email + phone.
-            </p>
+            {!unlock && (
+              <p className="hidden sm:block text-[9px] text-muted-foreground/70 leading-snug text-right">
+                Unlock with email + phone.
+              </p>
+            )}
           </header>
 
           {!unlock ? (
             <form
               onSubmit={handleUnlock}
-              className="mt-2 rounded-sm border border-amber/10 bg-background/50 p-2"
+              className="mt-1.5 rounded-sm border border-amber/10 bg-background/50 p-1.5"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-1.5 items-end">
                 <input
                   type="text"
                   inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email"
-                  className="rounded-sm border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                  className="rounded-sm border border-border/60 bg-background/80 px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                   autoComplete="email"
                   maxLength={255}
                 />
@@ -181,26 +183,26 @@ export const HomeFreeTools: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone"
-                  className="rounded-sm border border-border/60 bg-background/80 px-2.5 py-1.5 text-[11px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                  className="rounded-sm border border-border/60 bg-background/80 px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                   autoComplete="tel"
                   maxLength={40}
                 />
                 <button
                   type="submit"
                   disabled={!valid || submitting}
-                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[10px] px-3 py-1.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[9px] px-2.5 py-1 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "…" : "Unlock"}
                 </button>
               </div>
-              <p className="mt-1 text-[9px] text-muted-foreground/60">
+              <p className="mt-1 text-[8px] text-muted-foreground/60">
                 Unlock so you can return without losing work. No spam.
               </p>
             </form>
           ) : (
-            <div className="mt-2 flex items-center gap-2 rounded-sm border border-amber/10 bg-amber/5 px-2.5 py-1">
-              <Unlock className="w-3 h-3 text-amber" />
-              <span className="font-mono text-[9px] uppercase tracking-widest text-amber">
+            <div className="mt-1.5 flex items-center gap-1.5 rounded-sm border border-amber/10 bg-amber/5 px-2 py-1">
+              <Unlock className="w-2.5 h-2.5 text-amber" />
+              <span className="font-mono text-[8px] uppercase tracking-widest text-amber truncate">
                 Unlocked for {unlock.email}
               </span>
               <button
@@ -211,37 +213,37 @@ export const HomeFreeTools: React.FC = () => {
                   setEmail("");
                   setPhone("");
                 }}
-                className="ml-auto text-[10px] text-muted-foreground hover:text-amber underline underline-offset-2"
+                className="ml-auto text-[9px] text-muted-foreground hover:text-amber underline underline-offset-2"
               >
                 Switch
               </button>
             </div>
           )}
 
-          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+          <div className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const locked = !unlock;
               const Card = (
                 <div
-                  className={`relative h-full rounded-sm border p-2 transition-colors ${
+                  className={`relative h-full rounded-sm border p-1.5 transition-colors ${
                     locked
                       ? "border-border/60 bg-background/40 opacity-80"
                       : "border-amber/20 bg-background/50 hover:border-amber/50 hover:bg-amber/[0.04]"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-3 h-3 text-amber shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="w-2.5 h-2.5 text-amber shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-forensic text-[11px] font-bold text-foreground leading-tight truncate">
+                      <div className="font-forensic text-[10px] font-bold text-foreground leading-tight truncate">
                         {t.title}
                       </div>
-                      <div className="font-mono text-[8px] uppercase tracking-widest text-amber/80">
+                      <div className="font-mono text-[7px] uppercase tracking-widest text-amber/80">
                         {t.tag}
                       </div>
                     </div>
-                    {locked && <Lock className="w-3 h-3 text-muted-foreground ml-auto shrink-0" />}
-                    {!locked && <ArrowRight className="w-3 h-3 text-amber ml-auto shrink-0" />}
+                    {locked && <Lock className="w-2.5 h-2.5 text-muted-foreground ml-auto shrink-0" />}
+                    {!locked && <ArrowRight className="w-2.5 h-2.5 text-amber ml-auto shrink-0" />}
                   </div>
                 </div>
               );
@@ -265,7 +267,7 @@ export const HomeFreeTools: React.FC = () => {
             })}
           </div>
 
-          <div className="mt-2 text-[10px] text-muted-foreground/80 leading-snug">
+          <div className="mt-1.5 text-[9px] text-muted-foreground/80 leading-snug">
             <span className="text-foreground/90 font-forensic">Pieces vs. puzzle.</span>{" "}
             The{" "}
             <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">
