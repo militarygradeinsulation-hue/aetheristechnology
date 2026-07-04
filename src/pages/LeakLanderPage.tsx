@@ -211,6 +211,9 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-amber/80">
                 Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
               </p>
+              <p className="mt-1 text-[10px] font-mono uppercase tracking-[0.2em] text-foreground/80">
+                Joseph ~AI Architect · MS, BA · IBM AI Certified · Aetheris.Technology
+              </p>
             </div>
           </section>
 
