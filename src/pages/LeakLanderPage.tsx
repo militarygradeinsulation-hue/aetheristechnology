@@ -198,17 +198,17 @@ const LeakLanderPage: React.FC = () => {
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "260ms", animationFillMode: "both" }}
           >
-            <div className="rounded-xl border-2 border-amber/40 bg-card/95 backdrop-blur-sm p-4 sm:p-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
-              <div className="font-case text-[9px] uppercase tracking-[0.3em] text-amber mb-2">
+            <div className="rounded-lg border border-amber/30 bg-card/80 backdrop-blur-sm p-3 sm:p-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
+              <div className="font-case text-[9px] uppercase tracking-[0.3em] text-amber mb-1.5">
                 The operator behind the button
               </div>
-              <h2 className="font-forensic text-xl md:text-2xl font-bold text-foreground leading-tight mb-3">
+              <h2 className="font-forensic text-lg md:text-xl font-bold text-foreground leading-tight mb-2">
                 An operator — <span className="text-amber italic">not an agency</span>, not a chatbot.
               </h2>
-              <p className="text-foreground/90 text-sm leading-relaxed italic border-l-2 border-amber/60 pl-4">
+              <p className="text-foreground/90 text-sm leading-relaxed italic border-l-2 border-amber/60 pl-3">
                 "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks. You don't run anything. You get the leak sealed."
               </p>
-              <p className="mt-3 text-[11px] font-mono uppercase tracking-widest text-amber/80">
+              <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-amber/80">
                 Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
               </p>
             </div>
