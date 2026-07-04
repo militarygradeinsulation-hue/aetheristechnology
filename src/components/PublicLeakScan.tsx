@@ -268,12 +268,12 @@ export const PublicLeakScan = () => {
         )}
 
 
-        <div className="relative rounded-2xl border-2 border-amber/50 p-4 md:p-6 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-xl shadow-[0_0_60px_-15px_hsl(var(--amber)/0.35)]">
+        <div className="relative rounded-xl border border-amber/30 p-3 md:p-4 bg-gradient-to-br from-background/90 via-background/70 to-amber/5 backdrop-blur-sm shadow-[0_0_40px_-12px_hsl(var(--amber)/0.25)]">
           {/* Corner brackets — case-file styling */}
-          <div className="pointer-events-none absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-amber rounded-tl-2xl" />
-          <div className="pointer-events-none absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-amber rounded-tr-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-amber rounded-bl-2xl" />
-          <div className="pointer-events-none absolute -bottom-px -right-px w-4 h-4 border-b-2 border-r-2 border-amber rounded-br-2xl" />
+          <div className="pointer-events-none absolute -top-px -left-px w-3.5 h-3.5 border-t border-l border-amber rounded-tl-xl" />
+          <div className="pointer-events-none absolute -top-px -right-px w-3.5 h-3.5 border-t border-r border-amber rounded-tr-xl" />
+          <div className="pointer-events-none absolute -bottom-px -left-px w-3.5 h-3.5 border-b border-l border-amber rounded-bl-xl" />
+          <div className="pointer-events-none absolute -bottom-px -right-px w-3.5 h-3.5 border-b border-r border-amber rounded-br-xl" />
 
           <AnimatePresence mode="wait">
             {loading ? (
