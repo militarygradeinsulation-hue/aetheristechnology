@@ -25,14 +25,16 @@ const StaffEntry: React.FC = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
       <div
-        className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-40 animate-signature-drift"
+        className="absolute inset-0 bg-center bg-no-repeat bg-[length:90%_auto] opacity-40 animate-signature-drift"
         style={{
           backgroundImage: `url(${signatureBg.url})`,
-          filter: 'invert(1) brightness(3) contrast(1.5)',
+          mixBlendMode: 'screen',
+          filter: 'sepia(1) saturate(2) hue-rotate(5deg) brightness(1.2)',
         }}
         aria-hidden="true"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" aria-hidden="true" />
+
 
 
 
