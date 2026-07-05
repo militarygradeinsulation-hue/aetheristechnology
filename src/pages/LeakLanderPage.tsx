@@ -60,10 +60,11 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Your business is bleeding money. Aetheris Business Forensics."
-          description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
+          title="Your business is leaking money. Aetheris finds where. $2,500 flat."
+          description="The Leak Audit — a flat-fee forensic investigation of where your business bleeds revenue. Findings in writing. Fee credits toward the fix."
           path="/"
         />
+
 
         {/* LinkedIn premium offer banner — slim, above navbar */}
         <a
