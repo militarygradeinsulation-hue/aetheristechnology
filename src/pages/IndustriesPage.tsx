@@ -335,7 +335,7 @@ const IndustryModal: React.FC<{ industry: IndustryLeak | null; onClose: () => vo
   const Icon = industry.icon;
   return (
     <Dialog open={!!industry} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-3xl w-full p-0 gap-0 border border-amber/30 bg-background/95 overflow-hidden">
+      <DialogContent className="max-w-3xl w-full p-0 gap-0 border border-amber/30 bg-background/95 max-h-[90vh] overflow-y-auto">
         <div className="relative overflow-hidden border-b border-amber/20">
           <img
             src={industry.image}
