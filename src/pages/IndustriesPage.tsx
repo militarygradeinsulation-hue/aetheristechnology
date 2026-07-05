@@ -561,6 +561,7 @@ const IndustriesPage: React.FC = () => {
         <Footer />
       </div>
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      <IndustryModal industry={selectedIndustry} onClose={() => setSelectedIndustry(null)} />
     </div>
   );
 };
