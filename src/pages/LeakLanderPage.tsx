@@ -60,10 +60,11 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Your business is bleeding money. Aetheris Business Forensics."
-          description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
+          title="Your business is leaking money. Aetheris finds where. $2,500 flat."
+          description="The Leak Audit — a flat-fee forensic investigation of where your business bleeds revenue. Findings in writing. Fee credits toward the fix."
           path="/"
         />
+
 
         {/* LinkedIn premium offer banner — slim, above navbar */}
         <a
@@ -126,7 +127,7 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* HERO — raw rewrite */}
+          {/* HERO — tight */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
@@ -136,16 +137,11 @@ const LeakLanderPage: React.FC = () => {
               <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Indianapolis · US-Wide</span>
               <span className="h-px w-8 bg-amber/50" />
             </div>
-            <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-              Your business is <span className="text-crimson italic">bleeding money</span>.
-              <br className="hidden sm:block" />
-              <span className="text-foreground/85"> You just haven't found the wound yet.</span>
+            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+              Your business is <span className="text-crimson italic">leaking money</span>.
             </h1>
-            <p className="mt-4 text-sm sm:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-              We find it. We show you the number. Then we fix it — or we tell you you're not fixable and walk.
-            </p>
-            <p className="mt-3 text-sm text-foreground/70 max-w-2xl mx-auto leading-relaxed">
-              We are not a marketing agency. We are not consultants who bill you to agree with you. We run forensics on your entire operation — lead flow, sales process, follow-up, systems, brand, ops — and we put the evidence on the table whether you like what it says or not.
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-xl mx-auto">
+              We find it. We price it. Then we close it — <span className="text-amber font-semibold">$2,500 flat</span>.
             </p>
           </section>
 
@@ -154,22 +150,23 @@ const LeakLanderPage: React.FC = () => {
             className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 animate-fade-in"
             style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="default" className="relative overflow-hidden h-11 px-6 text-sm border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all">
+            <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
               <Link to="/leak-audit">
-                <FileText className="w-4 h-4 mr-2 text-amber relative" />
-                <span className="relative">Run the Free Leak Audit</span>
+                <FileText className="w-4 h-4 mr-2 text-amber" />
+                Free 60-sec Pre-Scan
               </Link>
             </Button>
             <Button
               size="default"
               onClick={() => setBookingOpen(true)}
-              className="relative overflow-hidden h-11 px-6 text-sm bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all"
+              className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
             >
-              <Calendar className="w-4 h-4 mr-2 relative" />
-              <span className="relative">Open a Case — $18,500</span>
-              <ArrowRight className="ml-2 w-4 h-4 relative" />
+              <Calendar className="w-4 h-4 mr-2" />
+              Book the Leak Audit — $2,500
+              <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </section>
+
 
           {/* THE FILTER — unmissable */}
           <section
@@ -182,11 +179,12 @@ const LeakLanderPage: React.FC = () => {
                 The Filter.
               </h2>
               <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
-                If <span className="text-crimson font-semibold">$18,500</span> to find out exactly where your company is hemorrhaging revenue sounds "expensive," you are not our client. Close this tab. No hard feelings — we just don't waste each other's time.
+                If <span className="text-crimson font-semibold">$2,500</span> to find out exactly where your company is bleeding revenue sounds "expensive," you are not our client. Close this tab.
               </p>
               <p className="mt-3 text-sm text-foreground/70 leading-relaxed">
-                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span>, every year, compounding while they "think about it."
+                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span> — every year it stays unfixed.
               </p>
+
             </div>
           </section>
 
@@ -265,15 +263,15 @@ const LeakLanderPage: React.FC = () => {
           >
             <div className="text-center mb-4">
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Offer</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">No menus. No packages. No negotiation.</h2>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">One flat fee. No packages. No negotiation.</h2>
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
               <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 01</div>
-                <div className="font-forensic text-lg font-bold mt-1">Free Leak Audit</div>
+                <div className="font-forensic text-lg font-bold mt-1">Free Pre-Scan</div>
                 <div className="font-mono text-2xl text-foreground mt-2">$0</div>
-                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">Self-scan. Thirty seconds. It will sting. That's the point.</p>
+                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">60-second self-scan. It will sting. That's the point.</p>
                 <Link to="/leak-audit" className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline">
                   Run it now <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -281,28 +279,29 @@ const LeakLanderPage: React.FC = () => {
 
               <div className="rounded-sm border-2 border-amber/60 bg-amber/[0.06] backdrop-blur-sm p-5 flex flex-col shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.4)]">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 02 · Flagship</div>
-                <div className="font-forensic text-lg font-bold mt-1">21-Day Revenue Diagnostic</div>
-                <div className="font-mono text-2xl text-amber mt-2">$18,500 <span className="text-xs text-foreground/60">flat</span></div>
+                <div className="font-forensic text-lg font-bold mt-1">The Leak Audit</div>
+                <div className="font-mono text-2xl text-amber mt-2">$2,500 <span className="text-xs text-foreground/60">flat</span></div>
                 <p className="text-sm text-foreground/80 mt-3 leading-relaxed flex-1">
-                  We open a case on your business. 21 days. Full forensic workup. You get the evidence file: what's broken, what it costs you annually, and the fix sequence — whether you hire us to execute or not. <span className="text-amber">Every dollar credits 1:1 toward implementation.</span>
+                  Operator-led forensic workup: website, sales, follow-up, systems, ops. Every leak documented with a dollar figure. <span className="text-amber">Fee credits 1:1 toward the fix.</span>
                 </p>
                 <button onClick={() => setBookingOpen(true)} className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline text-left">
-                  Open a case <ArrowRight className="w-3.5 h-3.5" />
+                  Book the audit <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 03</div>
-                <div className="font-forensic text-lg font-bold mt-1">Active Case</div>
+                <div className="font-forensic text-lg font-bold mt-1">Implementation</div>
                 <div className="font-mono text-2xl text-foreground mt-2">$15,000<span className="text-xs text-foreground/60">/mo</span></div>
-                <div className="font-mono text-[10px] text-foreground/60 mt-1">3-month minimum · Diagnostic clients only</div>
-                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">We don't implement blind, and you can't skip the autopsy. We build the systems — AI, automation, CRM, follow-up infrastructure — accountable to the numbers in your evidence file.</p>
+                <div className="font-mono text-[10px] text-foreground/60 mt-1">3-month minimum · Audit clients only</div>
+                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">We build the systems — AI, automation, CRM, follow-up — accountable to the numbers in your audit.</p>
               </div>
             </div>
 
             <p className="mt-4 text-center text-sm text-foreground/70 leading-relaxed max-w-2xl mx-auto">
-              That's it. There is no fourth option, no "lite" tier, no payment plan. If the math doesn't work for you, the leak isn't big enough to matter yet — <span className="text-amber">come back when it is</span>.
+              That's it. No "lite" tier, no payment plan. If $2,500 to find the leak feels heavy, the leak isn't big enough yet — <span className="text-amber">come back when it is</span>.
             </p>
+
           </section>
 
           {/* WHY WE'RE LIKE THIS */}
@@ -370,7 +369,7 @@ const LeakLanderPage: React.FC = () => {
                   <Link to="/leak-audit">Free Leak Audit</Link>
                 </Button>
                 <Button size="default" onClick={() => setBookingOpen(true)} className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
-                  Open a Case — $18,500 <ArrowRight className="ml-2 w-4 h-4" />
+                  Book the Leak Audit — $2,500 <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
               <p className="mt-4 text-xs text-foreground/60 italic">
