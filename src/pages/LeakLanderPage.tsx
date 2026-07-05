@@ -8,8 +8,8 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
-import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
-import signatureCard from "@/assets/joseph-toney-signature-card.jpg";
+
+import leakHeroBanner from "@/assets/hero-leak-banner.jpg";
 import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
@@ -119,8 +119,8 @@ const LeakLanderPage: React.FC = () => {
             style={{ animationDelay: "80ms", animationFillMode: "both" }}
           >
             <img
-              src={signatureCard}
-              alt="Joseph Toney — AI Architect, IBM AI Certified, Aetheris Technology"
+              src={leakHeroBanner}
+              alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks and turns real data into profit."
               className="w-full h-auto rounded-sm border border-amber/20 shadow-xl"
               loading="eager"
               fetchPriority="high"
