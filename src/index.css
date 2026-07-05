@@ -863,3 +863,14 @@ input, textarea, [contenteditable="true"] {
 html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
 /* Disable text selection on UI chrome (keep on content) */
 .no-select { -webkit-user-select: none; user-select: none; }
+
+/* ─── Industries mind-map animations ─── */
+@keyframes mindmap-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(1.6); opacity: 0;   }
+  100% { transform: scale(1.6); opacity: 0;   }
+}
+@keyframes mindmap-flow {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -20; }
+}
