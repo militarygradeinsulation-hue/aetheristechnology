@@ -127,7 +127,7 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* HERO — raw rewrite */}
+          {/* HERO — tight */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
@@ -137,16 +137,11 @@ const LeakLanderPage: React.FC = () => {
               <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Indianapolis · US-Wide</span>
               <span className="h-px w-8 bg-amber/50" />
             </div>
-            <h1 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
-              Your business is <span className="text-crimson italic">bleeding money</span>.
-              <br className="hidden sm:block" />
-              <span className="text-foreground/85"> You just haven't found the wound yet.</span>
+            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+              Your business is <span className="text-crimson italic">leaking money</span>.
             </h1>
-            <p className="mt-4 text-sm sm:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-              We find it. We show you the number. Then we fix it — or we tell you you're not fixable and walk.
-            </p>
-            <p className="mt-3 text-sm text-foreground/70 max-w-2xl mx-auto leading-relaxed">
-              We are not a marketing agency. We are not consultants who bill you to agree with you. We run forensics on your entire operation — lead flow, sales process, follow-up, systems, brand, ops — and we put the evidence on the table whether you like what it says or not.
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-xl mx-auto">
+              We find it. We price it. Then we close it — <span className="text-amber font-semibold">$2,500 flat</span>.
             </p>
           </section>
 
@@ -155,22 +150,23 @@ const LeakLanderPage: React.FC = () => {
             className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 animate-fade-in"
             style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="default" className="relative overflow-hidden h-11 px-6 text-sm border-white/20 bg-gradient-to-br from-white/[0.10] via-white/[0.04] to-transparent backdrop-blur-xl ring-1 ring-inset ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.18)] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider transition-all">
+            <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
               <Link to="/leak-audit">
-                <FileText className="w-4 h-4 mr-2 text-amber relative" />
-                <span className="relative">Run the Free Leak Audit</span>
+                <FileText className="w-4 h-4 mr-2 text-amber" />
+                Free 60-sec Pre-Scan
               </Link>
             </Button>
             <Button
               size="default"
               onClick={() => setBookingOpen(true)}
-              className="relative overflow-hidden h-11 px-6 text-sm bg-gradient-to-br from-amber via-amber to-amber/75 text-background hover:from-amber hover:to-amber/85 font-bold font-mono uppercase tracking-wider ring-1 ring-inset ring-white/30 shadow-[0_15px_40px_-10px_hsl(var(--amber)/0.7),inset_0_1px_0_0_rgba(255,255,255,0.45)] transition-all"
+              className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
             >
-              <Calendar className="w-4 h-4 mr-2 relative" />
-              <span className="relative">Open a Case — $18,500</span>
-              <ArrowRight className="ml-2 w-4 h-4 relative" />
+              <Calendar className="w-4 h-4 mr-2" />
+              Book the Leak Audit — $2,500
+              <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </section>
+
 
           {/* THE FILTER — unmissable */}
           <section
