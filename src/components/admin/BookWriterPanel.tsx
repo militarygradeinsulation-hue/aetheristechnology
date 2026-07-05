@@ -1,17 +1,37 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { BookOpen, Loader2, Wand2, Download, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { BookOpen, Loader2, Wand2, Download, FileText, ChevronDown, ChevronRight, Check, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { saveToAdminLibrary, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { saveToAdminLibrary, updateAdminLibraryItem, listAdminLibrary, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
 
 type Beat = string;
 type Chapter = { number: number; title: string; hook?: string; beats?: Beat[]; body?: string; generating?: boolean };
 type Outline = { title: string; subtitle?: string; premise?: string; chapters: Chapter[] };
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+const LOCAL_DRAFT_KEY = 'aetheris.bookWriter.autosave.v2';
+
+function cleanOutline(o: Outline): Outline {
+  return {
+    ...o,
+    chapters: (o.chapters || []).map((c) => ({ ...c, generating: false })),
+  };
+}
+
+function isOutline(value: unknown): value is Outline {
+  if (!value || typeof value !== 'object') return false;
+  const rec = value as Record<string, unknown>;
+  return typeof rec.title === 'string' && Array.isArray(rec.chapters);
+}
+
+function readRecord(obj: unknown): Record<string, unknown> {
+  return obj && typeof obj === 'object' ? obj as Record<string, unknown> : {};
+}
 
 function readString(obj: unknown, key: string): string {
   if (!obj || typeof obj !== 'object') return '';
@@ -26,6 +46,23 @@ function entriesFromLibrary(items: AdminLibraryItem[]) {
     body: readString(it.output_data, 'body'),
     mode: readString(it.output_data, 'mode'),
   })).filter((e) => e.body);
+}
+
+function buildManuscriptFromOutline(outline: Outline): string {
+  const o = cleanOutline(outline);
+  const lines: string[] = [];
+  lines.push(`# ${o.title}`);
+  if (o.subtitle) lines.push(`\n_${o.subtitle}_`);
+  if (o.premise) lines.push(`\n${o.premise}`);
+  lines.push('\n---\n\n## Table of Contents\n');
+  o.chapters.forEach((c) => lines.push(`- Chapter ${c.number}. ${c.title}`));
+  lines.push('\n---\n');
+  o.chapters.forEach((c) => {
+    lines.push('\n');
+    lines.push(c.body ? c.body : `# Chapter ${c.number}. ${c.title}\n\n_[not yet drafted]_\n\nHook: ${c.hook || ''}\n\n${(c.beats || []).map((b) => `- ${b}`).join('\n')}`);
+    lines.push('\n');
+  });
+  return lines.join('\n');
 }
 
 async function invokeBook(payload: Record<string, unknown>) {
@@ -47,11 +84,128 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
   const [outline, setOutline] = useState<Outline | null>(null);
   const [buildingOutline, setBuildingOutline] = useState(false);
   const [openChapter, setOpenChapter] = useState<number | null>(null);
+  const [savedLibraryId, setSavedLibraryId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<string>('');
 
   const [autoWriting, setAutoWriting] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const savedLibraryIdRef = useRef<string | null>(null);
+  const latestOutlineRef = useRef<Outline | null>(null);
 
   const entries = useMemo(() => entriesFromLibrary(library), [library]);
+
+  useEffect(() => { savedLibraryIdRef.current = savedLibraryId; }, [savedLibraryId]);
+  useEffect(() => { latestOutlineRef.current = outline; }, [outline]);
+
+  const writeLocalDraft = useCallback((currentOutline: Outline | null = latestOutlineRef.current) => {
+    try {
+      window.localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify({
+        savedLibraryId: savedLibraryIdRef.current,
+        bookTitle,
+        audience,
+        styleNotes,
+        outline: currentOutline ? cleanOutline(currentOutline) : null,
+        updatedAt: new Date().toISOString(),
+      }));
+    } catch {
+      // Local autosave is best-effort; backend save still runs at checkpoints.
+    }
+  }, [audience, bookTitle, styleNotes]);
+
+  useEffect(() => {
+    writeLocalDraft(outline);
+  }, [audience, bookTitle, outline, savedLibraryId, styleNotes, writeLocalDraft]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const hydrate = async () => {
+      let localUpdated = '';
+      try {
+        const raw = window.localStorage.getItem(LOCAL_DRAFT_KEY);
+        if (raw) {
+          const parsed = readRecord(JSON.parse(raw));
+          localUpdated = String(parsed.updatedAt || '');
+          if (typeof parsed.bookTitle === 'string') setBookTitle(parsed.bookTitle);
+          if (typeof parsed.audience === 'string') setAudience(parsed.audience);
+          if (typeof parsed.styleNotes === 'string') setStyleNotes(parsed.styleNotes);
+          if (typeof parsed.savedLibraryId === 'string') setSavedLibraryId(parsed.savedLibraryId);
+          if (isOutline(parsed.outline)) {
+            const restored = cleanOutline(parsed.outline);
+            setOutline(restored);
+            setOpen(true);
+            setOpenChapter(restored.chapters.findIndex((c) => !c.body));
+          }
+        }
+      } catch {
+        // Ignore corrupt local drafts and fall back to the library.
+      }
+
+      try {
+        const items = await listAdminLibrary({ toolType: 'book_manuscript', includeData: true, maxPages: 1 });
+        if (cancelled) return;
+        const latest = items.find((item) => isOutline(readRecord(item.output_data).outline));
+        if (!latest) return;
+        const out = readRecord(latest.output_data);
+        const serverUpdated = String(out.updatedAt || latest.created_at || '');
+        if (localUpdated && serverUpdated && Date.parse(localUpdated) > Date.parse(serverUpdated)) return;
+        const restored = cleanOutline(out.outline as Outline);
+        setSavedLibraryId(latest.id);
+        setBookTitle(latest.title || restored.title || bookTitle);
+        if (typeof out.audience === 'string') setAudience(out.audience);
+        if (typeof out.styleNotes === 'string') setStyleNotes(out.styleNotes);
+        setOutline(restored);
+        setOpen(true);
+        setOpenChapter(restored.chapters.findIndex((c) => !c.body));
+        setLastSavedAt(serverUpdated);
+        setSaveState('saved');
+      } catch {
+        // Existing library draft is optional; local draft already restored if present.
+      }
+    };
+    void hydrate();
+    return () => { cancelled = true; };
+    // Intentionally runs once on mount so an async library load cannot keep
+    // overwriting active edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const persistDraft = useCallback(async (currentOutline: Outline, reason: string) => {
+    const cleaned = cleanOutline(currentOutline);
+    const updatedAt = new Date().toISOString();
+    writeLocalDraft(cleaned);
+    setSaveState('saving');
+    const output_data = {
+      outline: cleaned,
+      manuscript: buildManuscriptFromOutline(cleaned),
+      audience,
+      styleNotes,
+      updatedAt,
+      saveReason: reason,
+      draftedChapters: cleaned.chapters.filter((c) => Boolean(c.body)).length,
+      totalChapters: cleaned.chapters.length,
+    };
+    try {
+      const existingId = savedLibraryIdRef.current;
+      if (existingId) {
+        await updateAdminLibraryItem(existingId, output_data, { title: cleaned.title || bookTitle || 'Book Manuscript' });
+      } else {
+        const item = await saveToAdminLibrary({
+          tool_type: 'book_manuscript',
+          title: cleaned.title || bookTitle || 'Book Manuscript',
+          input_data: { audience, styleNotes, entryCount: entries.length, autosaved: true },
+          output_data,
+        });
+        savedLibraryIdRef.current = item.id;
+        setSavedLibraryId(item.id);
+      }
+      setLastSavedAt(updatedAt);
+      setSaveState('saved');
+    } catch (e) {
+      setSaveState('error');
+      console.warn('Book autosave failed', e);
+    }
+  }, [audience, bookTitle, entries.length, styleNotes, writeLocalDraft]);
 
   const draftChapterInternal = async (
     idx: number,
@@ -72,11 +226,13 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
       const body = String((data as { chapter?: string }).chapter || '');
       const next = chapters.map((c, i) => i === idx ? { ...c, body, generating: false } : c);
       setOutline((prev) => prev ? ({ ...prev, chapters: next }) : prev);
+      await persistDraft({ ...(latestOutlineRef.current || { title: bookTitle, chapters: next }), chapters: next }, `chapter-${ch.number}`);
       return next;
     } catch (e) {
       toast({ title: `Chapter ${ch.number} failed`, description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
       const next = chapters.map((c, i) => i === idx ? { ...c, generating: false } : c);
       setOutline((prev) => prev ? ({ ...prev, chapters: next }) : prev);
+      writeLocalDraft({ ...(latestOutlineRef.current || { title: bookTitle, chapters: next }), chapters: next });
       return next;
     }
   };
@@ -95,6 +251,7 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
       setProgress({ done: i + 1, total: chapters.length });
     }
     setAutoWriting(false);
+    await persistDraft({ ...o, chapters }, 'complete');
     toast({ title: 'Manuscript complete', description: `${chapters.length} chapters drafted.` });
   };
 
@@ -111,10 +268,12 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
         entries: entries.slice(0, 60),
       });
       const o = (data as { outline: Outline }).outline;
-      setOutline(o);
+      const cleaned = cleanOutline(o);
+      setOutline(cleaned);
+      await persistDraft(cleaned, 'outline');
       toast({ title: 'Outline drafted — writing now', description: `${o.chapters?.length || 0} chapters queued.` });
       // Auto-start writing the full book, chapter by chapter.
-      void autoWriteAll(o);
+      void autoWriteAll(cleaned);
     } catch (e) {
       toast({ title: 'Outline failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     } finally {
@@ -135,22 +294,7 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
   };
 
 
-  const buildManuscript = (): string => {
-    if (!outline) return '';
-    const lines: string[] = [];
-    lines.push(`# ${outline.title}`);
-    if (outline.subtitle) lines.push(`\n_${outline.subtitle}_`);
-    if (outline.premise) lines.push(`\n${outline.premise}`);
-    lines.push('\n---\n\n## Table of Contents\n');
-    outline.chapters.forEach((c) => lines.push(`- Chapter ${c.number}. ${c.title}`));
-    lines.push('\n---\n');
-    outline.chapters.forEach((c) => {
-      lines.push('\n');
-      lines.push(c.body ? c.body : `# Chapter ${c.number}. ${c.title}\n\n_[not yet drafted]_\n\nHook: ${c.hook || ''}\n\n${(c.beats || []).map((b) => `- ${b}`).join('\n')}`);
-      lines.push('\n');
-    });
-    return lines.join('\n');
-  };
+  const buildManuscript = (): string => outline ? buildManuscriptFromOutline(outline) : '';
 
   const downloadManuscript = () => {
     if (!outline) return;
@@ -160,18 +304,17 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
 
   const saveToLibrary = async () => {
     if (!outline) return;
-    try {
-      await saveToAdminLibrary({
-        tool_type: 'book_manuscript',
-        title: outline.title,
-        input_data: { audience, styleNotes, entryCount: entries.length },
-        output_data: { outline, manuscript: buildManuscript() },
-      });
-      toast({ title: 'Saved to library' });
-    } catch (e) {
-      toast({ title: 'Save failed', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
-    }
+    await persistDraft(outline, 'manual');
+    toast({ title: 'Saved to library' });
   };
+
+  const saveStatusLabel = saveState === 'saving'
+    ? 'Saving…'
+    : saveState === 'saved'
+      ? `Saved${lastSavedAt ? ` ${new Date(lastSavedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : ''}`
+      : saveState === 'error'
+        ? 'Saved locally — library retry needed'
+        : 'Autosave ready';
 
   return (
     <div className="pt-3 border-t border-border/60">
@@ -221,6 +364,10 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
                 </Button>
               </>
             )}
+            <div className="inline-flex items-center gap-1.5 h-8 px-2 text-[10px] text-muted-foreground">
+              {saveState === 'saving' ? <Loader2 className="w-3 h-3 animate-spin" /> : saveState === 'error' ? <AlertTriangle className="w-3 h-3 text-destructive" /> : <Check className="w-3 h-3 text-green-400" />}
+              {saveStatusLabel}
+            </div>
           </div>
 
           {outline && (

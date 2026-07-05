@@ -74,9 +74,13 @@ export async function getAdminLibraryItem(id: string): Promise<AdminLibraryItem 
 }
 
 
-export async function updateAdminLibraryItem(id: string, output_data: unknown): Promise<AdminLibraryItem> {
+export async function updateAdminLibraryItem(
+  id: string,
+  output_data: unknown,
+  opts?: { title?: string; created_at?: string },
+): Promise<AdminLibraryItem> {
   const { data, error } = await supabase.functions.invoke("admin-library", {
-    body: { action: "update", id, output_data },
+    body: { action: "update", id, output_data, ...(opts || {}) },
     headers: adminHeaders(),
   });
   if (error) throw error;
