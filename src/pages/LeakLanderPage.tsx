@@ -15,6 +15,7 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 import { Navbar } from "@/components/Navbar";
+import { HomeMindMapSection } from "@/components/HomeMindMapSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const LeakLanderPage: React.FC = () => {
