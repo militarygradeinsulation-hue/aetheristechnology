@@ -5,23 +5,15 @@ import { MatrixRain } from './MatrixRain';
 /**
  * Site-wide amber matrix rain layered above each page's particle Background.
  * pointer-events-none so it never blocks UI.
- * Landing page ("/") shows full-brightness matrix (admin-login look).
- * All other pages use a subtle, screen-blended overlay.
+ * Landing page ("/") omits the matrix entirely — the particle Background is
+ * enough. All other pages use a subtle, screen-blended overlay.
  */
 export const GlobalMatrixOverlay: React.FC = () => {
   const { pathname } = useLocation();
   const isLanding = pathname === '/';
 
   if (isLanding) {
-    return (
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.5 }}
-        aria-hidden="true"
-      >
-        <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={1} />
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -36,3 +28,4 @@ export const GlobalMatrixOverlay: React.FC = () => {
 };
 
 export default GlobalMatrixOverlay;
+
