@@ -24,7 +24,12 @@ const StaffEntry: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
-      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-60 animate-signature-drift"
+        style={{ backgroundImage: `url(${signatureBg.url})` }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" aria-hidden="true" />
       <Link
         to="/"
         className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
