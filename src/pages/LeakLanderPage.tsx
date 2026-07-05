@@ -179,11 +179,12 @@ const LeakLanderPage: React.FC = () => {
                 The Filter.
               </h2>
               <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
-                If <span className="text-crimson font-semibold">$18,500</span> to find out exactly where your company is hemorrhaging revenue sounds "expensive," you are not our client. Close this tab. No hard feelings — we just don't waste each other's time.
+                If <span className="text-crimson font-semibold">$2,500</span> to find out exactly where your company is bleeding revenue sounds "expensive," you are not our client. Close this tab.
               </p>
               <p className="mt-3 text-sm text-foreground/70 leading-relaxed">
-                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span>, every year, compounding while they "think about it."
+                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span> — every year it stays unfixed.
               </p>
+
             </div>
           </section>
 
