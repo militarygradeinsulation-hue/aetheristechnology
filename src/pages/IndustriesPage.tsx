@@ -292,91 +292,130 @@ const INDUSTRIES: IndustryLeak[] = [
   },
 ].sort((a, b) => a.industry.localeCompare(b.industry));
 
-const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () => void }> = ({ v, expanded, onToggle }) => {
+const IndustryCard: React.FC<{ v: IndustryLeak; onOpen: () => void }> = ({ v, onOpen }) => {
   const Icon = v.icon;
-  const navigate = useNavigate();
   return (
-    <div className="forensic-tile rounded-sm border border-border/60 hover:border-amber/50 transition-all flex flex-col overflow-hidden">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        className="text-left group"
-      >
-        <div className="relative overflow-hidden border-b border-amber/20 bg-background/40">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="forensic-tile rounded-sm border border-border/60 hover:border-amber/50 transition-all flex flex-col overflow-hidden text-left group"
+    >
+      <div className="relative overflow-hidden border-b border-amber/20 bg-background/40">
+        <img
+          src={v.image}
+          alt={`${v.industry} forensic case-file infographic`}
+          loading="lazy"
+          width={768}
+          height={384}
+          className="w-full aspect-[2/1] object-cover"
+        />
+        <span className="absolute bottom-1.5 right-1.5 font-case text-[10px] uppercase tracking-widest text-amber bg-background/80 px-1.5 py-0.5 rounded-sm border border-amber/20">
+          Aetheris AI Studio
+        </span>
+      </div>
+      <div className="p-5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 shrink-0 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
+            <Icon className="w-5 h-5 text-amber" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold font-forensic text-foreground truncate">{v.industry}</h2>
+            <div className="font-mono text-crimson text-sm">{v.typicalLoss}</div>
+          </div>
+        </div>
+        <ChevronRight className="w-5 h-5 text-amber shrink-0" />
+      </div>
+    </button>
+  );
+};
+
+const IndustryModal: React.FC<{ industry: IndustryLeak | null; onClose: () => void }> = ({ industry, onClose }) => {
+  const navigate = useNavigate();
+  if (!industry) return null;
+  const Icon = industry.icon;
+  return (
+    <Dialog open={!!industry} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-3xl w-full p-0 gap-0 border border-amber/30 bg-background/95 overflow-hidden">
+        <div className="relative overflow-hidden border-b border-amber/20">
           <img
-            src={v.image}
-            alt={`${v.industry} forensic case-file infographic`}
-            loading="lazy"
+            src={industry.image}
+            alt={`${industry.industry} case-file infographic`}
             width={768}
             height={384}
             className="w-full aspect-[2/1] object-cover"
           />
-          <span className="absolute bottom-1.5 right-1.5 font-case text-[10px] uppercase tracking-widest text-amber bg-background/80 px-1.5 py-0.5 rounded-sm border border-amber/20">
+          <span className="absolute bottom-2 right-2 font-case text-xs uppercase tracking-widest text-amber bg-background/80 px-2 py-1 rounded-sm border border-amber/20">
             Aetheris AI Studio
           </span>
         </div>
-        <div className="p-5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 shrink-0 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
-              <Icon className="w-5 h-5 text-amber" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-xl font-bold font-forensic text-foreground truncate">{v.industry}</h2>
-              <div className="font-mono text-crimson text-sm">{v.typicalLoss}</div>
-            </div>
-          </div>
-          {expanded ? <ChevronUp className="w-5 h-5 text-amber shrink-0" /> : <ChevronDown className="w-5 h-5 text-amber shrink-0" />}
-        </div>
-      </button>
-
-        {expanded && (
-          <div className="px-5 pb-5 -mt-1">
-            <p className="text-base text-foreground/85 mb-3 italic">"{v.primaryLeak}"</p>
-
-            <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
-              <div className="font-case text-xs uppercase tracking-widest text-crimson mb-1">What this costs you personally</div>
-              <p className="text-sm text-foreground/90 leading-snug">{v.humanCost}</p>
-            </div>
-            <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
-              <div className="font-case text-xs uppercase tracking-widest text-amber mb-1">How the Leak Audit fixes it</div>
-              <p className="text-sm text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
-            </div>
-
-            <div className="font-case text-xs uppercase tracking-widest text-amber mb-2">What we measure</div>
-            <ul className="space-y-1 mb-4">
-              {v.whatWeMeasure.map((m) => (
-                <li key={m} className="text-sm text-foreground/90 flex gap-2">
-                  <span className="text-amber">›</span>{m}
-                </li>
-              ))}
-            </ul>
-
-            <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
-              <div className="flex items-center gap-1.5 font-case text-xs uppercase tracking-widest text-amber mb-1.5">
-                <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+        <div className="p-6 sm:p-8">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="flex items-center gap-3 text-2xl sm:text-3xl font-bold font-forensic text-foreground">
+              <div className="w-10 h-10 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-amber" />
               </div>
-              <div className="font-bold text-base text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
-              <div className="font-mono text-amber text-sm mb-2">{v.recommended.price}</div>
-              <p className="text-sm text-foreground/80 leading-snug mb-2">{v.recommended.why}</p>
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
-                className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline"
-              >
-                View this package <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
+              <span className="truncate">{industry.industry}</span>
+            </DialogTitle>
+            <div className="font-mono text-crimson text-base sm:text-lg mt-1">{industry.typicalLoss}</div>
+            <DialogDescription className="sr-only">{industry.industry} case file</DialogDescription>
+          </DialogHeader>
 
-          <Link
-            to={`/${v.slug}`}
-            className="text-amber font-semibold text-base inline-flex items-center gap-1 pt-3 border-t border-border/40 w-full"
-          >
-            Open the case file <ArrowRight className="w-4 h-4" />
-          </Link>
+          <p className="text-lg text-foreground/85 mb-4 italic">"{industry.primaryLeak}"</p>
+
+          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-4 mb-4">
+            <div className="font-case text-sm uppercase tracking-widest text-crimson mb-2">What this costs you personally</div>
+            <p className="text-base text-foreground/90 leading-relaxed">{industry.humanCost}</p>
+          </div>
+
+          <div className="rounded-sm border border-amber/30 bg-amber/5 p-4 mb-6">
+            <div className="font-case text-sm uppercase tracking-widest text-amber mb-2">How the Leak Audit fixes it</div>
+            <p className="text-base text-foreground/90 leading-relaxed">{industry.whatYouGetBack}</p>
+          </div>
+
+          <div className="font-case text-sm uppercase tracking-widest text-amber mb-3">What we measure</div>
+          <ul className="space-y-2 mb-6">
+            {industry.whatWeMeasure.map((m) => (
+              <li key={m} className="text-base text-foreground/90 flex gap-2">
+                <span className="text-amber">›</span>{m}
+              </li>
+            ))}
+          </ul>
+
+          <div className="rounded-sm border border-amber/40 bg-amber/5 p-4 mb-6">
+            <div className="flex items-center gap-1.5 font-case text-sm uppercase tracking-widest text-amber mb-2">
+              <Star className="w-4 h-4 fill-amber" /> Most popular for this niche
+            </div>
+            <div className="font-bold text-lg text-foreground leading-snug mb-1">{industry.recommended.name}</div>
+            <div className="font-mono text-amber text-base mb-2">{industry.recommended.price}</div>
+            <p className="text-base text-foreground/80 leading-snug mb-3">{industry.recommended.why}</p>
+            <button
+              type="button"
+              onClick={() => { onClose(); navigate(industry.recommended.link); }}
+              className="inline-flex items-center gap-1 text-base font-semibold text-amber hover:underline"
+            >
+              View this package <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border/40">
+            <Link
+              to={`/${industry.slug}`}
+              onClick={onClose}
+              className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors"
+            >
+              Open the case file <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center justify-center px-4 py-2 rounded-sm border border-border/60 hover:border-amber/40 transition-colors text-foreground"
+            >
+              Close
+            </button>
+          </div>
         </div>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
