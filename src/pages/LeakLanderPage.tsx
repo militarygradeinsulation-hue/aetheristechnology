@@ -120,7 +120,7 @@ const LeakLanderPage: React.FC = () => {
           >
             <img
               src={leakHeroBanner}
-              alt="Joseph Toney — AI Architect, IBM AI Certified, Aetheris Technology"
+              alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks and turns real data into profit."
               className="w-full h-auto rounded-sm border border-amber/20 shadow-xl"
               loading="eager"
               fetchPriority="high"
