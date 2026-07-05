@@ -229,7 +229,7 @@ const LeakLanderPage: React.FC = () => {
                 Revenue Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
               </h2>
               <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Every business over $5M has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
+                Every business has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
               </p>
               <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
                 You can't see them because you built them. We can, because we didn't.
