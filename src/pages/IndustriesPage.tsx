@@ -685,15 +685,22 @@ const IndustriesPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((v) => (
-                  <IndustryCard
-                    key={v.slug}
-                    v={v}
-                    onOpen={() => setSelectedIndustry(v)}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Mind-map view on tablet/desktop */}
+                <div className="hidden md:block">
+                  <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
+                </div>
+                {/* Compact list on mobile */}
+                <div className="grid grid-cols-1 gap-3 md:hidden">
+                  {filtered.map((v) => (
+                    <IndustryCard
+                      key={v.slug}
+                      v={v}
+                      onOpen={() => setSelectedIndustry(v)}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </section>
