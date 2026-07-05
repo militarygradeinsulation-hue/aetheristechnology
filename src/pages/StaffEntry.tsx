@@ -5,7 +5,7 @@ import { ArrowLeft, Lock, Shield, Users } from 'lucide-react';
 import { clearAdminToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { MatrixRain } from '@/components/MatrixRain';
+import signatureBg from '@/assets/joseph-signature-bg.png.asset.json';
 
 /**
  * Triple-tap landing page. Forces user to explicitly choose an entry path
