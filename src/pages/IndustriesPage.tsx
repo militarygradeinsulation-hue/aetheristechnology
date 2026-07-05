@@ -300,32 +300,198 @@ const IndustryCard: React.FC<{ v: IndustryLeak; onOpen: () => void }> = ({ v, on
       onClick={onOpen}
       className="forensic-tile rounded-sm border border-border/60 hover:border-amber/50 transition-all flex flex-col overflow-hidden text-left group"
     >
-      <div className="relative overflow-hidden border-b border-amber/20 bg-background/40">
-        <img
-          src={v.image}
-          alt={`${v.industry} forensic case-file infographic`}
-          loading="lazy"
-          width={768}
-          height={384}
-          className="w-full aspect-[2/1] object-cover"
-        />
-        <span className="absolute bottom-1.5 right-1.5 font-case text-[10px] uppercase tracking-widest text-amber bg-background/80 px-1.5 py-0.5 rounded-sm border border-amber/20">
-          Aetheris AI Studio
-        </span>
-      </div>
       <div className="p-5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 shrink-0 rounded-sm bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
             <Icon className="w-5 h-5 text-amber" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl font-bold font-forensic text-foreground truncate">{v.industry}</h2>
+            <h2 className="text-lg font-bold font-forensic text-foreground truncate">{v.industry}</h2>
             <div className="font-mono text-crimson text-sm">{v.typicalLoss}</div>
           </div>
         </div>
         <ChevronRight className="w-5 h-5 text-amber shrink-0" />
       </div>
     </button>
+  );
+};
+
+// -----------------------------
+// Mind-map layout + rendering
+// -----------------------------
+type NodePos = { x: number; y: number; ring: number };
+
+function computeMindMapLayout(n: number): NodePos[] {
+  if (n === 0) return [];
+  const rings = [
+    { r: 18, cap: 6 },
+    { r: 32, cap: 10 },
+    { r: 44, cap: 14 },
+    { r: 48, cap: 20 },
+  ];
+  const positions: NodePos[] = [];
+  let placed = 0;
+  for (let ringIdx = 0; ringIdx < rings.length && placed < n; ringIdx++) {
+    const { r, cap } = rings[ringIdx];
+    const remaining = n - placed;
+    const count = Math.min(cap, remaining);
+    const angleOffset = -Math.PI / 2 + (ringIdx % 2 === 0 ? 0 : Math.PI / count);
+    for (let i = 0; i < count; i++) {
+      const a = angleOffset + (i * 2 * Math.PI) / count;
+      positions.push({
+        x: 50 + r * Math.cos(a),
+        y: 50 + r * Math.sin(a),
+        ring: ringIdx,
+      });
+    }
+    placed += count;
+  }
+  return positions;
+}
+
+const MindMapNode: React.FC<{
+  v: IndustryLeak;
+  pos: NodePos;
+  index: number;
+  onOpen: () => void;
+}> = ({ v, pos, index, onOpen }) => {
+  const Icon = v.icon;
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      style={{
+        left: `${pos.x}%`,
+        top: `${pos.y}%`,
+        animationDelay: `${index * 60}ms`,
+      }}
+      className="absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10"
+    >
+      <div className="relative flex flex-col items-center">
+        <span
+          aria-hidden
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border border-amber/30 group-hover:border-amber/70 transition-colors"
+          style={{ animation: `mindmap-pulse 3.2s ease-out ${(index % 6) * 0.4}s infinite` }}
+        />
+        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 border-amber/40 group-hover:border-amber group-hover:bg-amber/10 flex items-center justify-center shadow-[0_0_20px_hsl(var(--amber)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--amber)/0.4)] transition-all">
+          <Icon className="w-7 h-7 md:w-8 md:h-8 text-amber" />
+        </div>
+        <div className="mt-2 text-center max-w-[130px]">
+          <div className="font-forensic text-xs md:text-sm font-bold text-foreground leading-tight group-hover:text-amber transition-colors">
+            {v.industry}
+          </div>
+          <div className="font-mono text-[10px] md:text-xs text-crimson leading-tight mt-0.5">
+            {v.typicalLoss}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) => void }> = ({ industries, onOpen }) => {
+  const positions = useMemo(() => computeMindMapLayout(industries.length), [industries.length]);
+
+  const ringGroups = useMemo(() => {
+    const groups: Record<number, number[]> = {};
+    positions.forEach((p, i) => {
+      (groups[p.ring] ||= []).push(i);
+    });
+    return groups;
+  }, [positions]);
+
+  return (
+    <div className="relative w-full h-[820px] md:h-[920px] lg:h-[1000px]">
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <defs>
+          <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="hsl(var(--crimson))" stopOpacity="0.35" />
+            <stop offset="70%" stopColor="hsl(var(--crimson))" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="spokeGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="hsl(var(--crimson))" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="hsl(var(--amber))" stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+
+        <circle cx="50" cy="50" r="18" fill="url(#hubGlow)" />
+
+        {positions.map((p, i) => (
+          <line
+            key={`spoke-${i}`}
+            x1="50"
+            y1="50"
+            x2={p.x}
+            y2={p.y}
+            stroke="url(#spokeGrad)"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+            strokeDasharray="4 6"
+            style={{ animation: `mindmap-flow 6s linear ${(i % 8) * -0.5}s infinite` }}
+          />
+        ))}
+
+        {Object.values(ringGroups).flatMap((idxs, gi) =>
+          idxs.map((idx, k) => {
+            if (idxs.length < 2) return null;
+            const next = idxs[(k + 1) % idxs.length];
+            const a = positions[idx];
+            const b = positions[next];
+            const mx = (a.x + b.x) / 2;
+            const my = (a.y + b.y) / 2;
+            const dx = mx - 50;
+            const dy = my - 50;
+            const len = Math.max(0.001, Math.hypot(dx, dy));
+            const bulge = 1.08;
+            const cx = 50 + (dx / len) * len * bulge;
+            const cy = 50 + (dy / len) * len * bulge;
+            return (
+              <path
+                key={`arc-${gi}-${k}`}
+                d={`M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`}
+                fill="none"
+                stroke="hsl(var(--amber))"
+                strokeOpacity="0.18"
+                strokeWidth="0.8"
+                vectorEffect="non-scaling-stroke"
+                strokeDasharray="2 5"
+              />
+            );
+          })
+        )}
+      </svg>
+
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+        <div className="relative">
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-full border border-crimson/40"
+            style={{ animation: 'mindmap-pulse 2.6s ease-out infinite' }}
+          />
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-full border border-crimson/30"
+            style={{ animation: 'mindmap-pulse 2.6s ease-out 1.3s infinite' }}
+          />
+          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-background border-2 border-crimson flex flex-col items-center justify-center text-center px-3 shadow-[0_0_40px_hsl(var(--crimson)/0.4)]">
+            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson">Every Business</div>
+            <div className="font-forensic font-bold text-base md:text-xl leading-tight text-foreground mt-1">
+              Revenue<br />Leaks
+            </div>
+            <div className="font-mono text-[10px] md:text-xs text-amber mt-1">The Leak Audit™</div>
+          </div>
+        </div>
+      </div>
+
+      {industries.map((v, i) => positions[i] && (
+        <MindMapNode key={v.slug} v={v} pos={positions[i]} index={i} onOpen={() => onOpen(v)} />
+      ))}
+    </div>
   );
 };
 
@@ -519,15 +685,22 @@ const IndustriesPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((v) => (
-                  <IndustryCard
-                    key={v.slug}
-                    v={v}
-                    onOpen={() => setSelectedIndustry(v)}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Mind-map view on tablet/desktop */}
+                <div className="hidden md:block">
+                  <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
+                </div>
+                {/* Compact list on mobile */}
+                <div className="grid grid-cols-1 gap-3 md:hidden">
+                  {filtered.map((v) => (
+                    <IndustryCard
+                      key={v.slug}
+                      v={v}
+                      onOpen={() => setSelectedIndustry(v)}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </section>
