@@ -112,14 +112,14 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Editorial hero banner. merged from /home */}
+          {/* Signature card — Joseph Toney / Aetheris */}
           <section
             className="mt-1 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "80ms", animationFillMode: "both" }}
           >
             <img
-              src={homeHeroBanner.url}
-              alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks, turns real data into insight, and keeps your business confidential."
+              src={signatureCard.url}
+              alt="Joseph Toney — AI Architect, IBM AI Certified, Aetheris Technology"
               className="w-full h-auto rounded-sm border border-amber/20 shadow-xl"
               loading="eager"
               fetchPriority="high"
