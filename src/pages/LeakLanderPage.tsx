@@ -276,6 +276,9 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          {/* THE LEAK ECOSYSTEM — interactive mind map */}
+          <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
+
           {/* THE OFFER */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
