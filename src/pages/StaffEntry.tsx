@@ -36,10 +36,8 @@ const StaffEntry: React.FC = () => {
 
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" aria-hidden="true" />
 
-
-
-
       <Link
+
         to="/"
         className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
       >
