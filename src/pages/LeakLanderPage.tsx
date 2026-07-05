@@ -369,7 +369,7 @@ const LeakLanderPage: React.FC = () => {
                   <Link to="/leak-audit">Free Leak Audit</Link>
                 </Button>
                 <Button size="default" onClick={() => setBookingOpen(true)} className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
-                  Open a Case — $18,500 <ArrowRight className="ml-2 w-4 h-4" />
+                  Book the Leak Audit — $2,500 <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
               <p className="mt-4 text-xs text-foreground/60 italic">
