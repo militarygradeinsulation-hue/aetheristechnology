@@ -9,7 +9,7 @@ import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 
-import leakHeroBanner from "@/assets/hero-leak-banner.jpg";
+
 import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
@@ -113,19 +113,8 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Signature card — Joseph Toney / Aetheris */}
-          <section
-            className="mt-1 max-w-5xl mx-auto animate-fade-in"
-            style={{ animationDelay: "80ms", animationFillMode: "both" }}
-          >
-            <img
-              src={leakHeroBanner}
-              alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks and turns real data into profit."
-              className="w-full h-auto rounded-sm border border-amber/20 shadow-xl"
-              loading="eager"
-              fetchPriority="high"
-            />
-          </section>
+
+
 
 
           {/* HERO — tight */}
