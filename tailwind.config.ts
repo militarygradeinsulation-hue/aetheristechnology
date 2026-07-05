@@ -115,6 +115,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-8px)" },
         },
+        "signature-drift": {
+          "0%, 100%": { transform: "scale(1.05) translate(0, 0)" },
+          "50%": { transform: "scale(1.08) translate(-1.2%, 0.8%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -122,6 +126,7 @@ export default {
         "fade-in": "fade-in 0.4s ease-out",
         "scale-in": "scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         "gold-float": "gold-float 6s ease-in-out infinite",
+        "signature-drift": "signature-drift 18s ease-in-out infinite",
       },
     },
   },
