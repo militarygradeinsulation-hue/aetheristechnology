@@ -119,7 +119,7 @@ const LeakLanderPage: React.FC = () => {
             style={{ animationDelay: "80ms", animationFillMode: "both" }}
           >
             <img
-              src={signatureCard.url}
+              src={signatureCard}
               alt="Joseph Toney — AI Architect, IBM AI Certified, Aetheris Technology"
               className="w-full h-auto rounded-sm border border-amber/20 shadow-xl"
               loading="eager"
