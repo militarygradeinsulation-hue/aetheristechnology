@@ -43,8 +43,8 @@ const Home = () => {
             </h1>
             <div className="max-w-6xl mx-auto">
               <img
-                src={signatureCard.url}
-                alt="Joseph Toney — AI Architect, IBM AI Certified, Aetheris Technology"
+                src={homeHeroBanner.url}
+                alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks, turns real data into insight, and keeps your business confidential."
                 className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
                 loading="eager"
                 fetchPriority="high"
