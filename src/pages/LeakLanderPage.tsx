@@ -560,8 +560,10 @@ const LeakLanderPage: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
 
 export default LeakLanderPage;
+
