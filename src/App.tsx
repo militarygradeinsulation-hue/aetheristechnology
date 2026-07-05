@@ -10,7 +10,7 @@ import { BookMeetingGate } from "@/components/BookMeetingGate";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { GlobalMatrixOverlay } from "@/components/GlobalMatrixOverlay";
+
 import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
 
 // Eager: home + 404 (always needed)
@@ -124,10 +124,10 @@ const App = () => (
               path="/*"
               element={
                 <AuthProvider>
-                  <GlobalMatrixOverlay />
                   <PageViewTracker />
                   <RetargetingPixel />
                   <FloatingWorkbench />
+
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                       <Route path="/" element={<LeakLanderPage />} />

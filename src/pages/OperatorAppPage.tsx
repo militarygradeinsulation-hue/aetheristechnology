@@ -13,7 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import AgentsTab from "@/components/AgentsTab";
-import { MatrixRain } from "@/components/MatrixRain";
+
 
 // ─────────────────────────── shared bits ───────────────────────────
 function Label({ children }: { children: React.ReactNode }) {
@@ -622,8 +622,8 @@ export default function OperatorAppPage() {
         <div className="fixed inset-0 pointer-events-none" aria-hidden="true" style={{ zIndex: 0 }}>
           <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 18% -10%, hsl(var(--amber)/0.10), transparent 55%), radial-gradient(circle at 82% 110%, hsl(var(--destructive)/0.08), transparent 55%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background)/0.92) 100%)" }} />
           <div className="absolute inset-0 opacity-[0.32]">
-            <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.28} density={0.85} />
           </div>
+
           {/* faint scanline grid */}
           <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "repeating-linear-gradient(0deg, hsl(var(--amber)) 0 1px, transparent 1px 4px)" }} />
           {/* vignette */}

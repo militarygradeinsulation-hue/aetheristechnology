@@ -7,7 +7,7 @@ import { Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { setAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
-import { MatrixRain } from '@/components/MatrixRain';
+
 
 const AdminLogin: React.FC = () => {
   const [pin, setPin] = useState('');
@@ -45,8 +45,8 @@ const AdminLogin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
-      <MatrixRain color="hsl(36 90% 55%)" fontSize={13} speed={0.35} density={0.7} />
       <Link
+
         to="/"
         className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
       >
