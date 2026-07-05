@@ -57,41 +57,42 @@ const LeakLanderPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
-      <SEOHead
-        title="Your business is bleeding money. Aetheris Business Forensics."
-        description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
-        path="/"
-      />
+      <Background />
+      <div className="relative z-10 flex flex-col flex-1">
+        <SEOHead
+          title="Your business is bleeding money. Aetheris Business Forensics."
+          description="We run forensics on your operation and put the evidence on the table — whether you like it or not. $18,500 flat Revenue Diagnostic. Indianapolis, US-wide."
+          path="/"
+        />
 
-      {/* LinkedIn premium offer banner — slim, above navbar */}
-      <a
-        href="https://www.linkedin.com/in/thejosephtoney"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative z-30 block w-full text-amber-50 border-b border-amber/30 transition-colors hover:brightness-110"
-        style={{ backgroundColor: 'hsl(36 75% 14%)' }}
-      >
-        <div className="max-w-5xl mx-auto px-4 py-1 text-center text-[11px] sm:text-xs font-medium truncate">
-          <span className="font-case uppercase tracking-widest text-amber mr-2">Limited</span>
-          Connect on LinkedIn — get a <span className="text-amber font-semibold">free premium analysis</span>
-          <span className="ml-2 underline underline-offset-2">Connect →</span>
-        </div>
-      </a>
+        {/* LinkedIn premium offer banner — slim, above navbar */}
+        <a
+          href="https://www.linkedin.com/in/thejosephtoney"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative z-30 block w-full text-amber-50 border-b border-amber/30 transition-colors hover:brightness-110"
+          style={{ backgroundColor: 'hsl(36 75% 14%)' }}
+        >
+          <div className="max-w-5xl mx-auto px-4 py-1 text-center text-[11px] sm:text-xs font-medium truncate">
+            <span className="font-case uppercase tracking-widest text-amber mr-2">Limited</span>
+            Connect on LinkedIn — get a <span className="text-amber font-semibold">free premium analysis</span>
+            <span className="ml-2 underline underline-offset-2">Connect →</span>
+          </div>
+        </a>
 
-      <Navbar onContactClick={() => {}} />
+        <Navbar onContactClick={() => {}} />
 
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 opacity-[0.06] mix-blend-overlay z-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 30%, hsl(var(--amber)) 0%, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--crimson, 0 60% 45%)) 0%, transparent 45%)",
+          }}
+        />
 
+        <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
 
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 opacity-[0.06] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 30%, hsl(var(--amber)) 0%, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--crimson, 0 60% 45%)) 0%, transparent 45%)",
-        }}
-      />
-
-      <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
         <div className="w-full">
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
           <div className="max-w-4xl mx-auto flex justify-start mb-1">
@@ -559,8 +560,10 @@ const LeakLanderPage: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
 
 export default LeakLanderPage;
+
