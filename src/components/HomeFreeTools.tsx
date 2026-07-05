@@ -283,8 +283,8 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
       className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
-        <div className="p-1.5 sm:p-2">
+      <div className="rounded-sm border border-amber/20 bg-card/80 backdrop-blur-sm overflow-hidden">
+        <div className="p-2 sm:p-3">
           {body}
         </div>
       </div>
