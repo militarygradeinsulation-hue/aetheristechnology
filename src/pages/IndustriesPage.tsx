@@ -422,7 +422,7 @@ const IndustryModal: React.FC<{ industry: IndustryLeak | null; onClose: () => vo
 const IndustriesPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [selectedIndustry, setSelectedIndustry] = useState<IndustryLeak | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
