@@ -311,7 +311,7 @@ const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () 
             height={384}
             className="w-full aspect-[2/1] object-cover"
           />
-          <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">
+          <span className="absolute bottom-1.5 right-1.5 font-case text-[10px] uppercase tracking-widest text-amber bg-background/80 px-1.5 py-0.5 rounded-sm border border-amber/20">
             Aetheris AI Studio
           </span>
         </div>
@@ -321,55 +321,55 @@ const IndustryCard: React.FC<{ v: IndustryLeak; expanded: boolean; onToggle: () 
               <Icon className="w-5 h-5 text-amber" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-bold font-forensic text-foreground truncate">{v.industry}</h2>
-              <div className="font-mono text-crimson text-xs">{v.typicalLoss}</div>
+              <h2 className="text-xl font-bold font-forensic text-foreground truncate">{v.industry}</h2>
+              <div className="font-mono text-crimson text-sm">{v.typicalLoss}</div>
             </div>
           </div>
           {expanded ? <ChevronUp className="w-5 h-5 text-amber shrink-0" /> : <ChevronDown className="w-5 h-5 text-amber shrink-0" />}
         </div>
       </button>
 
-      {expanded && (
-        <div className="px-5 pb-5 -mt-1">
-          <p className="text-sm text-muted-foreground mb-3 italic">"{v.primaryLeak}"</p>
+        {expanded && (
+          <div className="px-5 pb-5 -mt-1">
+            <p className="text-base text-foreground/85 mb-3 italic">"{v.primaryLeak}"</p>
 
-          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
-            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">What this costs you personally</div>
-            <p className="text-[12px] text-foreground/85 leading-snug">{v.humanCost}</p>
-          </div>
-          <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
-            <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">How the Leak Audit fixes it</div>
-            <p className="text-[12px] text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
-          </div>
-
-          <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">What we measure</div>
-          <ul className="space-y-1 mb-4">
-            {v.whatWeMeasure.map((m) => (
-              <li key={m} className="text-xs text-foreground/90 flex gap-2">
-                <span className="text-amber">›</span>{m}
-              </li>
-            ))}
-          </ul>
-
-          <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
-            <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-              <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+            <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3 mb-3">
+              <div className="font-case text-xs uppercase tracking-widest text-crimson mb-1">What this costs you personally</div>
+              <p className="text-sm text-foreground/90 leading-snug">{v.humanCost}</p>
             </div>
-            <div className="font-bold text-sm text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
-            <div className="font-mono text-amber text-xs mb-2">{v.recommended.price}</div>
-            <p className="text-[11px] text-muted-foreground leading-snug mb-2">{v.recommended.why}</p>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber hover:underline"
-            >
-              View this package <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
+            <div className="rounded-sm border border-amber/30 bg-amber/5 p-3 mb-4">
+              <div className="font-case text-xs uppercase tracking-widest text-amber mb-1">How the Leak Audit fixes it</div>
+              <p className="text-sm text-foreground/90 leading-snug">{v.whatYouGetBack}</p>
+            </div>
+
+            <div className="font-case text-xs uppercase tracking-widest text-amber mb-2">What we measure</div>
+            <ul className="space-y-1 mb-4">
+              {v.whatWeMeasure.map((m) => (
+                <li key={m} className="text-sm text-foreground/90 flex gap-2">
+                  <span className="text-amber">›</span>{m}
+                </li>
+              ))}
+            </ul>
+
+            <div className="rounded-sm border border-amber/40 bg-amber/5 p-3 mb-3">
+              <div className="flex items-center gap-1.5 font-case text-xs uppercase tracking-widest text-amber mb-1.5">
+                <Star className="w-3 h-3 fill-amber" /> Most popular for this niche
+              </div>
+              <div className="font-bold text-base text-foreground leading-snug mb-0.5">{v.recommended.name}</div>
+              <div className="font-mono text-amber text-sm mb-2">{v.recommended.price}</div>
+              <p className="text-sm text-foreground/80 leading-snug mb-2">{v.recommended.why}</p>
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(v.recommended.link); }}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline"
+              >
+                View this package <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
 
           <Link
             to={`/${v.slug}`}
-            className="text-amber font-semibold text-sm inline-flex items-center gap-1 pt-3 border-t border-border/40 w-full"
+            className="text-amber font-semibold text-base inline-flex items-center gap-1 pt-3 border-t border-border/40 w-full"
           >
             Open the case file <ArrowRight className="w-4 h-4" />
           </Link>
@@ -439,10 +439,10 @@ const IndustriesPage: React.FC = () => {
               Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
               Every owner <span className="text-amber">feels it the same way.</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
+            <p className="text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto mb-4">
               Tap any industry to open the case file. Type your niche below if you don't see it &mdash; the methodology travels.
             </p>
-            <p className="text-sm md:text-base text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
+            <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
               One offer fixes every industry on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
             </p>
 
@@ -455,7 +455,7 @@ const IndustriesPage: React.FC = () => {
                 className="pl-9 h-12 bg-background/60 border-amber/30 focus-visible:ring-amber/50"
                 aria-label="Search industries"
               />
-              <div className="mt-2 font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+              <div className="mt-2 font-case text-xs uppercase tracking-widest text-foreground/70">
                 {filtered.length} of {INDUSTRIES.length} industries
               </div>
             </div>
@@ -466,11 +466,11 @@ const IndustriesPage: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             {filtered.length === 0 ? (
               <div className="forensic-tile rounded-sm p-10 border border-amber/30 text-center max-w-2xl mx-auto">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">No exact match</div>
+                <div className="font-case text-xs uppercase tracking-widest text-amber mb-3">No exact match</div>
                 <h3 className="font-forensic text-2xl font-bold mb-3">
                   "{query}" isn't on the board yet. that doesn't mean it doesn't leak.
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-foreground/80 text-lg mb-6">
                   Run the free self-scan or book a 15-minute scoping call. The methodology travels across verticals.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -495,13 +495,13 @@ const IndustriesPage: React.FC = () => {
 
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto text-center forensic-tile rounded-sm p-10 border border-amber/30">
-            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+            <div className="font-case text-xs uppercase tracking-widest text-amber mb-3">
               Industry not listed?
             </div>
             <h2 className="font-forensic text-3xl md:text-4xl font-bold mb-4">
               The methodology travels.
             </h2>
-            <p className="text-muted-foreground text-lg mb-8">
+            <p className="text-foreground/85 text-lg mb-8">
               If revenue moves through systems and people, there are leaks. $2,500 flat. Applied 1:1 toward engagement.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
