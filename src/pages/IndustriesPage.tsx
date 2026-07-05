@@ -524,8 +524,7 @@ const IndustriesPage: React.FC = () => {
                   <IndustryCard
                     key={v.slug}
                     v={v}
-                    expanded={!!expanded[v.slug]}
-                    onToggle={() => setExpanded((s) => ({ ...s, [v.slug]: !s[v.slug] }))}
+                    onOpen={() => setSelectedIndustry(v)}
                   />
                 ))}
               </div>
