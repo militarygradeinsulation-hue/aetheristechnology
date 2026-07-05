@@ -9,7 +9,7 @@ import heroBanner from "@/assets/hero-leaking-building.jpg";
 import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import homeHeroBanner from "@/assets/home-hero-banner.jpg.asset.json";
-import signatureCard from "@/assets/joseph-toney-signature-card.jpg.asset.json";
+import signatureCard from "@/assets/joseph-toney-signature-card.jpg";
 import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
