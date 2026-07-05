@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, FileText, Clock, DollarSign, Star, Search, ChevronDown, ChevronUp, Scale, Home, GraduationCap, ShoppingBag, Hotel, Wrench, Plane, Megaphone, Stethoscope, Sparkles, Cpu, Leaf, Beaker, Hammer, Briefcase } from 'lucide-react';
+import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, Star, Search, ChevronRight, Scale, Home, GraduationCap, ShoppingBag, Hotel, Wrench, Plane, Megaphone, Stethoscope, Sparkles, Cpu, Leaf, Beaker, Hammer, Briefcase } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
