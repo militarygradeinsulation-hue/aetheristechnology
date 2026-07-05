@@ -146,11 +146,11 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
     <>
           {/* Header lockup */}
           <header className="flex items-center justify-between gap-2">
-            <h2 className="font-forensic text-[10px] sm:text-xs font-light text-foreground leading-tight">
-              Free instruments. <span className="italic text-amber/80">On the house.</span>
+            <h2 className="font-forensic text-xs sm:text-sm font-normal text-foreground leading-tight">
+              Free instruments. <span className="italic text-amber">On the house.</span>
             </h2>
             {!unlock && (
-              <p className="hidden sm:block text-[9px] text-muted-foreground/70 leading-snug text-right">
+              <p className="hidden sm:block text-xs text-foreground/80 leading-snug text-right">
                 Unlock with email + phone.
               </p>
             )}
@@ -159,7 +159,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
           {!unlock ? (
             <form
               onSubmit={handleUnlock}
-              className="mt-1 rounded-sm border border-amber/10 bg-background/50 p-1"
+              className="mt-1 rounded-sm border border-amber/20 bg-background/80 p-1.5"
             >
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-1 items-end">
                 <input
@@ -168,7 +168,7 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email"
-                  className="rounded-sm border border-border/60 bg-background/80 px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                  className="rounded-sm border border-border/80 bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                   autoComplete="email"
                   maxLength={255}
                 />
@@ -177,26 +177,26 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone"
-                  className="rounded-sm border border-border/60 bg-background/80 px-2 py-1 text-[10px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
+                  className="rounded-sm border border-border/80 bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-foreground/50 focus:outline-none focus:border-amber/60 transition-colors w-full"
                   autoComplete="tel"
                   maxLength={40}
                 />
                 <button
                   type="submit"
                   disabled={!valid || submitting}
-                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-[9px] px-2 py-1 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center rounded-sm bg-amber text-background font-mono uppercase tracking-[0.1em] text-xs px-3 py-1.5 hover:bg-amber/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? "…" : "Unlock"}
                 </button>
               </div>
-              <p className="mt-0.5 text-[8px] text-muted-foreground/60">
+              <p className="mt-0.5 text-xs text-foreground/70">
                 Unlock so you can return without losing work. No spam.
               </p>
             </form>
           ) : (
-            <div className="mt-1 flex items-center gap-1.5 rounded-sm border border-amber/10 bg-amber/5 px-2 py-0.5">
-              <Unlock className="w-2.5 h-2.5 text-amber" />
-              <span className="font-mono text-[8px] uppercase tracking-widest text-amber truncate">
+            <div className="mt-1 flex items-center gap-1.5 rounded-sm border border-amber/20 bg-amber/10 px-2 py-1">
+              <Unlock className="w-3 h-3 text-amber" />
+              <span className="font-mono text-xs uppercase tracking-widest text-amber truncate">
                 Unlocked for {unlock.email}
               </span>
               <button
@@ -207,34 +207,34 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                   setEmail("");
                   setPhone("");
                 }}
-                className="ml-auto text-[9px] text-muted-foreground hover:text-amber underline underline-offset-2"
+                className="ml-auto text-xs text-foreground/80 hover:text-amber underline underline-offset-2"
               >
                 Switch
               </button>
             </div>
           )}
 
-          <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const locked = !unlock;
               const Card = (
                 <div
-                  className={`relative h-full rounded-sm border px-1.5 py-1 transition-colors ${
+                  className={`relative h-full rounded-sm border px-2 py-1.5 transition-colors ${
                     locked
-                      ? "border-border/60 bg-background/40 opacity-80"
-                      : "border-amber/20 bg-background/50 hover:border-amber/50 hover:bg-amber/[0.04]"
+                      ? "border-border/80 bg-background/70"
+                      : "border-amber/30 bg-background/80 hover:border-amber/50 hover:bg-amber/[0.06]"
                   }`}
                 >
-                  <div className="flex items-center gap-1">
-                    <Icon className="w-2.5 h-2.5 text-amber shrink-0" />
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="w-3 h-3 text-amber shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <div className="font-forensic text-[9px] font-bold text-foreground leading-tight truncate">
+                      <div className="font-forensic text-xs font-bold text-foreground leading-tight truncate">
                         {t.title}
                       </div>
                     </div>
-                    {locked && <Lock className="w-2 h-2 text-muted-foreground shrink-0" />}
-                    {!locked && <ArrowRight className="w-2 h-2 text-amber shrink-0" />}
+                    {locked && <Lock className="w-2.5 h-2.5 text-foreground/60 shrink-0" />}
+                    {!locked && <ArrowRight className="w-2.5 h-2.5 text-amber shrink-0" />}
                   </div>
                 </div>
               );
@@ -258,8 +258,8 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             })}
           </div>
 
-          <div className="mt-1 text-[9px] text-muted-foreground/80 leading-snug">
-            <span className="text-foreground/90 font-forensic">Pieces vs. puzzle.</span>{" "}
+          <div className="mt-2 text-xs text-foreground/80 leading-snug">
+            <span className="text-foreground font-forensic font-semibold">Pieces vs. puzzle.</span>{" "}
             The{" "}
             <Link to="/diagnostic" className="text-amber underline underline-offset-2 hover:text-amber/80">
               Leak Audit
@@ -283,8 +283,8 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
       className="mt-1 max-w-6xl mx-auto scroll-mt-24 animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="rounded-sm border border-amber/10 bg-card/60 backdrop-blur-sm overflow-hidden">
-        <div className="p-1.5 sm:p-2">
+      <div className="rounded-sm border border-amber/20 bg-card/80 backdrop-blur-sm overflow-hidden">
+        <div className="p-2 sm:p-3">
           {body}
         </div>
       </div>
