@@ -414,7 +414,7 @@ serve(async (req) => {
         sitemap_urls: allLinks.length,
         pages_analyzed: pages.length + 1,
         analyzed_urls: [url, ...pages.map((p) => p.url)],
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
       },
     });
   } catch (e) {
