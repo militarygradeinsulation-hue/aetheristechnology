@@ -282,6 +282,7 @@ serve(async (req) => {
           const k = (a.candidate_email || "").toLowerCase();
           if (!attempts_by_email[k]) attempts_by_email[k] = a;
         }
+      }
       // Look up delivery status of the careers-test-access email for these recipients.
       const email_send_status: Record<string, { status: string; error: string | null; sent_at: string | null }> = {};
       if (emails.length) {
