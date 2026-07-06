@@ -38,6 +38,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
 const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
 const ScanPage = lazy(() => import("./pages/ScanPage"));
+const HeadToHeadPage = lazy(() => import("./pages/HeadToHeadPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
@@ -148,6 +149,8 @@ const App = () => (
                       <Route path="/ai-checklist" element={<AIChecklistPage />} />
                       <Route path="/scan" element={<ScanPage />} />
                       <Route path="/chaos-scan" element={<ChaosScanPage />} />
+                      <Route path="/head-to-head" element={<HeadToHeadPage />} />
+                      <Route path="/vs" element={<Navigate to="/head-to-head" replace />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
