@@ -5,6 +5,7 @@ import {
   EyeOff, PhoneOff, Receipt, Clock, Scale, Sparkles,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type OpId = "scan" | "price" | "fix";
 export interface Evidence { source_url?: string; quote?: string }
