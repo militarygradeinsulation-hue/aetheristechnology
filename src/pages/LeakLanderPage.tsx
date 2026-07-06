@@ -12,6 +12,7 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
+import { HomeFreeTrialArsenal } from "@/components/HomeFreeTrialArsenal";
 
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -181,6 +182,9 @@ const LeakLanderPage: React.FC = () => {
               Or run the free Chaos Scan <ArrowRight className="w-3 h-3" />
             </Link>
           </section>
+
+          {/* FREE-TRIAL ARSENAL — 5 flagship instruments, no gate */}
+          <HomeFreeTrialArsenal />
 
 
 
