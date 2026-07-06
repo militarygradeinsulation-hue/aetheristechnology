@@ -776,7 +776,7 @@ const IndustriesPage: React.FC = () => {
             ) : (
               <>
                 {/* Mind-map view — all breakpoints */}
-                <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
+                <MindMap industries={filtered} />
               </>
 
             )}
