@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Sparkles, Target, Shield, Cpu, Megaphone } from 'lucide-react';
 import { Background } from '@/components/Background';
@@ -9,6 +9,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, howToSchema, serviceSchema, speakableSchema } from '@/lib/schemas';
 import { VERTICAL_BY_SLUG, type VerticalUseCase } from '@/config/verticals';
+import LeakMindMap, { type MindMapNodeData } from '@/components/LeakMindMap';
 
 const CATEGORY_ICONS: Record<VerticalUseCase['category'], React.ComponentType<{ className?: string }>> = {
   'Strategy': Target,
