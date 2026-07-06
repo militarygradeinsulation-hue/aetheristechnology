@@ -245,7 +245,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
-    { key: 'chaosscan', label: 'Chaos Scan', icon: ScanSearch },
+    
     { key: 'mediastudio', label: 'Media Studio', icon: ImageIcon },
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'hiring', label: 'Hiring', icon: CalendarClock },
