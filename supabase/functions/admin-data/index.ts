@@ -282,11 +282,30 @@ serve(async (req) => {
           const k = (a.candidate_email || "").toLowerCase();
           if (!attempts_by_email[k]) attempts_by_email[k] = a;
         }
+      // Look up delivery status of the careers-test-access email for these recipients.
+      const email_send_status: Record<string, { status: string; error: string | null; sent_at: string | null }> = {};
+      if (emails.length) {
+        const { data: logs } = await supabase
+          .from("email_send_log")
+          .select("recipient_email,status,error_message,created_at")
+          .eq("template_name", "careers-test-access")
+          .in("recipient_email", emails)
+          .order("created_at", { ascending: false })
+          .limit(2000);
+        for (const l of logs || []) {
+          const k = (l.recipient_email || "").toLowerCase();
+          if (!email_send_status[k]) {
+            email_send_status[k] = { status: l.status, error: l.error_message, sent_at: l.created_at };
+          }
+        }
       }
+      const siteUrlPub = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
       return new Response(JSON.stringify({
         payments: rows,
         summary: { count: paid.length, total_cents, unique_emails: emails.length },
         attempts_by_email,
+        email_send_status,
+        test_link_base: `${siteUrlPub}/careers/test?session_id=`,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -299,8 +318,8 @@ serve(async (req) => {
         });
       }
       const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
-      const testUrl = `${siteUrl}/n?session_id=${sessionId}`;
-      const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
+      const testUrl = `${siteUrl}/careers/test?session_id=${sessionId}`;
+      const { data: sendData, error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
         body: {
           templateName: "careers-test-access",
           recipientEmail: email,
@@ -309,7 +328,21 @@ serve(async (req) => {
         },
       });
       if (sendErr) throw sendErr;
-      return new Response(JSON.stringify({ ok: true, testUrl }),
+      // Poll email_send_log briefly for confirmation
+      let confirmation: any = null;
+      for (let i = 0; i < 5; i++) {
+        const { data: log } = await supabase
+          .from("email_send_log")
+          .select("status,error_message,created_at,message_id")
+          .eq("template_name", "careers-test-access")
+          .eq("recipient_email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (log) { confirmation = log; if (log.status === 'sent' || log.status === 'suppressed' || log.status === 'failed') break; }
+        await new Promise(r => setTimeout(r, 400));
+      }
+      return new Response(JSON.stringify({ ok: true, testUrl, send: sendData || null, log: confirmation }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
