@@ -69,6 +69,8 @@ export const AdminCareersPayments: React.FC = () => {
       setPayments((data as any).payments || []);
       setSummary((data as any).summary || { count: 0, total_cents: 0, unique_emails: 0 });
       setAttempts((data as any).attempts_by_email || {});
+      setEmailStatus((data as any).email_send_status || {});
+      if ((data as any).test_link_base) setLinkBase((data as any).test_link_base);
     } catch (e) {
       toast({ title: 'Failed to load payments', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
