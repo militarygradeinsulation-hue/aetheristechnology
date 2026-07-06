@@ -435,31 +435,6 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* FINAL CTA — Two Doors */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "320ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-sm border-2 border-amber/50 bg-gradient-to-br from-amber/[0.08] via-transparent to-crimson/[0.05] p-6 sm:p-8 text-center">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Two doors</div>
-              <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight">
-                <span className="text-foreground/60">Door one:</span> keep doing what you're doing. The leak keeps its schedule.
-                <br />
-                <span className="text-amber">Door two:</span> open a case.
-              </h2>
-              <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button asChild variant="outline" size="default" className="h-11 px-6 border-white/20 bg-white/[0.06] hover:bg-amber/10 hover:border-amber/50 font-mono uppercase tracking-wider">
-                  <Link to="/leak-audit">Free Leak Audit</Link>
-                </Button>
-                <Button size="default" onClick={() => setBookingOpen(true)} className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
-                  Book the Leak Audit — $2,500 <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </div>
-              <p className="mt-4 text-xs text-foreground/60 italic">
-                No newsletter. No "book a friendly chat." No drip sequence begging you to reconsider. We don't chase. We investigate.
-              </p>
-            </div>
-          </section>
 
 
 
