@@ -218,72 +218,97 @@ Vocabulary: "leak", "bleed", "exposure", "active", "verified". Avoid "synergy",
 Currency: USD only. Every $ amount rendered as $X,XXX. Never €/£/¥.
 Output: production-grade prose suitable for a printed forensic report.`;
 
-async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
-  const chaptersList = CHAPTERS.map((c) => `${c.no}. ${c.title} [slug:${c.slug}]`).join("\n");
-  const prompt = `Build the complete 14-chapter Chaos Theory Forensics report for **${company || target}**.
-
-Target: ${target}
-Company: ${company || "(not provided)"}
-
-RAW FINDINGS (use only what is here, do not fabricate numbers):
-${JSON.stringify(findings).slice(0, 45_000)}
-
-Required chapters (in order):
-${chaptersList}
-
-For EACH chapter return an object with this exact shape:
-{
-  "no": <int>,
-  "slug": "<slug>",
-  "title": "<title>",
-  "verdict": "<one blunt sentence>",
-  "what_we_found": "<1-2 specific short paragraphs in markdown>",
-  "why_its_leaking": "<1-2 specific short paragraphs>",
-  "what_its_costing": "<1 concise paragraph, USD only>",
-  "what_to_do": {
-    "this_week": ["<action>", "<action>"],
-    "this_month": ["<action>"],
-    "this_quarter": ["<action>"]
-  },
-  "evidence": [
-    { "label": "<short label>", "value": "<datum>" }
-  ]
-}
-
-Also return:
-- "executive_summary": 4-6 paragraphs in markdown for the front of the report
-- "top_leaks": array of up to 10 { rank, name, dollars_low, dollars_high, chapter_slug, summary }
-
-Respond ONLY with valid JSON of shape:
-{ "executive_summary": "...", "top_leaks": [...], "chapters": [ ...14 chapter objects ] }`;
-
+async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, model = "google/gemini-2.5-flash") {
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(50_000),
+    signal: AbortSignal.timeout(timeoutMs),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+      model,
       messages: [
         { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      max_tokens: 12000,
+      max_tokens: maxTokens,
       temperature: 0.4,
     }),
   });
-  if (!r.ok) throw new Error(`AI synth failed ${r.status}: ${await r.text()}`);
+  if (!r.ok) throw new Error(`AI call failed ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
   const raw = j.choices?.[0]?.message?.content || "{}";
   try {
     return JSON.parse(raw);
   } catch {
     const m = raw.match(/\{[\s\S]*\}/);
-    return m ? JSON.parse(m[0]) : { executive_summary: raw, chapters: [], top_leaks: [] };
+    return m ? JSON.parse(m[0]) : {};
   }
+}
+
+const CHAPTER_SHAPE = `{
+  "no": <int>, "slug": "<slug>", "title": "<title>",
+  "verdict": "<one blunt sentence>",
+  "what_we_found": "<1-2 short markdown paragraphs>",
+  "why_its_leaking": "<1-2 short paragraphs>",
+  "what_its_costing": "<1 paragraph, USD only>",
+  "what_to_do": { "this_week": ["<action>"], "this_month": ["<action>"], "this_quarter": ["<action>"] },
+  "evidence": [{ "label": "<short>", "value": "<datum>" }]
+}`;
+
+async function synthesizeChapterBatch(
+  batch: typeof CHAPTERS,
+  findingsStr: string,
+  target: string,
+  company: string,
+) {
+  const list = batch.map((c) => `${c.no}. ${c.title} [slug:${c.slug}]`).join("\n");
+  const prompt = `Write these forensic report chapters for **${company || target}** (${target}).
+
+RAW FINDINGS (use only what is here, do not fabricate):
+${findingsStr}
+
+Chapters to write (in order):
+${list}
+
+For EACH chapter return an object shaped exactly:
+${CHAPTER_SHAPE}
+
+Respond ONLY as JSON: { "chapters": [ ...${batch.length} chapter objects ] }`;
+  const out = await aiJson(prompt, 6000, 40_000);
+  return Array.isArray(out.chapters) ? out.chapters : [];
+}
+
+async function synthesizeSummary(findingsStr: string, target: string, company: string) {
+  const prompt = `You are writing the front-matter of a Chaos Theory Forensics report for **${company || target}** (${target}).
+
+RAW FINDINGS:
+${findingsStr}
+
+Return JSON:
+{
+  "executive_summary": "<4-6 paragraphs, markdown, operator voice>",
+  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one line>" } ]  // up to 10, sorted by dollars_high desc
+}`;
+  return await aiJson(prompt, 3500, 30_000);
+}
+
+async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
+  const findingsStr = JSON.stringify(findings).slice(0, 28_000);
+  // Split 14 chapters into 3 parallel batches for speed.
+  const batches = [CHAPTERS.slice(0, 5), CHAPTERS.slice(5, 10), CHAPTERS.slice(10, 14)];
+  const [summary, ...chapterBatches] = await Promise.all([
+    synthesizeSummary(findingsStr, target, company),
+    ...batches.map((b) => synthesizeChapterBatch(b, findingsStr, target, company)),
+  ]);
+  const chapters = chapterBatches.flat();
+  return {
+    executive_summary: summary.executive_summary || "",
+    top_leaks: Array.isArray(summary.top_leaks) ? summary.top_leaks : [],
+    chapters,
+  };
 }
 
 // ──────────────────────────── background worker ─────────────────────────────
@@ -348,10 +373,18 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("crm", "skipped", "no account_id");
     }
 
-    await stage("synth", "running", { cap_seconds: 50 });
+    await stage("synth", "running", { cap_seconds: 40, mode: "parallel-batches" });
     let report;
     try {
       report = await synthesizeReport(findings, url, company);
+      // Fill any missing chapters from the deterministic fallback so the report is always complete.
+      if (!report.chapters || report.chapters.length < CHAPTERS.length) {
+        const fb = fallbackReport(findings, url, company);
+        const bySlug = new Map((report.chapters || []).map((c: { slug: string }) => [c.slug, c]));
+        report.chapters = CHAPTERS.map((c) => bySlug.get(c.slug) || fb.chapters.find((x) => x.slug === c.slug));
+        if (!report.executive_summary) report.executive_summary = fb.executive_summary;
+        if (!report.top_leaks?.length) report.top_leaks = fb.top_leaks;
+      }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
       report = fallbackReport(findings, url, company);
