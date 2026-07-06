@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Building2, Heart, Banknote, Truck, HardHat, Factory, Code2, Star, Search, ChevronRight, Scale, Home, GraduationCap, ShoppingBag, Hotel, Wrench, Plane, Megaphone, Stethoscope, Sparkles, Cpu, Leaf, Beaker, Hammer, Briefcase, AlertTriangle, CheckCircle2, Calendar } from 'lucide-react';
 import { Background } from '@/components/Background';
@@ -467,25 +467,37 @@ const MindMapNode: React.FC<{
   onClick: () => void;
   isSelected: boolean;
   isDimmed: boolean;
-}> = ({ v, pos, index, onClick, isSelected, isDimmed }) => {
+  offset: { dx: number; dy: number };
+  isDragging: boolean;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: (e: React.PointerEvent) => void;
+}> = ({ v, pos, index, onClick, isSelected, isDimmed, offset, isDragging, onPointerDown, onPointerMove, onPointerUp }) => {
   const Icon = v.icon;
   return (
     <button
       type="button"
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       style={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
+        transform: `translate(calc(-50% + ${offset.dx}px), calc(-50% + ${offset.dy}px))`,
         animationDelay: `${index * 60}ms`,
+        touchAction: 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
       }}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10 transition-opacity duration-300 ${
-        isDimmed ? 'opacity-25' : 'opacity-100'
-      }`}
+      className={`absolute group animate-fade-in transition-opacity duration-300 select-none ${
+        isDragging ? 'z-40' : 'z-10'
+      } ${isDimmed ? 'opacity-25' : 'opacity-100'}`}
     >
       <div
-        className="relative flex flex-col items-center"
+        className="relative flex flex-col items-center pointer-events-none"
         style={{
-          animation: isSelected
+          animation: isSelected || isDragging
             ? undefined
             : `industry-float-${index % 4} ${9 + (index % 5)}s ease-in-out ${(index % 7) * -0.6}s infinite`,
           willChange: 'transform',
@@ -499,7 +511,9 @@ const MindMapNode: React.FC<{
           style={{ animation: `mindmap-pulse 3.2s ease-out ${(index % 6) * 0.4}s infinite` }}
         />
         <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
-          isSelected
+          isDragging
+            ? 'border-amber bg-amber/25 shadow-[0_0_50px_hsl(var(--amber)/0.75)] scale-110'
+            : isSelected
             ? 'border-amber bg-amber/15 shadow-[0_0_40px_hsl(var(--amber)/0.55)]'
             : 'border-amber/40 group-hover:border-amber group-hover:bg-amber/10 shadow-[0_0_20px_hsl(var(--amber)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--amber)/0.4)]'
         }`}>
@@ -524,6 +538,132 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
   const positions = useMemo(() => computeMindMapLayout(industries.length), [industries.length]);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
+  // ============ Chaos physics: drag + ripple ============
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [offsets, setOffsets] = useState<{ dx: number; dy: number }[]>(
+    () => industries.map(() => ({ dx: 0, dy: 0 }))
+  );
+  const offsetsRef = useRef(offsets);
+  offsetsRef.current = offsets;
+  const velocitiesRef = useRef<{ vx: number; vy: number }[]>(
+    industries.map(() => ({ vx: 0, vy: 0 }))
+  );
+  const draggingRef = useRef<number | null>(null);
+  const dragStartRef = useRef<{ px: number; py: number; dx: number; dy: number } | null>(null);
+  const movedRef = useRef(0);
+  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+
+  // Reset when industry list changes
+  useEffect(() => {
+    setOffsets(industries.map(() => ({ dx: 0, dy: 0 })));
+    velocitiesRef.current = industries.map(() => ({ vx: 0, vy: 0 }));
+  }, [industries.length]);
+
+  // Spring-back physics loop
+  useEffect(() => {
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const cur = offsetsRef.current;
+      const vels = velocitiesRef.current;
+      let anyMoving = false;
+      const next = cur.map((o, i) => {
+        if (draggingRef.current === i) return o;
+        const v = vels[i];
+        const k = 22;    // spring stiffness
+        const damp = 5.5; // damping
+        const ax = -k * o.dx - damp * v.vx;
+        const ay = -k * o.dy - damp * v.vy;
+        v.vx += ax * dt;
+        v.vy += ay * dt;
+        const ndx = o.dx + v.vx * dt;
+        const ndy = o.dy + v.vy * dt;
+        if (Math.abs(ndx) > 0.05 || Math.abs(ndy) > 0.05 || Math.abs(v.vx) > 0.05 || Math.abs(v.vy) > 0.05) {
+          anyMoving = true;
+        }
+        return { dx: ndx, dy: ndy };
+      });
+      if (anyMoving || draggingRef.current !== null) setOffsets(next);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const handleNodePointerDown = (i: number, e: React.PointerEvent) => {
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    draggingRef.current = i;
+    setDraggingIdx(i);
+    dragStartRef.current = {
+      px: e.clientX,
+      py: e.clientY,
+      dx: offsetsRef.current[i].dx,
+      dy: offsetsRef.current[i].dy,
+    };
+    movedRef.current = 0;
+    velocitiesRef.current[i] = { vx: 0, vy: 0 };
+  };
+
+  const handleNodePointerMove = (i: number, e: React.PointerEvent) => {
+    if (draggingRef.current !== i || !dragStartRef.current) return;
+    const s = dragStartRef.current;
+    const nx = s.dx + (e.clientX - s.px);
+    const ny = s.dy + (e.clientY - s.py);
+    movedRef.current = Math.max(movedRef.current, Math.hypot(e.clientX - s.px, e.clientY - s.py));
+
+    const cur = [...offsetsRef.current];
+    const prev = cur[i];
+    const ddx = nx - prev.dx;
+    const ddy = ny - prev.dy;
+    cur[i] = { dx: nx, dy: ny };
+
+    // Ripple: push nearby nodes in the direction of the drag delta
+    const stage = stageRef.current?.getBoundingClientRect();
+    if (stage) {
+      const dragAnchor = {
+        x: (positions[i].x / 100) * stage.width + nx,
+        y: (positions[i].y / 100) * stage.height + ny,
+      };
+      const radius = 220;
+      const dragMag = Math.hypot(ddx, ddy);
+      for (let j = 0; j < cur.length; j++) {
+        if (j === i || !positions[j]) continue;
+        const anchor = {
+          x: (positions[j].x / 100) * stage.width + cur[j].dx,
+          y: (positions[j].y / 100) * stage.height + cur[j].dy,
+        };
+        const rdx = anchor.x - dragAnchor.x;
+        const rdy = anchor.y - dragAnchor.y;
+        const d = Math.hypot(rdx, rdy) || 1;
+        if (d < radius) {
+          const falloff = 1 - d / radius;
+          const push = dragMag * falloff * 6;
+          velocitiesRef.current[j].vx += (rdx / d) * push;
+          velocitiesRef.current[j].vy += (rdy / d) * push;
+        }
+      }
+    }
+    setOffsets(cur);
+  };
+
+  const handleNodePointerUp = (i: number, _e: React.PointerEvent) => {
+    if (draggingRef.current === i) {
+      draggingRef.current = null;
+      setDraggingIdx(null);
+      dragStartRef.current = null;
+    }
+  };
+
+  const handleNodeClick = (i: number, slug: string) => {
+    // Suppress click if user dragged more than a few px
+    if (movedRef.current > 5) {
+      movedRef.current = 0;
+      return;
+    }
+    setSelectedSlug((s) => (s === slug ? null : slug));
+  };
 
   const selectedIndex = selectedSlug ? industries.findIndex((v) => v.slug === selectedSlug) : -1;
   const selected = selectedIndex >= 0 ? industries[selectedIndex] : null;
@@ -540,7 +680,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
   const SelectedIcon = selected?.icon;
 
   return (
-    <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
+    <div ref={stageRef} className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
       <style>{`
         @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }
         @keyframes industry-float-1 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-7px,-5px) rotate(-0.8deg); } }
@@ -647,9 +787,14 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
           v={v}
           pos={positions[i]}
           index={i}
-          onClick={() => setSelectedSlug((s) => (s === v.slug ? null : v.slug))}
+          onClick={() => handleNodeClick(i, v.slug)}
           isSelected={selectedSlug === v.slug}
           isDimmed={selectedSlug !== null && selectedSlug !== v.slug}
+          offset={offsets[i] ?? { dx: 0, dy: 0 }}
+          isDragging={draggingIdx === i}
+          onPointerDown={(e) => handleNodePointerDown(i, e)}
+          onPointerMove={(e) => handleNodePointerMove(i, e)}
+          onPointerUp={(e) => handleNodePointerUp(i, e)}
         />
       ))}
 

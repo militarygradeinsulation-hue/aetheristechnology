@@ -10,9 +10,10 @@ import LeakMindMap, { type MindMapNodeData } from "@/components/LeakMindMap";
 
 
 
-type TabId = "symptoms" | "steps" | "systems" | "services";
+type TabId = "all" | "symptoms" | "steps" | "systems" | "services";
 
 const TABS: { id: TabId; label: string; blurb: string }[] = [
+  { id: "all",      label: "The whole ecosystem", blurb: "Every leak, every step, every system, every door — one map." },
   { id: "symptoms", label: "Where it leaks",   blurb: "Seven categories. Every business has at least four active right now." },
   { id: "steps",    label: "The 7-step audit", blurb: "How we trace the leak from symptom to dollar figure." },
   { id: "systems",  label: "The system stack", blurb: "The AI + tooling layer that runs quiet in the background." },
@@ -20,7 +21,7 @@ const TABS: { id: TabId; label: string; blurb: string }[] = [
 ];
 
 export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBookAudit }) => {
-  const [tab, setTab] = useState<TabId>("symptoms");
+  const [tab, setTab] = useState<TabId>("all");
   const navigate = useNavigate();
 
   const symptoms: MindMapNodeData[] = [
@@ -123,62 +124,67 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   ];
 
   const activeTab = TABS.find(t => t.id === tab)!;
+  const allNodes: MindMapNodeData[] = [...symptoms, ...steps, ...systems, ...services];
   const nodes =
-    tab === "symptoms" ? symptoms :
-    tab === "steps"    ? steps    :
-    tab === "systems"  ? systems  : services;
+    tab === "all"      ? allNodes  :
+    tab === "symptoms" ? symptoms  :
+    tab === "steps"    ? steps     :
+    tab === "systems"  ? systems   : services;
 
   const hubByTab: Record<TabId, { eyebrow: string; title: React.ReactNode; subtitle: string }> = {
-    symptoms: { eyebrow: "Every business",  title: <>Revenue<br/>Leaks</>,     subtitle: "The Leak Audit™" },
-    steps:    { eyebrow: "7-step protocol", title: <>The Leak<br/>Audit</>,    subtitle: "$2,500 flat" },
-    systems:  { eyebrow: "Ambient layer",   title: <>The System<br/>Stack</>,  subtitle: "Runs quiet 24/7" },
-    services: { eyebrow: "Three doors",     title: <>Case<br/>Openings</>,     subtitle: "One methodology" },
+    all:      { eyebrow: "One business",      title: <>The Leak<br/>Ecosystem</>, subtitle: "Every map at once" },
+    symptoms: { eyebrow: "Every business",    title: <>Revenue<br/>Leaks</>,      subtitle: "The Leak Audit™" },
+    steps:    { eyebrow: "7-step protocol",   title: <>The Leak<br/>Audit</>,     subtitle: "$2,500 flat" },
+    systems:  { eyebrow: "Ambient layer",     title: <>The System<br/>Stack</>,   subtitle: "Runs quiet 24/7" },
+    services: { eyebrow: "Three doors",       title: <>Case<br/>Openings</>,      subtitle: "One methodology" },
   };
-  const accent: "amber" | "crimson" = tab === "symptoms" ? "crimson" : "amber";
+  const accent: "amber" | "crimson" = tab === "symptoms" || tab === "all" ? "crimson" : "amber";
 
   return (
     <section
-      className="mt-8 max-w-6xl mx-auto animate-fade-in"
+      className="mt-10 max-w-7xl mx-auto animate-fade-in"
       style={{ animationDelay: "260ms", animationFillMode: "both" }}
     >
-      <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm p-5 sm:p-6">
-        <div className="text-center mb-5">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Leak Ecosystem</div>
-          <h2 className="font-forensic text-2xl sm:text-3xl font-bold mt-1 leading-tight">
-            One business. Several maps. <span className="text-crimson">Every clue traced.</span>
+      <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm p-6 sm:p-8 md:p-10">
+        <div className="text-center mb-6">
+          <div className="font-mono text-xs sm:text-sm uppercase tracking-[0.35em] text-amber">The Leak Ecosystem</div>
+          <h2 className="font-forensic text-4xl sm:text-5xl md:text-6xl font-bold mt-3 leading-[1.05]">
+            One business. Several maps.<br className="hidden sm:block" />
+            <span className="text-crimson">Every clue traced.</span>
           </h2>
-          <p className="mt-2 text-xs sm:text-sm text-foreground/65 max-w-2xl mx-auto">
-            Tap any node to trace its connections. Every free instrument opens from the map itself — no forms, no pitch.
+          <p className="mt-4 text-base sm:text-lg text-foreground/75 max-w-3xl mx-auto leading-relaxed">
+            The whole ecosystem is on the map. Click any category below to filter.
+            Tap any node to trace how one leak feeds the next.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 justify-center mb-2">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-3">
           {TABS.map(t => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`px-3 py-1.5 rounded-sm border font-mono text-[11px] uppercase tracking-wider transition-colors ${
+              className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-sm border font-mono text-xs sm:text-sm uppercase tracking-wider transition-all ${
                 tab === t.id
-                  ? "border-amber bg-amber/15 text-amber"
-                  : "border-border/50 text-foreground/70 hover:border-amber/40 hover:text-foreground"
+                  ? "border-amber bg-amber/15 text-amber shadow-[0_0_20px_-4px_hsl(var(--amber)/0.5)]"
+                  : "border-border/50 text-foreground/70 hover:border-amber/50 hover:text-foreground"
               }`}
             >
               {t.label}
             </button>
           ))}
         </div>
-        <p className="text-center text-xs sm:text-sm text-foreground/65 mb-2">{activeTab.blurb}</p>
+        <p className="text-center text-sm sm:text-base text-foreground/70 mb-3">{activeTab.blurb}</p>
 
         <LeakMindMap
           key={tab}
           hub={hubByTab[tab]}
           nodes={nodes}
           accent={accent}
-          heightClass="h-[680px] md:h-[780px] lg:h-[840px]"
+          heightClass="h-[820px] md:h-[960px] lg:h-[1080px]"
         />
 
-        <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 mt-2">
+        <p className="text-center text-xs sm:text-sm font-mono uppercase tracking-widest text-foreground/55 mt-3">
           Tap any node — watch the ripple hit every other leak it's feeding.
         </p>
       </div>
