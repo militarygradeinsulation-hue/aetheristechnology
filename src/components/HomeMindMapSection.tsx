@@ -179,7 +179,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
         />
 
         <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 mt-2">
-          Tap any circle to expand its connections. Tap again to open.
+          Tap any node — watch the ripple hit every other leak it's feeding.
         </p>
       </div>
     </section>
