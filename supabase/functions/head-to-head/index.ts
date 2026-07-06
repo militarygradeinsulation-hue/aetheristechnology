@@ -140,14 +140,41 @@ Output STRICT JSON only, no prose, matching this schema:
   "actionPlan": [                           // ordered, concrete moves for YOU
     { "priority": "P0"|"P1"|"P2", "action": string, "expectedImpact": string, "effort": "low"|"medium"|"high" }
   ],
-  "quickWins": string[]                      // 3-5 things you can ship this week
+  "quickWins": string[]                      // 3-5 things you can ship this week${takeover ? `,
+  "takeover": {
+    "thesis": string,                         // 2-3 sentences: the exact wedge to steal their market
+    "rivalChaos": [                          // vulnerabilities you found in the rival, ranked
+      { "weakness": string, "evidence": string, "exploitability": "high"|"medium"|"low", "howToExploit": string }
+    ],
+    "yourFixes": [                           // your own chaos you MUST close first (can't attack from a leaky ship)
+      { "issue": string, "evidence": string, "fix": string, "blockerLevel": "critical"|"important"|"nice-to-have" }
+    ],
+    "wedgeMoves": [                          // offensive plays that use their weakness + your strength
+      { "move": string, "leveragesRivalWeakness": string, "leveragesYourStrength": string, "expectedOutcome": string, "timeframe": "week"|"month"|"quarter" }
+    ],
+    "positioningPivot": {                    // how to reposition YOUR site to steal their buyers
+      "newHeadline": string,
+      "newSubhead": string,
+      "newCtaLabel": string,
+      "keywordsToOwn": string[],             // 5-8 SEO/messaging terms rival is weak on
+      "proofToAdd": string[]                 // specific proof elements (case study, guarantee, logo bar, price)
+    },
+    "counterMessaging": [                    // exact copy lines that reframe rival's strengths as liabilities
+      { "rivalClaim": string, "yourCounter": string }
+    ],
+    "kpis": [                                // how to measure takeover progress
+      { "metric": string, "baseline": string, "target30Day": string }
+    ]
+  }` : ""}
 }
 
 Rules:
 - Scores are integers 0-100. Overall = weighted synthesis, not simple average.
 - Every "why", "youEvidence", "rivalEvidence" MUST cite something concrete from the scraped pages (a quote, a missing element, a specific color/font, a CTA, a price, a claim).
 - If a page failed to scrape, mark that side "insufficient data" for that category and score conservatively.
-- No fluff, no consultant-speak. Operator tone.`;
+- No fluff, no consultant-speak. Operator tone.${takeover ? `
+- Takeover mode: be ruthless but ethical. Exploit rival's real, evidenced weaknesses (broken messaging, thin proof, hidden pricing, weak CTAs, brand contradictions). Do NOT fabricate rival flaws.
+- yourFixes must be honest — list YOUR bleed first. You cannot take over from a leaky ship.` : ""}`;
 
     const user = `HEAD-TO-HEAD SCAN
 
