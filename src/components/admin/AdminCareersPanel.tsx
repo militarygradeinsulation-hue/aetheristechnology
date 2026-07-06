@@ -1072,7 +1072,7 @@ export const AdminCareersPanel: React.FC = () => {
                     key={a.id}
                     type="button"
                     onClick={() => setDetailAttempt(a)}
-                    className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
+                    className={`w-full text-left rounded-lg border border-border/50 bg-secondary/20 ${minimized ? 'px-3 py-2' : 'p-3'} hover:border-amber/60 hover:bg-secondary/30 transition-colors`}
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex-1 min-w-0">
