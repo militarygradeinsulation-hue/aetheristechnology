@@ -6,6 +6,9 @@ import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import homepageBanner from "@/assets/homepage-banner.png.asset.json";
+import homepageBanner768 from "@/assets/homepage-banner-768.png.asset.json";
+import homepageBanner1280 from "@/assets/homepage-banner-1280.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
