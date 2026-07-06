@@ -97,6 +97,23 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   const [selected, setSelected] = useState<number | null>(null);
 
+  const idToIndex = useMemo(() => {
+    const m = new Map<string, number>();
+    nodes.forEach((n, i) => m.set(n.id, i));
+    return m;
+  }, [nodes]);
+
+  const affectedIdx = useMemo(() => {
+    if (selected === null) return new Set<number>();
+    const affects = nodes[selected]?.affects ?? [];
+    const s = new Set<number>();
+    affects.forEach((x) => {
+      const idx = idToIndex.get(x.id);
+      if (idx !== undefined) s.add(idx);
+    });
+    return s;
+  }, [selected, nodes, idToIndex]);
+
   return (
     <div className={`relative w-full ${heightClass}`}>
       <svg
