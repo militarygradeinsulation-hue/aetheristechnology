@@ -353,31 +353,43 @@ const MindMapNode: React.FC<{
   v: IndustryLeak;
   pos: NodePos;
   index: number;
-  onOpen: () => void;
-}> = ({ v, pos, index, onOpen }) => {
+  onClick: () => void;
+  isSelected: boolean;
+  isDimmed: boolean;
+}> = ({ v, pos, index, onClick, isSelected, isDimmed }) => {
   const Icon = v.icon;
   return (
     <button
       type="button"
-      onClick={onOpen}
+      onClick={onClick}
       style={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
         animationDelay: `${index * 60}ms`,
       }}
-      className="absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10"
+      className={`absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10 transition-opacity duration-300 ${
+        isDimmed ? 'opacity-25' : 'opacity-100'
+      }`}
     >
       <div className="relative flex flex-col items-center">
         <span
           aria-hidden
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border border-amber/30 group-hover:border-amber/70 transition-colors"
+          className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${
+            isSelected ? 'border-amber' : 'border-amber/30 group-hover:border-amber/70'
+          }`}
           style={{ animation: `mindmap-pulse 3.2s ease-out ${(index % 6) * 0.4}s infinite` }}
         />
-        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 border-amber/40 group-hover:border-amber group-hover:bg-amber/10 flex items-center justify-center shadow-[0_0_20px_hsl(var(--amber)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--amber)/0.4)] transition-all">
+        <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
+          isSelected
+            ? 'border-amber bg-amber/15 shadow-[0_0_40px_hsl(var(--amber)/0.55)]'
+            : 'border-amber/40 group-hover:border-amber group-hover:bg-amber/10 shadow-[0_0_20px_hsl(var(--amber)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--amber)/0.4)]'
+        }`}>
           <Icon className="w-7 h-7 md:w-8 md:h-8 text-amber" />
         </div>
         <div className="mt-2 text-center max-w-[130px]">
-          <div className="font-forensic text-xs md:text-sm font-bold text-foreground leading-tight group-hover:text-amber transition-colors">
+          <div className={`font-forensic text-xs md:text-sm font-bold leading-tight transition-colors ${
+            isSelected ? 'text-amber' : 'text-foreground group-hover:text-amber'
+          }`}>
             {v.industry}
           </div>
           <div className="font-mono text-[10px] md:text-xs text-crimson leading-tight mt-0.5">
@@ -389,8 +401,14 @@ const MindMapNode: React.FC<{
   );
 };
 
-const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) => void }> = ({ industries, onOpen }) => {
+const MindMap: React.FC<{ industries: IndustryLeak[] }> = ({ industries }) => {
+  const navigate = useNavigate();
   const positions = useMemo(() => computeMindMapLayout(industries.length), [industries.length]);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
+  const selectedIndex = selectedSlug ? industries.findIndex((v) => v.slug === selectedSlug) : -1;
+  const selected = selectedIndex >= 0 ? industries[selectedIndex] : null;
+  const selectedPos = selectedIndex >= 0 ? positions[selectedIndex] : null;
 
   const ringGroups = useMemo(() => {
     const groups: Record<number, number[]> = {};
@@ -399,6 +417,8 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
     });
     return groups;
   }, [positions]);
+
+  const SelectedIcon = selected?.icon;
 
   return (
     <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
@@ -421,20 +441,25 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
 
         <circle cx="50" cy="50" r="18" fill="url(#hubGlow)" />
 
-        {positions.map((p, i) => (
-          <line
-            key={`spoke-${i}`}
-            x1="50"
-            y1="50"
-            x2={p.x}
-            y2={p.y}
-            stroke="url(#spokeGrad)"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
-            strokeDasharray="4 6"
-            style={{ animation: `mindmap-flow 6s linear ${(i % 8) * -0.5}s infinite` }}
-          />
-        ))}
+        {positions.map((p, i) => {
+          const isActive = i === selectedIndex;
+          const isDim = selectedIndex >= 0 && !isActive;
+          return (
+            <line
+              key={`spoke-${i}`}
+              x1="50"
+              y1="50"
+              x2={p.x}
+              y2={p.y}
+              stroke={isActive ? 'hsl(var(--amber))' : 'url(#spokeGrad)'}
+              strokeOpacity={isDim ? 0.1 : isActive ? 0.95 : 1}
+              strokeWidth={isActive ? 1.6 : 1}
+              vectorEffect="non-scaling-stroke"
+              strokeDasharray={isActive ? '0' : '4 6'}
+              style={{ animation: isActive ? undefined : `mindmap-flow 6s linear ${(i % 8) * -0.5}s infinite` }}
+            />
+          );
+        })}
 
         {Object.values(ringGroups).flatMap((idxs, gi) =>
           idxs.map((idx, k) => {
@@ -456,7 +481,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
                 d={`M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`}
                 fill="none"
                 stroke="hsl(var(--amber))"
-                strokeOpacity="0.18"
+                strokeOpacity={selectedIndex >= 0 ? 0.06 : 0.18}
                 strokeWidth="0.8"
                 vectorEffect="non-scaling-stroke"
                 strokeDasharray="2 5"
@@ -466,34 +491,98 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
         )}
       </svg>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-        <div className="relative">
-          <span
-            aria-hidden
-            className="absolute inset-0 rounded-full border border-crimson/40"
-            style={{ animation: 'mindmap-pulse 2.6s ease-out infinite' }}
-          />
-          <span
-            aria-hidden
-            className="absolute inset-0 rounded-full border border-crimson/30"
-            style={{ animation: 'mindmap-pulse 2.6s ease-out 1.3s infinite' }}
-          />
-          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-background border-2 border-crimson flex flex-col items-center justify-center text-center px-3 shadow-[0_0_40px_hsl(var(--crimson)/0.4)]">
-            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson">Every Business</div>
-            <div className="font-forensic font-bold text-base md:text-xl leading-tight text-foreground mt-1">
-              Revenue<br />Leaks
+      {/* Center hub — hidden while a tile is open */}
+      {!selected && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+          <div className="relative">
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-full border border-crimson/40"
+              style={{ animation: 'mindmap-pulse 2.6s ease-out infinite' }}
+            />
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-full border border-crimson/30"
+              style={{ animation: 'mindmap-pulse 2.6s ease-out 1.3s infinite' }}
+            />
+            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-background border-2 border-crimson flex flex-col items-center justify-center text-center px-3 shadow-[0_0_40px_hsl(var(--crimson)/0.4)]">
+              <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson">Every Business</div>
+              <div className="font-forensic font-bold text-base md:text-xl leading-tight text-foreground mt-1">
+                Revenue<br />Leaks
+              </div>
+              <div className="font-mono text-[10px] md:text-xs text-amber mt-1">The Leak Audit™</div>
             </div>
-            <div className="font-mono text-[10px] md:text-xs text-amber mt-1">The Leak Audit™</div>
           </div>
         </div>
-      </div>
+      )}
 
       {industries.map((v, i) => positions[i] && (
-        <MindMapNode key={v.slug} v={v} pos={positions[i]} index={i} onOpen={() => onOpen(v)} />
+        <MindMapNode
+          key={v.slug}
+          v={v}
+          pos={positions[i]}
+          index={i}
+          onClick={() => setSelectedSlug((s) => (s === v.slug ? null : v.slug))}
+          isSelected={selectedSlug === v.slug}
+          isDimmed={selectedSlug !== null && selectedSlug !== v.slug}
+        />
       ))}
+
+      {/* Info tile — opens inline when a node is clicked */}
+      {selected && SelectedIcon && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[92%] sm:w-[80%] md:w-[60%] max-w-lg animate-scale-in">
+          <div className="relative forensic-tile rounded-sm border-2 border-amber bg-background/95 backdrop-blur-md shadow-[0_0_60px_hsl(var(--amber)/0.3)] p-5 sm:p-6">
+            <button
+              type="button"
+              onClick={() => setSelectedSlug(null)}
+              className="absolute top-2 right-2 w-8 h-8 rounded-sm border border-border/50 hover:border-amber/60 text-foreground/70 hover:text-amber flex items-center justify-center transition-colors"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className="flex items-center gap-3 mb-3 pr-8">
+              <div className="w-10 h-10 rounded-sm bg-amber/15 flex items-center justify-center shrink-0">
+                <SelectedIcon className="w-5 h-5 text-amber" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-forensic text-lg sm:text-xl font-bold text-foreground leading-tight truncate">{selected.industry}</div>
+                <div className="font-mono text-crimson text-sm">{selected.typicalLoss}</div>
+              </div>
+            </div>
+
+            <p className="text-sm sm:text-base text-foreground/85 italic mb-3">"{selected.primaryLeak}"</p>
+
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Connections we trace</div>
+            <ul className="space-y-1.5 mb-4">
+              {selected.whatWeMeasure.map((m) => (
+                <li key={m} className="text-sm text-foreground/90 flex gap-2 leading-snug">
+                  <span className="text-amber shrink-0">›</span>{m}
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-border/40">
+              <Link
+                to={`/${selected.slug}`}
+                className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors text-sm"
+              >
+                Open the case file <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSelectedSlug(null)}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-sm border border-border/60 hover:border-amber/40 transition-colors text-foreground text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 const IndustryModal: React.FC<{ industry: IndustryLeak | null; onClose: () => void }> = ({ industry, onClose }) => {
   const navigate = useNavigate();
@@ -687,7 +776,7 @@ const IndustriesPage: React.FC = () => {
             ) : (
               <>
                 {/* Mind-map view — all breakpoints */}
-                <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
+                <MindMap industries={filtered} />
               </>
 
             )}
