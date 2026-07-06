@@ -101,15 +101,26 @@ type Mode = "chaos" | "fixed";
 export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null; className?: string }> = ({ data, meta, className }) => {
   const [mode, setMode] = useState<Mode>("chaos");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
-  const symptoms = useMemo(() => layoutSymptoms((data?.symptoms || []).slice(0, 8)), [data]);
+  // Tighter ellipse and pulled-in operator anchors on mobile so labels + hub don't collide.
+  const rx = isMobile ? 34 : 42;
+  const ry = isMobile ? 32 : 34;
+  const opPos: Record<OpId, { x: number; y: number }> = isMobile
+    ? { scan: { x: 26, y: 50 }, price: { x: 50, y: 78 }, fix: { x: 74, y: 50 } }
+    : OP_POS;
+
+  const symptoms = useMemo(
+    () => layoutSymptoms((data?.symptoms || []).slice(0, 8), rx, ry),
+    [data, rx, ry],
+  );
   const operators = useMemo(
     () => (data?.operators || [
       { id: "scan", label: "Scan", body: "" },
       { id: "price", label: "Price", body: "" },
       { id: "fix", label: "Fix", body: "" },
-    ]).map((o) => ({ ...o, ...OP_POS[o.id] })),
-    [data],
+    ]).map((o) => ({ ...o, ...opPos[o.id] })),
+    [data, opPos],
   );
   const active = symptoms.find((s) => s.id === activeId) || null;
   const isFixed = mode === "fixed";
