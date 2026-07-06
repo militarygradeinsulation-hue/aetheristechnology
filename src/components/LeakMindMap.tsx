@@ -9,6 +9,8 @@ export type MindMapNodeData = {
   icon: LucideIcon;
   onClick?: () => void;
   connections?: string[];
+  /** Cross-node ripple: how selecting this node affects sibling nodes. */
+  affects?: { id: string; note: string }[];
 };
 
 type NodePos = { x: number; y: number; ring: number };
@@ -95,6 +97,23 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   const [selected, setSelected] = useState<number | null>(null);
 
+  const idToIndex = useMemo(() => {
+    const m = new Map<string, number>();
+    nodes.forEach((n, i) => m.set(n.id, i));
+    return m;
+  }, [nodes]);
+
+  const affectedIdx = useMemo(() => {
+    if (selected === null) return new Set<number>();
+    const affects = nodes[selected]?.affects ?? [];
+    const s = new Set<number>();
+    affects.forEach((x) => {
+      const idx = idToIndex.get(x.id);
+      if (idx !== undefined) s.add(idx);
+    });
+    return s;
+  }, [selected, nodes, idToIndex]);
+
   return (
     <div className={`relative w-full ${heightClass}`}>
       <svg
@@ -165,6 +184,35 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
             );
           })
         )}
+
+        {/* Ripple links: selected node → affected sibling nodes */}
+        {selected !== null && [...affectedIdx].map((tIdx) => {
+          const S = positions[selected];
+          const T = positions[tIdx];
+          if (!S || !T) return null;
+          // Curve away from the hub for readability
+          const mx = (S.x + T.x) / 2;
+          const my = (S.y + T.y) / 2;
+          const dx = mx - 50;
+          const dy = my - 50;
+          const len = Math.max(0.001, Math.hypot(dx, dy));
+          const bulge = 1.35;
+          const cx = 50 + (dx / len) * len * bulge;
+          const cy = 50 + (dy / len) * len * bulge;
+          return (
+            <path
+              key={`ripple-${selected}-${tIdx}`}
+              d={`M ${S.x} ${S.y} Q ${cx} ${cy} ${T.x} ${T.y}`}
+              fill="none"
+              stroke={a.stroke}
+              strokeOpacity={0.85}
+              strokeWidth="1.4"
+              strokeDasharray="3 3"
+              vectorEffect="non-scaling-stroke"
+              style={{ animation: "mindmap-flow 3s linear infinite" }}
+            />
+          );
+        })}
       </svg>
 
       {/* Central hub */}
@@ -201,7 +249,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         if (!p) return null;
         const Icon = n.icon;
         const isSel = selected === i;
-        const dim = selected !== null && !isSel;
+        const isAffected = affectedIdx.has(i);
+        const dim = selected !== null && !isSel && !isAffected;
         const handleClick = () => {
           if (isSel) {
             // Second click: trigger onClick if provided, else just collapse
@@ -244,7 +293,11 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                 />
                 <div
                   className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
-                    isSel ? `${a.selectedBorder} ${a.selectedGlow}` : `${a.border} ${a.bg} ${a.glow}`
+                    isSel
+                      ? `${a.selectedBorder} ${a.selectedGlow}`
+                      : isAffected
+                        ? `${a.selectedBorder} ${a.glow}`
+                        : `${a.border} ${a.bg} ${a.glow}`
                   }`}
                 >
                   <Icon className={`w-7 h-7 md:w-8 md:h-8 ${a.icon}`} />
@@ -292,6 +345,26 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                       <p className="text-[11px] text-foreground/70 leading-snug">
                         Traces back to the hub. Click again for details.
                       </p>
+                    )}
+                    {n.affects && n.affects.length > 0 && (
+                      <div className="mt-3 pt-2 border-t border-crimson/25">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-crimson mb-1.5">
+                          Ripple effect
+                        </div>
+                        <ul className="space-y-1.5">
+                          {n.affects.map((f, fi) => {
+                            const target = nodes[idToIndex.get(f.id) ?? -1];
+                            return (
+                              <li key={fi} className="text-[11px] md:text-xs leading-snug">
+                                <span className="font-forensic font-bold text-crimson">
+                                  → {target?.label ?? f.id}:
+                                </span>{" "}
+                                <span className="text-foreground/80">{f.note}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                     )}
                     {n.onClick && (
                       <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">

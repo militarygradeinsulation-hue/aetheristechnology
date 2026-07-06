@@ -25,19 +25,54 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
 
   const symptoms: MindMapNodeData[] = [
     { id: "vocab",     label: "Vocabulary Friction",  sublabel: "Words that kill deals", icon: MessageSquare,
-      connections: ["Homepage copy that talks about you, not the buyer", "Jargon in the sales deck", "Pricing page that hides the price", "Proposal language that invites objection"] },
+      connections: ["Homepage copy that talks about you, not the buyer", "Jargon in the sales deck", "Pricing page that hides the price", "Proposal language that invites objection"],
+      affects: [
+        { id: "brand",    note: "the words on the site stop matching what buyers actually experience" },
+        { id: "convert",  note: "confused visitors bounce before they ever ask for pricing" },
+        { id: "followup", note: "reps inherit leads that never understood the offer" },
+      ] },
     { id: "brand",     label: "Brand Contradictions", sublabel: "Promise ≠ delivery",    icon: GitFork,
-      connections: ["Site says premium, intake feels like a form mill", "Testimonials don't match ICP", "Response time contradicts urgency claim", "Delivery experience undercuts sales promise"] },
+      connections: ["Site says premium, intake feels like a form mill", "Testimonials don't match ICP", "Response time contradicts urgency claim", "Delivery experience undercuts sales promise"],
+      affects: [
+        { id: "convert",  note: "the pitch and the proof disagree, so the buyer stalls" },
+        { id: "followup", note: "reps sell one thing, ops delivers another — trust collapses" },
+        { id: "ceiling",  note: "referrals dry up because the story doesn't survive delivery" },
+      ] },
     { id: "convert",   label: "Conversion Drop-offs", sublabel: "Silent exits",          icon: TrendingDown,
-      connections: ["Form abandoned on field 3", "CTA buried below the fold", "Mobile checkout friction", "Pricing table causes rage-quit"] },
+      connections: ["Form abandoned on field 3", "CTA buried below the fold", "Mobile checkout friction", "Pricing table causes rage-quit"],
+      affects: [
+        { id: "followup", note: "the pipeline runs thin, so every lead gets over-worked" },
+        { id: "ceiling",  note: "marketing spend has to rise just to hold current revenue" },
+        { id: "waste",    note: "reps burn hours chasing what the site should've closed" },
+      ] },
     { id: "followup",  label: "Follow-up Failures",   sublabel: "Leads left to die",     icon: PhoneOff,
-      connections: ["Lead sits in inbox > 4 hours", "No second touch after day 3", "Quote sent, never re-referenced", "Won-lost data never captured"] },
+      connections: ["Lead sits in inbox > 4 hours", "No second touch after day 3", "Quote sent, never re-referenced", "Won-lost data never captured"],
+      affects: [
+        { id: "systems",  note: "no follow-up data means the CRM lies about pipeline health" },
+        { id: "brand",    note: "'we care' turns into a ghosted inbox — the promise breaks" },
+        { id: "ceiling",  note: "the ceiling is set by how fast leads rot, not by demand" },
+      ] },
     { id: "systems",   label: "System Disconnects",   sublabel: "Data that dies",        icon: Unplug,
-      connections: ["CRM and email don't talk", "Manual re-entry between tools", "No source-of-truth for customer record", "Reports built off stale exports"] },
+      connections: ["CRM and email don't talk", "Manual re-entry between tools", "No source-of-truth for customer record", "Reports built off stale exports"],
+      affects: [
+        { id: "waste",    note: "humans become the integration layer between broken tools" },
+        { id: "followup", note: "leads fall through the cracks between systems that don't sync" },
+        { id: "ceiling",  note: "you can't scale a business the software can't see" },
+      ] },
     { id: "waste",     label: "Operational Waste",    sublabel: "Headcount vs software", icon: Trash2,
-      connections: ["Human doing what a webhook could", "Meetings that should be a Loom", "Task queues without SLAs", "Vendor stack paying for overlap"] },
+      connections: ["Human doing what a webhook could", "Meetings that should be a Loom", "Task queues without SLAs", "Vendor stack paying for overlap"],
+      affects: [
+        { id: "ceiling",  note: "payroll eats the margin that should fund the next hire" },
+        { id: "followup", note: "team is too busy running the machine to answer buyers" },
+        { id: "systems",  note: "'we'll just do it manually' becomes permanent tech debt" },
+      ] },
     { id: "ceiling",   label: "Growth Ceilings",      sublabel: "Stuck at this number",  icon: Gauge,
-      connections: ["Owner is the bottleneck for every deal", "No documented playbook to hand off", "Pipeline math can't fund the next hire", "Delivery capacity capped by one operator"] },
+      connections: ["Owner is the bottleneck for every deal", "No documented playbook to hand off", "Pipeline math can't fund the next hire", "Delivery capacity capped by one operator"],
+      affects: [
+        { id: "waste",    note: "the owner keeps absorbing work instead of removing it" },
+        { id: "brand",    note: "capacity limits force the team to break delivery promises" },
+        { id: "vocab",    note: "no playbook = every rep re-invents the pitch, badly" },
+      ] },
   ];
 
   const steps: MindMapNodeData[] = [
@@ -144,7 +179,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
         />
 
         <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 mt-2">
-          Tap any circle to expand its connections. Tap again to open.
+          Tap any node — watch the ripple hit every other leak it's feeding.
         </p>
       </div>
     </section>
