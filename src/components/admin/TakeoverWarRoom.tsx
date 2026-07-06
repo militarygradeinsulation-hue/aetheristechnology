@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crosshair, ShieldAlert, Radio, Flag, Megaphone, Target, Skull, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Crosshair, ShieldAlert, Radio, Flag, Megaphone, Target, Skull, Trophy,
+  Play, Pause, RotateCcw, Zap, CheckCircle2, ArrowRight, Sparkle, TrendingUp,
+} from "lucide-react";
 
-type Takeover = NonNullable<Report["takeover"]>;
-
-// Re-declare minimal shape to avoid circular import
 type Report = {
   overall: { youScore: number; rivalScore: number; winner: "you" | "rival" | "tie" };
   battlefield?: {
@@ -27,13 +28,11 @@ type Report = {
 
 const fmt$ = (n?: number) => `$${Math.round(n || 0).toLocaleString()}`;
 
-// Deterministic pseudo-random so bubbles don't jump between renders
 const seeded = (n: number) => {
   const v = Math.sin(n * 137.31) * 43758.5453;
   return v - Math.floor(v);
 };
 
-// Layout N bubbles inside a rectangle (percentage coords) without overlap-ish spread
 function scatter(n: number, seedBase: number) {
   const pts: { x: number; y: number }[] = [];
   const cols = Math.max(2, Math.ceil(Math.sqrt(n)));
@@ -41,37 +40,46 @@ function scatter(n: number, seedBase: number) {
   for (let i = 0; i < n; i++) {
     const c = i % cols;
     const r = Math.floor(i / cols);
-    const jitterX = (seeded(seedBase + i) - 0.5) * 12;
-    const jitterY = (seeded(seedBase + i * 3.1) - 0.5) * 12;
+    const jitterX = (seeded(seedBase + i) - 0.5) * 14;
+    const jitterY = (seeded(seedBase + i * 3.1) - 0.5) * 14;
     const x = ((c + 0.5) / cols) * 100 + jitterX;
     const y = ((r + 0.5) / rows) * 100 + jitterY;
-    pts.push({ x: Math.max(10, Math.min(90, x)), y: Math.max(12, Math.min(88, y)) });
+    pts.push({ x: Math.max(12, Math.min(88, x)), y: Math.max(14, Math.min(86, y)) });
   }
   return pts;
 }
 
-function ChaosBubble({
-  x, y, label, detail, weight, side, i, onClick, active,
+// Weight -> impact points per node
+const weightPts = { high: 12, medium: 7, low: 4 } as const;
+const blockerWeight = (b: string) => (b === "critical" ? "high" : b === "important" ? "medium" : "low") as keyof typeof weightPts;
+
+function Bubble({
+  x, y, label, weight, side, i, onClick, active, resolved,
 }: {
-  x: number; y: number; label: string; detail: string; weight: "high" | "medium" | "low";
-  side: "you" | "rival"; i: number; onClick: () => void; active: boolean;
+  x: number; y: number; label: string; weight: keyof typeof weightPts;
+  side: "you" | "rival"; i: number; onClick: () => void; active: boolean; resolved: boolean;
 }) {
-  const size = weight === "high" ? 130 : weight === "medium" ? 110 : 92;
-  const border =
-    side === "rival"
-      ? weight === "high" ? "border-red-500/70" : "border-red-500/40"
-      : weight === "high" ? "border-amber-500/70" : "border-amber-500/40";
-  const glow =
-    side === "rival" ? "shadow-[0_0_30px_hsl(0_80%_55%/0.25)]" : "shadow-[0_0_30px_hsl(45_95%_55%/0.25)]";
-  const bg = side === "rival" ? "bg-red-500/10" : "bg-amber-500/10";
-  const tone = side === "rival" ? "text-red-300" : "text-amber-200";
+  const size = weight === "high" ? 128 : weight === "medium" ? 108 : 92;
+
+  const activeSide = side === "rival" ? "border-red-500/70" : "border-amber-500/70";
+  const dimSide = side === "rival" ? "border-red-500/30" : "border-amber-500/30";
+
+  const border = resolved ? "border-emerald-500/70" : (weight === "high" ? activeSide : dimSide);
+  const bg = resolved ? "bg-emerald-500/10" : (side === "rival" ? "bg-red-500/10" : "bg-amber-500/10");
+  const glow = resolved
+    ? "shadow-[0_0_30px_hsl(150_70%_45%/0.35)]"
+    : side === "rival"
+      ? "shadow-[0_0_30px_hsl(0_80%_55%/0.25)]"
+      : "shadow-[0_0_30px_hsl(45_95%_55%/0.25)]";
+  const tone = resolved ? "text-emerald-200" : (side === "rival" ? "text-red-200" : "text-amber-200");
   const dur = 8 + ((i * 1.7) % 6);
   const delay = (i * 0.6) % 4;
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border ${border} ${bg} ${glow} backdrop-blur-sm p-2 flex items-center justify-center text-center transition-all hover:scale-110 hover:z-20 animate-mindmap-drift ${active ? "ring-2 ring-offset-2 ring-offset-background scale-110 z-30" : "z-10"}`}
+      className={`group absolute -translate-x-1/2 -translate-y-1/2 rounded-full border ${border} ${bg} ${glow} backdrop-blur-sm p-2 flex flex-col items-center justify-center text-center transition-all hover:scale-110 hover:z-20 ${resolved ? "" : "animate-mindmap-drift"} ${active ? "ring-2 ring-offset-2 ring-offset-background scale-110 z-30" : "z-10"} ${resolved ? "opacity-90" : ""}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
@@ -82,10 +90,32 @@ function ChaosBubble({
       }}
       aria-label={label}
     >
+      {resolved && (
+        <CheckCircle2 className="w-4 h-4 text-emerald-400 mb-1" />
+      )}
       <div className={`text-[10px] leading-tight font-mono uppercase tracking-tight ${tone}`}>
         {label}
       </div>
+      {!resolved && (
+        <div className="mt-1 text-[9px] font-mono opacity-70 text-foreground/70">
+          +{weightPts[weight]} pts
+        </div>
+      )}
     </button>
+  );
+}
+
+function ScoreDial({ label, value, tone, delta }: { label: string; value: number; tone: string; delta?: number }) {
+  return (
+    <div className="flex flex-col items-end">
+      <div className="text-[10px] font-mono uppercase text-muted-foreground">{label}</div>
+      <div className={`text-3xl md:text-4xl font-mono font-bold tabular-nums ${tone} transition-all`}>{value}</div>
+      {delta !== undefined && delta !== 0 && (
+        <div className={`text-[10px] font-mono ${delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
+          {delta > 0 ? "+" : ""}{delta} vs baseline
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -98,10 +128,52 @@ export function TakeoverWarRoom({
 }) {
   const t = report.takeover;
   const [selected, setSelected] = useState<{ side: "you" | "rival"; index: number } | null>(null);
-  const [scenarioIdx, setScenarioIdx] = useState<number>(0);
+  const [sealed, setSealed] = useState<Set<number>>(new Set()); // your leaks fixed
+  const [exploited, setExploited] = useState<Set<number>>(new Set()); // rival chaos exploited
+  const [wedgeDone, setWedgeDone] = useState<Set<number>>(new Set());
+  const [running, setRunning] = useState(false);
+  const timerRef = useRef<number | null>(null);
 
   const yourPts = useMemo(() => scatter(t?.yourFixes.length || 0, 11), [t?.yourFixes.length]);
   const rivalPts = useMemo(() => scatter(t?.rivalChaos.length || 0, 71), [t?.rivalChaos.length]);
+
+  // Optimization queue: alternates seal → exploit → wedge for a satisfying rhythm
+  const optimizationQueue = useMemo(() => {
+    if (!t) return [] as { kind: "seal" | "exploit" | "wedge"; index: number }[];
+    const q: { kind: "seal" | "exploit" | "wedge"; index: number }[] = [];
+    const yf = t.yourFixes.map((f, i) => ({ i, w: weightPts[blockerWeight(f.blockerLevel)] }))
+      .sort((a, b) => b.w - a.w);
+    const rc = t.rivalChaos.map((c, i) => ({ i, w: weightPts[c.exploitability] }))
+      .sort((a, b) => b.w - a.w);
+    const maxLen = Math.max(yf.length, rc.length);
+    for (let k = 0; k < maxLen; k++) {
+      if (yf[k]) q.push({ kind: "seal", index: yf[k].i });
+      if (rc[k]) q.push({ kind: "exploit", index: rc[k].i });
+    }
+    t.wedgeMoves.forEach((_, i) => q.push({ kind: "wedge", index: i }));
+    return q;
+  }, [t]);
+
+  const [cursor, setCursor] = useState(0);
+
+  useEffect(() => {
+    if (!running) return;
+    if (cursor >= optimizationQueue.length) { setRunning(false); return; }
+    timerRef.current = window.setTimeout(() => {
+      const step = optimizationQueue[cursor];
+      if (step.kind === "seal") {
+        setSealed(prev => new Set(prev).add(step.index));
+        setSelected({ side: "you", index: step.index });
+      } else if (step.kind === "exploit") {
+        setExploited(prev => new Set(prev).add(step.index));
+        setSelected({ side: "rival", index: step.index });
+      } else {
+        setWedgeDone(prev => new Set(prev).add(step.index));
+      }
+      setCursor(c => c + 1);
+    }, 750);
+    return () => { if (timerRef.current) window.clearTimeout(timerRef.current); };
+  }, [running, cursor, optimizationQueue]);
 
   if (!t) return null;
 
@@ -111,56 +183,105 @@ export function TakeoverWarRoom({
   const youBleed = bf.youMonthlyBleedUsd || 0;
   const rivalBleed = bf.rivalMonthlyBleedUsd || 0;
 
-  // Score of the "what if" — derive from wedge move + battlefield
-  function scenarioScore(move: Takeover["wedgeMoves"][number]): {
-    swing: number; you: number; rival: number; note: string;
-  } {
-    const base = report.overall.youScore - report.overall.rivalScore;
-    const tfMult = move.timeframe === "week" ? 0.35 : move.timeframe === "month" ? 0.7 : 1;
-    const boost = Math.round(8 * tfMult + Math.min(12, stealable / 5000));
-    const drag = Math.round(4 * tfMult + Math.min(8, rivalBleed / 4000));
-    const you = Math.min(100, report.overall.youScore + boost);
-    const rival = Math.max(0, report.overall.rivalScore - drag);
-    const swing = (you - rival) - base;
-    return {
-      swing,
-      you,
-      rival,
-      note: `+${fmt$(Math.round((recoverable + stealable) * tfMult / 12))}/mo captured within one ${move.timeframe}`,
-    };
-  }
+  // Live projected scores
+  const sealBoost = t.yourFixes.reduce((sum, f, i) => sum + (sealed.has(i) ? weightPts[blockerWeight(f.blockerLevel)] : 0), 0);
+  const exploitDrag = t.rivalChaos.reduce((sum, c, i) => sum + (exploited.has(i) ? weightPts[c.exploitability] : 0), 0);
+  const wedgeBoost = Array.from(wedgeDone).reduce((sum, i) => {
+    const m = t.wedgeMoves[i];
+    return sum + (m?.timeframe === "week" ? 4 : m?.timeframe === "month" ? 7 : 10);
+  }, 0);
+
+  const liveYou = Math.min(100, report.overall.youScore + sealBoost + Math.round(wedgeBoost * 0.6));
+  const liveRival = Math.max(0, report.overall.rivalScore - exploitDrag - Math.round(wedgeBoost * 0.4));
+  const baselineGap = report.overall.youScore - report.overall.rivalScore;
+  const liveGap = liveYou - liveRival;
+
+  const totalMoves = t.yourFixes.length + t.rivalChaos.length + t.wedgeMoves.length;
+  const doneMoves = sealed.size + exploited.size + wedgeDone.size;
+  const pct = totalMoves ? Math.round((doneMoves / totalMoves) * 100) : 0;
+
+  const captured = Math.round(
+    (sealed.size / Math.max(1, t.yourFixes.length)) * recoverable +
+    (exploited.size / Math.max(1, t.rivalChaos.length)) * stealable
+  );
+
+  const won = liveYou > liveRival && doneMoves >= Math.ceil(totalMoves * 0.6);
+
+  const resetAll = () => {
+    setSealed(new Set()); setExploited(new Set()); setWedgeDone(new Set());
+    setCursor(0); setRunning(false); setSelected(null);
+  };
 
   const activeDetail = selected
-    ? selected.side === "rival"
-      ? t.rivalChaos[selected.index]
-      : t.yourFixes[selected.index]
+    ? selected.side === "rival" ? t.rivalChaos[selected.index] : t.yourFixes[selected.index]
     : null;
 
   return (
     <div className="space-y-4">
-      {/* War room header */}
+      {/* War room header + live HUD */}
       <Card className="relative overflow-hidden border-red-500/40 bg-[radial-gradient(ellipse_at_top,hsl(0_75%_20%/0.25),transparent_60%),radial-gradient(ellipse_at_bottom,hsl(45_95%_35%/0.15),transparent_60%)]">
         <div className="absolute inset-0 pointer-events-none opacity-[0.07]" style={{
           backgroundImage:
             "linear-gradient(hsl(0 0% 100% / 0.5) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.5) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }} />
-        <div className="relative p-5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border border-red-500/50 flex items-center justify-center animate-pulse">
-            <Radio className="w-5 h-5 text-red-400" />
+        <div className="relative p-5 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <div className="w-10 h-10 rounded-full border border-red-500/50 flex items-center justify-center animate-pulse shrink-0">
+              <Radio className="w-5 h-5 text-red-400" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-red-400/80">War Room · Live</div>
+              <h3 className="text-xl md:text-2xl font-serif font-bold">Takeover Command</h3>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1 max-w-3xl">{t.thesis}</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-red-400/80">War Room · Live</div>
-            <h3 className="text-xl md:text-2xl font-serif font-bold">Takeover Command</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1 max-w-3xl">{t.thesis}</p>
+          <div className="flex items-center gap-4">
+            <ScoreDial label="You" value={liveYou} tone="text-amber-400" delta={liveYou - report.overall.youScore} />
+            <div className="text-muted-foreground font-mono text-xs">vs</div>
+            <ScoreDial label="Rival" value={liveRival} tone="text-red-400" delta={liveRival - report.overall.rivalScore} />
           </div>
-          <Badge className="bg-red-500 text-white font-mono uppercase text-[10px]">Offensive</Badge>
+        </div>
+
+        {/* Progress + auto-optimize controls */}
+        <div className="relative px-5 pb-5 grid md:grid-cols-[1fr_auto] gap-4 items-center">
+          <div>
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase text-muted-foreground mb-1">
+              <span className="flex items-center gap-1"><Sparkle className="w-3 h-3 text-amber-500" /> Self-Optimizing Playbook</span>
+              <span>
+                {doneMoves}/{totalMoves} moves · gap {liveGap >= 0 ? "+" : ""}{liveGap} pts · captured {fmt$(captured)}/mo
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${won ? "bg-emerald-500" : "bg-gradient-to-r from-amber-500 to-red-500"}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            {won && (
+              <div className="mt-2 text-[11px] font-mono uppercase tracking-widest text-emerald-400 flex items-center gap-1 animate-fade-in">
+                <Trophy className="w-3 h-3" /> Takeover complete — you've overtaken the rival by {liveGap} pts.
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <Button
+              size="sm"
+              onClick={() => setRunning(r => !r)}
+              disabled={cursor >= optimizationQueue.length}
+              className={running ? "bg-amber-500 text-black hover:bg-amber-500/90" : "bg-red-500 text-white hover:bg-red-500/90"}
+            >
+              {running ? <><Pause className="w-3 h-3 mr-1" /> Pause</> : cursor === 0 ? <><Play className="w-3 h-3 mr-1" /> Auto-Optimize</> : <><Play className="w-3 h-3 mr-1" /> Resume</>}
+            </Button>
+            <Button size="sm" variant="outline" onClick={resetAll} disabled={running || doneMoves === 0}>
+              <RotateCcw className="w-3 h-3 mr-1" /> Reset
+            </Button>
+          </div>
         </div>
       </Card>
 
-      {/* Two-side battlefield */}
+      {/* Battlefield */}
       <Card className="relative overflow-hidden border-red-500/30 bg-background/60">
-        {/* Center divider / DMZ */}
         <div className="hidden md:block absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-red-500/40 to-transparent z-10" />
         <div className="hidden md:flex absolute inset-y-0 left-1/2 -translate-x-1/2 items-center z-20">
           <div className="text-[10px] font-mono uppercase tracking-widest text-red-400/70 rotate-90 whitespace-nowrap bg-background px-2 py-1 border border-red-500/30 rounded">
@@ -177,29 +298,35 @@ export function TakeoverWarRoom({
                 <div className="text-sm font-serif font-bold text-amber-200 truncate max-w-[220px]">{yourTitle || "You"}</div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-mono uppercase text-muted-foreground">Score</div>
-                <div className="text-2xl font-mono font-bold text-amber-400">{report.overall.youScore}</div>
+                <div className="text-[10px] font-mono uppercase text-muted-foreground">Sealed</div>
+                <div className="text-lg font-mono font-bold text-emerald-400">{sealed.size}/{t.yourFixes.length}</div>
                 <div className="text-[10px] font-mono text-red-400">bleed {fmt$(youBleed)}/mo</div>
               </div>
             </div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500/70 mb-2 flex items-center gap-1">
-              <ShieldAlert className="w-3 h-3" /> Chaos to seal — {t.yourFixes.length}
+              <ShieldAlert className="w-3 h-3" /> Click a bubble to seal
             </div>
             <div className="relative h-[340px] md:h-[430px]">
               {t.yourFixes.map((f, i) => {
                 const p = yourPts[i];
-                const w = f.blockerLevel === "critical" ? "high" : f.blockerLevel === "important" ? "medium" : "low";
                 return (
-                  <ChaosBubble
+                  <Bubble
                     key={i}
                     x={p.x} y={p.y}
                     label={f.issue}
-                    detail={f.fix}
-                    weight={w as any}
+                    weight={blockerWeight(f.blockerLevel)}
                     side="you"
                     i={i}
-                    onClick={() => setSelected({ side: "you", index: i })}
+                    onClick={() => {
+                      setSelected({ side: "you", index: i });
+                      setSealed(prev => {
+                        const n = new Set(prev);
+                        if (n.has(i)) n.delete(i); else n.add(i);
+                        return n;
+                      });
+                    }}
                     active={selected?.side === "you" && selected.index === i}
+                    resolved={sealed.has(i)}
                   />
                 );
               })}
@@ -214,28 +341,35 @@ export function TakeoverWarRoom({
                 <div className="text-sm font-serif font-bold text-red-300 truncate max-w-[220px]">{rivalTitle || "Rival"}</div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-mono uppercase text-muted-foreground">Score</div>
-                <div className="text-2xl font-mono font-bold text-red-400">{report.overall.rivalScore}</div>
+                <div className="text-[10px] font-mono uppercase text-muted-foreground">Exploited</div>
+                <div className="text-lg font-mono font-bold text-emerald-400">{exploited.size}/{t.rivalChaos.length}</div>
                 <div className="text-[10px] font-mono text-red-400">bleed {fmt$(rivalBleed)}/mo</div>
               </div>
             </div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-red-400/70 mb-2 flex items-center gap-1">
-              <Crosshair className="w-3 h-3" /> Chaos to exploit — {t.rivalChaos.length}
+              <Crosshair className="w-3 h-3" /> Click a bubble to exploit
             </div>
             <div className="relative h-[340px] md:h-[430px]">
               {t.rivalChaos.map((c, i) => {
                 const p = rivalPts[i];
                 return (
-                  <ChaosBubble
+                  <Bubble
                     key={i}
                     x={p.x} y={p.y}
                     label={c.weakness}
-                    detail={c.howToExploit}
-                    weight={c.exploitability as any}
+                    weight={c.exploitability}
                     side="rival"
                     i={i}
-                    onClick={() => setSelected({ side: "rival", index: i })}
+                    onClick={() => {
+                      setSelected({ side: "rival", index: i });
+                      setExploited(prev => {
+                        const n = new Set(prev);
+                        if (n.has(i)) n.delete(i); else n.add(i);
+                        return n;
+                      });
+                    }}
                     active={selected?.side === "rival" && selected.index === i}
+                    resolved={exploited.has(i)}
                   />
                 );
               })}
@@ -243,23 +377,38 @@ export function TakeoverWarRoom({
           </div>
         </div>
 
-        {/* Selected bubble detail rail */}
-        {activeDetail && (
-          <div className="border-t border-red-500/30 bg-background/80 p-4">
-            {selected?.side === "rival" ? (
-              <div className="grid md:grid-cols-[1fr_2fr] gap-3">
+        {/* Selected bubble insight rail */}
+        {activeDetail && selected && (
+          <div className="border-t border-red-500/30 bg-background/80 p-4 animate-fade-in">
+            {selected.side === "rival" ? (
+              <div className="grid md:grid-cols-[1fr_2fr_auto] gap-3 items-center">
                 <div>
                   <div className="text-[10px] font-mono uppercase text-red-400/80">Rival weakness</div>
                   <div className="font-serif font-bold text-red-200">{(activeDetail as any).weakness}</div>
                   <div className="text-xs text-muted-foreground italic mt-1">"{(activeDetail as any).evidence}"</div>
                 </div>
                 <div className="p-3 rounded border border-red-500/30 bg-red-500/5">
-                  <div className="text-[10px] font-mono uppercase text-red-400 mb-1">How to exploit</div>
+                  <div className="text-[10px] font-mono uppercase text-red-400 mb-1">Precision exploit</div>
                   <div className="text-sm">{(activeDetail as any).howToExploit}</div>
                 </div>
+                <Button
+                  size="sm"
+                  className={exploited.has(selected.index)
+                    ? "bg-emerald-500 text-black hover:bg-emerald-500/90"
+                    : "bg-red-500 text-white hover:bg-red-500/90"}
+                  onClick={() => setExploited(prev => {
+                    const n = new Set(prev);
+                    if (n.has(selected.index)) n.delete(selected.index); else n.add(selected.index);
+                    return n;
+                  })}
+                >
+                  {exploited.has(selected.index)
+                    ? <><CheckCircle2 className="w-3 h-3 mr-1" /> Exploited</>
+                    : <><Crosshair className="w-3 h-3 mr-1" /> Mark exploited</>}
+                </Button>
               </div>
             ) : (
-              <div className="grid md:grid-cols-[1fr_2fr] gap-3">
+              <div className="grid md:grid-cols-[1fr_2fr_auto] gap-3 items-center">
                 <div>
                   <div className="text-[10px] font-mono uppercase text-amber-500/80">Your leak</div>
                   <div className="font-serif font-bold text-amber-200">{(activeDetail as any).issue}</div>
@@ -269,95 +418,91 @@ export function TakeoverWarRoom({
                   <div className="text-[10px] font-mono uppercase text-amber-500 mb-1">Seal move</div>
                   <div className="text-sm">{(activeDetail as any).fix}</div>
                 </div>
+                <Button
+                  size="sm"
+                  className={sealed.has(selected.index)
+                    ? "bg-emerald-500 text-black hover:bg-emerald-500/90"
+                    : "bg-amber-500 text-black hover:bg-amber-500/90"}
+                  onClick={() => setSealed(prev => {
+                    const n = new Set(prev);
+                    if (n.has(selected.index)) n.delete(selected.index); else n.add(selected.index);
+                    return n;
+                  })}
+                >
+                  {sealed.has(selected.index)
+                    ? <><CheckCircle2 className="w-3 h-3 mr-1" /> Sealed</>
+                    : <><ShieldAlert className="w-3 h-3 mr-1" /> Mark sealed</>}
+                </Button>
               </div>
             )}
           </div>
         )}
       </Card>
 
-      {/* Chaos-theory What-If board */}
+      {/* Precision Playbook — ordered, clickable steps */}
       <Card className="p-5 border-amber-500/30 bg-gradient-to-br from-background to-amber-500/5">
         <div className="flex items-center gap-2 mb-3">
           <Target className="w-5 h-5 text-amber-500" />
-          <h4 className="font-serif font-bold text-lg">What-If Scenarios</h4>
-          <Badge variant="outline" className="font-mono uppercase text-[10px] ml-1">Chaos theory</Badge>
+          <h4 className="font-serif font-bold text-lg">Precision Playbook</h4>
+          <Badge variant="outline" className="font-mono uppercase text-[10px] ml-1">Sequenced to win</Badge>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Tiny cause → outsized effect. Each wedge move recalculates the projected score gap after impact.
+          Every wedge move ranked by impact. Tap to lock it in — the score bar above recalculates instantly.
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {t.wedgeMoves.map((m, i) => (
-            <button
-              key={i}
-              onClick={() => setScenarioIdx(i)}
-              className={`text-left rounded-lg border px-3 py-2 transition-all min-w-[220px] max-w-[300px] ${
-                scenarioIdx === i
-                  ? "border-amber-500 bg-amber-500/10 shadow-[0_0_20px_hsl(45_95%_55%/0.2)]"
-                  : "border-border bg-card/50 hover:border-amber-500/50"
-              }`}
-            >
-              <div className="text-[10px] font-mono uppercase text-amber-500 mb-1 flex items-center gap-1">
-                <Flag className="w-3 h-3" /> If: {m.timeframe}
-              </div>
-              <div className="text-xs font-semibold leading-snug">{m.move}</div>
-            </button>
-          ))}
+        <div className="space-y-2">
+          {t.wedgeMoves.map((m, i) => {
+            const done = wedgeDone.has(i);
+            const pts = m.timeframe === "week" ? 4 : m.timeframe === "month" ? 7 : 10;
+            return (
+              <button
+                key={i}
+                onClick={() => setWedgeDone(prev => {
+                  const n = new Set(prev);
+                  if (n.has(i)) n.delete(i); else n.add(i);
+                  return n;
+                })}
+                className={`w-full text-left rounded-lg border p-3 transition-all ${
+                  done
+                    ? "border-emerald-500/60 bg-emerald-500/5"
+                    : "border-border bg-card/50 hover:border-amber-500/60 hover:bg-amber-500/5"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border font-mono text-xs font-bold ${
+                    done ? "border-emerald-500 bg-emerald-500 text-black" : "border-amber-500/50 text-amber-400"
+                  }`}>
+                    {done ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <div className="font-semibold text-sm">{m.move}</div>
+                      <Badge variant="outline" className="font-mono uppercase text-[9px]">{m.timeframe}</Badge>
+                      <Badge className="bg-amber-500 text-black font-mono text-[9px]">+{pts} pts</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3 text-emerald-400" /> {m.expectedOutcome}
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-2 text-[11px]">
+                      <div className="p-2 rounded bg-red-500/5 border border-red-500/20">
+                        <span className="font-mono uppercase text-red-400 text-[9px] mr-1">Their weakness:</span>
+                        {m.leveragesRivalWeakness}
+                      </div>
+                      <div className="p-2 rounded bg-amber-500/5 border border-amber-500/20">
+                        <span className="font-mono uppercase text-amber-500 text-[9px] mr-1">Your strength:</span>
+                        {m.leveragesYourStrength}
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowRight className={`w-4 h-4 shrink-0 mt-2 ${done ? "text-emerald-400" : "text-muted-foreground"}`} />
+                </div>
+              </button>
+            );
+          })}
         </div>
-
-        {t.wedgeMoves[scenarioIdx] && (() => {
-          const s = scenarioScore(t.wedgeMoves[scenarioIdx]);
-          const m = t.wedgeMoves[scenarioIdx];
-          return (
-            <div className="grid md:grid-cols-[1.2fr_1fr] gap-4">
-              <div className="p-4 rounded-lg border border-amber-500/30 bg-background">
-                <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Projected outcome</div>
-                <div className="text-sm mb-3">{m.expectedOutcome}</div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <div className="text-[10px] font-mono uppercase text-amber-500 mb-1">You after move</div>
-                    <div className="text-3xl font-mono font-bold text-amber-400">{s.you}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground">from {report.overall.youScore}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-mono uppercase text-red-400 mb-1">Rival after move</div>
-                    <div className="text-3xl font-mono font-bold text-red-400">{s.rival}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground">from {report.overall.rivalScore}</div>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between p-2 rounded bg-amber-500/10 border border-amber-500/30">
-                  <span className="text-[10px] font-mono uppercase text-amber-500">Gap swing</span>
-                  <span className="text-lg font-mono font-bold text-amber-400 flex items-center gap-1">
-                    {s.swing >= 0 ? <Trophy className="w-4 h-4" /> : <Skull className="w-4 h-4 text-red-400" />}
-                    {s.swing >= 0 ? "+" : ""}{s.swing} pts
-                  </span>
-                </div>
-                <div className="mt-2 text-xs font-mono text-emerald-400">{s.note}</div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="p-3 rounded border border-red-500/30 bg-red-500/5">
-                  <div className="text-[10px] font-mono uppercase text-red-400 mb-1">Leverages their weakness</div>
-                  <div className="text-xs">{m.leveragesRivalWeakness}</div>
-                </div>
-                <div className="p-3 rounded border border-amber-500/30 bg-amber-500/5">
-                  <div className="text-[10px] font-mono uppercase text-amber-500 mb-1">Leverages your strength</div>
-                  <div className="text-xs">{m.leveragesYourStrength}</div>
-                </div>
-                <div className="p-3 rounded border border-border bg-card/50">
-                  <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Recoverable pool</div>
-                  <div className="text-xs">Fix your leaks: <span className="font-mono text-amber-400">{fmt$(recoverable)}/mo</span></div>
-                  <div className="text-xs">Steal from rival: <span className="font-mono text-red-400">{fmt$(stealable)}/mo</span></div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
       </Card>
 
-      {/* Positioning + counter-messaging in compact command panels */}
+      {/* Positioning + counter-messaging */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-5 border-amber-500/30">
           <h4 className="font-serif font-bold mb-3 flex items-center gap-2"><Megaphone className="w-4 h-4 text-amber-500" /> Positioning Pivot</h4>
@@ -397,9 +542,11 @@ export function TakeoverWarRoom({
         </Card>
       </div>
 
-      {/* KPIs strip */}
+      {/* KPIs */}
       <Card className="p-5 border-red-500/30 bg-gradient-to-r from-red-500/5 via-background to-amber-500/5">
-        <h4 className="font-serif font-bold mb-3 text-sm uppercase tracking-widest font-mono text-muted-foreground">30-Day Takeover KPIs</h4>
+        <h4 className="font-serif font-bold mb-3 text-sm uppercase tracking-widest font-mono text-muted-foreground flex items-center gap-2">
+          <Zap className="w-4 h-4 text-amber-500" /> 30-Day Takeover KPIs
+        </h4>
         <div className="grid md:grid-cols-3 gap-3">
           {t.kpis.map((k, i) => (
             <div key={i} className="p-3 rounded border border-border bg-background">
