@@ -126,8 +126,18 @@ export default function HeadToHeadTool() {
             <Input value={rivalUrl} onChange={(e) => setRivalUrl(e.target.value)} placeholder="https://competitor.com" disabled={loading} />
           </div>
         </div>
+        <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-red-500/30 bg-red-500/5 mb-3">
+          <div className="flex items-center gap-3">
+            <Crosshair className={`w-5 h-5 ${takeover ? "text-red-400" : "text-muted-foreground"}`} />
+            <div>
+              <div className="text-sm font-bold font-serif">Takeover Mode</div>
+              <div className="text-xs text-muted-foreground">Use rival's chaos as a wedge. Get a takeover playbook that also closes your own leaks first.</div>
+            </div>
+          </div>
+          <Switch checked={takeover} onCheckedChange={setTakeover} disabled={loading} />
+        </div>
         <Button onClick={run} disabled={loading} className="w-full md:w-auto">
-          {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Comparing…</>) : (<><Swords className="w-4 h-4 mr-2" /> Run Head-to-Head</>)}
+          {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {takeover ? "Building takeover playbook…" : "Comparing…"}</>) : (<>{takeover ? <><Crosshair className="w-4 h-4 mr-2" /> Run Takeover Scan</> : <><Swords className="w-4 h-4 mr-2" /> Run Head-to-Head</>}</>)}
         </Button>
       </Card>
 
