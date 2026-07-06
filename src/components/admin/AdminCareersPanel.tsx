@@ -608,7 +608,11 @@ export const AdminCareersPanel: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Paid Applications — proof of who paid and how much */}
+      <AdminCareersPayments />
+
       {/* Analytics */}
+
       <Card>
         <CardHeader>
           <CardTitle className="font-display flex items-center gap-2">
@@ -1133,9 +1137,8 @@ export const AdminCareersPanel: React.FC = () => {
         </CardContent>
       </Card>
 
-      <AdminCareersPayments />
-
       <AdminCareersTest />
+
 
       <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
