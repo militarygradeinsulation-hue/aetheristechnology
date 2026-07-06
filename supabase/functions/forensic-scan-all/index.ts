@@ -373,10 +373,18 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("crm", "skipped", "no account_id");
     }
 
-    await stage("synth", "running", { cap_seconds: 50 });
+    await stage("synth", "running", { cap_seconds: 40, mode: "parallel-batches" });
     let report;
     try {
       report = await synthesizeReport(findings, url, company);
+      // Fill any missing chapters from the deterministic fallback so the report is always complete.
+      if (!report.chapters || report.chapters.length < CHAPTERS.length) {
+        const fb = fallbackReport(findings, url, company);
+        const bySlug = new Map((report.chapters || []).map((c: { slug: string }) => [c.slug, c]));
+        report.chapters = CHAPTERS.map((c) => bySlug.get(c.slug) || fb.chapters.find((x) => x.slug === c.slug));
+        if (!report.executive_summary) report.executive_summary = fb.executive_summary;
+        if (!report.top_leaks?.length) report.top_leaks = fb.top_leaks;
+      }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
       report = fallbackReport(findings, url, company);
