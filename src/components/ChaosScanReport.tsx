@@ -247,12 +247,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
               <div key={o.id} className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ left: `${o.x}%`, top: `${o.y}%` }}>
                 <div className={`flex flex-col items-center transition-opacity ${dim ? "opacity-30" : "opacity-100"}`}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
                     isFixed ? "border-amber shadow-[0_0_18px_hsl(var(--amber)/0.45)]" : "border-amber/50"
                   }`}>
-                    <OIcon className="w-4 h-4 md:w-5 md:h-5 text-amber" />
+                    <OIcon className="w-6 h-6 md:w-7 md:h-7 text-amber" />
                   </div>
-                  <div className="mt-1 font-case text-[9px] md:text-[10px] uppercase tracking-widest text-amber">{o.label}</div>
+                  <div className="mt-1.5 font-case text-xs md:text-sm uppercase tracking-widest text-amber">{o.label}</div>
                 </div>
               </div>
             );
