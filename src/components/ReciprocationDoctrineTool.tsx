@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import {
   Loader2, Download, Copy, Check, ShieldCheck, ShieldAlert, BookOpen,
-  Scale, FileDown, ListChecks, Handshake,
+  Scale, FileDown, ListChecks, Handshake, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
