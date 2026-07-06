@@ -183,6 +183,9 @@ const LeakLanderPage: React.FC = () => {
             </Link>
           </section>
 
+          {/* FREE-TRIAL ARSENAL — 5 flagship instruments, no gate */}
+          <HomeFreeTrialArsenal />
+
 
 
 
