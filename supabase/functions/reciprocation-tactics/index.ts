@@ -48,7 +48,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Optional admin/portal auth — tool is operator-only but we accept either.
+    // Optional admin/portal auth — public callers are allowed (this is a public
+    // reciprocation demo / share link), but authed calls skip any future limits.
     const adminToken = getAdminTokenFromRequest(req);
     const portalToken = req.headers.get("x-portal-token");
     let authed = false;
@@ -57,11 +58,7 @@ serve(async (req) => {
       const p = await verifyPortalToken(portalToken, SERVICE).catch(() => null);
       authed = !!p;
     }
-    if (!authed) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+
 
     const body = await req.json();
     const scenario = String(body?.scenario || "").trim();
