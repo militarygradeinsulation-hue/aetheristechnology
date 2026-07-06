@@ -147,6 +147,7 @@ const App = () => (
                       <Route path="/ai-implementation-checklist" element={<AIChecklistPage />} />
                       <Route path="/ai-checklist" element={<AIChecklistPage />} />
                       <Route path="/scan" element={<ScanPage />} />
+                      <Route path="/chaos-scan" element={<ChaosScanPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
