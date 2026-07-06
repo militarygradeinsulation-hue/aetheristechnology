@@ -261,8 +261,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
           }
         };
         // Randomize drift per node
-        const driftDur = 5 + ((i * 1.3) % 4);
-        const driftDelay = (i * 0.6) % 3;
+        const driftDur = 6 + ((i * 1.3) % 5);
+        const driftDelay = (i * 0.5) % 4;
         return (
           <button
             key={n.id}
