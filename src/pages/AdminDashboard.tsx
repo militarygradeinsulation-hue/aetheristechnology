@@ -65,6 +65,7 @@ const SalesCrmPanel = lazy(() => import('@/components/admin/SalesCrmPanel'));
 const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard'));
 const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
 const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
+const AdminChaosScanTool = lazy(() => import('@/components/admin/ChaosScanTool'));
 const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
 const InterviewsPanel = lazy(() => import('@/components/admin/InterviewsPanel').then(m => ({ default: m.InterviewsPanel })));
 const InterviewBriefingPanel = lazy(() => import('@/components/portal/InterviewBriefingPanel').then(m => ({ default: m.InterviewBriefingPanel })));
@@ -243,6 +244,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
+    { key: 'chaosscan', label: 'Chaos Scan', icon: ScanSearch },
     { key: 'mediastudio', label: 'Media Studio', icon: ImageIcon },
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'hiring', label: 'Hiring', icon: CalendarClock },
@@ -584,6 +586,7 @@ const AdminDashboard: React.FC = () => {
       case 'easymode': return <EasyModeTool />;
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
+      case 'chaosscan': return <AdminChaosScanTool />;
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return (
         <Tabs defaultValue="engine" className="w-full">
