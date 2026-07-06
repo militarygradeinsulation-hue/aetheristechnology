@@ -7,9 +7,15 @@ import {
   Ghost,
   Flame,
   TrendingDown,
+  TrendingUp,
   Unplug,
+  Plug,
   Wallet,
+  PiggyBank,
+  ShieldCheck,
   Zap,
+  Link2,
+  LineChart,
   Target,
 } from 'lucide-react';
 
@@ -18,7 +24,9 @@ type Mode = 'chaos' | 'fixed';
 type Symptom = {
   id: string;
   label: string;
+  fixedLabel: string;
   icon: React.ComponentType<{ className?: string }>;
+  fixedIcon: React.ComponentType<{ className?: string }>;
   // position in a 100x100 viewBox
   x: number;
   y: number;
@@ -29,13 +37,13 @@ type Symptom = {
 };
 
 const SYMPTOMS: Symptom[] = [
-  { id: 'ghosted',  label: 'Ghosted leads',      icon: Ghost,        x: 14, y: 22, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
-  { id: 'churn',    label: 'Silent churn',       icon: TrendingDown, x: 86, y: 20, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
-  { id: 'missed',   label: 'Missed follow-ups',  icon: Unplug,       x: 8,  y: 62, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
-  { id: 'cash',     label: 'Cash bleed',         icon: Wallet,       x: 92, y: 62, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
-  { id: 'burnout',  label: 'Team burnout',       icon: Flame,        x: 24, y: 92, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
-  { id: 'handoff',  label: 'Broken handoffs',    icon: Zap,          x: 76, y: 92, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
-  { id: 'pipeline', label: 'Dead pipeline',      icon: AlertTriangle,x: 50, y: 6,  anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
+  { id: 'ghosted',  label: 'Ghosted leads',      fixedLabel: 'Leads worked in-window', icon: Ghost,        fixedIcon: CheckCircle2, x: 14, y: 22, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
+  { id: 'churn',    label: 'Silent churn',       fixedLabel: 'Churn caught early',     icon: TrendingDown, fixedIcon: TrendingUp,   x: 86, y: 20, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
+  { id: 'missed',   label: 'Missed follow-ups',  fixedLabel: 'Follow-up on rails',     icon: Unplug,       fixedIcon: Plug,         x: 8,  y: 62, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
+  { id: 'cash',     label: 'Cash bleed',         fixedLabel: 'Cash reclaimed',         icon: Wallet,       fixedIcon: PiggyBank,    x: 92, y: 62, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
+  { id: 'burnout',  label: 'Team burnout',       fixedLabel: 'Load sequenced',         icon: Flame,        fixedIcon: ShieldCheck,  x: 24, y: 92, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
+  { id: 'handoff',  label: 'Broken handoffs',    fixedLabel: 'Clean handoffs',         icon: Zap,          fixedIcon: Link2,        x: 76, y: 92, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
+  { id: 'pipeline', label: 'Dead pipeline',      fixedLabel: 'Pipeline reads true',    icon: AlertTriangle,fixedIcon: LineChart,    x: 50, y: 6,  anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
 ];
 
 const OPERATORS = [
@@ -254,7 +262,8 @@ export const ChaosMindMap: React.FC = () => {
 
           {/* Symptom nodes */}
           {SYMPTOMS.map((s) => {
-            const SIcon = s.icon;
+            const SIcon = isFixed ? s.fixedIcon : s.icon;
+            const displayLabel = isFixed ? s.fixedLabel : s.label;
             const isActive = active?.id === s.id;
             const dim = active !== null && !isActive;
             return (
@@ -263,7 +272,7 @@ export const ChaosMindMap: React.FC = () => {
                 type="button"
                 onClick={() => setActiveId((id) => (id === s.id ? null : s.id))}
                 aria-pressed={isActive}
-                aria-label={s.label}
+                aria-label={displayLabel}
                 className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 transition-all ${
                   dim ? 'opacity-30' : 'opacity-100'
                 }`}
@@ -282,7 +291,7 @@ export const ChaosMindMap: React.FC = () => {
                   <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
                     isActive ? 'text-amber' : isFixed ? 'text-foreground' : 'text-foreground/85'
                   }`}>
-                    {s.label}
+                    {displayLabel}
                   </div>
                 </div>
               </button>
@@ -312,16 +321,18 @@ export const ChaosMindMap: React.FC = () => {
       {/* Active symptom trace card */}
       <div className="mt-3 min-h-[92px]">
         {active ? (
-          <div className="grid gap-2 sm:grid-cols-2 animate-fade-in">
-            <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
-              <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
-                <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+          <div className={`grid gap-2 ${isFixed ? '' : 'sm:grid-cols-2'} animate-fade-in`}>
+            {!isFixed && (
+              <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
+                <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                  <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                </div>
+                <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
               </div>
-              <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
-            </div>
+            )}
             <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
               <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                <CheckCircle2 className="w-3 h-3" /> Source closed
+                <CheckCircle2 className="w-3 h-3" /> {isFixed ? `${active.fixedLabel} — source closed` : 'Source closed'}
               </div>
               <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.fixed}</p>
             </div>
