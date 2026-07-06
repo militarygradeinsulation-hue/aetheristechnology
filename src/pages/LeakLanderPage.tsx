@@ -321,53 +321,6 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* THE OFFER */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "260ms", animationFillMode: "both" }}
-          >
-            <div className="text-center mb-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Offer</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">One flat fee. No packages. No negotiation.</h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 01</div>
-                <div className="font-forensic text-lg font-bold mt-1">Free Pre-Scan</div>
-                <div className="font-mono text-2xl text-foreground mt-2">$0</div>
-                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">60-second self-scan. It will sting. That's the point.</p>
-                <Link to="/leak-audit" className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline">
-                  Run it now <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              <div className="rounded-sm border-2 border-amber/60 bg-amber/[0.06] backdrop-blur-sm p-5 flex flex-col shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.4)]">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 02 · Flagship</div>
-                <div className="font-forensic text-lg font-bold mt-1">The Leak Audit</div>
-                <div className="font-mono text-2xl text-amber mt-2">$2,500 <span className="text-xs text-foreground/60">flat</span></div>
-                <p className="text-sm text-foreground/80 mt-3 leading-relaxed flex-1">
-                  Operator-led forensic workup: website, sales, follow-up, systems, ops. Every leak documented with a dollar figure. <span className="text-amber">Fee credits 1:1 toward the fix.</span>
-                </p>
-                <button onClick={() => setBookingOpen(true)} className="mt-4 inline-flex items-center gap-2 text-amber font-mono text-[11px] uppercase tracking-wider hover:underline text-left">
-                  Book the audit <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm p-5 flex flex-col">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Tier 03</div>
-                <div className="font-forensic text-lg font-bold mt-1">Implementation</div>
-                <div className="font-mono text-2xl text-foreground mt-2">$15,000<span className="text-xs text-foreground/60">/mo</span></div>
-                <div className="font-mono text-[10px] text-foreground/60 mt-1">3-month minimum · Audit clients only</div>
-                <p className="text-sm text-foreground/75 mt-3 leading-relaxed flex-1">We build the systems — AI, automation, CRM, follow-up — accountable to the numbers in your audit.</p>
-              </div>
-            </div>
-
-            <p className="mt-4 text-center text-sm text-foreground/70 leading-relaxed max-w-2xl mx-auto">
-              That's it. No "lite" tier, no payment plan. If $2,500 to find the leak feels heavy, the leak isn't big enough yet — <span className="text-amber">come back when it is</span>.
-            </p>
-
-          </section>
 
 
 
