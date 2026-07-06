@@ -465,10 +465,8 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Public website leak scan + free tools suite — combined */}
-          <div className="mt-5">
-            <PublicLeakScan />
-          </div>
+          {/* Scan + free tools now live inside HomeMindMapSection above */}
+
 
 
           {/* Downloads + Deck — combined case-file card */}
