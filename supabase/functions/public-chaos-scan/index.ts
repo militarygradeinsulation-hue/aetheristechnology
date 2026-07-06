@@ -220,7 +220,7 @@ Return STRICT JSON of shape:
   "vertical": "1-3 word industry label",
   "url": "${url}",
   "source": {
-    "label": "2-4 word name of the single upstream cause feeding every symptom",
+    "label": "2-4 word Aetheris-style forensic name for the single upstream cause (see NAMING STYLE)",
     "chaos": "one blunt sentence: what it costs them today.",
     "sealed": "one blunt sentence: what changes when it's closed.",
     "dollar_leak": "$X.Xk-$X.Xk / mo estimated bleed range",
@@ -234,7 +234,7 @@ Return STRICT JSON of shape:
   "symptoms": [
     {
       "id": "kebab-case-id",
-      "label": "2-4 word symptom name",
+      "label": "2-4 word Aetheris-style forensic symptom name (see NAMING STYLE)",
       "icon": "ghost | trending-down | unplug | wallet | flame | zap | alert | eye-off | phone-off | receipt | clock | scale",
       "anchor": "scan | price | fix",
       "chaos": "one blunt sentence naming the specific pain on THIS business.",
@@ -264,11 +264,19 @@ Return STRICT JSON of shape:
   }
 }
 
+NAMING STYLE (Aetheris forensic — MANDATORY for every "label" in source and symptoms):
+- 2-4 words. Title Case. Evocative, forensic, physical. Sounds like a case-file code stamped on evidence.
+- Use the language of leaks, bleeds, fractures, ghosts, silence, blackouts, fog, drift, rot, voids, collapse, decay, mirage, static, blind spots.
+- Anchor to WHAT is failing on THIS business, not the tactic. Name the wound, not the fix.
+- Good examples: "Silent Buyer Leak", "Trust Fracture", "Pricing Blackout", "Ghost Funnel", "Authority Vacuum", "Conversion Bleed", "Proof Void", "Handoff Rot", "Message Fog", "Positioning Drift", "Signal Collapse", "Referral Blind Spot", "Follow-Up Decay", "Offer Mirage", "Buyer Static".
+- BANNED generic labels (do NOT use these or anything like them): "Weak CTA", "Poor SEO", "Bad UX", "Low Conversion", "No Pricing", "Slow Site", "Missing Analytics", "Unclear Messaging", "Lack of Trust", "Poor Branding". If your label sounds like a marketing-audit checklist item, rewrite it as a forensic wound.
+
 RULES:
 - Return 6-8 symptoms grounded in the evidence bundle. No generic filler.
 - Each symptom MUST include a dollar_leak, a 3-item cascade, an evidence object, and 1-3 connections.
 - Distribute anchors across scan / price / fix (roughly balanced).
-- "source.label" must be ONE root cause, not a list.
+- "source.label" must be ONE root cause, not a list, and MUST follow NAMING STYLE.
+- Every symptom "label" MUST follow NAMING STYLE.
 - 2-4 contradictions.
 - Output JSON only. No prose, no markdown fences.`;
 }
