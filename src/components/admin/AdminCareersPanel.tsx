@@ -1062,7 +1062,8 @@ export const AdminCareersPanel: React.FC = () => {
                       />
                     </div>
                   </div>
-                ))
+                  );
+                })
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
                 (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
