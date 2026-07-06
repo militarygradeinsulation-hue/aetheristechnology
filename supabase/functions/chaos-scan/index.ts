@@ -35,12 +35,12 @@ function normalizeUrl(input: string): string | null {
 
 // -------------------- Firecrawl helpers --------------------
 
-async function fcScrape(url: string, formats: any[]): Promise<any | null> {
+async function fcScrape(url: string, formats: any[], timeoutMs = 25_000): Promise<any | null> {
   if (!FIRECRAWL_API_KEY) return null;
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
@@ -52,7 +52,6 @@ async function fcScrape(url: string, formats: any[]): Promise<any | null> {
       return null;
     }
     const j = await r.json();
-    // v2 returns { success, data: {...} } typically
     return j?.data ?? j ?? null;
   } catch (e) {
     console.warn("fc scrape failed", url, e);
@@ -65,12 +64,12 @@ async function fcMap(url: string): Promise<string[]> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/map", {
       method: "POST",
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(15_000),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url, limit: 300, includeSubdomains: false }),
+      body: JSON.stringify({ url, limit: 150, includeSubdomains: false }),
     });
     if (!r.ok) return [];
     const j = await r.json();
