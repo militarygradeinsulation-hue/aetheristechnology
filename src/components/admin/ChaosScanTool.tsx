@@ -479,6 +479,21 @@ const AdminChaosScanTool: React.FC = () => {
                         .filter(Boolean).join(" · ")}
                     </p>
                   )}
+                  {active.evidence && (active.evidence.quote || active.evidence.source_url) && (
+                    <div className="mt-2 border-t border-crimson/20 pt-2">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1">Evidence</div>
+                      {active.evidence.quote && (
+                        <p className="text-[11px] italic text-foreground/80 leading-snug">"{active.evidence.quote}"</p>
+                      )}
+                      {active.evidence.source_url && (
+                        <a href={active.evidence.source_url} target="_blank" rel="noreferrer"
+                          className="mt-1 inline-block font-mono text-[10px] text-amber/90 hover:text-amber underline break-all">
+                          {active.evidence.source_url}
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                 </div>
                 <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
                   <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
