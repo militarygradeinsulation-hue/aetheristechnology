@@ -699,9 +699,9 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
           isDimmed={selectedSlug !== null && selectedSlug !== v.slug}
           offset={offsets[i] ?? { dx: 0, dy: 0 }}
           isDragging={draggingIdx === i}
-          onPointerDown={(e) => handleNodePointerDown(i, e)}
-          onPointerMove={(e) => handleNodePointerMove(i, e)}
-          onPointerUp={(e) => handleNodePointerUp(i, e)}
+          onPointerDown={(e) => onNodePointerDown(i, e)}
+          onPointerMove={(e) => onNodePointerMove(i, e)}
+          onPointerUp={(e) => onNodePointerUp(i, e)}
         />
       ))}
 
