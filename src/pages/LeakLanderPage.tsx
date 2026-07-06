@@ -334,31 +334,121 @@ const LeakLanderPage: React.FC = () => {
 
           {/* CUSTOM BUILD — specific idea or tool */}
           <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            className="mt-6 max-w-5xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
           >
-            <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6 text-center">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Custom Build</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Have a specific idea or tool you want built? <span className="text-amber italic">I can build it.</span>
-              </h2>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed max-w-2xl mx-auto">
-                One-off automations, internal AI tools, custom diagnostics, scraping pipelines, private dashboards — whatever your business actually needs. If it doesn't exist yet, we'll build it from scratch and hand it to you working.
-              </p>
-              <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  size="default"
-                  onClick={() => setBookingOpen(true)}
-                  className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Tell me what you want built
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
+            <style>{`
+              @keyframes customBuildMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+              @keyframes customBuildPulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.85; } }
+              @keyframes customBuildOrbit { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+              .cb-marquee-track { animation: customBuildMarquee 42s linear infinite; }
+              .cb-marquee:hover .cb-marquee-track { animation-play-state: paused; }
+              .cb-dot { animation: customBuildPulse 2.6s ease-in-out infinite; }
+              .cb-orbit { animation: customBuildOrbit 22s linear infinite; }
+            `}</style>
+
+            <div className="relative rounded-sm border border-amber/40 bg-gradient-to-br from-card/90 via-background/60 to-card/80 backdrop-blur-md p-6 sm:p-9 overflow-hidden shadow-[0_0_60px_-20px_hsl(var(--amber)/0.45)]">
+              {/* Ambient chaos glow */}
+              <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full opacity-30 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--amber)/0.5), transparent 70%)" }} />
+              <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-24 w-72 h-72 rounded-full opacity-25 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--crimson,0 60% 45%)/0.5), transparent 70%)" }} />
+
+              {/* Orbiting corner sigil */}
+              <div aria-hidden className="pointer-events-none absolute top-3 right-3 w-14 h-14 opacity-70">
+                <div className="absolute inset-0 rounded-full border border-amber/40" />
+                <div className="absolute inset-2 rounded-full border border-dashed border-amber/30 cb-orbit" />
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber cb-dot" />
               </div>
-              <p className="mt-3 text-xs text-foreground/60 italic">
-                Scoped, priced, and delivered — no ongoing retainers unless you want them.
-              </p>
+
+              {/* Corner brackets */}
+              {["top-2 left-2 border-l border-t","top-2 right-2 border-r border-t","bottom-2 left-2 border-l border-b","bottom-2 right-2 border-r border-b"].map(c => (
+                <span key={c} aria-hidden className={`absolute ${c} w-3 h-3 border-amber/70`} />
+              ))}
+
+              <div className="relative text-center">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <span className="h-px w-8 bg-amber/50" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber">Custom Build · Case File 0-Day</span>
+                  <span className="h-px w-8 bg-amber/50" />
+                </div>
+
+                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full border border-amber/40 bg-background/60">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber cb-dot" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/90">200+ apps shipped · Receipts below</span>
+                </div>
+
+                <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight max-w-3xl mx-auto">
+                  Have a specific idea or tool you want built?{" "}
+                  <span className="text-amber italic">I can build it.</span>
+                </h2>
+
+                <p className="mt-3 font-forensic text-lg sm:text-xl italic text-crimson/90 max-w-2xl mx-auto">
+                  The more crazy or impossible — the better.
+                </p>
+
+                <p className="mt-4 text-sm sm:text-base text-foreground/80 leading-relaxed max-w-2xl mx-auto">
+                  One-off automations. Internal AI tools. Forensic diagnostics.
+                  Scraping pipelines. Private dashboards. Custom operator systems.
+                  If it doesn't exist yet, I'll build it from scratch and hand it to you working.
+                </p>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button
+                    size="default"
+                    onClick={() => setBookingOpen(true)}
+                    className="h-12 px-7 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider shadow-[0_0_30px_-8px_hsl(var(--amber)/0.9)]"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Tell me what you want built
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </div>
+
+                <p className="mt-3 text-xs text-foreground/60 italic">
+                  Scoped, priced, delivered — no ongoing retainers unless you want them.
+                </p>
+              </div>
+
+              {/* Receipts marquee — real apps shipped */}
+              <div className="relative mt-7 pt-5 border-t border-dashed border-amber/25">
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-amber/80">Selected receipts · live builds</span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-foreground/50 hidden sm:inline">Hover to pause</span>
+                </div>
+                <div
+                  className="cb-marquee relative overflow-hidden"
+                  style={{ maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)" }}
+                >
+                  <div className="cb-marquee-track flex gap-3 whitespace-nowrap w-max">
+                    {(() => {
+                      const apps = [
+                        "Lumina Studio", "Genesis Control", "Kelly Oracle Machine",
+                        "Firecrawl AI", "Auto-Influence Nexus", "Token Risk Analyzer",
+                        "Muscle Memory Forge", "Sales-Fit Assessment Engine", "RenderRight AI",
+                        "AI Command Center", "Resume-Fit Compass", "Clear CRM Flow",
+                        "Founder Finder Pro", "Playground Insights Bot", "Script Spark",
+                        "Tax Treasure Chest", "MCP Interface", "Business Post Analyst",
+                        "Gemini Powerhouse", "Photo-to-Scene", "Friction Finder",
+                        "Aetheris AI Studio", "CTOguy Lead Gen", "AI Tile Haven",
+                        "Perfect System Builder", "Swift Code Composer", "Echo Influence Scribe",
+                        "Quantum Vision", "Build It Better", "Playful Blueprints Studio",
+                      ];
+                      const loop = [...apps, ...apps];
+                      return loop.map((name, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-amber/25 bg-background/50 font-mono text-[11px] uppercase tracking-widest text-foreground/85 hover:border-amber/70 hover:text-amber transition-colors"
+                        >
+                          <span className="w-1 h-1 rounded-full bg-amber/70" />
+                          {name}
+                        </span>
+                      ));
+                    })()}
+                  </div>
+                </div>
+                <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-foreground/55">
+                  …and ~170 more in the vault. Bring me your impossible one.
+                </p>
+              </div>
             </div>
           </section>
 
