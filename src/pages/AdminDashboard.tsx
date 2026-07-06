@@ -96,7 +96,7 @@ const PanelFallback = () => (
   </div>
 );
 
-type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
+type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
