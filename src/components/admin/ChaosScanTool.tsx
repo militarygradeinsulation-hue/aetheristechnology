@@ -132,6 +132,7 @@ const AdminChaosScanTool: React.FC = () => {
     if (!url.trim()) return;
     setBusy(true);
     setData(null);
+    setMeta(null);
     setActiveId(null);
     setMode("chaos");
     try {
@@ -145,6 +146,8 @@ const AdminChaosScanTool: React.FC = () => {
       if (error) throw error;
       if (!res?.map) throw new Error("No map returned");
       setData(res.map);
+      setMeta(res.intel_meta || null);
+
     } catch (e) {
       toast({
         title: "Chaos scan failed",
