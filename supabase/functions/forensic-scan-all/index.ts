@@ -226,7 +226,7 @@ Target: ${target}
 Company: ${company || "(not provided)"}
 
 RAW FINDINGS (use only what is here, do not fabricate numbers):
-${JSON.stringify(findings).slice(0, 90_000)}
+${JSON.stringify(findings).slice(0, 45_000)}
 
 Required chapters (in order):
 ${chaptersList}
@@ -237,9 +237,9 @@ For EACH chapter return an object with this exact shape:
   "slug": "<slug>",
   "title": "<title>",
   "verdict": "<one blunt sentence>",
-  "what_we_found": "<3-6 short paragraphs in markdown>",
-  "why_its_leaking": "<2-3 paragraphs>",
-  "what_its_costing": "<1-2 paragraphs, USD only>",
+  "what_we_found": "<1-2 specific short paragraphs in markdown>",
+  "why_its_leaking": "<1-2 specific short paragraphs>",
+  "what_its_costing": "<1 concise paragraph, USD only>",
   "what_to_do": {
     "this_week": ["<action>", "<action>"],
     "this_month": ["<action>"],

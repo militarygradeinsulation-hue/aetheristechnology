@@ -103,8 +103,10 @@ export function ForensicScanAllPanel() {
       if (data && !stopped) {
         setRow(data);
         const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;
+        const completedAt = data.completed_at ? new Date(data.completed_at).getTime() : NaN;
         if (Number.isFinite(createdAt)) startedAtRef.current = createdAt;
-        setElapsedSec(Math.floor((Date.now() - (startedAtRef.current || Date.now())) / 1000));
+        const endAt = Number.isFinite(completedAt) ? completedAt : Date.now();
+        setElapsedSec(Math.max(0, Math.floor((endAt - (startedAtRef.current || Date.now())) / 1000)));
         const r = data.report;
         if (r?.chapters?.length) {
           setOpen((prev) => {
