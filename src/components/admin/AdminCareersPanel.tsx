@@ -413,7 +413,7 @@ export const AdminCareersPanel: React.FC = () => {
   };
 
   const [stageSavingId, setStageSavingId] = useState<string | null>(null);
-  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no') => {
+  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no' | 'archived') => {
     setStageSavingId(shareCode);
     const prev = applications;
     setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, stage } : a));
