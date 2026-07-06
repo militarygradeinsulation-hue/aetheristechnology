@@ -674,11 +674,15 @@ export const AdminCareersPanel: React.FC = () => {
             <CardTitle className="font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-amber" /> Candidates & Applications
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search name, email, code…" className="pl-7 h-8 w-64" />
               </div>
+              <Button size="sm" variant="outline" onClick={toggleMinimized} title={minimized ? 'Expand all cards' : 'Collapse all cards'}>
+                {minimized ? <ChevronRight className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
+                {minimized ? 'Expand' : 'Collapse'}
+              </Button>
               <Button size="sm" variant="outline" onClick={load} disabled={loading}>
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
