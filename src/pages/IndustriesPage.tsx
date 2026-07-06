@@ -294,6 +294,115 @@ const INDUSTRIES: IndustryLeak[] = [
   },
 ].sort((a, b) => a.industry.localeCompare(b.industry));
 
+// Per-metric distinct findings — index matches whatWeMeasure order.
+const FRICTION_DETAILS: Record<string, { why: string; fixed: string }[]> = {
+  'ai-for-accounting': [
+    { why: 'Realization sits below quoted because scope-adds never make it to the invoice.', fixed: 'Every scope-add gets logged and billed the week it happens — realization defended line by line.' },
+    { why: 'Time gets remembered, not captured. Hours die in inboxes and Slack threads.', fixed: 'Time is captured at the moment of work, tied to a matter, and billable by default.' },
+    { why: 'Weeks pass between engagement letter and first invoice. Cash sits on the sideline.', fixed: 'Onboarding closes into a first invoice inside 7 days — no more free work by accident.' },
+  ],
+  'ai-for-architecture': [
+    { why: 'Revisions balloon past contract without a scope-change document. You eat the hours.', fixed: 'Every revision past scope triggers a written change order before the pencil moves.' },
+    { why: 'Proposals sit in inboxes for weeks because nobody owns the follow-up cadence.', fixed: 'Proposals get a written follow-up rhythm — close rate climbs without new leads.' },
+    { why: 'Phase invoices age past 60 days and nobody chases them until cash gets tight.', fixed: 'Phase-complete triggers the invoice automatically. Aging buckets stay under 30 days.' },
+  ],
+  'ai-for-automotive': [
+    { why: 'Web leads sit for hours. By the time you call, they already test-drove somewhere else.', fixed: 'Every web lead gets a live human touch inside 5 minutes — test drive conversion doubles.' },
+    { why: 'Bays sit empty between jobs because nobody sequenced the next ticket.', fixed: 'Service sequencing keeps bays 85%+ utilized without hiring another tech.' },
+    { why: 'F&I attach drops when the desk gets busy — thousands per deal walk out the door.', fixed: 'F&I gets a scripted attach path every deal — no more "we forgot to offer it."' },
+  ],
+  'ai-for-saas': [
+    { why: 'Trials never hit the activation moment because the onboarding drops them at step 3.', fixed: 'Activation is instrumented per step — the drop-off gets fixed where it actually bleeds.' },
+    { why: 'Renewals go silent because at-risk signals nobody watches happen 60 days before churn.', fixed: 'Health signals flag at-risk accounts in advance — CSMs get 60 days to save them.' },
+    { why: 'Expansion opportunities die because no one follows the playbook past the initial upsell.', fixed: 'Expansion touch-cadence is enforced weekly — attach rate climbs without new logos.' },
+  ],
+  'ai-for-construction': [
+    { why: 'Bids get sent then forgotten. The GC gives it to whoever called last week.', fixed: 'Every bid gets an automatic 3-touch follow-up cadence — award rate lifts on the same volume.' },
+    { why: 'RFIs sit in email chains for days while the crew waits on-site burning labor.', fixed: 'RFI cycle time cut by naming the stall points — crews stop standing around at $75/hr.' },
+    { why: 'Change orders happen verbally on-site and never get invoiced.', fixed: 'Change orders get captured on the phone the day they happen — no more eating overruns.' },
+  ],
+  'ai-for-education': [
+    { why: 'Inquiries never become enrollments because the follow-up sequence stops after email #2.', fixed: 'Inquiry-to-enroll gets a 30-day multi-channel cadence — enrollment lifts without more ad spend.' },
+    { why: 'Cohorts drop off mid-course and nobody names the exact week they lose people.', fixed: 'Completion is tracked by week — the drop-off gets fixed at the exact lesson that bleeds.' },
+    { why: 'Alumni never re-enroll because no one asked them at the right moment.', fixed: 'Re-enroll asks trigger on completion — lifetime revenue per student climbs.' },
+  ],
+  'ai-for-ecommerce': [
+    { why: 'Checkout drops at the shipping step and nobody fixes the friction.', fixed: 'Checkout is instrumented step by step — the leak gets closed where it actually happens.' },
+    { why: 'First-purchase customers never come back because there is no post-purchase flow.', fixed: 'Second-purchase sequence runs on autopilot — repeat rate climbs, CAC stops mattering.' },
+    { why: 'Returns get processed blind — nobody knows which SKU or reason drives the volume.', fixed: 'Refund reasons get categorized — the top-3 return drivers get fixed at the source.' },
+  ],
+  'ai-for-finance': [
+    { why: 'Files sit at the underwriter for days because no SLA is enforced.', fixed: 'Application-to-decision gets a written SLA — average cycle time cut in half.' },
+    { why: 'KYC hands off between teams and clients ghost during the handoff gap.', fixed: 'Handoff drop-offs get named and closed — completion rate climbs without new marketing.' },
+    { why: 'Files come back for re-work because intake never captured what underwriting needed.', fixed: 'Intake gets tuned to underwriting requirements — re-work rate collapses.' },
+  ],
+  'ai-for-healthcare': [
+    { why: 'Inquiries call the front desk and never get booked because the receptionist is drowning.', fixed: 'Booking becomes systematized — inquiry-to-appointment climbs without hiring.' },
+    { why: 'No-shows and last-minute cancels burn slots that could have paid for the day.', fixed: 'Reminders and waitlist automation reclaim the slots that used to just vanish.' },
+    { why: 'Prior auths age past 30 days and get written off as bad debt.', fixed: 'Prior-auth aging buckets get worked weekly — write-offs stop being routine.' },
+  ],
+  'ai-for-home-services': [
+    { why: 'Calls come in while techs are on jobs — leads go to whoever answers first.', fixed: 'Every call gets captured and routed — booked-job rate climbs on the same lead volume.' },
+    { why: 'Techs spend an hour a day driving, on paperwork, or waiting on parts.', fixed: 'Route sequencing and dispatch get tightened — billable hours per tech climb 15-25%.' },
+    { why: 'Upsell opportunities on the truck get missed because it is not part of the script.', fixed: 'Ticket-level upsell prompts run every visit — average ticket size climbs.' },
+  ],
+  'ai-for-hospitality': [
+    { why: 'OTAs take 15-25% of every booking they touch, and direct booking never gets marketed.', fixed: 'Direct booking incentives cut OTA dependency — margin per room lifts.' },
+    { why: 'RevPAR sits flat because segment mix is not managed week to week.', fixed: 'Segment yield gets managed per day-of-week — RevPAR climbs without dropping rates.' },
+    { why: 'F&B and upsell attach never happens because it is not scripted at check-in.', fixed: 'Check-in and in-stay upsell scripts run every guest — ancillary revenue lifts per stay.' },
+  ],
+  'ai-for-legal': [
+    { why: 'Qualified leads call, get a callback three days later, and hire someone else.', fixed: 'Intake closes inside the same-day window — engagement rate climbs on the same lead flow.' },
+    { why: 'WIP ages past 90 days because nobody owns collections until cash gets tight.', fixed: 'WIP is aged and worked weekly — write-downs drop, collections become routine.' },
+    { why: 'Realization gaps by partner never surface because timekeeping is optional.', fixed: 'Realization is measured per partner — the outliers get named with numbers, not gossip.' },
+  ],
+  'ai-for-logistics': [
+    { why: 'Quotes go back late and shippers give the load to whoever answered first.', fixed: 'Quote response SLA gets enforced — win rate lifts on the same RFQ volume.' },
+    { why: 'Certain lanes lose money and nobody can prove which ones until quarter-end.', fixed: 'Lane-level margin is visible weekly — money-losing lanes get repriced or dropped.' },
+    { why: 'Exceptions stack up in email and turn into service failures 48 hours later.', fixed: 'Exception triage gets a defined cycle — service failures stop hitting the customer blind.' },
+  ],
+  'creative-studios': [
+    { why: 'Hours run 30-60% over budget per account because scope is defended verbally.', fixed: 'Hours-vs-budget gets tracked weekly per account — scope creep gets billed or stopped.' },
+    { why: 'Retainers get spent early in the month, then the last two weeks are free work.', fixed: 'Engagement utilization is measured weekly — the free work stops without losing the client.' },
+    { why: 'Every pitch is built from scratch, eating a week of senior time per shot.', fixed: 'Pitch assets get libraried — new-business turnaround drops from weeks to days.' },
+  ],
+  'ai-for-medical-practices': [
+    { why: 'Recall lists sit untouched — patients disappear between hygiene visits.', fixed: 'Recall is worked every week with a defined cadence — hygiene chair stays full.' },
+    { why: 'Treatment plans get presented once and never followed up.', fixed: 'Unaccepted plans get a written follow-up cadence — case acceptance climbs.' },
+    { why: 'Insurance claims age past 60 days and get written off without a fight.', fixed: 'Aging buckets get worked to the dollar — write-offs stop being the default.' },
+  ],
+  'ai-for-professional-services': [
+    { why: 'Proposals take a week each because every one is a custom rebuild.', fixed: 'Proposals get templatized by service line — cycle time drops, close rate holds.' },
+    { why: 'Projects overrun quoted hours and the write-down never surfaces until close.', fixed: 'Project margin is tracked weekly against quote — write-downs get flagged early.' },
+    { why: 'Consultant utilization varies wildly and nobody names the underperformer.', fixed: 'Utilization is measured per person — coaching decisions get made on data, not vibes.' },
+  ],
+  'ai-for-real-estate': [
+    { why: 'Leads convert for whoever calls first — most agents call in 4+ hours.', fixed: 'Speed-to-first-touch drops under 5 minutes — conversion rate doubles on the same lead spend.' },
+    { why: 'Showings happen but offers never follow because nobody drove the ask.', fixed: 'Showing-to-offer gets scripted and tracked — closed volume climbs without more listings.' },
+    { why: 'Past clients get one holiday card a year and forget you exist.', fixed: 'Past-client cadence runs monthly on autopilot — referral volume becomes predictable.' },
+  ],
+  'ai-for-manufacturing': [
+    { why: 'Quotes get sent then forgotten. The 3rd-day follow-up that wins deals never happens.', fixed: 'Quote follow-up runs on written SLA — RFQ-to-PO conversion climbs on the same volume.' },
+    { why: 'Deals sit in stages past their historical close window and nobody works them.', fixed: 'Time-in-stage triggers action — stalled deals get named and closed or killed.' },
+    { why: 'Certain lanes and product mixes lose money and nobody prices them out.', fixed: 'Conversion by lane gets visible — the losers get repriced, the winners get more shots.' },
+  ],
+  'ai-for-it-services': [
+    { why: 'Ticket MTTR drifts because nobody classes tickets by SLA type.', fixed: 'MTTR is measured per ticket class — the outliers get fixed at the process level.' },
+    { why: 'Renewals go silent 90 days out and clients shop you before you reach out.', fixed: 'Renewal cadence starts at day-90 with a written touch plan — retention climbs.' },
+    { why: 'Add-ons never attach because sales was never part of the support motion.', fixed: 'Add-on attach gets scripted into QBRs — expansion revenue lifts per client.' },
+  ],
+  'ai-for-travel': [
+    { why: 'Inquiries pile up and quotes go back after the customer already booked elsewhere.', fixed: 'Quote SLA gets enforced — booking conversion climbs on the same inquiry flow.' },
+    { why: 'Ancillary attach happens by accident, never by design.', fixed: 'Upsell scripts run every quote — ancillary revenue per booking climbs measurably.' },
+    { why: 'Cancellations get processed blind — nobody knows what drove them.', fixed: 'Cancellation reasons get categorized — the top drivers get fixed at the source.' },
+  ],
+  'ai-for-wellness': [
+    { why: 'Members ghost silently — no engagement signals flag before the cancel.', fixed: 'Churn signals surface early — save-plays run before the member walks.' },
+    { why: 'Classes run half-empty because the fill strategy is "hope."', fixed: 'Class utilization gets managed with reminders and waitlists — capacity actually fills.' },
+    { why: 'Packages never get offered because it is not scripted into checkout.', fixed: 'Package upsell runs at every checkout — average revenue per member climbs.' },
+  ],
+};
+
 const IndustryCard: React.FC<{ v: IndustryLeak; onOpen: () => void }> = ({ v, onOpen }) => {
   const Icon = v.icon;
   return (
