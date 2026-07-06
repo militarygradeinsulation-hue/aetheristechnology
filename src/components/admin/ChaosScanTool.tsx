@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 type OpId = "scan" | "price" | "fix";
 type Mode = "chaos" | "fixed";
 
+interface Evidence { source_url?: string; quote?: string }
 interface Symptom {
   id: string;
   label: string;
@@ -24,17 +25,37 @@ interface Symptom {
   dollar_leak?: string;
   cascade?: string[];
   connections?: string[];
+  evidence?: Evidence;
+}
+
+interface Intel {
+  positioning?: string;
+  buyer?: string;
+  pricing_posture?: string;
+  operational_maturity?: string;
+  quick_wins?: string[];
+  estimated_total_monthly_leak?: string;
 }
 
 interface ChaosMap {
   company?: string;
   vertical?: string;
   url?: string;
-  source?: { label?: string; chaos?: string; sealed?: string; dollar_leak?: string };
+  source?: { label?: string; chaos?: string; sealed?: string; dollar_leak?: string; evidence?: string };
   operators?: { id: OpId; label: string; body: string }[];
   symptoms?: Symptom[];
   contradictions?: string[];
+  intel?: Intel;
 }
+
+interface IntelMeta {
+  firecrawl_used?: boolean;
+  sitemap_urls?: number;
+  pages_analyzed?: number;
+  analyzed_urls?: string[];
+  model?: string;
+}
+
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   ghost: Ghost, "trending-down": TrendingDown, unplug: Unplug, wallet: Wallet,
@@ -86,8 +107,10 @@ const AdminChaosScanTool: React.FC = () => {
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState<ChaosMap | null>(null);
+  const [meta, setMeta] = useState<IntelMeta | null>(null);
   const [mode, setMode] = useState<Mode>("chaos");
   const [activeId, setActiveId] = useState<string | null>(null);
+
 
   const symptoms = useMemo(
     () => layoutSymptoms((data?.symptoms || []).slice(0, 8)),
@@ -109,6 +132,7 @@ const AdminChaosScanTool: React.FC = () => {
     if (!url.trim()) return;
     setBusy(true);
     setData(null);
+    setMeta(null);
     setActiveId(null);
     setMode("chaos");
     try {
@@ -122,6 +146,8 @@ const AdminChaosScanTool: React.FC = () => {
       if (error) throw error;
       if (!res?.map) throw new Error("No map returned");
       setData(res.map);
+      setMeta(res.intel_meta || null);
+
     } catch (e) {
       toast({
         title: "Chaos scan failed",
@@ -453,6 +479,21 @@ const AdminChaosScanTool: React.FC = () => {
                         .filter(Boolean).join(" · ")}
                     </p>
                   )}
+                  {active.evidence && (active.evidence.quote || active.evidence.source_url) && (
+                    <div className="mt-2 border-t border-crimson/20 pt-2">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1">Evidence</div>
+                      {active.evidence.quote && (
+                        <p className="text-[11px] italic text-foreground/80 leading-snug">"{active.evidence.quote}"</p>
+                      )}
+                      {active.evidence.source_url && (
+                        <a href={active.evidence.source_url} target="_blank" rel="noreferrer"
+                          className="mt-1 inline-block font-mono text-[10px] text-amber/90 hover:text-amber underline break-all">
+                          {active.evidence.source_url}
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                 </div>
                 <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
                   <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
@@ -496,10 +537,70 @@ const AdminChaosScanTool: React.FC = () => {
               </ul>
             </div>
           </div>
+
+          {/* Golden report intel */}
+          {(data.intel || meta) && (
+            <div className="mt-4 rounded-sm border border-amber/30 bg-amber/5 p-3">
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                <div className="flex items-center gap-1.5 font-case text-[10px] uppercase tracking-widest text-amber">
+                  <Sparkles className="w-3 h-3" /> Golden report · deep intel
+                </div>
+                {meta && (
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-foreground/60">
+                    {meta.firecrawl_used ? "Firecrawl" : "raw fetch"} · {meta.pages_analyzed ?? 1} pages · {meta.sitemap_urls ?? 0} URLs mapped · {meta.model}
+                  </div>
+                )}
+              </div>
+              {data.intel && (
+                <div className="grid gap-2 md:grid-cols-2 mb-2">
+                  {data.intel.positioning && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Positioning:</span>{data.intel.positioning}</div>
+                  )}
+                  {data.intel.buyer && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Buyer:</span>{data.intel.buyer}</div>
+                  )}
+                  {data.intel.pricing_posture && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Pricing:</span>{data.intel.pricing_posture}</div>
+                  )}
+                  {data.intel.operational_maturity && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Ops maturity:</span>{data.intel.operational_maturity}</div>
+                  )}
+                </div>
+              )}
+              {data.intel?.estimated_total_monthly_leak && (
+                <div className="text-[11px] font-mono uppercase tracking-widest text-crimson mb-2">
+                  Total estimated bleed: {data.intel.estimated_total_monthly_leak}
+                </div>
+              )}
+              {data.intel?.quick_wins && data.intel.quick_wins.length > 0 && (
+                <div>
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Quick wins (&lt;30 days)</div>
+                  <ul className="grid gap-1 sm:grid-cols-2">
+                    {data.intel.quick_wins.map((w, i) => (
+                      <li key={i} className="text-[11px] text-foreground/85 flex gap-2"><span className="text-amber font-mono">→</span>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {meta?.analyzed_urls && meta.analyzed_urls.length > 0 && (
+                <div className="mt-3 pt-2 border-t border-amber/20">
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Pages analyzed</div>
+                  <ul className="space-y-0.5">
+                    {meta.analyzed_urls.map((u, i) => (
+                      <li key={i}>
+                        <a href={u} target="_blank" rel="noreferrer" className="font-mono text-[10px] text-foreground/70 hover:text-amber underline break-all">{u}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
       )}
     </div>
   );
 };
+
 
 export default AdminChaosScanTool;
