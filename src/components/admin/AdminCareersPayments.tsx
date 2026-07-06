@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { useToast } from '@/hooks/use-toast';
 import { openRepMail } from '@/lib/repMail';
-import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, Send, ArrowUpDown, X } from 'lucide-react';
+import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, Send, ArrowUpDown, X, Copy, Link as LinkIcon } from 'lucide-react';
 
 interface Payment {
   id: string;
@@ -42,6 +42,8 @@ export const AdminCareersPayments: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [summary, setSummary] = useState<{ count: number; total_cents: number; unique_emails: number }>({ count: 0, total_cents: 0, unique_emails: 0 });
   const [attempts, setAttempts] = useState<Record<string, AttemptLite>>({});
+  const [emailStatus, setEmailStatus] = useState<Record<string, { status: string; error: string | null; sent_at: string | null }>>({});
+  const [linkBase, setLinkBase] = useState<string>('https://aetheris.technology/careers/test?session_id=');
   const [sending, setSending] = useState<string | null>(null);
 
   // Filters
@@ -67,6 +69,8 @@ export const AdminCareersPayments: React.FC = () => {
       setPayments((data as any).payments || []);
       setSummary((data as any).summary || { count: 0, total_cents: 0, unique_emails: 0 });
       setAttempts((data as any).attempts_by_email || {});
+      setEmailStatus((data as any).email_send_status || {});
+      if ((data as any).test_link_base) setLinkBase((data as any).test_link_base);
     } catch (e) {
       toast({ title: 'Failed to load payments', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
@@ -89,7 +93,14 @@ export const AdminCareersPayments: React.FC = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast({ title: 'Test link sent', description: `Emailed ${p.email}` });
+      const log = (data as any)?.log;
+      const status = log?.status || 'queued';
+      toast({
+        title: status === 'sent' ? '✓ Email delivered' : status === 'suppressed' ? 'Recipient suppressed' : status === 'failed' ? 'Send failed' : 'Email queued',
+        description: `${p.email} · ${status}${log?.error_message ? ` · ${log.error_message}` : ''}`,
+        variant: status === 'failed' ? 'destructive' : 'default',
+      });
+      await load();
     } catch (e) {
       toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
@@ -244,53 +255,105 @@ export const AdminCareersPayments: React.FC = () => {
               const key = (p.email || '').toLowerCase();
               const at = attempts[key];
               const passed = at?.status === 'passed';
+              const sessionId = p.stripe_session_id || '';
+              const accessCode = sessionId ? sessionId.slice(-10).toUpperCase() : '';
+              const testLink = sessionId ? `${linkBase}${sessionId}` : '';
+              const es = emailStatus[key];
+              const copy = (text: string, label: string) => {
+                navigator.clipboard.writeText(text);
+                toast({ title: `${label} copied`, description: text.length > 60 ? text.slice(0, 60) + '…' : text });
+              };
               return (
-                <div key={p.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => p.email && openRepMail(p.email)} className="text-amber hover:underline font-mono text-sm truncate max-w-[240px] flex items-center gap-1">
-                        <Mail className="w-3 h-3" /> {p.email || '(no email)'}
-                      </button>
-                      <Badge className="bg-green-500/15 text-green-400 border border-green-500/30 text-[10px]">{p.status}</Badge>
-                      <Badge variant="outline" className="text-[10px] uppercase">{p.environment}</Badge>
-                      <span className="font-mono text-sm text-foreground">{fmt(p.amount_cents, p.currency)}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(p.occurred_at).toLocaleString()}
-                      {p.stripe_session_id && <span className="ml-2 font-mono">· {p.stripe_session_id.slice(0, 22)}…</span>}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {at ? (
-                      <div className="flex items-center gap-2 justify-end">
-                        <Badge className={passed ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}>
-                          {passed ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />} {at.status}
-                        </Badge>
-                        {typeof at.score_pct === 'number' && (
-                          <Badge variant="outline" className="font-mono text-[10px]">{Math.round(at.score_pct)}%</Badge>
-                        )}
-                        {at.share_code && (
-                          <span className="font-mono text-[10px] text-muted-foreground">#{at.share_code}</span>
-                        )}
+                <div key={p.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button onClick={() => p.email && openRepMail(p.email)} className="text-amber hover:underline font-mono text-sm truncate max-w-[240px] flex items-center gap-1">
+                          <Mail className="w-3 h-3" /> {p.email || '(no email)'}
+                        </button>
+                        <Badge className="bg-green-500/15 text-green-400 border border-green-500/30 text-[10px]">{p.status}</Badge>
+                        <Badge variant="outline" className="text-[10px] uppercase">{p.environment}</Badge>
+                        <span className="font-mono text-sm text-foreground">{fmt(p.amount_cents, p.currency)}</span>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2 justify-end flex-wrap">
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(p.occurred_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {at ? (
+                        <div className="flex items-center gap-2 justify-end flex-wrap">
+                          <Badge className={passed ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}>
+                            {passed ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />} {at.status}
+                          </Badge>
+                          {typeof at.score_pct === 'number' && (
+                            <Badge variant="outline" className="font-mono text-[10px]">{Math.round(at.score_pct)}%</Badge>
+                          )}
+                          {at.share_code && (
+                            <span className="font-mono text-[10px] text-muted-foreground">#{at.share_code}</span>
+                          )}
+                        </div>
+                      ) : (
                         <Badge variant="outline" className="text-[10px] text-muted-foreground">
                           Paid, no test taken yet
                         </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Access code + custom link */}
+                  {sessionId && (
+                    <div className="rounded-md border border-amber/30 bg-amber/5 p-2 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-mono uppercase text-muted-foreground">Access code</span>
+                        <code className="font-mono text-sm font-bold text-amber tracking-widest">{accessCode}</code>
+                        <Button size="sm" variant="ghost" onClick={() => copy(accessCode, 'Code')} className="h-6 text-[10px] px-2">
+                          <Copy className="w-3 h-3 mr-1" /> Copy code
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <LinkIcon className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <input
+                          readOnly
+                          value={testLink}
+                          onFocus={e => e.currentTarget.select()}
+                          className="flex-1 min-w-[220px] font-mono text-[11px] bg-background/60 border border-border/40 rounded px-2 py-1 text-foreground"
+                        />
+                        <Button size="sm" variant="outline" onClick={() => copy(testLink, 'Link')} className="h-7 text-xs">
+                          <Copy className="w-3 h-3 mr-1" /> Copy link
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => sendLink(p)}
-                          disabled={sending === p.id || !p.email || !p.stripe_session_id}
+                          disabled={sending === p.id || !p.email}
                           className="h-7 text-xs"
                         >
                           {sending === p.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
-                          Email test link
+                          {es?.status === 'sent' ? 'Resend' : 'Send email'}
                         </Button>
                       </div>
-                    )}
-                  </div>
+                      <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+                        <span className="text-muted-foreground uppercase">Email:</span>
+                        {es ? (
+                          <>
+                            <Badge className={
+                              es.status === 'sent' ? 'bg-green-500/15 text-green-400 border border-green-500/30' :
+                              es.status === 'failed' || es.status === 'dlq' ? 'bg-destructive/20 text-destructive border border-destructive/30' :
+                              es.status === 'suppressed' ? 'bg-amber/15 text-amber border border-amber/30' :
+                              'bg-muted/40 text-muted-foreground border border-border/40'
+                            }>
+                              {es.status === 'sent' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : es.status === 'failed' || es.status === 'dlq' ? <XCircle className="w-3 h-3 mr-1" /> : null}
+                              {es.status}
+                            </Badge>
+                            {es.sent_at && <span className="text-muted-foreground">{new Date(es.sent_at).toLocaleString()}</span>}
+                            {es.error && <span className="text-destructive truncate max-w-[280px]" title={es.error}>· {es.error}</span>}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">not sent yet</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

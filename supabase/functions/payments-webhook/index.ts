@@ -436,7 +436,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
 
     // Careers test access fee — email a resume link so the applicant can take the test.
     if (session.metadata?.purpose === "careers_test_fee" && email) {
-      const testUrl = `${PUBLIC_SITE_URL}/n?session_id=${session.id}`;
+      const testUrl = `${PUBLIC_SITE_URL}/careers/test?session_id=${session.id}`;
       triggerFunction("send-transactional-email", {
         templateName: "careers-test-access",
         recipientEmail: email,
