@@ -541,6 +541,12 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   return (
     <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
+      <style>{`
+        @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }
+        @keyframes industry-float-1 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-7px,-5px) rotate(-0.8deg); } }
+        @keyframes industry-float-2 { 0%,100% { transform: translate(0,0) rotate(0deg); } 33% { transform: translate(5px,6px) rotate(0.5deg); } 66% { transform: translate(-4px,-6px) rotate(-0.4deg); } }
+        @keyframes industry-float-3 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-6px,7px) rotate(0.7deg); } }
+      `}</style>
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
