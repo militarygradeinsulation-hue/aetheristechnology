@@ -107,8 +107,10 @@ const AdminChaosScanTool: React.FC = () => {
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState<ChaosMap | null>(null);
+  const [meta, setMeta] = useState<IntelMeta | null>(null);
   const [mode, setMode] = useState<Mode>("chaos");
   const [activeId, setActiveId] = useState<string | null>(null);
+
 
   const symptoms = useMemo(
     () => layoutSymptoms((data?.symptoms || []).slice(0, 8)),
