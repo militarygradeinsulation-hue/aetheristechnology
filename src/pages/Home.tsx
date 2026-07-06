@@ -83,7 +83,7 @@ const Home = () => {
             </div>
           </section>
 
-          <PublicLeakScan />
+          <PublicChaosScan />
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
             <div className="max-w-3xl mx-auto text-center">
