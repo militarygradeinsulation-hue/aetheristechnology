@@ -587,7 +587,7 @@ const AdminDashboard: React.FC = () => {
       case 'easymode': return <EasyModeTool />;
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
-      case 'chaosscan': return <AdminChaosScanTool />;
+      
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return (
         <Tabs defaultValue="engine" className="w-full">
