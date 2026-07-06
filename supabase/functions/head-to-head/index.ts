@@ -176,7 +176,7 @@ Rules:
 - Takeover mode: be ruthless but ethical. Exploit rival's real, evidenced weaknesses (broken messaging, thin proof, hidden pricing, weak CTAs, brand contradictions). Do NOT fabricate rival flaws.
 - yourFixes must be honest — list YOUR bleed first. You cannot take over from a leaky ship.` : ""}`;
 
-    const user = `HEAD-TO-HEAD SCAN
+    const user = `HEAD-TO-HEAD SCAN${takeover ? " — TAKEOVER MODE" : ""}
 
 YOU: ${yourUrl}
 RIVAL: ${rivalUrl}
