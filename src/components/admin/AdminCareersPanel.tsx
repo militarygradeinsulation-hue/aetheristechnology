@@ -776,13 +776,13 @@ export const AdminCareersPanel: React.FC = () => {
                     <ArrowUpAZ className="w-3 h-3 mr-1" /> Worst
                   </Button>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="text-muted-foreground">Stage:</span>
-                  {(['all', 'new', 'interview', 'wait', 'no'] as const).map(v => (
+                  {(['all', 'new', 'interview', 'wait', 'no', 'archived'] as const).map(v => (
                     <Button key={v} size="sm" variant={stageFilter === v ? 'default' : 'outline'}
                       onClick={() => setStageFilter(v)}
                       className={`h-7 capitalize ${stageFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
-                      {v}
+                      {v}{v === 'archived' && archivedCount > 0 ? ` (${archivedCount})` : ''}
                     </Button>
                   ))}
                 </div>
