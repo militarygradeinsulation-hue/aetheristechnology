@@ -482,6 +482,7 @@ const MindMapNode: React.FC<{
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onContextMenu={(e) => e.preventDefault()}
       style={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
@@ -489,8 +490,11 @@ const MindMapNode: React.FC<{
         animationDelay: `${index * 60}ms`,
         touchAction: 'none',
         cursor: isDragging ? 'grabbing' : 'grab',
+        WebkitTapHighlightColor: 'transparent',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
       }}
-      className={`absolute group animate-fade-in transition-opacity duration-300 select-none ${
+      className={`absolute group animate-fade-in transition-opacity duration-300 select-none p-3 sm:p-2 ${
         isDragging ? 'z-40' : 'z-10'
       } ${isDimmed ? 'opacity-25' : 'opacity-100'}`}
     >
