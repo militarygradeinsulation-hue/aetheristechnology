@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, FileSearch, Gauge, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,6 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { Button } from '@/components/ui/button';
+import { ChaosMindMap } from '@/components/ChaosMindMap';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -63,21 +64,7 @@ const Home = () => {
                 The Leak Audit — $2,500 flat.
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                {[
-                  { icon: FileSearch, label: 'Scan', body: 'Website, sales, follow-up, ops — audited end-to-end.' },
-                  { icon: Gauge, label: 'Price', body: 'Every leak quantified in dollars per year.' },
-                  { icon: CheckCircle2, label: 'Fix', body: 'Prioritized ledger. Fee credits toward the build.' },
-                ].map((c) => (
-                  <div key={c.label} className="rounded-sm border border-border/60 bg-background/40 p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <c.icon className="w-4 h-4 text-amber" />
-                      <div className="font-case text-[10px] uppercase tracking-widest text-amber">{c.label}</div>
-                    </div>
-                    <p className="text-xs text-foreground/85 leading-snug">{c.body}</p>
-                  </div>
-                ))}
-              </div>
+              <ChaosMindMap />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/leak-audit" className="w-full sm:w-auto">
