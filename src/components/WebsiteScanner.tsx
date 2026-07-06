@@ -17,6 +17,8 @@ import { suggestToolsForGap } from '@/lib/repToolTips';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { scanResultToChaos } from '@/lib/toolChaosAdapters';
 
 interface Gap {
   category: string;
@@ -452,7 +454,13 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* LOST LEADS + LEAK GRAPH FIRST (before any ROI / score talk) */}
+              {/* Chaos-theory mind map of every gap + its dollar leak */}
+              <ChaosScanReport
+                data={scanResultToChaos(url.trim(), result.companyName, result.gaps)}
+                className="mb-6"
+              />
+
+              {/* LOST LEADS + LEAK GRAPH */}
               <LeakChart gaps={result.gaps} className="mb-6" />
 
               {/* Then the health score (context, not the headline) */}

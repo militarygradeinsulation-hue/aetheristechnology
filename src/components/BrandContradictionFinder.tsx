@@ -11,6 +11,8 @@ import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { contradictionsToChaos } from '@/lib/toolChaosAdapters';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
@@ -103,6 +105,8 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       {result && (
         <div className="space-y-8">
           <QuickDownloadBar toolType="brand_contradictions" title={`${form.url}, Brand audit, ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
+          {/* Chaos-theory mind map — every contradiction and how they compound */}
+          <ChaosScanReport data={contradictionsToChaos(form.url, result.contradictions || [])} />
           {/* Score */}
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Brand Alignment Score</h2>
