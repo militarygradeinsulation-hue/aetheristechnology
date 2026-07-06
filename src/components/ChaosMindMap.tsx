@@ -7,9 +7,15 @@ import {
   Ghost,
   Flame,
   TrendingDown,
+  TrendingUp,
   Unplug,
+  Plug,
   Wallet,
+  PiggyBank,
+  ShieldCheck,
   Zap,
+  Link2,
+  LineChart,
   Target,
 } from 'lucide-react';
 
