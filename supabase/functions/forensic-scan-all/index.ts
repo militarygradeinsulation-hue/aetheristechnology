@@ -23,19 +23,38 @@ const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const FIRECRAWL = "https://api.firecrawl.dev/v2";
+const nowIso = () => new Date().toISOString();
 
 // ─────────────────────────────── helpers ────────────────────────────────────
 async function setStage(id: string, stage: string, state: string, extra: unknown = null) {
   const { data } = await sb.from("forensic_scans").select("stage_status").eq("id", id).single();
   const prev = (data?.stage_status as Record<string, unknown>) || {};
-  prev[stage] = { state, at: new Date().toISOString(), extra };
-  await sb.from("forensic_scans").update({ stage_status: prev, updated_at: new Date().toISOString() }).eq("id", id);
+  prev[stage] = { state, at: nowIso(), extra };
+  await sb.from("forensic_scans").update({ stage_status: prev, updated_at: nowIso() }).eq("id", id);
+}
+
+async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs: number, label: string) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, { ...init, signal: controller.signal });
+    const text = await r.text();
+    const json = text ? JSON.parse(text) : {};
+    return r.ok ? json : { error: `${label} failed with ${r.status}`, status: r.status, details: json };
+  } catch (e) {
+    return {
+      error: e instanceof Error && e.name === "AbortError"
+        ? `${label} timed out and was skipped so Golden Report could continue.`
+        : String(e),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function firecrawlScrape(url: string) {
   if (!FIRECRAWL_API_KEY) return null;
-  try {
-    const r = await fetch(`${FIRECRAWL}/scrape`, {
+  return await fetchJsonWithTimeout(`${FIRECRAWL}/scrape`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
@@ -45,30 +64,21 @@ async function firecrawlScrape(url: string) {
         url,
         formats: ["markdown", "links", "branding", "summary"],
         onlyMainContent: false,
+        waitFor: 1000,
       }),
-    });
-    const j = await r.json();
-    return j;
-  } catch (e) {
-    return { error: String(e) };
-  }
+    }, 14_000, "Firecrawl scrape");
 }
 
 async function firecrawlMap(url: string) {
   if (!FIRECRAWL_API_KEY) return null;
-  try {
-    const r = await fetch(`${FIRECRAWL}/map`, {
+  return await fetchJsonWithTimeout(`${FIRECRAWL}/map`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url, limit: 200, includeSubdomains: false }),
-    });
-    return await r.json();
-  } catch (e) {
-    return { error: String(e) };
-  }
+      body: JSON.stringify({ url, limit: 75, includeSubdomains: false }),
+    }, 10_000, "Firecrawl map");
 }
 
 async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
@@ -249,7 +259,7 @@ Respond ONLY with valid JSON of shape:
 
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(50_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
@@ -261,6 +271,7 @@ Respond ONLY with valid JSON of shape:
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
+      max_tokens: 12000,
       temperature: 0.4,
     }),
   });
@@ -280,44 +291,64 @@ async function runScan(id: string, url: string, company: string, accountId: stri
   try {
     await sb.from("forensic_scans").update({ status: "running" }).eq("id", id);
     const findings: Record<string, unknown> = {};
+    let stageQueue = Promise.resolve();
+    const stage = (name: string, state: string, extra: unknown = null) => {
+      stageQueue = stageQueue.then(() => setStage(id, name, state, extra)).catch((e) => {
+        console.error("stage update failed:", name, state, e instanceof Error ? e.message : String(e));
+      });
+      return stageQueue;
+    };
 
-    await setStage(id, "site", "running");
-    findings.firecrawl_scrape = await firecrawlScrape(url);
-    findings.firecrawl_map = await firecrawlMap(url);
-    await setStage(id, "site", "done");
-
-    await setStage(id, "scan_website", "running");
-    findings.scan_website = await invokeFn("scan-website", { url, company }, 35_000);
-    await setStage(id, "scan_website", "done");
-
-    await setStage(id, "friction", "running");
-    const [frictionAudit, brandContradictions] = await Promise.all([
-      invokeFn("generate-friction-audit", {
-        url,
-        desiredTone: ["direct", "credible", "trustworthy"],
-        industry: company || "business services",
-        targetCustomer: "business owner or decision-maker evaluating the company online",
-      }, 25_000),
-      invokeFn("generate-brand-contradictions", {
-        url,
-        socialLinks: "Not provided",
-        idealCustomer: "business owner or decision-maker evaluating the company online",
-        desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-      }, 25_000),
+    await Promise.all([
+      stage("site", "running"),
+      stage("scan_website", "running"),
+      stage("friction", "running"),
     ]);
-    findings.friction_audit = frictionAudit;
-    findings.brand_contradictions = brandContradictions;
-    await setStage(id, "friction", "done");
+
+    const siteTask = (async () => {
+      const [scrape, map] = await Promise.all([firecrawlScrape(url), firecrawlMap(url)]);
+      findings.firecrawl_scrape = scrape;
+      findings.firecrawl_map = map;
+      await stage("site", "done", { mode: "parallel", cap: "fast" });
+    })();
+
+    const websiteTask = (async () => {
+      findings.scan_website = await invokeFn("scan-website", { url, company }, 24_000);
+      await stage("scan_website", "done", { cap_seconds: 24 });
+    })();
+
+    const frictionTask = (async () => {
+      const [frictionAudit, brandContradictions] = await Promise.all([
+        invokeFn("generate-friction-audit", {
+          url,
+          desiredTone: ["direct", "credible", "trustworthy"],
+          industry: company || "business services",
+          targetCustomer: "business owner or decision-maker evaluating the company online",
+        }, 20_000),
+        invokeFn("generate-brand-contradictions", {
+          url,
+          socialLinks: "Not provided",
+          idealCustomer: "business owner or decision-maker evaluating the company online",
+          desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
+        }, 20_000),
+      ]);
+      findings.friction_audit = frictionAudit;
+      findings.brand_contradictions = brandContradictions;
+      await stage("friction", "done", { cap_seconds: 20 });
+    })();
+
+    await Promise.all([siteTask, websiteTask, frictionTask]);
+    await stageQueue;
 
     if (accountId) {
-      await setStage(id, "crm", "running");
+      await stage("crm", "running");
       findings.crm = await runCrmDetectors(accountId);
-      await setStage(id, "crm", "done");
+      await stage("crm", "done");
     } else {
-      await setStage(id, "crm", "skipped", "no account_id");
+      await stage("crm", "skipped", "no account_id");
     }
 
-    await setStage(id, "synth", "running");
+    await stage("synth", "running", { cap_seconds: 50 });
     let report;
     try {
       report = await synthesizeReport(findings, url, company);
@@ -325,13 +356,13 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
       report = fallbackReport(findings, url, company);
     }
-    await setStage(id, "synth", "done");
+    await stage("synth", "done");
 
     await sb.from("forensic_scans").update({
       raw_findings: findings,
       report,
       status: "completed",
-      completed_at: new Date().toISOString(),
+      completed_at: nowIso(),
     }).eq("id", id);
 
     // Attach the Golden Report to the matching CRM company (upsert by website host).
@@ -347,8 +378,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
         const patch = {
           latest_forensic_scan_id: id,
           latest_forensic_report: report,
-          latest_forensic_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          latest_forensic_at: nowIso(),
+          updated_at: nowIso(),
         };
         if (match?.id) {
           await sb.from("crm_companies").update(patch).eq("id", match.id);
