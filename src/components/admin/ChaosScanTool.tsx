@@ -537,10 +537,70 @@ const AdminChaosScanTool: React.FC = () => {
               </ul>
             </div>
           </div>
+
+          {/* Golden report intel */}
+          {(data.intel || meta) && (
+            <div className="mt-4 rounded-sm border border-amber/30 bg-amber/5 p-3">
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                <div className="flex items-center gap-1.5 font-case text-[10px] uppercase tracking-widest text-amber">
+                  <Sparkles className="w-3 h-3" /> Golden report · deep intel
+                </div>
+                {meta && (
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-foreground/60">
+                    {meta.firecrawl_used ? "Firecrawl" : "raw fetch"} · {meta.pages_analyzed ?? 1} pages · {meta.sitemap_urls ?? 0} URLs mapped · {meta.model}
+                  </div>
+                )}
+              </div>
+              {data.intel && (
+                <div className="grid gap-2 md:grid-cols-2 mb-2">
+                  {data.intel.positioning && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Positioning:</span>{data.intel.positioning}</div>
+                  )}
+                  {data.intel.buyer && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Buyer:</span>{data.intel.buyer}</div>
+                  )}
+                  {data.intel.pricing_posture && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Pricing:</span>{data.intel.pricing_posture}</div>
+                  )}
+                  {data.intel.operational_maturity && (
+                    <div className="text-[11px] text-foreground/85"><span className="font-mono text-[9px] uppercase tracking-widest text-amber/80 mr-1">Ops maturity:</span>{data.intel.operational_maturity}</div>
+                  )}
+                </div>
+              )}
+              {data.intel?.estimated_total_monthly_leak && (
+                <div className="text-[11px] font-mono uppercase tracking-widest text-crimson mb-2">
+                  Total estimated bleed: {data.intel.estimated_total_monthly_leak}
+                </div>
+              )}
+              {data.intel?.quick_wins && data.intel.quick_wins.length > 0 && (
+                <div>
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Quick wins (&lt;30 days)</div>
+                  <ul className="grid gap-1 sm:grid-cols-2">
+                    {data.intel.quick_wins.map((w, i) => (
+                      <li key={i} className="text-[11px] text-foreground/85 flex gap-2"><span className="text-amber font-mono">→</span>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {meta?.analyzed_urls && meta.analyzed_urls.length > 0 && (
+                <div className="mt-3 pt-2 border-t border-amber/20">
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Pages analyzed</div>
+                  <ul className="space-y-0.5">
+                    {meta.analyzed_urls.map((u, i) => (
+                      <li key={i}>
+                        <a href={u} target="_blank" rel="noreferrer" className="font-mono text-[10px] text-foreground/70 hover:text-amber underline break-all">{u}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
       )}
     </div>
   );
 };
+
 
 export default AdminChaosScanTool;
