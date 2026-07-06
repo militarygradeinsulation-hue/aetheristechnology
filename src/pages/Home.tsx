@@ -8,7 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { Button } from '@/components/ui/button';
-import homeHeroBanner from '@/assets/home-hero-banner.jpg.asset.json';
+import chaosTheoryForensicHero from '@/assets/chaos-theory-forensic-hero.png.asset.json';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -43,8 +43,8 @@ const Home = () => {
             </h1>
             <div className="max-w-6xl mx-auto">
               <img
-                src={homeHeroBanner.url}
-                alt="Your business is leaking. You just can't see it from inside the building. Aetheris Business Forensics finds hidden revenue leaks, turns real data into insight, and keeps your business confidential."
+                src={chaosTheoryForensicHero.url}
+                alt="Joseph Toney, AI Architect. Aetheris Technology — Business is chaos theory; we find what causes the random chaos and remove it at the source."
                 className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
                 loading="eager"
                 fetchPriority="high"
@@ -54,11 +54,11 @@ const Home = () => {
 
           <section className="px-4 py-8 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              We find where your business is{" "}
-              <span className="text-crimson italic">leaking money</span>.
+              We are in the business of{" "}
+              <span className="text-crimson italic">Chaos Theory Forensic</span>.
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Then we close it. $2,500 flat.
+              Find what causes the random chaos. Remove it where it begins.
             </p>
           </section>
 
