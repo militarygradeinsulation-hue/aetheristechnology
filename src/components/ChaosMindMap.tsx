@@ -236,16 +236,16 @@ export const ChaosMindMap: React.FC = () => {
                 className={`absolute inset-0 rounded-full border ${isFixed ? 'border-amber/30' : 'border-crimson/30'}`}
                 style={{ animation: 'mindmap-pulse 2.4s ease-out 1.2s infinite' }}
               />
-              <div className={`relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 transition-all ${
+              <div className={`relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 transition-all ${
                 isFixed
                   ? 'border-amber shadow-[0_0_40px_hsl(var(--amber)/0.5)]'
                   : 'border-crimson shadow-[0_0_40px_hsl(var(--crimson)/0.45)]'
               }`}>
-                <Target className={`w-4 h-4 mb-0.5 ${isFixed ? 'text-amber' : 'text-crimson'}`} />
-                <div className={`font-case text-[9px] uppercase tracking-widest ${isFixed ? 'text-amber' : 'text-crimson'}`}>
+                <Target className={`w-6 h-6 mb-1 ${isFixed ? 'text-amber' : 'text-crimson'}`} />
+                <div className={`font-case text-[11px] md:text-xs uppercase tracking-widest ${isFixed ? 'text-amber' : 'text-crimson'}`}>
                   The source
                 </div>
-                <div className="font-forensic text-[10px] md:text-xs font-bold text-foreground leading-tight mt-0.5">
+                <div className="font-forensic text-sm md:text-base font-bold text-foreground leading-tight mt-1">
                   {isFixed ? 'Sealed' : 'Bleeding'}
                 </div>
               </div>
