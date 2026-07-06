@@ -10,9 +10,10 @@ import LeakMindMap, { type MindMapNodeData } from "@/components/LeakMindMap";
 
 
 
-type TabId = "symptoms" | "steps" | "systems" | "services";
+type TabId = "all" | "symptoms" | "steps" | "systems" | "services";
 
 const TABS: { id: TabId; label: string; blurb: string }[] = [
+  { id: "all",      label: "The whole ecosystem", blurb: "Every leak, every step, every system, every door — one map." },
   { id: "symptoms", label: "Where it leaks",   blurb: "Seven categories. Every business has at least four active right now." },
   { id: "steps",    label: "The 7-step audit", blurb: "How we trace the leak from symptom to dollar figure." },
   { id: "systems",  label: "The system stack", blurb: "The AI + tooling layer that runs quiet in the background." },
