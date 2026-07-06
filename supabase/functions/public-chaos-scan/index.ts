@@ -345,13 +345,7 @@ serve(async (req) => {
     };
 
     const [deep, siteLinks] = await Promise.all([
-      fcScrape(url, [
-        "markdown",
-        "links",
-        "branding",
-        "summary",
-        { type: "json", schema: businessSchema },
-      ]),
+      fcScrape(url, ["markdown", "links", "branding"], 40_000),
       fcMap(url),
     ]);
 
