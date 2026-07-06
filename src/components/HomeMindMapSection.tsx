@@ -110,7 +110,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
         <div className="text-center mb-5">
           <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Leak Ecosystem</div>
           <h2 className="font-forensic text-2xl sm:text-3xl font-bold mt-1 leading-tight">
-            One business. Four maps. <span className="text-crimson">Every connection traced.</span>
+            One business. Several maps. <span className="text-crimson">Every clue traced.</span>
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-foreground/65 max-w-2xl mx-auto">
             Scan your site below to open the case. Your email unlocks every free instrument on this map — no packages, no pitch.
