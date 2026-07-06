@@ -41,15 +41,16 @@ async function fcScrape(url: string): Promise<any | null> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         url,
-        formats: ["markdown", "summary", "branding", "links"],
+        formats: ["markdown", "branding", "links"],
         onlyMainContent: true,
+        timeout: 25_000,
       }),
     });
     if (!r.ok) {
@@ -59,7 +60,7 @@ async function fcScrape(url: string): Promise<any | null> {
     const j = await r.json();
     return j?.data ?? j ?? null;
   } catch (e) {
-    console.warn("fc scrape failed", url, e);
+    console.warn("fc scrape failed", url, String(e));
     return null;
   }
 }
@@ -203,12 +204,13 @@ Return STRICT JSON only.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(90_000),
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": LOVABLE_API_KEY,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -238,7 +240,7 @@ Return STRICT JSON only.`;
       you: { url: yourUrl, scraped: !!yourData, title: evidence.you.title },
       rival: { url: rivalUrl, scraped: !!rivalData, title: evidence.rival.title },
       report,
-      meta: { model: "google/gemini-2.5-pro", generatedAt: new Date().toISOString() },
+      meta: { model: "google/gemini-2.5-flash", generatedAt: new Date().toISOString() },
     });
   } catch (e) {
     console.error("head-to-head fatal", e);
