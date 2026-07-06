@@ -329,11 +329,14 @@ const AdminChaosScanTool: React.FC = () => {
               </div>
 
               {/* Symptom nodes */}
-              {symptoms.map((s) => {
+              {symptoms.map((s, idx) => {
                 const SIcon = ICONS[s.icon] || AlertTriangle;
                 const isActive = active?.id === s.id;
                 const linked = active?.connections?.includes(s.id);
                 const dim = active !== null && !isActive && !linked;
+                // Give each bubble a slightly different drift so they feel alive
+                const dur = 5.5 + ((idx * 37) % 30) / 10; // 5.5s - 8.5s
+                const delay = -((idx * 53) % 40) / 10; // negative offsets stagger phase
                 return (
                   <button key={s.id}
                     type="button"
@@ -342,7 +345,12 @@ const AdminChaosScanTool: React.FC = () => {
                     aria-label={s.label}
                     className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 transition-all ${dim ? "opacity-30" : "opacity-100"}`}
                     style={{ left: `${s.x}%`, top: `${s.y}%` }}>
-                    <div className={`relative flex flex-col items-center transition-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}>
+                    <div
+                      className={`relative flex flex-col items-center will-change-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}
+                      style={{
+                        animation: `chaosFloat ${dur}s ease-in-out ${delay}s infinite`,
+                      }}
+                    >
                       <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/95 border-2 flex items-center justify-center ${
                         isFixed
                           ? "border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]"
@@ -357,6 +365,13 @@ const AdminChaosScanTool: React.FC = () => {
                       }`}>
                         {s.label}
                       </div>
+                      {s.dollar_leak && (
+                        <div className={`font-mono text-[9px] md:text-[10px] uppercase tracking-widest mt-0.5 whitespace-nowrap ${
+                          isFixed ? "text-amber/70" : "text-crimson/90"
+                        }`}>
+                          {s.dollar_leak}
+                        </div>
+                      )}
                     </div>
                   </button>
                 );
