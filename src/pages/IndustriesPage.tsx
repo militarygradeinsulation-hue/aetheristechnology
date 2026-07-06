@@ -482,7 +482,15 @@ const MindMapNode: React.FC<{
         isDimmed ? 'opacity-25' : 'opacity-100'
       }`}
     >
-      <div className="relative flex flex-col items-center">
+      <div
+        className="relative flex flex-col items-center"
+        style={{
+          animation: isSelected
+            ? undefined
+            : `industry-float-${index % 4} ${9 + (index % 5)}s ease-in-out ${(index % 7) * -0.6}s infinite`,
+          willChange: 'transform',
+        }}
+      >
         <span
           aria-hidden
           className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${
