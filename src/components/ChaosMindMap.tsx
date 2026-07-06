@@ -272,7 +272,7 @@ export const ChaosMindMap: React.FC = () => {
                 type="button"
                 onClick={() => setActiveId((id) => (id === s.id ? null : s.id))}
                 aria-pressed={isActive}
-                aria-label={s.label}
+                aria-label={displayLabel}
                 className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 transition-all ${
                   dim ? 'opacity-30' : 'opacity-100'
                 }`}
