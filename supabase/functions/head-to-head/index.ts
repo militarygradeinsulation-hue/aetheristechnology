@@ -97,6 +97,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const yourUrl = normalizeUrl(String(body?.yourUrl || "").trim());
     const rivalUrl = normalizeUrl(String(body?.rivalUrl || "").trim());
+    const takeover = !!body?.takeover;
     if (!yourUrl || !rivalUrl) return json({ error: "Provide two valid URLs" }, 400);
     if (yourUrl === rivalUrl) return json({ error: "URLs must be different" }, 400);
 
