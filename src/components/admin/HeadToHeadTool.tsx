@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Swords, Trophy, AlertTriangle, Target, Zap, TrendingDown, ExternalLink } from "lucide-react";
+import { Loader2, Swords, Trophy, AlertTriangle, Target, Zap, TrendingDown, ExternalLink, Crosshair, ShieldAlert, Flag, Megaphone } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 type Category = {
@@ -27,6 +28,15 @@ type Report = {
   silentLosses: { area: string; estimatedMonthlyLossUsd: number; why: string }[];
   actionPlan: { priority: "P0" | "P1" | "P2"; action: string; expectedImpact: string; effort: "low" | "medium" | "high" }[];
   quickWins: string[];
+  takeover?: {
+    thesis: string;
+    rivalChaos: { weakness: string; evidence: string; exploitability: "high" | "medium" | "low"; howToExploit: string }[];
+    yourFixes: { issue: string; evidence: string; fix: string; blockerLevel: "critical" | "important" | "nice-to-have" }[];
+    wedgeMoves: { move: string; leveragesRivalWeakness: string; leveragesYourStrength: string; expectedOutcome: string; timeframe: "week" | "month" | "quarter" }[];
+    positioningPivot: { newHeadline: string; newSubhead: string; newCtaLabel: string; keywordsToOwn: string[]; proofToAdd: string[] };
+    counterMessaging: { rivalClaim: string; yourCounter: string }[];
+    kpis: { metric: string; baseline: string; target30Day: string }[];
+  };
 };
 
 type Result = {
@@ -66,6 +76,7 @@ export default function HeadToHeadTool() {
   const [yourUrl, setYourUrl] = useState("");
   const [rivalUrl, setRivalUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [takeover, setTakeover] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
   const run = async () => {
@@ -77,12 +88,12 @@ export default function HeadToHeadTool() {
     setResult(null);
     try {
       const { data, error } = await supabase.functions.invoke("head-to-head", {
-        body: { yourUrl: yourUrl.trim(), rivalUrl: rivalUrl.trim() },
+        body: { yourUrl: yourUrl.trim(), rivalUrl: rivalUrl.trim(), takeover },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       setResult(data as Result);
-      toast.success("Head-to-head verdict ready");
+      toast.success(takeover ? "Takeover playbook ready" : "Head-to-head verdict ready");
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Comparison failed");
@@ -115,8 +126,18 @@ export default function HeadToHeadTool() {
             <Input value={rivalUrl} onChange={(e) => setRivalUrl(e.target.value)} placeholder="https://competitor.com" disabled={loading} />
           </div>
         </div>
+        <div className="flex items-center justify-between gap-4 p-3 rounded-lg border border-red-500/30 bg-red-500/5 mb-3">
+          <div className="flex items-center gap-3">
+            <Crosshair className={`w-5 h-5 ${takeover ? "text-red-400" : "text-muted-foreground"}`} />
+            <div>
+              <div className="text-sm font-bold font-serif">Takeover Mode</div>
+              <div className="text-xs text-muted-foreground">Use rival's chaos as a wedge. Get a takeover playbook that also closes your own leaks first.</div>
+            </div>
+          </div>
+          <Switch checked={takeover} onCheckedChange={setTakeover} disabled={loading} />
+        </div>
         <Button onClick={run} disabled={loading} className="w-full md:w-auto">
-          {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Comparing…</>) : (<><Swords className="w-4 h-4 mr-2" /> Run Head-to-Head</>)}
+          {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {takeover ? "Building takeover playbook…" : "Comparing…"}</>) : (<>{takeover ? <><Crosshair className="w-4 h-4 mr-2" /> Run Takeover Scan</> : <><Swords className="w-4 h-4 mr-2" /> Run Head-to-Head</>}</>)}
         </Button>
       </Card>
 
@@ -265,6 +286,137 @@ export default function HeadToHeadTool() {
               </ul>
             </Card>
           )}
+
+          {/* Takeover playbook */}
+          {r.takeover && (
+            <div className="space-y-4">
+              <Card className="p-6 border-red-500/40 bg-gradient-to-br from-red-500/10 to-background">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crosshair className="w-6 h-6 text-red-400" />
+                  <h3 className="text-xl font-bold font-serif">Takeover Playbook</h3>
+                  <Badge className="bg-red-500 text-white font-mono uppercase text-xs">Offensive</Badge>
+                </div>
+                <p className="text-sm leading-relaxed">{r.takeover.thesis}</p>
+              </Card>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="p-5 border-red-500/30">
+                  <h4 className="font-bold font-serif mb-3 flex items-center gap-2"><Crosshair className="w-4 h-4 text-red-400" /> Rival's Chaos (Exploit)</h4>
+                  <div className="space-y-3">
+                    {r.takeover.rivalChaos.map((c, i) => (
+                      <div key={i} className="p-3 rounded border border-red-500/20 bg-red-500/5">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-semibold text-sm">{c.weakness}</div>
+                          <Badge className={`font-mono uppercase text-xs ${c.exploitability === "high" ? "bg-red-500 text-white" : c.exploitability === "medium" ? "bg-amber-500 text-black" : "bg-muted"}`}>{c.exploitability}</Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-2 italic">"{c.evidence}"</div>
+                        <div className="text-xs"><span className="font-mono uppercase text-red-400">Exploit: </span>{c.howToExploit}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card className="p-5 border-amber-500/30">
+                  <h4 className="font-bold font-serif mb-3 flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-amber-500" /> Your Leaks (Close First)</h4>
+                  <div className="space-y-3">
+                    {r.takeover.yourFixes.map((f, i) => (
+                      <div key={i} className="p-3 rounded border border-amber-500/20 bg-amber-500/5">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-semibold text-sm">{f.issue}</div>
+                          <Badge className={`font-mono uppercase text-xs ${f.blockerLevel === "critical" ? "bg-red-500 text-white" : f.blockerLevel === "important" ? "bg-amber-500 text-black" : "bg-muted"}`}>{f.blockerLevel}</Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-2 italic">"{f.evidence}"</div>
+                        <div className="text-xs"><span className="font-mono uppercase text-amber-500">Fix: </span>{f.fix}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+
+              <Card className="p-6 border-red-500/30">
+                <h4 className="font-bold font-serif mb-3 flex items-center gap-2"><Flag className="w-5 h-5 text-red-400" /> Wedge Moves</h4>
+                <div className="space-y-3">
+                  {r.takeover.wedgeMoves.map((m, i) => (
+                    <div key={i} className="p-3 rounded border border-border bg-card/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-semibold">{m.move}</div>
+                        <Badge variant="outline" className="font-mono uppercase text-xs">{m.timeframe}</Badge>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-2 text-xs mb-2">
+                        <div className="p-2 rounded bg-red-500/10 border border-red-500/20">
+                          <div className="font-mono uppercase text-red-400 mb-1">Their weakness</div>
+                          <div>{m.leveragesRivalWeakness}</div>
+                        </div>
+                        <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                          <div className="font-mono uppercase text-amber-500 mb-1">Your strength</div>
+                          <div>{m.leveragesYourStrength}</div>
+                        </div>
+                      </div>
+                      <div className="text-xs"><span className="font-mono uppercase text-primary">Outcome: </span>{m.expectedOutcome}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-6 border-amber-500/30">
+                <h4 className="font-bold font-serif mb-3 flex items-center gap-2"><Megaphone className="w-5 h-5 text-amber-500" /> Positioning Pivot</h4>
+                <div className="space-y-3">
+                  <div className="p-4 rounded border border-amber-500/30 bg-amber-500/5">
+                    <div className="text-xs font-mono uppercase text-amber-500 mb-1">New headline</div>
+                    <div className="text-lg font-serif font-bold">{r.takeover.positioningPivot.newHeadline}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{r.takeover.positioningPivot.newSubhead}</div>
+                    <div className="mt-2"><Badge className="bg-amber-500 text-black font-mono">{r.takeover.positioningPivot.newCtaLabel}</Badge></div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-xs font-mono uppercase text-primary mb-1">Keywords to own</div>
+                      <div className="flex flex-wrap gap-1">
+                        {r.takeover.positioningPivot.keywordsToOwn.map((k, i) => <Badge key={i} variant="outline" className="font-mono text-xs">{k}</Badge>)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono uppercase text-primary mb-1">Proof to add</div>
+                      <ul className="space-y-1 text-xs">
+                        {r.takeover.positioningPivot.proofToAdd.map((p, i) => <li key={i}>▸ {p}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <h4 className="font-bold font-serif mb-3">Counter-Messaging</h4>
+                <div className="space-y-2">
+                  {r.takeover.counterMessaging.map((c, i) => (
+                    <div key={i} className="grid md:grid-cols-2 gap-2 p-2 rounded border border-border">
+                      <div className="p-2 rounded bg-red-500/5 border border-red-500/20 text-xs">
+                        <div className="font-mono uppercase text-red-400 mb-1">They claim</div>
+                        <div>{c.rivalClaim}</div>
+                      </div>
+                      <div className="p-2 rounded bg-amber-500/5 border border-amber-500/20 text-xs">
+                        <div className="font-mono uppercase text-amber-500 mb-1">You counter</div>
+                        <div>{c.yourCounter}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <h4 className="font-bold font-serif mb-3">30-Day Takeover KPIs</h4>
+                <div className="grid md:grid-cols-3 gap-3">
+                  {r.takeover.kpis.map((k, i) => (
+                    <div key={i} className="p-3 rounded border border-border bg-card/50">
+                      <div className="text-xs font-mono uppercase text-muted-foreground">{k.metric}</div>
+                      <div className="text-xs mt-1"><span className="text-muted-foreground">Now:</span> {k.baseline}</div>
+                      <div className="text-sm font-bold text-amber-500 mt-1">→ {k.target30Day}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
 
           <div className="text-xs font-mono text-muted-foreground text-center">
             Model: {result.meta.model} · Generated {new Date(result.meta.generatedAt).toLocaleString()}
