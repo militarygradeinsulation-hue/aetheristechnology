@@ -124,9 +124,6 @@ const LeakLanderPage: React.FC = () => {
               height={640}
             />
           </section>
-              height={640}
-            />
-          </section>
 
           {/* HERO — Chaos Theory Forensics */}
           <section
