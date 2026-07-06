@@ -321,16 +321,18 @@ export const ChaosMindMap: React.FC = () => {
       {/* Active symptom trace card */}
       <div className="mt-3 min-h-[92px]">
         {active ? (
-          <div className="grid gap-2 sm:grid-cols-2 animate-fade-in">
-            <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
-              <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
-                <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+          <div className={`grid gap-2 ${isFixed ? '' : 'sm:grid-cols-2'} animate-fade-in`}>
+            {!isFixed && (
+              <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
+                <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                  <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                </div>
+                <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
               </div>
-              <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
-            </div>
+            )}
             <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
               <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                <CheckCircle2 className="w-3 h-3" /> Source closed
+                <CheckCircle2 className="w-3 h-3" /> {isFixed ? `${active.fixedLabel} — source closed` : 'Source closed'}
               </div>
               <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.fixed}</p>
             </div>
