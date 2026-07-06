@@ -277,19 +277,18 @@ async function synthesize(prompt: string) {
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(75_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+      model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: SYSTEM },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.4,
     }),
   });
   if (!r.ok) {
