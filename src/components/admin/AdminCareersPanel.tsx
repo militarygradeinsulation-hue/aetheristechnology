@@ -1033,6 +1033,7 @@ export const AdminCareersPanel: React.FC = () => {
                         { k: 'interview', label: 'Move to interview', icon: CalendarCheck, cls: 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30' },
                         { k: 'wait', label: 'Wait', icon: Clock, cls: 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30' },
                         { k: 'no', label: 'No', icon: Ban, cls: 'bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30' },
+                        { k: 'archived', label: 'Archive', icon: Archive, cls: 'bg-muted text-muted-foreground border-border hover:bg-muted/70' },
                       ] as const).map(s => {
                         const Icon = s.icon;
                         const active = (a.stage || 'new') === s.k;
