@@ -152,6 +152,8 @@ const App = () => (
                       <Route path="/chaos-scan" element={<ChaosScanPage />} />
                       <Route path="/head-to-head" element={<HeadToHeadPage />} />
                       <Route path="/vs" element={<Navigate to="/head-to-head" replace />} />
+                      <Route path="/reciprocation" element={<ReciprocationPage />} />
+                      <Route path="/gift" element={<Navigate to="/reciprocation" replace />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
