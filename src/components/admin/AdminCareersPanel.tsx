@@ -795,9 +795,9 @@ export const AdminCareersPanel: React.FC = () => {
                 ))}
               </>
             )}
-            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none') && (
+            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none' || ageFilter !== 'all') && (
               <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
-                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); }}>
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); setAgeFilter('all'); }}>
                 Clear
               </Button>
             )}
