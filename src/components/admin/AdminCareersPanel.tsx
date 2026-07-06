@@ -1101,13 +1101,18 @@ export const AdminCareersPanel: React.FC = () => {
                             ) : null;
                           })()}
                         </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
-                          {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
-                          <span>Started {fmt(a.started_at)}</span>
-                          {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
-                        </div>
-                        {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {!minimized && (
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+                            <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
+                            {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
+                            <span>Started {fmt(a.started_at)}</span>
+                            {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
+                          </div>
+                        )}
+                        {!minimized && a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {minimized && (
+                          <span className="text-[10px] text-muted-foreground font-mono ml-auto">{Math.floor(ageDays(a.submitted_at || a.started_at))}d ago</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
                         <Button
