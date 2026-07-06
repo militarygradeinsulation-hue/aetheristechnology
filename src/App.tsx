@@ -238,7 +238,7 @@ const App = () => (
                     </Routes>
                   </Suspense>
 
-                  <SalesChat />
+                  <SalesChatGate />
                   <BookMeetingGate />
                 </AuthProvider>
               }
