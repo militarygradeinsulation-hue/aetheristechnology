@@ -5,6 +5,7 @@ import {
   EyeOff, PhoneOff, Receipt, Clock, Scale, Sparkles,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type OpId = "scan" | "price" | "fix";
 export interface Evidence { source_url?: string; quote?: string }
@@ -85,9 +86,8 @@ const orderedPath = (sx: number, sy: number, ex: number, ey: number) => {
   const mx = (sx + ex) / 2, my = (sy + ey) / 2;
   return `M ${sx} ${sy} Q ${mx} ${my}, ${ex} ${ey}`;
 };
-function layoutSymptoms(symptoms: Symptom[]): Array<Symptom & { x: number; y: number }> {
+function layoutSymptoms(symptoms: Symptom[], rx = 42, ry = 34): Array<Symptom & { x: number; y: number }> {
   const n = symptoms.length || 1;
-  const rx = 42, ry = 34;
   return symptoms.map((s, i) => {
     const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
     const x = Math.round((HUB.x + Math.cos(angle) * rx) * 10) / 10;
@@ -101,15 +101,26 @@ type Mode = "chaos" | "fixed";
 export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null; className?: string }> = ({ data, meta, className }) => {
   const [mode, setMode] = useState<Mode>("chaos");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
-  const symptoms = useMemo(() => layoutSymptoms((data?.symptoms || []).slice(0, 8)), [data]);
+  // Tighter ellipse and pulled-in operator anchors on mobile so labels + hub don't collide.
+  const rx = isMobile ? 34 : 42;
+  const ry = isMobile ? 32 : 34;
+  const opPos: Record<OpId, { x: number; y: number }> = isMobile
+    ? { scan: { x: 26, y: 50 }, price: { x: 50, y: 78 }, fix: { x: 74, y: 50 } }
+    : OP_POS;
+
+  const symptoms = useMemo(
+    () => layoutSymptoms((data?.symptoms || []).slice(0, 8), rx, ry),
+    [data, rx, ry],
+  );
   const operators = useMemo(
     () => (data?.operators || [
       { id: "scan", label: "Scan", body: "" },
       { id: "price", label: "Price", body: "" },
       { id: "fix", label: "Fix", body: "" },
-    ]).map((o) => ({ ...o, ...OP_POS[o.id] })),
-    [data],
+    ]).map((o) => ({ ...o, ...opPos[o.id] })),
+    [data, opPos],
   );
   const active = symptoms.find((s) => s.id === activeId) || null;
   const isFixed = mode === "fixed";
@@ -163,7 +174,7 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
 
       {/* Map */}
       <div className="relative w-full rounded-sm border border-border/50 bg-background/40 overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10]">
+        <div className="relative w-full aspect-square sm:aspect-[16/10]">
           <svg className="absolute inset-0 z-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
             <defs>
               <radialGradient id="chaosScanHub" cx="50%" cy="50%" r="50%">
@@ -258,12 +269,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
               <div key={o.id} className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ left: `${o.x}%`, top: `${o.y}%` }}>
                 <div className={`flex flex-col items-center transition-opacity ${dim ? "opacity-30" : "opacity-100"}`}>
-                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
+                  <div className={`w-9 h-9 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
                     isFixed ? "border-amber shadow-[0_0_18px_hsl(var(--amber)/0.45)]" : "border-amber/50"
                   }`}>
-                    <OIcon className="w-6 h-6 md:w-7 md:h-7 text-amber" />
+                    <OIcon className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 text-amber" />
                   </div>
-                  <div className="mt-1.5 font-case text-xs md:text-sm uppercase tracking-widest text-amber">{o.label}</div>
+                  <div className="mt-1 sm:mt-1.5 font-case text-[9px] sm:text-xs md:text-sm uppercase tracking-widest text-amber">{o.label}</div>
                 </div>
               </div>
             );
@@ -271,12 +282,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
 
           <div className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${HUB.x}%`, top: `${HUB.y}%` }}>
-            <div className={`relative w-32 h-32 md:w-36 md:h-36 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
+            <div className={`relative w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
               isFixed ? "border-amber shadow-[0_0_40px_hsl(var(--amber)/0.5)]" : "border-crimson shadow-[0_0_40px_hsl(var(--crimson)/0.45)]"
             }`}>
-              <Target className={`w-6 h-6 mb-1 ${isFixed ? "text-amber" : "text-crimson"}`} />
-              <div className={`font-case text-[11px] md:text-xs uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
-              <div className="font-forensic text-sm md:text-base font-bold text-foreground leading-tight mt-1">
+              <Target className={`w-4 h-4 sm:w-6 sm:h-6 mb-0.5 sm:mb-1 ${isFixed ? "text-amber" : "text-crimson"}`} />
+              <div className={`font-case text-[9px] sm:text-[11px] md:text-xs uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
+              <div className="font-forensic text-[11px] sm:text-sm md:text-base font-bold text-foreground leading-tight mt-0.5 sm:mt-1 line-clamp-2">
                 {data.source?.label || (isFixed ? "Sealed" : "Bleeding")}
               </div>
             </div>
@@ -297,20 +308,20 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
                 style={{ left: `${s.x}%`, top: `${s.y}%` }}>
                 <div className={`relative flex flex-col items-center will-change-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}
                   style={{ animation: `chaosFloat ${dur}s ease-in-out ${delay}s infinite` }}>
-                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center ${
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center ${
                     isFixed
                       ? "border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]"
                       : isActive
                         ? "border-amber bg-amber/15 shadow-[0_0_20px_hsl(var(--amber)/0.5)]"
                         : "border-crimson/60 group-hover:border-crimson shadow-[0_0_12px_hsl(var(--crimson)/0.3)]"
                   }`}>
-                    <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
+                    <SIcon className={`w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
                   </div>
-                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap max-w-[160px] text-center ${
+                  <div className={`mt-1 sm:mt-1.5 font-forensic text-[10px] sm:text-xs md:text-sm font-bold leading-tight text-center max-w-[70px] sm:max-w-[160px] sm:whitespace-nowrap ${
                     isActive ? "text-amber" : "text-foreground/85"
                   }`}>{isFixed ? deriveFixedLabel(s) : s.label}</div>
                   {s.dollar_leak && (
-                    <div className={`font-mono text-[11px] md:text-xs uppercase tracking-widest mt-1 whitespace-nowrap ${
+                    <div className={`font-mono text-[9px] sm:text-[11px] md:text-xs uppercase tracking-widest mt-0.5 sm:mt-1 text-center max-w-[80px] sm:max-w-none sm:whitespace-nowrap ${
                       isFixed ? "text-amber/70" : "text-crimson/90"
                     }`}>{s.dollar_leak}</div>
                   )}
