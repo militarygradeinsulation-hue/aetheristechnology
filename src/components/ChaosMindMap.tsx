@@ -262,7 +262,8 @@ export const ChaosMindMap: React.FC = () => {
 
           {/* Symptom nodes */}
           {SYMPTOMS.map((s) => {
-            const SIcon = s.icon;
+            const SIcon = isFixed ? s.fixedIcon : s.icon;
+            const displayLabel = isFixed ? s.fixedLabel : s.label;
             const isActive = active?.id === s.id;
             const dim = active !== null && !isActive;
             return (
