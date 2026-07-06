@@ -6,7 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
-import { PublicLeakScan } from '@/components/PublicLeakScan';
+import { PublicChaosScan } from '@/components/PublicChaosScan';
 import { Button } from '@/components/ui/button';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
 
