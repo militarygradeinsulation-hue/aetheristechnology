@@ -17,6 +17,8 @@ import { suggestToolsForGap } from '@/lib/repToolTips';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { scanResultToChaos } from '@/lib/toolChaosAdapters';
 
 interface Gap {
   category: string;
