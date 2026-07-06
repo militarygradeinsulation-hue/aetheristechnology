@@ -138,8 +138,8 @@ const LeakLanderPage: React.FC = () => {
               <span className="h-px w-8 bg-amber/50" />
             </div>
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
-              Business is <span className="text-amber italic">chaos theory</span>.<br />
-              Chaos always has a <span className="text-crimson italic">cause</span>.
+              Business is <span className="text-amber italic">chaos</span>.<br />
+              Chaos always has <span className="text-crimson italic">cause</span>.
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
               Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace the damage back to where it begins, and remove it at the source.
