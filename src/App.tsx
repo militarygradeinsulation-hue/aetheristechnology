@@ -174,6 +174,9 @@ const App = () => (
                       <Route path="/nexus-iq" element={<NexusIQPage />} />
                       <Route path="/aetheris-ai" element={<AetherisNexusPage />} />
                       <Route path="/aetheris-ai/:threadId" element={<AetherisNexusPage />} />
+                      <Route path="/aetheris-iq" element={<AetherisNexusPage />} />
+                      <Route path="/aetheris-iq/:threadId" element={<AetherisNexusPage />} />
+                      <Route path="/iq" element={<Navigate to="/aetheris-iq" replace />} />
                       <Route path="/t/:repCode/:toolSlug" element={<RepToolLinkPage />} />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/signup" element={<SignupPage />} />
