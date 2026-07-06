@@ -200,7 +200,7 @@ const CHAPTERS = [
   { no: 14, slug: "appendix",            title: "Appendix — Raw Findings & Source Data" },
 ];
 
-const SYSTEM_VOICE = `You are the Aetheris Business Forensics Operator.
+const SYSTEM_VOICE = `You are the Aetheris Chaos Theory Forensics Operator.
 Voice: blunt, operator-grade, no fluff, no em-dashes, no rhetorical questions.
 Identity: a forensic accountant for revenue leaks, not a consultant.
 Vocabulary: "leak", "bleed", "exposure", "active", "verified". Avoid "synergy",
@@ -210,7 +210,7 @@ Output: production-grade prose suitable for a printed forensic report.`;
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
   const chaptersList = CHAPTERS.map((c) => `${c.no}. ${c.title} [slug:${c.slug}]`).join("\n");
-  const prompt = `Build the complete 14-chapter Business Forensics report for **${company || target}**.
+  const prompt = `Build the complete 14-chapter Chaos Theory Forensics report for **${company || target}**.
 
 Target: ${target}
 Company: ${company || "(not provided)"}

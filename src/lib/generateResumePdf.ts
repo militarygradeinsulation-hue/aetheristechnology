@@ -72,7 +72,7 @@ function drawFooter(doc: jsPDF, page: number, total: number) {
   doc.setFont('courier', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(...SUB);
-  doc.text('aetheris.technology · Business Forensics Operator', MARGIN, PAGE_H - 7);
+  doc.text('aetheris.technology · Chaos Theory Forensics Operator', MARGIN, PAGE_H - 7);
   const p = `${page} / ${total}`;
   const w = doc.getTextWidth(p);
   doc.text(p, PAGE_W - MARGIN - w, PAGE_H - 7);

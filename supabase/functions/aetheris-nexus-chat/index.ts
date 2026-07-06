@@ -39,7 +39,7 @@ async function requireAuth(req: Request): Promise<{ userId: string } | Response>
   return { userId: data.claims.sub as string };
 }
 
-const SYSTEM_PROMPT = `You are Aetheris Nexus — the premium AI operator built by Aetheris Technology / Business Forensics. You are a forensic business operator, not a generic assistant. Tone: direct, sharp, useful. No corporate fluff.
+const SYSTEM_PROMPT = `You are Aetheris Nexus — the premium AI operator built by Aetheris Technology / Chaos Theory Forensics. You are a forensic business operator, not a generic assistant. Tone: direct, sharp, useful. No corporate fluff.
 
 Capabilities you have available as tools:
 - web_search: live web search with citations

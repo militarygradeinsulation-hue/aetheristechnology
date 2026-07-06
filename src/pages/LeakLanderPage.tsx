@@ -62,8 +62,8 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Your business is leaking money. Aetheris finds where. $2,500 flat."
-          description="The Leak Audit — a flat-fee forensic investigation of where your business bleeds revenue. Findings in writing. Fee credits toward the fix."
+          title="Chaos Theory Forensics — find the cause. Remove it. | Aetheris"
+          description="Aetheris practices Chaos Theory Forensics. We investigate established businesses, trace the damage to its origin, and remove it at the source. Real findings. No sugar."
           path="/"
         />
 
@@ -129,21 +129,25 @@ const LeakLanderPage: React.FC = () => {
             />
           </section>
 
-          {/* HERO — tight */}
+          {/* HERO — Chaos Theory Forensics */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="h-px w-8 bg-amber/50" />
-              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Indianapolis · US-Wide</span>
+              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Chaos Theory Forensics · Indianapolis · US-Wide</span>
               <span className="h-px w-8 bg-amber/50" />
             </div>
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
-              Your business is <span className="text-crimson italic">leaking money</span>.
+              Business is <span className="text-amber italic">chaos theory</span>.<br />
+              Chaos always has a <span className="text-crimson italic">cause</span>.
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-xl mx-auto">
-              We find it. We price it. Then we close it — <span className="text-amber font-semibold">$2,500 flat</span>.
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace the damage back to where it begins, and remove it at the source.
+            </p>
+            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
+              Real Findings. No Sugar.
             </p>
           </section>
 
@@ -164,9 +168,31 @@ const LeakLanderPage: React.FC = () => {
               className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Book the Leak Audit — $2,500
+              Request an Investigation
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
+          </section>
+
+          {/* THE PREMISE */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "190ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">The Premise</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
+                Nothing in your business is random.
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
+                Slow seasons. Leads that go quiet. Deals that stall at the same stage every time. Hours that disappear into work that never moves the needle. Owners call it bad luck, market conditions, or growing pains.
+              </p>
+              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+                It is none of those things. Your business is a deterministic system producing exactly the outcomes it was built to produce. What looks like random chaos follows patterns, and patterns have origin points.
+              </p>
+              <p className="mt-3 font-forensic text-base sm:text-lg text-amber italic">
+                The chaos always has a cause. The cause always leaves evidence. We find it.
+              </p>
+            </div>
           </section>
 
 
@@ -226,7 +252,7 @@ const LeakLanderPage: React.FC = () => {
             <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">What we actually do</div>
               <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Revenue Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
+                Chaos Theory Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
               </h2>
               <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
                 Every business has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
@@ -255,6 +281,27 @@ const LeakLanderPage: React.FC = () => {
                 </ol>
                 <p className="mt-4 text-xs text-foreground/60 italic">We don't guess. We document. Every finding comes with a dollar figure attached.</p>
               </div>
+            </div>
+          </section>
+
+          {/* WHAT WE ARE NOT */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "250ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-crimson/30 bg-card/60 backdrop-blur-sm p-5 sm:p-6">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">What we are not</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
+                Not an agency. Not a consultant. Not a software pitch.
+              </h2>
+              <div className="mt-4 grid sm:grid-cols-3 gap-4 text-sm text-foreground/80 leading-relaxed">
+                <p><span className="text-amber font-semibold">Agencies</span> sell you effort — retainers, deliverables, activity reports that measure motion instead of results.</p>
+                <p><span className="text-amber font-semibold">Consultants</span> sell you opinions — frameworks and slide decks that describe your problem back to you and leave the fixing to someone else.</p>
+                <p><span className="text-amber font-semibold">Software companies</span> sell you tools — one more login, one more subscription, one more system your team will not use.</p>
+              </div>
+              <p className="mt-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
+                Aetheris sells <span className="text-amber font-semibold">findings and removal</span>. We investigate, we identify the cause, we show you the evidence, and we build what eliminates it. Then the engagement ends, because the problem does.
+              </p>
             </div>
           </section>
 
@@ -328,7 +375,8 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
                 Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
               </p>
-              <p className="mt-4 font-forensic text-lg font-bold text-amber">Business Forensics. Real Findings. No Sugar.</p>
+              <p className="mt-4 font-forensic text-lg font-bold text-amber">Chaos Theory Forensics. Real Findings. No Sugar.</p>
+              <p className="mt-2 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
             </div>
           </section>
 
@@ -518,7 +566,7 @@ const LeakLanderPage: React.FC = () => {
               </div>
             </div>
             <p className="mt-2 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
-              Aetheris · Business Forensics · aetheris.technology
+              Aetheris · Chaos Theory Forensics · aetheris.technology
             </p>
           </section>
         </div>

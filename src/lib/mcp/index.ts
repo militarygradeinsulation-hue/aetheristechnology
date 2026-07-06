@@ -3,9 +3,9 @@ import echoTool from "./tools/echo";
 
 export default defineMcp({
   name: "aetheris-mcp",
-  title: "Aetheris / Business Forensics MCP",
+  title: "Aetheris / Chaos Theory Forensics MCP",
   version: "0.1.0",
   instructions:
-    "Agent integrations for the Aetheris / Business Forensics app. Use `echo` to verify connectivity. More tools will be exposed as they are enabled.",
+    "Agent integrations for the Aetheris / Chaos Theory Forensics app. Use `echo` to verify connectivity. More tools will be exposed as they are enabled.",
   tools: [echoTool],
 });

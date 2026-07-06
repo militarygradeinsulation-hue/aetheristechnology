@@ -42,7 +42,7 @@ const CareersPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Independent Rep | Aetheris Business Forensics"
+        title="Independent Rep | Aetheris Chaos Theory Forensics"
         description="2,500+ applications. Most turned down. One spot left. If you can't take a test, ask questions, or pay a $40 access fee, don't apply."
         path="/careers"
       />

@@ -13,7 +13,7 @@ const ContactPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Intake Form | Aetheris Business Forensics Indianapolis"
+        title="Intake Form | Aetheris Chaos Theory Forensics Indianapolis"
         description="Drop your details and run the free Leak Audit™. Operator-led intake with no public list and no spam. Indianapolis, US-wide."
         path="/contact"
         jsonLd={{

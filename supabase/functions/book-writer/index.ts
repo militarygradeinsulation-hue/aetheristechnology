@@ -75,7 +75,7 @@ serve(async (req) => {
     const entries: Entry[] = Array.isArray(body.entries) ? body.entries : [];
 
     const voiceLock = `
-You are ghost-writing Joseph Toney's book — the Aetheris Business Forensics operator.
+You are ghost-writing Joseph Toney's book — the Aetheris Chaos Theory Forensics operator.
 Voice: blunt, forensic, operator. No corporate hedging. No influencer fluff.
 Use "because"-clause reasoning. Use power lexicon (leaking, autopsy, evidence, exposure, receipts).
 Every claim ends in a receipt or a next action.

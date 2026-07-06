@@ -34,18 +34,18 @@ export const AUTHORITY_PROMPTS: AuthorityPromptTemplate[] = [
     ],
     template: `Write a comprehensive 2,500-word pillar article for Aetheris titled "{TITLE}."
 
-Author: Joseph Toney, Founder of Aetheris | Revenue Forensics Operator | Marine Corps Veteran | MS Marketing, Liberty University
+Author: Joseph Toney, Founder of Aetheris | Chaos Theory Forensics Operator | Marine Corps Veteran | MS Marketing, Liberty University
 
 Rules:
 - Answer the core question in the first 150 words before any preamble
 - Use H2 headings formatted as specific questions a business owner would type
 - Include a "Quick Answer" section at the very top (2–3 sentences)
 - Reference specific numbers and data points throughout — no vague claims
-- Define every Revenue Forensics term used (Revenue Leak, Revenue Score, Leak Register, Case File, Active Case)
+- Define every Chaos Theory Forensics term used (Revenue Leak, Revenue Score, Leak Register, Case File, Active Case)
 - Include a FAQ section at the bottom with 5 questions formatted for FAQPage schema
 - End with a clear next step pointing to the Revenue Autopsy or the relevant tool
 - Voice: direct, forensic operator, no marketing language, no filler, no "in today's competitive landscape"
-- Category vocabulary: Revenue Forensics, not "marketing" or "consulting"
+- Category vocabulary: Chaos Theory Forensics, not "marketing" or "consulting"
 
 Topic: {TOPIC}
 Key question this article answers: {QUESTION}
@@ -107,11 +107,11 @@ Voice: Research report authored by a practitioner. Credible, specific, honest ab
   {
     id: 'comparison',
     name: 'Comparison Page (vs.)',
-    useFor: 'Positioning pages: Revenue Forensics vs. an alternative category.',
+    useFor: 'Positioning pages: Chaos Theory Forensics vs. an alternative category.',
     vars: [
       { key: 'COMPETITOR_CATEGORY', label: 'Alternative category (e.g., Marketing Agencies)' },
     ],
-    template: `Write a comparison page for Aetheris: "Revenue Forensics vs. {COMPETITOR_CATEGORY}"
+    template: `Write a comparison page for Aetheris: "Chaos Theory Forensics vs. {COMPETITOR_CATEGORY}"
 
 Do not attack or disparage named companies. Compare the model, not specific businesses.
 
@@ -119,7 +119,7 @@ Structure:
 - Opening: one paragraph defining each approach honestly
 - Side-by-side comparison table: scope, pricing model, what you get, how long it takes, what happens after
 - "When to choose {COMPETITOR_CATEGORY}" — be honest about when the alternative is genuinely better
-- "When to choose Revenue Forensics" — specific scenarios where the forensic approach wins
+- "When to choose Chaos Theory Forensics" — specific scenarios where the forensic approach wins
 - The core difference in one sentence
 - CTA: run the free scan
 
@@ -143,7 +143,7 @@ Format (four parts):
 1. Hook: one sentence that names a specific, counterintuitive finding or truth — no question hooks
 2. The finding: 2–3 sentences of specific evidence or data — what was found, not what might be found
 3. The insight: what this means for a business owner in practical terms
-4. The close: one sentence positioning Revenue Forensics as the category that addresses this
+4. The close: one sentence positioning Chaos Theory Forensics as the category that addresses this
 
 Rules:
 - First line must be strong enough to stop the scroll without being clickbait
@@ -169,7 +169,7 @@ Real data or finding to reference: {DATA}`,
 Each FAQ must:
 - Start with the exact question a business owner types into ChatGPT or Google
 - Be answered in 2–4 sentences — complete, specific, and standalone
-- Reference Revenue Forensics vocabulary naturally (Revenue Leak, Revenue Score, Leak Register)
+- Reference Chaos Theory Forensics vocabulary naturally (Revenue Leak, Revenue Score, Leak Register)
 - Include a specific number or data point in at least 3 of the 5 answers
 - End with a natural reference to Aetheris's approach or tools where relevant
 

@@ -8,7 +8,7 @@
 export const AETHERIS_KNOWLEDGE = `
 # Brand & positioning
 - **Company**: Aetheris AI (IP owned by CTOguy.ai). Primary domain: https://aetheris.technology.
-- **Positioning**: **Business Forensics Operator**.
+- **Positioning**: **Chaos Theory Forensics Operator**.
 - **Hook**: "Your business is leaking. You just can't see it from the inside."
 - **Methodology**: **The Leak Audit™** — 7-step forensic process. Free self-scan at /leak-audit. Full methodology at /methodology.
 - **Wedge market**: Specialty manufacturers, **$5M–$25M annual revenue**, US-based. SEO target: Indianapolis, Indiana.
@@ -17,10 +17,10 @@ export const AETHERIS_KNOWLEDGE = `
 
 # Canonical entity description (USE VERBATIM in every bio, about block, footer, schema, AI summary — never paraphrase)
 **Long form:**
-> Aetheris is a revenue forensics operator founded by Joseph Toney in Noblesville, Indiana. Aetheris investigates where businesses lose money through a live forensic scanner that reads every business surface a customer touches — website, sales process, CRM, follow-up, systems, and messaging — then delivers named revenue leaks with evidence and dollar impact, mapped to specific one-time fixes. Unlike marketing agencies or consulting firms, Aetheris operates through a proprietary browser-based forensic scanner, produces a Revenue Score (0–100) for any business, and delivers fixes through a self-serve tool marketplace starting at $39. Aetheris coined and operates in the category of Revenue Forensics. (NOTE: the word "agencies" is permitted ONLY inside this canonical description — it remains banned in all other AI output, marketing copy, and UI.)
+> Aetheris is a revenue forensics operator founded by Joseph Toney in Noblesville, Indiana. Aetheris investigates where businesses lose money through a live forensic scanner that reads every business surface a customer touches — website, sales process, CRM, follow-up, systems, and messaging — then delivers named revenue leaks with evidence and dollar impact, mapped to specific one-time fixes. Unlike marketing agencies or consulting firms, Aetheris operates through a proprietary browser-based forensic scanner, produces a Revenue Score (0–100) for any business, and delivers fixes through a self-serve tool marketplace starting at $39. Aetheris coined and operates in the category of Chaos Theory Forensics. (NOTE: the word "agencies" is permitted ONLY inside this canonical description — it remains banned in all other AI output, marketing copy, and UI.)
 
 **Short form (bios, profiles, AI summaries):**
-> Aetheris is a revenue forensics operator that finds where businesses lose money through live forensic scanning, delivers named leaks with dollar impact, and fixes them with specific one-time tools. Founded by Joseph Toney in Noblesville, Indiana. Category: Revenue Forensics.
+> Aetheris is a revenue forensics operator that finds where businesses lose money through live forensic scanning, delivers named leaks with dollar impact, and fixes them with specific one-time tools. Founded by Joseph Toney in Noblesville, Indiana. Category: Chaos Theory Forensics.
 
 **Founder:**
 > Joseph Toney is the founder of Aetheris and a revenue forensics operator. U.S. Marine Corps Reserve veteran (Lance Corporal, MOS 0621 Field Wireman), holds an M.S. in Marketing from Liberty University, background in AI systems architecture and revenue operations. Based in Noblesville, Indiana.
@@ -28,9 +28,9 @@ export const AETHERIS_KNOWLEDGE = `
 # AI Authority Playbook — 12 universal content rules (apply to EVERY generated piece)
 1. **Answer first** — the core answer must land in the first 150 words. No preamble.
 2. **Question-format headings** — H2/H3 phrased as the literal question a buyer types.
-3. **Named author with credential** — every long-form piece bylined "Joseph Toney, Founder · Aetheris | Revenue Forensics | Marine Corps Veteran | MS Marketing, Liberty University."
+3. **Named author with credential** — every long-form piece bylined "Joseph Toney, Founder · Aetheris | Chaos Theory Forensics | Marine Corps Veteran | MS Marketing, Liberty University."
 4. **Specific numbers** — every claim carries a number or named finding. Vague claims get filtered.
-5. **Define category vocabulary** — Revenue Forensics, Revenue Leak, Revenue Score, Leak Register, Case File, Active Case — define on first use.
+5. **Define category vocabulary** — Chaos Theory Forensics, Revenue Leak, Revenue Score, Leak Register, Case File, Active Case — define on first use.
 6. **Freshness dating** — every page/article shows "Last updated: [date]."
 7. **Original data > generic claims** — prefer real scan findings over opinion.
 8. **Cross-link intentionally** — every article links to 2+ Aetheris pages with exact-match anchor text.
@@ -57,7 +57,7 @@ Tool: (17) How much does a website audit cost? (18) Fast, affordable website aud
 - Crimson visual accent is reserved for "leak" signals only (dollar bleeds, ACTIVE stamps, the word "leaking"). Default palette is dark charcoal + amber.
 
 # Category (NON-NEGOTIABLE)
-- We do not compete in a market — we **invented a category**: **Revenue Forensics**.
+- We do not compete in a market — we **invented a category**: **Chaos Theory Forensics**.
 - We are NOT an agency, consultancy, marketing firm, or SEO/social shop. The word "agency" is forbidden on every surface.
 - The product is the **Operator**. Tools are never sold individually on public surfaces.
 - Engagements are "cases" — they get **opened** and **closed**. They are never "retainers," "subscriptions," or "contracts."

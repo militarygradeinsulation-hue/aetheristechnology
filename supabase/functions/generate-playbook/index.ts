@@ -9,15 +9,15 @@ const corsHeaders = {
 
 // Forensic-aligned topic pool across three pillars
 const TOPIC_POOL = [
-  // Revenue Forensics Pillar
-  { title: "The Revenue Leak Audit Playbook", subtitle: "7 Steps to Finding Every Dollar Your Business Is Losing", pillar: "Revenue Forensics", tags: ["Leak Audit", "Revenue Recovery", "Pipeline Diagnostics"], icon: "Shield" },
-  { title: "The Pipeline Autopsy Framework", subtitle: "Why 35% of Your Deals Die Before Reaching a Proposal", pillar: "Revenue Forensics", tags: ["Pipeline Analysis", "Deal Velocity", "Sales Forensics"], icon: "BarChart3" },
-  { title: "The CRM Autopsy Guide", subtitle: "Your $50K CRM Has a 26% Adoption Rate — Here's the Fix", pillar: "Revenue Forensics", tags: ["CRM Strategy", "Sales Enablement", "Technology Adoption"], icon: "Shield" },
-  { title: "The Pricing Architecture Diagnostic", subtitle: "How Misaligned Pricing Drains 15-30% of Available Revenue", pillar: "Revenue Forensics", tags: ["Pricing Strategy", "Value-Based Pricing", "Revenue Architecture"], icon: "TrendingUp" },
-  { title: "The Client Retention Forensics Playbook", subtitle: "Diagnosing Why Clients Leave Before They Tell You", pillar: "Revenue Forensics", tags: ["Client Retention", "Churn Analysis", "Relationship Forensics"], icon: "BookOpen" },
-  { title: "The Revenue Attribution Autopsy", subtitle: "Closing the Gap Between Marketing Spend and Actual Pipeline Revenue", pillar: "Revenue Forensics", tags: ["Revenue Attribution", "Marketing ROI", "Pipeline Tracking"], icon: "BarChart3" },
-  { title: "The Follow-Up Failure Report", subtitle: "80% of Sales Need 5+ Touches — 44% of Reps Stop at One", pillar: "Revenue Forensics", tags: ["Sales Process", "Follow-Up Systems", "Lead Conversion"], icon: "TrendingUp" },
-  { title: "The Proposal-to-Close Leak Map", subtitle: "Finding the Invisible Drop-Off Between Yes and Signed Contract", pillar: "Revenue Forensics", tags: ["Proposal Management", "Close Rate", "Deal Forensics"], icon: "FileText" },
+  // Chaos Theory Forensics Pillar
+  { title: "The Revenue Leak Audit Playbook", subtitle: "7 Steps to Finding Every Dollar Your Business Is Losing", pillar: "Chaos Theory Forensics", tags: ["Leak Audit", "Revenue Recovery", "Pipeline Diagnostics"], icon: "Shield" },
+  { title: "The Pipeline Autopsy Framework", subtitle: "Why 35% of Your Deals Die Before Reaching a Proposal", pillar: "Chaos Theory Forensics", tags: ["Pipeline Analysis", "Deal Velocity", "Sales Forensics"], icon: "BarChart3" },
+  { title: "The CRM Autopsy Guide", subtitle: "Your $50K CRM Has a 26% Adoption Rate — Here's the Fix", pillar: "Chaos Theory Forensics", tags: ["CRM Strategy", "Sales Enablement", "Technology Adoption"], icon: "Shield" },
+  { title: "The Pricing Architecture Diagnostic", subtitle: "How Misaligned Pricing Drains 15-30% of Available Revenue", pillar: "Chaos Theory Forensics", tags: ["Pricing Strategy", "Value-Based Pricing", "Revenue Architecture"], icon: "TrendingUp" },
+  { title: "The Client Retention Forensics Playbook", subtitle: "Diagnosing Why Clients Leave Before They Tell You", pillar: "Chaos Theory Forensics", tags: ["Client Retention", "Churn Analysis", "Relationship Forensics"], icon: "BookOpen" },
+  { title: "The Revenue Attribution Autopsy", subtitle: "Closing the Gap Between Marketing Spend and Actual Pipeline Revenue", pillar: "Chaos Theory Forensics", tags: ["Revenue Attribution", "Marketing ROI", "Pipeline Tracking"], icon: "BarChart3" },
+  { title: "The Follow-Up Failure Report", subtitle: "80% of Sales Need 5+ Touches — 44% of Reps Stop at One", pillar: "Chaos Theory Forensics", tags: ["Sales Process", "Follow-Up Systems", "Lead Conversion"], icon: "TrendingUp" },
+  { title: "The Proposal-to-Close Leak Map", subtitle: "Finding the Invisible Drop-Off Between Yes and Signed Contract", pillar: "Chaos Theory Forensics", tags: ["Proposal Management", "Close Rate", "Deal Forensics"], icon: "FileText" },
 
   // Operational Intelligence Pillar
   { title: "The Operational X-Ray Playbook", subtitle: "Mapping the Gap Between What You Claim and What You Do", pillar: "Operational Intelligence", tags: ["Process Mapping", "Operational Audit", "Systems Diagnostics"], icon: "Shield" },
@@ -255,7 +255,7 @@ ${HUMANIZED_PLAYBOOK_VOICE}
 COMPANY CONTEXT
 ═══════════════════════════════════════════════════════════════════
 
-You are a Business Forensics Operator at Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney. You write authoritative, data-rich strategic playbooks that read like forensic case files written by a human operator who's lived inside the businesses being autopsied — not consulting decks.
+You are a Chaos Theory Forensics Operator at Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney. You write authoritative, data-rich strategic playbooks that read like forensic case files written by a human operator who's lived inside the businesses being autopsied — not consulting decks.
 
 BRAND VOICE: Direct. Forensic. Aggressive. No fluff. Use real statistics. Reference named diagnostic frameworks. Write like a forensic investigator presenting evidence to a CEO — every finding backed by data, every recommendation tied to a dollar amount.
 

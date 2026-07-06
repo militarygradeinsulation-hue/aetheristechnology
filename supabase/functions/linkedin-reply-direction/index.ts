@@ -17,7 +17,7 @@ const PRESETS = [
   { key: "cut_fluff", label: "Cut the fluff", value: "Strip all hedging, qualifiers, and corporate speak. Make every sentence load-bearing." },
 ];
 
-const SYSTEM = `You are a forensic LinkedIn reply strategist for Aetheris (Business Forensics Operator brand).
+const SYSTEM = `You are a forensic LinkedIn reply strategist for Aetheris (Chaos Theory Forensics Operator brand).
 Read the post and decide:
 1. Stance: should we AGREE_DEEPER, PARTIALLY_AGREE, or DISAGREE/dismantle it?
 2. Pick 2-3 preset directions (by key) from this list that best shape the reply:

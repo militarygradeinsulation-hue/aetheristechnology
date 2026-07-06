@@ -16,7 +16,7 @@ const CatalogPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Operator-Led Bundles | Aetheris Business Forensics"
+        title="Operator-Led Bundles | Aetheris Chaos Theory Forensics"
         description="Three operator-led bundles — Signal ($2,500), Revenue ($5,000), Operator Suite ($10,000). We don't sell tools. We pair you with an operator who runs them."
         path="/catalog"
         keywords="business forensics bundles, operator-led consulting, revenue diagnostic, leak audit packages, Indianapolis"
@@ -40,7 +40,7 @@ const CatalogPage: React.FC = () => {
                 <span className="text-amber italic">We sell the operator.</span>
               </h1>
               <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                Every bundle below pairs you with a Business Forensics Operator who finds every leak,
+                Every bundle below pairs you with a Chaos Theory Forensics Operator who finds every leak,
                 then rebuilds the systems causing them.
               </p>
             </div>

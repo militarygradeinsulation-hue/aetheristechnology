@@ -370,7 +370,7 @@ function buildEasyReadText(result: DetectResult, subject: string): string {
   lines.push('PREPARED BY');
   lines.push(hr());
   lines.push('');
-  lines.push('Aetheris Technology  ·  Business Forensics Division');
+  lines.push('Aetheris Technology  ·  Chaos Theory Forensics Division');
   lines.push('Indianapolis, IN  ·  https://aetheris.technology');
   lines.push('');
   lines.push('This report is operator-grade forensic analysis, not a legal determination.');

@@ -66,7 +66,7 @@ const LeadIntakeEmail = ({
         ) : null}
 
         <Hr style={hr} />
-        <Text style={footer}>Aetheris Business Forensics — operator intake notification.</Text>
+        <Text style={footer}>Aetheris Chaos Theory Forensics — operator intake notification.</Text>
       </Container>
     </Body>
   </Html>

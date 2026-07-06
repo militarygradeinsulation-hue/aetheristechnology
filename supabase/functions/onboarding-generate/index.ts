@@ -33,7 +33,7 @@ async function generateScript(
     ? `\n\nWhile narrating each slide, the player will display a captured SCREENSHOT of one of these app areas. Pick the most relevant key per slide from this list (use the KEY string, not the path):\n${Object.entries(routeHints).map(([k, v]) => `  - ${k} → ${v}${screenshotMap[k] ? " [screenshot ready]" : ""}`).join("\n")}\nIf no area fits a slide (intro/outro), set "route_key" to null.`
     : "";
 
-  const sys = `You are a sales onboarding script writer for Aetheris Technology, a Business Forensics operator.
+  const sys = `You are a sales onboarding script writer for Aetheris Technology, a Chaos Theory Forensics operator.
 Voice: blunt, operator, confident, never corporate. Write like a senior closer talking to a new hire.
 Output STRICT JSON only — no markdown, no code fences:
 { "slides": [ { "title": "<short slide title, max 6 words>", "bullets": ["<3-5 short punchy bullets, max 10 words each>"], "narration": "<60-110 words spoken naturally, conversational, includes the bullets in flow>", "route_key": "<one key from allowed list, or null>" } ] }

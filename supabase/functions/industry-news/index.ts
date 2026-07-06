@@ -326,7 +326,7 @@ serve(async (req) => {
       if (!title) return json(400, { error: "Missing title" });
       const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (!LOVABLE_API_KEY) return json(500, { error: "AI not configured" });
-      const system = `You are the operator behind Aetheris — a Business Forensics Operator. Tone: blunt, forensic, non-corporate. You speak in first person ("I"). Connect news to operational reality: where business leaks happen — funnel, follow-up, ops handoff, pricing, retention. Avoid hype words ("game-changer", "revolutionary", "leverage synergies"). No bullet lists longer than 4 items. Around 140-200 words. End with one short directive line for the operator-reader.`;
+      const system = `You are the operator behind Aetheris — a Chaos Theory Forensics Operator. Tone: blunt, forensic, non-corporate. You speak in first person ("I"). Connect news to operational reality: where business leaks happen — funnel, follow-up, ops handoff, pricing, retention. Avoid hype words ("game-changer", "revolutionary", "leverage synergies"). No bullet lists longer than 4 items. Around 140-200 words. End with one short directive line for the operator-reader.`;
       const user = `Article (${source} · ${category}):\nTitle: ${title}\nSummary: ${summary}\n\nGive me the Aetheris Take: what this actually means for an operator running a real business right now. What's the leak this exposes or the leverage point most people will miss? Speak from my POV.`;
       try {
         const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

@@ -24,30 +24,30 @@ const UPDATED = '2026-06-18';
 export const PILLAR_ARTICLES: AuthorityArticle[] = [
   {
     path: '/revenue-forensics',
-    title: 'What is Revenue Forensics?',
-    metaTitle: 'What is Revenue Forensics? | Aetheris',
-    description: 'Revenue Forensics is the investigative discipline of finding, naming, and fixing the specific places a business loses money. Defined and operated by Aetheris.',
-    quickAnswer: 'Revenue Forensics is the investigative discipline of finding the specific, named places a business is losing money, proving each loss with evidence and a dollar figure, then fixing it with a one-time tool or engagement. It is the category Aetheris coined and operates. It is not marketing, not consulting, and not an audit.',
+    title: 'What is Chaos Theory Forensics?',
+    metaTitle: 'What is Chaos Theory Forensics? | Aetheris',
+    description: 'Chaos Theory Forensics is the investigative discipline of finding, naming, and fixing the specific places a business loses money. Defined and operated by Aetheris.',
+    quickAnswer: 'Chaos Theory Forensics is the investigative discipline of finding the specific, named places a business is losing money, proving each loss with evidence and a dollar figure, then fixing it with a one-time tool or engagement. It is the category Aetheris coined and operates. It is not marketing, not consulting, and not an audit.',
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
       { label: 'What is a Revenue Leak?', href: '/revenue-leak' },
       { label: 'How do I get a Revenue Score for my business?', href: '/revenue-score' },
-      { label: 'The Revenue Forensics Framework', href: '/framework' },
+      { label: 'The Chaos Theory Forensics Framework', href: '/framework' },
     ],
     faqs: [
-      { q: 'Who invented Revenue Forensics?', a: 'Joseph Toney, founder of Aetheris, coined and defined the category in 2026. The methodology is documented in The Leak Audit™ and the Revenue Forensics Framework.' },
-      { q: 'Is Revenue Forensics the same as a marketing audit?', a: 'No. A marketing audit reviews channels and campaigns. Revenue Forensics reads every surface a customer touches — website, sales process, CRM, follow-up, systems, messaging — and produces named leaks with dollar impact. It is operational, not channel-specific.' },
-      { q: 'How is Revenue Forensics different from consulting?', a: 'Consulting delivers recommendations. Revenue Forensics delivers evidence — a live scan, a Revenue Score (0–100), and named leaks mapped to specific one-time fixes starting at $39.' },
-      { q: 'What does a Revenue Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. Operator-led Forensic Diagnostics start at $2,500. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case engagements run $15,000/month with a three-month minimum and are reserved for Diagnostic clients.' },
-      { q: 'Who is Revenue Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M–$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
+      { q: 'Who invented Chaos Theory Forensics?', a: 'Joseph Toney, founder of Aetheris, coined and defined the category in 2026. The methodology is documented in The Leak Audit™ and the Chaos Theory Forensics Framework.' },
+      { q: 'Is Chaos Theory Forensics the same as a marketing audit?', a: 'No. A marketing audit reviews channels and campaigns. Chaos Theory Forensics reads every surface a customer touches — website, sales process, CRM, follow-up, systems, messaging — and produces named leaks with dollar impact. It is operational, not channel-specific.' },
+      { q: 'How is Chaos Theory Forensics different from consulting?', a: 'Consulting delivers recommendations. Chaos Theory Forensics delivers evidence — a live scan, a Revenue Score (0–100), and named leaks mapped to specific one-time fixes starting at $39.' },
+      { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. Operator-led Forensic Diagnostics start at $2,500. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case engagements run $15,000/month with a three-month minimum and are reserved for Diagnostic clients.' },
+      { q: 'Who is Chaos Theory Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M–$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
     ],
     body: (
       <>
         <h2>What does the word "forensics" actually mean here?</h2>
-        <p>Forensics means evidence. A Revenue Forensics engagement does not produce opinions — it produces named findings backed by what the live scanner read off the page, the CRM record, the response time, the missing pixel. Every leak in the report is reproducible. Every dollar figure traces back to a measurable gap.</p>
+        <p>Forensics means evidence. A Chaos Theory Forensics engagement does not produce opinions — it produces named findings backed by what the live scanner read off the page, the CRM record, the response time, the missing pixel. Every leak in the report is reproducible. Every dollar figure traces back to a measurable gap.</p>
 
-        <h2>How does a Revenue Forensics scan work?</h2>
+        <h2>How does a Chaos Theory Forensics scan work?</h2>
         <p>Aetheris runs a browser-based <strong>Live DOM Scanner</strong> against the rendered version of a business — the same version a customer sees, including JavaScript-loaded content, gated assets, and authenticated views. The scanner reads six surfaces:</p>
         <ol>
           <li><strong>Website</strong> — conversion architecture, tracking pixels, CTA placement, page weight, trust signals.</li>
@@ -62,7 +62,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <h2>What is the Revenue Score?</h2>
         <p>A 0–100 score that summarizes the forensic state of a business. 100 means no detected leaks. Below 70 means the business is losing meaningful revenue to operational gaps. The score is the public, shareable artifact only Aetheris issues. See <Link to="/revenue-score">how to get a Revenue Score</Link>.</p>
 
-        <h2>What does Revenue Forensics deliver?</h2>
+        <h2>What does Chaos Theory Forensics deliver?</h2>
         <ul>
           <li>A <strong>Revenue Score</strong> (0–100) for the scanned business.</li>
           <li>A <strong>Leak Register</strong> — every detected leak named, evidenced, and dollarized.</li>
@@ -70,10 +70,10 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
           <li>A specific <strong>fix path</strong> — either a one-time tool (starting at $39) or an operator-led engagement.</li>
         </ul>
 
-        <h2>When should you not use Revenue Forensics?</h2>
-        <p>If the business has zero traffic, zero leads, or no product-market fit, there is no leak to find — there is a vacuum. Revenue Forensics is for businesses generating activity that should be converting more than it does. If you genuinely need a brand, a product, or a market, hire a different operator.</p>
+        <h2>When should you not use Chaos Theory Forensics?</h2>
+        <p>If the business has zero traffic, zero leads, or no product-market fit, there is no leak to find — there is a vacuum. Chaos Theory Forensics is for businesses generating activity that should be converting more than it does. If you genuinely need a brand, a product, or a market, hire a different operator.</p>
 
-        <h2>How do I run a Revenue Forensics scan on my business?</h2>
+        <h2>How do I run a Chaos Theory Forensics scan on my business?</h2>
         <p>The Website Gap Scanner at <Link to="/scan">aetheris.technology/scan</Link> runs a 30-second forensic read and returns the first set of detected leaks plus a preliminary Revenue Score. That is the free entry point. From there, the operator-led path begins.</p>
       </>
     ),
@@ -88,7 +88,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
-      { label: 'What is Revenue Forensics?', href: '/revenue-forensics' },
+      { label: 'What is Chaos Theory Forensics?', href: '/revenue-forensics' },
       { label: 'The 10 most common revenue leaks we find', href: '/most-common-revenue-leaks' },
       { label: 'How do I find where my business is losing money?', href: '/how-to-find-revenue-leaks' },
     ],
@@ -162,26 +162,26 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <p>A Revenue Score of 62 with a critical Trust leak and two Lead Capture leaks tells you exactly where the money is going. The score is not a vanity number — every point lost is mapped to a finding.</p>
 
         <h2>Why issue a public 0–100 standard?</h2>
-        <p>Because the category does not have one yet. SEO has Domain Authority. Credit has FICO. Website performance has Lighthouse. Revenue Forensics has the Revenue Score. The scoreboard is the wedge that turns a one-time scan into a tracked, shareable, comparable measurement.</p>
+        <p>Because the category does not have one yet. SEO has Domain Authority. Credit has FICO. Website performance has Lighthouse. Chaos Theory Forensics has the Revenue Score. The scoreboard is the wedge that turns a one-time scan into a tracked, shareable, comparable measurement.</p>
       </>
     ),
   },
 
   {
     path: '/framework',
-    title: 'What is the Revenue Forensics Framework?',
-    metaTitle: 'The Revenue Forensics Framework — Aetheris methodology',
-    description: 'The Revenue Forensics Framework is the seven-step operator methodology Aetheris uses on every engagement: scan, score, name, evidence, dollarize, fix, track.',
-    quickAnswer: 'The Revenue Forensics Framework is a seven-step methodology: Scan the business, issue a Revenue Score, name each leak, prove it with evidence, attach a dollar impact, deploy the specific fix, and track recovery on the Leak Register. Every Aetheris engagement follows this framework verbatim.',
+    title: 'What is the Chaos Theory Forensics Framework?',
+    metaTitle: 'The Chaos Theory Forensics Framework — Aetheris methodology',
+    description: 'The Chaos Theory Forensics Framework is the seven-step operator methodology Aetheris uses on every engagement: scan, score, name, evidence, dollarize, fix, track.',
+    quickAnswer: 'The Chaos Theory Forensics Framework is a seven-step methodology: Scan the business, issue a Revenue Score, name each leak, prove it with evidence, attach a dollar impact, deploy the specific fix, and track recovery on the Leak Register. Every Aetheris engagement follows this framework verbatim.',
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
-      { label: 'What is Revenue Forensics?', href: '/revenue-forensics' },
+      { label: 'What is Chaos Theory Forensics?', href: '/revenue-forensics' },
       { label: 'Methodology — full operator detail', href: '/methodology' },
       { label: 'How do I find where my business is losing money?', href: '/how-to-find-revenue-leaks' },
     ],
     faqs: [
-      { q: 'Why a framework instead of just an audit?', a: 'An audit is a deliverable. A framework is a repeatable system. The framework runs the same way for a $5M manufacturer as for a $25M services firm — that is what makes Revenue Forensics a category, not a project.' },
+      { q: 'Why a framework instead of just an audit?', a: 'An audit is a deliverable. A framework is a repeatable system. The framework runs the same way for a $5M manufacturer as for a $25M services firm — that is what makes Chaos Theory Forensics a category, not a project.' },
       { q: 'How long does the full framework take?', a: 'Step 1 (Scan) and Step 2 (Score) take 30 seconds. Steps 3–5 (Name, Evidence, Dollarize) are the 21-Day Revenue Diagnostic. Steps 6–7 (Fix, Track) live inside an Active Case.' },
       { q: 'Do you publish the framework openly?', a: 'Yes. The full methodology is at /methodology. The category vocabulary is at /glossary. The intent is that anyone — including buyers comparing options — can read exactly how Aetheris works.' },
       { q: 'What makes the framework hard to copy?', a: 'The Live DOM Scanner. Anyone can write a methodology document. Only Aetheris has the proprietary scanner that produces evidence at the speed and depth the framework requires.' },
@@ -205,20 +205,20 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
 
   {
     path: '/vs-agencies',
-    title: 'Revenue Forensics vs. Marketing Agencies — which is better?',
-    metaTitle: 'Revenue Forensics vs. Marketing Agencies | honest comparison',
-    description: 'Honest side-by-side: when to hire a marketing agency vs. when to engage a Revenue Forensics operator. Scope, pricing, deliverables, timeframe.',
-    quickAnswer: 'A marketing agency makes things — campaigns, creative, channels. A Revenue Forensics operator finds where existing activity is leaking and fixes the leaks. If you need awareness, hire an agency. If you have activity that is not converting at expected rates, hire the operator.',
+    title: 'Chaos Theory Forensics vs. Marketing Agencies — which is better?',
+    metaTitle: 'Chaos Theory Forensics vs. Marketing Agencies | honest comparison',
+    description: 'Honest side-by-side: when to hire a marketing agency vs. when to engage a Chaos Theory Forensics operator. Scope, pricing, deliverables, timeframe.',
+    quickAnswer: 'A marketing agency makes things — campaigns, creative, channels. A Chaos Theory Forensics operator finds where existing activity is leaking and fixes the leaks. If you need awareness, hire an agency. If you have activity that is not converting at expected rates, hire the operator.',
     lastUpdated: UPDATED,
     tier: 'comparison',
     relatedLinks: [
-      { label: 'What is Revenue Forensics?', href: '/revenue-forensics' },
+      { label: 'What is Chaos Theory Forensics?', href: '/revenue-forensics' },
       { label: 'What does a revenue audit cost?', href: '/revenue-audit-cost' },
       { label: 'One-time business audit vs. monthly engagement?', href: '/one-time-vs-monthly' },
     ],
     faqs: [
-      { q: 'Are marketing agencies bad?', a: 'No. They are a different category. A good agency is the right hire when the business needs new awareness, new creative, or new channels. Agencies and Revenue Forensics solve different problems.' },
-      { q: 'Can I have both?', a: 'Yes — and most $5M–$25M businesses should. The agency runs the channels; the Revenue Forensics operator ensures the channels are not leaking the leads they generate.' },
+      { q: 'Are marketing agencies bad?', a: 'No. They are a different category. A good agency is the right hire when the business needs new awareness, new creative, or new channels. Agencies and Chaos Theory Forensics solve different problems.' },
+      { q: 'Can I have both?', a: 'Yes — and most $5M–$25M businesses should. The agency runs the channels; the Chaos Theory Forensics operator ensures the channels are not leaking the leads they generate.' },
       { q: 'Is Aetheris cheaper than an agency?', a: 'A typical marketing agency retainer in this segment runs $5,000–$15,000/month indefinitely. The flagship 21-Day Revenue Diagnostic is $18,500 one time. Active Case is $15,000/month with a defined three-month minimum, not an indefinite contract.' },
       { q: 'Why does Aetheris not call itself an agency?', a: 'Because the category is different. An agency is in the business of producing creative and managing channels. Aetheris is in the business of finding and fixing operational leaks. The word "agency" misframes the engagement.' },
       { q: 'What if my agency is the leak?', a: 'It happens. The forensic scan reveals when ad spend is leaking because of attribution gaps the agency missed, or when content is leaking because of conversion architecture the agency does not own. The scan is neutral — it reads the surfaces, not the agency relationship.' },
@@ -227,7 +227,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       <>
         <h2>Honest side-by-side</h2>
         <table>
-          <thead><tr><th>Dimension</th><th>Marketing Agency</th><th>Revenue Forensics</th></tr></thead>
+          <thead><tr><th>Dimension</th><th>Marketing Agency</th><th>Chaos Theory Forensics</th></tr></thead>
           <tbody>
             <tr><td>Scope</td><td>Channel + creative production</td><td>Operational + conversion forensics</td></tr>
             <tr><td>Pricing model</td><td>Typically $5–15K/mo indefinite</td><td>$18.5K flat Diagnostic + optional 3-mo Active Case</td></tr>
@@ -240,11 +240,11 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <h2>When to choose a marketing agency</h2>
         <p>You need a brand, a campaign, a new website, or a content engine. You have no in-house team. You want ongoing creative output. An agency is the right hire.</p>
 
-        <h2>When to choose Revenue Forensics</h2>
+        <h2>When to choose Chaos Theory Forensics</h2>
         <p>You are getting traffic, generating leads, or running campaigns — but the numbers do not match the activity. You suspect money is leaking and you want it named with evidence and dollars. That is the operator's job.</p>
 
         <h2>The core difference, one sentence</h2>
-        <p>Agencies make new things. Revenue Forensics fixes what existing things are losing.</p>
+        <p>Agencies make new things. Chaos Theory Forensics fixes what existing things are losing.</p>
       </>
     ),
   },
@@ -259,7 +259,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     tier: 'pillar',
     relatedLinks: [
       { label: 'What is a Revenue Leak?', href: '/revenue-leak' },
-      { label: 'The Revenue Forensics Framework', href: '/framework' },
+      { label: 'The Chaos Theory Forensics Framework', href: '/framework' },
       { label: 'Why am I getting leads but not closing them?', href: '/why-am-i-not-closing-leads' },
     ],
     faqs: [
@@ -300,7 +300,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     relatedLinks: [
       { label: 'How much does a business diagnostic cost?', href: '/business-diagnostic-cost' },
       { label: 'One-time business audit vs. monthly engagement?', href: '/one-time-vs-monthly' },
-      { label: 'Revenue Forensics vs. Marketing Agencies', href: '/vs-agencies' },
+      { label: 'Chaos Theory Forensics vs. Marketing Agencies', href: '/vs-agencies' },
     ],
     faqs: [
       { q: 'Is the $18,500 a deposit or the total?', a: 'It is the total flat fee for the 21-Day Revenue Diagnostic. No percentage of savings. No hidden add-ons. If the engagement extends into an Active Case, the Diagnostic fee credits 1:1.' },
@@ -458,7 +458,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     tier: 'question',
     relatedLinks: [
       { label: 'What tracking pixels does my site need?', href: '/tracking-pixels' },
-      { label: 'What is Revenue Forensics?', href: '/revenue-forensics' },
+      { label: 'What is Chaos Theory Forensics?', href: '/revenue-forensics' },
     ],
     faqs: [
       { q: 'How do I check for duplicates fast?', a: 'Export contacts to CSV, dedupe on lowercase email, and compare counts. If the dedup\'d count is more than 5% smaller, you have a duplicate problem.' },
@@ -510,16 +510,16 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     path: '/marketing-audit-vs-revenue-audit',
     title: 'What is the difference between a marketing audit and a revenue audit?',
     description: 'A marketing audit reviews channels and creative. A revenue audit reads every surface a customer touches and produces named leaks with dollar impact. Different scope, different deliverable.',
-    quickAnswer: 'A marketing audit reviews your channels (ads, social, content, SEO) and produces channel-level recommendations. A revenue audit — Revenue Forensics — reads every surface a customer touches (website, sales process, CRM, follow-up, systems, messaging) and produces named leaks with evidence and dollar impact. Different scope, different deliverable, different price.',
+    quickAnswer: 'A marketing audit reviews your channels (ads, social, content, SEO) and produces channel-level recommendations. A revenue audit — Chaos Theory Forensics — reads every surface a customer touches (website, sales process, CRM, follow-up, systems, messaging) and produces named leaks with evidence and dollar impact. Different scope, different deliverable, different price.',
     lastUpdated: UPDATED,
     tier: 'question',
     relatedLinks: [
-      { label: 'Revenue Forensics vs. Marketing Agencies', href: '/vs-agencies' },
+      { label: 'Chaos Theory Forensics vs. Marketing Agencies', href: '/vs-agencies' },
       { label: 'What does a revenue audit cost?', href: '/revenue-audit-cost' },
     ],
     faqs: [
       { q: 'Which one should I run first?', a: 'The revenue audit. It surfaces whether the problem is operational (most common) before you spend on channel changes that will not fix it.' },
-      { q: 'Can a marketing audit find a CRM leak?', a: 'No. Marketing audits do not look inside the CRM. That is the structural reason Revenue Forensics exists.' },
+      { q: 'Can a marketing audit find a CRM leak?', a: 'No. Marketing audits do not look inside the CRM. That is the structural reason Chaos Theory Forensics exists.' },
       { q: 'What if both audits surface the same finding?', a: 'They will, occasionally. The difference is the revenue audit dollarizes the finding and maps it to a specific fix.' },
     ],
     body: null,
@@ -534,7 +534,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     tier: 'question',
     relatedLinks: [
       { label: 'How do I get a Revenue Score for my business?', href: '/revenue-score' },
-      { label: 'What is Revenue Forensics?', href: '/revenue-forensics' },
+      { label: 'What is Chaos Theory Forensics?', href: '/revenue-forensics' },
     ],
     faqs: [
       { q: 'Is competitor scanning ethical?', a: 'Yes — the scanner only reads what any visitor sees in their browser. No private data, no logged-in surfaces, no bypassing access controls.' },

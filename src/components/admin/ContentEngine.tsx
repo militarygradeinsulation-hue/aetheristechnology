@@ -147,7 +147,7 @@ const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
   ],
   'Trust & Positioning': [
     'I don\'t do active cases until I find the leak. Here\'s why.',
-    'What a "Business Forensics Operator" actually does (it\'s not consulting)',
+    'What a "Chaos Theory Forensics Operator" actually does (it\'s not consulting)',
     'Why I refuse to pitch, and what I do instead',
     'The 3 kinds of clients I turn away (and why you should too)',
     'How to vet anyone selling you "AI for your business" in 4 questions',

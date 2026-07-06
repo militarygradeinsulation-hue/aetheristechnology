@@ -40,7 +40,7 @@ How to work with me:
 2. Operator-led Forensic Diagnostic → ${SITE}/diagnostic
 3. DM me "LEAK" and I'll send the 7-step Audit playbook.
 
-— [Your name], Business Forensics Operator @ Aetheris`;
+— [Your name], Chaos Theory Forensics Operator @ Aetheris`;
 
 const HOOK_FORMULAS = [
   { name: 'Contrarian Take', body: 'Everyone says [common advice]. They\'re wrong. Here\'s why: …' },

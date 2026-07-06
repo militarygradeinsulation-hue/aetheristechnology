@@ -46,7 +46,7 @@ export const LeakAuditHowToSchema: React.FC<Props> = ({ pageUrl }) => {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: 'The Leak Audit™ — 7-Step Business Forensics Methodology',
+    name: 'The Leak Audit™ — 7-Step Chaos Theory Forensics Methodology',
     description:
       'Aetheris\'s 7-step forensic process for finding and proving revenue leaks inside an existing business, used in the free self-scan and the operator-led Forensic Diagnostic.',
     totalTime: 'P14D',

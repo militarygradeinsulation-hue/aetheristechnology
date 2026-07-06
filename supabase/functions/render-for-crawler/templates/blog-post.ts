@@ -189,7 +189,7 @@ export async function renderBlogPost(
         <hr />
         <section>
           <h2>About Aetheris AI</h2>
-          <p>Aetheris AI is the Indianapolis-based Business Forensics Operator behind The Leak Audit™ — a 7-step methodology for finding the silent revenue leaks in operational businesses.</p>
+          <p>Aetheris AI is the Indianapolis-based Chaos Theory Forensics Operator behind The Leak Audit™ — a 7-step methodology for finding the silent revenue leaks in operational businesses.</p>
           <p><a href="${SITE_URL}/leak-audit">Run the free Leak Audit self-scan →</a></p>
           <p><a href="${SITE_URL}/services">See engagement options</a> · Call <a href="tel:+13173762110">(317) 376-2110</a></p>
         </section>

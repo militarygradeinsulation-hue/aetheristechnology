@@ -17,12 +17,12 @@ export async function renderHomepage(
   const path = "/";
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
-  const title = override?.title || "Your Business Is Leaking | Aetheris AI — Business Forensics Operator";
-  const description = override?.description || "Indianapolis Business Forensics Operator. The Leak Audit™ methodology finds the silent revenue leaks killing your business — quotes that never close, leads that ghost, ops that bleed margin.";
+  const title = override?.title || "Your Business Is Leaking | Aetheris AI — Chaos Theory Forensics Operator";
+  const description = override?.description || "Indianapolis Chaos Theory Forensics Operator. The Leak Audit™ methodology finds the silent revenue leaks killing your business — quotes that never close, leads that ghost, ops that bleed margin.";
   const keywords = override?.keywords || "business forensics, revenue leak audit, AI consulting Indianapolis, operational diagnostics, leak audit, business autopsy, conversion forensics";
 
   const defaultFaqs = [
-    { question: "What is a Business Forensics Operator?", answer: "A forensic operator examines the working parts of your business — sales motion, ops, marketing, fulfillment — and finds the specific places where revenue, time, or trust is leaking. Unlike a generalist consultant, the deliverable is named leaks with dollar costs, not slide decks." },
+    { question: "What is a Chaos Theory Forensics Operator?", answer: "A forensic operator examines the working parts of your business — sales motion, ops, marketing, fulfillment — and finds the specific places where revenue, time, or trust is leaking. Unlike a generalist consultant, the deliverable is named leaks with dollar costs, not slide decks." },
     { question: "What is The Leak Audit™?", answer: "A 7-step forensic methodology: 1) Intake autopsy, 2) Funnel pressure test, 3) Quote-to-close inspection, 4) Follow-up pulse check, 5) Ops friction map, 6) Tooling drag analysis, 7) Leak ledger with prioritized fixes. Self-scan free at /leak-audit. Operator-led Forensic Diagnostic is $2,500 flat, applied toward engagement." },
     { question: "Why hire Aetheris instead of a typical consultant?", answer: "Most consultants bring frameworks. We bring a forensic posture: assume the leak exists, find it, prove it with numbers, then close it. No 90-day discovery phases, no slide-deck deliverables. The first deliverable is a named leak with a dollar figure attached." },
     { question: "Where is Aetheris based?", answer: "Indianapolis, Indiana. We work with operators across the U.S., but Indy is home base." },
