@@ -1137,9 +1137,8 @@ export const AdminCareersPanel: React.FC = () => {
         </CardContent>
       </Card>
 
-      <AdminCareersPayments />
-
       <AdminCareersTest />
+
 
       <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
