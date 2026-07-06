@@ -346,6 +346,26 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                         Traces back to the hub. Click again for details.
                       </p>
                     )}
+                    {n.affects && n.affects.length > 0 && (
+                      <div className="mt-3 pt-2 border-t border-crimson/25">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-crimson mb-1.5">
+                          Ripple effect
+                        </div>
+                        <ul className="space-y-1.5">
+                          {n.affects.map((f, fi) => {
+                            const target = nodes[idToIndex.get(f.id) ?? -1];
+                            return (
+                              <li key={fi} className="text-[11px] md:text-xs leading-snug">
+                                <span className="font-forensic font-bold text-crimson">
+                                  → {target?.label ?? f.id}:
+                                </span>{" "}
+                                <span className="text-foreground/80">{f.note}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
                     {n.onClick && (
                       <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">
                         Tap again to open →
