@@ -291,7 +291,7 @@ export const ChaosMindMap: React.FC = () => {
                   <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
                     isActive ? 'text-amber' : isFixed ? 'text-foreground' : 'text-foreground/85'
                   }`}>
-                    {s.label}
+                    {displayLabel}
                   </div>
                 </div>
               </button>
