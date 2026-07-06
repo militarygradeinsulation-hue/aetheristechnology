@@ -802,6 +802,51 @@ export const AdminCareersPanel: React.FC = () => {
               </Button>
             )}
           </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Age:</span>
+            {([
+              { k: 'all', label: 'All time' },
+              { k: '7', label: '≤ 7 days' },
+              { k: '30', label: '≤ 30 days' },
+              { k: '90', label: '≤ 90 days' },
+              { k: 'over30', label: '> 30 days' },
+              { k: 'over90', label: '> 90 days' },
+            ] as const).map(v => (
+              <Button key={v.k} size="sm" variant={ageFilter === v.k ? 'default' : 'outline'}
+                onClick={() => setAgeFilter(v.k)}
+                className={`h-7 ${ageFilter === v.k ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                {v.label}
+              </Button>
+            ))}
+          </div>
+          {tab === 'apps' && (
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+              <span className="font-mono uppercase text-muted-foreground">Cleanup:</span>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') === 'no'), 'all rejected')}>
+                {bulkBusy === 'archive' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Archive className="w-3 h-3 mr-1" />}
+                Archive rejected
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') !== 'archived' && (a.stage || 'new') !== 'interview' && ageDays(a.created_at) > 90), 'older than 90 days, not in interview')}>
+                <Archive className="w-3 h-3 mr-1" /> Archive &gt; 90 days
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-destructive/40 text-destructive hover:bg-destructive/10"
+                disabled={!!bulkBusy || archivedCount === 0}
+                onClick={() => bulkDeleteApps(applications.filter(a => (a.stage || 'new') === 'archived'), 'all archived')}>
+                {bulkBusy === 'delete' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                Delete all archived ({archivedCount})
+              </Button>
+              <Button size="sm" variant="ghost" className={`h-7 ${autoArchiveEnabled ? 'text-amber' : 'text-muted-foreground'}`}
+                onClick={toggleAutoArchive}
+                title="When ON, rejected applicants older than 30 days are auto-archived on load">
+                <ArchiveRestore className="w-3 h-3 mr-1" />
+                Auto-archive rejected &gt; 30d: {autoArchiveEnabled ? 'ON' : 'OFF'}
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {loading ? <div className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div> : (
