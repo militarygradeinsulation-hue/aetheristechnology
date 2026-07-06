@@ -348,6 +348,39 @@ const LeakLanderPage: React.FC = () => {
 
 
 
+          {/* CUSTOM BUILD — specific idea or tool */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "280ms", animationFillMode: "both" }}
+          >
+            <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6 text-center">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Custom Build</div>
+              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
+                Have a specific idea or tool you want built? <span className="text-amber italic">I can build it.</span>
+              </h2>
+              <p className="mt-3 text-sm text-foreground/80 leading-relaxed max-w-2xl mx-auto">
+                One-off automations, internal AI tools, custom diagnostics, scraping pipelines, private dashboards — whatever your business actually needs. If it doesn't exist yet, we'll build it from scratch and hand it to you working.
+              </p>
+              <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="default"
+                  onClick={() => setBookingOpen(true)}
+                  className="h-11 px-6 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Tell me what you want built
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </div>
+              <p className="mt-3 text-xs text-foreground/60 italic">
+                Scoped, priced, and delivered — no ongoing retainers unless you want them.
+              </p>
+            </div>
+          </section>
+
+
+
+
           {/* FAQ — the honest version */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
