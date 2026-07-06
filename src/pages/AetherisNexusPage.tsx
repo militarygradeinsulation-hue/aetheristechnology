@@ -579,14 +579,30 @@ export default function AetherisNexusPage() {
               Aetheris 3.5
             </span>
           </div>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-            title="Back to website"
-          >
-            <Home size={14} />
-            <span className="hidden sm:inline">Home</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigate("/login")}
+              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Sign in or create an account"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => navigate("/rep-portal")}
+              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Sign in with your Rep ID"
+            >
+              Rep ID
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Back to website"
+            >
+              <Home size={14} />
+              <span className="hidden sm:inline">Home</span>
+            </button>
+          </div>
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
         </header>
 
