@@ -247,12 +247,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
               <div key={o.id} className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ left: `${o.x}%`, top: `${o.y}%` }}>
                 <div className={`flex flex-col items-center transition-opacity ${dim ? "opacity-30" : "opacity-100"}`}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-sm border-2 flex items-center justify-center bg-background/90 ${
                     isFixed ? "border-amber shadow-[0_0_18px_hsl(var(--amber)/0.45)]" : "border-amber/50"
                   }`}>
-                    <OIcon className="w-4 h-4 md:w-5 md:h-5 text-amber" />
+                    <OIcon className="w-6 h-6 md:w-7 md:h-7 text-amber" />
                   </div>
-                  <div className="mt-1 font-case text-[9px] md:text-[10px] uppercase tracking-widest text-amber">{o.label}</div>
+                  <div className="mt-1.5 font-case text-xs md:text-sm uppercase tracking-widest text-amber">{o.label}</div>
                 </div>
               </div>
             );
@@ -260,12 +260,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
 
           <div className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${HUB.x}%`, top: `${HUB.y}%` }}>
-            <div className={`relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
+            <div className={`relative w-32 h-32 md:w-36 md:h-36 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
               isFixed ? "border-amber shadow-[0_0_40px_hsl(var(--amber)/0.5)]" : "border-crimson shadow-[0_0_40px_hsl(var(--crimson)/0.45)]"
             }`}>
-              <Target className={`w-4 h-4 mb-0.5 ${isFixed ? "text-amber" : "text-crimson"}`} />
-              <div className={`font-case text-[9px] uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
-              <div className="font-forensic text-[10px] md:text-xs font-bold text-foreground leading-tight mt-0.5">
+              <Target className={`w-6 h-6 mb-1 ${isFixed ? "text-amber" : "text-crimson"}`} />
+              <div className={`font-case text-[11px] md:text-xs uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
+              <div className="font-forensic text-sm md:text-base font-bold text-foreground leading-tight mt-1">
                 {data.source?.label || (isFixed ? "Sealed" : "Bleeding")}
               </div>
             </div>
@@ -286,20 +286,20 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
                 style={{ left: `${s.x}%`, top: `${s.y}%` }}>
                 <div className={`relative flex flex-col items-center will-change-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}
                   style={{ animation: `chaosFloat ${dur}s ease-in-out ${delay}s infinite` }}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/95 border-2 flex items-center justify-center ${
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center ${
                     isFixed
                       ? "border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]"
                       : isActive
                         ? "border-amber bg-amber/15 shadow-[0_0_20px_hsl(var(--amber)/0.5)]"
                         : "border-crimson/60 group-hover:border-crimson shadow-[0_0_12px_hsl(var(--crimson)/0.3)]"
                   }`}>
-                    <SIcon className={`w-4 h-4 md:w-5 md:h-5 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
+                    <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
                   </div>
-                  <div className={`mt-1 font-forensic text-[10px] md:text-xs font-bold leading-tight whitespace-nowrap max-w-[130px] text-center ${
+                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap max-w-[160px] text-center ${
                     isActive ? "text-amber" : "text-foreground/85"
                   }`}>{s.label}</div>
                   {s.dollar_leak && (
-                    <div className={`font-mono text-[9px] md:text-[10px] uppercase tracking-widest mt-0.5 whitespace-nowrap ${
+                    <div className={`font-mono text-[11px] md:text-xs uppercase tracking-widest mt-1 whitespace-nowrap ${
                       isFixed ? "text-amber/70" : "text-crimson/90"
                     }`}>{s.dollar_leak}</div>
                   )}
