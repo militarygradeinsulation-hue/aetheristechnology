@@ -401,7 +401,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
   }, [positions]);
 
   return (
-    <div className="relative w-full h-[820px] md:h-[920px] lg:h-[1000px]">
+    <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
@@ -686,21 +686,10 @@ const IndustriesPage: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Mind-map view on tablet/desktop */}
-                <div className="hidden md:block">
-                  <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
-                </div>
-                {/* Compact list on mobile */}
-                <div className="grid grid-cols-1 gap-3 md:hidden">
-                  {filtered.map((v) => (
-                    <IndustryCard
-                      key={v.slug}
-                      v={v}
-                      onOpen={() => setSelectedIndustry(v)}
-                    />
-                  ))}
-                </div>
+                {/* Mind-map view — all breakpoints */}
+                <MindMap industries={filtered} onOpen={(v) => setSelectedIndustry(v)} />
               </>
+
             )}
           </div>
         </section>
