@@ -155,11 +155,24 @@ export const AdminCareersPayments: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                        Paid, no test taken yet <ExternalLink className="w-3 h-3 ml-1" />
-                      </Badge>
+                      <div className="flex items-center gap-2 justify-end flex-wrap">
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                          Paid, no test taken yet
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sendLink(p)}
+                          disabled={sending === p.id || !p.email || !p.stripe_session_id}
+                          className="h-7 text-xs"
+                        >
+                          {sending === p.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                          Email test link
+                        </Button>
+                      </div>
                     )}
                   </div>
+
                 </div>
               );
             })}
