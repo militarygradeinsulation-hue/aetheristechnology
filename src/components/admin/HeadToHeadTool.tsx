@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { TakeoverWarRoom } from "./TakeoverWarRoom";
 
 type Category = {
   name: string;
