@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
             <span className="text-sm text-muted-foreground">© {currentYear} Aetheris · Chaos Theory Forensics</span>
           </div>
           <p className="font-case text-[10px] uppercase tracking-widest text-amber/80 text-center md:text-right">
-            Proven · Forensic-Verified · Operator-Only · Risk-Free Diagnosis
+            Chaos Theory Forensics · Real Findings · No Sugar
           </p>
         </div>
       </div>
