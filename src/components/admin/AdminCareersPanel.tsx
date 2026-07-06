@@ -13,7 +13,7 @@ import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
   ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
-  Star, CalendarPlus, Share2, Copy, Trash2,
+  Star, CalendarPlus, Share2, Copy, Trash2, ChevronDown, ChevronRight, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
 import { AdminCareersPayments } from './AdminCareersPayments';
@@ -92,7 +92,24 @@ export const AdminCareersPanel: React.FC = () => {
   const [minFitScore, setMinFitScore] = useState<string>('');
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
-  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
+  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no' | 'archived'>('all');
+  const [ageFilter, setAgeFilter] = useState<'all' | '7' | '30' | '90' | 'over30' | 'over90'>('all');
+  const [minimized, setMinimized] = useState<boolean>(() => {
+    try { return localStorage.getItem('aetheris_careers_minimized') !== '0'; } catch { return true; }
+  });
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleMinimized = () => {
+    setMinimized(m => {
+      const next = !m;
+      try { localStorage.setItem('aetheris_careers_minimized', next ? '1' : '0'); } catch {}
+      if (next) setExpandedIds(new Set());
+      return next;
+    });
+  };
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  };
+  const [bulkBusy, setBulkBusy] = useState<string | null>(null);
   const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('aetheris_saved_candidates') || '[]')); }
@@ -206,9 +223,24 @@ export const AdminCareersPanel: React.FC = () => {
   const minFit = minFitScore === '' ? null : Number(minFitScore);
   const matchesText = (name: string | null, email: string, code: string | null) =>
     !q || (name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q) || (code || '').toLowerCase().includes(q);
+
+  const now = Date.now();
+  const ageDays = (iso: string | null | undefined) => iso ? (now - new Date(iso).getTime()) / 86400000 : 0;
+  const matchesAge = (iso: string | null | undefined) => {
+    if (ageFilter === 'all') return true;
+    const d = ageDays(iso);
+    if (ageFilter === '7') return d <= 7;
+    if (ageFilter === '30') return d <= 30;
+    if (ageFilter === '90') return d <= 90;
+    if (ageFilter === 'over30') return d > 30;
+    if (ageFilter === 'over90') return d > 90;
+    return true;
+  };
+
   const filteredAttempts = attempts.filter(a =>
     matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-    (minTest == null || (a.score_pct ?? -1) >= minTest)
+    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+    matchesAge(a.submitted_at || a.started_at)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
 
@@ -225,19 +257,28 @@ export const AdminCareersPanel: React.FC = () => {
   const countFor = (email: string | null | undefined) =>
     attemptCountByEmail[(email || '').toLowerCase().trim()] || 0;
   const filteredApps = applications
-    .filter(a =>
-      matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-      (minTest == null || (a.score_pct ?? -1) >= minTest) &&
-      (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
-      (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
-      (stageFilter === 'all' || (a.stage || 'new') === stageFilter)
-    )
+    .filter(a => {
+      const stage = a.stage || 'new';
+      // By default hide archived unless user is looking at "all" with age > filter or explicitly at "archived"
+      if (stageFilter === 'all' && stage === 'archived') return false;
+      return (
+        matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+        (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+        (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+        (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
+        (stageFilter === 'all' || stage === stageFilter) &&
+        matchesAge(a.created_at)
+      );
+    })
     .sort((a, b) => {
       if (fitSort === 'none') return 0;
       const av = a.ai_fit_score ?? -1;
       const bv = b.ai_fit_score ?? -1;
       return fitSort === 'desc' ? bv - av : av - bv;
     });
+
+  const archivedCount = applications.filter(a => (a.stage || 'new') === 'archived').length;
+
 
   const openResume = async (shareCode: string) => {
     const popup = window.open('', '_blank');
@@ -372,7 +413,7 @@ export const AdminCareersPanel: React.FC = () => {
   };
 
   const [stageSavingId, setStageSavingId] = useState<string | null>(null);
-  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no') => {
+  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no' | 'archived') => {
     setStageSavingId(shareCode);
     const prev = applications;
     setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, stage } : a));
@@ -420,6 +461,75 @@ export const AdminCareersPanel: React.FC = () => {
       toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setDeletingId(null); }
   };
+
+  // Bulk archive / delete helpers
+  const bulkArchive = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to archive' }); return; }
+    if (!window.confirm(`Archive ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? They'll be hidden from the default view but not deleted.`)) return;
+    setBulkBusy('archive');
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try { await updateApp(t.share_code, { stage: 'archived' }); ok++; } catch { fail++; }
+    }
+    setApplications(prev => prev.map(a => targets.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+    setBulkBusy(null);
+    toast({ title: `Archived ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  const bulkDeleteApps = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to delete' }); return; }
+    if (!window.confirm(`PERMANENTLY DELETE ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? This removes applications AND attempts. Cannot be undone.`)) return;
+    setBulkBusy('delete');
+    const token = getAdminToken();
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try {
+        const { error } = await supabase.functions.invoke('careers-test', {
+          body: { action: 'admin_delete_application', share_code: t.share_code },
+          headers: { 'x-admin-token': token || '' },
+        });
+        if (error) throw error;
+        ok++;
+      } catch { fail++; }
+    }
+    const codes = new Set(targets.map(t => t.share_code));
+    setApplications(prev => prev.filter(a => !codes.has(a.share_code)));
+    setAttempts(prev => prev.filter(a => !codes.has(a.share_code || '')));
+    setBulkBusy(null);
+    toast({ title: `Deleted ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  // Auto-archive rejected applicants older than 30 days on load (one-time per session, opt-in via localStorage flag)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('aetheris_careers_autoarchive') !== '1') return;
+    } catch { return; }
+    if (!applications.length) return;
+    const stale = applications.filter(a => (a.stage || 'new') === 'no' && ageDays(a.created_at) > 30);
+    if (!stale.length) return;
+    (async () => {
+      for (const t of stale) {
+        try { await updateApp(t.share_code, { stage: 'archived' }); } catch {}
+      }
+      setApplications(prev => prev.map(a => stale.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+      toast({ title: `Auto-archived ${stale.length} old rejected applicant${stale.length === 1 ? '' : 's'}` });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applications.length]);
+
+  const autoArchiveEnabled = (() => {
+    try { return localStorage.getItem('aetheris_careers_autoarchive') === '1'; } catch { return false; }
+  })();
+  const toggleAutoArchive = () => {
+    try {
+      const next = !autoArchiveEnabled;
+      localStorage.setItem('aetheris_careers_autoarchive', next ? '1' : '0');
+      toast({ title: next ? 'Auto-archive ON, rejected > 30 days will archive' : 'Auto-archive OFF' });
+      window.location.reload();
+    } catch {}
+  };
+
+
 
   const [sendingId, setSendingId] = useState<string | null>(null);
   const sendToWorkspace = async (a: Application, opts: { schedule: boolean }) => {
@@ -564,11 +674,15 @@ export const AdminCareersPanel: React.FC = () => {
             <CardTitle className="font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-amber" /> Candidates & Applications
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search name, email, code…" className="pl-7 h-8 w-64" />
               </div>
+              <Button size="sm" variant="outline" onClick={toggleMinimized} title={minimized ? 'Expand all cards' : 'Collapse all cards'}>
+                {minimized ? <ChevronRight className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
+                {minimized ? 'Expand' : 'Collapse'}
+              </Button>
               <Button size="sm" variant="outline" onClick={load} disabled={loading}>
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
@@ -662,13 +776,13 @@ export const AdminCareersPanel: React.FC = () => {
                     <ArrowUpAZ className="w-3 h-3 mr-1" /> Worst
                   </Button>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="text-muted-foreground">Stage:</span>
-                  {(['all', 'new', 'interview', 'wait', 'no'] as const).map(v => (
+                  {(['all', 'new', 'interview', 'wait', 'no', 'archived'] as const).map(v => (
                     <Button key={v} size="sm" variant={stageFilter === v ? 'default' : 'outline'}
                       onClick={() => setStageFilter(v)}
                       className={`h-7 capitalize ${stageFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
-                      {v}
+                      {v}{v === 'archived' && archivedCount > 0 ? ` (${archivedCount})` : ''}
                     </Button>
                   ))}
                 </div>
@@ -681,21 +795,101 @@ export const AdminCareersPanel: React.FC = () => {
                 ))}
               </>
             )}
-            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none') && (
+            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none' || ageFilter !== 'all') && (
               <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
-                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); }}>
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); setAgeFilter('all'); }}>
                 Clear
               </Button>
             )}
           </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Age:</span>
+            {([
+              { k: 'all', label: 'All time' },
+              { k: '7', label: '≤ 7 days' },
+              { k: '30', label: '≤ 30 days' },
+              { k: '90', label: '≤ 90 days' },
+              { k: 'over30', label: '> 30 days' },
+              { k: 'over90', label: '> 90 days' },
+            ] as const).map(v => (
+              <Button key={v.k} size="sm" variant={ageFilter === v.k ? 'default' : 'outline'}
+                onClick={() => setAgeFilter(v.k)}
+                className={`h-7 ${ageFilter === v.k ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                {v.label}
+              </Button>
+            ))}
+          </div>
+          {tab === 'apps' && (
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+              <span className="font-mono uppercase text-muted-foreground">Cleanup:</span>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') === 'no'), 'all rejected')}>
+                {bulkBusy === 'archive' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Archive className="w-3 h-3 mr-1" />}
+                Archive rejected
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') !== 'archived' && (a.stage || 'new') !== 'interview' && ageDays(a.created_at) > 90), 'older than 90 days, not in interview')}>
+                <Archive className="w-3 h-3 mr-1" /> Archive &gt; 90 days
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-destructive/40 text-destructive hover:bg-destructive/10"
+                disabled={!!bulkBusy || archivedCount === 0}
+                onClick={() => bulkDeleteApps(applications.filter(a => (a.stage || 'new') === 'archived'), 'all archived')}>
+                {bulkBusy === 'delete' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                Delete all archived ({archivedCount})
+              </Button>
+              <Button size="sm" variant="ghost" className={`h-7 ${autoArchiveEnabled ? 'text-amber' : 'text-muted-foreground'}`}
+                onClick={toggleAutoArchive}
+                title="When ON, rejected applicants older than 30 days are auto-archived on load">
+                <ArchiveRestore className="w-3 h-3 mr-1" />
+                Auto-archive rejected &gt; 30d: {autoArchiveEnabled ? 'ON' : 'OFF'}
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {loading ? <div className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div> : (
             <div className="space-y-2">
               {tab === 'apps' ? (
                 filteredApps.length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No applications submitted yet.</p> :
-                filteredApps.map(a => (
+                filteredApps.map(a => {
+                  const isCollapsed = minimized && !expandedIds.has(a.id);
+                  if (isCollapsed) {
+                    const stage = a.stage || 'new';
+                    return (
+                      <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 hover:border-amber/50 hover:bg-secondary/30 transition-colors">
+                        <button type="button" onClick={() => toggleExpanded(a.id)} className="w-full text-left px-3 py-2 flex items-center gap-2 flex-wrap">
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="font-display font-semibold text-foreground truncate">{a.candidate_name || a.candidate_email}</span>
+                          <Badge variant="outline" className="font-mono text-[10px] h-5">{a.share_code}</Badge>
+                          {a.score_pct != null && <Badge className="h-5 text-[10px] bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
+                          {a.ai_fit_score != null && (
+                            <Badge className={`h-5 text-[10px] border ${a.ai_fit_score >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 30 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              Fit {a.ai_fit_score}/60
+                            </Badge>
+                          )}
+                          {stage !== 'new' && (
+                            <Badge className={`h-5 text-[10px] capitalize border ${
+                              stage === 'interview' ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+                              stage === 'wait' ? 'bg-amber/20 text-amber border-amber/40' :
+                              stage === 'no' ? 'bg-destructive/20 text-destructive border-destructive/40' :
+                              stage === 'archived' ? 'bg-muted text-muted-foreground border-border' :
+                              'bg-muted'
+                            }`}>{stage}</Badge>
+                          )}
+                          {a.contacted && <Badge className="h-5 text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/40">Contacted</Badge>}
+                          <span className="ml-auto text-[10px] text-muted-foreground font-mono">{Math.floor(ageDays(a.created_at))}d ago</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
                   <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                    <button type="button" onClick={() => toggleExpanded(a.id)}
+                      className="text-[10px] font-mono uppercase text-muted-foreground hover:text-amber flex items-center gap-1 mb-2">
+                      <ChevronDown className="w-3 h-3" /> Collapse
+                    </button>
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2">
@@ -839,6 +1033,7 @@ export const AdminCareersPanel: React.FC = () => {
                         { k: 'interview', label: 'Move to interview', icon: CalendarCheck, cls: 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30' },
                         { k: 'wait', label: 'Wait', icon: Clock, cls: 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30' },
                         { k: 'no', label: 'No', icon: Ban, cls: 'bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30' },
+                        { k: 'archived', label: 'Archive', icon: Archive, cls: 'bg-muted text-muted-foreground border-border hover:bg-muted/70' },
                       ] as const).map(s => {
                         const Icon = s.icon;
                         const active = (a.stage || 'new') === s.k;
@@ -868,7 +1063,8 @@ export const AdminCareersPanel: React.FC = () => {
                       />
                     </div>
                   </div>
-                ))
+                  );
+                })
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
                 (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
@@ -876,7 +1072,7 @@ export const AdminCareersPanel: React.FC = () => {
                     key={a.id}
                     type="button"
                     onClick={() => setDetailAttempt(a)}
-                    className="w-full text-left rounded-lg border border-border/50 bg-secondary/20 p-3 hover:border-amber/60 hover:bg-secondary/30 transition-colors"
+                    className={`w-full text-left rounded-lg border border-border/50 bg-secondary/20 ${minimized ? 'px-3 py-2' : 'p-3'} hover:border-amber/60 hover:bg-secondary/30 transition-colors`}
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex-1 min-w-0">
@@ -905,13 +1101,18 @@ export const AdminCareersPanel: React.FC = () => {
                             ) : null;
                           })()}
                         </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
-                          {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
-                          <span>Started {fmt(a.started_at)}</span>
-                          {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
-                        </div>
-                        {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {!minimized && (
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+                            <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
+                            {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
+                            <span>Started {fmt(a.started_at)}</span>
+                            {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
+                          </div>
+                        )}
+                        {!minimized && a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {minimized && (
+                          <span className="text-[10px] text-muted-foreground font-mono ml-auto">{Math.floor(ageDays(a.submitted_at || a.started_at))}d ago</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
                         <Button
