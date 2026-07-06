@@ -21,6 +21,8 @@ interface Symptom {
   anchor: OpId;
   chaos: string;
   fixed: string;
+  dollar_leak?: string;
+  cascade?: string[];
   connections?: string[];
 }
 
