@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { X } from "lucide-react";
+import { useChaosPhysics, DEFAULT_TUNING, type ChaosTuning } from "@/hooks/useChaosPhysics";
+import { ChaosTuner } from "@/components/ChaosTuner";
 
 export type MindMapNodeData = {
   id: string;
