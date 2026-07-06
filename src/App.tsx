@@ -80,6 +80,7 @@ const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage")
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
+const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -146,6 +147,7 @@ const App = () => (
                       <Route path="/ai-implementation-checklist" element={<AIChecklistPage />} />
                       <Route path="/ai-checklist" element={<AIChecklistPage />} />
                       <Route path="/scan" element={<ScanPage />} />
+                      <Route path="/chaos-scan" element={<ChaosScanPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
