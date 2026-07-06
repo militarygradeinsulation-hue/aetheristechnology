@@ -401,7 +401,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpen: (v: IndustryLeak) 
   }, [positions]);
 
   return (
-    <div className="relative w-full h-[820px] md:h-[920px] lg:h-[1000px]">
+    <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
