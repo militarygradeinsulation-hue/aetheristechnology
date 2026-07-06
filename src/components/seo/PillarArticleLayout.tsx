@@ -63,7 +63,7 @@ const PillarArticleLayout: React.FC<PillarArticleProps> = ({
     author: {
       '@type': 'Person',
       name: 'Joseph Toney',
-      jobTitle: 'Founder, Aetheris · Revenue Forensics Operator',
+      jobTitle: 'Founder, Aetheris · Chaos Theory Forensics Operator',
       alumniOf: 'Liberty University',
       url: `${SITE}/`,
     },
@@ -88,7 +88,7 @@ const PillarArticleLayout: React.FC<PillarArticleProps> = ({
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Aetheris', item: SITE },
-      { '@type': 'ListItem', position: 2, name: 'Revenue Forensics', item: `${SITE}/revenue-forensics` },
+      { '@type': 'ListItem', position: 2, name: 'Chaos Theory Forensics', item: `${SITE}/revenue-forensics` },
       { '@type': 'ListItem', position: 3, name: title, item: url },
     ],
   };
@@ -121,7 +121,7 @@ const PillarArticleLayout: React.FC<PillarArticleProps> = ({
         <nav aria-label="Breadcrumb" className="mb-6 text-xs font-case uppercase tracking-widest text-muted-foreground">
           <Link to="/" className="hover:text-amber">Aetheris</Link>
           <span className="mx-2">/</span>
-          <Link to="/revenue-forensics" className="hover:text-amber">Revenue Forensics</Link>
+          <Link to="/revenue-forensics" className="hover:text-amber">Chaos Theory Forensics</Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">{tier === 'question' ? 'Question' : 'Pillar'}</span>
         </nav>

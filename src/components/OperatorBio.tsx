@@ -33,7 +33,7 @@ export const OperatorBio: React.FC = () => {
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
               Joseph Toney,{" "}
-              <span className="text-amber">Business Forensics Operator</span>
+              <span className="text-amber">Chaos Theory Forensics Operator</span>
             </h2>
             <p className="mt-3 text-base text-muted-foreground max-w-2xl mx-auto">
               Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
@@ -107,7 +107,7 @@ export const OperatorBio: React.FC = () => {
               <p className="text-base md:text-lg text-foreground/90 leading-relaxed">
                 I work with growth-minded businesses running $5M to $50M that know they should be further along.
                 Marine Corps veteran. MS Marketing, Liberty University, 4.0 GPA. This year I begin my doctorate
-                in Digital Forensics — formally defining Revenue Forensics as a new field. Based in Noblesville,
+                in Digital Forensics — formally defining Chaos Theory Forensics as a new field. Based in Noblesville,
                 Indiana.
               </p>
 

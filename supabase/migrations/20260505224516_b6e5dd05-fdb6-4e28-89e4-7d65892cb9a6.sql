@@ -110,7 +110,7 @@ CREATE TRIGGER trg_careers_questions_updated_at
 -- ===========================================================
 INSERT INTO public.careers_questions (question, choices, correct_choice_id, category, difficulty) VALUES
 -- Positioning (10)
-('What is Aetheris''s positioning?', '[{"id":"a","text":"Marketing agency"},{"id":"b","text":"Business Forensics Operator"},{"id":"c","text":"AI consultancy"},{"id":"d","text":"Web development shop"}]'::jsonb, 'b', 'positioning', 1),
+('What is Aetheris''s positioning?', '[{"id":"a","text":"Marketing agency"},{"id":"b","text":"Chaos Theory Forensics Operator"},{"id":"c","text":"AI consultancy"},{"id":"d","text":"Web development shop"}]'::jsonb, 'b', 'positioning', 1),
 ('Complete the hook: "Your business is leaking. You just can''t see it from ___."', '[{"id":"a","text":"the outside"},{"id":"b","text":"the inside"},{"id":"c","text":"your CRM"},{"id":"d","text":"your dashboard"}]'::jsonb, 'b', 'positioning', 1),
 ('Which methodology does Aetheris own?', '[{"id":"a","text":"The Growth Stack"},{"id":"b","text":"The Leak Audit"},{"id":"c","text":"The 7-Step Funnel"},{"id":"d","text":"The Forensic Framework"}]'::jsonb, 'b', 'positioning', 1),
 ('Aetheris sees itself as a ___, not a consultant.', '[{"id":"a","text":"vendor"},{"id":"b","text":"operator"},{"id":"c","text":"freelancer"},{"id":"d","text":"coach"}]'::jsonb, 'b', 'positioning', 1),

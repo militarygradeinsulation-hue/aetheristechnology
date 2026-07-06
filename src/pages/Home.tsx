@@ -24,7 +24,7 @@ const Home = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Business Forensics Operator | Aetheris"
+        title="Chaos Theory Forensics Operator | Aetheris"
         description="Most growth-stage businesses are bleeding time, leads, and revenue without knowing where. I help established businesses uncover what is actually broken beneath the surface and build the systems to fix it."
         path="/home"
         keywords="business forensics, revenue leak audit, True Cost Forensics, Indianapolis, operator"
@@ -37,7 +37,7 @@ const Home = () => {
         <main>
           <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
             Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
-            Aetheris Business Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
+            Aetheris Chaos Theory Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
           </h1>
 
           <section className="px-4 py-8 max-w-3xl mx-auto text-center">

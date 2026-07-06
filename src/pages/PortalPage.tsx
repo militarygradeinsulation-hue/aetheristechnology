@@ -799,11 +799,11 @@ const PortalPage: React.FC = () => {
             </Card>
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2"><Search className="w-5 h-5 text-amber" /><CardTitle className="font-display">Revenue Forensics</CardTitle></div>
+                <div className="flex items-center gap-2"><Search className="w-5 h-5 text-amber" /><CardTitle className="font-display">Chaos Theory Forensics</CardTitle></div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="rounded-lg overflow-hidden border border-border/50 bg-card/50">
-                  <img src={revenueForensicsBreakdown} alt="Revenue Forensics breakdown" className="w-full h-auto" loading="lazy" />
+                  <img src={revenueForensicsBreakdown} alt="Chaos Theory Forensics breakdown" className="w-full h-auto" loading="lazy" />
                 </div>
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                   <div className="flex items-start gap-3 min-w-0">

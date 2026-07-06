@@ -345,7 +345,7 @@ serve(async (req) => {
       const attachmentTextBlock = signedAtts.length
         ? `\n\n--\nAttachments:\n${signedAtts.map(a => `• ${a.name} (${Math.round(a.size / 1024)} KB) — ${a.signed_url}`).join("\n")}`
         : "";
-      const finalText = `${bodyText}${attachmentTextBlock}${sigBlock}\n\nAetheris — Business Forensics Operator\nhttps://aetheris.technology`;
+      const finalText = `${bodyText}${attachmentTextBlock}${sigBlock}\n\nAetheris — Chaos Theory Forensics Operator\nhttps://aetheris.technology`;
       const brandHtml = `
 <table cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #2a2a2a;padding-top:12px;font-family:Inter,Arial,sans-serif;font-size:12px;color:#6b7280;">
   <tr>
@@ -356,7 +356,7 @@ serve(async (req) => {
     </td>
     <td style="vertical-align:middle;line-height:1.4;">
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#111827;font-weight:600;letter-spacing:0.2px;">Aetheris</div>
-      <div style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;">Business Forensics Operator</div>
+      <div style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;">Chaos Theory Forensics Operator</div>
       <div style="margin-top:2px;"><a href="https://aetheris.technology" target="_blank" style="color:#d97706;text-decoration:none;font-weight:600;">aetheris.technology</a></div>
     </td>
   </tr>

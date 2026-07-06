@@ -13,7 +13,7 @@ const FIELDS: { key: string; label: string; placeholder: string; type?: 'textare
   { key: 'target_audience', label: 'Target audience', placeholder: 'Owners doing $1M-$5M' },
   { key: 'tone', label: 'Default tone', placeholder: 'Direct, no fluff' },
   { key: 'sender_name', label: 'Your name (sender)', placeholder: 'Joseph T.' },
-  { key: 'sender_title', label: 'Your title', placeholder: 'Business Forensics Operator' },
+  { key: 'sender_title', label: 'Your title', placeholder: 'Chaos Theory Forensics Operator' },
   { key: 'sender_email', label: 'Your email address', placeholder: 'you@yourdomain.com', help: "Used as the 'from' account when you click a lead's email." },
   { key: 'email_provider', label: 'Email provider', placeholder: '', type: 'select', options: [
     { value: 'default', label: 'System default (mailto:)' },
@@ -22,7 +22,7 @@ const FIELDS: { key: string; label: string; placeholder: string; type?: 'textare
     { value: 'yahoo', label: 'Yahoo Mail (web)' },
   ], help: "Which inbox opens when you click a lead's email." },
   { key: 'cta_link', label: 'Default CTA link', placeholder: 'https://aetheris.technology/leak-audit' },
-  { key: 'signature', label: 'Email signature', placeholder: 'First Name\nOperator\nAetheris Business Forensics\nhttps://businessforensics.tech/', type: 'textarea' },
+  { key: 'signature', label: 'Email signature', placeholder: 'First Name\nOperator\nAetheris Chaos Theory Forensics\nhttps://businessforensics.tech/', type: 'textarea' },
 ];
 
 export const WorkspaceSettings: React.FC = () => {

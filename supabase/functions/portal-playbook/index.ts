@@ -47,7 +47,7 @@ serve(async (req) => {
       {
         id: "seed-1", category: "Outreach", industry: null, is_published: true,
         title: "Cold email — Leak Audit hook",
-        body: `Subject: I found 3 leaks on your site\n\nHi {firstName},\n\nRan a 60-second forensic scan on {company} and tagged three Revenue Leaks costing roughly $X/month combined: a Follow-Up Failure on your contact form, a System Disconnect between your CRM and email, and Vocabulary Friction on your services page.\n\nNot pitching. Sharing the findings. 12-min walkthrough this week?\n\n— {repFirstName}\nAetheris Business Forensics`,
+        body: `Subject: I found 3 leaks on your site\n\nHi {firstName},\n\nRan a 60-second forensic scan on {company} and tagged three Revenue Leaks costing roughly $X/month combined: a Follow-Up Failure on your contact form, a System Disconnect between your CRM and email, and Vocabulary Friction on your services page.\n\nNot pitching. Sharing the findings. 12-min walkthrough this week?\n\n— {repFirstName}\nAetheris Chaos Theory Forensics`,
       },
       {
         id: "seed-2", category: "Outreach", industry: null, is_published: true,

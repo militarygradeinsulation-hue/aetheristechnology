@@ -105,14 +105,14 @@ export function organizationLd(): Record<string, unknown> {
     logo: OG_IMAGE,
     telephone: PHONE,
     email: EMAIL,
-    description: "Business Forensics Operator. Indianapolis-based AI consulting and operational diagnostics. The Leak Audit™ methodology finds and fixes the revenue your business is silently losing.",
+    description: "Chaos Theory Forensics Operator. Indianapolis-based AI consulting and operational diagnostics. The Leak Audit™ methodology finds and fixes the revenue your business is silently losing.",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Indianapolis",
       addressRegion: "IN",
       addressCountry: "US",
     },
-    founder: { "@type": "Person", name: "Joseph Toney", jobTitle: "Business Forensics Operator" },
+    founder: { "@type": "Person", name: "Joseph Toney", jobTitle: "Chaos Theory Forensics Operator" },
     sameAs: ["https://www.linkedin.com/company/aetheris-technology"],
   };
 }
@@ -154,7 +154,7 @@ export function renderFooter(): string {
   return `
     <footer>
       <hr />
-      <p><strong>Aetheris AI</strong> — Business Forensics Operator</p>
+      <p><strong>Aetheris AI</strong> — Chaos Theory Forensics Operator</p>
       <p>Indianapolis, Indiana</p>
       <p>Phone: <a href="tel:+13173762110">${PHONE}</a></p>
       <p>Email: <a href="mailto:${EMAIL}">${EMAIL}</a></p>

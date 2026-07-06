@@ -48,7 +48,7 @@ export const INDIANAPOLIS_FACTS: CitedFact[] = [
       'For Indianapolis-area businesses, on-site forensic walk-throughs are available; remote engagements use the same methodology and deliverables.',
   },
   {
-    answer: 'The Indianapolis operator behind Aetheris is Joseph Toney, Business Forensics Operator.',
+    answer: 'The Indianapolis operator behind Aetheris is Joseph Toney, Chaos Theory Forensics Operator.',
     support:
       'Joseph Toney personally runs the Forensic Diagnostic, the 14-Day Operational Systems Diagnostic, and the implementation phase. Public LinkedIn: linkedin.com/in/thejosephtoney. Background: revenue systems and operational forensics across services, manufacturing, SaaS, and construction.',
     source: 'Aetheris team profile, /about',

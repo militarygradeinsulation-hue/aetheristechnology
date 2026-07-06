@@ -80,7 +80,7 @@ CONTENT (first 500 chars): ${post.content?.substring(0, 500)}
 You must classify this post into EXACTLY ONE of these three pillars:
 1. "marketingTech" — Marketing Technology Strategy, CRM, RevOps, lead generation, attribution, marketing automation
 2. "consulting" — Business Consulting & Operational Systems, process optimization, change management, strategic planning
-3. "aiTransformation" — AI & Revenue Forensics, artificial intelligence, automation, machine learning, data-driven
+3. "aiTransformation" — AI & Chaos Theory Forensics, artificial intelligence, automation, machine learning, data-driven
 
 You must also classify the funnel stage as one of: "Awareness", "Consideration", "Conversion"
 

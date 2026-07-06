@@ -42,7 +42,7 @@ const SECTIONS: ScriptSection[] = [
 
 We are not consultants. We are not an operator. We are not "AI experts."
 
-We are Business Forensics Operators. Our job is to walk into a business, find where it's leaking money, time, and trust — and seal those leaks before the owner loses another quarter.
+We are Chaos Theory Forensics Operators. Our job is to walk into a business, find where it's leaking money, time, and trust — and seal those leaks before the owner loses another quarter.
 
 Our positioning is simple: "Your business is leaking. You just can't see it from the inside." That is the only sentence you ever need to memorize. Everything we sell flows from that one truth.
 

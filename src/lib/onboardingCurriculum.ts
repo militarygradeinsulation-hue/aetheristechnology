@@ -37,7 +37,7 @@ export const ONBOARDING_CURRICULUM: OnboardingModuleDef[] = [
     slug: "welcome",
     title: "Welcome to Aetheris",
     summary: "Who we are, what we sell, and how the commission math actually works.",
-    scriptOutline: `Welcome a brand-new sales rep to Aetheris Technology, a Business Forensics operator based in Indianapolis.
+    scriptOutline: `Welcome a brand-new sales rep to Aetheris Technology, a Chaos Theory Forensics operator based in Indianapolis.
 Cover the positioning in one line: "Your business is leaking. You just can't see it from the inside." We do not sell tools. We sell the operator who wields the tools.
 The public site offers exactly five things, in this order:
   1) Signal Pack — $2,500 one-time, operator-led bundle (~6 hrs).

@@ -16,7 +16,7 @@ const CLUSTERS: Cluster[] = [
     title: 'Strategy & Consulting',
     tagline: 'AI strategy consulting that ties every initiative to ROI.',
     items: [
-      'Revenue Forensics Strategy',
+      'Chaos Theory Forensics Strategy',
       'Live DOM Scanner Setup',
       'Use Case Prioritization',
       'AI Maturity Assessment',

@@ -27,7 +27,7 @@ const SECTIONS: Section[] = [
     subtitle: "Use this as the first thing you say after the handshake. It frames everything else.",
     icon: Building2,
     bullets: [
-      "Aetheris Technology is a Business Forensics firm. We are not consultants. We are operators.",
+      "Aetheris Technology is a Chaos Theory Forensics firm. We are not consultants. We are operators.",
       'Our hook: "Your business is leaking, you just can\'t see it from the inside." We find the leaks, then we fix them.',
       "Our methodology is The Leak Audit™, a 7-step forensic process. Anyone can run a free self-scan at aetheris.technology/leak-audit.",
       "Operator-led work starts with a $2,500 Forensic Diagnostic that gets credited toward the larger engagement.",

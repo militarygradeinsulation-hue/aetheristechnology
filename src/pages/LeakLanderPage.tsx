@@ -226,7 +226,7 @@ const LeakLanderPage: React.FC = () => {
             <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
               <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">What we actually do</div>
               <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Revenue Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
+                Chaos Theory Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
               </h2>
               <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
                 Every business has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
@@ -328,7 +328,7 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
                 Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
               </p>
-              <p className="mt-4 font-forensic text-lg font-bold text-amber">Business Forensics. Real Findings. No Sugar.</p>
+              <p className="mt-4 font-forensic text-lg font-bold text-amber">Chaos Theory Forensics. Real Findings. No Sugar.</p>
             </div>
           </section>
 
@@ -518,7 +518,7 @@ const LeakLanderPage: React.FC = () => {
               </div>
             </div>
             <p className="mt-2 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
-              Aetheris · Business Forensics · aetheris.technology
+              Aetheris · Chaos Theory Forensics · aetheris.technology
             </p>
           </section>
         </div>

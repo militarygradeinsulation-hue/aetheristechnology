@@ -18,7 +18,7 @@ export async function renderServices(
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
   const title = override?.title || "Services & Pricing — Forensic Diagnostic & Engagements | Aetheris AI";
-  const description = override?.description || "Forensic Diagnostic $2,500 flat. Engagement scoped per leak. Indianapolis-based Revenue Forensics Operator. No ongoing-billing roulette, no slide-deck deliverables.";
+  const description = override?.description || "Forensic Diagnostic $2,500 flat. Engagement scoped per leak. Indianapolis-based Chaos Theory Forensics Operator. No ongoing-billing roulette, no slide-deck deliverables.";
   const keywords = override?.keywords || "business forensics pricing, forensic diagnostic cost, AI consulting pricing Indianapolis, leak audit pricing, business consulting cost";
 
   const defaultFaqs = [

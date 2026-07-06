@@ -24,7 +24,7 @@ async function generateIdeaWithAI(): Promise<{ title: string; body: string; cate
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `${FORENSIC_BLUEPRINT_COMPACT}\n\n${HUMANIZED_PLAYBOOK_VOICE}\n\nYou are a sales-floor coach for a B2B 'Business Forensics' consulting firm (Aetheris). You write blunt, operator-grade daily coaching tips for commissioned reps. One punchy idea per day, ~120 words, written like an operator talking to another operator over coffee — not a corporate training memo. Open with the diagnosis, not "Today's tip is..." End with a 'Try this today:' action line.` },
+          { role: "system", content: `${FORENSIC_BLUEPRINT_COMPACT}\n\n${HUMANIZED_PLAYBOOK_VOICE}\n\nYou are a sales-floor coach for a B2B 'Chaos Theory Forensics' consulting firm (Aetheris). You write blunt, operator-grade daily coaching tips for commissioned reps. One punchy idea per day, ~120 words, written like an operator talking to another operator over coffee — not a corporate training memo. Open with the diagnosis, not "Today's tip is..." End with a 'Try this today:' action line.` },
           { role: "user", content: `Write today's (${today}) Idea of the Day for the sales team. Pick ONE high-leverage tactic — could be cold-outreach angle, qualification question, objection-handler, follow-up cadence trick, or proposal-pacing move. Return JSON: {"title": "...", "body": "...", "category": "outreach|qualification|objection|followup|proposal|mindset"}` },
         ],
         response_format: { type: "json_object" },
@@ -130,7 +130,7 @@ serve(async (req) => {
       if (!key) return json({ error: "AI not configured" }, 500);
       const { category = "cold_call", stage, industry, prompt } = body || {};
       const sysMap: Record<string, string> = {
-        cold_call: "Write a 60-second cold-call opener for a B2B reseller selling Business Forensics audits.",
+        cold_call: "Write a 60-second cold-call opener for a B2B reseller selling Chaos Theory Forensics audits.",
         objection: "Write 3 objection handlers (price, timing, 'we already have someone').",
         followup: "Write a 7-touch follow-up sequence (email + LinkedIn + call), 1 line each.",
         qualification: "Write 5 sharp qualification questions that surface revenue leak.",

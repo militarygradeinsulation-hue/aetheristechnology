@@ -57,7 +57,7 @@ async function planVideo(prompt: string, images: { id: string; url: string; labe
     },
   };
 
-  const sys = `You are an Aetheris (Business Forensics Operator) short-form video director.
+  const sys = `You are an Aetheris (Chaos Theory Forensics Operator) short-form video director.
 Voice: aggressive, blunt, non-corporate. Forensic > influencer. Real numbers > round numbers.
 Never use "Hey guys", "Today I'm going to". Open with the punch.
 Pick images from the provided list — do NOT invent ids.
@@ -219,7 +219,7 @@ serve(async (req) => {
       const count = Math.max(4, Math.min(20, Number(body.count) || 10));
       const exclude = Array.isArray(body.exclude) ? (body.exclude as string[]).slice(0, 80) : [];
 
-      const sys = `You are the Aetheris Business Forensics Operator. Generate sharp, specific short-form video TOPIC IDEAS for a 30-90 second forensic-style B2B video aimed at $5M-$50M owner-operators. Tone: blunt, non-corporate, operator > consultant, forensic > influencer. Each topic must be ONE SENTENCE, concrete, ideally with a number or dollar figure, no clichés, no emojis, no hashtags, no quote marks. Stay on-brand: revenue leaks, CRM hygiene, sales process, follow-up gaps, owner overload, AI-as-leak-finder, Indianapolis mid-market.`;
+      const sys = `You are the Aetheris Chaos Theory Forensics Operator. Generate sharp, specific short-form video TOPIC IDEAS for a 30-90 second forensic-style B2B video aimed at $5M-$50M owner-operators. Tone: blunt, non-corporate, operator > consultant, forensic > influencer. Each topic must be ONE SENTENCE, concrete, ideally with a number or dollar figure, no clichés, no emojis, no hashtags, no quote marks. Stay on-brand: revenue leaks, CRM hygiene, sales process, follow-up gaps, owner overload, AI-as-leak-finder, Indianapolis mid-market.`;
 
       const user = `Category: ${category === "All" ? "any of {Revenue Leaks, Systems & Ops, AI / Practical, Sales & Pipeline, Founder POV, Industry-Specific}" : category}.
 Generate ${count} BRAND NEW topic ideas. Avoid duplicating these existing ones:
@@ -263,7 +263,7 @@ Return ONLY a JSON object: { "topics": ["...", "...", ...] }. No prose.`;
       const excludeTopics = Array.isArray(body.excludeTopics) ? (body.excludeTopics as string[]).slice(0, 80) : [];
       const excludeRecipes = Array.isArray(body.excludeRecipes) ? (body.excludeRecipes as string[]).slice(0, 40) : [];
 
-      const sys = `You are the Aetheris Business Forensics Operator. You generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
+      const sys = `You are the Aetheris Chaos Theory Forensics Operator. You generate sharp, blunt, operator-grade short-form video ideas for $5M-$50M owner-operators. No clichés, no hashtags, no emojis, no quote marks, no corporate fluff. Forensic > influencer. Operator > consultant.`;
 
       const user = `Generate fresh ideas for an Idea Mixer used to compose 30-90s vertical videos.
 

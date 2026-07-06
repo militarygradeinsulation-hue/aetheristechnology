@@ -39,7 +39,7 @@ const week1: DayPlan6W[] = [
       title: "We are operators, not consultants.",
       body: `Consultants sell decks. Operators sell repairs.
 
-Aetheris is a Business Forensics firm. Our wedge: specialty manufacturers doing $5M–$25M in revenue. Our hook: "Your business is leaking. You just can't see it from the inside."
+Aetheris is a Chaos Theory Forensics firm. Our wedge: specialty manufacturers doing $5M–$25M in revenue. Our hook: "Your business is leaking. You just can't see it from the inside."
 
 The leak metaphor isn't marketing fluff — it's diagnostic language. A CEO can argue with "you should optimize your funnel." A CEO cannot argue with "you are bleeding $312K/year through stalled HubSpot deals." One sounds like an opinion. The other sounds like an autopsy.
 
@@ -944,7 +944,7 @@ Conversion benchmark: 60% of Diagnostic clients should sign the Active Case. If 
 
 3 referred reps each closing 2 Diagnostics/month = $3,000/month override income on top of your own commissions. This is how operators build leverage.
 
-The pitch to your network is forensic, not 'side hustle': "I'm building a sales team at a Business Forensics firm. Fixed flat fees, $5K/sale, $4K/month per active client. If you have a sales background and want to operate, not influence, let's talk."`,
+The pitch to your network is forensic, not 'side hustle': "I'm building a sales team at a Chaos Theory Forensics firm. Fixed flat fees, $5K/sale, $4K/month per active client. If you have a sales background and want to operate, not influence, let's talk."`,
     },
     sessions: [
       s("w6d27-s1", "Morning · Identify 5 Targets", 45, "Your future team.", [

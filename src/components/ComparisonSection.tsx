@@ -4,7 +4,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 
 // Category move: stop comparing to vendors. Anchor on the 5 structural moats
 // nobody else can replicate. This is not "us vs them" — this is "us vs an
-// empty category." Revenue Forensics has one operator. Period.
+// empty category." Chaos Theory Forensics has one operator. Period.
 const MOATS: Array<{ id: string; name: string; one: string; detail: string }> = [
   {
     id: '01',
@@ -56,7 +56,7 @@ export const ComparisonSection: React.FC = () => {
             We don't compete. <span className="text-amber italic">We invented the category.</span>
           </h2>
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed mt-5 max-w-[68ch]">
-            Revenue Forensics has one operator. Five structural advantages, none of them positioning — each one a thing nobody else has built and nobody else can ship by next quarter. When a prospect hears it for the first time, the sentence we want is the one we get: <span className="text-foreground italic">"I've never heard of anything like that."</span>
+            Chaos Theory Forensics has one operator. Five structural advantages, none of them positioning — each one a thing nobody else has built and nobody else can ship by next quarter. When a prospect hears it for the first time, the sentence we want is the one we get: <span className="text-foreground italic">"I've never heard of anything like that."</span>
           </p>
         </RevealOnScroll>
 

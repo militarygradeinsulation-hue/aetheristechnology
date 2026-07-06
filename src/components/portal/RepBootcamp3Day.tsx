@@ -52,7 +52,7 @@ const PROGRAM: DayPlan[] = [
             expand: (
               <div className="space-y-3">
                 <Block title="What we are">
-                  Aetheris is a <strong>Business Forensics</strong> firm. We are operators, not consultants, not influencers, not a marketing operator. We diagnose where a business is bleeding money, time, and attention — and then we seal the leaks.
+                  Aetheris is a <strong>Chaos Theory Forensics</strong> firm. We are operators, not consultants, not influencers, not a marketing operator. We diagnose where a business is bleeding money, time, and attention — and then we seal the leaks.
                 </Block>
                 <Block title="The hook (memorize verbatim)">
                   "Your business is leaking. You just can't see it from the inside."

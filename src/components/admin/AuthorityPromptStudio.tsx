@@ -41,7 +41,7 @@ const AuthorityPromptStudio: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('sales-chat', {
         body: {
           messages: [
-            { role: 'system', content: 'You are an Aetheris Revenue Forensics content writer. Follow the user\'s instructions exactly. Output the finished piece only — no preamble.' },
+            { role: 'system', content: 'You are an Aetheris Chaos Theory Forensics content writer. Follow the user\'s instructions exactly. Output the finished piece only — no preamble.' },
             { role: 'user', content: compiled },
           ],
         },

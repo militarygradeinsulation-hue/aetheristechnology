@@ -251,7 +251,7 @@ function briefingToText(b: Briefing): string {
       lines.push('');
     }
   }
-  lines.push('— Aetheris Technology · Business Forensics Division · Indianapolis');
+  lines.push('— Aetheris Technology · Chaos Theory Forensics Division · Indianapolis');
   return lines.join('\n');
 }
 

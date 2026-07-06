@@ -9,7 +9,7 @@ export function buildDefaultSignature(fullName?: string | null): string {
   return [
     first,
     'Operator',
-    'Aetheris Business Forensics',
+    'Aetheris Chaos Theory Forensics',
     'https://businessforensics.tech/',
     LOGO_URL,
   ].filter(Boolean).join('\n');

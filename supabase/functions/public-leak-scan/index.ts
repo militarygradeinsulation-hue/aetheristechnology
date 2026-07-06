@@ -34,7 +34,7 @@ function leadOnlyFallback(url: string) {
   };
 }
 
-const FORENSIC_SYSTEM = `You are an Aetheris Business Forensics operator. Given a company's website scan summary, produce a CROSS-FUNCTIONAL forensic leak audit. You are NOT a website reviewer. Diagnose the business across seven operational surfaces.
+const FORENSIC_SYSTEM = `You are an Aetheris Chaos Theory Forensics operator. Given a company's website scan summary, produce a CROSS-FUNCTIONAL forensic leak audit. You are NOT a website reviewer. Diagnose the business across seven operational surfaces.
 
 Return STRICT JSON (no prose, no markdown):
 {

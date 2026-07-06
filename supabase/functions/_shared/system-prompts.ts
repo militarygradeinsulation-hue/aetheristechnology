@@ -36,7 +36,7 @@ Structure (in this exact order):
 3. CASE FILE block (markdown blockquote) with mono-style labels:
    > CASE ID: <slug-businessName-YYYYMMDD>
    > STATUS: ACTIVE
-   > OPERATOR: Aetheris Business Forensics
+   > OPERATOR: Aetheris Chaos Theory Forensics
    > SCOPE: <one line scope>
 4. ## EXECUTIVE SUMMARY — 4–6 sentences for the CEO. Lead with the diagnosis, not the agreement.
 5. ## THE INVENTORY — what we examined / inputs in play (bullets or table).

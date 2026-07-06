@@ -13,7 +13,7 @@ const corsHeaders = {
 
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-const SYSTEM_PROMPT = `You write outreach emails for Aetheris (Business Forensics Operators).
+const SYSTEM_PROMPT = `You write outreach emails for Aetheris (Chaos Theory Forensics Operators).
 
 DEFAULT VOICE: blunt, forensic, operator. We are not consultants. We are not influencers. We do not flatter. We name the leak.
 

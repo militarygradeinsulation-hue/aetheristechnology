@@ -72,7 +72,7 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
       messages: [
         {
           role: "system",
-          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks.
+          content: `You are a B2B prospecting analyst for Aetheris Technology — a Chaos Theory Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks.
 
 ICP — TWO TRACKS, both valid:
   TRACK A (B2B / pro services): small-to-mid-market businesses, 10–500 employees, revenue $1M–$50M — HubSpot/Salesforce users, legacy shops, professional services, SaaS, e-commerce, B2B in Indianapolis / Indiana / Midwest.

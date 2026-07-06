@@ -12,7 +12,7 @@ const WhyUsPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Why Aetheris. Business Forensics, Not Consulting"
+        title="Why Aetheris. Chaos Theory Forensics, Not Consulting"
         description="Why owner-led businesses choose Aetheris over traditional consultants: forensic proof over strategy decks, fixed fees, $2,500 Forensic Diagnostic applied toward engagement."
         path="/why-us"
         keywords="why aetheris, business forensics vs consulting, revenue leak audit Indianapolis, operator-led diagnostic, fixed-fee consulting"
