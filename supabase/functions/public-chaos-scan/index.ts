@@ -59,7 +59,7 @@ async function fcScrape(url: string, formats: any[], timeoutMs = 25_000): Promis
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
