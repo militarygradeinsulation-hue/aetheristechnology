@@ -105,6 +105,8 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
       {result && (
         <div className="space-y-8">
           <QuickDownloadBar toolType="brand_contradictions" title={`${form.url}, Brand audit, ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
+          {/* Chaos-theory mind map — every contradiction and how they compound */}
+          <ChaosScanReport data={contradictionsToChaos(form.url, result.contradictions || [])} />
           {/* Score */}
           <div className="glass rounded-xl p-8 border border-border text-center">
             <h2 className="text-2xl font-bold text-foreground font-display mb-2">Brand Alignment Score</h2>
