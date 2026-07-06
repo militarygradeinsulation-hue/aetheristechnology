@@ -80,6 +80,7 @@ const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage")
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
+const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
