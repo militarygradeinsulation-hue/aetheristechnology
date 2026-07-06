@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, Eye, MousePointerClick, Search as SearchIcon, Users, RefreshCw } from 'lucide-react';
+import { Activity, Eye, MousePointerClick, Search as SearchIcon, Users, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+
 import { getAdminToken } from '@/lib/adminAuth';
 
 type TopItem = { key: string; count: number };
@@ -24,6 +25,15 @@ export const AdminLiveTrafficBar: React.FC = () => {
   const [data, setData] = useState<LiveTraffic | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const v = window.localStorage.getItem('admin_live_traffic_collapsed');
+    return v === null ? true : v === '1';
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('admin_live_traffic_collapsed', collapsed ? '1' : '0'); } catch {}
+  }, [collapsed]);
+
 
   const load = async () => {
     try {
@@ -81,17 +91,27 @@ export const AdminLiveTrafficBar: React.FC = () => {
   );
 
   return (
-    <section className="rounded-xl border border-amber/30 bg-background/60 backdrop-blur p-4 mb-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+    <section className="rounded-xl border border-amber/30 bg-background/60 backdrop-blur px-4 py-2 mb-4">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setCollapsed(c => !c)}
+          className="flex items-center gap-2 group"
+          title={collapsed ? 'Expand' : 'Minimize'}
+        >
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
           </span>
           <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber">Live Site Traffic · Last 24h</span>
-        </div>
+          {collapsed && data && (
+            <span className="font-mono text-[10px] text-muted-foreground ml-2">
+              {data.active_now} now · {data.sessions_window} visitors · {data.page_views} views · {data.clicks} clicks
+            </span>
+          )}
+          {collapsed ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" /> : <ChevronUp className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />}
+        </button>
         <div className="flex items-center gap-3">
-          {data && (
+          {data && !collapsed && (
             <span className="text-[10px] text-muted-foreground font-mono">
               updated {new Date(data.generated_at).toLocaleTimeString()}
             </span>
@@ -107,25 +127,30 @@ export const AdminLiveTrafficBar: React.FC = () => {
         </div>
       </div>
 
-      {err && <div className="text-xs text-destructive mb-2">{err}</div>}
+      {!collapsed && (
+        <div className="mt-3">
+          {err && <div className="text-xs text-destructive mb-2">{err}</div>}
 
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Stat icon={Activity} label="Active Now" value={data?.active_now ?? '—'} sub="last 5 min" />
-        <Stat icon={Users} label="Visitors (24h)" value={data?.sessions_window ?? '—'} sub={`${data?.active_last_hour ?? 0} in last hour`} />
-        <Stat icon={Eye} label="Page Views" value={data?.page_views ?? '—'} />
-        <Stat icon={MousePointerClick} label="Clicks" value={data?.clicks ?? '—'} />
-        <Stat icon={SearchIcon} label="Searches / Scans" value={data?.searches ?? '—'} />
-      </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <Stat icon={Activity} label="Active Now" value={data?.active_now ?? '—'} sub="last 5 min" />
+            <Stat icon={Users} label="Visitors (24h)" value={data?.sessions_window ?? '—'} sub={`${data?.active_last_hour ?? 0} in last hour`} />
+            <Stat icon={Eye} label="Page Views" value={data?.page_views ?? '—'} />
+            <Stat icon={MousePointerClick} label="Clicks" value={data?.clicks ?? '—'} />
+            <Stat icon={SearchIcon} label="Searches / Scans" value={data?.searches ?? '—'} />
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <TopList title="Top Pages" items={data?.top_pages ?? []} emptyHint="No page views yet." />
-        <TopList title="Top Clicks" items={data?.top_clicks ?? []} emptyHint="No tracked clicks yet." />
-        <TopList title="Top Searches" items={data?.top_searches ?? []} emptyHint="No searches or scans yet." />
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <TopList title="Top Pages" items={data?.top_pages ?? []} emptyHint="No page views yet." />
+            <TopList title="Top Clicks" items={data?.top_clicks ?? []} emptyHint="No tracked clicks yet." />
+            <TopList title="Top Searches" items={data?.top_searches ?? []} emptyHint="No searches or scans yet." />
+          </div>
 
-      <div className="mt-2 text-[10px] text-muted-foreground font-mono">
-        Tip: ask the Operator Assistant "what are people clicking on?" or "show me live traffic".
-      </div>
+          <div className="mt-2 text-[10px] text-muted-foreground font-mono">
+            Tip: ask the Operator Assistant "what are people clicking on?" or "show me live traffic".
+          </div>
+        </div>
+      )}
     </section>
   );
 };
+
