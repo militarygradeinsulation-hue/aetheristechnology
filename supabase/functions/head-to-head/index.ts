@@ -123,15 +123,22 @@ Output STRICT JSON only, no prose, matching this schema:
     "winner": "you" | "rival" | "tie",
     "gapSummary": string                    // 1-2 sentence why
   },
-  "categories": [                           // exactly these 8 categories, in this order
-    { "name": "Positioning & Messaging",  "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string },
-    { "name": "Offer Clarity & Pricing",  ... },
-    { "name": "Proof & Credibility",      ... },
-    { "name": "Visual & Brand Identity",  ... },
-    { "name": "Conversion Path & CTAs",   ... },
-    { "name": "Content Depth & SEO",      ... },
-    { "name": "Trust & Risk Reduction",   ... },
-    { "name": "Differentiation",          ... }
+  "battlefield": {
+    "youMonthlyBleedUsd": number,           // total estimated $/mo YOU are bleeding across all 8 categories, integer USD
+    "rivalMonthlyBleedUsd": number,         // total estimated $/mo RIVAL is bleeding, integer USD
+    "recoverableIfFixedUsd": number,        // total $/mo YOU could reclaim in 90 days if you close your top leaks
+    "stealableFromRivalUsd": number,        // total $/mo YOU could steal from rival by exploiting their weaknesses in 90 days
+    "verdictLine": string                   // one blunt line, e.g. "Every month you leave this un-fixed = $18,400 gone."
+  },
+  "categories": [                           // exactly these 8 categories, in this order — every field required
+    { "name": "Positioning & Messaging",  "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Offer Clarity & Pricing",  "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Proof & Credibility",      "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Visual & Brand Identity",  "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Conversion Path & CTAs",   "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Content Depth & SEO",      "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Trust & Risk Reduction",   "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number },
+    { "name": "Differentiation",          "youScore": number, "rivalScore": number, "winner": "you"|"rival"|"tie", "why": string, "youEvidence": string, "rivalEvidence": string, "fix": string, "youMonthlyDollarImpact": number, "rivalMonthlyDollarImpact": number, "roiIfFixedUsd": number }
   ],
   "youWins": string[],                       // 3-6 specific things you beat them at, with evidence
   "rivalWins": string[],                     // 3-6 specific things they beat you at, with evidence
