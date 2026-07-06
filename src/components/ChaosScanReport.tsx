@@ -86,9 +86,8 @@ const orderedPath = (sx: number, sy: number, ex: number, ey: number) => {
   const mx = (sx + ex) / 2, my = (sy + ey) / 2;
   return `M ${sx} ${sy} Q ${mx} ${my}, ${ex} ${ey}`;
 };
-function layoutSymptoms(symptoms: Symptom[]): Array<Symptom & { x: number; y: number }> {
+function layoutSymptoms(symptoms: Symptom[], rx = 42, ry = 34): Array<Symptom & { x: number; y: number }> {
   const n = symptoms.length || 1;
-  const rx = 42, ry = 34;
   return symptoms.map((s, i) => {
     const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
     const x = Math.round((HUB.x + Math.cos(angle) * rx) * 10) / 10;
