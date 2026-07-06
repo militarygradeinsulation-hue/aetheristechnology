@@ -238,6 +238,7 @@ Return STRICT JSON of shape:
     {
       "id": "kebab-case-id",
       "label": "2-4 word Aetheris-style forensic symptom name (see NAMING STYLE)",
+      "fixed_label": "2-4 word positive-outcome name for what this looks like once the source is sealed (e.g. 'Leads worked in-window', 'Churn caught early', 'Cash reclaimed'). Never repeat the chaos label.",
       "icon": "ghost | trending-down | unplug | wallet | flame | zap | alert | eye-off | phone-off | receipt | clock | scale",
       "anchor": "scan | price | fix",
       "chaos": "one blunt sentence naming the specific pain on THIS business.",
