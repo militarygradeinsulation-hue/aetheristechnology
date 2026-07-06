@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, FileSearch, Gauge, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,6 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { Button } from '@/components/ui/button';
+import { ChaosMindMap } from '@/components/ChaosMindMap';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
