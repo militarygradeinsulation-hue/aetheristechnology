@@ -260,12 +260,12 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
 
           <div className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${HUB.x}%`, top: `${HUB.y}%` }}>
-            <div className={`relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
+            <div className={`relative w-32 h-32 md:w-36 md:h-36 rounded-full bg-background border-2 flex flex-col items-center justify-center text-center px-2 ${
               isFixed ? "border-amber shadow-[0_0_40px_hsl(var(--amber)/0.5)]" : "border-crimson shadow-[0_0_40px_hsl(var(--crimson)/0.45)]"
             }`}>
-              <Target className={`w-4 h-4 mb-0.5 ${isFixed ? "text-amber" : "text-crimson"}`} />
-              <div className={`font-case text-[9px] uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
-              <div className="font-forensic text-[10px] md:text-xs font-bold text-foreground leading-tight mt-0.5">
+              <Target className={`w-6 h-6 mb-1 ${isFixed ? "text-amber" : "text-crimson"}`} />
+              <div className={`font-case text-[11px] md:text-xs uppercase tracking-widest ${isFixed ? "text-amber" : "text-crimson"}`}>The source</div>
+              <div className="font-forensic text-sm md:text-base font-bold text-foreground leading-tight mt-1">
                 {data.source?.label || (isFixed ? "Sealed" : "Bleeding")}
               </div>
             </div>
