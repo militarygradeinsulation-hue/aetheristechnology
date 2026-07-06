@@ -106,7 +106,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     intake: I([
       { name: "dataSources", label: "Customer data sources you can share (emails, Slack, support tickets, reviews...)", type: "textarea", required: true },
       { name: "currentPositioning", label: "Current positioning / messaging in one paragraph", type: "textarea", required: true },
-      { name: "competitors", label: "Top 2–3 competitors", type: "text" },
+      { name: "competitors", label: "Top 2-3 competitors", type: "text" },
     ])},
   { priceId: "revenue_leak_detector_once", title: "The Revenue Leak Detector", tier: "1M IQ · Core",
     intake: I([
@@ -119,7 +119,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     intake: I([
       { name: "currentCopy", label: "Paste current homepage hero / primary messaging", type: "textarea", required: true },
       { name: "buyerEmotions", label: "What you THINK your buyer feels before buying", type: "textarea", required: true },
-      { name: "competitorCopy", label: "1–2 competitor headlines for contrast", type: "textarea" },
+      { name: "competitorCopy", label: "1-2 competitor headlines for contrast", type: "textarea" },
     ])},
   { priceId: "opportunity_radar_once", title: "The Opportunity Radar", tier: "1M IQ · Core",
     intake: I([
@@ -233,7 +233,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     ])},
   { priceId: "account_growth_accelerator_monthly", title: "Account Growth Accelerator", tier: "1M IQ · Strategic",
     intake: I([
-      { name: "keyAccounts", label: "Top 10–20 key accounts (names + spend)", type: "textarea", required: true },
+      { name: "keyAccounts", label: "Top 10-20 key accounts (names + spend)", type: "textarea", required: true },
       { name: "expansionLevers", label: "Expansion levers in your model (seats, modules, departments)", type: "textarea", required: true },
     ])},
   { priceId: "operational_excellence_once", title: "Operational Excellence Auditor", tier: "1M IQ · Strategic",
@@ -252,7 +252,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
   { priceId: "disruption_predictor_once", title: "Disruption Predictor", tier: "1M IQ · Strategic",
     intake: I([
       { name: "industry", label: "Industry + sub-segment", type: "text", required: true },
-      { name: "currentModel", label: "Your current business model in 2–3 sentences", type: "textarea", required: true },
+      { name: "currentModel", label: "Your current business model in 2-3 sentences", type: "textarea", required: true },
       { name: "watchlist", label: "Players / tech you already watch", type: "textarea" },
     ])},
   { priceId: "org_structure_optimizer_once", title: "Org Structure Optimizer", tier: "1M IQ · Strategic",
@@ -283,7 +283,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "unfair_advantage_detector_once",
   "ltv_maximizer_once",
   "pmf_predictor_once",
-  // More 1M IQ Innovations (#11–#20, distinct from prior set)
+  // More 1M IQ Innovations (#11-#20, distinct from prior set)
   "conversation_intelligence_monthly",
   "deal_momentum_predictor_monthly",
   "competitive_stealing_blueprint_monthly",
@@ -291,7 +291,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "product_usage_optimization_monthly",
   "customer_research_automation_monthly",
   "sales_team_cloning_monthly",
-  // 1M IQ Innovations #31–#40 (skipped #34, #37, overlap with Customer Research Automation)
+  // 1M IQ Innovations #31-#40 (skipped #34, #37, overlap with Customer Research Automation)
   "hiring_predictor_monthly",
   "customer_health_score_monthly",
   "territory_intelligence_once",

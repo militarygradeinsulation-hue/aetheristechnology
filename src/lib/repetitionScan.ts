@@ -76,7 +76,7 @@ export function scanRepetition(texts: string[]): ScanReport {
   }
   const minPhrase = clean.length >= 6 ? 3 : 2;
 
-  // Repeated n-gram phrases (4–7 words)
+  // Repeated n-gram phrases (4-7 words)
   const merged = new Map<string, number>();
   for (const n of [4, 5, 6, 7]) {
     for (const [k, v] of ngramCounts(clean, n)) {

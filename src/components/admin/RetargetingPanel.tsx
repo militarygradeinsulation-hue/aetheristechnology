@@ -200,7 +200,7 @@ export const RetargetingPanel: React.FC = () => {
           <li>Toggle "Enable retargeting pixels" ON and Save</li>
           <li>Build the Suggested Audiences listed above in each ad platform</li>
           <li>Download the Email Match List CSV and upload as a Custom Audience</li>
-          <li>Launch a $20–50/day Sponsored Content / Boosted Post targeting non-converters</li>
+          <li>Launch a $20-50/day Sponsored Content / Boosted Post targeting non-converters</li>
         </ol>
       </div>
     </div>

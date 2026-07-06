@@ -33,7 +33,7 @@ const SECTIONS: Section[] = [
   },
   {
     title: '21-Day Diagnostic, deliverables',
-    body: 'Written report (15–30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic, runs on a CSV export.',
+    body: 'Written report (15-30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic, runs on a CSV export.',
   },
 ];
 
@@ -68,7 +68,7 @@ export function generateMethodologyPdf() {
   doc.setFontSize(9.5);
   doc.setTextColor(190, 185, 170);
   const intro = doc.splitTextToSize(
-    'How we define, measure, and attribute revenue leaks for specialty manufacturers ($5M–$25M). Sent to every prospect before pricing.',
+    'How we define, measure, and attribute revenue leaks for specialty manufacturers ($5M-$25M). Sent to every prospect before pricing.',
     contentW,
   );
   doc.text(intro, margin, 40);

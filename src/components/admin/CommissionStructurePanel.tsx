@@ -126,8 +126,8 @@ export const CommissionStructurePanel: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {t === 1 && 'Entry-level $29–$59. Built for volume + fast wins.'}
-                    {t === 2 && 'Mid-level $79–$349. Bread-and-butter consultative sales.'}
+                    {t === 1 && 'Entry-level $29-$59. Built for volume + fast wins.'}
+                    {t === 2 && 'Mid-level $79-$349. Bread-and-butter consultative sales.'}
                     {t === 3 && 'High-ticket $599+. Fewer points, big dollars per close.'}
                   </p>
                 </div>

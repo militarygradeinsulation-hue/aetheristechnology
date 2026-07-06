@@ -166,7 +166,7 @@ const ContactLookupPanel: React.FC = () => {
                     <div className="text-xs font-bold text-foreground mb-1">Work history</div>
                     {rr.job_history.map((j: any, i: number) => (
                       <div key={i} className="text-xs text-muted-foreground">
-                        {j.title} @ {j.company_name} {j.start_date ? `(${j.start_date}${j.end_date ? `–${j.end_date}` : '–present'})` : ''}
+                        {j.title} @ {j.company_name} {j.start_date ? `(${j.start_date}${j.end_date ? `-${j.end_date}` : '-present'})` : ''}
                       </div>
                     ))}
                   </div>

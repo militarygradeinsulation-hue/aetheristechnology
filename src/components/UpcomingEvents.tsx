@@ -106,7 +106,7 @@ export const UpcomingEvents: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 text-amber shrink-0" />
                       <span>
                         {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
-                        {end ? ` – ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : ''}
+                        {end ? ` - ${end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : ''}
                       </span>
                     </div>
                     {e.location && (

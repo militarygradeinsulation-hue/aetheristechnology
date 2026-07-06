@@ -38,9 +38,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     faqs: [
       { q: 'Who invented Chaos Theory Forensics?', a: 'Joseph Toney, founder of Aetheris, coined and defined the category in 2026. The methodology is documented in The Leak Audit™ and the Chaos Theory Forensics Framework.' },
       { q: 'Is Chaos Theory Forensics the same as a marketing audit?', a: 'No. A marketing audit reviews channels and campaigns. Chaos Theory Forensics reads every surface a customer touches — website, sales process, CRM, follow-up, systems, messaging — and produces named leaks with dollar impact. It is operational, not channel-specific.' },
-      { q: 'How is Chaos Theory Forensics different from consulting?', a: 'Consulting delivers recommendations. Chaos Theory Forensics delivers evidence — a live scan, a Revenue Score (0–100), and named leaks mapped to specific one-time fixes starting at $39.' },
+      { q: 'How is Chaos Theory Forensics different from consulting?', a: 'Consulting delivers recommendations. Chaos Theory Forensics delivers evidence — a live scan, a Revenue Score (0-100), and named leaks mapped to specific one-time fixes starting at $39.' },
       { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. Operator-led Forensic Diagnostics start at $2,500. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case engagements run $15,000/month with a three-month minimum and are reserved for Diagnostic clients.' },
-      { q: 'Who is Chaos Theory Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M–$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
+      { q: 'Who is Chaos Theory Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M-$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
     ],
     body: (
       <>
@@ -60,11 +60,11 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <p>Each finding is written into the <Link to="/glossary#leak-register">Leak Register</Link> with a severity, an estimated dollar impact, and a specific fix.</p>
 
         <h2>What is the Revenue Score?</h2>
-        <p>A 0–100 score that summarizes the forensic state of a business. 100 means no detected leaks. Below 70 means the business is losing meaningful revenue to operational gaps. The score is the public, shareable artifact only Aetheris issues. See <Link to="/revenue-score">how to get a Revenue Score</Link>.</p>
+        <p>A 0-100 score that summarizes the forensic state of a business. 100 means no detected leaks. Below 70 means the business is losing meaningful revenue to operational gaps. The score is the public, shareable artifact only Aetheris issues. See <Link to="/revenue-score">how to get a Revenue Score</Link>.</p>
 
         <h2>What does Chaos Theory Forensics deliver?</h2>
         <ul>
-          <li>A <strong>Revenue Score</strong> (0–100) for the scanned business.</li>
+          <li>A <strong>Revenue Score</strong> (0-100) for the scanned business.</li>
           <li>A <strong>Leak Register</strong> — every detected leak named, evidenced, and dollarized.</li>
           <li>A <strong>Case File</strong> — the living document tracking what's open, what's been fixed, and what was recovered.</li>
           <li>A specific <strong>fix path</strong> — either a one-time tool (starting at $39) or an operator-led engagement.</li>
@@ -94,7 +94,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'What is the difference between a leak and a weakness?', a: 'A weakness is a general observation ("your website is slow"). A leak is specific, measurable, and fixable: "Your contact form fires no tracking pixel. 100% of form submissions are invisible to your ads platform. Estimated $4,200/mo in wasted spend."' },
-      { q: 'How many leaks does the average business have?', a: 'Across the businesses we have scanned, the median count is 11 named leaks. Critical leaks (Severity 4+) average 2–3 per business.' },
+      { q: 'How many leaks does the average business have?', a: 'Across the businesses we have scanned, the median count is 11 named leaks. Critical leaks (Severity 4+) average 2-3 per business.' },
       { q: 'What is the most expensive single leak type?', a: 'Broken or missing follow-up sequences. The average dollar impact across our scans is the highest of any leak category — typically several multiples of monthly ad spend.' },
       { q: 'Can a leak be fixed once or does it need ongoing work?', a: 'Most individual leaks are one-time fixes — install the pixel, write the sequence, restructure the CTA. The Active Case engagement exists when a business has many leaks that need coordinated execution.' },
       { q: 'How are leak dollar impacts calculated?', a: 'Each leak category has a defined estimation method documented in the Methodology page. Lead-loss leaks use the business\'s own conversion rate and average deal size. Tracking leaks use ad spend and attribution gap percentage. The math is visible — not a black box.' },
@@ -113,7 +113,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         </ol>
 
         <h2>What evidence does Aetheris produce for each leak?</h2>
-        <p>Every leak in the Leak Register includes: a name, the surface where it was detected, the literal evidence (screenshot, network trace, CRM record), a severity (1–5), an estimated dollar impact with the calculation visible, and a specific fix mapped to a tool or engagement.</p>
+        <p>Every leak in the Leak Register includes: a name, the surface where it was detected, the literal evidence (screenshot, network trace, CRM record), a severity (1-5), an estimated dollar impact with the calculation visible, and a specific fix mapped to a tool or engagement.</p>
 
         <h2>How does severity work?</h2>
         <p>Severity is calculated from impact × frequency × confidence. A leak that costs $10k/month and happens to every visitor with high evidence confidence is Severity 5. A leak that costs $200/month with intermittent occurrence is Severity 1.</p>
@@ -127,8 +127,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
   {
     path: '/revenue-score',
     title: 'How do I get a Revenue Score for my business?',
-    metaTitle: 'Revenue Score: free 0–100 forensic score for any business | Aetheris',
-    description: 'The Revenue Score is a 0–100 forensic grade only Aetheris issues. Get yours in 30 seconds from a live scan of your business. Free. Shareable. Public.',
+    metaTitle: 'Revenue Score: free 0-100 forensic score for any business | Aetheris',
+    description: 'The Revenue Score is a 0-100 forensic grade only Aetheris issues. Get yours in 30 seconds from a live scan of your business. Free. Shareable. Public.',
     quickAnswer: 'Run the Website Gap Scanner at aetheris.technology/scan. The Live DOM Scanner reads your business in 30 seconds and returns a Revenue Score from 0 to 100. The score is free, shareable, and the only public forensic standard issued by Aetheris. Below 70 means meaningful revenue is being lost.',
     lastUpdated: UPDATED,
     tier: 'pillar',
@@ -139,9 +139,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'Is the Revenue Score free?', a: 'Yes. The first scan and score are free. The detailed Leak Register and fix path are gated behind a quick form.' },
-      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60–70% of what a full forensic scan finds. The operator-led Forensic Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
+      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60-70% of what a full forensic scan finds. The operator-led Forensic Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
       { q: 'Can I share my Revenue Score?', a: 'Yes — that is the point. The Revenue Score is designed as a public, citable standard. Use it on LinkedIn, in proposals, in board decks.' },
-      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70–84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a Forensic Diagnostic is warranted.' },
+      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70-84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a Forensic Diagnostic is warranted.' },
       { q: 'Can I run the scan on a competitor?', a: 'Yes. The Competitor Teardown points the same scanner at any URL and returns a Revenue Score plus the named leaks. It is one of the structural moats of the platform.' },
     ],
     body: (
@@ -156,12 +156,12 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
           <li>Messaging consistency and vocabulary friction — 15%</li>
           <li>Follow-up posture and reachable channels — 10%</li>
         </ul>
-        <p>Each surface is scored 0–100 by the live scanner; the composite is the public Revenue Score.</p>
+        <p>Each surface is scored 0-100 by the live scanner; the composite is the public Revenue Score.</p>
 
         <h2>What the score reveals</h2>
         <p>A Revenue Score of 62 with a critical Trust leak and two Lead Capture leaks tells you exactly where the money is going. The score is not a vanity number — every point lost is mapped to a finding.</p>
 
-        <h2>Why issue a public 0–100 standard?</h2>
+        <h2>Why issue a public 0-100 standard?</h2>
         <p>Because the category does not have one yet. SEO has Domain Authority. Credit has FICO. Website performance has Lighthouse. Chaos Theory Forensics has the Revenue Score. The scoreboard is the wedge that turns a one-time scan into a tracked, shareable, comparable measurement.</p>
       </>
     ),
@@ -182,7 +182,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'Why a framework instead of just an audit?', a: 'An audit is a deliverable. A framework is a repeatable system. The framework runs the same way for a $5M manufacturer as for a $25M services firm — that is what makes Chaos Theory Forensics a category, not a project.' },
-      { q: 'How long does the full framework take?', a: 'Step 1 (Scan) and Step 2 (Score) take 30 seconds. Steps 3–5 (Name, Evidence, Dollarize) are the 21-Day Revenue Diagnostic. Steps 6–7 (Fix, Track) live inside an Active Case.' },
+      { q: 'How long does the full framework take?', a: 'Step 1 (Scan) and Step 2 (Score) take 30 seconds. Steps 3-5 (Name, Evidence, Dollarize) are the 21-Day Revenue Diagnostic. Steps 6-7 (Fix, Track) live inside an Active Case.' },
       { q: 'Do you publish the framework openly?', a: 'Yes. The full methodology is at /methodology. The category vocabulary is at /glossary. The intent is that anyone — including buyers comparing options — can read exactly how Aetheris works.' },
       { q: 'What makes the framework hard to copy?', a: 'The Live DOM Scanner. Anyone can write a methodology document. Only Aetheris has the proprietary scanner that produces evidence at the speed and depth the framework requires.' },
       { q: 'Can a business apply the framework without hiring Aetheris?', a: 'The free scan and the seven-step Leak Audit at /leak-audit let any owner walk the framework manually. Most cannot execute the fixes themselves — that is where the operator-led engagements come in.' },
@@ -192,7 +192,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <h2>The seven steps</h2>
         <ol>
           <li><strong>Scan</strong> — Live DOM read of every customer-facing surface.</li>
-          <li><strong>Score</strong> — 0–100 Revenue Score issued and recorded.</li>
+          <li><strong>Score</strong> — 0-100 Revenue Score issued and recorded.</li>
           <li><strong>Name</strong> — every leak gets a category, a label, and a severity.</li>
           <li><strong>Evidence</strong> — screenshot, network trace, CRM record, or transcript proves the finding.</li>
           <li><strong>Dollarize</strong> — each leak gets an estimated dollar impact with the math visible.</li>
@@ -218,8 +218,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'Are marketing agencies bad?', a: 'No. They are a different category. A good agency is the right hire when the business needs new awareness, new creative, or new channels. Agencies and Chaos Theory Forensics solve different problems.' },
-      { q: 'Can I have both?', a: 'Yes — and most $5M–$25M businesses should. The agency runs the channels; the Chaos Theory Forensics operator ensures the channels are not leaking the leads they generate.' },
-      { q: 'Is Aetheris cheaper than an agency?', a: 'A typical marketing agency retainer in this segment runs $5,000–$15,000/month indefinitely. The flagship 21-Day Revenue Diagnostic is $18,500 one time. Active Case is $15,000/month with a defined three-month minimum, not an indefinite contract.' },
+      { q: 'Can I have both?', a: 'Yes — and most $5M-$25M businesses should. The agency runs the channels; the Chaos Theory Forensics operator ensures the channels are not leaking the leads they generate.' },
+      { q: 'Is Aetheris cheaper than an agency?', a: 'A typical marketing agency retainer in this segment runs $5,000-$15,000/month indefinitely. The flagship 21-Day Revenue Diagnostic is $18,500 one time. Active Case is $15,000/month with a defined three-month minimum, not an indefinite contract.' },
       { q: 'Why does Aetheris not call itself an agency?', a: 'Because the category is different. An agency is in the business of producing creative and managing channels. Aetheris is in the business of finding and fixing operational leaks. The word "agency" misframes the engagement.' },
       { q: 'What if my agency is the leak?', a: 'It happens. The forensic scan reveals when ad spend is leaking because of attribution gaps the agency missed, or when content is leaking because of conversion architecture the agency does not own. The scan is neutral — it reads the surfaces, not the agency relationship.' },
     ],
@@ -230,7 +230,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
           <thead><tr><th>Dimension</th><th>Marketing Agency</th><th>Chaos Theory Forensics</th></tr></thead>
           <tbody>
             <tr><td>Scope</td><td>Channel + creative production</td><td>Operational + conversion forensics</td></tr>
-            <tr><td>Pricing model</td><td>Typically $5–15K/mo indefinite</td><td>$18.5K flat Diagnostic + optional 3-mo Active Case</td></tr>
+            <tr><td>Pricing model</td><td>Typically $5-15K/mo indefinite</td><td>$18.5K flat Diagnostic + optional 3-mo Active Case</td></tr>
             <tr><td>Deliverable</td><td>Campaigns, content, channel reports</td><td>Revenue Score + Leak Register + fixes</td></tr>
             <tr><td>Timeframe</td><td>Ongoing</td><td>Defined start and close</td></tr>
             <tr><td>Best when</td><td>Need awareness or new creative</td><td>Activity exists but is leaking</td></tr>
@@ -263,11 +263,11 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { label: 'Why am I getting leads but not closing them?', href: '/why-am-i-not-closing-leads' },
     ],
     faqs: [
-      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30–40% of their leaks unaided. The operator-led Forensic Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
-      { q: 'What is the single most common leak in $5M–$25M businesses?', a: 'Slow follow-up. Across our scans, the median first-touch lag from form submission to first human reply is over 18 hours. Industry data is unambiguous that this destroys conversion.' },
+      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30-40% of their leaks unaided. The operator-led Forensic Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
+      { q: 'What is the single most common leak in $5M-$25M businesses?', a: 'Slow follow-up. Across our scans, the median first-touch lag from form submission to first human reply is over 18 hours. Industry data is unambiguous that this destroys conversion.' },
       { q: 'How long does the scan take?', a: 'The free scan is 30 seconds. The full operator-led Forensic Diagnostic is 21 days and ends with a written Case File and 60-minute readout.' },
       { q: 'What tools do I need to run this myself?', a: 'A browser, your CRM access, your ad platform access, and a willingness to look at the actual numbers instead of the dashboard summary.' },
-      { q: 'What if I find a leak I cannot fix?', a: 'Most leaks have a $39–$300 one-time fix in the tool marketplace. The leaks that require coordination across multiple surfaces are the reason the Active Case engagement exists.' },
+      { q: 'What if I find a leak I cannot fix?', a: 'Most leaks have a $39-$300 one-time fix in the tool marketplace. The leaks that require coordination across multiple surfaces are the reason the Active Case engagement exists.' },
     ],
     body: (
       <>
@@ -284,7 +284,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <p>At each surface, ask one forensic question: <em>what fraction of value entering this stage exits it?</em> Anywhere the fraction drops sharply is a leak. Name it. Evidence it. Dollarize it.</p>
 
         <h2>The fastest path</h2>
-        <p>Run the free <Link to="/scan">Website Gap Scanner</Link> first — it surfaces the public-facing leaks in 30 seconds. Then walk surfaces 4–7 manually using the prompts in the <Link to="/leak-audit">free Leak Audit</Link>.</p>
+        <p>Run the free <Link to="/scan">Website Gap Scanner</Link> first — it surfaces the public-facing leaks in 30 seconds. Then walk surfaces 4-7 manually using the prompts in the <Link to="/leak-audit">free Leak Audit</Link>.</p>
       </>
     ),
   },
@@ -306,7 +306,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { q: 'Is the $18,500 a deposit or the total?', a: 'It is the total flat fee for the 21-Day Revenue Diagnostic. No percentage of savings. No hidden add-ons. If the engagement extends into an Active Case, the Diagnostic fee credits 1:1.' },
       { q: 'Is there a money-back guarantee?', a: 'The Diagnostic is fixed-fee work product. The Leak Register and Case File are delivered regardless. If the engagement does not produce at least one named leak worth more than the fee, the operator refunds the difference.' },
       { q: 'What is included in the $18,500?', a: 'The full seven-step framework: live scan, Revenue Score, complete Leak Register with evidence and dollarization, prioritized fix path, written Case File, 60-minute readout call.' },
-      { q: 'How does Aetheris pricing compare to a marketing agency?', a: 'A typical agency retainer in this segment runs $60–180K per year indefinitely. The Diagnostic is $18,500 one time. The Active Case option exists only when the operator-led execution is warranted by the diagnostic findings.' },
+      { q: 'How does Aetheris pricing compare to a marketing agency?', a: 'A typical agency retainer in this segment runs $60-180K per year indefinitely. The Diagnostic is $18,500 one time. The Active Case option exists only when the operator-led execution is warranted by the diagnostic findings.' },
       { q: 'Why a flat fee instead of percentage-of-savings?', a: 'Percentage-of-savings creates conflicting incentives — the operator over-counts savings to inflate the invoice. Flat fee aligns the operator with the buyer: do the work, deliver the evidence, charge a known number.' },
     ],
     body: (
@@ -333,7 +333,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     path: '/why-am-i-not-closing-leads',
     title: 'Why am I getting leads but not closing them?',
     description: 'Three forensic causes of leads that never close: response-time leaks, qualification leaks, follow-up gaps. Plus how to find which one is hurting you.',
-    quickAnswer: 'You are almost certainly losing them in one of three places: the first-touch response time is too long, the qualification step is missing or wrong, or the follow-up sequence stops after two touches. Forensic scans on $5M–$25M businesses find the first cause in ~62% of cases.',
+    quickAnswer: 'You are almost certainly losing them in one of three places: the first-touch response time is too long, the qualification step is missing or wrong, or the follow-up sequence stops after two touches. Forensic scans on $5M-$25M businesses find the first cause in ~62% of cases.',
     lastUpdated: UPDATED,
     tier: 'question',
     relatedLinks: [
@@ -342,7 +342,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'How fast should the first response be?', a: 'Under 5 minutes. Contacting a web lead within 5 minutes vs. 30 minutes increases the odds of qualifying the lead by approximately 9×.' },
-      { q: 'How many follow-up touches is enough?', a: 'Across our scans, businesses that average 7+ touches over 14 days convert inbound leads at roughly 2–3× the rate of businesses that stop at 3 touches.' },
+      { q: 'How many follow-up touches is enough?', a: 'Across our scans, businesses that average 7+ touches over 14 days convert inbound leads at roughly 2-3× the rate of businesses that stop at 3 touches.' },
       { q: 'What if the leads are bad?', a: 'Run a forensic scan first. In our experience the lead quality is rarely the real leak — the lead handling is. "Bad leads" is often the diagnosis when the real finding is unmeasured follow-up.' },
     ],
     body: (
@@ -351,7 +351,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
         <h3>1. Response-time leak</h3>
         <p>The lead submits a form. The notification goes to a shared inbox. Someone replies the next business day. The lead has already talked to two competitors. Industry data: response within 5 minutes increases qualification odds by ~9×. Check your literal median first-touch lag, not the dashboard estimate.</p>
         <h3>2. Qualification leak</h3>
-        <p>No defined qualification criteria. Every lead gets the same treatment. The good ones go cold while the operator works the loud ones. Fix: define 3–5 binary qualifiers before any handoff.</p>
+        <p>No defined qualification criteria. Every lead gets the same treatment. The good ones go cold while the operator works the loud ones. Fix: define 3-5 binary qualifiers before any handoff.</p>
         <h3>3. Follow-up gap</h3>
         <p>The sequence stops after two emails. The deal sits in "no response" forever. Deploy a 14-day cadence with named exits.</p>
 
@@ -380,7 +380,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     body: (
       <>
         <h2>The data</h2>
-        <p>The Lead Response Management Study (originally by InsideSales / Velocify, repeatedly replicated) found that the odds of qualifying a web lead drop by ~80% between 5 minutes and 30 minutes after submission. Our scans across $5M–$25M businesses find a median first-touch lag of <strong>18+ hours</strong>. The gap is the leak.</p>
+        <p>The Lead Response Management Study (originally by InsideSales / Velocify, repeatedly replicated) found that the odds of qualifying a web lead drop by ~80% between 5 minutes and 30 minutes after submission. Our scans across $5M-$25M businesses find a median first-touch lag of <strong>18+ hours</strong>. The gap is the leak.</p>
 
         <h2>The operator playbook</h2>
         <ol>
@@ -396,8 +396,8 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
   {
     path: '/b2b-conversion-benchmark',
     title: 'What is a good website conversion rate for B2B?',
-    description: '2–5% for B2B services in the $5M–$25M segment is healthy. Below 1.5% suggests a Lead Capture or Trust leak. Here is how to read the number forensically.',
-    quickAnswer: 'For B2B services in the $5M–$25M segment, 2–5% visitor-to-lead is healthy. 1.5–2% is workable. Below 1.5% indicates a Lead Capture or Trust leak. Above 5% usually means the traffic is over-qualified — which is its own kind of leak.',
+    description: '2-5% for B2B services in the $5M-$25M segment is healthy. Below 1.5% suggests a Lead Capture or Trust leak. Here is how to read the number forensically.',
+    quickAnswer: 'For B2B services in the $5M-$25M segment, 2-5% visitor-to-lead is healthy. 1.5-2% is workable. Below 1.5% indicates a Lead Capture or Trust leak. Above 5% usually means the traffic is over-qualified — which is its own kind of leak.',
     lastUpdated: UPDATED,
     tier: 'question',
     relatedLinks: [
@@ -472,7 +472,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     path: '/most-common-revenue-leaks',
     title: 'What is the most common reason businesses lose leads?',
     description: 'Across the businesses Aetheris has scanned, slow first-touch follow-up is the most common revenue leak. Here is what we find and how often.',
-    quickAnswer: 'Slow first-touch follow-up. Across the businesses we have scanned, the median lag from web form submission to first human reply is over 18 hours. The 5-minute threshold matters because qualification odds drop ~80% between 5 and 30 minutes. This is the single most common Revenue Leak in the $5M–$25M segment.',
+    quickAnswer: 'Slow first-touch follow-up. Across the businesses we have scanned, the median lag from web form submission to first human reply is over 18 hours. The 5-minute threshold matters because qualification odds drop ~80% between 5 and 30 minutes. This is the single most common Revenue Leak in the $5M-$25M segment.',
     lastUpdated: UPDATED,
     tier: 'question',
     relatedLinks: [
@@ -480,8 +480,8 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
       { label: 'Why am I getting leads but not closing them?', href: '/why-am-i-not-closing-leads' },
     ],
     faqs: [
-      { q: 'Is this true even for high-ticket B2B?', a: 'Especially for high-ticket B2B. The buyer is comparing 3–5 vendors. Whoever responds first frames the conversation.' },
-      { q: 'Does an auto-reply count as a response?', a: 'Partially. A useful auto-reply with a calendar link preserves perhaps 60–70% of the speed advantage. Silence loses all of it.' },
+      { q: 'Is this true even for high-ticket B2B?', a: 'Especially for high-ticket B2B. The buyer is comparing 3-5 vendors. Whoever responds first frames the conversation.' },
+      { q: 'Does an auto-reply count as a response?', a: 'Partially. A useful auto-reply with a calendar link preserves perhaps 60-70% of the speed advantage. Silence loses all of it.' },
       { q: 'What other leaks are common?', a: 'Missing CTA above the fold, broken Meta Pixel, no LinkedIn Insight Tag, and pipeline stages that mean different things to different reps.' },
     ],
     body: <p>Find your literal median first-touch lag. If it is above 1 hour, you are losing money you do not need to lose.</p>,
@@ -491,7 +491,7 @@ export const QUESTION_ARTICLES: AuthorityArticle[] = [
     path: '/revenue-leak-calculator',
     title: 'How much revenue is my business leaving on the table?',
     description: 'A forensic estimation method any operator can run in 10 minutes. Three inputs, three multipliers, one dollar figure.',
-    quickAnswer: 'Take your monthly inbound lead count, multiply by your average deal value, multiply by (your current close rate minus 0.30). For most $5M–$25M businesses with unattended follow-up gaps, the result is between $25,000 and $250,000 per month. Run the Revenue Score scan for a precise figure.',
+    quickAnswer: 'Take your monthly inbound lead count, multiply by your average deal value, multiply by (your current close rate minus 0.30). For most $5M-$25M businesses with unattended follow-up gaps, the result is between $25,000 and $250,000 per month. Run the Revenue Score scan for a precise figure.',
     lastUpdated: UPDATED,
     tier: 'question',
     relatedLinks: [

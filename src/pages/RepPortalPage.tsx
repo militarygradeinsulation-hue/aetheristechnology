@@ -255,7 +255,7 @@ const RepPortalPage: React.FC = () => {
                         <TableCell className="text-foreground">Monthly Subscriptions</TableCell>
                         <TableCell className="text-right text-muted-foreground">varies</TableCell>
                         <TableCell className="text-right font-semibold text-primary">
-                          20–30% of every invoice (by tier)
+                          20-30% of every invoice (by tier)
                         </TableCell>
                       </TableRow>
                     </TableBody>

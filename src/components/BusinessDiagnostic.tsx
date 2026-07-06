@@ -43,18 +43,18 @@ const sections: Section[] = [
         { label: 'Local Business', score: -1 }, { label: 'Other', score: -1 },
       ]},
       { id: 2, text: 'Company size', options: [
-        { label: 'Just me', score: -1 }, { label: '2–10 employees', score: -1 },
-        { label: '11–50 employees', score: -1 }, { label: '51–200 employees', score: -1 },
+        { label: 'Just me', score: -1 }, { label: '2-10 employees', score: -1 },
+        { label: '11-50 employees', score: -1 }, { label: '51-200 employees', score: -1 },
         { label: '200+', score: -1 },
       ]},
       { id: 3, text: 'Years in business', options: [
-        { label: '0–1', score: -1 }, { label: '1–3', score: -1 },
-        { label: '3–7', score: -1 }, { label: '7–15', score: -1 },
+        { label: '0-1', score: -1 }, { label: '1-3', score: -1 },
+        { label: '3-7', score: -1 }, { label: '7-15', score: -1 },
         { label: '15+', score: -1 },
       ]},
       { id: 4, text: 'Monthly revenue range', options: [
-        { label: 'Under $10k', score: -1 }, { label: '$10k–$50k', score: -1 },
-        { label: '$50k–$250k', score: -1 }, { label: '$250k–$1M', score: -1 },
+        { label: 'Under $10k', score: -1 }, { label: '$10k-$50k', score: -1 },
+        { label: '$50k-$250k', score: -1 }, { label: '$250k-$1M', score: -1 },
         { label: '$1M+', score: -1 },
       ]},
     ],
@@ -380,7 +380,7 @@ export const BusinessDiagnostic: React.FC = () => {
             })}
           </ul>
           <p className="text-sm text-muted-foreground italic">
-            This typically results in 20%–40% of potential leads being lost.
+            This typically results in 20%-40% of potential leads being lost.
           </p>
         </div>
 

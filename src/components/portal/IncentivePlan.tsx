@@ -22,7 +22,7 @@ const POST_BLOCKS: PostBlock[] = [
   {
     title: "The pitch (LinkedIn)",
     body:
-`Most businesses are leaking 6–7 figures a year and can't see it from the inside.
+`Most businesses are leaking 6-7 figures a year and can't see it from the inside.
 
 We run a 21-Day Revenue Diagnostic, forensic-grade, $18,500 flat, and hand back the exact list of leaks plus what to plug first.
 
@@ -31,7 +31,7 @@ If you know an operator who'd want that audit, send them my way. I get paid to m
   {
     title: "The intro ask (DM / text)",
     body:
-`Quick favor, I'm rolling out forensic revenue diagnostics for SMBs and SaaS shops doing $1M–$50M.
+`Quick favor, I'm rolling out forensic revenue diagnostics for SMBs and SaaS shops doing $1M-$50M.
 
 If you know one founder/operator who'd want a 21-day audit of where their business is leaking money, drop their name. No pressure on them, no commitment from you.`,
   },

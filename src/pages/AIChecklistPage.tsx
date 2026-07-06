@@ -135,7 +135,7 @@ export default function AIChecklistPage() {
                   <Button type="submit" size="lg" disabled={submitting} className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                     {submitting ? 'Generating PDF…' : (<><Download className="w-4 h-4 mr-2" />Download the Checklist</>)}
                   </Button>
-                  <p className="text-[11px] text-muted-foreground text-center font-case uppercase tracking-wider">PDF · 35 checkboxes · 4–5 pages</p>
+                  <p className="text-[11px] text-muted-foreground text-center font-case uppercase tracking-wider">PDF · 35 checkboxes · 4-5 pages</p>
                 </form>
               </>
             ) : (

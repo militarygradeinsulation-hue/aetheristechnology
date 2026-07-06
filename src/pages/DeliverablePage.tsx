@@ -204,7 +204,7 @@ export default function DeliverablePage() {
                 Generate my deliverable
               </Button>
               <p className="text-xs text-muted-foreground">
-                Builds in 30–90 seconds. You can close this tab, your link stays active.
+                Builds in 30-90 seconds. You can close this tab, your link stays active.
               </p>
             </form>
           </Card>
@@ -215,7 +215,7 @@ export default function DeliverablePage() {
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Building your deliverable…</h2>
             <p className="text-muted-foreground">
-              This usually takes 30–90 seconds. The page will refresh automatically.
+              This usually takes 30-90 seconds. The page will refresh automatically.
             </p>
           </Card>
         )}

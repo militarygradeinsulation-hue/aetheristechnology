@@ -951,7 +951,7 @@ export const AdminCareersPanel: React.FC = () => {
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
                             {a.ai_section_scores && Object.keys(a.ai_section_scores).length > 0 && (
                               <div>
-                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1–10), sum = fit score / 60</div>
+                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1-10), sum = fit score / 60</div>
                                 <div className="grid sm:grid-cols-2 gap-1">
                                   {SECTION_LABELS.map(([key, label]) => {
                                     const s = a.ai_section_scores?.[key];

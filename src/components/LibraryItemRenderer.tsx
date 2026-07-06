@@ -1326,7 +1326,7 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
       return (
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber border-b border-amber/20 pb-2">
-            <span>Reciprocation Tactics · Mauss / Regan / Mexico–Ethiopia</span>
+            <span>Reciprocation Tactics · Mauss / Regan / Mexico-Ethiopia</span>
           </div>
           {data?.scenario_summary && (
             <p className="text-sm text-foreground/85 italic border-l-2 border-amber/50 pl-3">{String(data.scenario_summary)}</p>

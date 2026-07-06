@@ -185,7 +185,7 @@ export function ForensicScanAllPanel() {
                         <span className="font-mono text-xs text-amber-500">#{l.rank}</span>
                         {l.dollars_low != null && l.dollars_high != null && (
                           <span className="text-xs font-mono text-red-400">
-                            ${l.dollars_low.toLocaleString()}–${l.dollars_high.toLocaleString()}
+                            ${l.dollars_low.toLocaleString()}-${l.dollars_high.toLocaleString()}
                           </span>
                         )}
                       </div>

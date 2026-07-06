@@ -143,7 +143,7 @@ export const LinkedInCommentGenerator: React.FC = () => {
           />
           {([
             ["short", "Short (1 line)"],
-            ["medium", "Medium (2–3 sentences)"],
+            ["medium", "Medium (2-3 sentences)"],
             ["sharp_question", "Sharp question"],
           ] as const).map(([k, label]) => (
             <Card key={k} className="border-l-2 border-l-amber/60">

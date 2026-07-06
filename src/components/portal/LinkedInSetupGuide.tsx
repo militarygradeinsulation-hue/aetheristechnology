@@ -52,7 +52,7 @@ const HOOK_FORMULAS = [
 
 const CONTENT_TYPES = [
   { tone: 'amber', name: 'Contrarian Take', goal: 'Build Authority', structure: 'Bold statement + context + alternative perspective', example: '"Cold outreach is dead." No — your script is dead. Here\'s the 3-line opener that books 1 in 8.' },
-  { tone: 'emerald', name: 'Framework', goal: 'Show Expertise', structure: 'Memorable name + 3–5 steps + real-world example', example: 'The Leak Audit™ — 7 steps to find where your business is bleeding money this quarter.' },
+  { tone: 'emerald', name: 'Framework', goal: 'Show Expertise', structure: 'Memorable name + 3-5 steps + real-world example', example: 'The Leak Audit™ — 7 steps to find where your business is bleeding money this quarter.' },
   { tone: 'primary', name: 'Behind-the-Scenes', goal: 'Build Trust', structure: 'The situation + the mistake + the lesson learned', example: 'Diagnostic call last week. I missed the obvious leak for 22 minutes. Here\'s what I should have asked first.' },
   { tone: 'rose', name: 'Personal Story (Personality is the Moat)', goal: 'Build Connection', structure: 'Specific moment + emotion + tie-back to your work', example: 'My first sales job, I was fired for being "too blunt." 12 years later that bluntness is the product.' },
 ];
@@ -131,7 +131,7 @@ export const LinkedInSetupGuide: React.FC = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Most reps treat LinkedIn like a resume. That's why they get ignored. The reps who close deals treat it like a <span className="text-amber font-semibold">landing page</span> — a profile that does the selling for them while they sleep. Follow these 8 steps in order. Each one takes 10–20 minutes. Total setup: about 2 hours.
+            Most reps treat LinkedIn like a resume. That's why they get ignored. The reps who close deals treat it like a <span className="text-amber font-semibold">landing page</span> — a profile that does the selling for them while they sleep. Follow these 8 steps in order. Each one takes 10-20 minutes. Total setup: about 2 hours.
           </p>
           <p className="text-xs text-muted-foreground">
             Always include your Aetheris link → <a href={SITE} target="_blank" rel="noopener noreferrer" className="text-amber underline inline-flex items-center gap-1">{SITE} <ExternalLink className="w-3 h-3" /></a>
@@ -146,7 +146,7 @@ export const LinkedInSetupGuide: React.FC = () => {
         </p>
         <ul className="space-y-2">
           {[
-            ['Who do you help?', 'Be specific. "Founders" is weak. "SaaS founders doing $1M–$10M ARR" is strong.'],
+            ['Who do you help?', 'Be specific. "Founders" is weak. "SaaS founders doing $1M-$10M ARR" is strong.'],
             ['What problem do you solve?', 'Use the words your customer would use. Not "synergize workflows" — "stop leads from going cold."'],
             ['Why should they trust you?', 'Specific results, real numbers, or a clear method (e.g. "The Leak Audit™").'],
           ].map(([q, a]) => (
@@ -257,7 +257,7 @@ export const LinkedInSetupGuide: React.FC = () => {
             <p className="text-[10px] uppercase tracking-widest font-mono text-amber">Posting</p>
             <ul className="text-sm mt-2 space-y-1">
               <li>• 3 posts per week, minimum.</li>
-              <li>• Tuesday / Wednesday / Thursday, 7–9am local.</li>
+              <li>• Tuesday / Wednesday / Thursday, 7-9am local.</li>
               <li>• Reply to every comment within 4 hours of posting.</li>
               <li>• Repurpose your best post each month as a carousel.</li>
             </ul>

@@ -1027,7 +1027,7 @@ export const AdminLeadBrowser: React.FC = () => {
                       <Input value={row.location} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, location: e.target.value } : r))} />
                     </div>
                     <div>
-                      <Label className="text-[10px]">Score (0–100)</Label>
+                      <Label className="text-[10px]">Score (0-100)</Label>
                       <Input type="number" min={0} max={100} value={row.score} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, score: e.target.value } : r))} />
                     </div>
                   </div>

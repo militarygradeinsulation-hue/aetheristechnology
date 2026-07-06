@@ -225,7 +225,7 @@ const AdminHiresOnboardingPanel: React.FC = () => {
             <div className="text-xs uppercase tracking-wide text-amber mb-2 font-mono">+ New Team</div>
             <div className="grid md:grid-cols-4 gap-2">
               <Input placeholder="Name (e.g. Team 3, SDRs)" value={newTeam.name} onChange={e => setNewTeam(s => ({ ...s, name: e.target.value }))} />
-              <Input placeholder="Experience band (e.g. 0–3mo)" value={newTeam.experience_band} onChange={e => setNewTeam(s => ({ ...s, experience_band: e.target.value }))} />
+              <Input placeholder="Experience band (e.g. 0-3mo)" value={newTeam.experience_band} onChange={e => setNewTeam(s => ({ ...s, experience_band: e.target.value }))} />
               <Input className="md:col-span-2" placeholder="Description" value={newTeam.description} onChange={e => setNewTeam(s => ({ ...s, description: e.target.value }))} />
             </div>
             <Button size="sm" className="mt-2 bg-amber text-primary-foreground hover:bg-amber/90" onClick={onCreateTeam}><Plus className="w-3.5 h-3.5 mr-1" /> Add team</Button>

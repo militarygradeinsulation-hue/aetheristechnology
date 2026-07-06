@@ -21,11 +21,11 @@ const useCopy = () => {
 // 1. OFFER STACK
 // ──────────────────────────────────────────────────────────────────────
 const OFFERS_TABLE = [
-  { name: "Forensic Diagnostic (Leak Audit)", what: "Full forensic: CRM, marketing, ops, systems. Ranked list of where money is being lost and how to recover it.", price: "$2.5k → applied", time: "7–10 days", use: "Entry point. Almost always reveals enough to sell implementation." },
-  { name: "Revenue Recovery Sprint", what: "Fix the top 3 highest-impact leaks identified in the audit. CRM cleanup, automation, offer restructuring, funnel repair.", price: "$25k – $50k", time: "30 days", use: "Post-audit upsell. High close rate, the problem is already proven." },
-  { name: "Active Case", what: "Custom AI tools, automation stacks, digital infrastructure. Recovery Engine, Hygiene Engine, LinkedIn Engine, custom builds.", price: "$15k / mo", time: "rolling 3–6 mo", use: "Mid-market $10M–$50M ready to scale operations." },
-  { name: "Fractional CTO Active Case", what: "Strategic oversight of tech stack, AI roadmap, vendor management, system governance. Monthly calls + async + quarterly reviews.", price: "$5k – $15k / mo", time: "rolling 6–12 mo", use: "Post-project. Builds recurring revenue. Stacks fast." },
-  { name: "Done-For-You Growth Stack", what: "Full engagement: audit + systems build + 90 days of active case support. White-glove, premium.", price: "$100k – $175k", time: "90–120 days", use: "Serious operators who want one partner, not a patchwork." },
+  { name: "Forensic Diagnostic (Leak Audit)", what: "Full forensic: CRM, marketing, ops, systems. Ranked list of where money is being lost and how to recover it.", price: "$2.5k → applied", time: "7-10 days", use: "Entry point. Almost always reveals enough to sell implementation." },
+  { name: "Revenue Recovery Sprint", what: "Fix the top 3 highest-impact leaks identified in the audit. CRM cleanup, automation, offer restructuring, funnel repair.", price: "$25k - $50k", time: "30 days", use: "Post-audit upsell. High close rate, the problem is already proven." },
+  { name: "Active Case", what: "Custom AI tools, automation stacks, digital infrastructure. Recovery Engine, Hygiene Engine, LinkedIn Engine, custom builds.", price: "$15k / mo", time: "rolling 3-6 mo", use: "Mid-market $10M-$50M ready to scale operations." },
+  { name: "Fractional CTO Active Case", what: "Strategic oversight of tech stack, AI roadmap, vendor management, system governance. Monthly calls + async + quarterly reviews.", price: "$5k - $15k / mo", time: "rolling 6-12 mo", use: "Post-project. Builds recurring revenue. Stacks fast." },
+  { name: "Done-For-You Growth Stack", what: "Full engagement: audit + systems build + 90 days of active case support. White-glove, premium.", price: "$100k - $175k", time: "90-120 days", use: "Serious operators who want one partner, not a patchwork." },
 ];
 
 export const OfferStackSection: React.FC = () => (
@@ -76,7 +76,7 @@ export const OfferStackSection: React.FC = () => (
         <div className="rounded-md border border-amber/30 bg-amber/5 p-3">
           <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-1">The framing that closes</div>
           <p className="text-xs text-muted-foreground italic">
-            "Most companies your size are losing $300k–$2M a year in preventable revenue leaks, missed follow-up,
+            "Most companies your size are losing $300k-$2M a year in preventable revenue leaks, missed follow-up,
             broken systems, underperforming marketing, ops gaps. We find exactly where it's happening and fix it. The
             audit pays for itself in the first finding."
           </p>
@@ -91,20 +91,20 @@ export const OfferStackSection: React.FC = () => (
 // ──────────────────────────────────────────────────────────────────────
 const VERTICALS = [
   { tag: "Vertical 1, Primary", name: "Specialty Manufacturers", lines: [
-    "Revenue: $5M–$50M",
+    "Revenue: $5M-$50M",
     "Pain: long sales cycles, manual quoting, no CRM discipline, outdated systems",
     'Trigger words: "leaving money on the table" / "sales doesn\'t follow up" / "built on spreadsheets"',
     "Best entry: Forensic Diagnostic",
     "Find them: LinkedIn, NAM + regional mfg councils, trade shows",
   ]},
   { tag: "Vertical 2, Secondary", name: "Commercial Construction & GCs", lines: [
-    "Revenue: $8M–$40M",
+    "Revenue: $8M-$40M",
     "Pain: chaotic bid process, project handoffs break, post-close client comms fail",
     'Trigger words: "win bids but lose on margins" / "can\'t scale without hiring" / "CRM is a mess"',
     "Best entry: Revenue Recovery Sprint",
     "Find them: LinkedIn, AGC chapter events, local business journals",
   ]},
-  { tag: "Vertical 3, Fast Cash", name: "Commercial Services ($10M–$30M)", lines: [
+  { tag: "Vertical 3, Fast Cash", name: "Commercial Services ($10M-$30M)", lines: [
     "HVAC, electrical, landscaping, facility management at commercial scale",
     "Pain: recurring revenue uncaptured, tech stack is a mess, marketing scattered",
     'Trigger words: "website doesn\'t bring anything" / "lose customers after year 1" / "no system"',
@@ -114,12 +114,12 @@ const VERTICALS = [
 ];
 
 const LEAD_SOURCES = [
-  { src: "Warm Network (personal/professional)", vol: "15–25 leads", conv: "30–40%", days: "7–14", priority: "FIRST", tone: "border-destructive/50 text-destructive" },
-  { src: "LinkedIn Direct Outreach (DMs)", vol: "200–500 / mo", conv: "3–8%", days: "21–45", priority: "HIGH", tone: "border-amber/50 text-amber" },
-  { src: "Cold Email (targeted ICP)", vol: "500–2000 / mo", conv: "1–4%", days: "21–30", priority: "HIGH", tone: "border-amber/50 text-amber" },
-  { src: "Strategic Referral Partners (CPAs, attorneys, legacy shops)", vol: "5–15 / mo active", conv: "25–50%", days: "14–21", priority: "HIGH", tone: "border-amber/50 text-amber" },
-  { src: "LinkedIn Content (thought leadership)", vol: "passive / compounds", conv: "2–5% engaged", days: "30–60", priority: "SUPPORT", tone: "border-muted-foreground/50 text-muted-foreground" },
-  { src: "Paid Ads (LinkedIn, Meta retargeting)", vol: "scalable", conv: "1–3%", days: "30–60", priority: "PHASE 2+", tone: "border-muted-foreground/50 text-muted-foreground" },
+  { src: "Warm Network (personal/professional)", vol: "15-25 leads", conv: "30-40%", days: "7-14", priority: "FIRST", tone: "border-destructive/50 text-destructive" },
+  { src: "LinkedIn Direct Outreach (DMs)", vol: "200-500 / mo", conv: "3-8%", days: "21-45", priority: "HIGH", tone: "border-amber/50 text-amber" },
+  { src: "Cold Email (targeted ICP)", vol: "500-2000 / mo", conv: "1-4%", days: "21-30", priority: "HIGH", tone: "border-amber/50 text-amber" },
+  { src: "Strategic Referral Partners (CPAs, attorneys, legacy shops)", vol: "5-15 / mo active", conv: "25-50%", days: "14-21", priority: "HIGH", tone: "border-amber/50 text-amber" },
+  { src: "LinkedIn Content (thought leadership)", vol: "passive / compounds", conv: "2-5% engaged", days: "30-60", priority: "SUPPORT", tone: "border-muted-foreground/50 text-muted-foreground" },
+  { src: "Paid Ads (LinkedIn, Meta retargeting)", vol: "scalable", conv: "1-3%", days: "30-60", priority: "PHASE 2+", tone: "border-muted-foreground/50 text-muted-foreground" },
 ];
 
 export const TargetMarketSection: React.FC = () => (
@@ -178,7 +178,7 @@ const SCRIPTS = [
   { label: "LinkedIn DM, First Touch (Cold Connection)", note: "Keep it short. One question at the end. No links. Reply rate drops 60% with links in first message.",
     text: `Hey [First Name], noticed you're running [Company] in [industry].
 
-Most companies your size are quietly bleeding $300k–$1M/year through broken follow-up systems, underperforming marketing, and ops gaps they don't even know exist.
+Most companies your size are quietly bleeding $300k-$1M/year through broken follow-up systems, underperforming marketing, and ops gaps they don't even know exist.
 
 We built a diagnostic process that finds exactly where it's happening, in about 7 days.
 
@@ -200,7 +200,7 @@ Up to you either way.` },
 
 [First Name],
 
-We work with specialty [manufacturers / contractors / commercial services companies] in the $5M–$40M range to find and fix the revenue leaks that are costing them six figures per year.
+We work with specialty [manufacturers / contractors / commercial services companies] in the $5M-$40M range to find and fix the revenue leaks that are costing them six figures per year.
 
 Most of the time, the biggest problems are:
 → Leads falling through the cracks after initial contact
@@ -214,7 +214,7 @@ Worth a 20-minute call to see if it applies to [Company Name]?
 ,  Joseph
 Aetheris AI | aetheris.technology` },
   { label: "Referral Partner Outreach (CPAs, Attorneys, M&A Advisors)", note: "Position as a resource, not a commission pitch. Referral fee conversation happens AFTER they show interest.",
-    text: `Hey [Name], I know you work with a lot of growth-stage businesses in the $5M–$50M range.
+    text: `Hey [Name], I know you work with a lot of growth-stage businesses in the $5M-$50M range.
 
 We do revenue and operations diagnostics for companies in that zone, specifically finding where they're bleeding money in their systems, marketing, and ops.
 
@@ -269,9 +269,9 @@ export const OutreachSection: React.FC = () => {
           <div className="rounded-md border border-border/60 bg-background/40 p-3">
             <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">Daily outreach sequence</div>
             <ul className="text-xs text-muted-foreground space-y-1 list-disc ml-5">
-              <li>Morning 8–9am: review replies, book calls, follow up on open threads</li>
-              <li>9–10am: send 20 LinkedIn DMs (new + follow-ups)</li>
-              <li>10–11am: send 50 cold emails OR run 1–2 sales calls</li>
+              <li>Morning 8-9am: review replies, book calls, follow up on open threads</li>
+              <li>9-10am: send 20 LinkedIn DMs (new + follow-ups)</li>
+              <li>10-11am: send 50 cold emails OR run 1-2 sales calls</li>
               <li>Afternoon: LinkedIn content post (pre-scheduled)</li>
               <li>EOD: log all activity in CRM, update pipeline stage</li>
             </ul>
@@ -296,22 +296,22 @@ export const OutreachSection: React.FC = () => {
 // 4. SALES PROCESS + OBJECTIONS
 // ──────────────────────────────────────────────────────────────────────
 const STAGES = [
-  { stage: "Stage 1", time: "Discovery Call · 20–30 min", title: "The entry conversation",
+  { stage: "Stage 1", time: "Discovery Call · 20-30 min", title: "The entry conversation",
     bullets: [
       "Goal: understand their situation, not pitch your services",
       'Questions: "What\'s not working right now?" / "Where are you leaving money?" / "What does growth look like if systems worked?"',
       "Find the pain, quantify it loosely, earn the right to a deeper conversation",
       'Close: "Based on what you shared, an audit would show exactly what this is costing you. Can I send what that looks like?"',
   ]},
-  { stage: "Stage 2", time: "Audit Proposal · 24–48 hrs", title: "The diagnostic proposal",
+  { stage: "Stage 2", time: "Audit Proposal · 24-48 hrs", title: "The diagnostic proposal",
     bullets: [
-      "1–2 page document (not a deck)",
+      "1-2 page document (not a deck)",
       'Lead with what you heard: "Based on our conversation, here\'s what appears to be happening…"',
       "Describe the audit process and what they'll receive (ranked issues, recovery estimates, recommended path)",
       "Price: $2.5k Forensic Diagnostic (applied toward engagement)",
       'Frame: "Either it shows you where the money is, or confirms you don\'t have a problem. Either way, you\'ll know."',
   ]},
-  { stage: "Stage 3", time: "Audit Delivery · Day 7–10", title: "The proof moment",
+  { stage: "Stage 3", time: "Audit Delivery · Day 7-10", title: "The proof moment",
     bullets: [
       "Present findings on a live call (not just email)",
       "Lead with the most painful, highest-dollar finding first",
@@ -319,20 +319,20 @@ const STAGES = [
       'Frame each finding: "What\'s happening / What it\'s costing / What fixing it looks like"',
       'End with: "We can fix the top 3 in 30 days. Want to see what that engagement looks like?"',
   ]},
-  { stage: "Stage 4", time: "Sprint / Build Proposal · 48–72 hrs", title: "The big close",
+  { stage: "Stage 4", time: "Sprint / Build Proposal · 48-72 hrs", title: "The big close",
     bullets: [
       "The hard sell is already done, by the audit findings",
       "Proposal scoped to their exact issues, not a generic package",
       'Anchor to ROI: "Recover 20% of what we found and this pays for itself 4x over"',
-      "Offer two paths: Sprint ($25k–$50k) or Active Case ($15k/mo)",
+      "Offer two paths: Sprint ($25k-$50k) or Active Case ($15k/mo)",
       "Payment terms close fence-sitters: 50% upfront, 50% at delivery",
   ]},
-  { stage: "Stage 5", time: "Active Case Conversion · Day 60–90", title: "Lock in recurring revenue",
+  { stage: "Stage 5", time: "Active Case Conversion · Day 60-90", title: "Lock in recurring revenue",
     bullets: [
-      "At 60–70% completion of any project, introduce the active case",
+      "At 60-70% completion of any project, introduce the active case",
       'Frame: "Most clients keep us on for strategic oversight, last thing you want is to rebuild these systems in 6 months without anyone watching the architecture"',
-      "$5k–$15k/month depending on scope",
-      "Goal: 5 active case clients by Day 90 = $25k–$75k/month MRR foundation",
+      "$5k-$15k/month depending on scope",
+      "Goal: 5 active case clients by Day 90 = $25k-$75k/month MRR foundation",
   ]},
 ];
 
@@ -399,7 +399,7 @@ export const SalesProcessSection: React.FC = () => {
 // 5. TRAINING MATRIX
 // ──────────────────────────────────────────────────────────────────────
 const TRAINING = [
-  { module: "Offer Fluency Drill", owner: "Joseph", format: "Live roleplay, 30 min", freq: "Weekly (Days 1–30)", target: "Day 7" },
+  { module: "Offer Fluency Drill", owner: "Joseph", format: "Live roleplay, 30 min", freq: "Weekly (Days 1-30)", target: "Day 7" },
   { module: "Discovery Call Framework", owner: "Joseph", format: "Recorded call + debrief", freq: "2x/week first month", target: "Day 10" },
   { module: "Objection Response Bank", owner: "Joseph", format: "Written doc + practice", freq: "Review weekly", target: "Day 5" },
   { module: "Revenue Leak Diagnosis (per ICP)", owner: "Joseph + Braden", format: "Case study walkthrough", freq: "Per new vertical", target: "Day 14" },
@@ -444,7 +444,7 @@ export const TrainingMatrixSection: React.FC = () => (
       </div>
       <div className="grid md:grid-cols-2 gap-3">
         <div className="rounded-md border border-border/60 bg-background/40 p-3">
-          <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">Sales rep onboarding · Days 1–7</div>
+          <div className="text-[10px] uppercase tracking-wide text-amber font-mono mb-2">Sales rep onboarding · Days 1-7</div>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li><strong className="text-foreground">Day 1</strong>, mission, ICP, offer stack, pricing rationale</li>
             <li><strong className="text-foreground">Day 2</strong>, Revenue Leak frame in 90 seconds</li>
@@ -473,12 +473,12 @@ export const TrainingMatrixSection: React.FC = () => (
 // 6. KPI SCOREBOARD + RECOVERY/ACCEL
 // ──────────────────────────────────────────────────────────────────────
 const KPIS = [
-  { kpi: "LinkedIn DM reply rate", target: "10–15%", min: "6%", action: "Rewrite opening line, test 3 new variants" },
-  { kpi: "Cold email open rate", target: "35–50%", min: "25%", action: "A/B subject lines, recheck domain health" },
-  { kpi: "Cold email reply rate", target: "4–8%", min: "2%", action: "Rewrite body, tighten ICP targeting" },
-  { kpi: "Discovery → Proposal", target: "50–60%", min: "35%", action: "Audit discovery structure, add qualifying questions" },
-  { kpi: "Proposal → Close", target: "30–40%", min: "20%", action: "Review pricing, sharpen proposal, add case study proof" },
-  { kpi: "Audit → Sprint upsell", target: "60–70%", min: "40%", action: "Improve audit delivery presentation, sharpen ROI framing" },
+  { kpi: "LinkedIn DM reply rate", target: "10-15%", min: "6%", action: "Rewrite opening line, test 3 new variants" },
+  { kpi: "Cold email open rate", target: "35-50%", min: "25%", action: "A/B subject lines, recheck domain health" },
+  { kpi: "Cold email reply rate", target: "4-8%", min: "2%", action: "Rewrite body, tighten ICP targeting" },
+  { kpi: "Discovery → Proposal", target: "50-60%", min: "35%", action: "Audit discovery structure, add qualifying questions" },
+  { kpi: "Proposal → Close", target: "30-40%", min: "20%", action: "Review pricing, sharpen proposal, add case study proof" },
+  { kpi: "Audit → Sprint upsell", target: "60-70%", min: "40%", action: "Improve audit delivery presentation, sharpen ROI framing" },
   { kpi: "Client → Active Case conversion", target: "50%", min: "25%", action: "Introduce active case earlier, improve success milestones" },
 ];
 
@@ -497,9 +497,9 @@ export const KpiScoreboardSection: React.FC = () => (
         {[
           { v: "70",   l: "LinkedIn DMs / wk" },
           { v: "250",  l: "Cold emails / wk" },
-          { v: "8–12", l: "Discovery calls / wk" },
-          { v: "3–5",  l: "Proposals / wk" },
-          { v: "1–2",  l: "Closes / wk" },
+          { v: "8-12", l: "Discovery calls / wk" },
+          { v: "3-5",  l: "Proposals / wk" },
+          { v: "1-2",  l: "Closes / wk" },
         ].map(s => (
           <div key={s.l} className="rounded border border-border/60 bg-background/40 p-3 text-center">
             <div className="text-xl font-forensic text-amber">{s.v}</div>

@@ -272,8 +272,8 @@ export const LeadsBoard: React.FC = () => {
     } else if (mineGroupBy === 'score') {
       const buckets: Array<[string, string, string, (n: number) => boolean]> = [
         ['hot', 'HOT (80+)', 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', n => n >= 80],
-        ['warm', 'WARM (60–79)', 'bg-amber/15 text-amber border-amber/40', n => n >= 60 && n < 80],
-        ['shot', 'WORTH A SHOT (40–59)', 'bg-amber/10 text-amber/80 border-amber/20', n => n >= 40 && n < 60],
+        ['warm', 'WARM (60-79)', 'bg-amber/15 text-amber border-amber/40', n => n >= 60 && n < 80],
+        ['shot', 'WORTH A SHOT (40-59)', 'bg-amber/10 text-amber/80 border-amber/20', n => n >= 40 && n < 60],
         ['low', 'LOW PRIORITY (<40)', 'bg-muted text-muted-foreground border-border', n => n < 40],
       ];
       buckets.forEach(([k, label, color, test]) =>
@@ -1185,7 +1185,7 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
               <Input value={location} onChange={e => setLocation(e.target.value)} />
             </div>
             <div>
-              <Label className="text-xs">Count (3–25)</Label>
+              <Label className="text-xs">Count (3-25)</Label>
               <Input type="number" min={3} max={25} value={count}
                 onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
             </div>
@@ -1933,7 +1933,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Work History</p>
                     <ul className="space-y-0.5 text-muted-foreground">
                       {rr.job_history.map((j: any, i: number) => (
-                        <li key={i}>{j.title} @ {j.company_name} <span className="text-[10px]">({j.start_date || '?'} – {j.end_date || 'present'})</span></li>
+                        <li key={i}>{j.title} @ {j.company_name} <span className="text-[10px]">({j.start_date || '?'} - {j.end_date || 'present'})</span></li>
                       ))}
                     </ul>
                   </div>

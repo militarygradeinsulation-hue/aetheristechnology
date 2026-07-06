@@ -81,13 +81,13 @@ export const RUBRIC: RubricEntry[] = [
   { key: 'pain',     label: 'Pain signal',         weight: 10, what: 'Manual / hiring / leak / bottleneck language.', stage: 'triage' },
   { key: 'contact',   label: 'Contactability',      weight: 15, what: 'phone + email + form + calendar (each 1/4).', stage: 'audit' },
   { key: 'capture',   label: 'Lead capture',        weight: 10, what: '70% CTA strength + 30% lead magnet.', stage: 'audit' },
-  { key: 'messaging', label: 'Messaging clarity',   weight: 10, what: 'Value-prop clarity 0–5.', stage: 'audit' },
+  { key: 'messaging', label: 'Messaging clarity',   weight: 10, what: 'Value-prop clarity 0-5.', stage: 'audit' },
   { key: 'content',   label: 'Content + authority', weight: 10, what: '70% content depth + 30% case studies.', stage: 'audit' },
   { key: 'seo',       label: 'SEO hygiene',         weight: 10, what: 'title + meta + schema (each 1/3).', stage: 'audit' },
   { key: 'mobile',    label: 'Mobile + speed',      weight:  5, what: 'Responsive + fast first paint.', stage: 'audit' },
-  { key: 'brand',     label: 'Brand consistency',   weight:  5, what: 'Visual + voice cohesion 0–5.', stage: 'audit' },
+  { key: 'brand',     label: 'Brand consistency',   weight:  5, what: 'Visual + voice cohesion 0-5.', stage: 'audit' },
   { key: 'industry',  label: 'Industry leverage',   weight: 15, what: 'How well Aetheris ops apply (high/med/low).', stage: 'audit' },
-  { key: 'revenue',   label: 'Revenue band',        weight: 10, what: '$2M–$10M scores highest (ability to pay).', stage: 'audit' },
+  { key: 'revenue',   label: 'Revenue band',        weight: 10, what: '$2M-$10M scores highest (ability to pay).', stage: 'audit' },
   { key: 'gaps',      label: 'Gap severity load',   weight: 10, what: 'More critical/warning gaps = more $ to find.', stage: 'audit' },
 ];
 

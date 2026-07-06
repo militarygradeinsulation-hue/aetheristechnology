@@ -236,7 +236,7 @@ export const HygieneRecordReviewDialog = ({ action, open, onClose, onComplete }:
 
         <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border pb-2">
           <div>
-            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, ids.length)} of {ids.length.toLocaleString()}
+            Showing {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, ids.length)} of {ids.length.toLocaleString()}
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => toggleAll(true)} className="hover:text-foreground">Select all</button>

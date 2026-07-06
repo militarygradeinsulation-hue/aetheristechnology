@@ -61,8 +61,8 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
 
     // 3. Talk to THIS person
     const talkTo: string[] = [];
-    if (isOwner) talkTo.push(`**${contactFirstName} is an owner/operator.** They care about: revenue leaks, time leaks, hiring leaks. Skip features. Lead with: "I scanned ${company}, found about ${topGap?.annualCost || '$50k–$120k'}/yr leaving silently. Want the breakdown?"`);
-    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics, most ops leaders we audit find 8–15% of revenue leaking through process gaps. Leak Audit, $2,900, applied to anything bigger."`);
+    if (isOwner) talkTo.push(`**${contactFirstName} is an owner/operator.** They care about: revenue leaks, time leaks, hiring leaks. Skip features. Lead with: "I scanned ${company}, found about ${topGap?.annualCost || '$50k-$120k'}/yr leaving silently. Want the breakdown?"`);
+    else if (isOps) talkTo.push(`**Ops/COO.** They care about: process gaps, system fragmentation, manual work. Lead with: "We do operational forensics, most ops leaders we audit find 8-15% of revenue leaking through process gaps. Leak Audit, $2,900, applied to anything bigger."`);
     else if (isMarketing) talkTo.push(`**Marketing leader.** They care about: attribution, conversion leaks, brand contradictions. Lead with: "We ran a brand contradiction scan on ${company}, found [X]. Want to see the rest?" (use Brand Contradiction Finder first.)`);
     else if (isSales) talkTo.push(`**Sales leader.** They care about: pipeline leaks, follow-up failure, lost deals. Lead with: "Our forensic audit on companies your size usually finds 20-30% of pipeline value leaking from broken follow-up. Want a free leak audit?"`);
     else if (isTech) talkTo.push(`**Tech leader.** They care about: stack debt, integration leaks, data silos. They\'ll skip BS, go technical fast. Mention Triple-AI architecture and skip the marketing pitch.`);
@@ -87,7 +87,7 @@ export const LeadGamePlan: React.FC<Props> = ({ lead, scan, rr, fc }) => {
     if (topGap) {
       openers.push(`Subject: ${topGap.title} at ${company}\n\nHi ${contactFirstName}, ran a forensic scan on ${company} this morning. Top finding: ${topGap.title}. We estimate it's costing about ${topGap.annualCost}/yr in silent leaks.\n\nNot a sales pitch, happy to send the full breakdown (free). Worth 60 seconds?\n\n,  [Your name], Aetheris`);
     }
-    openers.push(`Hi ${contactFirstName}, I run forensic diagnostics on companies in ${lead.industry || 'your space'}. Most are leaking 8–15% of revenue through gaps they can't see from inside.\n\nI looked at ${company} for 5 minutes. Want me to send what I found?\n\n,  [Your name]`);
+    openers.push(`Hi ${contactFirstName}, I run forensic diagnostics on companies in ${lead.industry || 'your space'}. Most are leaking 8-15% of revenue through gaps they can't see from inside.\n\nI looked at ${company} for 5 minutes. Want me to send what I found?\n\n,  [Your name]`);
     if (hasScan) {
       openers.push(`Hi ${contactFirstName}, quick one. I scored ${company} on our forensic scan: ${scan?.grade || ''} (${scan?.score}/100). The 3 biggest leaks are fixable in <30 days.\n\nSend the report? No charge.\n\n,  [Your name]`);
     }

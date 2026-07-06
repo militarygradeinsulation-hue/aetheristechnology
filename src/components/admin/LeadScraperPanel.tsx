@@ -280,7 +280,7 @@ export const LeadScraperPanel: React.FC = () => {
               <Input value={location} onChange={e => setLocation(e.target.value)} />
             </div>
             <div>
-              <Label className="text-xs">Count (5–50)</Label>
+              <Label className="text-xs">Count (5-50)</Label>
               <Input type="number" min={5} max={50} value={count} onChange={e => setCount(Number(e.target.value) || 15)} />
             </div>
           </div>

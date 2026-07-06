@@ -51,7 +51,7 @@ export const REP_TOOL_TIPS: Record<RepToolKey, RepToolTip> = {
     proTip: 'Always feed it the executive summary from the scan, not just the URL.',
   },
   'follow-up-plan': {
-    useFor: 'Building a 7–14 day touch cadence after the first email so you don\'t lose them at touch #2.',
+    useFor: 'Building a 7-14 day touch cadence after the first email so you don\'t lose them at touch #2.',
     pairWith: 'Use AFTER Sales Script Generator. Pair with Business Post Analyst for fresh angles on touch #3.',
     proTip: 'Most reps lose deals by stopping at touch #3. This tool keeps you alive until #7.',
   },
@@ -61,7 +61,7 @@ export const REP_TOOL_TIPS: Record<RepToolKey, RepToolTip> = {
     proTip: 'Best for booked discovery calls. Print the 5 questions and follow them in order.',
   },
   'brand-contradictions': {
-    useFor: 'Pulling 1–3 brand contradictions from a prospect\'s site you can drop into an email subject line.',
+    useFor: 'Pulling 1-3 brand contradictions from a prospect\'s site you can drop into an email subject line.',
     pairWith: 'Pair with Friction Vocabulary Audit for a 1-2 punch. Use the contradiction as the email subject.',
     proTip: 'Subject lines like "You say X but your homepage says Y" get opened. Always.',
   },

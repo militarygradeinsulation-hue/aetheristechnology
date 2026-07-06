@@ -39,7 +39,7 @@ const week1: DayPlan6W[] = [
       title: "We are operators, not consultants.",
       body: `Consultants sell decks. Operators sell repairs.
 
-Aetheris is a Chaos Theory Forensics firm. Our wedge: specialty manufacturers doing $5M–$25M in revenue. Our hook: "Your business is leaking. You just can't see it from the inside."
+Aetheris is a Chaos Theory Forensics firm. Our wedge: specialty manufacturers doing $5M-$25M in revenue. Our hook: "Your business is leaking. You just can't see it from the inside."
 
 The leak metaphor isn't marketing fluff — it's diagnostic language. A CEO can argue with "you should optimize your funnel." A CEO cannot argue with "you are bleeding $312K/year through stalled HubSpot deals." One sounds like an opinion. The other sounds like an autopsy.
 
@@ -63,8 +63,8 @@ Joseph (CEO) is a Marine, former Director of Strategy at a $25M aerospace firm w
         t("w1d1-s1-4", "Watch the Welcome onboarding video", undefined, "/portal?tab=onboarding"),
       ]),
       s("w1d1-s2", "Midday · The Pitch", 60, "Pitch in 12 seconds, 30 seconds, and 2 minutes.", [
-        t("w1d1-s1-5", "Write the 12-second version in your notes", "'We find the $200K–$2M your business is leaking through broken CRM and follow-up.'"),
-        t("w1d1-s1-6", "Write the 30-second version", "Add: who it's for (specialty mfrs $5–$25M), the deliverable (Diagnostic), the price ($18.5K fixed)."),
+        t("w1d1-s1-5", "Write the 12-second version in your notes", "'We find the $200K-$2M your business is leaking through broken CRM and follow-up.'"),
+        t("w1d1-s1-6", "Write the 30-second version", "Add: who it's for (specialty mfrs $5-$25M), the deliverable (Diagnostic), the price ($18.5K fixed)."),
         t("w1d1-s1-7", "Write the 2-minute version", "Add: 21-day timeline, active case upsell, methodology bullets."),
         t("w1d1-s1-8", "Record yourself saying all three on your phone, listen back"),
       ]),
@@ -128,13 +128,13 @@ Pilot pricing ($9,500 for first three) exists in outreach scripts only — never
   {
     week: 1, day: 3, weekTheme: W1_THEME, weekOutcome: W1_OUT,
     theme: "Day 3 · The Ideal Client Profile (ICP)",
-    tagline: "Specialty manufacturers, $5M–$25M, US-based. Know them cold.",
+    tagline: "Specialty manufacturers, $5M-$25M, US-based. Know them cold.",
     lesson: {
       title: "We hunt narrow. That's the unfair advantage.",
       body: `Internal wedge: commercial playground equipment manufacturers. Public wedge: "specialty manufacturers." Same prospect, different language.
 
 Why this ICP:
-• They have real revenue ($5M–$25M = mature enough to have a CRM, small enough that owner cares about every $50K leak).
+• They have real revenue ($5M-$25M = mature enough to have a CRM, small enough that owner cares about every $50K leak).
 • They've usually bought HubSpot or Salesforce but never finished the setup.
 • They have a salesperson who does outbound by hand and forgets follow-up.
 • They run trade shows, generate hundreds of leads, then watch 80% die in inboxes.
@@ -156,14 +156,14 @@ Out of scope (politely decline or refer):
     ],
     sessions: [
       s("w1d3-s1", "Morning · ICP Drill", 75, "Build a target list filter you can reuse forever.", [
-        t("w1d3-s1-1", "List 20 specialty manufacturers in the Midwest with $5–$25M revenue (LinkedIn Sales Nav or Apollo)"),
+        t("w1d3-s1-1", "List 20 specialty manufacturers in the Midwest with $5-$25M revenue (LinkedIn Sales Nav or Apollo)"),
         t("w1d3-s1-2", "Tag each: Has CRM? Has outbound salesperson? Has trade show presence?"),
         t("w1d3-s1-3", "Rank top 5 most likely to buy and write WHY in one sentence each"),
       ]),
       s("w1d3-s2", "Midday · Disqualify Faster", 45, "Saying no is a sales skill.", [
         t("w1d3-s2-1", "Write 3 polite disqualification lines for pre-revenue startups"),
         t("w1d3-s2-2", "Write 3 polite disqualification lines for $100M+ enterprises"),
-        t("w1d3-s2-3", "Memorize: 'We work with specialty manufacturers $5–$25M. Outside that window I'm not the right call.'"),
+        t("w1d3-s2-3", "Memorize: 'We work with specialty manufacturers $5-$25M. Outside that window I'm not the right call.'"),
       ]),
       s("w1d3-s3", "Afternoon · Add Leads", 60, "Turn research into pipeline.", [
         t("w1d3-s3-1", "Add your top 5 ICP-fit leads to the Leads Board", undefined, "/portal?tab=leads"),
@@ -184,7 +184,7 @@ Out of scope (politely decline or refer):
 1. Stalled deals — proposals sent, no follow-up, deals dying in 'sent' stage.
 2. Dead MQLs — marketing leads that never got worked.
 3. Slow follow-up — form fills with >4-hour first reply (industry benchmark: 5 min).
-4. Closed-lost reactivation — 6–18 months old, never re-touched.
+4. Closed-lost reactivation — 6-18 months old, never re-touched.
 5. Missing contact info on real deals — $5K+ deals with no email or phone on the contact record.
 6. Owner overload — one rep with 3× the average deal count.
 7. High-intent leads stuck outside any workflow — engaged 2+ times in 30 days, no nurture sequence.
@@ -193,7 +193,7 @@ You will see these names again in: the audit-engine code, the Diagnostic PDF, ev
       keyTakeaways: [
         "Memorize all 7. They map 1:1 to the database functions that detect them.",
         "Every prospect we audit has at least 3 active leaks.",
-        "Average exposure per leak in our ICP: $40K–$300K/year.",
+        "Average exposure per leak in our ICP: $40K-$300K/year.",
       ],
     },
     resources: [
@@ -557,7 +557,7 @@ Pause. Let them respond. Don't fill silence.`,
         t("w3d13-s1-2", "Eliminate every filler word ('um', 'so', 'kind of')"),
       ]),
       s("w3d13-s2", "Afternoon · 20 Dials", 120, "Make them.", [
-        t("w3d13-s2-1", "Make 20 outbound dials between 8–10 AM and 4–6 PM (prime answer windows)"),
+        t("w3d13-s2-1", "Make 20 outbound dials between 8-10 AM and 4-6 PM (prime answer windows)"),
         t("w3d13-s2-2", "Log every conversation as a lead activity"),
         t("w3d13-s2-3", "Voicemail = log + send a follow-up email same day"),
         t("w3d13-s2-4", "Complete Day 13 quiz", undefined, "/portal?tab=training"),
@@ -568,7 +568,7 @@ Pause. Let them respond. Don't fill silence.`,
   {
     week: 3, day: 14, weekTheme: W3_THEME, weekOutcome: W3_OUT,
     theme: "Day 14 · Multi-Touch Cadences",
-    tagline: "It takes 8–12 touches to convert a cold lead. Plan for it.",
+    tagline: "It takes 8-12 touches to convert a cold lead. Plan for it.",
     lesson: {
       title: "Single-touch outreach is amateur hour.",
       body: `Standard Aetheris cadence (3 weeks):
@@ -634,10 +634,10 @@ const week4: DayPlan6W[] = [
       body: `The discovery call is a forensic exam. You're not selling. You're surfacing leaks the prospect can feel.
 
 Structure (30 min):
-• 0–2 min: Frame. "I'll spend 25 minutes asking forensic questions about your revenue ops. Last 5 we'll talk about whether a Diagnostic makes sense. Sound fair?"
-• 2–25 min: Forensic questioning. Use the 7-leak map.
-• 25–28 min: Replay what you heard in dollar terms. "So you've got ~$400K trapped in stalled deals and another $150K in dead MQLs."
-• 28–30 min: Soft close. "Worth a Diagnostic to map it formally?"
+• 0-2 min: Frame. "I'll spend 25 minutes asking forensic questions about your revenue ops. Last 5 we'll talk about whether a Diagnostic makes sense. Sound fair?"
+• 2-25 min: Forensic questioning. Use the 7-leak map.
+• 25-28 min: Replay what you heard in dollar terms. "So you've got ~$400K trapped in stalled deals and another $150K in dead MQLs."
+• 28-30 min: Soft close. "Worth a Diagnostic to map it formally?"
 
 Selling happens by NOT selling. The prospect convinces themselves.`,
       keyTakeaways: [
@@ -724,7 +724,7 @@ Run the scan, read the signals, walk into the call already knowing 3 leaks.`,
   {
     week: 4, day: 19, weekTheme: W4_THEME, weekOutcome: W4_OUT,
     theme: "Day 19 · Multi-Stakeholder Sales",
-    tagline: "Mid-market = 2–4 decision makers. Map them.",
+    tagline: "Mid-market = 2-4 decision makers. Map them.",
     lesson: {
       title: "If you only talk to one person, you only have half a deal.",
       body: `Typical Diagnostic buying committee:
@@ -999,7 +999,7 @@ Clients churn for one reason: silence. Don't go silent.`,
 • 5 lead-board status updates.
 • 3 forensic observations posted on LinkedIn or sent to prospects.
 
-That's a 2–3 hour day, every day, that produces predictable pipeline. Reps who hit this monthly close 1–2 Diagnostics consistently. Reps who don't, don't.
+That's a 2-3 hour day, every day, that produces predictable pipeline. Reps who hit this monthly close 1-2 Diagnostics consistently. Reps who don't, don't.
 
 The Daily Hustle card in the portal tracks this for you. Use it.`,
     },

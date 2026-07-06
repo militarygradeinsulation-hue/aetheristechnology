@@ -477,13 +477,13 @@ const NewsPage = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {[
-                    { tag: "Funnel", title: "Lead-form abandon ≥ 60%", body: "Most sites lose 6 of 10 visitors at the form. Field count, friction copy, mobile keyboard.", est: "$3K–$18K/mo" },
-                    { tag: "Sales", title: "First-touch > 1 hour", body: "Conversion drops ~7x past the first hour. No SLA, no router, no triage.", est: "$5K–$40K/mo" },
-                    { tag: "Ops", title: "Manual handoffs between tools", body: "Sales → ops → fulfillment via spreadsheets and DMs. Drops, double-work, missed SLAs.", est: "$2K–$25K/mo" },
-                    { tag: "Tech stack", title: "Overlapping SaaS", body: "Two CRMs, three calendars, four chat tools. Paying twice, syncing nothing.", est: "$400–$6K/mo" },
-                    { tag: "Retention", title: "No churn signal", body: "You find out customers left when the invoice doesn't clear. No usage telemetry, no save play.", est: "$8K–$60K/mo" },
-                    { tag: "Cash", title: "AR aging buried", body: "30/60/90 not reviewed weekly. No reminder cadence. Working capital trapped.", est: "$5K–$50K AR" },
-                    { tag: "Marketing", title: "Spend without attribution", body: "Ads run, leads land, nothing tied back to revenue. Optimizing on vibes.", est: "$2K–$30K/mo" },
+                    { tag: "Funnel", title: "Lead-form abandon ≥ 60%", body: "Most sites lose 6 of 10 visitors at the form. Field count, friction copy, mobile keyboard.", est: "$3K-$18K/mo" },
+                    { tag: "Sales", title: "First-touch > 1 hour", body: "Conversion drops ~7x past the first hour. No SLA, no router, no triage.", est: "$5K-$40K/mo" },
+                    { tag: "Ops", title: "Manual handoffs between tools", body: "Sales → ops → fulfillment via spreadsheets and DMs. Drops, double-work, missed SLAs.", est: "$2K-$25K/mo" },
+                    { tag: "Tech stack", title: "Overlapping SaaS", body: "Two CRMs, three calendars, four chat tools. Paying twice, syncing nothing.", est: "$400-$6K/mo" },
+                    { tag: "Retention", title: "No churn signal", body: "You find out customers left when the invoice doesn't clear. No usage telemetry, no save play.", est: "$8K-$60K/mo" },
+                    { tag: "Cash", title: "AR aging buried", body: "30/60/90 not reviewed weekly. No reminder cadence. Working capital trapped.", est: "$5K-$50K AR" },
+                    { tag: "Marketing", title: "Spend without attribution", body: "Ads run, leads land, nothing tied back to revenue. Optimizing on vibes.", est: "$2K-$30K/mo" },
                     { tag: "Team", title: "Bottleneck = founder", body: "Every approval, every reply routes through one person. Throughput capped at one human.", est: "Capped growth" },
                   ].map((leak) => (
                     <div key={leak.title} className="border border-border rounded-xl bg-card/30 p-5 hover:border-amber/40 transition group">

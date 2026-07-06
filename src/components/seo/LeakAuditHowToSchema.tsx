@@ -18,7 +18,7 @@ const STEPS = [
   },
   {
     name: 'Score the four categories',
-    text: 'Score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion against a 14-point rubric. Each scored 0–4 from Never to Always systemized.',
+    text: 'Score Lead Capture, Response & Follow-Up, Operational Drag, and Trust & Conversion against a 14-point rubric. Each scored 0-4 from Never to Always systemized.',
   },
   {
     name: 'Attribute recovered revenue',
@@ -30,7 +30,7 @@ const STEPS = [
   },
   {
     name: 'Deliver the case file',
-    text: 'Written 15–30 page report, source-data appendix (CSVs + queries), 60-minute readout, and a fixed-fee implementation quote. Every claim traces back to a record export anyone can re-verify.',
+    text: 'Written 15-30 page report, source-data appendix (CSVs + queries), 60-minute readout, and a fixed-fee implementation quote. Every claim traces back to a record export anyone can re-verify.',
   },
   {
     name: 'Rebuild the broken systems',

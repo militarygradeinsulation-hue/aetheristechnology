@@ -55,7 +55,7 @@ ${p.summary || p.description}
 
 Download it here (no form, no gate): ${p.file_url}
 
-Worth a 12-minute walkthrough this week? I'll map the top 1–2 leaks I see on ${company} against what's in the playbook so you can act on it immediately.
+Worth a 12-minute walkthrough this week? I'll map the top 1-2 leaks I see on ${company} against what's in the playbook so you can act on it immediately.
 
 — Aetheris`;
     openRepMail(lead.email, { subject, body });

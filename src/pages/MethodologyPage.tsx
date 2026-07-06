@@ -46,7 +46,7 @@ const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: stri
   5: {
     image: INFOGRAPHICS.methodologyDeliverables,
     alt: 'Stack of forensic deliverables: a 24-page leak map report, a CSV source data appendix, a fixed-fee quote',
-    summary: 'Written report (15–30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $18,500 flat, 21 calendar days, CRM-agnostic.',
+    summary: 'Written report (15-30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. $18,500 flat, 21 calendar days, CRM-agnostic.',
     humanWhy: "At the end of 21 days you don't get a slide deck and a hug. You get a sealed report you can hand to anyone, a number to act on, and a fixed quote if you want me to fix it. No mystery invoices. No 'let's chat about phase two.'",
   },
 };
@@ -93,7 +93,7 @@ const SECTIONS = [
   {
     title: 'Diagnostic deliverables',
     body: [
-      '• Written report (15–30 pages): leak map, prioritized fixes, ROI projections, implementation roadmap.',
+      '• Written report (15-30 pages): leak map, prioritized fixes, ROI projections, implementation roadmap.',
       '• Source-data appendix: every CSV and query used.',
       '• 60-minute readout call with you and up to two of your team.',
       '• A fixed-fee quote for implementation if you choose to proceed.',
@@ -196,7 +196,7 @@ const MethodologyPage: React.FC = () => {
 
             <div className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <p className="text-foreground font-semibold">Ready to see this run on your numbers?</p>
-              <p className="text-sm text-muted-foreground mt-1">21 days. $18,500 fixed fee. Specialty manufacturers, $5M–$25M.</p>
+              <p className="text-sm text-muted-foreground mt-1">21 days. $18,500 fixed fee. Specialty manufacturers, $5M-$25M.</p>
               <a
                 href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
                 target="_blank"

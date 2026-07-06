@@ -183,7 +183,7 @@ export const hygieneCostModels: Record<string, HygieneCostModel> = {
   duplicate_contacts: {
     perIssue: 18,
     basis: "wasted send + sales time",
-    why: "Duplicate contacts inflate marketing sends, double-count engagement, and cause reps to call the same person twice. Industry benchmarks (Validity, 2023) put the blended cost of a duplicate at ~$15–25 once you factor in storage, sends, and rep time.",
+    why: "Duplicate contacts inflate marketing sends, double-count engagement, and cause reps to call the same person twice. Industry benchmarks (Validity, 2023) put the blended cost of a duplicate at ~$15-25 once you factor in storage, sends, and rep time.",
     formula: "$18 × duplicates (sends + 5 min rep time per dup)",
   },
   missing_critical_fields: {
