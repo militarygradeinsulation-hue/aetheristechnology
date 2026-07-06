@@ -8,7 +8,7 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
-import { PublicLeakScan } from "@/components/PublicLeakScan";
+
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
@@ -465,10 +465,8 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* Public website leak scan + free tools suite — combined */}
-          <div className="mt-5">
-            <PublicLeakScan />
-          </div>
+          {/* Scan + free tools now live inside HomeMindMapSection above */}
+
 
 
           {/* Downloads + Deck — combined case-file card */}
