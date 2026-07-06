@@ -7,6 +7,8 @@ import {
   Search, Microscope, Wrench, Building2, Newspaper, BookOpen,
 } from "lucide-react";
 import LeakMindMap, { type MindMapNodeData } from "@/components/LeakMindMap";
+import { PublicLeakScan } from "@/components/PublicLeakScan";
+
 
 type TabId = "symptoms" | "steps" | "systems" | "services";
 
