@@ -11,6 +11,8 @@ import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { contradictionsToChaos } from '@/lib/toolChaosAdapters';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
