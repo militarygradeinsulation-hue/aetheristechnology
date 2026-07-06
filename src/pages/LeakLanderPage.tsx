@@ -12,7 +12,7 @@ import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
-import { BuildMeASystemSection } from "@/components/BuildMeASystemSection";
+
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
