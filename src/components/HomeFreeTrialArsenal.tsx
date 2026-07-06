@@ -1,45 +1,168 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Radar,
-  Swords,
-  Gift,
-  FileSearch,
-  Brain,
-  ArrowRight,
-} from "lucide-react";
+
+/**
+ * Chaos-theory mind map — "Layered Neural Stack".
+ * Central hub → 5 tool nodes across 3 layers, connected by animated
+ * amber/crimson neural filaments. Cursor-driven 3D parallax on the
+ * filament layer and per-node tilt. Mobile-friendly by default.
+ */
 
 type Tool = {
   to: string;
   label: string;
   tagline: string;
-  chip: string;
-  icon: React.ComponentType<{ className?: string }>;
-  hue: "crimson" | "amber";
-  /** Position on the chaos map (percent) */
-  x: number;
-  y: number;
-  /** Parallax depth: 0 = far, 1 = close */
-  depth: number;
+  tags: { text: string; hue: "amber" | "crimson" | "muted" }[];
+  badge?: { text: string; hue: "amber" | "muted" };
+  focal?: boolean; // Layer-2 focal point
+  emailBadge?: boolean;
+  rotate: string; // subtle tape-on-corkboard tilt
 };
 
-const TOOLS: Tool[] = [
-  { to: "/chaos-scan",   label: "Chaos Scan",           tagline: "Feed a URL. Watch the leaks connect.",     chip: "Node 01", icon: Radar,      hue: "crimson", x: 18, y: 22, depth: 0.9 },
-  { to: "/head-to-head", label: "Head-to-Head",         tagline: "Your site vs. theirs. Every difference exposed.", chip: "Node 02", icon: Swords,     hue: "amber",   x: 78, y: 16, depth: 0.55 },
-  { to: "/reciprocation",label: "Reciprocation Engine", tagline: "The gifts that make prospects owe you a reply.",  chip: "Node 03", icon: Gift,       hue: "crimson", x: 82, y: 68, depth: 0.75 },
-  { to: "/golden-report",label: "Golden Report",        tagline: "The full forensic scan. 14 chapters. No filter.", chip: "Node 04", icon: FileSearch, hue: "amber",   x: 22, y: 74, depth: 0.4 },
-  { to: "/aetheris-iq",  label: "Aetheris IQ",          tagline: "The forensic AI operator. Ask it anything.",       chip: "Node 05", icon: Brain,      hue: "crimson", x: 50, y: 45, depth: 1.0 },
+const HUB_LABEL = "Neural Core";
+
+// Layered layout: [top-left, top-right] · [focal] · [bottom-left, bottom-right]
+const TOP: [Tool, Tool] = [
+  {
+    to: "/chaos-scan",
+    label: "Chaos Scan",
+    tagline: "Feed a URL. Watch the leaks connect.",
+    tags: [
+      { text: "URL", hue: "muted" },
+      { text: "AI", hue: "muted" },
+    ],
+    badge: { text: "Free", hue: "amber" },
+    rotate: "-rotate-1",
+  },
+  {
+    to: "/aetheris-iq",
+    label: "Aetheris IQ",
+    tagline: "The forensic AI operator. Ask it anything.",
+    tags: [
+      { text: "AI", hue: "muted" },
+      { text: "LEAK", hue: "crimson" },
+    ],
+    rotate: "rotate-2",
+  },
 ];
 
-/**
- * Chaos-theory mind map with 3D parallax.
- * Desktop: 5 nodes positioned as a constellation, connected by chaos filaments,
- * with mouse-driven parallax + card tilt. Mobile: falls back to a compact grid.
- */
+const FOCAL: Tool = {
+  to: "/head-to-head",
+  label: "Head-to-Head",
+  tagline: "Your site vs. theirs. Every difference exposed.",
+  tags: [],
+  focal: true,
+  emailBadge: true,
+  rotate: "rotate-0",
+};
+
+const BOTTOM: [Tool, Tool] = [
+  {
+    to: "/reciprocation",
+    label: "Reciprocation Engine",
+    tagline: "The gifts that make prospects owe you a reply.",
+    tags: [{ text: "GIFT", hue: "muted" }],
+    rotate: "rotate-1",
+  },
+  {
+    to: "/golden-report",
+    label: "Golden Report",
+    tagline: "The full forensic scan. 14 chapters. No filter.",
+    tags: [{ text: "PDF", hue: "muted" }],
+    badge: { text: "Flagship", hue: "muted" },
+    rotate: "-rotate-3",
+  },
+];
+
+const tagClass = (hue: Tool["tags"][number]["hue"]) => {
+  switch (hue) {
+    case "crimson":
+      return "text-crimson border-crimson/30";
+    case "amber":
+      return "text-amber border-amber/30";
+    default:
+      return "text-foreground/50 border-border/40";
+  }
+};
+
+const NodeCard: React.FC<{ tool: Tool; parallax: React.CSSProperties }> = ({ tool, parallax }) => {
+  if (tool.focal) {
+    return (
+      <div className="relative flex flex-col items-center" style={parallax}>
+        <div className="absolute -top-4 font-mono text-[9px] tracking-widest text-crimson/80 animate-pulse">
+          DATA_LEAK_SIGNAL
+        </div>
+        <Link
+          to={tool.to}
+          className="group relative w-[220px] sm:w-[260px] bg-background/85 backdrop-blur-md border-y border-amber/30 hover:border-amber/70 p-4 rounded-md text-center shadow-[0_0_40px_-8px_hsl(var(--amber)/0.35)] hover:shadow-[0_0_50px_-4px_hsl(var(--amber)/0.6)] transition-all"
+        >
+          <h3 className="font-forensic text-lg italic text-amber leading-tight mb-1">
+            {tool.label}
+          </h3>
+          <div className="text-[11px] text-foreground/75 mb-2 leading-snug">
+            {tool.tagline}
+          </div>
+          {tool.emailBadge && (
+            <div className="inline-flex items-center px-2 py-0.5 border border-crimson/40 bg-crimson/5 text-crimson text-[9px] font-mono tracking-widest">
+              EMAIL REQUIRED FOR PDF
+            </div>
+          )}
+        </Link>
+        <div className="mt-2 font-mono text-[9px] text-foreground/40 flex gap-4 uppercase tracking-widest">
+          <span>PDF</span>
+          <span>Compare</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      to={tool.to}
+      className={`group relative w-[44%] sm:w-[46%] bg-background/85 backdrop-blur-sm border border-border/40 hover:border-amber/50 p-3 rounded-md transform ${tool.rotate} hover:rotate-0 transition-all duration-500 hover:-translate-y-0.5`}
+      style={parallax}
+    >
+      {tool.badge && (
+        <div
+          className={`absolute -top-2 -left-2 px-1.5 py-0.5 text-[8px] font-bold uppercase rounded-[2px] ${
+            tool.badge.hue === "amber"
+              ? "bg-amber text-background"
+              : "bg-foreground/10 text-foreground/80 border border-border/40"
+          }`}
+        >
+          {tool.badge.text}
+        </div>
+      )}
+      <h3 className="font-forensic text-amber text-sm sm:text-base italic leading-tight mb-1">
+        {tool.label}
+      </h3>
+      {tool.tags.length > 0 && (
+        <div className="flex gap-1 mb-2 flex-wrap">
+          {tool.tags.map((t) => (
+            <span
+              key={t.text}
+              className={`text-[8px] font-mono border px-1 py-[1px] tracking-wide ${tagClass(t.hue)}`}
+            >
+              {t.text}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="text-[10px] sm:text-[11px] text-foreground/65 leading-snug font-light">
+        {tool.tagline}
+      </div>
+      {/* branch node dot */}
+      <span
+        aria-hidden
+        className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber shadow-[0_0_6px_hsl(var(--amber))]"
+      />
+    </Link>
+  );
+};
+
 export const HomeFreeTrialArsenal: React.FC = () => {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [p, setP] = useState({ x: 0, y: 0 }); // -1..1
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   useEffect(() => {
     const el = stageRef.current;
@@ -62,36 +185,18 @@ export const HomeFreeTrialArsenal: React.FC = () => {
     };
   }, []);
 
-  const parallax = (depth: number, mult = 22) => ({
+  const layer = (depth: number, mult = 18): React.CSSProperties => ({
     transform: `translate3d(${-p.x * depth * mult}px, ${-p.y * depth * mult}px, 0)`,
+    transition: "transform 220ms ease-out",
   });
 
   return (
     <section
       id="free-trial-arsenal"
-      className="mt-8 max-w-6xl mx-auto animate-fade-in scroll-mt-24"
+      className="mt-8 max-w-3xl mx-auto animate-fade-in scroll-mt-24 px-2"
       style={{ animationDelay: "160ms", animationFillMode: "both" }}
       aria-label="Free tools — chaos mind map"
     >
-      <style>{`
-        @keyframes chaosPulse {
-          0%,100% { opacity: 0.35; }
-          50%     { opacity: 0.9; }
-        }
-        @keyframes chaosDrift {
-          0%   { stroke-dashoffset: 0; }
-          100% { stroke-dashoffset: -60; }
-        }
-        @keyframes chaosOrbit {
-          0%   { transform: rotate(0deg) translateX(2px) rotate(0deg); }
-          100% { transform: rotate(360deg) translateX(2px) rotate(-360deg); }
-        }
-        .chaos-filament { stroke-dasharray: 4 6; animation: chaosDrift 6s linear infinite; }
-        .chaos-node-glow { animation: chaosPulse 3.2s ease-in-out infinite; }
-        .chaos-map-stage { perspective: 1400px; }
-        .chaos-node-card { transform-style: preserve-3d; will-change: transform; }
-      `}</style>
-
       {/* Header */}
       <div className="flex items-end justify-between gap-3 mb-4 px-1">
         <div>
@@ -107,201 +212,111 @@ export const HomeFreeTrialArsenal: React.FC = () => {
         </span>
       </div>
 
-      {/* ============ DESKTOP: 3D chaos constellation ============ */}
+      {/* Stage — parallax pointer surface */}
       <div
         ref={stageRef}
-        className="chaos-map-stage relative hidden md:block w-full rounded-sm border border-border/50 bg-gradient-to-br from-background/60 via-background/40 to-background/70 overflow-hidden"
-        style={{ height: "620px" }}
+        className="relative w-full flex flex-col items-center pt-4 pb-6 rounded-md border border-border/40 bg-gradient-to-b from-background/40 via-background/20 to-background/50 overflow-hidden"
+        style={{ perspective: "1200px" }}
       >
-        {/* Deep starfield / grid — furthest layer */}
-        <div
-          className="absolute inset-0 opacity-[0.18] pointer-events-none"
-          style={{
-            ...parallax(0.15, 30),
-            backgroundImage:
-              "radial-gradient(circle at 20% 30%, hsl(var(--amber)/0.35) 0, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--crimson,0 60% 45%)/0.3) 0, transparent 45%), linear-gradient(hsl(var(--border)/0.4) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)/0.4) 1px, transparent 1px)",
-            backgroundSize: "auto, auto, 60px 60px, 60px 60px",
-          }}
-        />
+        {/* Filament layer (SVG neural web) */}
+        <svg
+          aria-hidden
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 390 720"
+          preserveAspectRatio="none"
+          style={layer(0.5, 28)}
+        >
+          <defs>
+            <linearGradient id="filamentAmber" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--amber))" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="hsl(var(--amber))" stopOpacity="0.15" />
+            </linearGradient>
+          </defs>
+          {/* hub → top-left */}
+          <path d="M195 80 C 195 130, 90 150, 80 210" stroke="url(#filamentAmber)" strokeWidth="1.2" fill="none" />
+          {/* hub → top-right */}
+          <path d="M195 80 C 195 130, 300 150, 310 210" stroke="url(#filamentAmber)" strokeWidth="1.2" fill="none" />
+          {/* hub → focal */}
+          <path d="M195 80 C 195 180, 195 240, 195 340" stroke="hsl(var(--amber))" strokeOpacity="0.4" strokeWidth="1" fill="none" />
+          {/* focal → bottom-left */}
+          <path d="M195 400 C 195 460, 90 500, 80 560" stroke="hsl(var(--crimson,0 60% 45%))" strokeOpacity="0.55" strokeWidth="0.9" strokeDasharray="4 3" fill="none" />
+          {/* focal → bottom-right */}
+          <path d="M195 400 C 195 460, 300 500, 310 560" stroke="url(#filamentAmber)" strokeWidth="1.1" fill="none" />
+          {/* cross-branch chaos strands */}
+          <path d="M80 210 C 140 260, 250 260, 310 210" stroke="hsl(var(--amber))" strokeOpacity="0.15" strokeWidth="0.6" strokeDasharray="2 4" fill="none" />
+          <path d="M80 560 C 140 610, 250 610, 310 560" stroke="hsl(var(--crimson,0 60% 45%))" strokeOpacity="0.2" strokeWidth="0.6" strokeDasharray="2 4" fill="none" />
+          {/* Junction glow points */}
+          <circle cx="195" cy="80"  r="3" fill="hsl(var(--amber))" />
+          <circle cx="80"  cy="210" r="2" fill="hsl(var(--amber))" />
+          <circle cx="310" cy="210" r="2" fill="hsl(var(--amber))" />
+          <circle cx="195" cy="340" r="2.5" fill="hsl(var(--crimson,0 60% 45%))">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="80"  cy="560" r="2" fill="hsl(var(--crimson,0 60% 45%))" />
+          <circle cx="310" cy="560" r="2" fill="hsl(var(--amber))" />
+        </svg>
 
-        {/* Floating particles */}
-        <div className="absolute inset-0 pointer-events-none" style={parallax(0.35, 40)}>
-          {Array.from({ length: 28 }).map((_, i) => {
-            const seedX = (i * 97) % 100;
-            const seedY = (i * 53) % 100;
-            const size = ((i * 7) % 3) + 1;
-            const isC = i % 3 === 0;
+        {/* Ambient particles — furthest depth */}
+        <div className="absolute inset-0 pointer-events-none opacity-40" style={layer(0.15, 40)}>
+          {Array.from({ length: 22 }).map((_, i) => {
+            const x = (i * 97) % 100;
+            const y = (i * 53) % 100;
+            const isC = i % 4 === 0;
             return (
               <span
                 key={i}
-                className="absolute rounded-full chaos-node-glow"
+                className="absolute rounded-full"
                 style={{
-                  left: `${seedX}%`,
-                  top: `${seedY}%`,
-                  width: size,
-                  height: size,
-                  background: isC ? "hsl(var(--crimson,0 60% 45%))" : "hsl(var(--amber))",
-                  animationDelay: `${(i % 7) * 0.4}s`,
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  width: 2,
+                  height: 2,
+                  background: isC
+                    ? "hsl(var(--crimson,0 60% 45%))"
+                    : "hsl(var(--amber))",
                   boxShadow: isC
-                    ? "0 0 8px hsl(var(--crimson,0 60% 45%)/0.9)"
-                    : "0 0 8px hsl(var(--amber)/0.9)",
+                    ? "0 0 6px hsl(var(--crimson,0 60% 45%))"
+                    : "0 0 6px hsl(var(--amber))",
                 }}
               />
             );
           })}
         </div>
 
-        {/* Chaos filaments connecting every node to every other node */}
-        <svg
-          aria-hidden
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          style={parallax(0.5, 22)}
-        >
-          <defs>
-            <linearGradient id="filamentGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--crimson,0 60% 45%))" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="hsl(var(--amber))" stopOpacity="0.7" />
-            </linearGradient>
-          </defs>
-          {TOOLS.flatMap((a, i) =>
-            TOOLS.slice(i + 1).map((b, j) => {
-              const mx = (a.x + b.x) / 2 + (((i + j) % 2 ? 1 : -1) * 6);
-              const my = (a.y + b.y) / 2 + (((i + j) % 2 ? -1 : 1) * 5);
-              return (
-                <path
-                  key={`${i}-${j}`}
-                  d={`M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`}
-                  fill="none"
-                  stroke="url(#filamentGrad)"
-                  strokeWidth="0.25"
-                  strokeOpacity={hoverIdx === i || hoverIdx === TOOLS.indexOf(b) ? 0.9 : 0.45}
-                  vectorEffect="non-scaling-stroke"
-                  className="chaos-filament transition-[stroke-opacity] duration-300"
-                />
-              );
-            })
-          )}
-        </svg>
+        {/* Central Hub — mid depth */}
+        <div className="relative z-10 mb-10" style={layer(0.7, 14)}>
+          <div className="w-20 h-20 rounded-full bg-background/90 border border-amber/40 flex items-center justify-center shadow-[0_0_30px_hsl(var(--amber)/0.2)]">
+            <div className="font-forensic text-3xl font-black italic text-amber">C</div>
+          </div>
+          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] tracking-widest uppercase text-amber/70">
+            {HUB_LABEL}
+          </div>
+        </div>
 
-        {/* Nodes */}
-        {TOOLS.map((t, i) => {
-          const Icon = t.icon;
-          const isCrimson = t.hue === "crimson";
-          const stroke = isCrimson ? "hsl(var(--crimson,0 60% 45%))" : "hsl(var(--amber))";
-          const border = isCrimson ? "border-crimson/60" : "border-amber/60";
-          const chipColor = isCrimson ? "text-crimson" : "text-amber";
-          const glow = isCrimson
-            ? "shadow-[0_0_40px_-6px_hsl(var(--crimson,0_60%_45%)/0.55)]"
-            : "shadow-[0_0_40px_-6px_hsl(var(--amber)/0.55)]";
-          const hovered = hoverIdx === i;
-          const tiltX = -p.y * 8;
-          const tiltY = p.x * 8;
-          return (
-            <Link
-              key={t.to}
-              to={t.to}
-              onMouseEnter={() => setHoverIdx(i)}
-              onMouseLeave={() => setHoverIdx(null)}
-              className={`chaos-node-card absolute block w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-sm border ${border} bg-background/85 backdrop-blur-md p-4 ${glow} transition-shadow duration-300`}
-              style={{
-                left: `${t.x}%`,
-                top: `${t.y}%`,
-                zIndex: hovered ? 40 : 20 + Math.round(t.depth * 10),
-                transform: `translate3d(calc(-50% + ${-p.x * t.depth * 34}px), calc(-50% + ${-p.y * t.depth * 34}px), ${t.depth * 60}px) rotateX(${tiltX * t.depth}deg) rotateY(${tiltY * t.depth}deg) scale(${hovered ? 1.06 : 1})`,
-                transition: "transform 180ms ease-out, box-shadow 300ms ease",
-              }}
-            >
-              {/* corner brackets */}
-              {["top-1 left-1 border-l border-t", "top-1 right-1 border-r border-t", "bottom-1 left-1 border-l border-b", "bottom-1 right-1 border-r border-b"].map((c) => (
-                <span key={c} aria-hidden className={`absolute ${c} w-2 h-2 ${isCrimson ? "border-crimson/80" : "border-amber/80"}`} />
-              ))}
+        {/* Node stack — closest depth */}
+        <div className="w-full max-w-[390px] space-y-10 relative z-20" style={layer(1, 10)}>
+          <div className="flex justify-between w-full px-2 gap-2">
+            <NodeCard tool={TOP[0]} parallax={layer(1.1, 12)} />
+            <NodeCard tool={TOP[1]} parallax={layer(1.1, 12)} />
+          </div>
 
-              {/* orbit indicator */}
-              <span
-                aria-hidden
-                className="absolute -top-1 -right-1 w-3 h-3 rounded-full chaos-node-glow"
-                style={{ background: stroke, boxShadow: `0 0 14px ${stroke}` }}
-              />
+          <div className="flex justify-center w-full">
+            <NodeCard tool={FOCAL} parallax={layer(1.3, 14)} />
+          </div>
 
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className={`font-mono text-[9px] uppercase tracking-[0.28em] ${chipColor}`}>
-                  {t.chip}
-                </span>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-                  Free · No signup
-                </span>
-              </div>
+          <div className="flex justify-between w-full px-2 gap-2">
+            <NodeCard tool={BOTTOM[0]} parallax={layer(1.1, 12)} />
+            <NodeCard tool={BOTTOM[1]} parallax={layer(1.1, 12)} />
+          </div>
+        </div>
 
-              <div className="flex items-start gap-3">
-                <div className={`shrink-0 w-11 h-11 rounded-sm border ${border} bg-background/70 flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${isCrimson ? "text-crimson" : "text-amber"}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-forensic text-lg font-bold leading-tight">{t.label}</div>
-                  <p className="mt-0.5 text-xs text-foreground/80 leading-snug">{t.tagline}</p>
-                </div>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-dashed border-border/60">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/70">
-                  Open instrument
-                </span>
-                <ArrowRight className={`w-4 h-4 ${isCrimson ? "text-crimson" : "text-amber"} transition-transform duration-300 ${hovered ? "translate-x-1" : ""}`} />
-              </div>
-            </Link>
-          );
-        })}
-
-        {/* corner labels */}
-        <span className="absolute top-2 left-3 font-mono text-[9px] uppercase tracking-[0.3em] text-foreground/50 pointer-events-none">
-          Chaos map · v1
-        </span>
-        <span className="absolute bottom-2 right-3 font-mono text-[9px] uppercase tracking-[0.3em] text-foreground/50 pointer-events-none">
-          Move cursor · parallax active
-        </span>
-      </div>
-
-      {/* ============ MOBILE fallback: compact stacked grid ============ */}
-      <div className="md:hidden grid gap-2 grid-cols-1">
-        {TOOLS.map((t) => {
-          const Icon = t.icon;
-          const isCrimson = t.hue === "crimson";
-          const border = isCrimson ? "border-crimson/45" : "border-amber/45";
-          const chipColor = isCrimson ? "text-crimson" : "text-amber";
-          return (
-            <Link
-              key={t.to}
-              to={t.to}
-              className={`relative block rounded-sm border ${border} bg-background/70 backdrop-blur-sm p-4`}
-            >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className={`font-mono text-[9px] uppercase tracking-[0.28em] ${chipColor}`}>
-                  {t.chip}
-                </span>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-                  Free · No signup
-                </span>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className={`shrink-0 w-10 h-10 rounded-sm border ${border} bg-background/60 flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${isCrimson ? "text-crimson" : "text-amber"}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-forensic text-base font-bold leading-tight">{t.label}</div>
-                  <p className="mt-0.5 text-xs text-foreground/80 leading-snug">{t.tagline}</p>
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-dashed border-border/60">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-foreground/70">
-                  Open instrument
-                </span>
-                <ArrowRight className={`w-4 h-4 ${isCrimson ? "text-crimson" : "text-amber"}`} />
-              </div>
-            </Link>
-          );
-        })}
+        {/* Footer legend */}
+        <div className="mt-10 pb-2 flex flex-col items-center gap-2 opacity-50 relative z-10">
+          <div className="h-px w-12 bg-amber/40" />
+          <p className="font-mono text-[9px] uppercase tracking-tighter text-foreground/70">
+            Arsenal Framework v2.04 — Entropy Managed
+          </p>
+        </div>
       </div>
 
       <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-foreground/60">
