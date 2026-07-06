@@ -184,6 +184,35 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
             );
           })
         )}
+
+        {/* Ripple links: selected node → affected sibling nodes */}
+        {selected !== null && [...affectedIdx].map((tIdx) => {
+          const S = positions[selected];
+          const T = positions[tIdx];
+          if (!S || !T) return null;
+          // Curve away from the hub for readability
+          const mx = (S.x + T.x) / 2;
+          const my = (S.y + T.y) / 2;
+          const dx = mx - 50;
+          const dy = my - 50;
+          const len = Math.max(0.001, Math.hypot(dx, dy));
+          const bulge = 1.35;
+          const cx = 50 + (dx / len) * len * bulge;
+          const cy = 50 + (dy / len) * len * bulge;
+          return (
+            <path
+              key={`ripple-${selected}-${tIdx}`}
+              d={`M ${S.x} ${S.y} Q ${cx} ${cy} ${T.x} ${T.y}`}
+              fill="none"
+              stroke={a.stroke}
+              strokeOpacity={0.85}
+              strokeWidth="1.4"
+              strokeDasharray="3 3"
+              vectorEffect="non-scaling-stroke"
+              style={{ animation: "mindmap-flow 3s linear infinite" }}
+            />
+          );
+        })}
       </svg>
 
       {/* Central hub */}
