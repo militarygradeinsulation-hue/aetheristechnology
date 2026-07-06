@@ -180,6 +180,9 @@ Rules:
 - Scores are integers 0-100. Overall = weighted synthesis, not simple average.
 - Every "why", "youEvidence", "rivalEvidence" MUST cite something concrete from the scraped pages (a quote, a missing element, a specific color/font, a CTA, a price, a claim).
 - If a page failed to scrape, mark that side "insufficient data" for that category and score conservatively.
+- Dollar impacts are integer USD/month estimates for a mid-market business ($1M-$20M ARR). Ground them in the specific weakness observed (missing pricing = larger bleed than a font mismatch). Ranges: font/visual glitches $200-$2,000/mo; weak CTAs / conversion gaps $2,000-$15,000/mo; missing offer clarity or pricing $5,000-$25,000/mo; missing proof/case studies $3,000-$18,000/mo; thin content/SEO $2,000-$12,000/mo; weak differentiation $4,000-$20,000/mo. Never zero. Never round-number placeholders.
+- battlefield.youMonthlyBleedUsd ≈ sum of categories[].youMonthlyDollarImpact (allow ±10%). Same for rival. recoverableIfFixedUsd = 50-80% of youMonthlyBleedUsd. stealableFromRivalUsd = 20-50% of rivalMonthlyBleedUsd.
+- roiIfFixedUsd for each category = 50-80% of that category's youMonthlyDollarImpact.
 - No fluff, no consultant-speak. Operator tone.${takeover ? `
 - Takeover mode: be ruthless but ethical. Exploit rival's real, evidenced weaknesses (broken messaging, thin proof, hidden pricing, weak CTAs, brand contradictions). Do NOT fabricate rival flaws.
 - yourFixes must be honest — list YOUR bleed first. You cannot take over from a leaky ship.` : ""}`;
