@@ -96,6 +96,12 @@ Return STRICT JSON of shape:
       "anchor": "scan | price | fix",
       "chaos": "one blunt sentence naming the specific pain on THIS business.",
       "fixed": "one blunt sentence naming what changes once the source is sealed.",
+      "dollar_leak": "$X.Xk-$X.Xk / mo estimated bleed range for THIS symptom",
+      "cascade": [
+        "first downstream consequence if left unchecked (30 days) — one blunt sentence with a $ number.",
+        "second downstream consequence (90 days) — one blunt sentence with a $ number.",
+        "third downstream consequence (12 months) — one blunt sentence naming the compounding failure."
+      ],
       "connections": ["other-symptom-id", "other-symptom-id"]
     }
   ],
@@ -108,6 +114,7 @@ Return STRICT JSON of shape:
 
 RULES:
 - Return 6-8 symptoms. Every symptom must reference this specific business, not generic filler.
+- Each symptom MUST include a specific dollar_leak range and a 3-item cascade showing how it compounds over 30 / 90 / 365 days.
 - Each symptom must list 1-3 "connections" to other symptom ids so the mind map has real cross-links.
 - Distribute anchors across scan / price / fix (roughly balanced).
 - "source.label" must be ONE root cause, not a list.
