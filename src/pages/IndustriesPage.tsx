@@ -401,10 +401,10 @@ const MindMapNode: React.FC<{
   );
 };
 
-const MindMap: React.FC<{ industries: IndustryLeak[] }> = ({ industries }) => {
-  const navigate = useNavigate();
+const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: IndustryLeak) => void }> = ({ industries, onOpenCaseFile }) => {
   const positions = useMemo(() => computeMindMapLayout(industries.length), [industries.length]);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
 
   const selectedIndex = selectedSlug ? industries.findIndex((v) => v.slug === selectedSlug) : -1;
   const selected = selectedIndex >= 0 ? industries[selectedIndex] : null;
@@ -562,12 +562,13 @@ const MindMap: React.FC<{ industries: IndustryLeak[] }> = ({ industries }) => {
             </ul>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-border/40">
-              <Link
-                to={`/${selected.slug}`}
+              <button
+                type="button"
+                onClick={() => onOpenCaseFile(selected)}
                 className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors text-sm"
               >
                 Open the case file <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedSlug(null)}
@@ -776,7 +777,7 @@ const IndustriesPage: React.FC = () => {
             ) : (
               <>
                 {/* Mind-map view — all breakpoints */}
-                <MindMap industries={filtered} />
+                <MindMap industries={filtered} onOpenCaseFile={(v) => setSelectedIndustry(v)} />
               </>
 
             )}
