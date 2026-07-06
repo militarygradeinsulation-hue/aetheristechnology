@@ -198,62 +198,38 @@
       hsl(36 90% 55% / 0.08) 0%, transparent 70%);
   }
 
-  /* Golden shimmering border for the floating signature banner */
+  /* Golden shimmering border for the floating signature banner — calm & slow */
   .shimmer-gold-border {
     position: relative;
     border-radius: 0.5rem;
-    overflow: hidden;
     isolation: isolate;
-    box-shadow: 0 0 40px hsl(36 90% 55% / 0.15), 0 0 80px hsl(36 90% 55% / 0.08);
+    box-shadow: 0 0 24px hsl(36 90% 55% / 0.08);
   }
   .shimmer-gold-border::before {
     content: '';
     position: absolute;
-    inset: -2px;
-    background: conic-gradient(
-      from 0deg,
-      hsl(36 90% 55% / 0) 0%,
-      hsl(36 90% 55% / 0.85) 25%,
-      hsl(40 90% 72% / 0.95) 50%,
-      hsl(36 90% 55% / 0.85) 75%,
-      hsl(36 90% 55% / 0) 100%
-    );
-    animation: shimmer-gold-spin 3s linear infinite;
-    z-index: -1;
+    inset: 0;
     border-radius: inherit;
-    padding: 2px;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(36 90% 55% / 0.15) 0%,
+      hsl(40 90% 72% / 0.55) 50%,
+      hsl(36 90% 55% / 0.15) 100%
+    );
+    background-size: 200% 200%;
+    animation: shimmer-gold-drift 9s ease-in-out infinite;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: xor;
     pointer-events: none;
-  }
-  .shimmer-gold-border::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      110deg,
-      transparent 0%,
-      hsl(36 90% 55% / 0.1) 40%,
-      hsl(36 90% 55% / 0.35) 50%,
-      hsl(36 90% 55% / 0.1) 60%,
-      transparent 100%
-    );
-    transform: translateX(-150%) skewX(-20deg);
-    animation: shimmer-gold-sweep 4s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 2;
+    z-index: 1;
   }
 
-  @keyframes shimmer-gold-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  @keyframes shimmer-gold-sweep {
-    0%, 100% { transform: translateX(-150%) skewX(-20deg); }
-    50% { transform: translateX(150%) skewX(-20deg); }
+  @keyframes shimmer-gold-drift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
   }
 
 
