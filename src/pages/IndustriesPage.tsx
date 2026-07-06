@@ -562,12 +562,13 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
             </ul>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-border/40">
-              <Link
-                to={`/${selected.slug}`}
+              <button
+                type="button"
+                onClick={() => onOpenCaseFile(selected)}
                 className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors text-sm"
               >
                 Open the case file <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedSlug(null)}
