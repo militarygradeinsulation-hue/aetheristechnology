@@ -60,7 +60,33 @@ export const AdminCareersPayments: React.FC = () => {
     }
   };
 
+  const [sending, setSending] = useState<string | null>(null);
+
+  const sendLink = async (p: Payment) => {
+    if (!p.email || !p.stripe_session_id) {
+      toast({ title: 'Missing email or session', variant: 'destructive' });
+      return;
+    }
+    setSending(p.id);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'send_careers_test_link', email: p.email, stripe_session_id: p.stripe_session_id },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: 'Test link sent', description: `Emailed ${p.email}` });
+    } catch (e) {
+      toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSending(null);
+    }
+  };
+
   useEffect(() => { load(); }, []);
+
 
   return (
     <Card>
