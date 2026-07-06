@@ -25,6 +25,15 @@ export const AdminLiveTrafficBar: React.FC = () => {
   const [data, setData] = useState<LiveTraffic | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const v = window.localStorage.getItem('admin_live_traffic_collapsed');
+    return v === null ? true : v === '1';
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('admin_live_traffic_collapsed', collapsed ? '1' : '0'); } catch {}
+  }, [collapsed]);
+
 
   const load = async () => {
     try {
