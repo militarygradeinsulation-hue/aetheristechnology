@@ -8,7 +8,7 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
-import { PublicLeakScan } from "@/components/PublicLeakScan";
+
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
