@@ -6,7 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
-import { PublicLeakScan } from '@/components/PublicLeakScan';
+import { PublicChaosScan } from '@/components/PublicChaosScan';
 import { Button } from '@/components/ui/button';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
 
@@ -83,7 +83,7 @@ const Home = () => {
             </div>
           </section>
 
-          <PublicLeakScan />
+          <PublicChaosScan />
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
             <div className="max-w-3xl mx-auto text-center">
