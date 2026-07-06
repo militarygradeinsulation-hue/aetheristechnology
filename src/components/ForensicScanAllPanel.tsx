@@ -17,6 +17,9 @@ type Row = {
   stage_status: Record<string, { state: string; at: string; extra?: unknown }>;
   report: ForensicReport | null;
   error_message: string | null;
+  created_at?: string;
+  updated_at?: string;
+  completed_at?: string | null;
 };
 
 const STAGES: { key: string; label: string }[] = [
@@ -31,6 +34,9 @@ const STAGES: { key: string; label: string }[] = [
 const SCAN_STORAGE_KEY = "aetheris:golden-report:scan-id";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const TARGET_SECONDS = 75;
+
+const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
 async function fetchScanRow(id: string): Promise<Row | null> {
   try {
@@ -96,6 +102,8 @@ export function ForensicScanAllPanel() {
       const data = await fetchScanRow(scanId);
       if (data && !stopped) {
         setRow(data);
+        const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;
+        if (Number.isFinite(createdAt)) startedAtRef.current = createdAt;
         setElapsedSec(Math.floor((Date.now() - (startedAtRef.current || Date.now())) / 1000));
         const r = data.report;
         if (r?.chapters?.length) {
@@ -120,10 +128,25 @@ export function ForensicScanAllPanel() {
     };
   }, [scanId]);
 
+  useEffect(() => {
+    if (!scanId || row?.status === "completed" || row?.status === "failed") return;
+    const timer = window.setInterval(() => {
+      setElapsedSec(Math.floor((Date.now() - (startedAtRef.current || Date.now())) / 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [scanId, row?.status]);
+
 
   const stageState = (key: string) => row?.stage_status?.[key]?.state || (scanId ? "pending" : "");
   const report = row?.report || null;
   const chapters: Chapter[] = report?.chapters || [];
+  const completedStages = STAGES.filter((s) => ["done", "skipped"].includes(stageState(s.key))).length;
+  const activeStage = STAGES.find((s) => stageState(s.key) === "running") || null;
+  const progressPct = row?.status === "completed"
+    ? 100
+    : row?.status === "failed"
+      ? Math.max(12, Math.round((completedStages / STAGES.length) * 100))
+      : Math.min(94, Math.max(8, Math.round((completedStages / STAGES.length) * 86 + Math.min(elapsedSec / TARGET_SECONDS, 1) * 14)));
 
   return (
     <div className="space-y-4">
@@ -152,13 +175,23 @@ export function ForensicScanAllPanel() {
             <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Progress</h4>
             {row?.status && row.status !== "completed" && row.status !== "failed" && (
               <span className="font-mono text-[10px] uppercase tracking-widest text-amber-500">
-                {Math.floor(elapsedSec / 60)}:{String(elapsedSec % 60).padStart(2, "0")} elapsed
+                {formatClock(elapsedSec)} elapsed
               </span>
             )}
+          </div>
+          <div className="mb-4 space-y-2">
+            <div className="h-2 rounded-full bg-muted overflow-hidden border border-border">
+              <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${progressPct}%` }} />
+            </div>
+            <div className="flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <span>{activeStage ? activeStage.label : row?.status === "completed" ? "Report complete" : row?.status === "failed" ? "Stopped" : "Initializing"}</span>
+              <span>{progressPct}%</span>
+            </div>
           </div>
           <ul className="space-y-1.5">
             {STAGES.map((s) => {
               const st = stageState(s.key);
+              const stamp = row?.stage_status?.[s.key]?.at;
               const dot =
                 st === "done" ? "bg-green-500" :
                 st === "running" ? "bg-amber-500 animate-pulse" :
@@ -168,14 +201,25 @@ export function ForensicScanAllPanel() {
                   <span className={`w-2 h-2 rounded-full ${dot}`} />
                   <span>{s.label}</span>
                   {st === "skipped" && <span className="text-xs text-muted-foreground">(skipped)</span>}
+                  {st === "running" && <Loader2 className="w-3 h-3 animate-spin text-amber-500" />}
+                  {stamp && st !== "pending" && (
+                    <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                      {new Date(stamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </span>
+                  )}
                 </li>
               );
             })}
           </ul>
           {row?.status !== "completed" && row?.status !== "failed" && (
             <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
-              Golden Reports take roughly <span className="text-amber-500 font-mono">90&ndash;180 seconds</span> to synthesize.
-              Keep this tab open &mdash; if you refresh, we'll resume from where the scan left off.
+              Fast mode is active: slow outside detectors are capped, then the report finalizes from the evidence already captured.
+              Target finish: <span className="text-amber-500 font-mono">under 75 seconds</span> on normal sites.
+            </p>
+          )}
+          {row?.status === "completed" && (
+            <p className="mt-3 text-xs text-green-500 font-mono uppercase tracking-widest">
+              Complete in {formatClock(elapsedSec)}. Report unlocked below.
             </p>
           )}
           {row?.status === "failed" && (
