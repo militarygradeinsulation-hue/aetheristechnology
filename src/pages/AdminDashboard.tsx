@@ -1239,6 +1239,11 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
             <ReciprocationDoctrineTool />
           </Suspense>
         )}
+        {activeTool === 'chaosscan' && (
+          <Suspense fallback={<PanelFallback />}>
+            <AdminChaosScanTool />
+          </Suspense>
+        )}
         {activeTool === 'allinone' && <AllInOneGenerator />}
         {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
