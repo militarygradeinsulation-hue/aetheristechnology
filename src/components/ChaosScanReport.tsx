@@ -342,59 +342,61 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
       {/* Active symptom */}
       <div className="mt-3 min-h-[92px]">
         {active ? (
-          <div className="grid gap-2 sm:grid-cols-2 animate-fade-in">
-            <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson">
-                  <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+          <div className={`grid gap-2 ${isFixed ? "" : "sm:grid-cols-2"} animate-fade-in`}>
+            {!isFixed && (
+              <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson">
+                    <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                  </div>
+                  {active.dollar_leak && (
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-crimson bg-crimson/10 border border-crimson/30 rounded-sm px-1.5 py-0.5">
+                      {active.dollar_leak}
+                    </div>
+                  )}
                 </div>
-                {active.dollar_leak && (
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-crimson bg-crimson/10 border border-crimson/30 rounded-sm px-1.5 py-0.5">
-                    {active.dollar_leak}
+                <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
+                {active.cascade && active.cascade.length > 0 && (
+                  <div className="mt-2.5 border-t border-crimson/20 pt-2">
+                    <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1.5">Left unchecked, the chain reaction</div>
+                    <ol className="space-y-1.5">
+                      {active.cascade.map((c, i) => (
+                        <li key={i} className="flex gap-2 text-[11px] sm:text-xs text-foreground/85 leading-snug">
+                          <span className="font-mono text-crimson font-bold shrink-0">
+                            {i === 0 ? "30d" : i === 1 ? "90d" : "12mo"}
+                          </span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+                {active.connections && active.connections.length > 0 && (
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-crimson/80">
+                    Feeds: {active.connections
+                      .map((cid) => symptoms.find((x) => x.id === cid)?.label)
+                      .filter(Boolean).join(" · ")}
+                  </p>
+                )}
+                {active.evidence && (active.evidence.quote || active.evidence.source_url) && (
+                  <div className="mt-2 border-t border-crimson/20 pt-2">
+                    <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1">Evidence</div>
+                    {active.evidence.quote && (
+                      <p className="text-[11px] italic text-foreground/80 leading-snug">"{active.evidence.quote}"</p>
+                    )}
+                    {active.evidence.source_url && (
+                      <a href={active.evidence.source_url} target="_blank" rel="noreferrer"
+                        className="mt-1 inline-block font-mono text-[10px] text-amber/90 hover:text-amber underline break-all">
+                        {active.evidence.source_url}
+                      </a>
+                    )}
                   </div>
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
-              {active.cascade && active.cascade.length > 0 && (
-                <div className="mt-2.5 border-t border-crimson/20 pt-2">
-                  <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1.5">Left unchecked, the chain reaction</div>
-                  <ol className="space-y-1.5">
-                    {active.cascade.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-[11px] sm:text-xs text-foreground/85 leading-snug">
-                        <span className="font-mono text-crimson font-bold shrink-0">
-                          {i === 0 ? "30d" : i === 1 ? "90d" : "12mo"}
-                        </span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-              {active.connections && active.connections.length > 0 && (
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-crimson/80">
-                  Feeds: {active.connections
-                    .map((cid) => symptoms.find((x) => x.id === cid)?.label)
-                    .filter(Boolean).join(" · ")}
-                </p>
-              )}
-              {active.evidence && (active.evidence.quote || active.evidence.source_url) && (
-                <div className="mt-2 border-t border-crimson/20 pt-2">
-                  <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1">Evidence</div>
-                  {active.evidence.quote && (
-                    <p className="text-[11px] italic text-foreground/80 leading-snug">"{active.evidence.quote}"</p>
-                  )}
-                  {active.evidence.source_url && (
-                    <a href={active.evidence.source_url} target="_blank" rel="noreferrer"
-                      className="mt-1 inline-block font-mono text-[10px] text-amber/90 hover:text-amber underline break-all">
-                      {active.evidence.source_url}
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
             <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
               <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                <CheckCircle2 className="w-3 h-3" /> Source closed
+                <CheckCircle2 className="w-3 h-3" /> {isFixed ? `${deriveFixedLabel(active)} — source closed` : "Source closed"}
               </div>
               <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.fixed}</p>
             </div>
