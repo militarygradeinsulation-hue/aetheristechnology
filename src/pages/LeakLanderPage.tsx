@@ -236,39 +236,46 @@ const LeakLanderPage: React.FC = () => {
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "240ms", animationFillMode: "both" }}
           >
-            <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">What we actually do</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Chaos Theory Forensics. <span className="text-foreground/60">Not marketing. Not "strategy."</span> Forensics.
-              </h2>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Every business has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
-              </p>
-              <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
-                You can't see them because you built them. We can, because we didn't.
-              </p>
-
-              <div className="mt-5">
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">The Leak Audit™ — 7-point forensic protocol</div>
-                <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-foreground/85">
-                  {[
-                    "Vocabulary friction — the words costing you deals",
-                    "Brand contradictions — what you promise vs. what you deliver",
-                    "Conversion drop-offs — where buyers quietly exit",
-                    "Follow-up failures — the leads you paid for and then ignored",
-                    "System disconnects — tools that don't talk, data that dies",
-                    "Operational waste — headcount solving software problems",
-                    "Growth ceilings — the structural reason you're stuck at this number",
-                  ].map((item, i) => (
-                    <li key={i} className="flex gap-3">
-                      <span className="font-mono text-amber text-xs pt-0.5 shrink-0">0{i + 1}</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ol>
-                <p className="mt-4 text-xs text-foreground/60 italic">We don't guess. We document. Every finding comes with a dollar figure attached.</p>
+            <details className="group rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm">
+              <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">What we actually do</div>
+                  <div className="font-forensic text-base sm:text-lg font-bold leading-tight truncate">
+                    Chaos Theory Forensics. <span className="text-foreground/60">Not marketing. Forensics.</span>
+                  </div>
+                </div>
+                <span className="font-mono text-xs text-amber shrink-0 group-open:hidden">+ expand</span>
+                <span className="font-mono text-xs text-amber shrink-0 hidden group-open:inline">− collapse</span>
+              </summary>
+              <div className="px-4 sm:px-5 pb-5 -mt-1">
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  Every business has leaks. Vocabulary on your site that kills deals before the first call. Brand promises your operation contradicts daily. Leads that die in follow-up purgatory. Systems that don't talk to each other. Waste that got promoted to "process."
+                </p>
+                <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
+                  You can't see them because you built them. We can, because we didn't.
+                </p>
+                <div className="mt-5">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">The Leak Audit™ — 7-point forensic protocol</div>
+                  <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-foreground/85">
+                    {[
+                      "Vocabulary friction — the words costing you deals",
+                      "Brand contradictions — what you promise vs. what you deliver",
+                      "Conversion drop-offs — where buyers quietly exit",
+                      "Follow-up failures — the leads you paid for and then ignored",
+                      "System disconnects — tools that don't talk, data that dies",
+                      "Operational waste — headcount solving software problems",
+                      "Growth ceilings — the structural reason you're stuck at this number",
+                    ].map((item, i) => (
+                      <li key={i} className="flex gap-3">
+                        <span className="font-mono text-amber text-xs pt-0.5 shrink-0">0{i + 1}</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="mt-4 text-xs text-foreground/60 italic">We don't guess. We document. Every finding comes with a dollar figure attached.</p>
+                </div>
               </div>
-            </div>
+            </details>
           </section>
 
           {/* WHAT WE ARE NOT */}
@@ -276,27 +283,36 @@ const LeakLanderPage: React.FC = () => {
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "250ms", animationFillMode: "both" }}
           >
-            <div className="rounded-sm border border-crimson/30 bg-card/60 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">What we are not</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Not an agency. Not a consultant. Not a software pitch.
-              </h2>
-              <div className="mt-4 grid sm:grid-cols-3 gap-4 text-sm text-foreground/80 leading-relaxed">
-                <p><span className="text-amber font-semibold">Agencies</span> sell you effort — retainers, deliverables, activity reports that measure motion instead of results.</p>
-                <p><span className="text-amber font-semibold">Consultants</span> sell you opinions — frameworks and slide decks that describe your problem back to you and leave the fixing to someone else.</p>
-                <p><span className="text-amber font-semibold">Software companies</span> sell you tools — one more login, one more subscription, one more system your team will not use.</p>
-              </div>
-              <p className="mt-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
-                Aetheris sells <span className="text-amber font-semibold">findings and removal</span>. We investigate, we identify the cause, we show you the evidence, and we build what eliminates it. Then the engagement ends, because the problem does.
-              </p>
-              <div className="mt-5 pt-4 border-t border-amber/15">
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
+            <details className="group rounded-sm border border-crimson/30 bg-card/60 backdrop-blur-sm">
+              <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-1">What we are not</div>
+                  <div className="font-forensic text-base sm:text-lg font-bold leading-tight truncate">
+                    Not an agency. Not a consultant. Not a software pitch.
+                  </div>
+                </div>
+                <span className="font-mono text-xs text-crimson shrink-0 group-open:hidden">+ expand</span>
+                <span className="font-mono text-xs text-crimson shrink-0 hidden group-open:inline">− collapse</span>
+              </summary>
+              <div className="px-4 sm:px-5 pb-5 -mt-1">
+                <div className="grid sm:grid-cols-3 gap-4 text-sm text-foreground/80 leading-relaxed">
+                  <p><span className="text-amber font-semibold">Agencies</span> sell you effort — retainers, deliverables, activity reports that measure motion instead of results.</p>
+                  <p><span className="text-amber font-semibold">Consultants</span> sell you opinions — frameworks and slide decks that describe your problem back to you and leave the fixing to someone else.</p>
+                  <p><span className="text-amber font-semibold">Software companies</span> sell you tools — one more login, one more subscription, one more system your team will not use.</p>
+                </div>
+                <p className="mt-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
+                  Aetheris sells <span className="text-amber font-semibold">findings and removal</span>. We investigate, we identify the cause, we show you the evidence, and we build what eliminates it. Then the engagement ends, because the problem does.
                 </p>
-                <p className="mt-3 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
+                <div className="mt-5 pt-4 border-t border-amber/15">
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
+                  </p>
+                  <p className="mt-3 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
+                </div>
               </div>
-            </div>
+            </details>
           </section>
+
 
           {/* THE LEAK ECOSYSTEM — interactive mind map */}
           <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
