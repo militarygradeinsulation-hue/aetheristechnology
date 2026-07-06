@@ -93,7 +93,14 @@ export const AdminCareersPayments: React.FC = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast({ title: 'Test link sent', description: `Emailed ${p.email}` });
+      const log = (data as any)?.log;
+      const status = log?.status || 'queued';
+      toast({
+        title: status === 'sent' ? '✓ Email delivered' : status === 'suppressed' ? 'Recipient suppressed' : status === 'failed' ? 'Send failed' : 'Email queued',
+        description: `${p.email} · ${status}${log?.error_message ? ` · ${log.error_message}` : ''}`,
+        variant: status === 'failed' ? 'destructive' : 'default',
+      });
+      await load();
     } catch (e) {
       toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally {
