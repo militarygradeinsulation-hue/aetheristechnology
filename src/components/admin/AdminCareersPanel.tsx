@@ -608,7 +608,11 @@ export const AdminCareersPanel: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Paid Applications — proof of who paid and how much */}
+      <AdminCareersPayments />
+
       {/* Analytics */}
+
       <Card>
         <CardHeader>
           <CardTitle className="font-display flex items-center gap-2">
