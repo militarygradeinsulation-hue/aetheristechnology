@@ -148,7 +148,14 @@ export function ForensicScanAllPanel() {
 
       {scanId && (
         <Card className="p-4 bg-card border-border">
-          <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-3">Progress</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Progress</h4>
+            {row?.status && row.status !== "completed" && row.status !== "failed" && (
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-500">
+                {Math.floor(elapsedSec / 60)}:{String(elapsedSec % 60).padStart(2, "0")} elapsed
+              </span>
+            )}
+          </div>
           <ul className="space-y-1.5">
             {STAGES.map((s) => {
               const st = stageState(s.key);
@@ -165,11 +172,19 @@ export function ForensicScanAllPanel() {
               );
             })}
           </ul>
+          {row?.status !== "completed" && row?.status !== "failed" && (
+            <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+              Golden Reports take roughly <span className="text-amber-500 font-mono">90&ndash;180 seconds</span> to synthesize.
+              Keep this tab open &mdash; if you refresh, we'll resume from where the scan left off.
+            </p>
+          )}
           {row?.status === "failed" && (
             <p className="mt-3 text-sm text-red-400">Failed: {row.error_message}</p>
           )}
         </Card>
       )}
+
+
 
       {report && row && (
         <Card className="p-0 bg-card border-border overflow-hidden">
