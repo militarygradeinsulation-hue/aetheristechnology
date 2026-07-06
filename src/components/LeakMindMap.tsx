@@ -9,6 +9,8 @@ export type MindMapNodeData = {
   icon: LucideIcon;
   onClick?: () => void;
   connections?: string[];
+  /** Cross-node ripple: how selecting this node affects sibling nodes. */
+  affects?: { id: string; note: string }[];
 };
 
 type NodePos = { x: number; y: number; ring: number };
