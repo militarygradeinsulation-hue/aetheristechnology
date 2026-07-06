@@ -11,7 +11,7 @@ import { combineSchemas, howToSchema, serviceSchema, speakableSchema } from '@/l
 import { VERTICAL_BY_SLUG, type VerticalUseCase } from '@/config/verticals';
 import LeakMindMap, { type MindMapNodeData } from '@/components/LeakMindMap';
 
-const CATEGORY_ICONS: Record<VerticalUseCase['category'], React.ComponentType<{ className?: string }>> = {
+const CATEGORY_ICONS: Record<VerticalUseCase['category'], typeof Target> = {
   'Strategy': Target,
   'Governance': Shield,
   'Technology': Cpu,
