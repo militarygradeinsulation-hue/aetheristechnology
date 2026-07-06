@@ -281,6 +281,11 @@ const LeakLanderPage: React.FC = () => {
           {/* THE LEAK ECOSYSTEM — interactive mind map */}
           <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
 
+          {/* CUSTOM BUILD REQUEST — direct-to-Joseph */}
+          <BuildMeASystemSection />
+
+
+
           {/* THE OFFER */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
