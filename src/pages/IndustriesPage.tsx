@@ -795,11 +795,11 @@ const IndustryModal: React.FC<{ industry: IndustryLeak | null; onClose: () => vo
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border/40">
             <Link
-              to={`/${industry.slug}`}
+              to={`/ai-for-${industry.slug}`}
               onClick={onClose}
               className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors"
             >
-              Open the case file <ArrowRight className="w-4 h-4" />
+              View the full playbook <ArrowRight className="w-4 h-4" />
             </Link>
             <button
               type="button"
