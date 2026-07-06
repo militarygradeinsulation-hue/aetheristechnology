@@ -161,6 +161,7 @@ export function ReciprocationDoctrineTool() {
   const [tactics, setTactics] = useState<Tactic[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [checked, setChecked] = useState<Record<number, boolean>>({});
+  const [citationsOpen, setCitationsOpen] = useState(false);
 
   const isAdmin = !!getAdminToken();
   const headers: Record<string, string> = isAdmin
