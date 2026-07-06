@@ -21,7 +21,7 @@ const TABS: { id: TabId; label: string; blurb: string }[] = [
 ];
 
 export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBookAudit }) => {
-  const [tab, setTab] = useState<TabId>("symptoms");
+  const [tab, setTab] = useState<TabId>("all");
   const navigate = useNavigate();
 
   const symptoms: MindMapNodeData[] = [
