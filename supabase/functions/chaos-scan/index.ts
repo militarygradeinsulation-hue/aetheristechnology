@@ -35,12 +35,12 @@ function normalizeUrl(input: string): string | null {
 
 // -------------------- Firecrawl helpers --------------------
 
-async function fcScrape(url: string, formats: any[]): Promise<any | null> {
+async function fcScrape(url: string, formats: any[], timeoutMs = 25_000): Promise<any | null> {
   if (!FIRECRAWL_API_KEY) return null;
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
-      signal: AbortSignal.timeout(45_000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
@@ -52,7 +52,6 @@ async function fcScrape(url: string, formats: any[]): Promise<any | null> {
       return null;
     }
     const j = await r.json();
-    // v2 returns { success, data: {...} } typically
     return j?.data ?? j ?? null;
   } catch (e) {
     console.warn("fc scrape failed", url, e);
@@ -65,12 +64,12 @@ async function fcMap(url: string): Promise<string[]> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/map", {
       method: "POST",
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(15_000),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url, limit: 300, includeSubdomains: false }),
+      body: JSON.stringify({ url, limit: 150, includeSubdomains: false }),
     });
     if (!r.ok) return [];
     const j = await r.json();
@@ -284,19 +283,18 @@ async function synthesize(prompt: string) {
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(75_000),
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-pro",
+      model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: SYSTEM },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.4,
     }),
   });
   if (!r.ok) {
@@ -349,14 +347,9 @@ serve(async (req) => {
       },
     };
 
+    // Primary scrape: keep it fast — no LLM-heavy formats (json/summary) here.
     const [deep, siteLinks] = await Promise.all([
-      fcScrape(url, [
-        "markdown",
-        "links",
-        "branding",
-        "summary",
-        { type: "json", schema: businessSchema },
-      ]),
+      fcScrape(url, ["markdown", "links", "branding"], 40_000),
       fcMap(url),
     ]);
 
@@ -376,12 +369,12 @@ serve(async (req) => {
 
     // Merge & rank interior links
     const allLinks = Array.from(new Set([...(siteLinks || []), ...(pageLinks || [])]));
-    const top = pickTopLinks(allLinks, rootHost, 5);
+    const top = pickTopLinks(allLinks, rootHost, 3);
 
     // Scrape the top interior pages in parallel (markdown-only, faster)
     const pages: Array<{ url: string; title: string; markdown: string }> = [];
     if (top.length && FIRECRAWL_API_KEY) {
-      const results = await Promise.all(top.map((u) => fcScrape(u, ["markdown"])));
+      const results = await Promise.all(top.map((u) => fcScrape(u, ["markdown"], 18_000)));
       results.forEach((res, i) => {
         if (!res) return;
         pages.push({
@@ -416,7 +409,7 @@ serve(async (req) => {
         sitemap_urls: allLinks.length,
         pages_analyzed: pages.length + 1,
         analyzed_urls: [url, ...pages.map((p) => p.url)],
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
       },
     });
   } catch (e) {
