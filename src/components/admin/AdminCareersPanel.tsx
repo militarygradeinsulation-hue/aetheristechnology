@@ -16,6 +16,7 @@ import {
   Star, CalendarPlus, Share2, Copy, Trash2,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
+import { AdminCareersPayments } from './AdminCareersPayments';
 import { upsertCompanyEntry } from '@/lib/companyCalendar';
 import { ReadAloudButton } from '@/components/ReadAloudButton';
 
@@ -930,6 +931,8 @@ export const AdminCareersPanel: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <AdminCareersPayments />
 
       <AdminCareersTest />
 
