@@ -169,6 +169,13 @@ const AdminChaosScanTool: React.FC = () => {
 
       {data && (
         <Card className="p-4 md:p-5">
+          <style>{`@keyframes chaosFloat {
+            0%   { transform: translate(0px, 0px) rotate(0deg); }
+            25%  { transform: translate(2px, -3px) rotate(0.4deg); }
+            50%  { transform: translate(-1px, -5px) rotate(-0.3deg); }
+            75%  { transform: translate(-3px, -1px) rotate(0.2deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+          }`}</style>
           {/* Header + toggle */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
             <div>
