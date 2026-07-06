@@ -16,6 +16,7 @@ import { template as monthlyDelivery } from './monthly-delivery.tsx'
 import { template as deliverableMagicLink } from './deliverable-magic-link.tsx'
 import { template as leadIntakeNotification } from './lead-intake-notification.tsx'
 import { template as repInactivityAlert } from './rep-inactivity-alert.tsx'
+import { template as careersTestAccess } from './careers-test-access.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-welcome': repWelcome,
@@ -25,4 +26,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'deliverable-magic-link': deliverableMagicLink,
   'lead-intake-notification': leadIntakeNotification,
   'rep-inactivity-alert': repInactivityAlert,
+  'careers-test-access': careersTestAccess,
 }
