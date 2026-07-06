@@ -113,18 +113,8 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
             One business. Several maps. <span className="text-crimson">Every clue traced.</span>
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-foreground/65 max-w-2xl mx-auto">
-            Scan your site below to open the case. Your email unlocks every free instrument on this map — no packages, no pitch.
+            Tap any node to trace its connections. Every free instrument opens from the map itself — no forms, no pitch.
           </p>
-        </div>
-
-        {/* Live scan + free tool suite — entry point into the ecosystem */}
-        <div className="mb-6 -mx-2 sm:-mx-3">
-          <PublicLeakScan />
-        </div>
-
-        <div className="text-center mb-3">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Trace the chaos</div>
-          <p className="text-xs sm:text-sm text-foreground/65 mt-1">Four maps. Tap a node to expand its connections.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center mb-2">
