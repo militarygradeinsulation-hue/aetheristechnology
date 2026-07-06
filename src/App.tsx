@@ -3,9 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import { SalesChat } from "@/components/SalesChat";
+
+const SalesChatGate = () => {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/aetheris-iq") || pathname.startsWith("/aetheris-ai") || pathname === "/iq") return null;
+  return <SalesChat />;
+};
 import { BookMeetingGate } from "@/components/BookMeetingGate";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { RetargetingPixel } from "@/components/RetargetingPixel";
