@@ -932,6 +932,8 @@ export const AdminCareersPanel: React.FC = () => {
         </CardContent>
       </Card>
 
+      <AdminCareersPayments />
+
       <AdminCareersTest />
 
       <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
