@@ -151,24 +151,32 @@ const LeakLanderPage: React.FC = () => {
 
           {/* CTAs */}
           <section
-            className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 animate-fade-in"
+            className="mt-5 flex flex-col items-center gap-3 animate-fade-in"
             style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
-            <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
-              <Link to="/leak-audit">
-                <FileText className="w-4 h-4 mr-2 text-amber" />
-                Free 60-sec Pre-Scan
-              </Link>
-            </Button>
-            <Button
-              size="default"
-              onClick={() => setBookingOpen(true)}
-              className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full">
+              <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
+                <Link to="/leak-audit">
+                  <FileText className="w-4 h-4 mr-2 text-amber" />
+                  Free 60-sec Pre-Scan
+                </Link>
+              </Button>
+              <Button
+                size="default"
+                onClick={() => setBookingOpen(true)}
+                className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Request an Investigation
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </div>
+            <Link
+              to="/chaos-scan"
+              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber hover:underline underline-offset-4"
             >
-              <Calendar className="w-4 h-4 mr-2" />
-              Request an Investigation
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+              Or run the free Chaos Scan <ArrowRight className="w-3 h-3" />
+            </Link>
           </section>
 
 
