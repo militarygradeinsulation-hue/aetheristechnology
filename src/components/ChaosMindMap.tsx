@@ -270,16 +270,16 @@ export const ChaosMindMap: React.FC = () => {
                 style={{ left: `${s.x}%`, top: `${s.y}%` }}
               >
                 <div className={`relative flex flex-col items-center transition-transform ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
                     isFixed
                       ? 'border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]'
                       : isActive
                         ? 'border-amber bg-amber/15 shadow-[0_0_20px_hsl(var(--amber)/0.5)]'
                         : 'border-crimson/60 group-hover:border-crimson shadow-[0_0_12px_hsl(var(--crimson)/0.3)]'
                   }`}>
-                    <SIcon className={`w-4 h-4 md:w-5 md:h-5 ${isFixed ? 'text-amber' : isActive ? 'text-amber' : 'text-crimson'}`} />
+                    <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? 'text-amber' : isActive ? 'text-amber' : 'text-crimson'}`} />
                   </div>
-                  <div className={`mt-1 font-forensic text-[10px] md:text-xs font-bold leading-tight whitespace-nowrap ${
+                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
                     isActive ? 'text-amber' : isFixed ? 'text-foreground' : 'text-foreground/85'
                   }`}>
                     {s.label}
