@@ -345,24 +345,8 @@ const LeakLanderPage: React.FC = () => {
 
           </section>
 
-          {/* WHY WE'RE LIKE THIS */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Why we're like this</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold">Because polite consulting is why you're stuck.</h2>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Every agency you've hired told you what you wanted to hear, billed you monthly, and called stagnation "brand building." We'd rather lose the sale than join the pile of invoices that changed nothing.
-              </p>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
-              </p>
-              <p className="mt-4 font-forensic text-lg font-bold text-amber">Chaos Theory Forensics. Real Findings. No Sugar.</p>
-              <p className="mt-2 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
-            </div>
-          </section>
+
+
 
           {/* FAQ — the honest version */}
           <section
