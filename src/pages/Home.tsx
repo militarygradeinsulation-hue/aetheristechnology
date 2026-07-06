@@ -8,7 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { Button } from '@/components/ui/button';
-import chaosTheoryForensicHero from '@/assets/chaos-theory-forensic-hero.png.asset.json';
+import chaosTheoryForensicHero from '@/assets/chaos-theory-forensic-banner.jpg.asset.json';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
