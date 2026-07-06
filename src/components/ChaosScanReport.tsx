@@ -153,7 +153,7 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
       {/* Map */}
       <div className="relative w-full rounded-sm border border-border/50 bg-background/40 overflow-hidden">
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/10]">
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+          <svg className="absolute inset-0 z-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
             <defs>
               <radialGradient id="chaosScanHub" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor={isFixed ? "hsl(var(--amber))" : "hsl(var(--crimson))"} stopOpacity="0.35" />
@@ -200,21 +200,42 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
               return links;
             })}
 
-            {isFixed && symptoms.flatMap((s) => {
+            {isFixed && symptoms.flatMap((s, si) => {
               const anchor = operators.find((o) => o.id === s.anchor) || operators[0];
+              const isActive = active?.id === s.id;
+              const dim = active !== null && !isActive && !active?.connections?.includes(s.id);
               return [
+                <path key={`o-hub-glow-${s.id}`} d={orderedPath(HUB.x, HUB.y, s.x, s.y)}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.08 : isActive ? 0.55 : 0.28} strokeWidth={7}
+                  strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
+                <path key={`o-hub-${s.id}`} d={orderedPath(HUB.x, HUB.y, s.x, s.y)}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.18 : isActive ? 1 : 0.82} strokeWidth={isActive ? 2.6 : 1.7}
+                  strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                 <path key={`o-s-glow-${s.id}`} d={orderedPath(s.x, s.y, anchor.x, anchor.y)}
-                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.35} strokeWidth={5}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.06 : 0.28} strokeWidth={5}
                   strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                 <path key={`o-s-${s.id}`} d={orderedPath(s.x, s.y, anchor.x, anchor.y)}
-                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={1} strokeWidth={2}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.16 : 0.78} strokeWidth={1.5}
                   strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                 <path key={`o-a-glow-${s.id}`} d={orderedPath(anchor.x, anchor.y, HUB.x, HUB.y)}
-                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.4} strokeWidth={6}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.05 : 0.22} strokeWidth={6}
                   strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                 <path key={`o-a-${s.id}`} d={orderedPath(anchor.x, anchor.y, HUB.x, HUB.y)}
-                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={1} strokeWidth={2.5}
+                  fill="none" stroke="hsl(var(--amber))" strokeOpacity={dim ? 0.14 : 0.72} strokeWidth={1.8}
                   strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
+                ...(s.connections || []).map((cid, ci) => {
+                  const t = symptoms.find((x) => x.id === cid);
+                  if (!t) return null;
+                  const activePair = isActive || active?.id === cid;
+                  return (
+                    <path key={`o-x-${s.id}-${cid}-${ci}`}
+                      d={chaosPath(s.x, s.y, t.x, t.y, si * 11 + ci + 89)}
+                      fill="none" stroke="hsl(var(--amber))"
+                      strokeOpacity={activePair ? 0.78 : active ? 0.12 : 0.32}
+                      strokeWidth={activePair ? 1.7 : 0.95}
+                      strokeDasharray="4 5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  );
+                }),
               ];
             })}
           </svg>
