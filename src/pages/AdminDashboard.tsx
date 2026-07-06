@@ -66,6 +66,7 @@ const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard')
 const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
 const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
 const AdminChaosScanTool = lazy(() => import('@/components/admin/ChaosScanTool'));
+const AdminHeadToHeadTool = lazy(() => import('@/components/admin/HeadToHeadTool'));
 const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
 const InterviewsPanel = lazy(() => import('@/components/admin/InterviewsPanel').then(m => ({ default: m.InterviewsPanel })));
 const InterviewBriefingPanel = lazy(() => import('@/components/portal/InterviewBriefingPanel').then(m => ({ default: m.InterviewBriefingPanel })));
