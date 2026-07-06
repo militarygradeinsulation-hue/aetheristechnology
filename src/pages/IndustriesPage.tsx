@@ -8,6 +8,8 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useChaosPhysics, type ChaosTuning, DEFAULT_TUNING } from '@/hooks/useChaosPhysics';
+import { ChaosTuner } from '@/components/ChaosTuner';
 import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { INFOGRAPHICS } from '@/lib/infographics';
