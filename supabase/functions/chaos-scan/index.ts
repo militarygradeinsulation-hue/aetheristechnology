@@ -379,7 +379,7 @@ serve(async (req) => {
     // Scrape the top interior pages in parallel (markdown-only, faster)
     const pages: Array<{ url: string; title: string; markdown: string }> = [];
     if (top.length && FIRECRAWL_API_KEY) {
-      const results = await Promise.all(top.map((u) => fcScrape(u, ["markdown"])));
+      const results = await Promise.all(top.map((u) => fcScrape(u, ["markdown"], 18_000)));
       results.forEach((res, i) => {
         if (!res) return;
         pages.push({
