@@ -401,10 +401,10 @@ const MindMapNode: React.FC<{
   );
 };
 
-const MindMap: React.FC<{ industries: IndustryLeak[] }> = ({ industries }) => {
-  const navigate = useNavigate();
+const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: IndustryLeak) => void }> = ({ industries, onOpenCaseFile }) => {
   const positions = useMemo(() => computeMindMapLayout(industries.length), [industries.length]);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
 
   const selectedIndex = selectedSlug ? industries.findIndex((v) => v.slug === selectedSlug) : -1;
   const selected = selectedIndex >= 0 ? industries[selectedIndex] : null;
