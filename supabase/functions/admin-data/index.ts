@@ -260,6 +260,38 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "careers_payments") {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("id,email,amount_cents,currency,status,environment,occurred_at,stripe_session_id,metadata")
+        .eq("metadata->>purpose", "careers_test_fee")
+        .order("occurred_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      const rows = data || [];
+      const paid = rows.filter((r: any) => r.status === "paid");
+      const total_cents = paid.reduce((s: number, r: any) => s + (r.amount_cents || 0), 0);
+      const emails = Array.from(new Set(paid.map((r: any) => (r.email || "").toLowerCase()).filter(Boolean)));
+      const attempts_by_email: Record<string, any> = {};
+      if (emails.length) {
+        const { data: at } = await supabase
+          .from("careers_attempts")
+          .select("id,candidate_email,candidate_name,status,score_pct,share_code,submitted_at")
+          .in("candidate_email", emails);
+        for (const a of at || []) {
+          const k = (a.candidate_email || "").toLowerCase();
+          if (!attempts_by_email[k]) attempts_by_email[k] = a;
+        }
+      }
+      return new Response(JSON.stringify({
+        payments: rows,
+        summary: { count: paid.length, total_cents, unique_emails: emails.length },
+        attempts_by_email,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
