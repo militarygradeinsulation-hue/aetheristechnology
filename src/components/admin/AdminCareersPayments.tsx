@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { useToast } from '@/hooks/use-toast';
 import { openRepMail } from '@/lib/repMail';
-import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, ExternalLink } from 'lucide-react';
+import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, ExternalLink, Send } from 'lucide-react';
 
 interface Payment {
   id: string;
