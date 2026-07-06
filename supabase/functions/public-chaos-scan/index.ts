@@ -54,7 +54,7 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-async function fcScrape(url: string, formats: any[]): Promise<any | null> {
+async function fcScrape(url: string, formats: any[], timeoutMs = 25_000): Promise<any | null> {
   if (!FIRECRAWL_API_KEY) return null;
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
