@@ -853,8 +853,43 @@ export const AdminCareersPanel: React.FC = () => {
             <div className="space-y-2">
               {tab === 'apps' ? (
                 filteredApps.length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No applications submitted yet.</p> :
-                filteredApps.map(a => (
+                filteredApps.map(a => {
+                  const isCollapsed = minimized && !expandedIds.has(a.id);
+                  if (isCollapsed) {
+                    const stage = a.stage || 'new';
+                    return (
+                      <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 hover:border-amber/50 hover:bg-secondary/30 transition-colors">
+                        <button type="button" onClick={() => toggleExpanded(a.id)} className="w-full text-left px-3 py-2 flex items-center gap-2 flex-wrap">
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="font-display font-semibold text-foreground truncate">{a.candidate_name || a.candidate_email}</span>
+                          <Badge variant="outline" className="font-mono text-[10px] h-5">{a.share_code}</Badge>
+                          {a.score_pct != null && <Badge className="h-5 text-[10px] bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
+                          {a.ai_fit_score != null && (
+                            <Badge className={`h-5 text-[10px] border ${a.ai_fit_score >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 30 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              Fit {a.ai_fit_score}/60
+                            </Badge>
+                          )}
+                          {stage !== 'new' && (
+                            <Badge className={`h-5 text-[10px] capitalize border ${
+                              stage === 'interview' ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+                              stage === 'wait' ? 'bg-amber/20 text-amber border-amber/40' :
+                              stage === 'no' ? 'bg-destructive/20 text-destructive border-destructive/40' :
+                              stage === 'archived' ? 'bg-muted text-muted-foreground border-border' :
+                              'bg-muted'
+                            }`}>{stage}</Badge>
+                          )}
+                          {a.contacted && <Badge className="h-5 text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/40">Contacted</Badge>}
+                          <span className="ml-auto text-[10px] text-muted-foreground font-mono">{Math.floor(ageDays(a.created_at))}d ago</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
                   <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                    <button type="button" onClick={() => toggleExpanded(a.id)}
+                      className="text-[10px] font-mono uppercase text-muted-foreground hover:text-amber flex items-center gap-1 mb-2">
+                      <ChevronDown className="w-3 h-3" /> Collapse
+                    </button>
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2">
