@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
+import { X } from "lucide-react";
 
 export type MindMapNodeData = {
   id: string;
@@ -7,6 +8,7 @@ export type MindMapNodeData = {
   sublabel?: string;
   icon: LucideIcon;
   onClick?: () => void;
+  connections?: string[];
 };
 
 type NodePos = { x: number; y: number; ring: number };
@@ -57,6 +59,9 @@ const accentMap = {
     ring: "border-amber/30 group-hover:border-amber/70",
     sublabel: "text-crimson",
     label: "group-hover:text-amber",
+    selectedBorder: "border-amber",
+    selectedGlow: "shadow-[0_0_40px_hsl(var(--amber)/0.55)]",
+    stroke: "hsl(var(--amber))",
   },
   crimson: {
     border: "border-crimson/40 group-hover:border-crimson",
@@ -66,6 +71,9 @@ const accentMap = {
     ring: "border-crimson/30 group-hover:border-crimson/70",
     sublabel: "text-amber",
     label: "group-hover:text-crimson",
+    selectedBorder: "border-crimson",
+    selectedGlow: "shadow-[0_0_40px_hsl(var(--crimson)/0.55)]",
+    stroke: "hsl(var(--crimson))",
   },
 };
 
@@ -84,6 +92,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
     return g;
   }, [positions]);
   const a = accentMap[accent];
+
+  const [selected, setSelected] = useState<number | null>(null);
 
   return (
     <div className={`relative w-full ${heightClass}`}>
@@ -106,20 +116,25 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
         <circle cx="50" cy="50" r="18" fill="url(#lmm-hub-glow)" />
 
-        {positions.map((p, i) => (
-          <line
-            key={`spoke-${i}`}
-            x1="50"
-            y1="50"
-            x2={p.x}
-            y2={p.y}
-            stroke="url(#lmm-spoke)"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
-            strokeDasharray="4 6"
-            style={{ animation: `mindmap-flow 6s linear ${(i % 8) * -0.5}s infinite` }}
-          />
-        ))}
+        {positions.map((p, i) => {
+          const isSel = selected === i;
+          const dim = selected !== null && !isSel;
+          return (
+            <line
+              key={`spoke-${i}`}
+              x1="50"
+              y1="50"
+              x2={p.x}
+              y2={p.y}
+              stroke={isSel ? a.stroke : "url(#lmm-spoke)"}
+              strokeWidth={isSel ? "1.8" : "1"}
+              strokeOpacity={dim ? 0.15 : 1}
+              vectorEffect="non-scaling-stroke"
+              strokeDasharray={isSel ? "0" : "4 6"}
+              style={{ animation: isSel ? undefined : `mindmap-flow 6s linear ${(i % 8) * -0.5}s infinite` }}
+            />
+          );
+        })}
 
         {Object.values(ringGroups).flatMap((idxs, gi) =>
           idxs.map((idx, k) => {
@@ -135,16 +150,17 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
             const bulge = 1.08;
             const cx = 50 + (dx / len) * len * bulge;
             const cy = 50 + (dy / len) * len * bulge;
+            const isSelArc = selected === idx || selected === next;
             return (
               <path
                 key={`arc-${gi}-${k}`}
                 d={`M ${A.x} ${A.y} Q ${cx} ${cy} ${B.x} ${B.y}`}
                 fill="none"
-                stroke="hsl(var(--amber))"
-                strokeOpacity="0.18"
-                strokeWidth="0.8"
+                stroke={isSelArc ? a.stroke : "hsl(var(--amber))"}
+                strokeOpacity={selected !== null ? (isSelArc ? 0.9 : 0.06) : 0.18}
+                strokeWidth={isSelArc ? "1.2" : "0.8"}
                 vectorEffect="non-scaling-stroke"
-                strokeDasharray="2 5"
+                strokeDasharray={isSelArc ? "0" : "2 5"}
               />
             );
           })
@@ -184,43 +200,109 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         const p = positions[i];
         if (!p) return null;
         const Icon = n.icon;
-        const isButton = !!n.onClick;
-        const Comp: any = isButton ? "button" : "div";
+        const isSel = selected === i;
+        const dim = selected !== null && !isSel;
+        const handleClick = () => {
+          if (isSel) {
+            // Second click: trigger onClick if provided, else just collapse
+            if (n.onClick) n.onClick();
+            else setSelected(null);
+          } else {
+            setSelected(i);
+          }
+        };
+        // Randomize drift per node
+        const driftDur = 7 + ((i * 1.3) % 5);
+        const driftDelay = (i * 0.45) % 4;
         return (
-          <Comp
+          <button
             key={n.id}
-            type={isButton ? "button" : undefined}
-            onClick={n.onClick}
+            type="button"
+            onClick={handleClick}
+            aria-pressed={isSel}
+            aria-label={`${n.label}. ${isSel ? "Collapse" : "Expand connections"}`}
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
-              animationDelay: `${i * 60}ms`,
             }}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10 ${isButton ? "cursor-pointer" : ""}`}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 cursor-pointer transition-opacity duration-300 ${
+              dim ? "opacity-40" : "opacity-100"
+            } ${isSel ? "z-30" : ""}`}
           >
-            <div className="relative flex flex-col items-center">
-              <span
-                aria-hidden
-                className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${a.ring}`}
-                style={{ animation: `mindmap-pulse 3.2s ease-out ${(i % 6) * 0.4}s infinite` }}
-              />
-              <div
-                className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${a.border} ${a.bg} ${a.glow}`}
-              >
-                <Icon className={`w-7 h-7 md:w-8 md:h-8 ${a.icon}`} />
-              </div>
-              <div className="mt-2 text-center max-w-[140px]">
-                <div className={`font-forensic text-xs md:text-sm font-bold text-foreground leading-tight transition-colors ${a.label}`}>
-                  {n.label}
+            <div
+              className="animate-mindmap-drift"
+              style={{
+                animationDuration: `${driftDur}s`,
+                animationDelay: `-${driftDelay}s`,
+              }}
+            >
+              <div className={`relative flex flex-col items-center transition-transform duration-300 ${isSel ? "scale-110" : ""}`}>
+                <span
+                  aria-hidden
+                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${a.ring}`}
+                  style={{ animation: `mindmap-pulse 3.2s ease-out ${(i % 6) * 0.4}s infinite` }}
+                />
+                <div
+                  className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
+                    isSel ? `${a.selectedBorder} ${a.selectedGlow}` : `${a.border} ${a.bg} ${a.glow}`
+                  }`}
+                >
+                  <Icon className={`w-7 h-7 md:w-8 md:h-8 ${a.icon}`} />
                 </div>
-                {n.sublabel && (
-                  <div className={`font-mono text-[10px] md:text-xs leading-tight mt-0.5 ${a.sublabel}`}>
-                    {n.sublabel}
+                <div className="mt-2 text-center max-w-[140px]">
+                  <div className={`font-forensic text-xs md:text-sm font-bold text-foreground leading-tight transition-colors ${a.label}`}>
+                    {n.label}
+                  </div>
+                  {n.sublabel && (
+                    <div className={`font-mono text-[10px] md:text-xs leading-tight mt-0.5 ${a.sublabel}`}>
+                      {n.sublabel}
+                    </div>
+                  )}
+                </div>
+
+                {/* Expanded connections panel */}
+                {isSel && (
+                  <div
+                    className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-[220px] md:w-[240px] rounded-sm border border-amber/40 bg-background/95 backdrop-blur-md p-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] animate-fade-in text-left"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber">
+                        Connections
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setSelected(null); }}
+                        className="text-foreground/60 hover:text-foreground"
+                        aria-label="Close"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    {n.connections && n.connections.length > 0 ? (
+                      <ul className="space-y-1.5">
+                        {n.connections.map((c, ci) => (
+                          <li key={ci} className="flex items-start gap-2 text-[11px] md:text-xs text-foreground/85 leading-snug">
+                            <span className={`mt-1 h-1 w-1 rounded-full shrink-0 ${accent === "crimson" ? "bg-crimson" : "bg-amber"}`} />
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-[11px] text-foreground/70 leading-snug">
+                        Traces back to the hub. Click again for details.
+                      </p>
+                    )}
+                    {n.onClick && (
+                      <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">
+                        Tap again to open →
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
-          </Comp>
+          </button>
         );
       })}
     </div>

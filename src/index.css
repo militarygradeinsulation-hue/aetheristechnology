@@ -217,6 +217,19 @@
     }
   }
 
+  @keyframes mindmap-drift {
+    0%   { transform: translate(0px, 0px); }
+    25%  { transform: translate(4px, -6px); }
+    50%  { transform: translate(-3px, 3px); }
+    75%  { transform: translate(-5px, -4px); }
+    100% { transform: translate(0px, 0px); }
+  }
+
+  .animate-mindmap-drift {
+    animation: mindmap-drift 9s ease-in-out infinite;
+    will-change: transform;
+  }
+
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }

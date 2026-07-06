@@ -22,41 +22,67 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   const navigate = useNavigate();
 
   const symptoms: MindMapNodeData[] = [
-    { id: "vocab",     label: "Vocabulary Friction",  sublabel: "Words that kill deals", icon: MessageSquare },
-    { id: "brand",     label: "Brand Contradictions", sublabel: "Promise ≠ delivery",    icon: GitFork },
-    { id: "convert",   label: "Conversion Drop-offs", sublabel: "Silent exits",          icon: TrendingDown },
-    { id: "followup",  label: "Follow-up Failures",   sublabel: "Leads left to die",     icon: PhoneOff },
-    { id: "systems",   label: "System Disconnects",   sublabel: "Data that dies",        icon: Unplug },
-    { id: "waste",     label: "Operational Waste",    sublabel: "Headcount vs software", icon: Trash2 },
-    { id: "ceiling",   label: "Growth Ceilings",      sublabel: "Stuck at this number",  icon: Gauge },
+    { id: "vocab",     label: "Vocabulary Friction",  sublabel: "Words that kill deals", icon: MessageSquare,
+      connections: ["Homepage copy that talks about you, not the buyer", "Jargon in the sales deck", "Pricing page that hides the price", "Proposal language that invites objection"] },
+    { id: "brand",     label: "Brand Contradictions", sublabel: "Promise ≠ delivery",    icon: GitFork,
+      connections: ["Site says premium, intake feels like a form mill", "Testimonials don't match ICP", "Response time contradicts urgency claim", "Delivery experience undercuts sales promise"] },
+    { id: "convert",   label: "Conversion Drop-offs", sublabel: "Silent exits",          icon: TrendingDown,
+      connections: ["Form abandoned on field 3", "CTA buried below the fold", "Mobile checkout friction", "Pricing table causes rage-quit"] },
+    { id: "followup",  label: "Follow-up Failures",   sublabel: "Leads left to die",     icon: PhoneOff,
+      connections: ["Lead sits in inbox > 4 hours", "No second touch after day 3", "Quote sent, never re-referenced", "Won-lost data never captured"] },
+    { id: "systems",   label: "System Disconnects",   sublabel: "Data that dies",        icon: Unplug,
+      connections: ["CRM and email don't talk", "Manual re-entry between tools", "No source-of-truth for customer record", "Reports built off stale exports"] },
+    { id: "waste",     label: "Operational Waste",    sublabel: "Headcount vs software", icon: Trash2,
+      connections: ["Human doing what a webhook could", "Meetings that should be a Loom", "Task queues without SLAs", "Vendor stack paying for overlap"] },
+    { id: "ceiling",   label: "Growth Ceilings",      sublabel: "Stuck at this number",  icon: Gauge,
+      connections: ["Owner is the bottleneck for every deal", "No documented playbook to hand off", "Pipeline math can't fund the next hire", "Delivery capacity capped by one operator"] },
   ];
 
   const steps: MindMapNodeData[] = [
-    { id: "01", label: "Intake & Scope",       sublabel: "01",  icon: ClipboardList },
-    { id: "02", label: "Website & Vocabulary", sublabel: "02",  icon: Globe },
-    { id: "03", label: "Sales & Follow-up",    sublabel: "03",  icon: Phone },
-    { id: "04", label: "Systems & Data Map",   sublabel: "04",  icon: Network },
-    { id: "05", label: "Ops & Headcount",      sublabel: "05",  icon: Users },
-    { id: "06", label: "Dollar-Quantified Findings", sublabel: "06", icon: DollarSign },
-    { id: "07", label: "Fix Stack & Priority Ledger", sublabel: "07", icon: ListChecks },
+    { id: "01", label: "Intake & Scope",       sublabel: "01",  icon: ClipboardList,
+      connections: ["30-minute operator call", "NDA + read-only access to systems", "Symptom list ranked by pain"] },
+    { id: "02", label: "Website & Vocabulary", sublabel: "02",  icon: Globe,
+      connections: ["Live DOM scan", "Copy leak inventory", "Trust-signal audit"] },
+    { id: "03", label: "Sales & Follow-up",    sublabel: "03",  icon: Phone,
+      connections: ["Response-time forensic", "Pipeline stage bleed analysis", "Quote-to-close gap"] },
+    { id: "04", label: "Systems & Data Map",   sublabel: "04",  icon: Network,
+      connections: ["Tool inventory", "Integration diagram", "Data-source-of-truth verdict"] },
+    { id: "05", label: "Ops & Headcount",      sublabel: "05",  icon: Users,
+      connections: ["Hours spent on automatable work", "Role vs. system waste", "Bottleneck map"] },
+    { id: "06", label: "Dollar-Quantified Findings", sublabel: "06", icon: DollarSign,
+      connections: ["Every leak carries an annual $ figure", "Ranked by impact and effort", "Attached to the specific fix"] },
+    { id: "07", label: "Fix Stack & Priority Ledger", sublabel: "07", icon: ListChecks,
+      connections: ["Sequenced fix plan", "Ownership per line", "Recovery tracker template"] },
   ];
 
   const systems: MindMapNodeData[] = [
-    { id: "aetheris",  label: "Aetheris Ops",    sublabel: "Workflow engine",   icon: Cog },
-    { id: "ctoguy",    label: "CTOguy AI",       sublabel: "Analysis brain",    icon: Brain },
-    { id: "ghost",     label: "Ghost Analyst",   sublabel: "Silent monitoring", icon: Eye },
-    { id: "bridge",    label: "Data Bridge",     sublabel: "Integrations",      icon: Cable },
-    { id: "report",    label: "Report Engine",   sublabel: "Sealed findings",   icon: FileText },
-    { id: "alerts",    label: "Leak Alerts",     sublabel: "Signals, not noise", icon: Bell },
+    { id: "aetheris",  label: "Aetheris Ops",    sublabel: "Workflow engine",   icon: Cog,
+      connections: ["Ties CRM, forms, and comms", "Triggers on real events", "One record, one truth"] },
+    { id: "ctoguy",    label: "CTOguy AI",       sublabel: "Analysis brain",    icon: Brain,
+      connections: ["Reads scans and CRMs", "Flags patterns humans miss", "Drafts findings on demand"] },
+    { id: "ghost",     label: "Ghost Analyst",   sublabel: "Silent monitoring", icon: Eye,
+      connections: ["Passive listener across systems", "Watches SLA breach", "Signals only when action is due"] },
+    { id: "bridge",    label: "Data Bridge",     sublabel: "Integrations",      icon: Cable,
+      connections: ["Two-way syncs", "Custom webhooks", "Legacy-to-modern glue"] },
+    { id: "report",    label: "Report Engine",   sublabel: "Sealed findings",   icon: FileText,
+      connections: ["PDF/HTML deliverables", "Every claim linked to evidence", "Auto-versioned"] },
+    { id: "alerts",    label: "Leak Alerts",     sublabel: "Signals, not noise", icon: Bell,
+      connections: ["Threshold-based", "Routed to the right operator", "Silent when nothing needs doing"] },
   ];
 
   const services: MindMapNodeData[] = [
-    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "$0",         icon: Search,     onClick: () => navigate("/leak-audit") },
-    { id: "audit",    label: "The Leak Audit",    sublabel: "$2,500",     icon: Microscope, onClick: onBookAudit },
-    { id: "impl",     label: "Implementation",    sublabel: "$15K / mo",  icon: Wrench,     onClick: onBookAudit },
-    { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/industries") },
-    { id: "field",    label: "Field Notes",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog") },
-    { id: "playbooks",label: "Playbooks",         sublabel: "Sealed IP",  icon: BookOpen,   onClick: () => navigate("/resources") },
+    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "$0",         icon: Search,     onClick: () => navigate("/leak-audit"),
+      connections: ["60-second self-scan", "No email required", "Sting is the point"] },
+    { id: "audit",    label: "The Leak Audit",    sublabel: "$2,500",     icon: Microscope, onClick: onBookAudit,
+      connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Fee credits 1:1 to the fix"] },
+    { id: "impl",     label: "Implementation",    sublabel: "$15K / mo",  icon: Wrench,     onClick: onBookAudit,
+      connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
+    { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/industries"),
+      connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
+    { id: "field",    label: "Field Notes",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog"),
+      connections: ["Weekly operator dispatches", "Real leaks, real fixes", "No fluff"] },
+    { id: "playbooks",label: "Playbooks",         sublabel: "Sealed IP",  icon: BookOpen,   onClick: () => navigate("/resources"),
+      connections: ["Named-leak playbooks", "Repeatable fix stacks", "Reserved for operators"] },
   ];
 
   const activeTab = TABS.find(t => t.id === tab)!;
@@ -114,7 +140,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
         />
 
         <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 mt-2">
-          Lines pulse toward the hub — that's how leaks travel through the business.
+          Tap any circle to expand its connections. Tap again to open.
         </p>
       </div>
     </section>
