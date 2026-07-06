@@ -174,7 +174,7 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
 
       {/* Map */}
       <div className="relative w-full rounded-sm border border-border/50 bg-background/40 overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10]">
+        <div className="relative w-full aspect-square sm:aspect-[16/10]">
           <svg className="absolute inset-0 z-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
             <defs>
               <radialGradient id="chaosScanHub" cx="50%" cy="50%" r="50%">
