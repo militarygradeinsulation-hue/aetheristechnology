@@ -279,20 +279,29 @@ const AdminChaosScanTool: React.FC = () => {
                   return links;
                 })}
 
-                {/* Fixed: clean symptom → anchor → hub */}
+                {/* Fixed: clean symptom → anchor → hub, bright amber with glow */}
                 {isFixed && symptoms.flatMap((s) => {
                   const anchor = operators.find((o) => o.id === s.anchor) || operators[0];
                   return [
+                    <path key={`o-s-glow-${s.id}`}
+                      d={orderedPath(s.x, s.y, anchor.x, anchor.y)}
+                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.35} strokeWidth={5}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                     <path key={`o-s-${s.id}`}
                       d={orderedPath(s.x, s.y, anchor.x, anchor.y)}
-                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.7} strokeWidth={1}
-                      vectorEffect="non-scaling-stroke" />,
+                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={1} strokeWidth={2}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
+                    <path key={`o-a-glow-${s.id}`}
+                      d={orderedPath(anchor.x, anchor.y, HUB.x, HUB.y)}
+                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.4} strokeWidth={6}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                     <path key={`o-a-${s.id}`}
                       d={orderedPath(anchor.x, anchor.y, HUB.x, HUB.y)}
-                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={0.85} strokeWidth={1.3}
-                      vectorEffect="non-scaling-stroke" />,
+                      fill="none" stroke="hsl(var(--amber))" strokeOpacity={1} strokeWidth={2.5}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />,
                   ];
                 })}
+
               </svg>
 
               {/* Operator anchors */}
