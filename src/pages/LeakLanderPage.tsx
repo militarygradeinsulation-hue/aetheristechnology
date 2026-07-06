@@ -16,6 +16,8 @@ import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
+import { BuildMeASystemSection } from "@/components/BuildMeASystemSection";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const LeakLanderPage: React.FC = () => {
@@ -278,6 +280,11 @@ const LeakLanderPage: React.FC = () => {
 
           {/* THE LEAK ECOSYSTEM — interactive mind map */}
           <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
+
+          {/* CUSTOM BUILD REQUEST — direct-to-Joseph */}
+          <BuildMeASystemSection />
+
+
 
           {/* THE OFFER */}
           <section
