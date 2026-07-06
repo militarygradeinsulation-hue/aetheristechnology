@@ -462,6 +462,75 @@ export const AdminCareersPanel: React.FC = () => {
     } finally { setDeletingId(null); }
   };
 
+  // Bulk archive / delete helpers
+  const bulkArchive = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to archive' }); return; }
+    if (!window.confirm(`Archive ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? They'll be hidden from the default view but not deleted.`)) return;
+    setBulkBusy('archive');
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try { await updateApp(t.share_code, { stage: 'archived' }); ok++; } catch { fail++; }
+    }
+    setApplications(prev => prev.map(a => targets.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+    setBulkBusy(null);
+    toast({ title: `Archived ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  const bulkDeleteApps = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to delete' }); return; }
+    if (!window.confirm(`PERMANENTLY DELETE ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? This removes applications AND attempts. Cannot be undone.`)) return;
+    setBulkBusy('delete');
+    const token = getAdminToken();
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try {
+        const { error } = await supabase.functions.invoke('careers-test', {
+          body: { action: 'admin_delete_application', share_code: t.share_code },
+          headers: { 'x-admin-token': token || '' },
+        });
+        if (error) throw error;
+        ok++;
+      } catch { fail++; }
+    }
+    const codes = new Set(targets.map(t => t.share_code));
+    setApplications(prev => prev.filter(a => !codes.has(a.share_code)));
+    setAttempts(prev => prev.filter(a => !codes.has(a.share_code || '')));
+    setBulkBusy(null);
+    toast({ title: `Deleted ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  // Auto-archive rejected applicants older than 30 days on load (one-time per session, opt-in via localStorage flag)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('aetheris_careers_autoarchive') !== '1') return;
+    } catch { return; }
+    if (!applications.length) return;
+    const stale = applications.filter(a => (a.stage || 'new') === 'no' && ageDays(a.created_at) > 30);
+    if (!stale.length) return;
+    (async () => {
+      for (const t of stale) {
+        try { await updateApp(t.share_code, { stage: 'archived' }); } catch {}
+      }
+      setApplications(prev => prev.map(a => stale.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+      toast({ title: `Auto-archived ${stale.length} old rejected applicant${stale.length === 1 ? '' : 's'}` });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applications.length]);
+
+  const autoArchiveEnabled = (() => {
+    try { return localStorage.getItem('aetheris_careers_autoarchive') === '1'; } catch { return false; }
+  })();
+  const toggleAutoArchive = () => {
+    try {
+      const next = !autoArchiveEnabled;
+      localStorage.setItem('aetheris_careers_autoarchive', next ? '1' : '0');
+      toast({ title: next ? 'Auto-archive ON, rejected > 30 days will archive' : 'Auto-archive OFF' });
+      window.location.reload();
+    } catch {}
+  };
+
+
+
   const [sendingId, setSendingId] = useState<string | null>(null);
   const sendToWorkspace = async (a: Application, opts: { schedule: boolean }) => {
     setSendingId(a.share_code);
