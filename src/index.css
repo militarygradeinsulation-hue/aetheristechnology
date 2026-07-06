@@ -253,11 +253,12 @@
   }
 
   @keyframes mindmap-drift {
-    0%   { transform: translate(0px, 0px); }
-    25%  { transform: translate(4px, -6px); }
-    50%  { transform: translate(-3px, 3px); }
-    75%  { transform: translate(-5px, -4px); }
-    100% { transform: translate(0px, 0px); }
+    0%   { transform: translate(0px, 0px) scale(1); }
+    20%  { transform: translate(10px, -14px) scale(1.02); }
+    40%  { transform: translate(-12px, 8px) scale(0.98); }
+    60%  { transform: translate(8px, 12px) scale(1.01); }
+    80%  { transform: translate(-9px, -7px) scale(0.99); }
+    100% { transform: translate(0px, 0px) scale(1); }
   }
 
   .animate-mindmap-drift {
