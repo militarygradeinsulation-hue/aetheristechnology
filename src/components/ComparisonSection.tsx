@@ -22,7 +22,7 @@ const MOATS: Array<{ id: string; name: string; one: string; detail: string }> = 
   },
   {
     id: '03',
-    name: 'Revenue Score (0–100)',
+    name: 'Revenue Score (0-100)',
     one: 'A public standard only we can issue.',
     detail:
       'Every scan emits a Revenue Score — shareable, embeddable, ranked. Businesses display it. Prospects ask for it. Over time it becomes the number industries cite the way websites cite Lighthouse. We own the standard because we built the only scanner that produces it.',

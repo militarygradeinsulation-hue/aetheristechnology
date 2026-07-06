@@ -12,7 +12,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
 const INITIAL_MESSAGE: Msg = {
   role: 'assistant',
-  content: "I'm the Aetheris Sales Advisor. We help specialty manufacturers ($5M–$25M) find the $200K–$2M they're leaking through broken CRM, sales follow-up, and lead flow — then fix it.\n\nWhat do you make, and where do you think the leak is?",
+  content: "I'm the Aetheris Sales Advisor. We help specialty manufacturers ($5M-$25M) find the $200K-$2M they're leaking through broken CRM, sales follow-up, and lead flow — then fix it.\n\nWhat do you make, and where do you think the leak is?",
 };
 
 const STARTER_PROBLEMS = [

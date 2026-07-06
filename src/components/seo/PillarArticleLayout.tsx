@@ -15,7 +15,7 @@ export interface PillarArticleProps {
   metaTitle?: string;
   /** Meta description (≤160 chars) */
   description: string;
-  /** 2–3 sentence direct answer — extracted by AI engines */
+  /** 2-3 sentence direct answer — extracted by AI engines */
   quickAnswer: string;
   /** ISO date last updated */
   lastUpdated: string;

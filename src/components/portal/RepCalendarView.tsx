@@ -560,7 +560,7 @@ const DayAgenda: React.FC<{
                         </div>
                         <div className="text-[10px] font-mono text-muted-foreground">
                           {new Date(e.start_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                          {e.end_at && ` – ${new Date(e.end_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+                          {e.end_at && ` - ${new Date(e.end_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
                           {" · "}{meta.label}
                         </div>
                         {e.body && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.body}</div>}
@@ -576,7 +576,7 @@ const DayAgenda: React.FC<{
 
       {earlyOrLate.length > 0 && (
         <div>
-          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">Outside 7a–8p</p>
+          <p className="text-[10px] uppercase tracking-wider font-mono text-muted-foreground mb-1">Outside 7a-8p</p>
           <div className="flex flex-col gap-1">
             {earlyOrLate.map((e) => {
               const meta = KIND_META[e.kind];

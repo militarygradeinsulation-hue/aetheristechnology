@@ -157,7 +157,7 @@ export const LeakChart: React.FC<Props> = ({
                 </span>
               </div>
               <div className="font-forensic text-3xl md:text-4xl font-bold text-destructive mt-1">
-                {fmtLeads(leadsPeriodLow)}–{fmtLeads(leadsPeriodHigh)}
+                {fmtLeads(leadsPeriodLow)}-{fmtLeads(leadsPeriodHigh)}
               </div>
               <div className="text-[11px] text-muted-foreground mt-1">
                 Leads slipping past your funnel every {timeframe === "day" ? "day" : timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"}
@@ -172,7 +172,7 @@ export const LeakChart: React.FC<Props> = ({
                 </span>
               </div>
               <div className="font-forensic text-3xl md:text-4xl font-bold text-amber mt-1">
-                {fmt$(leakLow)} – {fmt$(leakHigh)}
+                {fmt$(leakLow)} - {fmt$(leakHigh)}
               </div>
               <div className="text-[11px] text-muted-foreground mt-1">
                 {timeframe === "day"

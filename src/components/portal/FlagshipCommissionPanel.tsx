@@ -87,7 +87,7 @@ const FLAGSHIPS: Flagship[] = [
     included: [
       '12-month CRM snapshot and lead-flow review',
       'Lead-to-contact, follow-up, and deal-stage leak analysis',
-      '15–30 page written findings report with prioritized fixes',
+      '15-30 page written findings report with prioritized fixes',
       'ROI projections, source-data appendix, and 60-minute readout',
     ],
     // Fixed: $10,500 / $5,000 / $3,000  (sum = $18,500)

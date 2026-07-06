@@ -235,7 +235,7 @@ const RevenueBanner = ({ gaps }: { gaps: Gap[] }) => {
       className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center mb-6"
     >
       <p className="text-sm text-destructive font-medium mb-1">Estimated Annual Revenue Leaks</p>
-      <p className="text-2xl font-bold text-destructive">{fmt(low)} – {fmt(high)}</p>
+      <p className="text-2xl font-bold text-destructive">{fmt(low)} - {fmt(high)}</p>
     </motion.div>
   );
 };

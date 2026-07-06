@@ -229,7 +229,7 @@ export function buildWeeks(): WeekPlan[] {
 
 // =====================================================
 // Daily goals, granular day-by-day breakdown of the 90 days.
-// Mon–Fri only (≈65 working days). Each day inherits its week's phase + theme,
+// Mon-Fri only (≈65 working days). Each day inherits its week's phase + theme,
 // plus a weekday-specific operating motion so the team always knows the
 // single most important thing to do today.
 // =====================================================
@@ -324,7 +324,7 @@ const WEEKDAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
 /**
  * Build daily goals for the full 90-day sprint, anchored to the Monday of `start`.
- * Returns one entry per weekday (Mon–Fri) for 13 weeks.
+ * Returns one entry per weekday (Mon-Fri) for 13 weeks.
  */
 export function buildDailyGoals(start: Date, opts?: {
   scenario?: MdpScenario;

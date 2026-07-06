@@ -17,7 +17,7 @@ interface Term {
 const TERMS: Term[] = [
   { slug: 'revenue-forensics', term: 'Chaos Theory Forensics', definition: 'The investigative discipline of finding, naming, and fixing the specific places a business loses money. Coined and operated by Aetheris.' },
   { slug: 'revenue-leak', term: 'Revenue Leak', definition: 'A specific, named, measurable gap in a business where money is being lost — not a general weakness. Each leak has a category, severity, dollar impact, and fix.' },
-  { slug: 'revenue-score', term: 'Revenue Score', definition: 'A 0–100 forensic grade summarizing the leak state of a business. Issued only by Aetheris. The public standard for the category.' },
+  { slug: 'revenue-score', term: 'Revenue Score', definition: 'A 0-100 forensic grade summarizing the leak state of a business. Issued only by Aetheris. The public standard for the category.' },
   { slug: 'leak-register', term: 'Leak Register', definition: 'The living, versioned forensic document that tracks every named leak, the evidence behind it, the fix deployed, and revenue recovered.' },
   { slug: 'case-file', term: 'Case File', definition: 'The written record of an open or closed engagement. Includes Revenue Score history, Leak Register, fix actions, and recovery measurements.' },
   { slug: 'active-case', term: 'Active Case', definition: 'An open forensic engagement after the Diagnostic where Aetheris executes prioritized fixes. $15,000/month, three-month minimum, Diagnostic clients only. Cases get opened and closed — never "retainers."' },
@@ -28,7 +28,7 @@ const TERMS: Term[] = [
   { slug: 'forensic-diagnostic', term: 'Forensic Diagnostic', definition: 'The operator-led entry engagement starting at $2,500 flat, applied 1:1 toward the 21-Day Revenue Diagnostic.' },
   { slug: 'revenue-diagnostic', term: '21-Day Revenue Diagnostic', definition: 'The flagship engagement. $18,500 flat. 21 days. Live scan, Revenue Score, complete Leak Register, prioritized fix path, written Case File, 60-minute readout.' },
   { slug: 'leak-categories', term: 'Leak Categories', definition: 'The seven forensic categories every leak falls into: Lead Capture, Tracking, Trust, Follow-Up, Performance, Messaging, Systems.' },
-  { slug: 'severity', term: 'Severity (1–5)', definition: 'A per-leak rating calculated from impact × frequency × evidence confidence. Severity 5 is critical (named, frequent, certain). Severity 1 is observable but low-impact.' },
+  { slug: 'severity', term: 'Severity (1-5)', definition: 'A per-leak rating calculated from impact × frequency × evidence confidence. Severity 5 is critical (named, frequent, certain). Severity 1 is observable but low-impact.' },
   { slug: 'dollarize', term: 'Dollarize', definition: 'The forensic act of attaching a specific dollar impact to a leak using a visible calculation method. Distinguishes Chaos Theory Forensics from opinion-based audits.' },
   { slug: 'fix-path', term: 'Fix Path', definition: 'The specific remediation mapped to a leak — either a one-time tool from the marketplace ($39+) or an operator-led work track inside an Active Case.' },
   { slug: 'operator', term: 'Operator', definition: 'The product. Aetheris does not sell tools individually on the public site — the operator (Joseph Toney) is the engagement. Tools are the by-product.' },

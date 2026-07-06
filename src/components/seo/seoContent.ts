@@ -7,7 +7,7 @@ export const CORE_LEAK_FACTS: CitedFact[] = [
   {
     answer: 'The free Leak Audit is a 14-question self-scan that returns a dollar-quantified leak estimate.',
     support:
-      '14 questions across 4 categories (Lead Capture, Response & Follow-Up, Operational Drag, Trust & Conversion) score 0–4 each. The result is a downloadable PDF case file with an estimated annual leak in dollars, scaled to your revenue band.',
+      '14 questions across 4 categories (Lead Capture, Response & Follow-Up, Operational Drag, Trust & Conversion) score 0-4 each. The result is a downloadable PDF case file with an estimated annual leak in dollars, scaled to your revenue band.',
     source: 'Aetheris Leak Audit, /leak-audit',
     implication:
       'Run it once. If the estimate is meaningful, the $2,500 Forensic Diagnostic confirms it inside your real data and is applied 1:1 toward any engagement.',
@@ -92,7 +92,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'What do I receive at the end?',
     answer:
-      'A 15–30 page written report with a leak map, prioritized fixes, and ROI projections; a source-data appendix containing every CSV, query, and tool export used; a 60-minute readout; and a fixed-fee implementation quote if you choose to proceed.',
+      'A 15-30 page written report with a leak map, prioritized fixes, and ROI projections; a source-data appendix containing every CSV, query, and tool export used; a 60-minute readout; and a fixed-fee implementation quote if you choose to proceed.',
   },
   {
     question: 'How is this different from a traditional consultant?',
@@ -132,7 +132,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'Can I buy individual tools without the full Diagnostic?',
     answer:
-      'Yes. The Operator Tool Suite is available à la carte. Standalone tools run $79–$400 each (Website + Digital Footprint Scan $149, CRM Hygiene Audit $79, Brand Contradictions Finder $129, and others). See /diagnostic for the full menu.',
+      'Yes. The Operator Tool Suite is available à la carte. Standalone tools run $79-$400 each (Website + Digital Footprint Scan $149, CRM Hygiene Audit $79, Brand Contradictions Finder $129, and others). See /diagnostic for the full menu.',
   },
   {
     question: 'How do I know the audit is honest?',

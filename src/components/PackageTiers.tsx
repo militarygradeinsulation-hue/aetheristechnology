@@ -45,7 +45,7 @@ const TIERS: Tier[] = [
     icon: ShieldCheck,
     name: 'Revenue Pack',
     tagline: 'Core — fix the sales engine.',
-    forWho: '$1M–$10M companies leaking on outbound and follow-up.',
+    forWho: '$1M-$10M companies leaking on outbound and follow-up.',
     price: '$5,000',
     priceNote: 'one-time · operator-led',
     operatorHours: '~14 hours operator time',

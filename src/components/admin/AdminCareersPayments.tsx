@@ -190,7 +190,7 @@ export const AdminCareersPayments: React.FC = () => {
               <label className="text-[10px] font-mono uppercase text-muted-foreground">Amount ($)</label>
               <div className="flex items-center gap-1 mt-1">
                 <Input type="number" min="0" value={minAmt} onChange={e => setMinAmt(e.target.value)} placeholder="min" className="h-8" />
-                <span className="text-muted-foreground text-xs">–</span>
+                <span className="text-muted-foreground text-xs">-</span>
                 <Input type="number" min="0" value={maxAmt} onChange={e => setMaxAmt(e.target.value)} placeholder="max" className="h-8" />
               </div>
             </div>
@@ -198,7 +198,7 @@ export const AdminCareersPayments: React.FC = () => {
               <label className="text-[10px] font-mono uppercase text-muted-foreground">Date range</label>
               <div className="flex items-center gap-1 mt-1">
                 <Input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="h-8" />
-                <span className="text-muted-foreground text-xs">–</span>
+                <span className="text-muted-foreground text-xs">-</span>
                 <Input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="h-8" />
               </div>
             </div>

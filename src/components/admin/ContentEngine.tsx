@@ -1382,7 +1382,7 @@ function ThumbnailBlock({ post, headshots, onGenerate }: {
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-2" />
               <div className="text-xs text-muted-foreground">Generating with OpenAI gpt-image-1...</div>
-              <div className="text-[10px] text-muted-foreground mt-1">~10–20 seconds</div>
+              <div className="text-[10px] text-muted-foreground mt-1">~10-20 seconds</div>
             </div>
           ) : hasThumb ? (
             <img src={post.thumbnail_url!} alt="Post thumbnail" className="w-full h-full object-cover" />

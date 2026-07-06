@@ -29,7 +29,7 @@ type Result = {
   tactics: Tactic[];
 };
 
-// -------- Static citations panel (Mauss / Regan / Mexico–Ethiopia) --------
+// -------- Static citations panel (Mauss / Regan / Mexico-Ethiopia) --------
 const CITATIONS: Record<string, { label: string; body: string }> = {
   Mauss: {
     label: "Mauss · The Gift (1925)",
@@ -64,7 +64,7 @@ const DEFENSE_CHECKLIST: { step: string; check: string; why: string }[] = [
   },
   {
     step: "3. Score the asymmetry.",
-    check: "Estimate the value of the 'gift' vs. the value of what they're asking back. If the return is 3–10× the gift, you're in a Hare Krishna / DAV pattern.",
+    check: "Estimate the value of the 'gift' vs. the value of what they're asking back. If the return is 3-10× the gift, you're in a Hare Krishna / DAV pattern.",
     why: "Compliance professionals bank on tiny gifts producing massive returns (address labels: 18% → 35%).",
   },
   {

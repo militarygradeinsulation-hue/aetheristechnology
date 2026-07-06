@@ -132,7 +132,7 @@ export const PlaybookCreator: React.FC = () => {
             <BookOpen className="w-6 h-6 text-amber" />
             <h2 className="text-2xl font-bold text-foreground font-display">Create a Custom Playbook</h2>
           </div>
-          <p className="text-sm text-muted-foreground mb-6">Generates a 4–5k word strategic playbook PDF and saves it to your library.</p>
+          <p className="text-sm text-muted-foreground mb-6">Generates a 4-5k word strategic playbook PDF and saves it to your library.</p>
 
           <div className="space-y-4">
             <div>
@@ -162,7 +162,7 @@ export const PlaybookCreator: React.FC = () => {
             <Button onClick={handleGenerate} className="bg-amber hover:bg-amber/90 text-background font-bold px-8" disabled={!form.title || !form.subtitle}>
               Generate Playbook PDF
             </Button>
-            <p className="text-xs text-muted-foreground">Takes ~30–60 seconds. The PDF will save to your library automatically.</p>
+            <p className="text-xs text-muted-foreground">Takes ~30-60 seconds. The PDF will save to your library automatically.</p>
           </div>
         </div>
       )}

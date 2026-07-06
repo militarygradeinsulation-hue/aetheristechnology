@@ -35,7 +35,7 @@ const SITE_BRIEFING: Briefing = {
       id: 'goal',
       title: 'Primary Conversion Goal',
       body: [
-        'The site has ONE goal: get a qualified specialty manufacturer ($5M–$25M) to book a 15-minute qualification call for the 21-Day Revenue Diagnostic ($18,500 fixed fee).',
+        'The site has ONE goal: get a qualified specialty manufacturer ($5M-$25M) to book a 15-minute qualification call for the 21-Day Revenue Diagnostic ($18,500 fixed fee).',
         'Every section either (1) builds trust, (2) reframes their pain in dollars, or (3) hands them a no-friction next step. Anything that does not do one of those three things is pulled.',
       ],
     },

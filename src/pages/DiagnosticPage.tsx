@@ -17,7 +17,7 @@ const INCLUDES = [
   
   'Lead-to-contact, deal-stage progression, and touch-frequency analysis',
   'Full Operator Tool Suite (9 live tools) run against your business, see below',
-  'Written report (15–30 pages): leak map + prioritized fixes + ROI projections',
+  'Written report (15-30 pages): leak map + prioritized fixes + ROI projections',
   'Source-data appendix, every CSV, query, and tool export used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
@@ -101,9 +101,9 @@ const TOOL_BUNDLE: ToolItem[] = [
     icon: ListChecks,
     name: '20-Question Business Diagnostic',
     finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.',
-    inputs: ['60–90 minutes from the founder/CEO', '15 minutes each from sales lead + ops lead', 'Last 90 days of revenue + pipeline data'],
+    inputs: ['60-90 minutes from the founder/CEO', '15 minutes each from sales lead + ops lead', 'Last 90 days of revenue + pipeline data'],
     process: ['Structured interview across 4 functional pillars', 'Operator scoring against industry benchmarks', 'Triangulation of leadership answers vs. actual data'],
-    deliverables: ['Pillar-by-pillar scorecard (0–100 per area)', 'Top 5 leverage points ranked by ROI', 'Quick-win list executable inside 30 days'],
+    deliverables: ['Pillar-by-pillar scorecard (0-100 per area)', 'Top 5 leverage points ranked by ROI', 'Quick-win list executable inside 30 days'],
     exampleLeak: 'Marketing scored 82/100 for activity, 19/100 for attribution. They were spending $40K/mo with no idea what worked.',
     standalonePrice: '$349',
     standaloneDetail: 'one-time · operator scorecard',
@@ -116,7 +116,7 @@ const TOOL_BUNDLE: ToolItem[] = [
     inputs: ['ICP definition + top 3 buyer personas', 'Top 5 stalled-deal reasons from CRM', 'Existing email + call templates if any'],
     process: ['Pattern-match stalled deals to objection clusters', 'Write outbound + follow-up sequences per persona', 'Build talk-tracks for the 3 most common objections'],
     deliverables: ['7-touch outbound cadence (email + LinkedIn + call)', '5-touch post-quote follow-up sequence', 'Objection-handling cheat sheet for the sales team'],
-    exampleLeak: 'Reps stopped following up after touch 2. The data says 80% of closed deals took 5–9 touches. We rebuilt the cadence.',
+    exampleLeak: 'Reps stopped following up after touch 2. The data says 80% of closed deals took 5-9 touches. We rebuilt the cadence.',
     standalonePrice: '$59',
     standaloneDetail: 'one-time · scripts + cadence',
     priceId: 'sales_script_pack_once',
@@ -125,8 +125,8 @@ const TOOL_BUNDLE: ToolItem[] = [
     icon: CalendarRange,
     name: '90-Day Content Calendar',
     finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.',
-    inputs: ['Findings from the diagnostic (auto-fed)', 'Founder/CEO voice samples (3–5 posts or articles)', 'Top 3 customer-success stories'],
-    process: ['Cluster diagnostic findings into 4–6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
+    inputs: ['Findings from the diagnostic (auto-fed)', 'Founder/CEO voice samples (3-5 posts or articles)', 'Top 3 customer-success stories'],
+    process: ['Cluster diagnostic findings into 4-6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
     deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer'],
     exampleLeak: 'Founder posted twice a quarter, randomly. We turned the diagnostic into 90 days of content that pre-sold the next engagement.',
     standalonePrice: '$39',
@@ -161,7 +161,7 @@ const DiagnosticPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="The Leak Audit™, $2,500 | Aetheris"
-        description="Operator-led Leak Audit for specialty manufacturers $5M–$25M. $2,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
+        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. $2,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
@@ -173,7 +173,7 @@ const DiagnosticPage: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-6">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Specialty manufacturers · $5M–$25M
+                Specialty manufacturers · $5M-$25M
               </div>
               <h1 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-[1.05]">
                 <span className="leak-audit-glow text-amber">The Leak Audit™.</span>
@@ -262,7 +262,7 @@ const DiagnosticPage: React.FC = () => {
               </p>
 
               <h3 className="font-forensic text-base md:text-lg font-bold text-foreground mb-3">
-                $2,500 buys what the alternative shelf charges $90K–$240K for — and most still won't touch your CRM data.
+                $2,500 buys what the alternative shelf charges $90K-$240K for — and most still won't touch your CRM data.
               </h3>
 
               <div className="overflow-x-auto mb-4">
@@ -276,14 +276,14 @@ const DiagnosticPage: React.FC = () => {
                   </thead>
                   <tbody className="text-foreground/85">
                     {[
-                      ['CRM audit + cleanup (HubSpot/Salesforce)', '$15K – $40K', 'Included'],
-                      ['Sales process + pipeline diagnostic', '$20K – $50K', 'Included'],
-                      ['Website + SEO/GEO + AI-visibility audit', '$8K – $25K', 'Included'],
-                      ['Brand/messaging contradiction audit', '$10K – $20K', 'Included'],
-                      ['Sales script + 7-touch follow-up build', '$6K – $15K', 'Included'],
-                      ['90-day content calendar + first 14 drafts', '$8K – $20K', 'Included'],
-                      ['Operator-graded scorecard + readout', '$10K – $30K', 'Included'],
-                      ['Written report w/ ROI + roadmap', '$5K – $15K', 'Included'],
+                      ['CRM audit + cleanup (HubSpot/Salesforce)', '$15K - $40K', 'Included'],
+                      ['Sales process + pipeline diagnostic', '$20K - $50K', 'Included'],
+                      ['Website + SEO/GEO + AI-visibility audit', '$8K - $25K', 'Included'],
+                      ['Brand/messaging contradiction audit', '$10K - $20K', 'Included'],
+                      ['Sales script + 7-touch follow-up build', '$6K - $15K', 'Included'],
+                      ['90-day content calendar + first 14 drafts', '$8K - $20K', 'Included'],
+                      ['Operator-graded scorecard + readout', '$10K - $30K', 'Included'],
+                      ['Written report w/ ROI + roadmap', '$5K - $15K', 'Included'],
                       ['Source-data appendix (CSVs + queries)', 'Rare', 'Included'],
                     ].map(([item, alt, us]) => (
                       <tr key={item} className="border-b border-border/30">
@@ -294,7 +294,7 @@ const DiagnosticPage: React.FC = () => {
                     ))}
                     <tr className="border-t-2 border-amber/50">
                       <td className="py-2 pr-2 font-bold text-foreground">TOTAL</td>
-                      <td className="py-2 px-2 font-bold text-muted-foreground">$82K – $215K</td>
+                      <td className="py-2 px-2 font-bold text-muted-foreground">$82K - $215K</td>
                       <td className="py-2 pl-2 font-bold text-amber">$2,500 flat</td>
                     </tr>
                   </tbody>
@@ -304,7 +304,7 @@ const DiagnosticPage: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="forensic-tile rounded-sm border border-amber/40 p-2.5 text-center">
                   <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">Fast</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">vs. 90–120 days</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">vs. 90-120 days</div>
                 </div>
                 <div className="forensic-tile rounded-sm border border-amber/40 p-2.5 text-center">
                   <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">1 operator</div>
@@ -318,7 +318,7 @@ const DiagnosticPage: React.FC = () => {
 
               <div className="forensic-tile rounded-sm border border-crimson/40 p-3">
                 <p className="text-foreground/90 text-xs md:text-sm leading-relaxed">
-                  Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find it is a rounding error.</span> One recovered deal usually pays 100x.
+                  Average $5M-$25M manufacturer leaks <span className="text-crimson font-bold">$400K-$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot. <span className="text-foreground font-bold">$2,500 to find it is a rounding error.</span> One recovered deal usually pays 100x.
                 </p>
               </div>
             </section>

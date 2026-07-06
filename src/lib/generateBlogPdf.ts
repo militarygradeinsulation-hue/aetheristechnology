@@ -14,7 +14,7 @@ interface BlogPdfData {
 const cleanText = (text: string): string => {
   return text
     .replace(/â€"/g, ', ')
-    .replace(/â€"/g, '–')
+    .replace(/â€"/g, '-')
     .replace(/â€œ/g, '"')
     .replace(/â€[^a-zA-Z]/g, '"')
     .replace(/â€™/g, "'")

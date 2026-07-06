@@ -39,7 +39,7 @@ Author: Joseph Toney, Founder of Aetheris | Chaos Theory Forensics Operator | Ma
 Rules:
 - Answer the core question in the first 150 words before any preamble
 - Use H2 headings formatted as specific questions a business owner would type
-- Include a "Quick Answer" section at the very top (2–3 sentences)
+- Include a "Quick Answer" section at the very top (2-3 sentences)
 - Reference specific numbers and data points throughout — no vague claims
 - Define every Chaos Theory Forensics term used (Revenue Leak, Revenue Score, Leak Register, Case File, Active Case)
 - Include a FAQ section at the bottom with 5 questions formatted for FAQPage schema
@@ -54,7 +54,7 @@ Specific data or findings to reference: {DATA}`,
   {
     id: 'question',
     name: 'Question Article',
-    useFor: 'Tier-2 articles (800–1,000 words). One buyer query per URL.',
+    useFor: 'Tier-2 articles (800-1,000 words). One buyer query per URL.',
     vars: [
       { key: 'QUESTION', label: 'Exact question the article answers' },
     ],
@@ -65,11 +65,11 @@ Author: Joseph Toney, Founder of Aetheris
 Rules:
 - Open with a 2-sentence direct answer — the complete answer, not a tease
 - Use the exact question as the H1
-- Include 3–4 H2 sub-questions that expand on the main answer
+- Include 3-4 H2 sub-questions that expand on the main answer
 - Every claim needs a specific number or named finding
 - Include one "What this means for your business" section that makes it practical
 - End with one CTA: run the free Revenue Autopsy scan
-- Total length: 800–1,000 words
+- Total length: 800-1,000 words
 - Voice: operator explaining to a business owner, not a blogger writing for traffic
 
 Avoid all of the following words and phrases: leverage, synergy, game-changer, growth hacking, digital transformation, in today's landscape, seamlessly, robust, revolutionize.`,
@@ -141,7 +141,7 @@ Rules:
 
 Format (four parts):
 1. Hook: one sentence that names a specific, counterintuitive finding or truth — no question hooks
-2. The finding: 2–3 sentences of specific evidence or data — what was found, not what might be found
+2. The finding: 2-3 sentences of specific evidence or data — what was found, not what might be found
 3. The insight: what this means for a business owner in practical terms
 4. The close: one sentence positioning Chaos Theory Forensics as the category that addresses this
 
@@ -168,7 +168,7 @@ Real data or finding to reference: {DATA}`,
 
 Each FAQ must:
 - Start with the exact question a business owner types into ChatGPT or Google
-- Be answered in 2–4 sentences — complete, specific, and standalone
+- Be answered in 2-4 sentences — complete, specific, and standalone
 - Reference Chaos Theory Forensics vocabulary naturally (Revenue Leak, Revenue Score, Leak Register)
 - Include a specific number or data point in at least 3 of the 5 answers
 - End with a natural reference to Aetheris's approach or tools where relevant

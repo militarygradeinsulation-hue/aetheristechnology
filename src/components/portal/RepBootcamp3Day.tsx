@@ -95,7 +95,7 @@ const PROGRAM: DayPlan[] = [
                   "We're a business forensics firm — we find the money your business is leaking and seal it shut."
                 </Block>
                 <Block title="30-second pitch">
-                  "Most owners I talk to feel something is off but can't name it. We run a Leak Audit — a 7-step forensic sweep across ops, sales, marketing, and finance — and hand you a 15–30 page report that names every leak in dollars. Flat $2,500, 21 days, applied toward whatever we fix together. No active case, no scope creep."
+                  "Most owners I talk to feel something is off but can't name it. We run a Leak Audit — a 7-step forensic sweep across ops, sales, marketing, and finance — and hand you a 15-30 page report that names every leak in dollars. Flat $2,500, 21 days, applied toward whatever we fix together. No active case, no scope creep."
                 </Block>
                 <Block title="Drill">
                   Say it out loud 5x without looking. Then say it 3x to a real human. If they ask "what do you do?" and you stumble, repeat the drill.
@@ -138,7 +138,7 @@ const PROGRAM: DayPlan[] = [
             expand: (
               <div className="space-y-3">
                 <Block title="The offer">
-                  <strong>Forensic Diagnostic — $2,500 flat.</strong> 21 calendar days, kickoff to sealed report. 15–30 page deliverable. Every dollar applied toward any engagement that follows.
+                  <strong>Forensic Diagnostic — $2,500 flat.</strong> 21 calendar days, kickoff to sealed report. 15-30 page deliverable. Every dollar applied toward any engagement that follows.
                 </Block>
                 <Block title="What's included">
                   <Bullets items={[
@@ -164,7 +164,7 @@ const PROGRAM: DayPlan[] = [
             expand: (
               <div className="space-y-3">
                 <Block title="Flagship Diagnostic — $18,000 fixed">
-                  Deep forensic engagement for $5M–$50M operators. Full systems rebuild plan + 90-day execution roadmap.
+                  Deep forensic engagement for $5M-$50M operators. Full systems rebuild plan + 90-day execution roadmap.
                   <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $10k / Rep $5k / Partner $3k</div>
                 </Block>
                 <Block title="Flagship Active Case — $15,000 / month">
@@ -267,7 +267,7 @@ const PROGRAM: DayPlan[] = [
             label: "Generate 2 branded prospect graphics in Image Studio",
             expand: (
               <Block title="Use case">
-                Custom graphic in an outreach email = 3–5x reply rate. Make one for a specific prospect's site, attach it to your first email.
+                Custom graphic in an outreach email = 3-5x reply rate. Make one for a specific prospect's site, attach it to your first email.
               </Block>
             ),
           },
@@ -337,7 +337,7 @@ const PROGRAM: DayPlan[] = [
         minutes: 120,
         goal: "Generate real pipeline using the playbook.",
         tasks: [
-          { id: "d3-s1-1", label: "Use the All-In-One on 10 specialty manufacturer prospects ($5M–$25M revenue)" },
+          { id: "d3-s1-1", label: "Use the All-In-One on 10 specialty manufacturer prospects ($5M-$25M revenue)" },
           { id: "d3-s1-2", label: "Send 25 personalized cold emails using AI Coach drafts" },
           { id: "d3-s1-3", label: "Make 25 outbound dials. Log every conversation." },
           { id: "d3-s1-4", label: "Add every conversation to Leads Board, even rejections", route: "/portal?tab=leads" },

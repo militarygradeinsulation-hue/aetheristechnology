@@ -72,7 +72,7 @@ function RubricInfoButton() {
         </DialogHeader>
         <div className="space-y-4 text-sm">
           <p className="text-muted-foreground">
-            Every lead has <strong>one number 0–100</strong>. The number is deterministic math — same inputs always produce the same score. AI only reports observable signals; the rubric below converts those signals into points.
+            Every lead has <strong>one number 0-100</strong>. The number is deterministic math — same inputs always produce the same score. AI only reports observable signals; the rubric below converts those signals into points.
           </p>
 
           <div>

@@ -374,7 +374,7 @@ export const AdminPodcastStudio: React.FC = () => {
                     <audio src={ep.audio_url} controls className="w-full mt-3" />
                   ) : ep.status === 'processing' ? (
                     <div className="mt-3 text-xs text-amber flex items-center gap-2">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering voice + cover art… (1–3 min)
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering voice + cover art… (1-3 min)
                     </div>
                   ) : ep.status === 'failed' ? (
                     <div className="mt-3 text-xs text-destructive">Failed: {ep.error || 'Unknown error'}</div>

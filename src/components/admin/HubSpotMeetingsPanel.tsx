@@ -175,7 +175,7 @@ function MeetingRow({ m }: { m: Meeting }) {
           {m.title && <div className="text-sm mt-1">{m.title}</div>}
           <div className="text-xs text-muted-foreground mt-1">
             {start ? start.toLocaleString() : "No start time"}
-            {end && ` – ${end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+            {end && ` - ${end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
             {m.location && ` · ${m.location}`}
           </div>
           {m.internal_notes && (

@@ -19,10 +19,10 @@ interface ChoreoBlock {
 }
 
 const CHOREOGRAPHY: ChoreoBlock[] = [
-  { time: '08:00', gear: 'Forensic Content', action: 'Drop today\'s post + engage Reciprocity Pod', detail: 'Publish the scheduled post. Within 30 min, get 5–8 pod members to leave additive comments to spike algorithmic velocity.' },
+  { time: '08:00', gear: 'Forensic Content', action: 'Drop today\'s post + engage Reciprocity Pod', detail: 'Publish the scheduled post. Within 30 min, get 5-8 pod members to leave additive comments to spike algorithmic velocity.' },
   { time: '09:00', gear: 'Borrowed Distribution', action: 'Comment-Jack 5 industry giants', detail: 'Be in the first 5 comments on 5 high-reach posts. Sharp, additive insights only, never compliments. Their audience clicks your profile.' },
-  { time: '11:00', gear: 'Surgical Outbound', action: 'Record + dispatch 10 Loom audits', detail: '3-min screen recording of prospect\'s site pointing out 2–3 visible leaks. Target mid-level Marketing/Ops, not CEOs.' },
-  { time: '14:00', gear: 'Surgical Outbound', action: 'Reverse-engineer demand search', detail: 'Search "looking for help with [HubSpot / lead flow / CRM]" → Posts → Latest. Comment thoughtfully on 5–10. NO pitch.' },
+  { time: '11:00', gear: 'Surgical Outbound', action: 'Record + dispatch 10 Loom audits', detail: '3-min screen recording of prospect\'s site pointing out 2-3 visible leaks. Target mid-level Marketing/Ops, not CEOs.' },
+  { time: '14:00', gear: 'Surgical Outbound', action: 'Reverse-engineer demand search', detail: 'Search "looking for help with [HubSpot / lead flow / CRM]" → Posts → Latest. Comment thoughtfully on 5-10. NO pitch.' },
   { time: '16:00', gear: 'Forensic Content', action: 'Reply + Soft Front Door DM drop', detail: 'Reply to every comment on today\'s post. DM the asset to anyone who used the keyword. Ask ONE curious question. Never pitch.' },
 ];
 
@@ -64,16 +64,16 @@ const HIDDEN_MOVES = [
   { num: 3, name: 'The Soft Front Door', tactic: 'End posts with "Comment [KEYWORD] for the PDF"', soWhat: 'Velocity spikes algo + warm DMs' },
   { num: 4, name: 'Expensive Mistake Hook', tactic: '"$4M company lost 31% of leads due to [error]"', soWhat: 'Pain + specificity = scroll-stop' },
   { num: 5, name: 'Reverse-Engineer Buyer Search', tactic: 'Search "looking for help with [service]" → Latest', soWhat: 'Real-time prospects in active pain' },
-  { num: 6, name: 'The Loom Audit Weapon', tactic: '3-min video teardown via DM', soWhat: '20–40% reply vs 1% cold InMail' },
+  { num: 6, name: 'The Loom Audit Weapon', tactic: '3-min video teardown via DM', soWhat: '20-40% reply vs 1% cold InMail' },
   { num: 7, name: 'Content Series Stacking', tactic: 'Numbered series ("Business Autopsy #14")', soWhat: 'Sticky followers fear missing #15' },
   { num: 8, name: 'Mid-Manager DMs', tactic: 'Target Ops/Marketing Directors with helpful observations', soWhat: 'They\'re the actual buyers' },
   { num: 9, name: 'Reciprocity Networks', tactic: '10 non-competing peers comment within 30 min', soWhat: 'Early engagement = quality signal' },
 ];
 
 const PHASES = [
-  { range: 'Days 1–30', label: 'QUIT ZONE', actions: ['Define 6 pillars + Song Sheet', '100 thoughtful comments/week on giants', 'Establish daily choreography rhythm'] },
-  { range: 'Days 31–60', label: 'FLATLINE', actions: ['Launch Business Autopsy series', '50 Loom audits/week', 'Carousel cadence stable'] },
-  { range: 'Days 61–90', label: 'IGNITION', actions: ['3-step batching system live', 'VA for DM management', 'Newsletter launched (deplatform traffic)'] },
+  { range: 'Days 1-30', label: 'QUIT ZONE', actions: ['Define 6 pillars + Song Sheet', '100 thoughtful comments/week on giants', 'Establish daily choreography rhythm'] },
+  { range: 'Days 31-60', label: 'FLATLINE', actions: ['Launch Business Autopsy series', '50 Loom audits/week', 'Carousel cadence stable'] },
+  { range: 'Days 61-90', label: 'IGNITION', actions: ['3-step batching system live', 'VA for DM management', 'Newsletter launched (deplatform traffic)'] },
 ];
 
 const GOLDEN_METRICS = [
@@ -286,7 +286,7 @@ const LinkedInPlaybookPage: React.FC = () => {
                   <li className="flex justify-between"><span className="text-muted-foreground">Loom audits</span><span className="font-mono font-bold text-foreground">50</span></li>
                   <li className="flex justify-between"><span className="text-muted-foreground">Comments</span><span className="font-mono font-bold text-foreground">100</span></li>
                   <li className="flex justify-between"><span className="text-muted-foreground">Warm convos</span><span className="font-mono font-bold text-foreground">20</span></li>
-                  <li className="flex justify-between"><span className="text-muted-foreground">Discovery calls</span><span className="font-mono font-bold text-foreground">5–15</span></li>
+                  <li className="flex justify-between"><span className="text-muted-foreground">Discovery calls</span><span className="font-mono font-bold text-foreground">5-15</span></li>
                 </ul>
               </Card>
             </div>

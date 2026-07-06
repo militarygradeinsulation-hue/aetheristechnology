@@ -50,7 +50,7 @@ export const MotivationCard: React.FC = () => {
             <p className="text-sm text-muted-foreground mt-1">
               A lead has to see you <span className="text-foreground font-semibold">7 times</span> before they
               actually <span className="text-foreground font-semibold">see you</span>. Email, call,
-              LinkedIn, comment, in-person — they all count. Touch 1–6 feel invisible.
+              LinkedIn, comment, in-person — they all count. Touch 1-6 feel invisible.
               That's the job.
             </p>
           </div>

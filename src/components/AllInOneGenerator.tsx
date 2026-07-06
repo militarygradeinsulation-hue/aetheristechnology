@@ -325,7 +325,7 @@ export const AllInOneGenerator: React.FC = () => {
 
     // Concurrency pool of 3 — running 9 long AI calls in parallel reliably hits
     // gateway rate limits and times out the whole batch. 3-at-a-time keeps every
-    // tool inside its budget while still finishing in ~60–90s.
+    // tool inside its budget while still finishing in ~60-90s.
     const POOL_SIZE = 3;
     const queue = [...allJobs];
     const workers = Array.from({ length: Math.min(POOL_SIZE, queue.length) }, async () => {
@@ -544,7 +544,7 @@ export const AllInOneGenerator: React.FC = () => {
 
         <p className="text-xs text-muted-foreground mt-3">
           Paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>. We read your site,
-          infer your business profile, then run all 9 tools 3-at-a-time (~60–90 seconds) so the AI gateway doesn't
+          infer your business profile, then run all 9 tools 3-at-a-time (~60-90 seconds) so the AI gateway doesn't
           rate-limit the batch. Each tool auto-retries up to 4 times on transient failures and saves independently.
         </p>
 

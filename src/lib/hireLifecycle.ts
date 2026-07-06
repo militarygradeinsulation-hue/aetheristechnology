@@ -32,11 +32,11 @@ export interface RepLifecycle {
 
 const STAGE_BANDS: { stage: LifecycleStage; label: string; min: number; max: number }[] = [
   { stage: "pre_start",   label: "Pre-Start (Day 0)",        min: -999, max: 0 },
-  { stage: "day_one",     label: "Day 1–2 · First Touch",    min: 1,    max: 2 },
-  { stage: "first_week",  label: "Day 3–7 · First Week",     min: 3,    max: 7 },
-  { stage: "first_month", label: "Day 8–30 · First Month",   min: 8,    max: 30 },
-  { stage: "ramp",        label: "Day 31–90 · Ramp",         min: 31,   max: 90 },
-  { stage: "growth",      label: "Day 91–180 · Growth",      min: 91,   max: 180 },
+  { stage: "day_one",     label: "Day 1-2 · First Touch",    min: 1,    max: 2 },
+  { stage: "first_week",  label: "Day 3-7 · First Week",     min: 3,    max: 7 },
+  { stage: "first_month", label: "Day 8-30 · First Month",   min: 8,    max: 30 },
+  { stage: "ramp",        label: "Day 31-90 · Ramp",         min: 31,   max: 90 },
+  { stage: "growth",      label: "Day 91-180 · Growth",      min: 91,   max: 180 },
   { stage: "veteran",     label: "180+ · Veteran",           min: 181,  max: 99999 },
 ];
 
@@ -71,9 +71,9 @@ function stepsFor(stage: LifecycleStage, rep: RepCodeRow): LifecycleStep[] {
       ];
     case "first_week":
       return [
-        { id: "w1", label: "Daily 10-min standup (Mon–Fri)", owner: "Joseph",
+        { id: "w1", label: "Daily 10-min standup (Mon-Fri)", owner: "Joseph",
           detail: "Numbers from yesterday, blockers, one win. Hard cap 10 minutes.", scriptKey: "week_one" },
-        { id: "w2", label: "Complete onboarding modules 1–5", owner: "Either",
+        { id: "w2", label: "Complete onboarding modules 1-5", owner: "Either",
           detail: "Track completion in Training Studio. Gate Week-2 portal features behind it." },
         { id: "w3", label: "First booked meeting target", owner: "Braden",
           detail: "Goal: 1 qualified meeting booked by Friday. Pair them for the close." },

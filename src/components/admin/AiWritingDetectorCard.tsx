@@ -361,8 +361,8 @@ function buildEasyReadText(result: DetectResult, subject: string): string {
   lines.push('');
   lines.push('Scoring is additive and evidence-driven. Each forensic marker contributes');
   lines.push('points scaled by confidence; the total is capped at 100. Verdicts are derived');
-  lines.push('from the resulting score (0–19 Human, 20–39 Likely Human, 40–59 Mixed,');
-  lines.push('60–79 Likely AI, 80–100 AI). Cross-sample analysis weights recurring');
+  lines.push('from the resulting score (0-19 Human, 20-39 Likely Human, 40-59 Mixed,');
+  lines.push('60-79 Likely AI, 80-100 AI). Cross-sample analysis weights recurring');
   lines.push('patterns more heavily — the same fingerprint across multiple samples is a');
   lines.push('stronger signal than any single tell in isolation.');
   lines.push('');

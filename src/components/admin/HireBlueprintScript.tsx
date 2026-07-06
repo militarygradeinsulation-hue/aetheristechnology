@@ -322,7 +322,7 @@ Last thing: every operator I've ever hired has hit one wall around day 9 to 14. 
 
 Welcome in. Let's go to work.`,
         beats: [
-          "48-hour checkpoint: portal + modules 1–2",
+          "48-hour checkpoint: portal + modules 1-2",
           "Friday checkpoint: 1 real diagnostic question asked",
           "Pre-warn the day-9-to-14 wall",
           "Close strong — 'let's go to work'",

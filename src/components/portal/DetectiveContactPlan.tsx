@@ -23,21 +23,21 @@ interface ContactPlan {
 }
 
 const INDUSTRY_TIME: Array<{ match: RegExp; day: string; window: string; reason: string }> = [
-  { match: /law|legal|attorney/i, day: "Tue–Thu", window: "8:00–9:30 AM local", reason: "Before docket / client calls start." },
-  { match: /restaurant|food|hospitality|bar|cafe/i, day: "Tue–Thu", window: "2:30–4:30 PM local", reason: "Between lunch and dinner rush — owners breathe." },
-  { match: /retail|ecom|shop|store/i, day: "Tue–Wed", window: "10:00–11:30 AM local", reason: "Post-open, before midday rush." },
-  { match: /real ?estate|realtor|broker|property/i, day: "Tue–Thu", window: "9:00–10:30 AM local", reason: "Between morning showings and client calls." },
-  { match: /construction|contractor|trades|hvac|plumb|electric|roof/i, day: "Mon–Wed", window: "6:30–7:30 AM or 4:30–5:30 PM", reason: "Before crews start / after they wrap." },
-  { match: /health|clinic|dental|medical|chiropract|therap/i, day: "Tue–Thu", window: "12:00–1:30 PM local", reason: "Lunch break between patient blocks." },
-  { match: /operator|marketing|consult|saas|software|tech/i, day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "Post-standup, pre-lunch decision window." },
-  { match: /finance|accounting|cpa|bookkeep|insurance/i, day: "Tue–Thu", window: "9:30–11:00 AM local", reason: "After market open, before client meetings stack." },
-  { match: /manufactur|industrial|logistics|warehouse/i, day: "Tue–Wed", window: "7:30–9:00 AM local", reason: "Shift handover — owners on the floor with coffee." },
-  { match: /auto|dealer|repair|mechanic/i, day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "After service bays fill, before lunch." },
-  { match: /fitness|gym|wellness|spa|salon/i, day: "Tue–Thu", window: "1:00–3:00 PM local", reason: "Between morning and evening client waves." },
-  { match: /education|school|tutor|coach/i, day: "Tue–Thu", window: "3:30–5:00 PM local", reason: "Post-class, pre-evening prep." },
+  { match: /law|legal|attorney/i, day: "Tue-Thu", window: "8:00-9:30 AM local", reason: "Before docket / client calls start." },
+  { match: /restaurant|food|hospitality|bar|cafe/i, day: "Tue-Thu", window: "2:30-4:30 PM local", reason: "Between lunch and dinner rush — owners breathe." },
+  { match: /retail|ecom|shop|store/i, day: "Tue-Wed", window: "10:00-11:30 AM local", reason: "Post-open, before midday rush." },
+  { match: /real ?estate|realtor|broker|property/i, day: "Tue-Thu", window: "9:00-10:30 AM local", reason: "Between morning showings and client calls." },
+  { match: /construction|contractor|trades|hvac|plumb|electric|roof/i, day: "Mon-Wed", window: "6:30-7:30 AM or 4:30-5:30 PM", reason: "Before crews start / after they wrap." },
+  { match: /health|clinic|dental|medical|chiropract|therap/i, day: "Tue-Thu", window: "12:00-1:30 PM local", reason: "Lunch break between patient blocks." },
+  { match: /operator|marketing|consult|saas|software|tech/i, day: "Tue-Thu", window: "10:00-11:30 AM local", reason: "Post-standup, pre-lunch decision window." },
+  { match: /finance|accounting|cpa|bookkeep|insurance/i, day: "Tue-Thu", window: "9:30-11:00 AM local", reason: "After market open, before client meetings stack." },
+  { match: /manufactur|industrial|logistics|warehouse/i, day: "Tue-Wed", window: "7:30-9:00 AM local", reason: "Shift handover — owners on the floor with coffee." },
+  { match: /auto|dealer|repair|mechanic/i, day: "Tue-Thu", window: "10:00-11:30 AM local", reason: "After service bays fill, before lunch." },
+  { match: /fitness|gym|wellness|spa|salon/i, day: "Tue-Thu", window: "1:00-3:00 PM local", reason: "Between morning and evening client waves." },
+  { match: /education|school|tutor|coach/i, day: "Tue-Thu", window: "3:30-5:00 PM local", reason: "Post-class, pre-evening prep." },
 ];
 
-const DEFAULT_TIME = { day: "Tue–Thu", window: "10:00–11:30 AM local", reason: "Highest decision-maker open rate across most B2B industries." };
+const DEFAULT_TIME = { day: "Tue-Thu", window: "10:00-11:30 AM local", reason: "Highest decision-maker open rate across most B2B industries." };
 
 function pickTime(industry?: string | null) {
   if (industry) {

@@ -4,8 +4,8 @@
 // TWO MODELS LIVE HERE — read this before touching anything:
 //
 // 1) TIERED COMMISSION (catalog tools + the 3 public bundles)
-//    Tier 1, Entry ($29–$59):   Company 50% · Rep 30% · Partner 20%
-//    Tier 2, Mid   ($79–$349):  Company 60% · Rep 25% · Partner 15%
+//    Tier 1, Entry ($29-$59):   Company 50% · Rep 30% · Partner 20%
+//    Tier 2, Mid   ($79-$349):  Company 60% · Rep 25% · Partner 15%
 //    Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
 //    The 3 bundles ($2,500 / $5,000 / $10,000) all land in Tier 3.
 //
@@ -89,7 +89,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     flagship: 'diagnostic',
     highlight: true,
     description: 'Operator-led 3-week forensic teardown of the client\'s revenue system. Ends with a written leak report, a 90-day remediation plan, and a redesigned funnel.',
-    forWho: 'Owners doing $1M–$25M who know money is leaking but cannot pinpoint where. Pre-requisite to the Active Case.',
+    forWho: 'Owners doing $1M-$25M who know money is leaking but cannot pinpoint where. Pre-requisite to the Active Case.',
   },
   {
     name: 'Active Case',
@@ -110,7 +110,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     bundle: true,
     highlight: true,
     description: 'One-day forensic snapshot: website scan, CRM data audit, top-of-funnel leak map. Operator walks the report with you.',
-    forWho: 'Owners $500k–$3M who need a directional read before committing to a full Diagnostic.',
+    forWho: 'Owners $500k-$3M who need a directional read before committing to a full Diagnostic.',
   },
   {
     name: 'Revenue Pack',
@@ -119,7 +119,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     bundle: true,
     highlight: true,
     description: 'Signal Pack + 2-week sales-cycle teardown. Includes call-recording review, deal-stage forensics, and 3 hands-on rebuilds.',
-    forWho: 'Teams $1M–$10M with a sales motion that worked once and stopped scaling.',
+    forWho: 'Teams $1M-$10M with a sales motion that worked once and stopped scaling.',
   },
   {
     name: 'Operator Suite',
@@ -134,7 +134,7 @@ export const REP_PRODUCTS: RepProduct[] = [
 
   // ── LEGACY À LA CARTE (rep-portal internal only — NOT on public site) ──
   // Kept for back-compat with existing Stripe products + rep-led direct sales.
-  // Tier 1, Entry ($29–$59)
+  // Tier 1, Entry ($29-$59)
   { name: 'Playbook Unlock', priceCents: 2900, tier: 1, legacy: true,
     description: 'Unlocks the full playbook PDF library — 30+ tactical guides on sales, CRM, content, and ops.',
     forWho: 'Owners DIY-ing their growth who want operator-grade SOPs, not Medium articles.' },
@@ -156,7 +156,7 @@ export const REP_PRODUCTS: RepProduct[] = [
   { name: 'CRM Health Check', priceCents: 7900, tier: 1, legacy: true,
     description: '90-min CRM audit — pipeline hygiene, automation gaps, reporting holes, dirty data — with a fix list.',
     forWho: 'HubSpot/Salesforce/Pipedrive owners who suspect their data is lying to them.' },
-  // Tier 2, Mid ($79–$349)
+  // Tier 2, Mid ($79-$349)
   { name: 'Friction Vocabulary Audit', priceCents: 7900, tier: 2, legacy: true,
     description: 'Forensic copy audit that flags every fluff word, jargon term, and unclear phrase costing them conversions.',
     forWho: 'Brands whose copy "sounds professional" but does not sell.' },
@@ -182,7 +182,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     description: 'New-rep ramp kit — playbook, scripts, objection handling, week-by-week plan to first close.',
     forWho: 'Founders hiring their first 1-3 sales reps.' },
   { name: 'Prospecting List Builder', priceCents: 29900, tier: 2, legacy: true,
-    description: 'Custom ICP list (250–1,000 verified contacts) scraped + enriched, ready for outreach.',
+    description: 'Custom ICP list (250-1,000 verified contacts) scraped + enriched, ready for outreach.',
     forWho: 'Outbound teams burning hours on LinkedIn instead of selling.' },
   { name: 'Lead Nurture Automation', priceCents: 29900, tier: 2, recurring: true, legacy: true,
     description: 'Fully built + managed lead-nurture sequences across email/SMS, optimized monthly.',
@@ -214,7 +214,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     forWho: 'Companies where marketing and sales blame each other instead of closing deals.' },
   { name: 'Sales Process Redesign', priceCents: 149900, tier: 3, legacy: true,
     description: 'Tear-down and rebuild of the entire sales process — stages, exit criteria, automation, forecasting.',
-    forWho: '5–25 person sales teams whose pipeline is a mystery to the CEO.' },
+    forWho: '5-25 person sales teams whose pipeline is a mystery to the CEO.' },
 ];
 
 // Resolve tier from raw price (used by webhook where we may only have a price in cents).

@@ -144,7 +144,7 @@ const ServicesPage: React.FC = () => {
                   <div>
                     <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Who qualifies</div>
                     <p className="text-sm text-foreground/85 leading-relaxed">
-                      US-based specialty manufacturer, $5M–$25M revenue, decision-maker on the call. We confirm fit on the discovery call before the bonus clock starts.
+                      US-based specialty manufacturer, $5M-$25M revenue, decision-maker on the call. We confirm fit on the discovery call before the bonus clock starts.
                     </p>
                   </div>
                 </div>

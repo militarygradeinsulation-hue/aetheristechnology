@@ -205,7 +205,7 @@ export const BriefingChat: React.FC = () => {
         {loading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin text-amber" />
-            Writing briefing… this can take 20–40 seconds for long documents.
+            Writing briefing… this can take 20-40 seconds for long documents.
           </div>
         )}
       </div>

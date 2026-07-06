@@ -83,7 +83,7 @@ export const WhyUs: React.FC = () => {
                     </div>
                     <p className="text-foreground/85 text-[15px] leading-relaxed italic">
                       No hidden timelines. No retainers. No generic AI-guru fluff. Just honest work
-                      with growth-minded businesses running $5M–$50M that know they should be further
+                      with growth-minded businesses running $5M-$50M that know they should be further
                       along. If something is wrong, I find it. If it needs fixing, I build it.
                     </p>
                   </div>

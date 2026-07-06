@@ -72,7 +72,7 @@ export const CompanyCalendarRepView: React.FC = () => {
     if (view === "month") return anchor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
     if (view === "week") {
       const s = startOfWeek(anchor); const e = addDays(s, 6);
-      return `${s.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${e.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+      return `${s.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${e.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
     }
     return "Upcoming";
   }, [view, anchor]);
