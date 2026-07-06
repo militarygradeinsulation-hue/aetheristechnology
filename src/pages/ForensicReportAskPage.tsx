@@ -20,8 +20,17 @@ export default function ForensicReportAskPage() {
   useEffect(() => {
     (async () => {
       if (!scanId) return;
-      const { data } = await supabase.from("forensic_scans").select("company_name,target_url,status").eq("id", scanId).single();
-      if (data) setMeta(data as { company_name: string | null; target_url: string });
+      try {
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+        const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(scanId)}`, {
+          headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+        });
+        if (r.ok) {
+          const data = await r.json();
+          if (data) setMeta({ company_name: data.company_name ?? null, target_url: data.target_url });
+        }
+      } catch { /* ignore */ }
     })();
   }, [scanId]);
 

@@ -28,14 +28,38 @@ const STAGES: { key: string; label: string }[] = [
   { key: "synth",         label: "Synthesizing 14-chapter report" },
 ];
 
+const SCAN_STORAGE_KEY = "aetheris:golden-report:scan-id";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+async function fetchScanRow(id: string): Promise<Row | null> {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
+    if (!r.ok) return null;
+    return (await r.json()) as Row;
+  } catch {
+    return null;
+  }
+}
+
 export function ForensicScanAllPanel() {
   const [url, setUrl] = useState("");
   const [company, setCompany] = useState("");
-  const [scanId, setScanId] = useState<string | null>(null);
+  const [scanId, setScanId] = useState<string | null>(() => {
+    try { return sessionStorage.getItem(SCAN_STORAGE_KEY); } catch { return null; }
+  });
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  const [elapsedSec, setElapsedSec] = useState(0);
   const pollRef = useRef<number | null>(null);
+  const startedAtRef = useRef<number | null>(null);
 
   const isAdmin = !!getAdminToken();
   const headers: Record<string, string> = isAdmin
@@ -46,6 +70,7 @@ export function ForensicScanAllPanel() {
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
     setBusy(true);
     setScanId(null); setRow(null);
+    try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
     try {
       const { data, error } = await supabase.functions.invoke("forensic-scan-all", {
         body: { url: url.trim(), company: company.trim() || undefined },
@@ -53,6 +78,9 @@ export function ForensicScanAllPanel() {
       });
       if (error) throw error;
       if (!data?.scan_id) throw new Error("No scan id returned");
+      startedAtRef.current = Date.now();
+      setElapsedSec(0);
+      try { sessionStorage.setItem(SCAN_STORAGE_KEY, data.scan_id); } catch { /* ignore */ }
       setScanId(data.scan_id);
     } catch (e) {
       toast({ title: "Scan failed to start", description: String((e as Error).message || e), variant: "destructive" });
@@ -63,12 +91,13 @@ export function ForensicScanAllPanel() {
   useEffect(() => {
     if (!scanId) return;
     let stopped = false;
+    if (!startedAtRef.current) startedAtRef.current = Date.now();
     const tick = async () => {
-      const { data, error } = await supabase.from("forensic_scans").select("*").eq("id", scanId).single();
-      if (!error && data && !stopped) {
-        setRow(data as unknown as Row);
-        // Auto-expand every chapter as soon as the report lands
-        const r = (data as unknown as Row).report;
+      const data = await fetchScanRow(scanId);
+      if (data && !stopped) {
+        setRow(data);
+        setElapsedSec(Math.floor((Date.now() - (startedAtRef.current || Date.now())) / 1000));
+        const r = data.report;
         if (r?.chapters?.length) {
           setOpen((prev) => {
             if (Object.keys(prev).length >= r.chapters!.length) return prev;
@@ -77,7 +106,10 @@ export function ForensicScanAllPanel() {
             return next;
           });
         }
-        if (data.status === "completed" || data.status === "failed") return;
+        if (data.status === "completed" || data.status === "failed") {
+          try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
+          return;
+        }
       }
       pollRef.current = window.setTimeout(tick, 3000) as unknown as number;
     };
@@ -116,7 +148,14 @@ export function ForensicScanAllPanel() {
 
       {scanId && (
         <Card className="p-4 bg-card border-border">
-          <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-3">Progress</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Progress</h4>
+            {row?.status && row.status !== "completed" && row.status !== "failed" && (
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-500">
+                {Math.floor(elapsedSec / 60)}:{String(elapsedSec % 60).padStart(2, "0")} elapsed
+              </span>
+            )}
+          </div>
           <ul className="space-y-1.5">
             {STAGES.map((s) => {
               const st = stageState(s.key);
@@ -133,11 +172,19 @@ export function ForensicScanAllPanel() {
               );
             })}
           </ul>
+          {row?.status !== "completed" && row?.status !== "failed" && (
+            <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+              Golden Reports take roughly <span className="text-amber-500 font-mono">90&ndash;180 seconds</span> to synthesize.
+              Keep this tab open &mdash; if you refresh, we'll resume from where the scan left off.
+            </p>
+          )}
           {row?.status === "failed" && (
             <p className="mt-3 text-sm text-red-400">Failed: {row.error_message}</p>
           )}
         </Card>
       )}
+
+
 
       {report && row && (
         <Card className="p-0 bg-card border-border overflow-hidden">
