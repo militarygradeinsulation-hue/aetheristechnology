@@ -249,7 +249,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         if (!p) return null;
         const Icon = n.icon;
         const isSel = selected === i;
-        const dim = selected !== null && !isSel;
+        const isAffected = affectedIdx.has(i);
+        const dim = selected !== null && !isSel && !isAffected;
         const handleClick = () => {
           if (isSel) {
             // Second click: trigger onClick if provided, else just collapse
