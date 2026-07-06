@@ -467,25 +467,37 @@ const MindMapNode: React.FC<{
   onClick: () => void;
   isSelected: boolean;
   isDimmed: boolean;
-}> = ({ v, pos, index, onClick, isSelected, isDimmed }) => {
+  offset: { dx: number; dy: number };
+  isDragging: boolean;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: (e: React.PointerEvent) => void;
+}> = ({ v, pos, index, onClick, isSelected, isDimmed, offset, isDragging, onPointerDown, onPointerMove, onPointerUp }) => {
   const Icon = v.icon;
   return (
     <button
       type="button"
       onClick={onClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       style={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
+        transform: `translate(calc(-50% + ${offset.dx}px), calc(-50% + ${offset.dy}px))`,
         animationDelay: `${index * 60}ms`,
+        touchAction: 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
       }}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 group animate-fade-in z-10 transition-opacity duration-300 ${
-        isDimmed ? 'opacity-25' : 'opacity-100'
-      }`}
+      className={`absolute group animate-fade-in transition-opacity duration-300 select-none ${
+        isDragging ? 'z-40' : 'z-10'
+      } ${isDimmed ? 'opacity-25' : 'opacity-100'}`}
     >
       <div
-        className="relative flex flex-col items-center"
+        className="relative flex flex-col items-center pointer-events-none"
         style={{
-          animation: isSelected
+          animation: isSelected || isDragging
             ? undefined
             : `industry-float-${index % 4} ${9 + (index % 5)}s ease-in-out ${(index % 7) * -0.6}s infinite`,
           willChange: 'transform',
@@ -499,7 +511,9 @@ const MindMapNode: React.FC<{
           style={{ animation: `mindmap-pulse 3.2s ease-out ${(index % 6) * 0.4}s infinite` }}
         />
         <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
-          isSelected
+          isDragging
+            ? 'border-amber bg-amber/25 shadow-[0_0_50px_hsl(var(--amber)/0.75)] scale-110'
+            : isSelected
             ? 'border-amber bg-amber/15 shadow-[0_0_40px_hsl(var(--amber)/0.55)]'
             : 'border-amber/40 group-hover:border-amber group-hover:bg-amber/10 shadow-[0_0_20px_hsl(var(--amber)/0.15)] group-hover:shadow-[0_0_30px_hsl(var(--amber)/0.4)]'
         }`}>
