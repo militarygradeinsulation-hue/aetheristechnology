@@ -293,7 +293,11 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                 />
                 <div
                   className={`relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-background/95 border-2 flex items-center justify-center transition-all ${
-                    isSel ? `${a.selectedBorder} ${a.selectedGlow}` : `${a.border} ${a.bg} ${a.glow}`
+                    isSel
+                      ? `${a.selectedBorder} ${a.selectedGlow}`
+                      : isAffected
+                        ? `${a.selectedBorder} ${a.glow}`
+                        : `${a.border} ${a.bg} ${a.glow}`
                   }`}
                 >
                   <Icon className={`w-7 h-7 md:w-8 md:h-8 ${a.icon}`} />
