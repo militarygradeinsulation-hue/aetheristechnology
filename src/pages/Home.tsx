@@ -54,11 +54,11 @@ const Home = () => {
 
           <section className="px-4 py-8 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              We find where your business is{" "}
-              <span className="text-crimson italic">leaking money</span>.
+              We are in the business of{" "}
+              <span className="text-crimson italic">Chaos Theory Forensic</span>.
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Then we close it. $2,500 flat.
+              Find what causes the random chaos. Remove it where it begins.
             </p>
           </section>
 
