@@ -308,7 +308,7 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
                   </div>
                   <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap max-w-[160px] text-center ${
                     isActive ? "text-amber" : "text-foreground/85"
-                  }`}>{s.label}</div>
+                  }`}>{isFixed ? deriveFixedLabel(s) : s.label}</div>
                   {s.dollar_leak && (
                     <div className={`font-mono text-[11px] md:text-xs uppercase tracking-widest mt-1 whitespace-nowrap ${
                       isFixed ? "text-amber/70" : "text-crimson/90"
