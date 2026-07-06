@@ -262,27 +262,38 @@ export function ReciprocationDoctrineTool() {
         </Button>
       </Card>
 
-      {/* Citations panel — always visible */}
-      <Card className="p-4 bg-card border-border">
-        <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="w-4 h-4 text-amber" />
-          <h3 className="font-semibold tracking-wide">Inline Citations Panel</h3>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground ml-1">
-            referenced by every tactic below
-          </span>
-        </div>
-        <div className="grid md:grid-cols-3 gap-3">
-          {CITATION_ORDER.map((key) => {
-            const c = CITATIONS[key];
-            return (
-              <div key={key} className="border border-border rounded-md p-3 bg-muted/20">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">{key}</div>
-                <div className="font-serif font-semibold text-sm mb-2">{c.label}</div>
-                <p className="text-xs leading-relaxed text-foreground/85">{c.body}</p>
-              </div>
-            );
-          })}
-        </div>
+      {/* Inline Citations panel — collapsed by default */}
+      <Card className="bg-card border-border overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setCitationsOpen((o) => !o)}
+          className="w-full flex items-center justify-between gap-2 p-3 text-left hover:bg-muted/20 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-amber" />
+            <h3 className="font-semibold tracking-wide text-sm">Inline Citations Panel</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground hidden sm:inline">
+              referenced by every tactic below
+            </span>
+            {citationsOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+          </div>
+        </button>
+        {citationsOpen && (
+          <div className="px-3 pb-3 grid md:grid-cols-3 gap-3">
+            {CITATION_ORDER.map((key) => {
+              const c = CITATIONS[key];
+              return (
+                <div key={key} className="border border-border rounded-md p-3 bg-muted/20">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">{key}</div>
+                  <div className="font-serif font-semibold text-sm mb-2">{c.label}</div>
+                  <p className="text-xs leading-relaxed text-foreground/85">{c.body}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
       {/* Results */}
