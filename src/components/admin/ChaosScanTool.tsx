@@ -21,6 +21,8 @@ interface Symptom {
   anchor: OpId;
   chaos: string;
   fixed: string;
+  dollar_leak?: string;
+  cascade?: string[];
   connections?: string[];
 }
 
@@ -167,6 +169,13 @@ const AdminChaosScanTool: React.FC = () => {
 
       {data && (
         <Card className="p-4 md:p-5">
+          <style>{`@keyframes chaosFloat {
+            0%   { transform: translate(0px, 0px) rotate(0deg); }
+            25%  { transform: translate(2px, -3px) rotate(0.4deg); }
+            50%  { transform: translate(-1px, -5px) rotate(-0.3deg); }
+            75%  { transform: translate(-3px, -1px) rotate(0.2deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+          }`}</style>
           {/* Header + toggle */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
             <div>
@@ -327,11 +336,14 @@ const AdminChaosScanTool: React.FC = () => {
               </div>
 
               {/* Symptom nodes */}
-              {symptoms.map((s) => {
+              {symptoms.map((s, idx) => {
                 const SIcon = ICONS[s.icon] || AlertTriangle;
                 const isActive = active?.id === s.id;
                 const linked = active?.connections?.includes(s.id);
                 const dim = active !== null && !isActive && !linked;
+                // Give each bubble a slightly different drift so they feel alive
+                const dur = 5.5 + ((idx * 37) % 30) / 10; // 5.5s - 8.5s
+                const delay = -((idx * 53) % 40) / 10; // negative offsets stagger phase
                 return (
                   <button key={s.id}
                     type="button"
@@ -340,7 +352,12 @@ const AdminChaosScanTool: React.FC = () => {
                     aria-label={s.label}
                     className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 transition-all ${dim ? "opacity-30" : "opacity-100"}`}
                     style={{ left: `${s.x}%`, top: `${s.y}%` }}>
-                    <div className={`relative flex flex-col items-center transition-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}>
+                    <div
+                      className={`relative flex flex-col items-center will-change-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}
+                      style={{
+                        animation: `chaosFloat ${dur}s ease-in-out ${delay}s infinite`,
+                      }}
+                    >
                       <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/95 border-2 flex items-center justify-center ${
                         isFixed
                           ? "border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]"
@@ -355,6 +372,13 @@ const AdminChaosScanTool: React.FC = () => {
                       }`}>
                         {s.label}
                       </div>
+                      {s.dollar_leak && (
+                        <div className={`font-mono text-[9px] md:text-[10px] uppercase tracking-widest mt-0.5 whitespace-nowrap ${
+                          isFixed ? "text-amber/70" : "text-crimson/90"
+                        }`}>
+                          {s.dollar_leak}
+                        </div>
+                      )}
                     </div>
                   </button>
                 );
@@ -385,10 +409,34 @@ const AdminChaosScanTool: React.FC = () => {
             {active ? (
               <div className="grid gap-2 sm:grid-cols-2 animate-fade-in">
                 <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
-                  <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
-                    <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson">
+                      <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                    </div>
+                    {active.dollar_leak && (
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-crimson bg-crimson/10 border border-crimson/30 rounded-sm px-1.5 py-0.5">
+                        {active.dollar_leak}
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
+                  {active.cascade && active.cascade.length > 0 && (
+                    <div className="mt-2.5 border-t border-crimson/20 pt-2">
+                      <div className="font-case text-[9px] uppercase tracking-widest text-crimson/80 mb-1.5">
+                        Left unchecked, the chain reaction
+                      </div>
+                      <ol className="space-y-1.5">
+                        {active.cascade.map((c, i) => (
+                          <li key={i} className="flex gap-2 text-[11px] sm:text-xs text-foreground/85 leading-snug">
+                            <span className="font-mono text-crimson font-bold shrink-0">
+                              {i === 0 ? "30d" : i === 1 ? "90d" : "12mo"}
+                            </span>
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
                   {active.connections && active.connections.length > 0 && (
                     <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-crimson/80">
                       Feeds: {active.connections
