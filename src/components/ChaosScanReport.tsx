@@ -308,20 +308,20 @@ export const ChaosScanReport: React.FC<{ data: ChaosMap; meta?: IntelMeta | null
                 style={{ left: `${s.x}%`, top: `${s.y}%` }}>
                 <div className={`relative flex flex-col items-center will-change-transform ${isActive ? "scale-110" : "group-hover:scale-105"}`}
                   style={{ animation: `chaosFloat ${dur}s ease-in-out ${delay}s infinite` }}>
-                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center ${
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-background/95 border-2 flex items-center justify-center ${
                     isFixed
                       ? "border-amber/70 shadow-[0_0_14px_hsl(var(--amber)/0.35)]"
                       : isActive
                         ? "border-amber bg-amber/15 shadow-[0_0_20px_hsl(var(--amber)/0.5)]"
                         : "border-crimson/60 group-hover:border-crimson shadow-[0_0_12px_hsl(var(--crimson)/0.3)]"
                   }`}>
-                    <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
+                    <SIcon className={`w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 ${isFixed ? "text-amber" : isActive ? "text-amber" : "text-crimson"}`} />
                   </div>
-                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap max-w-[160px] text-center ${
+                  <div className={`mt-1 sm:mt-1.5 font-forensic text-[10px] sm:text-xs md:text-sm font-bold leading-tight text-center max-w-[70px] sm:max-w-[160px] sm:whitespace-nowrap ${
                     isActive ? "text-amber" : "text-foreground/85"
                   }`}>{isFixed ? deriveFixedLabel(s) : s.label}</div>
                   {s.dollar_leak && (
-                    <div className={`font-mono text-[11px] md:text-xs uppercase tracking-widest mt-1 whitespace-nowrap ${
+                    <div className={`font-mono text-[9px] sm:text-[11px] md:text-xs uppercase tracking-widest mt-0.5 sm:mt-1 text-center max-w-[80px] sm:max-w-none sm:whitespace-nowrap ${
                       isFixed ? "text-amber/70" : "text-crimson/90"
                     }`}>{s.dollar_leak}</div>
                   )}
