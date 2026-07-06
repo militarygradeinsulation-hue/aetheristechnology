@@ -13,11 +13,16 @@ import { supabase } from "@/integrations/supabase/client";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
+// Guest mode: sign-in is optional. If a session exists we send the bearer;
+// otherwise we fall back to the publishable anon key so the edge function
+// (verify_jwt = false) still gets a valid apikey.
 async function getUserAuthHeader(): Promise<string> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Please sign in to use Aetheris Nexus.");
-  return `Bearer ${token}`;
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) return `Bearer ${token}`;
+  } catch {}
+  return `Bearer ${ANON_KEY}`;
 }
 
 const STORAGE_KEY = "aetheris-nexus-threads-v1";
