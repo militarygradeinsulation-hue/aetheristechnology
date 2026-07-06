@@ -6,6 +6,9 @@ import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
+import homepageBanner from "@/assets/homepage-banner.png.asset.json";
+import homepageBanner768 from "@/assets/homepage-banner-768.png.asset.json";
+import homepageBanner1280 from "@/assets/homepage-banner-1280.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
@@ -110,6 +113,22 @@ const LeakLanderPage: React.FC = () => {
               />
             </button>
           </div>
+          {/* Homepage banner — responsive srcset */}
+          <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Chaos Theory Forensic">
+            <img
+              src={homepageBanner.url}
+              srcSet={`${homepageBanner768.url} 768w, ${homepageBanner1280.url} 1280w, ${homepageBanner.url} 1920w`}
+              sizes="(max-width: 896px) calc(100vw - 2rem), 896px"
+              alt="Joseph Toney, AI Architect — Aetheris Technology. Business is chaos theory; we find what causes the random chaos and remove it at the source."
+              className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              width={1920}
+              height={640}
+            />
+          </section>
+
           {/* HERO — tight */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
