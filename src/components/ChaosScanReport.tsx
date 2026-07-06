@@ -11,6 +11,7 @@ export interface Evidence { source_url?: string; quote?: string }
 export interface Symptom {
   id: string;
   label: string;
+  fixed_label?: string;
   icon: string;
   anchor: OpId;
   chaos: string;
