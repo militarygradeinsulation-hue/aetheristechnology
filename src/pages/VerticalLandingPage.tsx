@@ -28,6 +28,18 @@ const VerticalLandingPage: React.FC = () => {
 
   const path = `/${vertical.slug}`;
 
+  const mindMapNodes: MindMapNodeData[] = useMemo(
+    () =>
+      vertical.useCases.map((uc, i) => ({
+        id: `${uc.category}-${i}`,
+        label: uc.title,
+        sublabel: uc.category,
+        icon: CATEGORY_ICONS[uc.category],
+        connections: [uc.description],
+      })),
+    [vertical.useCases],
+  );
+
   const jsonLd = combineSchemas(
     serviceSchema(
       `${vertical.industry} AI Consulting`,
