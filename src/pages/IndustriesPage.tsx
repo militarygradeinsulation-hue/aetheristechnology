@@ -676,11 +676,14 @@ const InfoTile: React.FC<{
   const fixSentences = useMemo(() => splitSentences(selected.whatYouGetBack), [selected.whatYouGetBack]);
   const leakSentences = useMemo(() => splitSentences(selected.humanCost), [selected.humanCost]);
 
-  const frictions = selected.whatWeMeasure.map((label, i) => ({
-    label,
-    why: leakSentences[i] ?? leakSentences[leakSentences.length - 1] ?? selected.primaryLeak,
-    fixed: fixSentences[i] ?? fixSentences[fixSentences.length - 1] ?? selected.whatYouGetBack,
-  }));
+  const frictions = selected.whatWeMeasure.map((label, i) => {
+    const detail = FRICTION_DETAILS[selected.slug]?.[i];
+    return {
+      label,
+      why: detail?.why ?? leakSentences[i] ?? leakSentences[leakSentences.length - 1] ?? selected.primaryLeak,
+      fixed: detail?.fixed ?? fixSentences[i] ?? fixSentences[fixSentences.length - 1] ?? selected.whatYouGetBack,
+    };
+  });
 
   const activeIsResolved = openFriction !== null;
 
