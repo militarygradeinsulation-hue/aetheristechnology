@@ -13,11 +13,16 @@ import { supabase } from "@/integrations/supabase/client";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
+// Guest mode: sign-in is optional. If a session exists we send the bearer;
+// otherwise we fall back to the publishable anon key so the edge function
+// (verify_jwt = false) still gets a valid apikey.
 async function getUserAuthHeader(): Promise<string> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Please sign in to use Aetheris Nexus.");
-  return `Bearer ${token}`;
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) return `Bearer ${token}`;
+  } catch {}
+  return `Bearer ${ANON_KEY}`;
 }
 
 const STORAGE_KEY = "aetheris-nexus-threads-v1";
@@ -574,14 +579,30 @@ export default function AetherisNexusPage() {
               Aetheris 3.5
             </span>
           </div>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-            title="Back to website"
-          >
-            <Home size={14} />
-            <span className="hidden sm:inline">Home</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => navigate("/login")}
+              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Sign in or create an account"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => navigate("/rep-portal")}
+              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Sign in with your Rep ID"
+            >
+              Rep ID
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
+              title="Back to website"
+            >
+              <Home size={14} />
+              <span className="hidden sm:inline">Home</span>
+            </button>
+          </div>
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
         </header>
 
