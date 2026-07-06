@@ -92,7 +92,24 @@ export const AdminCareersPanel: React.FC = () => {
   const [minFitScore, setMinFitScore] = useState<string>('');
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
-  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
+  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no' | 'archived'>('all');
+  const [ageFilter, setAgeFilter] = useState<'all' | '7' | '30' | '90' | 'over30' | 'over90'>('all');
+  const [minimized, setMinimized] = useState<boolean>(() => {
+    try { return localStorage.getItem('aetheris_careers_minimized') !== '0'; } catch { return true; }
+  });
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleMinimized = () => {
+    setMinimized(m => {
+      const next = !m;
+      try { localStorage.setItem('aetheris_careers_minimized', next ? '1' : '0'); } catch {}
+      if (next) setExpandedIds(new Set());
+      return next;
+    });
+  };
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  };
+  const [bulkBusy, setBulkBusy] = useState<string | null>(null);
   const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('aetheris_saved_candidates') || '[]')); }
