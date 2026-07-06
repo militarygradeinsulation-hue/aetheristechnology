@@ -374,7 +374,7 @@ serve(async (req) => {
 
     // Merge & rank interior links
     const allLinks = Array.from(new Set([...(siteLinks || []), ...(pageLinks || [])]));
-    const top = pickTopLinks(allLinks, rootHost, 5);
+    const top = pickTopLinks(allLinks, rootHost, 3);
 
     // Scrape the top interior pages in parallel (markdown-only, faster)
     const pages: Array<{ url: string; title: string; markdown: string }> = [];
