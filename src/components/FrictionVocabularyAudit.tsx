@@ -10,6 +10,8 @@ import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { frictionToChaos } from '@/lib/toolChaosAdapters';
 
 const PHASES = [
   { label: 'Scraping your website copy...', target: 15 },
