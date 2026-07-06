@@ -51,6 +51,11 @@ const CONTACT_LINKS = [
 ];
 
 export const SalesChat: React.FC = () => {
+  // Hide the sales chat bubble on the Aetheris IQ / Nexus surface — it already has its own composer.
+  if (typeof window !== "undefined") {
+    const p = window.location.pathname;
+    if (p.startsWith("/aetheris-iq") || p.startsWith("/aetheris-ai") || p === "/iq") return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
