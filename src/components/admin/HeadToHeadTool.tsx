@@ -28,6 +28,15 @@ type Report = {
   silentLosses: { area: string; estimatedMonthlyLossUsd: number; why: string }[];
   actionPlan: { priority: "P0" | "P1" | "P2"; action: string; expectedImpact: string; effort: "low" | "medium" | "high" }[];
   quickWins: string[];
+  takeover?: {
+    thesis: string;
+    rivalChaos: { weakness: string; evidence: string; exploitability: "high" | "medium" | "low"; howToExploit: string }[];
+    yourFixes: { issue: string; evidence: string; fix: string; blockerLevel: "critical" | "important" | "nice-to-have" }[];
+    wedgeMoves: { move: string; leveragesRivalWeakness: string; leveragesYourStrength: string; expectedOutcome: string; timeframe: "week" | "month" | "quarter" }[];
+    positioningPivot: { newHeadline: string; newSubhead: string; newCtaLabel: string; keywordsToOwn: string[]; proofToAdd: string[] };
+    counterMessaging: { rivalClaim: string; yourCounter: string }[];
+    kpis: { metric: string; baseline: string; target30Day: string }[];
+  };
 };
 
 type Result = {
