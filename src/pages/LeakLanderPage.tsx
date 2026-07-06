@@ -12,7 +12,7 @@ import { PublicLeakScan } from "@/components/PublicLeakScan";
 
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
-import { BuildMeASystemSection } from "@/components/BuildMeASystemSection";
+
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -171,27 +171,8 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
-          {/* THE PREMISE */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "190ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">The Premise</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Nothing in your business is random.
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
-                Slow seasons. Leads that go quiet. Deals that stall at the same stage every time. Hours that disappear into work that never moves the needle. Owners call it bad luck, market conditions, or growing pains.
-              </p>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                It is none of those things. Your business is a deterministic system producing exactly the outcomes it was built to produce. What looks like random chaos follows patterns, and patterns have origin points.
-              </p>
-              <p className="mt-3 font-forensic text-base sm:text-lg text-amber italic">
-                The chaos always has a cause. The cause always leaves evidence. We find it.
-              </p>
-            </div>
-          </section>
+
+
 
 
           {/* THE FILTER — unmissable */}
@@ -300,14 +281,19 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
                 Aetheris sells <span className="text-amber font-semibold">findings and removal</span>. We investigate, we identify the cause, we show you the evidence, and we build what eliminates it. Then the engagement ends, because the problem does.
               </p>
+              <div className="mt-5 pt-4 border-t border-amber/15">
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
+                </p>
+                <p className="mt-3 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
+              </div>
             </div>
           </section>
 
           {/* THE LEAK ECOSYSTEM — interactive mind map */}
           <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
 
-          {/* CUSTOM BUILD REQUEST — direct-to-Joseph */}
-          <BuildMeASystemSection />
+
 
 
 
@@ -359,24 +345,8 @@ const LeakLanderPage: React.FC = () => {
 
           </section>
 
-          {/* WHY WE'RE LIKE THIS */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Why we're like this</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold">Because polite consulting is why you're stuck.</h2>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Every agency you've hired told you what you wanted to hear, billed you monthly, and called stagnation "brand building." We'd rather lose the sale than join the pile of invoices that changed nothing.
-              </p>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                Marine Corps veteran. Doctorate work in Digital Forensics. We treat your business like a crime scene: <span className="text-amber">evidence first, feelings never, verdict in writing.</span>
-              </p>
-              <p className="mt-4 font-forensic text-lg font-bold text-amber">Chaos Theory Forensics. Real Findings. No Sugar.</p>
-              <p className="mt-2 text-sm text-foreground/70 italic">"Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins." — Joseph Toney</p>
-            </div>
-          </section>
+
+
 
           {/* FAQ — the honest version */}
           <section
