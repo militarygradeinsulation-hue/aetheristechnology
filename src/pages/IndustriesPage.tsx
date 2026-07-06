@@ -482,7 +482,15 @@ const MindMapNode: React.FC<{
         isDimmed ? 'opacity-25' : 'opacity-100'
       }`}
     >
-      <div className="relative flex flex-col items-center">
+      <div
+        className="relative flex flex-col items-center"
+        style={{
+          animation: isSelected
+            ? undefined
+            : `industry-float-${index % 4} ${9 + (index % 5)}s ease-in-out ${(index % 7) * -0.6}s infinite`,
+          willChange: 'transform',
+        }}
+      >
         <span
           aria-hidden
           className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${
@@ -533,6 +541,12 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   return (
     <div className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px]">
+      <style>{`
+        @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }
+        @keyframes industry-float-1 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-7px,-5px) rotate(-0.8deg); } }
+        @keyframes industry-float-2 { 0%,100% { transform: translate(0,0) rotate(0deg); } 33% { transform: translate(5px,6px) rotate(0.5deg); } 66% { transform: translate(-4px,-6px) rotate(-0.4deg); } }
+        @keyframes industry-float-3 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-6px,7px) rotate(0.7deg); } }
+      `}</style>
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
