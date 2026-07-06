@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
-import heroBanner from "@/assets/hero-leaking-building.jpg";
-import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
-
-
-import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
@@ -115,40 +110,6 @@ const LeakLanderPage: React.FC = () => {
               />
             </button>
           </div>
-          {/* Signature nameplate — official Joseph Toney signature card */}
-          <section
-            className="mt-5 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "260ms", animationFillMode: "both" }}
-          >
-            <div className="relative rounded-sm bg-black border border-[#C5A059]/25 shadow-[0_20px_60px_-20px_rgba(197,160,89,0.3)] overflow-hidden">
-              {/* Corner brackets */}
-              <div className="pointer-events-none absolute top-3 left-3 w-6 h-6 border-t border-l border-[#C5A059]/40 z-10" />
-              <div className="pointer-events-none absolute top-3 right-3 w-6 h-6 border-t border-r border-[#C5A059]/40 z-10" />
-              <div className="pointer-events-none absolute bottom-3 left-3 w-6 h-6 border-b border-l border-[#C5A059]/40 z-10" />
-              <div className="pointer-events-none absolute bottom-3 right-3 w-6 h-6 border-b border-r border-[#C5A059]/40 z-10" />
-
-              <img
-                src={josephSignature.url}
-                alt="Joseph Toney — AI Architect · MS, BA · IBM AI Certified · Aetheris.Technology"
-                className="w-full h-auto block animate-gold-float"
-                loading="lazy"
-              />
-
-              <div className="px-6 pb-8 pt-2 flex flex-col items-center text-center">
-                <p className="max-w-xl text-foreground/85 text-sm leading-relaxed italic border-l-2 border-[#C5A059]/50 pl-4 text-left">
-                  "I sit in the chair next to yours, open your CRM, and tell you in plain English where the money is bleeding out. Then I fix it myself — with AI, automation, and systems built for closing leaks."
-                </p>
-                <p className="mt-3 text-[10px] font-atelier uppercase tracking-widest text-[#C5A059]/70">
-                  Marine veteran · MS Marketing (4.0) · Doctorate, Digital Forensics · Noblesville, IN
-                </p>
-              </div>
-            </div>
-          </section>
-
-
-
-
-
           {/* HERO — tight */}
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
