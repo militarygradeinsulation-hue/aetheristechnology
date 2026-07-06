@@ -110,11 +110,23 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
         <div className="text-center mb-5">
           <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">The Leak Ecosystem</div>
           <h2 className="font-forensic text-2xl sm:text-3xl font-bold mt-1 leading-tight">
-            One business. Four maps. <span className="text-crimson">Every ripple traced.</span>
+            One business. Four maps. <span className="text-crimson">Every connection traced.</span>
           </h2>
+          <p className="mt-2 text-xs sm:text-sm text-foreground/65 max-w-2xl mx-auto">
+            Scan your site below to open the case. Your email unlocks every free instrument on this map — no packages, no pitch.
+          </p>
         </div>
 
-        {/* Tab switcher */}
+        {/* Live scan + free tool suite — entry point into the ecosystem */}
+        <div className="mb-6 -mx-2 sm:-mx-3">
+          <PublicLeakScan />
+        </div>
+
+        <div className="text-center mb-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">Trace the chaos</div>
+          <p className="text-xs sm:text-sm text-foreground/65 mt-1">Four maps. Tap a node to expand its connections.</p>
+        </div>
+
         <div className="flex flex-wrap gap-2 justify-center mb-2">
           {TABS.map(t => (
             <button
