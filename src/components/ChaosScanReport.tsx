@@ -60,6 +60,16 @@ const OP_POS: Record<OpId, { x: number; y: number }> = {
 };
 const HUB = { x: 50, y: 50 };
 
+// Turn a "fixed" sentence into a short positive label (3-5 words).
+function deriveFixedLabel(s: Symptom): string {
+  if (s.fixed_label) return s.fixed_label;
+  const raw = (s.fixed || "").trim();
+  if (!raw) return s.label;
+  const firstClause = raw.split(/[.,;:]/)[0].trim();
+  const words = firstClause.split(/\s+/).slice(0, 5).join(" ");
+  return words.length > 34 ? words.slice(0, 32).trim() + "…" : words;
+}
+
 const chaosPath = (sx: number, sy: number, ex: number, ey: number, seed: number) => {
   const rand = (n: number) => {
     const v = Math.sin(seed * 999 + n * 17.13) * 43758.5453;
