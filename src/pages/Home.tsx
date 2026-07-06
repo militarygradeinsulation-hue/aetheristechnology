@@ -8,7 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicLeakScan } from '@/components/PublicLeakScan';
 import { Button } from '@/components/ui/button';
-import chaosTheoryForensicHero from '@/assets/chaos-theory-forensic-banner.jpg.asset.json';
+import { Button } from '@/components/ui/button';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -36,21 +36,10 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
-          <section className="px-4 pt-28 md:pt-36 pb-6">
-            <h1 className="sr-only">
-              Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
-              Aetheris Business Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
-            </h1>
-            <div className="max-w-6xl mx-auto">
-              <img
-                src={chaosTheoryForensicHero.url}
-                alt="Joseph Toney, AI Architect. Aetheris Technology — Business is chaos theory; we find what causes the random chaos and remove it at the source."
-                className="w-full h-auto rounded-sm border border-amber/20 shadow-2xl"
-                loading="eager"
-                fetchPriority="high"
-              />
-            </div>
-          </section>
+          <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
+            Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
+            Aetheris Business Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
+          </h1>
 
           <section className="px-4 py-8 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
