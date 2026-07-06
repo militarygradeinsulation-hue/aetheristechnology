@@ -171,27 +171,8 @@ const LeakLanderPage: React.FC = () => {
             </Button>
           </section>
 
-          {/* THE PREMISE */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "190ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 sm:p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">The Premise</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                Nothing in your business is random.
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
-                Slow seasons. Leads that go quiet. Deals that stall at the same stage every time. Hours that disappear into work that never moves the needle. Owners call it bad luck, market conditions, or growing pains.
-              </p>
-              <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
-                It is none of those things. Your business is a deterministic system producing exactly the outcomes it was built to produce. What looks like random chaos follows patterns, and patterns have origin points.
-              </p>
-              <p className="mt-3 font-forensic text-base sm:text-lg text-amber italic">
-                The chaos always has a cause. The cause always leaves evidence. We find it.
-              </p>
-            </div>
-          </section>
+
+
 
 
           {/* THE FILTER — unmissable */}
