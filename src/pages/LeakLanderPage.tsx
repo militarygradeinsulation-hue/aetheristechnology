@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
-import heroBanner from "@/assets/hero-leaking-building.jpg";
-import heroLeakVideo from "@/assets/hero-leak.mp4";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
-
-
-import josephSignature from "@/assets/joseph-signature.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { PublicLeakScan } from "@/components/PublicLeakScan";
 
