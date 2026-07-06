@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 type OpId = "scan" | "price" | "fix";
 type Mode = "chaos" | "fixed";
 
+interface Evidence { source_url?: string; quote?: string }
 interface Symptom {
   id: string;
   label: string;
@@ -24,17 +25,37 @@ interface Symptom {
   dollar_leak?: string;
   cascade?: string[];
   connections?: string[];
+  evidence?: Evidence;
+}
+
+interface Intel {
+  positioning?: string;
+  buyer?: string;
+  pricing_posture?: string;
+  operational_maturity?: string;
+  quick_wins?: string[];
+  estimated_total_monthly_leak?: string;
 }
 
 interface ChaosMap {
   company?: string;
   vertical?: string;
   url?: string;
-  source?: { label?: string; chaos?: string; sealed?: string; dollar_leak?: string };
+  source?: { label?: string; chaos?: string; sealed?: string; dollar_leak?: string; evidence?: string };
   operators?: { id: OpId; label: string; body: string }[];
   symptoms?: Symptom[];
   contradictions?: string[];
+  intel?: Intel;
 }
+
+interface IntelMeta {
+  firecrawl_used?: boolean;
+  sitemap_urls?: number;
+  pages_analyzed?: number;
+  analyzed_urls?: string[];
+  model?: string;
+}
+
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   ghost: Ghost, "trending-down": TrendingDown, unplug: Unplug, wallet: Wallet,
