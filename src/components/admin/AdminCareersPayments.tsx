@@ -42,6 +42,8 @@ export const AdminCareersPayments: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [summary, setSummary] = useState<{ count: number; total_cents: number; unique_emails: number }>({ count: 0, total_cents: 0, unique_emails: 0 });
   const [attempts, setAttempts] = useState<Record<string, AttemptLite>>({});
+  const [emailStatus, setEmailStatus] = useState<Record<string, { status: string; error: string | null; sent_at: string | null }>>({});
+  const [linkBase, setLinkBase] = useState<string>('https://aetheris.technology/careers/test?session_id=');
   const [sending, setSending] = useState<string | null>(null);
 
   // Filters
