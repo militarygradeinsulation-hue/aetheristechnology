@@ -111,18 +111,20 @@ const LeakLanderPage: React.FC = () => {
               />
             </button>
           </div>
-          {/* Signature banner — gentle float */}
+          {/* Signature banner — gentle float + golden shimmer edge */}
           <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Technology">
-            <img
-              src={signatureBanner.url}
-              alt="Joseph Toney, AI Architect — Aetheris Technology. Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins."
-              className="w-full h-auto animate-float"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              width={1920}
-              height={640}
-            />
+            <div className="shimmer-gold-border">
+              <img
+                src={signatureBanner.url}
+                alt="Joseph Toney, AI Architect — Aetheris Technology. Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins."
+                className="w-full h-auto animate-float rounded-sm"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                width={1920}
+                height={640}
+              />
+            </div>
           </section>
 
           {/* HERO — Chaos Theory Forensics */}
