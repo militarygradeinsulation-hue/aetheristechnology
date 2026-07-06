@@ -80,12 +80,12 @@ async function fcMap(url: string): Promise<string[]> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/map", {
       method: "POST",
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(15_000),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url, limit: 200, includeSubdomains: false }),
+      body: JSON.stringify({ url, limit: 120, includeSubdomains: false }),
     });
     if (!r.ok) return [];
     const j = await r.json();
