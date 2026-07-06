@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, Eye, MousePointerClick, Search as SearchIcon, Users, RefreshCw } from 'lucide-react';
+import { Activity, Eye, MousePointerClick, Search as SearchIcon, Users, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+
 import { getAdminToken } from '@/lib/adminAuth';
 
 type TopItem = { key: string; count: number };
