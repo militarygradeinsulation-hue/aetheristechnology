@@ -454,7 +454,13 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* LOST LEADS + LEAK GRAPH FIRST (before any ROI / score talk) */}
+              {/* Chaos-theory mind map of every gap + its dollar leak */}
+              <ChaosScanReport
+                data={scanResultToChaos(url.trim(), result.companyName, result.gaps)}
+                className="mb-6"
+              />
+
+              {/* LOST LEADS + LEAK GRAPH */}
               <LeakChart gaps={result.gaps} className="mb-6" />
 
               {/* Then the health score (context, not the headline) */}
