@@ -76,6 +76,7 @@ export default function HeadToHeadTool() {
   const [yourUrl, setYourUrl] = useState("");
   const [rivalUrl, setRivalUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [takeover, setTakeover] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
   const run = async () => {
@@ -87,12 +88,12 @@ export default function HeadToHeadTool() {
     setResult(null);
     try {
       const { data, error } = await supabase.functions.invoke("head-to-head", {
-        body: { yourUrl: yourUrl.trim(), rivalUrl: rivalUrl.trim() },
+        body: { yourUrl: yourUrl.trim(), rivalUrl: rivalUrl.trim(), takeover },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       setResult(data as Result);
-      toast.success("Head-to-head verdict ready");
+      toast.success(takeover ? "Takeover playbook ready" : "Head-to-head verdict ready");
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Comparison failed");
