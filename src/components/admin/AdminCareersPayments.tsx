@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { useToast } from '@/hooks/use-toast';
 import { openRepMail } from '@/lib/repMail';
-import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, ExternalLink } from 'lucide-react';
+import { DollarSign, RefreshCw, Loader2, CheckCircle2, XCircle, Mail, ExternalLink, Send } from 'lucide-react';
 
 interface Payment {
   id: string;
@@ -60,7 +60,33 @@ export const AdminCareersPayments: React.FC = () => {
     }
   };
 
+  const [sending, setSending] = useState<string | null>(null);
+
+  const sendLink = async (p: Payment) => {
+    if (!p.email || !p.stripe_session_id) {
+      toast({ title: 'Missing email or session', variant: 'destructive' });
+      return;
+    }
+    setSending(p.id);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'send_careers_test_link', email: p.email, stripe_session_id: p.stripe_session_id },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: 'Test link sent', description: `Emailed ${p.email}` });
+    } catch (e) {
+      toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSending(null);
+    }
+  };
+
   useEffect(() => { load(); }, []);
+
 
   return (
     <Card>
@@ -129,11 +155,24 @@ export const AdminCareersPayments: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                        Paid, no test taken yet <ExternalLink className="w-3 h-3 ml-1" />
-                      </Badge>
+                      <div className="flex items-center gap-2 justify-end flex-wrap">
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                          Paid, no test taken yet
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sendLink(p)}
+                          disabled={sending === p.id || !p.email || !p.stripe_session_id}
+                          className="h-7 text-xs"
+                        >
+                          {sending === p.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                          Email test link
+                        </Button>
+                      </div>
                     )}
                   </div>
+
                 </div>
               );
             })}

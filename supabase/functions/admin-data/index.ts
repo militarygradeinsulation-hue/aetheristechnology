@@ -290,6 +290,31 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "send_careers_test_link") {
+      const email = String(body.email || "").trim().toLowerCase();
+      const sessionId = String(body.stripe_session_id || "").trim();
+      if (!email || !sessionId) {
+        return new Response(JSON.stringify({ error: "email and stripe_session_id required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
+      const testUrl = `${siteUrl}/n?session_id=${sessionId}`;
+      const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "careers-test-access",
+          recipientEmail: email,
+          idempotencyKey: `careers-test-resend-${sessionId}-${Date.now()}`,
+          templateData: { testUrl },
+        },
+      });
+      if (sendErr) throw sendErr;
+      return new Response(JSON.stringify({ ok: true, testUrl }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
+
 
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
