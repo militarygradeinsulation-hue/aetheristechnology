@@ -223,9 +223,24 @@ export const AdminCareersPanel: React.FC = () => {
   const minFit = minFitScore === '' ? null : Number(minFitScore);
   const matchesText = (name: string | null, email: string, code: string | null) =>
     !q || (name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q) || (code || '').toLowerCase().includes(q);
+
+  const now = Date.now();
+  const ageDays = (iso: string | null | undefined) => iso ? (now - new Date(iso).getTime()) / 86400000 : 0;
+  const matchesAge = (iso: string | null | undefined) => {
+    if (ageFilter === 'all') return true;
+    const d = ageDays(iso);
+    if (ageFilter === '7') return d <= 7;
+    if (ageFilter === '30') return d <= 30;
+    if (ageFilter === '90') return d <= 90;
+    if (ageFilter === 'over30') return d > 30;
+    if (ageFilter === 'over90') return d > 90;
+    return true;
+  };
+
   const filteredAttempts = attempts.filter(a =>
     matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-    (minTest == null || (a.score_pct ?? -1) >= minTest)
+    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+    matchesAge(a.submitted_at || a.started_at)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
 
@@ -242,19 +257,28 @@ export const AdminCareersPanel: React.FC = () => {
   const countFor = (email: string | null | undefined) =>
     attemptCountByEmail[(email || '').toLowerCase().trim()] || 0;
   const filteredApps = applications
-    .filter(a =>
-      matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-      (minTest == null || (a.score_pct ?? -1) >= minTest) &&
-      (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
-      (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
-      (stageFilter === 'all' || (a.stage || 'new') === stageFilter)
-    )
+    .filter(a => {
+      const stage = a.stage || 'new';
+      // By default hide archived unless user is looking at "all" with age > filter or explicitly at "archived"
+      if (stageFilter === 'all' && stage === 'archived') return false;
+      return (
+        matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+        (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+        (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+        (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
+        (stageFilter === 'all' || stage === stageFilter) &&
+        matchesAge(a.created_at)
+      );
+    })
     .sort((a, b) => {
       if (fitSort === 'none') return 0;
       const av = a.ai_fit_score ?? -1;
       const bv = b.ai_fit_score ?? -1;
       return fitSort === 'desc' ? bv - av : av - bv;
     });
+
+  const archivedCount = applications.filter(a => (a.stage || 'new') === 'archived').length;
+
 
   const openResume = async (shareCode: string) => {
     const popup = window.open('', '_blank');
