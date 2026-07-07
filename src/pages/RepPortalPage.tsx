@@ -123,9 +123,34 @@ const RepPortalPage: React.FC = () => {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 
   if (repData) {
+    const cert = repData.certification_image_url ? (
+      <a
+        href={repData.certification_image_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-40 sm:w-48 rounded-lg overflow-hidden border border-amber/40 shadow-lg hover:shadow-amber/30 transition-shadow bg-black"
+        title={`Certified Aetheris Operator — ${repData.certification_id ?? ''}`}
+      >
+        <img
+          src={repData.certification_image_url}
+          alt={`Certified Aetheris Operator ${repData.certification_id ?? ''}`}
+          className="w-full h-auto block"
+          loading="eager"
+        />
+        <div className="px-2 py-1 text-[10px] font-mono text-amber tracking-wider text-center border-t border-amber/30">
+          {repData.certification_id}
+        </div>
+      </a>
+    ) : (
+      <div className="w-40 sm:w-48 p-3 rounded-lg border border-dashed border-muted-foreground/40 text-[11px] text-muted-foreground text-center">
+        Not yet certified. A Certified Aetheris Operator credential is required going forward.
+      </div>
+    );
+
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
-      <Button variant="ghost" size="sm" className="absolute top-4 left-4" onClick={() => setRepData(null)}>
+      <div className="min-h-screen bg-background flex items-start justify-center px-4 relative">
+        <div className="absolute top-4 left-4 z-10">{cert}</div>
+        <Button variant="ghost" size="sm" className="absolute top-4 right-4" onClick={() => setRepData(null)}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Log out
         </Button>
         <EasyModeWrapper tabKey="rep-portal">
@@ -134,8 +159,19 @@ const RepPortalPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-foreground font-display">
                 {repData.rep_name || 'Rep'} Dashboard
               </h1>
-              <p className="text-muted-foreground text-sm mt-1">Code: {repData.code}</p>
+              <p className="text-muted-foreground text-sm mt-1">
+                Code: {repData.code}
+                {repData.certification_id && (
+                  <> · <span className="text-amber font-mono">{repData.certification_id}</span></>
+                )}
+              </p>
+              {repData.certification_valid_until && (
+                <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                  Certification valid through {new Date(repData.certification_valid_until).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              )}
             </div>
+
 
             {/* TOOLS — Chrome extension + Android APK (TOP for fast access) */}
             <Card className={extOutdated ? 'border-red-500/60' : undefined}>
