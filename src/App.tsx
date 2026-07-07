@@ -71,6 +71,7 @@ const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
+const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
 const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
