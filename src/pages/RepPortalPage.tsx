@@ -39,6 +39,9 @@ const RepPortalPage: React.FC = () => {
   const [repData, setRepData] = useState<RepData | null>(null);
   const [extVersion, setExtVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
   const { toast } = useToast();
+  const instrumentsFlag = useFeatureFlag('instruments_tab', true);
+  const leadsFlag = useFeatureFlag('leads_board', true);
+  const operatorFlag = useFeatureFlag('operator_console', true);
 
   useEffect(() => {
     const refresh = () => setExtVersion(getDownloadedExtensionVersion());
