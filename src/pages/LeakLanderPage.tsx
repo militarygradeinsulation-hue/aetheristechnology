@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download, Bot, Database, LineChart, Workflow, Cpu, Search, Globe, Terminal, Zap, Brain, Rocket, Code2, Sparkles, Radar, Wand2, Boxes } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ChevronDown, Play, Download, Bot, Database, LineChart, Workflow, Cpu, Search, Globe, Terminal, Zap, Brain, Rocket, Code2, Sparkles, Radar, Wand2, Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
