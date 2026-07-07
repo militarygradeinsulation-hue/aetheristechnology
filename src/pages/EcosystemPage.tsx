@@ -171,10 +171,7 @@ const ToolCard: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
             {tool.name}
             <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
           </h3>
-          <p className="text-xs text-muted-foreground/90 mt-1 leading-relaxed">{tool.desc}</p>
-          <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-400/50">
-            ▸ {tool.path}
-          </div>
+          <p className="text-sm text-muted-foreground/90 mt-2 leading-relaxed">{tool.desc}</p>
         </div>
       </div>
     </Link>
