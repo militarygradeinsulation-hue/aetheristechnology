@@ -299,8 +299,10 @@ export const ChaosMindMap: React.FC = () => {
               </button>
             );
           })}
+          </div>
         </div>
       </div>
+
 
       {/* Detail rail */}
       <div className="mt-4 grid gap-3 md:grid-cols-3">
