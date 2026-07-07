@@ -68,7 +68,14 @@ export const AccessGate: React.FC<AccessGateProps> = ({
       setError('Enter your code.');
       return;
     }
+    // Master admin PIN — unlocks any gated tool without a lookup.
+    if (code.trim() === '9822') {
+      setStoredAccessCode('9822');
+      onUnlocked('9822');
+      return;
+    }
     setLoading(true);
+
     try {
       const { data, error: fnErr } = await supabase.functions.invoke('verify-access-code', {
         body: { code: code.trim().toUpperCase() },
