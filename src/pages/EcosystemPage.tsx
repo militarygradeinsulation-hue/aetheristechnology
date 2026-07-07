@@ -257,7 +257,6 @@ const EcosystemPage: React.FC = () => {
     })).filter((g) => g.tools.length > 0);
   }, [query]);
 
-  const totalTools = GROUPS.reduce((n, g) => n + g.tools.length, 0);
   const px = (mouse.x - 0.5) * 2; // -1..1
   const py = (mouse.y - 0.5) * 2;
 
