@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import {
@@ -6,7 +6,7 @@ import {
   FileSearch, Brain, Users, UserCog, Zap, FileText, BookOpen,
   Sparkles, PenTool, ScrollText, Calendar, ListChecks, HelpCircle,
   AlertTriangle, Scan, Stethoscope, CheckSquare, Trophy, Swords,
-  Gift, Database, Cpu, Smartphone, Monitor, LogOut, ExternalLink,
+  Gift, Database, Cpu, Smartphone, Monitor, LogOut,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,29 +24,28 @@ type Tool = {
   icon: React.ComponentType<{ className?: string }>;
   tag?: string;
 };
-
 type Group = { title: string; blurb: string; tools: Tool[] };
 
 const GROUPS: Group[] = [
   {
     title: 'Portals',
-    blurb: 'Where your team logs in every day.',
+    blurb: 'Where the team lives.',
     tools: [
-      { name: 'Rep Portal', path: '/rep-portal', desc: 'Your daily dashboard: leads, commissions, playbook.', icon: Users },
-      { name: 'Partner Portal', path: '/partner-portal', desc: 'Partner view: referrals, splits, receipts.', icon: UserCog },
-      { name: 'Test Portal', path: '/test-portal', desc: 'Sandbox clone with promote-to-live feature flags.', icon: Zap, tag: 'Beta' },
-      { name: 'Operator App', path: '/operator-app', desc: 'Field console for operator-led engagements.', icon: Monitor },
-      { name: 'Mobile App', path: '/mobile-app', desc: 'Mobile-first rep workflow.', icon: Smartphone },
+      { name: 'Rep Portal', path: '/rep-portal', desc: 'Leads, commissions, playbook.', icon: Users },
+      { name: 'Partner Portal', path: '/partner-portal', desc: 'Referrals, splits, receipts.', icon: UserCog },
+      { name: 'Test Portal', path: '/test-portal', desc: 'Sandbox with promote-to-live flags.', icon: Zap, tag: 'Beta' },
+      { name: 'Operator App', path: '/operator-app', desc: 'Field console for operators.', icon: Monitor },
+      { name: 'Mobile App', path: '/mobile-app', desc: 'Mobile rep workflow.', icon: Smartphone },
     ],
   },
   {
     title: 'Detective & Intelligence',
-    blurb: 'Investigate anything on demand.',
+    blurb: 'Investigate anything.',
     tools: [
-      { name: 'Detective Mode', path: '/detective', desc: 'Drop a URL → full forensic case file.', icon: FileSearch, tag: 'New' },
-      { name: 'Aetheris Nexus AI', path: '/aetheris-ai', desc: 'Your operator AI. Ask it anything.', icon: Brain },
-      { name: 'Nexus IQ', path: '/nexus-iq', desc: 'Structured intelligence brief on any target.', icon: Cpu },
-      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'Rapid-fire chaos surface scan.', icon: Zap },
+      { name: 'Detective Mode', path: '/detective', desc: 'URL → forensic case file.', icon: FileSearch, tag: 'New' },
+      { name: 'Aetheris Nexus AI', path: '/aetheris-ai', desc: 'Your operator AI.', icon: Brain },
+      { name: 'Nexus IQ', path: '/nexus-iq', desc: 'Structured intel brief.', icon: Cpu },
+      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'Rapid chaos surface scan.', icon: Zap },
     ],
   },
   {
@@ -54,44 +53,133 @@ const GROUPS: Group[] = [
     blurb: 'Surface leaks with data.',
     tools: [
       { name: 'Diagnostic', path: '/diagnostic', desc: 'The Leak Audit™ — full 7-step.', icon: Stethoscope },
-      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: '20-question guided diagnostic.', icon: ListChecks },
-      { name: 'Scan', path: '/scan', desc: 'Website scan with AI assessment.', icon: Scan },
-      { name: 'Friction Audit', path: '/friction-audit', desc: 'Where prospects drop off — pinpointed.', icon: AlertTriangle },
-      { name: 'Brand Contradictions', path: '/brand-contradictions', desc: 'Voice vs. reality mismatch report.', icon: AlertTriangle },
-      { name: 'AI Checklist', path: '/ai-checklist', desc: 'AI readiness / implementation checklist.', icon: CheckSquare },
+      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: '20-question guided.', icon: ListChecks },
+      { name: 'Scan', path: '/scan', desc: 'Website scan + AI assessment.', icon: Scan },
+      { name: 'Friction Audit', path: '/friction-audit', desc: 'Where prospects drop off.', icon: AlertTriangle },
+      { name: 'Brand Contradictions', path: '/brand-contradictions', desc: 'Voice vs reality.', icon: AlertTriangle },
+      { name: 'AI Checklist', path: '/ai-checklist', desc: 'AI readiness checklist.', icon: CheckSquare },
     ],
   },
   {
-    title: 'Reports & Comparisons',
-    blurb: 'Deliverables you send to prospects.',
+    title: 'Reports & Deliverables',
+    blurb: 'What you send to prospects.',
     tools: [
-      { name: 'Golden Report', path: '/golden-report', desc: 'The flagship forensic report format.', icon: Trophy },
-      { name: 'Head-to-Head', path: '/head-to-head', desc: 'Side-by-side competitor teardown.', icon: Swords },
+      { name: 'Golden Report', path: '/golden-report', desc: 'Flagship forensic report.', icon: Trophy },
+      { name: 'Head-to-Head', path: '/head-to-head', desc: 'Competitor teardown.', icon: Swords },
       { name: 'Resume Forensics', path: '/resume-forensics', desc: 'ATS + hiring-manager scan.', icon: FileText },
-      { name: 'Reciprocation Gift', path: '/reciprocation', desc: 'Free-value asset to open doors.', icon: Gift },
+      { name: 'Reciprocation Gift', path: '/reciprocation', desc: 'Free-value door-opener.', icon: Gift },
     ],
   },
   {
     title: 'Content & Outreach',
     blurb: 'Fill the pipeline.',
     tools: [
-      { name: 'Content Generator', path: '/content-generator', desc: 'On-brand posts, ready to publish.', icon: PenTool },
-      { name: 'Sales Scripts', path: '/sales-scripts', desc: 'Cold, warm, follow-up — done.', icon: ScrollText },
+      { name: 'Content Generator', path: '/content-generator', desc: 'On-brand posts, ready to ship.', icon: PenTool },
+      { name: 'Sales Scripts', path: '/sales-scripts', desc: 'Cold, warm, follow-up.', icon: ScrollText },
       { name: 'Content Calendar', path: '/content-calendar', desc: '30-day rolling plan.', icon: Calendar },
-      { name: 'Follow-Up Plan', path: '/follow-up-plan', desc: 'Sequenced outreach after any meeting.', icon: ListChecks },
-      { name: 'Strategic Questions', path: '/strategic-questions', desc: 'Discovery questions that unlock deals.', icon: HelpCircle },
+      { name: 'Follow-Up Plan', path: '/follow-up-plan', desc: 'Post-meeting sequences.', icon: ListChecks },
+      { name: 'Strategic Questions', path: '/strategic-questions', desc: 'Discovery that unlocks deals.', icon: HelpCircle },
       { name: 'LinkedIn Playbook', path: '/playbook/linkedin', desc: 'The full LinkedIn 360 Brew.', icon: BookOpen },
     ],
   },
   {
     title: 'Sales & Ops',
-    blurb: 'Close and manage the book.',
+    blurb: 'Close and manage.',
     tools: [
-      { name: 'CRM Demo', path: '/crm-demo', desc: 'Live CRM walkthrough for prospects.', icon: Database },
+      { name: 'CRM Demo', path: '/crm-demo', desc: 'Live CRM walkthrough.', icon: Database },
       { name: 'Capabilities', path: '/capabilities', desc: 'What we sell, one page.', icon: Sparkles },
     ],
   },
 ];
+
+// 3D parallax card with mouse-tracked tilt
+const ToolCard: React.FC<{ tool: Tool; index: number }> = ({ tool, index }) => {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, px: 50, py: 50 });
+  const Icon = tool.icon;
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    setTilt({
+      ry: (x - 0.5) * 14,
+      rx: -(y - 0.5) * 14,
+      px: x * 100,
+      py: y * 100,
+    });
+  }, []);
+  const onLeave = () => setTilt({ rx: 0, ry: 0, px: 50, py: 50 });
+
+  return (
+    <Link
+      ref={ref}
+      to={tool.path}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      className="group relative block rounded-xl [transform-style:preserve-3d] transition-transform duration-200 will-change-transform"
+      style={{
+        transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateZ(0)`,
+        animation: `card-float 8s ease-in-out ${(index % 6) * 0.4}s infinite`,
+      }}
+    >
+      {/* neon border glow */}
+      <div
+        aria-hidden
+        className="absolute -inset-px rounded-xl opacity-40 group-hover:opacity-100 transition-opacity duration-300 blur-[6px]"
+        style={{
+          background: `radial-gradient(120px circle at ${tilt.px}% ${tilt.py}%, hsl(38 92% 55% / 0.55), transparent 60%)`,
+        }}
+      />
+      {/* glass surface */}
+      <div className="relative rounded-xl border border-amber-400/25 bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-sm p-5 overflow-hidden">
+        {/* moving sheen */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+          style={{
+            background: `radial-gradient(300px circle at ${tilt.px}% ${tilt.py}%, hsl(38 92% 55% / 0.18), transparent 55%)`,
+          }}
+        />
+        {/* grid corner */}
+        <div
+          aria-hidden
+          className="absolute -bottom-8 -right-8 w-32 h-32 opacity-[0.08] group-hover:opacity-20 transition-opacity"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(38 92% 55%) 1px, transparent 1px), linear-gradient(90deg, hsl(38 92% 55%) 1px, transparent 1px)',
+            backgroundSize: '14px 14px',
+            transform: 'perspective(300px) rotateX(55deg)',
+          }}
+        />
+
+        <div className="relative flex items-start justify-between mb-3" style={{ transform: 'translateZ(30px)' }}>
+          <div className="w-10 h-10 rounded-lg bg-amber-400/10 border border-amber-400/40 flex items-center justify-center text-amber-300 shadow-[0_0_20px_-4px_hsl(38_92%_55%/0.5)]">
+            <Icon className="w-4 h-4" />
+          </div>
+          {tool.tag && (
+            <Badge className="bg-amber-400/15 text-amber-300 border-amber-400/40 text-[10px] uppercase tracking-widest">
+              {tool.tag}
+            </Badge>
+          )}
+        </div>
+
+        <div className="relative" style={{ transform: 'translateZ(24px)' }}>
+          <h3 className="font-serif text-lg text-foreground group-hover:text-amber-200 transition-colors flex items-center gap-1.5">
+            {tool.name}
+            <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+          </h3>
+          <p className="text-xs text-muted-foreground/90 mt-1 leading-relaxed">{tool.desc}</p>
+          <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-amber-400/50">
+            ▸ {tool.path}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 const EcosystemPage: React.FC = () => {
   const [authed, setAuthed] = useState(false);
@@ -99,12 +187,28 @@ const EcosystemPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [activeCode, setActiveCode] = useState<string | null>(null);
+  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
     if (sessionStorage.getItem(AUTH_KEY) === '1') {
       setAuthed(true);
       setActiveCode(sessionStorage.getItem(CODE_KEY));
     }
+  }, []);
+
+  useEffect(() => {
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setMouse({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -157,30 +261,168 @@ const EcosystemPage: React.FC = () => {
   }, [query]);
 
   const totalTools = GROUPS.reduce((n, g) => n + g.tools.length, 0);
+  const px = (mouse.x - 0.5) * 2; // -1..1
+  const py = (mouse.y - 0.5) * 2;
+
+  // Shared scene styles (keyframes + parallax layers)
+  const sceneStyles = (
+    <style>{`
+      @keyframes card-float {
+        0%,100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      @keyframes orb-drift {
+        0%,100% { transform: translate3d(0,0,0) scale(1); }
+        50% { transform: translate3d(30px,-20px,0) scale(1.05); }
+      }
+      @keyframes ring-spin {
+        from { transform: translate(-50%,-50%) rotate(0deg); }
+        to { transform: translate(-50%,-50%) rotate(360deg); }
+      }
+      @keyframes ring-spin-rev {
+        from { transform: translate(-50%,-50%) rotate(360deg); }
+        to { transform: translate(-50%,-50%) rotate(0deg); }
+      }
+      @keyframes grid-drift {
+        from { background-position: 0 0, 0 0; }
+        to { background-position: 60px 60px, 60px 60px; }
+      }
+      @keyframes particle-rise {
+        0% { transform: translateY(20vh); opacity: 0; }
+        20% { opacity: 1; }
+        100% { transform: translateY(-120vh); opacity: 0; }
+      }
+    `}</style>
+  );
+
+  const ParallaxScene = () => (
+    <div className="fixed inset-0 -z-0 overflow-hidden pointer-events-none" aria-hidden>
+      {/* deep vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(220_30%_8%)_0%,hsl(220_40%_4%)_60%,black_100%)]" />
+      {/* perspective floor grid */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[70vh] opacity-40"
+        style={{
+          transform: `perspective(600px) rotateX(65deg) translateY(${py * 20}px) translateX(${px * -30}px)`,
+          transformOrigin: 'center top',
+          backgroundImage:
+            'linear-gradient(hsl(38 92% 55% / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(38 92% 55% / 0.35) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          animation: 'grid-drift 8s linear infinite',
+          maskImage: 'linear-gradient(to top, black 0%, transparent 90%)',
+          WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 90%)',
+        }}
+      />
+      {/* orbital rings */}
+      <div
+        className="absolute top-1/2 left-1/2 rounded-full border border-amber-400/20"
+        style={{
+          width: 1200, height: 1200,
+          transform: `translate(-50%,-50%) translate3d(${px * -20}px, ${py * -20}px, 0)`,
+          animation: 'ring-spin 90s linear infinite',
+          borderStyle: 'dashed',
+        }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 rounded-full border border-amber-400/15"
+        style={{
+          width: 800, height: 800,
+          transform: `translate(-50%,-50%) translate3d(${px * -40}px, ${py * -40}px, 0)`,
+          animation: 'ring-spin-rev 60s linear infinite',
+        }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 rounded-full border border-amber-400/10"
+        style={{
+          width: 500, height: 500,
+          transform: `translate(-50%,-50%) translate3d(${px * -60}px, ${py * -60}px, 0)`,
+          animation: 'ring-spin 45s linear infinite',
+          borderStyle: 'dotted',
+        }}
+      />
+
+      {/* floating orbs */}
+      <div
+        className="absolute rounded-full blur-3xl"
+        style={{
+          width: 500, height: 500,
+          top: '10%', left: '5%',
+          background: 'radial-gradient(circle, hsl(38 92% 55% / 0.25), transparent 70%)',
+          transform: `translate3d(${px * -60}px, ${py * -60}px, 0)`,
+          animation: 'orb-drift 12s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute rounded-full blur-3xl"
+        style={{
+          width: 600, height: 600,
+          bottom: '5%', right: '5%',
+          background: 'radial-gradient(circle, hsl(0 72% 50% / 0.15), transparent 70%)',
+          transform: `translate3d(${px * -40}px, ${py * -40}px, 0)`,
+          animation: 'orb-drift 15s ease-in-out infinite reverse',
+        }}
+      />
+      <div
+        className="absolute rounded-full blur-3xl"
+        style={{
+          width: 400, height: 400,
+          top: '40%', right: '25%',
+          background: 'radial-gradient(circle, hsl(200 80% 50% / 0.12), transparent 70%)',
+          transform: `translate3d(${px * -80}px, ${py * -80}px, 0)`,
+          animation: 'orb-drift 18s ease-in-out infinite',
+        }}
+      />
+
+      {/* particles */}
+      {Array.from({ length: 24 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-amber-300/60"
+          style={{
+            left: `${(i * 37) % 100}%`,
+            bottom: '-10px',
+            animation: `particle-rise ${18 + (i % 8)}s linear ${i * 0.7}s infinite`,
+            boxShadow: '0 0 8px hsl(38 92% 55% / 0.8)',
+          }}
+        />
+      ))}
+      {/* scanline */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, white 0 1px, transparent 1px 3px)' }} />
+    </div>
+  );
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="relative min-h-screen bg-black text-foreground overflow-hidden">
+        {sceneStyles}
         <Helmet>
           <title>Team Ecosystem | Aetheris</title>
           <meta name="description" content="Aetheris team ecosystem — all operator tools in one place." />
         </Helmet>
-        <header className="border-b border-border/60 bg-card/40 backdrop-blur">
+        <ParallaxScene />
+        <header className="relative z-10 border-b border-amber-400/10 backdrop-blur-sm">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-amber-300">
               <ArrowLeft className="w-4 h-4" /> Back to Aetheris
             </Link>
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400/80">Team Ecosystem</span>
+            <span className="text-xs font-mono uppercase tracking-[0.35em] text-amber-400/80">// Ecosystem //</span>
           </div>
         </header>
-        <main className="max-w-md mx-auto px-4 py-16">
-          <div className="glass p-8 rounded-2xl">
-            <div className="text-center mb-6">
-              <ShieldCheck className="w-8 h-8 mx-auto text-amber-400 mb-2" />
-              <h1 className="font-serif text-2xl">Team Access</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Enter your rep code to unlock the ecosystem.
-              </p>
+        <main className="relative z-10 max-w-md mx-auto px-4 py-20">
+          <div
+            className="rounded-2xl border border-amber-400/25 bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-xl p-8 shadow-[0_0_80px_-20px_hsl(38_92%_55%/0.4)]"
+            style={{
+              transform: `perspective(1000px) rotateX(${-py * 4}deg) rotateY(${px * 4}deg)`,
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            <div className="text-center mb-6" style={{ transform: 'translateZ(30px)' }}>
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full border border-amber-400/40 bg-amber-400/10 mb-3 shadow-[0_0_30px_-4px_hsl(38_92%_55%/0.6)]">
+                <ShieldCheck className="w-6 h-6 text-amber-300" />
+              </div>
+              <h1 className="font-serif text-2xl">Ecosystem Access</h1>
+              <p className="text-sm text-muted-foreground mt-1">Enter your rep code.</p>
             </div>
             <form onSubmit={handleLogin} className="space-y-3">
               <Input
@@ -191,9 +433,14 @@ const EcosystemPage: React.FC = () => {
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                 autoFocus
                 required
+                className="bg-black/40 border-amber-400/30 text-center font-mono tracking-[0.5em] text-lg"
               />
-              <Button type="submit" className="w-full" disabled={loading || !code}>
-                {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</>) : 'Enter Ecosystem'}
+              <Button
+                type="submit"
+                className="w-full bg-amber-400 text-black hover:bg-amber-300 font-mono uppercase tracking-widest"
+                disabled={loading || !code}
+              >
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying</> : 'Engage'}
               </Button>
             </form>
           </div>
@@ -203,109 +450,115 @@ const EcosystemPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-black text-foreground overflow-hidden">
+      {sceneStyles}
       <Helmet>
         <title>Team Ecosystem | Aetheris</title>
-        <meta name="description" content="Aetheris team ecosystem — all operator tools, portals, and playbooks in one place." />
+        <meta name="description" content="Aetheris team ecosystem — all operator tools in one place." />
         <link rel="canonical" href="https://aetheris.technology/ecosystem" />
       </Helmet>
 
-      <header className="border-b border-border/60 bg-card/40 backdrop-blur sticky top-0 z-20">
+      <ParallaxScene />
+
+      <header className="relative z-20 border-b border-amber-400/10 backdrop-blur-md bg-black/30 sticky top-0">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-amber-300">
               <ArrowLeft className="w-4 h-4" /> Home
             </Link>
-            <span className="text-xs font-mono uppercase tracking-widest text-amber-400/80 hidden sm:inline">
-              Team Ecosystem
+            <span className="text-xs font-mono uppercase tracking-[0.35em] text-amber-400/80 hidden sm:inline">
+              // Ecosystem //
             </span>
           </div>
           <div className="flex items-center gap-3">
             {activeCode && (
-              <Badge variant="outline" className="font-mono text-xs">
-                {activeCode === 'ADMIN' ? 'ADMIN' : `REP ${activeCode}`}
+              <Badge variant="outline" className="font-mono text-xs border-amber-400/40 text-amber-300 bg-amber-400/5">
+                {activeCode === 'ADMIN' ? '● ADMIN' : `● REP ${activeCode}`}
               </Badge>
             )}
-            <Button size="sm" variant="ghost" onClick={handleLogout}>
+            <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-amber-300">
               <LogOut className="w-4 h-4 mr-1.5" /> Sign out
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-10">
-        <div className="mb-10">
-          <h1 className="font-serif text-3xl md:text-5xl leading-tight mb-3">
-            The Aetheris Operator Ecosystem
+      <main className="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        {/* HERO */}
+        <div
+          className="mb-16 text-center max-w-3xl mx-auto"
+          style={{
+            transform: `perspective(1200px) rotateX(${-py * 3}deg) rotateY(${px * 3}deg)`,
+            transformStyle: 'preserve-3d',
+          }}
+        >
+          <span className="inline-block font-mono text-[10px] uppercase tracking-[0.5em] text-amber-400/80 mb-4"
+            style={{ transform: 'translateZ(20px)' }}>
+            ⌁ Operator Command Grid ⌁
+          </span>
+          <h1
+            className="font-serif text-4xl md:text-6xl lg:text-7xl leading-[1.05] mb-5"
+            style={{
+              transform: 'translateZ(60px)',
+              textShadow: '0 0 40px hsl(38 92% 55% / 0.3)',
+            }}
+          >
+            The Aetheris <span className="text-amber-300">Ecosystem</span>
           </h1>
-          <p className="text-muted-foreground max-w-2xl mb-6">
-            Every tool your team has built, in one place. {totalTools} tools across {GROUPS.length} categories —
-            portals, detective work, diagnostics, deliverables, content, and sales ops.
+          <p className="text-muted-foreground max-w-xl mx-auto" style={{ transform: 'translateZ(30px)' }}>
+            {totalTools} operator tools. {GROUPS.length} systems.
+            One command surface for the entire team.
           </p>
-          <div className="relative max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+
+          <div className="relative max-w-md mx-auto mt-8" style={{ transform: 'translateZ(40px)' }}>
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400/70" />
             <Input
-              placeholder="Search tools..."
+              placeholder="Search the grid..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-black/50 border-amber-400/30 font-mono placeholder:text-amber-400/40 focus:border-amber-400/70"
             />
           </div>
         </div>
 
-        <div className="space-y-12">
-          {filtered.map((group) => (
-            <section key={group.title}>
-              <div className="mb-4 flex items-baseline justify-between gap-4 border-b border-border/50 pb-2">
+        {/* GROUPS */}
+        <div className="space-y-20">
+          {filtered.map((group, gi) => (
+            <section
+              key={group.title}
+              style={{
+                transform: `perspective(1400px) rotateX(${-py * 1.5}deg) rotateY(${px * 1.5}deg)`,
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              <div className="mb-6 flex items-baseline justify-between gap-4 border-b border-amber-400/15 pb-3">
                 <div>
-                  <h2 className="font-serif text-xl md:text-2xl">{group.title}</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">{group.blurb}</p>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-400/60 mb-1">
+                    SYS/{String(gi + 1).padStart(2, '0')}
+                  </div>
+                  <h2 className="font-serif text-2xl md:text-3xl">{group.title}</h2>
+                  <p className="text-xs text-muted-foreground/80 mt-1">{group.blurb}</p>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {group.tools.length} {group.tools.length === 1 ? 'tool' : 'tools'}
+                <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/50">
+                  {group.tools.length} node{group.tools.length !== 1 && 's'}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {group.tools.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <Link
-                      key={tool.path}
-                      to={tool.path}
-                      className="group relative rounded-lg border border-border/60 bg-card/40 hover:bg-card/70 hover:border-amber-400/50 transition-all p-4 flex flex-col gap-2"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="w-9 h-9 rounded-md bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 group-hover:bg-amber-400/20">
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        {tool.tag && (
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-                            {tool.tag}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="font-semibold text-foreground group-hover:text-amber-400 transition-colors">
-                          {tool.name}
-                        </h3>
-                        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{tool.desc}</p>
-                      <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-muted-foreground/70">
-                        <ExternalLink className="w-3 h-3" />
-                        aetheris.technology{tool.path}
-                      </div>
-                    </Link>
-                  );
-                })}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {group.tools.map((tool, i) => (
+                  <ToolCard key={tool.path} tool={tool} index={i} />
+                ))}
               </div>
             </section>
           ))}
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-muted-foreground">
-              No tools match "{query}".
+            <div className="text-center py-16 text-muted-foreground font-mono">
+              &gt; NO MATCH FOUND FOR "{query}"
             </div>
           )}
+        </div>
+
+        <div className="mt-24 text-center font-mono text-[10px] uppercase tracking-[0.4em] text-amber-400/40">
+          ⌁ END OF GRID ⌁
         </div>
       </main>
     </div>
