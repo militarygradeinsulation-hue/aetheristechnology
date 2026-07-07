@@ -55,15 +55,15 @@ const CareersPage = () => {
 
             {/* RAW HERO */}
             <div className="text-center space-y-4">
-              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Careers · Independent Rep</div>
+              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Careers · Certified Aetheris Operator</div>
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
                 2,500 applied. <span className="text-crimson">Most got a hard no.</span>
               </h1>
               <p className="text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-                We want people who want to change their lives. We don't want people who need quick cash, expect to skate by, or complain that $40 is "too expensive" when the state requires it for a 1099 role.
+                You aren't buying a job. You're buying the test to become a Certified Aetheris Operator — the same way you pay for a driver's license, a college course, or a professional certification. We don't hand credentials to people who won't prove they can sit across from a $50 million company and talk like an operator.
               </p>
               <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                If you can't take our test, ask questions, or see the vision — leave. If you can, one spot is left.
+                If you can't take the test, ask questions, or see the vision — leave. If you can, one spot is left.
               </p>
             </div>
 
@@ -99,35 +99,35 @@ const CareersPage = () => {
                   <Lock className="w-3.5 h-3.5" /> One door in
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
-                  $40. A test. Then we talk.
+                  Buy the test. Earn the certification. Then we talk.
                 </h2>
                 <p className="text-sm text-foreground/85">
-                  We don't read resumes from people who skip the test. We don't interview people who won't spend 10 minutes learning what we do. The $40 access fee is the cheapest filter we have — and the state wants it for a 1099 role. If that offends you, this isn't the place.
+                  We don't read resumes from people who skip the test. We don't interview people who won't spend 10 minutes learning what we do. The $40 certification fee is the cheapest filter we have — and the only way to prove you can operate at the level this role demands. If that offends you, this isn't the place.
                 </p>
                 <div className="grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
-                    <p className="font-semibold text-foreground">Pay $40</p>
-                    <p className="text-muted-foreground text-xs mt-1">No exceptions. No "I'll pay later." No comp codes.</p>
+                    <p className="font-semibold text-foreground">Buy the test</p>
+                    <p className="text-muted-foreground text-xs mt-1">$40. No exceptions. No "I'll pay later." No comp codes.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 2</p>
-                    <p className="font-semibold text-foreground">Take the test</p>
+                    <p className="font-semibold text-foreground">Pass the test</p>
                     <p className="text-muted-foreground text-xs mt-1">25 of 60 randomized questions · 50 min · 80% to pass · 5 attempts/day.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 3</p>
-                    <p className="font-semibold text-foreground">Show us you care</p>
+                    <p className="font-semibold text-foreground">Earn the credential</p>
                     <p className="text-muted-foreground text-xs mt-1">Resume + short pitch. Joseph reviews every passing app. Most don't pass.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
                   <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span><strong className="text-foreground">The fee isn't the problem. You are.</strong> $40 is less than one decent meal. If you can't commit that, you won't commit to building anything real.</span>
+                  <span><strong className="text-foreground">The fee isn't the problem. You are.</strong> You pay for a driver's license, college, and certifications. This is no different — except the companies you'll sit across from do $50 million a year. If $40 is too much, you aren't ready.</span>
                 </div>
                 <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
                   <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Pay $40 & take the test →
+                    Buy the $40 certification test →
                   </Button>
                 </a>
               </CardContent>
@@ -215,14 +215,14 @@ const CareersPage = () => {
                   <Clock className="w-3.5 h-3.5" /> 10 minutes to prove it
                 </div>
                 <h2 className="font-display text-2xl sm:text-3xl text-foreground">
-                  Pay $40. Pass the test. Make your pitch.
+                  Buy the test. Pass it. Earn the certification.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
                   That's the only way in. No contact form. No shortcuts. No exceptions.
                 </p>
                 <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Start the $40 access test →
+                    Start the $40 certification test →
                   </Button>
                 </a>
               </CardContent>
