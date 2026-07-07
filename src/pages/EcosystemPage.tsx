@@ -76,7 +76,7 @@ const GROUPS: Group[] = [
     tools: [
       { name: 'AI Content Generator', path: '/content-generator', desc: 'Write on-brand LinkedIn posts, emails, and marketing copy in seconds — no blank page stress.', icon: PenTool },
       { name: 'Sales Scripts', path: '/sales-scripts', desc: 'Battle-tested cold, warm, and follow-up scripts so you know exactly what to say on every call.', icon: ScrollText },
-      { name: 'Content Calendar', path: '/content-calendar', desc: 'A rolling 30-day posting plan so you never wonder what to post — just show up and publish.', icon: Calendar },
+      { name: 'Content Calendar', path: '/content-calendar', desc: 'A rolling posting plan so you never wonder what to post — just show up and publish.', icon: Calendar },
       { name: 'Follow-Up Sequences', path: '/follow-up-plan', desc: 'Plug-and-play post-meeting emails that keep deals alive when prospects go quiet.', icon: ListChecks },
       { name: 'Discovery Questions', path: '/strategic-questions', desc: 'The strategic questions that get prospects to reveal their real problem and budget.', icon: HelpCircle },
       { name: 'LinkedIn Playbook', path: '/playbook/linkedin', desc: 'The full LinkedIn system that turns your profile into a lead-generating machine.', icon: BookOpen },
