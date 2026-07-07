@@ -545,9 +545,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   // ============ Chaos physics (shared hook) ============
   const stageRef = useRef<HTMLDivElement>(null);
-  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
-  const tuningRef = useRef(tuning);
-  tuningRef.current = tuning;
+  const tuningRef = useRef(DEFAULT_TUNING);
 
   const {
     offsets,
@@ -557,8 +555,6 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
     onNodePointerUp,
     wasDragged,
     clearDrag,
-    resetAll,
-    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const handleNodeClick = (_i: number, slug: string) => {
