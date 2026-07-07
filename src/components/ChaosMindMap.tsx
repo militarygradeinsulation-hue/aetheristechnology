@@ -290,7 +290,7 @@ export const ChaosMindMap: React.FC = () => {
                   }`}>
                     <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? 'text-amber' : isActive ? 'text-amber' : 'text-crimson'}`} />
                   </div>
-                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
+                  <div className={`mt-1.5 font-forensic text-[11px] md:text-sm font-bold leading-tight text-center w-24 md:w-28 ${
                     isActive ? 'text-amber' : isFixed ? 'text-foreground' : 'text-foreground/85'
                   }`}>
                     {displayLabel}
