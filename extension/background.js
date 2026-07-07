@@ -35,7 +35,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
         if (!tab?.id) { sendResponse({ error: "no active tab" }); return; }
         // Focus the tab so the overlay is visible to the user
-        await chrome.windows.update(tab.windowId, { focused: true, state: "normal" }).catch(() => {});
+        // Focus without changing window state — passing state: "normal" un-maximizes the window.
+        await chrome.windows.update(tab.windowId, { focused: true }).catch(() => {});
         await chrome.tabs.update(tab.id, { active: true }).catch(() => {});
 
         // Ensure content script is present
@@ -134,7 +135,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       const t = tabs?.[0];
       if (!t?.id) { sendResponse({ ok: false }); return; }
-      chrome.windows.update(t.windowId, { focused: true, state: "normal" }, () => {
+      chrome.windows.update(t.windowId, { focused: true }, () => {
         chrome.tabs.update(t.id, { active: true }, () => sendResponse({ ok: true, tabId: t.id }));
       });
     });
