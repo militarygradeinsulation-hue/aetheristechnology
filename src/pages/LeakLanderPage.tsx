@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download, Bot, Database, LineChart, Workflow, Cpu, Search, Globe, Terminal, Zap, Brain, Rocket, Code2, Sparkles, Radar, Wand2, Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
@@ -392,21 +392,67 @@ const LeakLanderPage: React.FC = () => {
                 </p>
 
                 <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    size="default"
+                  <button
                     onClick={() => setBookingOpen(true)}
-                    className="h-12 px-7 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider shadow-[0_0_30px_-8px_hsl(var(--amber)/0.9)]"
+                    className="group relative inline-flex items-center justify-center h-14 px-8 font-mono uppercase tracking-[0.2em] text-sm font-bold text-background overflow-hidden rounded-sm"
                   >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Tell me what you want built
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
+                    {/* animated gradient background */}
+                    <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-amber via-amber/80 to-amber bg-[length:200%_100%]" style={{ animation: "shimmer-gold-drift 3s linear infinite" }} />
+                    {/* pulsing outer glow */}
+                    <span aria-hidden className="absolute -inset-0.5 bg-amber/60 blur-lg opacity-70 group-hover:opacity-100 transition-opacity" />
+                    {/* corner brackets */}
+                    <span aria-hidden className="absolute top-1 left-1 w-2.5 h-2.5 border-l border-t border-background/70" />
+                    <span aria-hidden className="absolute top-1 right-1 w-2.5 h-2.5 border-r border-t border-background/70" />
+                    <span aria-hidden className="absolute bottom-1 left-1 w-2.5 h-2.5 border-l border-b border-background/70" />
+                    <span aria-hidden className="absolute bottom-1 right-1 w-2.5 h-2.5 border-r border-b border-background/70" />
+                    <span className="relative flex items-center">
+                      <Calendar className="w-4 h-4 mr-2.5" />
+                      Tell me what you want built
+                      <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </button>
                 </div>
 
                 <p className="mt-3 text-xs text-foreground/60 italic">
                   Scoped, priced, delivered — no ongoing retainers unless you want them.
                 </p>
+
+                {/* Tiny icon strip — placeholders for the kinds of builds shipped */}
+                <div className="mt-5 flex flex-col items-center gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-foreground/45">
+                    ⌁ Built before · pick your poison ⌁
+                  </span>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-md">
+                    {[
+                      { Icon: Bot, label: "AI Agents" },
+                      { Icon: Database, label: "Databases" },
+                      { Icon: LineChart, label: "Dashboards" },
+                      { Icon: Workflow, label: "Automations" },
+                      { Icon: Cpu, label: "AI Tools" },
+                      { Icon: Search, label: "Scrapers" },
+                      { Icon: Globe, label: "Web Apps" },
+                      { Icon: Terminal, label: "CLI / Scripts" },
+                      { Icon: Zap, label: "Integrations" },
+                      { Icon: Brain, label: "LLM Pipelines" },
+                      { Icon: Rocket, label: "MVPs" },
+                      { Icon: Code2, label: "Custom Code" },
+                      { Icon: Sparkles, label: "Generators" },
+                      { Icon: Radar, label: "Monitors" },
+                      { Icon: Wand2, label: "AI Studios" },
+                      { Icon: Boxes, label: "Internal Ops" },
+                    ].map(({ Icon, label }, i) => (
+                      <span
+                        key={i}
+                        title={label}
+                        className="group/icon w-6 h-6 flex items-center justify-center rounded-sm border border-amber/20 bg-background/40 text-foreground/50 hover:text-amber hover:border-amber/70 hover:bg-amber/5 transition-all cursor-default"
+                      >
+                        <Icon className="w-3 h-3" />
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
+
 
               {/* Receipts marquee — real apps shipped */}
               <div className="relative mt-7 pt-5 border-t border-dashed border-amber/25">
