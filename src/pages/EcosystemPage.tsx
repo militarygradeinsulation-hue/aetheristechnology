@@ -45,7 +45,7 @@ const GROUPS: Group[] = [
       { name: 'Detective Mode', path: '/detective', desc: 'Paste any URL and get a full forensic case file exposing exactly where a business is leaking money.', icon: FileSearch, tag: 'New' },
       { name: 'AI Assistant', path: '/aetheris-ai', desc: 'Ask anything — get strategy, scripts, and objection handling in seconds instead of guessing.', icon: Brain },
       { name: 'Prospect Intel Brief', path: '/nexus-iq', desc: 'Build a dossier that makes you the smartest person in the room before you even walk in.', icon: Cpu },
-      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'A 60-second surface scan that hands you instant conversation starters and clear pain points.', icon: Zap },
+      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'A fast surface scan that hands you instant conversation starters and clear pain points.', icon: Zap },
     ],
   },
   {
