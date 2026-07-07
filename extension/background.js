@@ -135,7 +135,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       const t = tabs?.[0];
       if (!t?.id) { sendResponse({ ok: false }); return; }
-      chrome.windows.update(t.windowId, { focused: true, state: "normal" }, () => {
+      chrome.windows.update(t.windowId, { focused: true }, () => {
         chrome.tabs.update(t.id, { active: true }, () => sendResponse({ ok: true, tabId: t.id }));
       });
     });
