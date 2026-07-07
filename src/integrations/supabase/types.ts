@@ -4112,6 +4112,39 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_feature_flags: {
+        Row: {
+          config: Json
+          description: string | null
+          enabled: boolean
+          flag_key: string
+          id: string
+          label: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          description?: string | null
+          enabled?: boolean
+          flag_key: string
+          id?: string
+          label: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          description?: string | null
+          enabled?: boolean
+          flag_key?: string
+          id?: string
+          label?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       prerender_cache: {
         Row: {
           etag: string
