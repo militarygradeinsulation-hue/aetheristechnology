@@ -530,14 +530,11 @@ const EcosystemPage: React.FC = () => {
             >
               <div className="mb-6 flex items-baseline justify-between gap-4 border-b border-amber-400/15 pb-3">
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber-400/60 mb-1">
-                    SYS/{String(gi + 1).padStart(2, '0')}
-                  </div>
                   <h2 className="font-serif text-2xl md:text-3xl">{group.title}</h2>
-                  <p className="text-xs text-muted-foreground/80 mt-1">{group.blurb}</p>
+                  <p className="text-sm text-muted-foreground/80 mt-1">{group.blurb}</p>
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/50">
-                  {group.tools.length} node{group.tools.length !== 1 && 's'}
+                  {group.tools.length} tool{group.tools.length !== 1 && 's'}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
