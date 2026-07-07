@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { X } from "lucide-react";
+import { useChaosPhysics, DEFAULT_TUNING, type ChaosTuning } from "@/hooks/useChaosPhysics";
+import { ChaosTuner } from "@/components/ChaosTuner";
 
 export type MindMapNodeData = {
   id: string;
@@ -97,6 +99,22 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   const [selected, setSelected] = useState<number | null>(null);
 
+  // Chaos physics — draggable bubbles with ripples
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
+  const tuningRef = useRef(tuning);
+  tuningRef.current = tuning;
+  const {
+    offsets,
+    draggingIdx,
+    onNodePointerDown,
+    onNodePointerMove,
+    onNodePointerUp,
+    wasDragged,
+    clearDrag,
+    resetAll,
+  } = useChaosPhysics(positions, tuningRef, stageRef);
+
   const idToIndex = useMemo(() => {
     const m = new Map<string, number>();
     nodes.forEach((n, i) => m.set(n.id, i));
@@ -115,7 +133,13 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
   }, [selected, nodes, idToIndex]);
 
   return (
-    <div className={`relative w-full ${heightClass}`}>
+    <div ref={stageRef} className={`relative w-full ${heightClass} overflow-hidden`}>
+      <ChaosTuner
+        tuning={tuning}
+        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
+        onReset={() => setTuning(DEFAULT_TUNING)}
+        onResetPositions={resetAll}
+      />
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
@@ -252,8 +276,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         const isAffected = affectedIdx.has(i);
         const dim = selected !== null && !isSel && !isAffected;
         const handleClick = () => {
+          if (wasDragged()) { clearDrag(); return; }
           if (isSel) {
-            // Second click: trigger onClick if provided, else just collapse
             if (n.onClick) n.onClick();
             else setSelected(null);
           } else {
@@ -263,29 +287,43 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         // Randomize drift per node
         const driftDur = 6 + ((i * 1.3) % 5);
         const driftDelay = (i * 0.5) % 4;
+        const off = offsets[i] ?? { dx: 0, dy: 0 };
+        const isDragging = draggingIdx === i;
         return (
           <button
             key={n.id}
             type="button"
             onClick={handleClick}
+            onPointerDown={(e) => onNodePointerDown(i, e)}
+            onPointerMove={(e) => onNodePointerMove(i, e)}
+            onPointerUp={(e) => onNodePointerUp(i, e)}
+            onPointerCancel={(e) => onNodePointerUp(i, e)}
+            onContextMenu={(e) => e.preventDefault()}
             aria-pressed={isSel}
             aria-label={`${n.label}. ${isSel ? "Collapse" : "Expand connections"}`}
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
+              transform: `translate(calc(-50% + ${off.dx}px), calc(-50% + ${off.dy}px))`,
+              touchAction: "none",
+              cursor: isDragging ? "grabbing" : "grab",
+              WebkitTapHighlightColor: "transparent",
+              WebkitUserSelect: "none",
+              userSelect: "none",
             }}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 cursor-pointer transition-opacity duration-300 ${
+            className={`absolute group p-3 sm:p-2 cursor-pointer transition-opacity duration-300 select-none ${
               dim ? "opacity-40" : "opacity-100"
-            } ${isSel ? "z-30" : ""}`}
+            } ${isSel || isDragging ? "z-30" : "z-10"}`}
           >
             <div
-              className="animate-mindmap-drift"
+              className="animate-mindmap-drift pointer-events-none"
               style={{
                 animationDuration: `${driftDur}s`,
                 animationDelay: `-${driftDelay}s`,
+                animationPlayState: isDragging ? "paused" : "running",
               }}
             >
-              <div className={`relative flex flex-col items-center transition-transform duration-300 ${isSel ? "scale-110" : ""}`}>
+              <div className={`relative flex flex-col items-center transition-transform duration-300 ${isSel || isDragging ? "scale-110" : ""}`}>
                 <span
                   aria-hidden
                   className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${a.ring}`}
