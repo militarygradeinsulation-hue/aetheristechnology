@@ -10,6 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
+import { setPortalSession, type PortalProfile } from '@/lib/portalAuth';
+import { useFeatureFlag } from '@/lib/portalFeatureFlags';
+import { HomeFreeTrialArsenal } from '@/components/HomeFreeTrialArsenal';
+import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { RepToolLinks } from '@/components/portal/RepToolLinks';
 import {
   CURRENT_EXTENSION_VERSION,
@@ -35,6 +39,9 @@ const RepPortalPage: React.FC = () => {
   const [repData, setRepData] = useState<RepData | null>(null);
   const [extVersion, setExtVersion] = useState<string | null>(() => getDownloadedExtensionVersion());
   const { toast } = useToast();
+  const instrumentsFlag = useFeatureFlag('instruments_tab', true);
+  const leadsFlag = useFeatureFlag('leads_board', true);
+  const operatorFlag = useFeatureFlag('operator_console', true);
 
   useEffect(() => {
     const refresh = () => setExtVersion(getDownloadedExtensionVersion());
@@ -83,6 +90,11 @@ const RepPortalPage: React.FC = () => {
       if ((profile.rep_email || '').toLowerCase() !== email.trim().toLowerCase()) {
         toast({ title: 'Invalid credentials', description: 'Code or email does not match.', variant: 'destructive' });
         return;
+      }
+      // Persist a portal session so LeadsBoard + other portal tools work
+      // when the flag-gated tabs are on.
+      if (data.token) {
+        setPortalSession(data.token, profile as PortalProfile);
       }
       setRepData({
         rep_name: profile.rep_name,
@@ -157,6 +169,40 @@ const RepPortalPage: React.FC = () => {
             <AndroidApkDownloadCard />
 
             <RepToolLinks repCode={repData.code} />
+
+            {leadsFlag.enabled && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display">Your Leads</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LeadsBoard />
+                </CardContent>
+              </Card>
+            )}
+
+            {instrumentsFlag.enabled && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display">Instruments — Free forensic tools</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <HomeFreeTrialArsenal />
+                </CardContent>
+              </Card>
+            )}
+
+            {operatorFlag.enabled && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display">Operator Console</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>The full operator cockpit — scans, agents, contradictions, friction audit, growth signals — is live in the web app.</p>
+                  <Button asChild size="sm"><Link to="/app/operator">Open Operator Console</Link></Button>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <Card>
