@@ -71,9 +71,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </Link>
           <Link to="/app/dashboard" className="flex items-center gap-2">
             <img src={aetherisLogo} alt="Aetheris" className="h-8 w-auto" />
-            <span className="font-semibold tracking-tight text-sm">Revenue Recovery</span>
+            <span className="font-forensic italic text-base font-bold tracking-tight">Chaos Theory</span>
           </Link>
-          <p className="text-xs text-muted-foreground">CTOguy Engine</p>
+          <p className="font-case text-[10px] uppercase tracking-[0.2em] text-crimson">Case File · Operator</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((n) => (
@@ -101,7 +101,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <div className="flex items-center justify-between px-4 h-14">
             <Link to="/app/dashboard" className="flex items-center gap-2 min-w-0">
               <img src={aetherisLogo} alt="Aetheris" className="h-7 w-auto shrink-0" />
-              <span className="font-semibold text-sm truncate">Cockpit</span>
+              <span className="font-forensic italic font-bold text-sm truncate">Chaos Theory</span>
             </Link>
             <div className="flex items-center gap-1">
               <Link
