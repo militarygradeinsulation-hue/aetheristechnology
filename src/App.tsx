@@ -199,6 +199,7 @@ const App = () => (
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
+                      <Route path="/test-portal" element={<TestPortalPage />} />
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
