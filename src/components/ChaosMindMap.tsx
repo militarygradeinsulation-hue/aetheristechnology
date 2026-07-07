@@ -126,8 +126,10 @@ export const ChaosMindMap: React.FC = () => {
       </div>
 
       {/* Map */}
-      <div className="relative w-full rounded-sm border border-border/50 bg-background/40 overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10]">
+      <div className="relative w-full rounded-sm border border-border/50 bg-background/40">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[4/3] lg:aspect-[16/10] px-8 py-10 sm:px-12 sm:py-12">
+          <div className="absolute inset-8 sm:inset-12">
+
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 100"
