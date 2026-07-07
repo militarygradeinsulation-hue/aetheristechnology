@@ -45,15 +45,15 @@ const GROUPS: Group[] = [
       { name: 'Detective Mode', path: '/detective', desc: 'Paste any URL and get a full forensic case file exposing exactly where a business is leaking money.', icon: FileSearch, tag: 'New' },
       { name: 'AI Assistant', path: '/aetheris-ai', desc: 'Ask anything — get strategy, scripts, and objection handling in seconds instead of guessing.', icon: Brain },
       { name: 'Prospect Intel Brief', path: '/nexus-iq', desc: 'Build a dossier that makes you the smartest person in the room before you even walk in.', icon: Cpu },
-      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'A 60-second surface scan that hands you instant conversation starters and clear pain points.', icon: Zap },
+      { name: 'Chaos Scan', path: '/chaos-scan', desc: 'A fast surface scan that hands you instant conversation starters and clear pain points.', icon: Zap },
     ],
   },
   {
     title: 'Diagnose the Business',
     blurb: 'Data-backed audits that prove there is a problem worth paying to fix.',
     tools: [
-      { name: 'Full Leak Audit', path: '/diagnostic', desc: 'The complete 7-step Leak Audit — uncover every revenue leak and justify a paid engagement.', icon: Stethoscope },
-      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: 'A 20-question walk-through that exposes exactly where a business is bleeding revenue.', icon: ListChecks },
+      { name: 'Full Leak Audit', path: '/diagnostic', desc: 'The complete Leak Audit that uncovers every revenue leak and justifies a paid engagement.', icon: Stethoscope },
+      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: 'A guided walk-through that exposes exactly where a business is bleeding revenue.', icon: ListChecks },
       { name: 'Website Health Scan', path: '/scan', desc: 'One-click scan that shows what is costing a website customers right now, graded by AI.', icon: Scan },
       { name: 'Friction Audit', path: '/friction-audit', desc: 'Map every click, form, and page where prospects drop off so you know what to fix first.', icon: AlertTriangle },
       { name: 'Brand Check', path: '/brand-contradictions', desc: 'Compare what a company says about itself to what customers actually experience — expose trust gaps.', icon: AlertTriangle },
@@ -64,7 +64,7 @@ const GROUPS: Group[] = [
     title: 'Reports You Send to Close',
     blurb: 'Polished deliverables that make prospects ask how they hire you.',
     tools: [
-      { name: 'Golden Report', path: '/golden-report', desc: 'The flagship forensic report that turns a $2,500 diagnostic into a $15k/month retainer.', icon: Trophy },
+      { name: 'Golden Report', path: '/golden-report', desc: 'The flagship forensic report that turns the diagnostic into a paid monthly retainer.', icon: Trophy },
       { name: 'Head-to-Head Report', path: '/head-to-head', desc: 'Compare a prospect to their competitors and show exactly where they win, lose, and can improve.', icon: Swords },
       { name: 'Resume Audit', path: '/resume-forensics', desc: 'Show candidates exactly what to fix on their resume to get past ATS filters and land interviews.', icon: FileText },
       { name: 'Reciprocation Gift', path: '/reciprocation', desc: 'Generate a free, high-value custom report that opens doors cold emails never could.', icon: Gift },
@@ -76,7 +76,7 @@ const GROUPS: Group[] = [
     tools: [
       { name: 'AI Content Generator', path: '/content-generator', desc: 'Write on-brand LinkedIn posts, emails, and marketing copy in seconds — no blank page stress.', icon: PenTool },
       { name: 'Sales Scripts', path: '/sales-scripts', desc: 'Battle-tested cold, warm, and follow-up scripts so you know exactly what to say on every call.', icon: ScrollText },
-      { name: 'Content Calendar', path: '/content-calendar', desc: 'A rolling 30-day posting plan so you never wonder what to post — just show up and publish.', icon: Calendar },
+      { name: 'Content Calendar', path: '/content-calendar', desc: 'A rolling posting plan so you never wonder what to post — just show up and publish.', icon: Calendar },
       { name: 'Follow-Up Sequences', path: '/follow-up-plan', desc: 'Plug-and-play post-meeting emails that keep deals alive when prospects go quiet.', icon: ListChecks },
       { name: 'Discovery Questions', path: '/strategic-questions', desc: 'The strategic questions that get prospects to reveal their real problem and budget.', icon: HelpCircle },
       { name: 'LinkedIn Playbook', path: '/playbook/linkedin', desc: 'The full LinkedIn system that turns your profile into a lead-generating machine.', icon: BookOpen },
@@ -257,7 +257,6 @@ const EcosystemPage: React.FC = () => {
     })).filter((g) => g.tools.length > 0);
   }, [query]);
 
-  const totalTools = GROUPS.reduce((n, g) => n + g.tools.length, 0);
   const px = (mouse.x - 0.5) * 2; // -1..1
   const py = (mouse.y - 0.5) * 2;
 
@@ -503,8 +502,7 @@ const EcosystemPage: React.FC = () => {
             The Aetheris <span className="text-amber-300">Ecosystem</span>
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto" style={{ transform: 'translateZ(30px)' }}>
-            {totalTools} operator tools. {GROUPS.length} systems.
-            One command surface for the entire team.
+            Every operator tool in one command surface for the entire team.
           </p>
 
           <div className="relative max-w-md mx-auto mt-8" style={{ transform: 'translateZ(40px)' }}>
@@ -533,9 +531,6 @@ const EcosystemPage: React.FC = () => {
                   <h2 className="font-serif text-2xl md:text-3xl">{group.title}</h2>
                   <p className="text-sm text-muted-foreground/80 mt-1">{group.blurb}</p>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/50">
-                  {group.tools.length} tool{group.tools.length !== 1 && 's'}
-                </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {group.tools.map((tool, i) => (
