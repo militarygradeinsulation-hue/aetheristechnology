@@ -64,7 +64,7 @@ const GROUPS: Group[] = [
     title: 'Reports You Send to Close',
     blurb: 'Polished deliverables that make prospects ask how they hire you.',
     tools: [
-      { name: 'Golden Report', path: '/golden-report', desc: 'The flagship forensic report that turns a $2,500 diagnostic into a $15k/month retainer.', icon: Trophy },
+      { name: 'Golden Report', path: '/golden-report', desc: 'The flagship forensic report that turns the diagnostic into a paid monthly retainer.', icon: Trophy },
       { name: 'Head-to-Head Report', path: '/head-to-head', desc: 'Compare a prospect to their competitors and show exactly where they win, lose, and can improve.', icon: Swords },
       { name: 'Resume Audit', path: '/resume-forensics', desc: 'Show candidates exactly what to fix on their resume to get past ATS filters and land interviews.', icon: FileText },
       { name: 'Reciprocation Gift', path: '/reciprocation', desc: 'Generate a free, high-value custom report that opens doors cold emails never could.', icon: Gift },
