@@ -503,8 +503,7 @@ const EcosystemPage: React.FC = () => {
             The Aetheris <span className="text-amber-300">Ecosystem</span>
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto" style={{ transform: 'translateZ(30px)' }}>
-            {totalTools} operator tools. {GROUPS.length} systems.
-            One command surface for the entire team.
+            Every operator tool in one command surface for the entire team.
           </p>
 
           <div className="relative max-w-md mx-auto mt-8" style={{ transform: 'translateZ(40px)' }}>
