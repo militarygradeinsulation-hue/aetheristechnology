@@ -314,7 +314,22 @@ export default function AetherisNexusPage() {
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text && pendingAttachments.length === 0) return;
-    if (!activeThread || streaming) return;
+    if (streaming) return;
+
+    // Auto-heal: if the URL points at a missing thread (deleted, or storage
+    // cleared) or the bootstrap effect hasn't landed yet, create one right
+    // now so Send is never a silent no-op.
+    let thread = activeThread;
+    if (!thread) {
+      thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
+      setThreads((prev) => {
+        const next = [thread!, ...prev.filter((t) => t.id !== thread!.id)];
+        saveThreads(next);
+        return next;
+      });
+      navigate(`/aetheris-ai/${thread.id}`, { replace: true });
+    }
+    const activeThreadLocal = thread;
 
     const userMsg: ChatMessage = {
       id: uid(), role: "user", content: text,
