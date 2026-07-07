@@ -276,8 +276,8 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         const isAffected = affectedIdx.has(i);
         const dim = selected !== null && !isSel && !isAffected;
         const handleClick = () => {
+          if (wasDragged()) { clearDrag(); return; }
           if (isSel) {
-            // Second click: trigger onClick if provided, else just collapse
             if (n.onClick) n.onClick();
             else setSelected(null);
           } else {
@@ -287,29 +287,43 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         // Randomize drift per node
         const driftDur = 6 + ((i * 1.3) % 5);
         const driftDelay = (i * 0.5) % 4;
+        const off = offsets[i] ?? { dx: 0, dy: 0 };
+        const isDragging = draggingIdx === i;
         return (
           <button
             key={n.id}
             type="button"
             onClick={handleClick}
+            onPointerDown={(e) => onNodePointerDown(i, e)}
+            onPointerMove={(e) => onNodePointerMove(i, e)}
+            onPointerUp={(e) => onNodePointerUp(i, e)}
+            onPointerCancel={(e) => onNodePointerUp(i, e)}
+            onContextMenu={(e) => e.preventDefault()}
             aria-pressed={isSel}
             aria-label={`${n.label}. ${isSel ? "Collapse" : "Expand connections"}`}
             style={{
               left: `${p.x}%`,
               top: `${p.y}%`,
+              transform: `translate(calc(-50% + ${off.dx}px), calc(-50% + ${off.dy}px))`,
+              touchAction: "none",
+              cursor: isDragging ? "grabbing" : "grab",
+              WebkitTapHighlightColor: "transparent",
+              WebkitUserSelect: "none",
+              userSelect: "none",
             }}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 group z-10 cursor-pointer transition-opacity duration-300 ${
+            className={`absolute group p-3 sm:p-2 cursor-pointer transition-opacity duration-300 select-none ${
               dim ? "opacity-40" : "opacity-100"
-            } ${isSel ? "z-30" : ""}`}
+            } ${isSel || isDragging ? "z-30" : "z-10"}`}
           >
             <div
-              className="animate-mindmap-drift"
+              className="animate-mindmap-drift pointer-events-none"
               style={{
                 animationDuration: `${driftDur}s`,
                 animationDelay: `-${driftDelay}s`,
+                animationPlayState: isDragging ? "paused" : "running",
               }}
             >
-              <div className={`relative flex flex-col items-center transition-transform duration-300 ${isSel ? "scale-110" : ""}`}>
+              <div className={`relative flex flex-col items-center transition-transform duration-300 ${isSel || isDragging ? "scale-110" : ""}`}>
                 <span
                   aria-hidden
                   className={`absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full border transition-colors ${a.ring}`}
