@@ -578,13 +578,6 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   return (
     <div ref={stageRef} className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px] overflow-hidden">
-      <ChaosTuner
-        tuning={tuning}
-        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
-        onReset={() => setTuning(DEFAULT_TUNING)}
-        onResetPositions={resetAll}
-        onShake={() => shake(800)}
-      />
 
       <style>{`
         @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }
