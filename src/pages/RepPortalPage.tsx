@@ -84,6 +84,11 @@ const RepPortalPage: React.FC = () => {
         toast({ title: 'Invalid credentials', description: 'Code or email does not match.', variant: 'destructive' });
         return;
       }
+      // Persist a portal session so LeadsBoard + other portal tools work
+      // when the flag-gated tabs are on.
+      if (data.token) {
+        setPortalSession(data.token, profile as PortalProfile);
+      }
       setRepData({
         rep_name: profile.rep_name,
         code: profile.code,
