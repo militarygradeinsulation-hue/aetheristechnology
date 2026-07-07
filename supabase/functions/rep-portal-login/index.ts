@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const { data, error } = await sb.from("rep_codes")
-      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active")
+      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active, certification_id, certification_image_url, certification_issued_at, certification_valid_until")
       .eq("code", code)
       .eq("is_active", true)
       .maybeSingle();
@@ -92,6 +92,10 @@ Deno.serve(async (req) => {
           total_sales_cents: data.total_sales_cents,
           total_commission_cents: data.total_commission_cents,
           role,
+          certification_id: data.certification_id,
+          certification_image_url: data.certification_image_url,
+          certification_issued_at: data.certification_issued_at,
+          certification_valid_until: data.certification_valid_until,
         },
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

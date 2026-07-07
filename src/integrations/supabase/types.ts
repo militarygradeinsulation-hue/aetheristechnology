@@ -4525,6 +4525,10 @@ export type Database = {
       }
       rep_codes: {
         Row: {
+          certification_id: string | null
+          certification_image_url: string | null
+          certification_issued_at: string | null
+          certification_valid_until: string | null
           code: string
           commission_rate: number
           created_at: string
@@ -4540,6 +4544,10 @@ export type Database = {
           webinar_boost_bps: number
         }
         Insert: {
+          certification_id?: string | null
+          certification_image_url?: string | null
+          certification_issued_at?: string | null
+          certification_valid_until?: string | null
           code: string
           commission_rate?: number
           created_at?: string
@@ -4555,6 +4563,10 @@ export type Database = {
           webinar_boost_bps?: number
         }
         Update: {
+          certification_id?: string | null
+          certification_image_url?: string | null
+          certification_issued_at?: string | null
+          certification_valid_until?: string | null
           code?: string
           commission_rate?: number
           created_at?: string
