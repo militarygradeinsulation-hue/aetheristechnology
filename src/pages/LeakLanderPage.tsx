@@ -7,12 +7,6 @@ import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
-import buildThumb1 from "@/assets/build-thumb-1.jpg";
-import buildThumb2 from "@/assets/build-thumb-2.jpg";
-import buildThumb3 from "@/assets/build-thumb-3.jpg";
-import buildThumb4 from "@/assets/build-thumb-4.jpg";
-import buildThumb5 from "@/assets/build-thumb-5.jpg";
-import buildThumb6 from "@/assets/build-thumb-6.jpg";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
@@ -423,46 +417,37 @@ const LeakLanderPage: React.FC = () => {
                   Scoped, priced, delivered — no ongoing retainers unless you want them.
                 </p>
 
-                {/* Redacted build thumbnails — visible but not identifiable or clickable */}
+                {/* Build placeholders — small, unbranded tiles */}
                 <div className="mt-6 flex flex-col items-center gap-3">
                   <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-foreground/45">
-                    ⌁ Built before · under seal ⌁
+                    ⌁ Selected builds · under seal ⌁
                   </span>
-                  <div className="w-full max-w-2xl rounded-md border border-amber/20 bg-background/60 p-3 sm:p-4 shadow-[0_0_40px_-20px_rgba(251,191,36,0.12)]">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full">
-                      {[buildThumb1, buildThumb2, buildThumb3, buildThumb4, buildThumb5, buildThumb6].map((src, i) => (
+                  <div className="w-full max-w-xl rounded-md border border-amber/20 bg-background/60 p-3">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 w-full">
+                      {Array.from({ length: 12 }).map((_, i) => (
                         <div
                           key={i}
-                          className="group relative aspect-[4/3] w-full overflow-hidden rounded-sm border border-amber/30 bg-black/50"
+                          className="aspect-square w-full rounded-sm border border-amber/25 bg-black/40 flex items-center justify-center"
                         >
-                          <img
-                            src={src}
-                            alt=""
-                            loading="lazy"
-                            width={400}
-                            height={300}
-                            className="absolute inset-0 h-full w-full object-cover opacity-95 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border border-crimson/50 bg-background/85 px-2.5 py-1 rotate-[-2deg] shadow-sm">
-                              Redacted
-                            </span>
-                          </div>
+                          <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-foreground/40">
+                            #{String(i + 1).padStart(2, "0")}
+                          </span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <p className="mt-1 text-center text-xs sm:text-sm text-foreground/70 max-w-md">
-                    Want to see what’s underneath?{" "}
+                    Want to see what's underneath?{" "}
                     <button
                       onClick={() => setBookingOpen(true)}
                       className="text-amber underline underline-offset-4 hover:text-amber/80 transition-colors"
                     >
                       Get in touch
                     </button>{" "}
-                    and I’ll walk you through what I’ve built — or what I could build for you.
+                    and I'll walk you through what I've built.
                   </p>
                 </div>
+
               </div>
 
 
