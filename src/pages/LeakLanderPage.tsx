@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, HelpCircle, ChevronDown, Play, Download, Bot, Database, LineChart, Workflow, Cpu, Search, Globe, Terminal, Zap, Brain, Rocket, Code2, Sparkles, Radar, Wand2, Boxes } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ChevronDown, Play, Download, Bot, Database, LineChart, Workflow, Cpu, Search, Globe, Terminal, Zap, Brain, Rocket, Code2, Sparkles, Radar, Wand2, Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
@@ -501,35 +501,6 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* FAQ — the honest version */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "300ms", animationFillMode: "both" }}
-          >
-            <div className="text-center mb-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">FAQ · The honest version</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold mt-1">Screenshot at your own risk.</h2>
-            </div>
-            <div className="rounded-sm border border-amber/25 bg-card/60 backdrop-blur-sm divide-y divide-amber/15">
-              {[
-                { q: "Can you work with our budget?", a: "No. The fee is fixed because the work is fixed. Budgets flex; forensics don't." },
-                { q: "Can we get a discount if we commit longer?", a: "You're asking the coroner for a coupon. No." },
-                { q: "What if we don't like the findings?", a: "Irrelevant. The findings are true either way. What you do with them is your call." },
-                { q: "How do we know it'll work?", a: "You don't, and anyone who guarantees outcomes is selling you a feeling. What we guarantee: you'll know exactly what's broken, exactly what it costs, and exactly what to fix first. Most clients have never had that. That's why they're leaking." },
-                { q: "Why should we trust you?", a: "You shouldn't — yet. Run the free audit. If the free version doesn't surface something that bothers you, we're not your firm and that's fine." },
-              ].map((item, i) => (
-                <div key={i} className="p-4 sm:p-5">
-                  <div className="flex items-start gap-3">
-                    <HelpCircle className="w-4 h-4 text-amber mt-0.5 shrink-0" />
-                    <div className="flex-1">
-                      <div className="font-forensic font-bold text-sm sm:text-base">"{item.q}"</div>
-                      <p className="mt-1.5 text-sm text-foreground/80 leading-relaxed">{item.a}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
 
 
 
