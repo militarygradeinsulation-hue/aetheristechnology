@@ -10,6 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
+import { setPortalSession, type PortalProfile } from '@/lib/portalAuth';
+import { useFeatureFlag } from '@/lib/portalFeatureFlags';
+import { HomeFreeTrialArsenal } from '@/components/HomeFreeTrialArsenal';
+import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { RepToolLinks } from '@/components/portal/RepToolLinks';
 import {
   CURRENT_EXTENSION_VERSION,
