@@ -55,7 +55,8 @@
   </div>
 
   <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="agents">Agents</button>
+    <button class="tab active" data-tab="instruments">Instruments</button>
+    <button class="tab" data-tab="agents">Agents</button>
     <button class="tab" data-tab="scan">Scan</button>
     <button class="tab" data-tab="operator">Operator</button>
     <button class="tab" data-tab="fix">Fix</button>
@@ -67,9 +68,56 @@
     <button class="tab" data-tab="record">Record</button>
   </nav>
 
+
   <main>
+    <!-- INSTRUMENTS — public forensic tools, mirror of the site's Chaos Map -->
+    <section class="panel active" id="tab-instruments">
+      <div class="card">
+        <div class="card-title">Five Instruments · Zero paywall</div>
+        <div class="muted" style="margin-bottom:10px">
+          Same free forensic tools as the main site. Open any instrument in a new tab — no signup, email only for the Report PDF.
+        </div>
+        <div class="instrument-grid">
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/chaos-scan">
+            <div class="ins-chip">NODE 01 · FREE</div>
+            <div class="ins-title">Chaos Scan</div>
+            <div class="ins-tag">Feed a URL. Watch the leaks connect.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument amber" target="_blank" rel="noopener" href="https://aetheris.technology/head-to-head">
+            <div class="ins-chip">NODE 02 · FREE</div>
+            <div class="ins-title">Head-to-Head</div>
+            <div class="ins-tag">Your site vs. theirs. Every difference exposed.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/reciprocation">
+            <div class="ins-chip">NODE 03 · FREE</div>
+            <div class="ins-title">Reciprocation Engine</div>
+            <div class="ins-tag">The gifts that make prospects owe you a reply.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument amber" target="_blank" rel="noopener" href="https://aetheris.technology/golden-report">
+            <div class="ins-chip">NODE 04 · FREE</div>
+            <div class="ins-title">Golden Report</div>
+            <div class="ins-tag">The full forensic scan. 14 chapters. No filter.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/aetheris-iq">
+            <div class="ins-chip">NODE 05 · FREE</div>
+            <div class="ins-title">Aetheris IQ</div>
+            <div class="ins-tag">The forensic AI operator. Ask it anything.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+        </div>
+        <div class="muted" style="margin-top:10px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase">
+          Chaos Map · v2 · use every tool free
+        </div>
+      </div>
+    </section>
+
     <!-- AGENTS -->
-    <section class="panel active" id="tab-agents">
+    <section class="panel" id="tab-agents">
+
       <div class="card">
         <div class="card-title">One-Click AI Agents</div>
         <div class="muted" style="margin-bottom:8px">

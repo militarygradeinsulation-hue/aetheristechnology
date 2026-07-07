@@ -511,3 +511,36 @@ textarea { resize: vertical; font-family: inherit; }
 .dm-title { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
 .dm-meta { font: 11px var(--mono); color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
 .dm-meta a { color: var(--amber); text-decoration: none; }
+
+/* ── Instruments (Chaos Map mirror) ── */
+.instrument-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.instrument {
+  position: relative;
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.35));
+  text-decoration: none;
+  color: inherit;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  overflow: hidden;
+}
+.instrument::before,
+.instrument::after {
+  content: ""; position: absolute; width: 12px; height: 12px;
+  border-color: currentColor; opacity: .7;
+}
+.instrument::before { top: 6px; left: 6px; border-top: 1px solid; border-left: 1px solid; }
+.instrument::after  { bottom: 6px; right: 6px; border-bottom: 1px solid; border-right: 1px solid; }
+.instrument.crimson { color: var(--crimson, #e0384a); }
+.instrument.amber   { color: var(--amber, #ffb020); }
+.instrument:hover {
+  transform: translateY(-1px);
+  border-color: currentColor;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 8px 26px -14px currentColor;
+}
+.ins-chip { font: 10px var(--mono, monospace); letter-spacing: .18em; color: currentColor; opacity: .85; margin-bottom: 6px; }
+.ins-title { font-family: var(--serif, Fraunces, serif); font-weight: 700; font-size: 18px; color: #fff; line-height: 1.15; }
+.ins-tag   { font-size: 12px; color: #cfcfcf; margin-top: 4px; }
+.ins-open  { margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.12); font: 10.5px var(--mono, monospace); letter-spacing: .18em; color: currentColor; }

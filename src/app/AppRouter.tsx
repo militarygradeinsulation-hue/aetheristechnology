@@ -13,6 +13,7 @@ import AppAuditHealth from "./pages/AppAuditHealth";
 import AppAssistant from "./pages/AppAssistant";
 import AppChanges from "./pages/AppChanges";
 import AppComposer from "./pages/AppComposer";
+import AppInstruments from "./pages/AppInstruments";
 
 export const AppRouter = () => (
   <AuthProvider>
@@ -21,6 +22,7 @@ export const AppRouter = () => (
       <Route path="login" element={<AppLogin />} />
       <Route path="signup" element={<AppSignup />} />
       <Route path="dashboard" element={<AppDashboard />} />
+      <Route path="instruments" element={<AppInstruments />} />
       <Route path="reports" element={<AppReports />} />
       <Route path="reports/:id" element={<AppReportDetail />} />
       <Route path="hygiene" element={<Navigate to="/app/hygiene/scan" replace />} />
