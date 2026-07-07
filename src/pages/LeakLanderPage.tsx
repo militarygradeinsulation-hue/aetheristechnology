@@ -428,28 +428,29 @@ const LeakLanderPage: React.FC = () => {
                   <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-foreground/45">
                     ⌁ Built before · under seal ⌁
                   </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-2xl mx-auto">
-                    {[buildThumb1, buildThumb2, buildThumb3, buildThumb4, buildThumb5, buildThumb6].map((src, i) => (
-                      <div
-                        key={i}
-                        className="group relative aspect-[4/3] w-full max-w-[190px] sm:max-w-[220px] overflow-hidden rounded-sm border border-amber/30 bg-background/50 shadow-[0_0_25px_-10px_rgba(251,191,36,0.15)]"
-                      >
-                        <img
-                          src={src}
-                          alt=""
-                          loading="lazy"
-                          width={400}
-                          height={300}
-                          className="absolute inset-0 h-full w-full object-cover opacity-90 brightness-110 contrast-105 transition-all duration-500 group-hover:opacity-100 group-hover:brightness-125 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/10" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border border-crimson/50 bg-background/85 px-2.5 py-1 rotate-[-2deg] shadow-sm">
-                            Redacted
-                          </span>
+                  <div className="rounded-md border border-amber/20 bg-background/60 p-3 sm:p-4 shadow-[0_0_40px_-20px_rgba(251,191,36,0.12)]">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-2xl mx-auto">
+                      {[buildThumb1, buildThumb2, buildThumb3, buildThumb4, buildThumb5, buildThumb6].map((src, i) => (
+                        <div
+                          key={i}
+                          className="group relative aspect-[4/3] w-full max-w-[220px] sm:max-w-[240px] overflow-hidden rounded-sm border border-amber/30 bg-black/50"
+                        >
+                          <img
+                            src={src}
+                            alt=""
+                            loading="lazy"
+                            width={400}
+                            height={300}
+                            className="absolute inset-0 h-full w-full object-cover opacity-95 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border border-crimson/50 bg-background/85 px-2.5 py-1 rotate-[-2deg] shadow-sm">
+                              Redacted
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                   <p className="mt-1 text-center text-xs sm:text-sm text-foreground/70 max-w-md">
                     Want to see what’s underneath?{" "}
