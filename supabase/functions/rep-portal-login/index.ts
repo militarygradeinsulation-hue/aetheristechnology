@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const { data, error } = await sb.from("rep_codes")
-      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active")
+      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active, certification_id, certification_image_url, certification_issued_at, certification_valid_until")
       .eq("code", code)
       .eq("is_active", true)
       .maybeSingle();
