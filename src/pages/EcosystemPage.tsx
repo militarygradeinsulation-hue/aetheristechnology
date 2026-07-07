@@ -52,8 +52,8 @@ const GROUPS: Group[] = [
     title: 'Diagnose the Business',
     blurb: 'Data-backed audits that prove there is a problem worth paying to fix.',
     tools: [
-      { name: 'Full Leak Audit', path: '/diagnostic', desc: 'The complete 7-step Leak Audit — uncover every revenue leak and justify a paid engagement.', icon: Stethoscope },
-      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: 'A 20-question walk-through that exposes exactly where a business is bleeding revenue.', icon: ListChecks },
+      { name: 'Full Leak Audit', path: '/diagnostic', desc: 'The complete Leak Audit that uncovers every revenue leak and justifies a paid engagement.', icon: Stethoscope },
+      { name: 'Business Diagnostic', path: '/business-diagnostic', desc: 'A guided walk-through that exposes exactly where a business is bleeding revenue.', icon: ListChecks },
       { name: 'Website Health Scan', path: '/scan', desc: 'One-click scan that shows what is costing a website customers right now, graded by AI.', icon: Scan },
       { name: 'Friction Audit', path: '/friction-audit', desc: 'Map every click, form, and page where prospects drop off so you know what to fix first.', icon: AlertTriangle },
       { name: 'Brand Check', path: '/brand-contradictions', desc: 'Compare what a company says about itself to what customers actually experience — expose trust gaps.', icon: AlertTriangle },
