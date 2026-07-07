@@ -204,6 +204,9 @@ const App = () => (
                       <Route path="/test-portal" element={<TestPortalPage />} />
                       <Route path="/detective" element={<DetectiveModePage />} />
                       <Route path="/detective-mode" element={<DetectiveModePage />} />
+                      <Route path="/ecosystem" element={<EcosystemPage />} />
+                      <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
+                      <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
