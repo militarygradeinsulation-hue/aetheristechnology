@@ -14,6 +14,7 @@ import AppAssistant from "./pages/AppAssistant";
 import AppChanges from "./pages/AppChanges";
 import AppComposer from "./pages/AppComposer";
 import AppInstruments from "./pages/AppInstruments";
+import AppOperator from "./pages/AppOperator";
 
 export const AppRouter = () => (
   <AuthProvider>
