@@ -99,6 +99,22 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   const [selected, setSelected] = useState<number | null>(null);
 
+  // Chaos physics — draggable bubbles with ripples
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
+  const tuningRef = useRef(tuning);
+  tuningRef.current = tuning;
+  const {
+    offsets,
+    draggingIdx,
+    onNodePointerDown,
+    onNodePointerMove,
+    onNodePointerUp,
+    wasDragged,
+    clearDrag,
+    resetAll,
+  } = useChaosPhysics(positions, tuningRef, stageRef);
+
   const idToIndex = useMemo(() => {
     const m = new Map<string, number>();
     nodes.forEach((n, i) => m.set(n.id, i));
@@ -117,7 +133,13 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
   }, [selected, nodes, idToIndex]);
 
   return (
-    <div className={`relative w-full ${heightClass}`}>
+    <div ref={stageRef} className={`relative w-full ${heightClass} overflow-hidden`}>
+      <ChaosTuner
+        tuning={tuning}
+        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
+        onReset={() => setTuning(DEFAULT_TUNING)}
+        onResetPositions={resetAll}
+      />
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
