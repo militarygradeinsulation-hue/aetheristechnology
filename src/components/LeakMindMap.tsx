@@ -113,6 +113,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
     wasDragged,
     clearDrag,
     resetAll,
+    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const idToIndex = useMemo(() => {
@@ -139,7 +140,9 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
         onReset={() => setTuning(DEFAULT_TUNING)}
         onResetPositions={resetAll}
+        onShake={() => shake(700)}
       />
+
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         viewBox="0 0 100 100"
