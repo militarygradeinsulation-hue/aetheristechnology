@@ -56,7 +56,7 @@ export function generateCredentialsPdf() {
   );
   block(
     'EDUCATION',
-    'B.A. in Psychology and Communication. M.S. in Business Marketing. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
+    'B.A. in Psychology and Communication. M.S. in Business Marketing. Currently pursuing further Doctorate work in Digital Forensics. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
   );
   block(
     'CERTIFICATIONS',
