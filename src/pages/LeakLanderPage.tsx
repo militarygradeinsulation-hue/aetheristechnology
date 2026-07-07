@@ -397,7 +397,7 @@ const LeakLanderPage: React.FC = () => {
                     className="group relative inline-flex items-center justify-center h-14 px-8 font-mono uppercase tracking-[0.2em] text-sm font-bold text-background overflow-hidden rounded-sm"
                   >
                     {/* animated gradient background */}
-                    <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-amber via-amber/90 to-amber bg-[length:200%_100%] animate-[cbShimmer_3s_linear_infinite]" />
+                    <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-amber via-amber/80 to-amber bg-[length:200%_100%]" style={{ animation: "shimmer-gold-drift 3s linear infinite" }} />
                     {/* pulsing outer glow */}
                     <span aria-hidden className="absolute -inset-0.5 bg-amber/60 blur-lg opacity-70 group-hover:opacity-100 transition-opacity" />
                     {/* corner brackets */}
