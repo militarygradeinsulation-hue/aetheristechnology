@@ -100,9 +100,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   // Chaos physics — draggable bubbles with ripples
   const stageRef = useRef<HTMLDivElement>(null);
-  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
-  const tuningRef = useRef(tuning);
-  tuningRef.current = tuning;
+  const tuningRef = useRef(DEFAULT_TUNING);
   const {
     offsets,
     draggingIdx,
@@ -111,8 +109,6 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
     onNodePointerUp,
     wasDragged,
     clearDrag,
-    resetAll,
-    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const idToIndex = useMemo(() => {
