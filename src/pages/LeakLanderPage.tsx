@@ -7,12 +7,6 @@ import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
-import buildThumb1 from "@/assets/build-thumb-1.jpg";
-import buildThumb2 from "@/assets/build-thumb-2.jpg";
-import buildThumb3 from "@/assets/build-thumb-3.jpg";
-import buildThumb4 from "@/assets/build-thumb-4.jpg";
-import buildThumb5 from "@/assets/build-thumb-5.jpg";
-import buildThumb6 from "@/assets/build-thumb-6.jpg";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
