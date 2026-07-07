@@ -30,6 +30,10 @@ interface RepData {
   total_sales_cents: number;
   total_commission_cents: number;
   is_active: boolean;
+  certification_id?: string | null;
+  certification_image_url?: string | null;
+  certification_issued_at?: string | null;
+  certification_valid_until?: string | null;
 }
 
 const RepPortalPage: React.FC = () => {
