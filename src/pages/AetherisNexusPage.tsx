@@ -342,7 +342,7 @@ export default function AetherisNexusPage() {
       const assistantMsg: ChatMessage = {
         id: uid(), role: "assistant", content: "Generating image…", images: [], createdAt: now(),
       };
-      updateThread(activeThread.id, (t) => ({
+      updateThread(activeThreadLocal.id, (t) => ({
         ...t,
         title: t.messages.length === 0 ? text.slice(0, 60) : t.title,
         updatedAt: now(),
@@ -357,7 +357,7 @@ export default function AetherisNexusPage() {
       try {
         await streamImage(text, async (dataUrl, isFinal) => {
           const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) =>
               m.id === assistantMsg.id
@@ -367,7 +367,7 @@ export default function AetherisNexusPage() {
           }));
         }, ac.signal);
       } catch (e: any) {
-        updateThread(activeThread.id, (t) => ({
+        updateThread(activeThreadLocal.id, (t) => ({
           ...t,
           messages: t.messages.map((m) =>
             m.id === assistantMsg.id ? { ...m, content: `Image generation failed: ${e.message}` } : m,
@@ -384,7 +384,7 @@ export default function AetherisNexusPage() {
       id: uid(), role: "assistant", content: "", tools: [], images: [], createdAt: now(),
     };
 
-    updateThread(activeThread.id, (t) => ({
+    updateThread(activeThreadLocal.id, (t) => ({
       ...t,
       title: t.messages.length === 0 ? text.slice(0, 60) : t.title,
       updatedAt: now(),
@@ -397,26 +397,26 @@ export default function AetherisNexusPage() {
     const ac = new AbortController();
     abortRef.current = ac;
 
-    const baseMessages: ChatMessage[] = [...activeThread.messages, userMsg];
+    const baseMessages: ChatMessage[] = [...activeThreadLocal.messages, userMsg];
 
     try {
       await streamChat(baseMessages, (evt) => {
         if (evt.type === "delta") {
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) =>
               m.id === assistantMsg.id ? { ...m, content: (m.content || "") + (evt.text || "") } : m,
             ),
           }));
         } else if (evt.type === "tool_start") {
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) =>
               m.id === assistantMsg.id ? { ...m, tools: [...(m.tools || []), { name: evt.name, args: evt.args }] } : m,
             ),
           }));
         } else if (evt.type === "tool_result") {
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) => {
               if (m.id !== assistantMsg.id) return m;
@@ -428,7 +428,7 @@ export default function AetherisNexusPage() {
             }),
           }));
         } else if (evt.type === "error") {
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) =>
               m.id === assistantMsg.id ? { ...m, content: (m.content || "") + `\n\n_Error: ${evt.error}_` } : m,
@@ -440,7 +440,7 @@ export default function AetherisNexusPage() {
       // Post-process: detect [GENERATE_IMAGE: ...] markers and render images
       const finalContent = (await new Promise<string>((resolve) => {
         setThreads((prev) => {
-          const t = prev.find((x) => x.id === activeThread.id);
+          const t = prev.find((x) => x.id === activeThreadLocal.id);
           const m = t?.messages.find((x) => x.id === assistantMsg.id);
           resolve(m?.content || "");
           return prev;
@@ -450,7 +450,7 @@ export default function AetherisNexusPage() {
       if (imgMatch) {
         const prompt = imgMatch[1].trim();
         const cleanedContent = finalContent.replace(/\[GENERATE_IMAGE:[^\]]+\]/, "").trim();
-        updateThread(activeThread.id, (t) => ({
+        updateThread(activeThreadLocal.id, (t) => ({
           ...t,
           messages: t.messages.map((m) =>
             m.id === assistantMsg.id ? { ...m, content: cleanedContent + "\n\n_Generating image…_" } : m,
@@ -459,7 +459,7 @@ export default function AetherisNexusPage() {
         try {
           await streamImage(prompt, async (dataUrl, isFinal) => {
             const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
-            updateThread(activeThread.id, (t) => ({
+            updateThread(activeThreadLocal.id, (t) => ({
               ...t,
               messages: t.messages.map((m) =>
                 m.id === assistantMsg.id
@@ -469,7 +469,7 @@ export default function AetherisNexusPage() {
             }));
           }, ac.signal);
         } catch (e: any) {
-          updateThread(activeThread.id, (t) => ({
+          updateThread(activeThreadLocal.id, (t) => ({
             ...t,
             messages: t.messages.map((m) =>
               m.id === assistantMsg.id ? { ...m, content: cleanedContent + `\n\n_Image gen failed: ${e.message}_` } : m,
@@ -479,7 +479,7 @@ export default function AetherisNexusPage() {
       }
     } catch (e: any) {
       if (e.name !== "AbortError") {
-        updateThread(activeThread.id, (t) => ({
+        updateThread(activeThreadLocal.id, (t) => ({
           ...t,
           messages: t.messages.map((m) =>
             m.id === assistantMsg.id ? { ...m, content: `Error: ${e.message}` } : m,
