@@ -130,13 +130,6 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   return (
     <div ref={stageRef} className={`relative w-full ${heightClass} overflow-hidden`}>
-      <ChaosTuner
-        tuning={tuning}
-        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
-        onReset={() => setTuning(DEFAULT_TUNING)}
-        onResetPositions={resetAll}
-        onShake={() => shake(700)}
-      />
 
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
