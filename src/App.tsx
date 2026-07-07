@@ -73,6 +73,7 @@ const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
 const DetectiveModePage = lazy(() => import("./pages/DetectiveModePage"));
+const EcosystemPage = lazy(() => import("./pages/EcosystemPage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
 const LeakReportPage = lazy(() => import("./pages/LeakReportPage"));
@@ -203,6 +204,9 @@ const App = () => (
                       <Route path="/test-portal" element={<TestPortalPage />} />
                       <Route path="/detective" element={<DetectiveModePage />} />
                       <Route path="/detective-mode" element={<DetectiveModePage />} />
+                      <Route path="/ecosystem" element={<EcosystemPage />} />
+                      <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
+                      <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
