@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Settings, LogOut, FileSearch, Sparkles, HeartPulse, Bot,
-  History, ArrowLeft, Home, Linkedin,
+  History, ArrowLeft, Home, Linkedin, Radar,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,7 @@ interface AppLayoutProps {
 
 const navItems = [
   { to: "/app/dashboard", label: "Home", icon: LayoutDashboard, end: true },
+  { to: "/app/instruments", label: "Instruments", icon: Radar },
   { to: "/app/assistant", label: "Co-Pilot", icon: Bot },
   { to: "/app/composer", label: "Compose", icon: Linkedin },
   { to: "/app/reports", label: "Audits", icon: FileSearch },
