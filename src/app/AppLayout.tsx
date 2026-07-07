@@ -15,6 +15,7 @@ interface AppLayoutProps {
 
 const navItems = [
   { to: "/app/dashboard", label: "Home", icon: LayoutDashboard, end: true },
+  { to: "/app/operator", label: "Operator", icon: Crosshair },
   { to: "/app/instruments", label: "Instruments", icon: Radar },
   { to: "/app/assistant", label: "Co-Pilot", icon: Bot },
   { to: "/app/composer", label: "Compose", icon: Linkedin },
