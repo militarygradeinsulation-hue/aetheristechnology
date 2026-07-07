@@ -8,8 +8,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useChaosPhysics, type ChaosTuning, DEFAULT_TUNING } from '@/hooks/useChaosPhysics';
-import { ChaosTuner } from '@/components/ChaosTuner';
+import { useChaosPhysics, DEFAULT_TUNING } from '@/hooks/useChaosPhysics';
 import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { INFOGRAPHICS } from '@/lib/infographics';
@@ -546,9 +545,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   // ============ Chaos physics (shared hook) ============
   const stageRef = useRef<HTMLDivElement>(null);
-  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
-  const tuningRef = useRef(tuning);
-  tuningRef.current = tuning;
+  const tuningRef = useRef(DEFAULT_TUNING);
 
   const {
     offsets,
@@ -558,8 +555,6 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
     onNodePointerUp,
     wasDragged,
     clearDrag,
-    resetAll,
-    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const handleNodeClick = (_i: number, slug: string) => {
@@ -583,13 +578,6 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
 
   return (
     <div ref={stageRef} className="relative w-full h-[560px] sm:h-[700px] md:h-[920px] lg:h-[1000px] overflow-hidden">
-      <ChaosTuner
-        tuning={tuning}
-        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
-        onReset={() => setTuning(DEFAULT_TUNING)}
-        onResetPositions={resetAll}
-        onShake={() => shake(800)}
-      />
 
       <style>{`
         @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }

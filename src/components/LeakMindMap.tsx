@@ -1,8 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { X } from "lucide-react";
-import { useChaosPhysics, DEFAULT_TUNING, type ChaosTuning } from "@/hooks/useChaosPhysics";
-import { ChaosTuner } from "@/components/ChaosTuner";
+import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
 
 export type MindMapNodeData = {
   id: string;
@@ -101,9 +100,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   // Chaos physics — draggable bubbles with ripples
   const stageRef = useRef<HTMLDivElement>(null);
-  const [tuning, setTuning] = useState<ChaosTuning>(DEFAULT_TUNING);
-  const tuningRef = useRef(tuning);
-  tuningRef.current = tuning;
+  const tuningRef = useRef(DEFAULT_TUNING);
   const {
     offsets,
     draggingIdx,
@@ -112,8 +109,6 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
     onNodePointerUp,
     wasDragged,
     clearDrag,
-    resetAll,
-    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const idToIndex = useMemo(() => {
@@ -135,13 +130,6 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
 
   return (
     <div ref={stageRef} className={`relative w-full ${heightClass} overflow-hidden`}>
-      <ChaosTuner
-        tuning={tuning}
-        onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
-        onReset={() => setTuning(DEFAULT_TUNING)}
-        onResetPositions={resetAll}
-        onShake={() => shake(700)}
-      />
 
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
