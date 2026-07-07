@@ -491,7 +491,7 @@ export default function AetherisNexusPage() {
       abortRef.current = null;
       textareaRef.current?.focus();
     }
-  }, [input, pendingAttachments, activeThread, streaming, imageMode, updateThread]);
+  }, [input, pendingAttachments, activeThread, streaming, imageMode, updateThread, navigate]);
 
   const stopStream = useCallback(() => {
     abortRef.current?.abort();
