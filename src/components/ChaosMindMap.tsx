@@ -37,13 +37,13 @@ type Symptom = {
 };
 
 const SYMPTOMS: Symptom[] = [
-  { id: 'ghosted',  label: 'Ghosted leads',      fixedLabel: 'Leads worked in-window', icon: Ghost,        fixedIcon: CheckCircle2, x: 14, y: 22, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
-  { id: 'churn',    label: 'Silent churn',       fixedLabel: 'Churn caught early',     icon: TrendingDown, fixedIcon: TrendingUp,   x: 86, y: 20, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
-  { id: 'missed',   label: 'Missed follow-ups',  fixedLabel: 'Follow-up on rails',     icon: Unplug,       fixedIcon: Plug,         x: 8,  y: 62, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
-  { id: 'cash',     label: 'Cash bleed',         fixedLabel: 'Cash reclaimed',         icon: Wallet,       fixedIcon: PiggyBank,    x: 92, y: 62, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
-  { id: 'burnout',  label: 'Team burnout',       fixedLabel: 'Load sequenced',         icon: Flame,        fixedIcon: ShieldCheck,  x: 24, y: 92, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
-  { id: 'handoff',  label: 'Broken handoffs',    fixedLabel: 'Clean handoffs',         icon: Zap,          fixedIcon: Link2,        x: 76, y: 92, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
-  { id: 'pipeline', label: 'Dead pipeline',      fixedLabel: 'Pipeline reads true',    icon: AlertTriangle,fixedIcon: LineChart,    x: 50, y: 6,  anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
+  { id: 'ghosted',  label: 'Ghosted leads',      fixedLabel: 'Leads worked in-window', icon: Ghost,        fixedIcon: CheckCircle2, x: 18, y: 24, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
+  { id: 'churn',    label: 'Silent churn',       fixedLabel: 'Churn caught early',     icon: TrendingDown, fixedIcon: TrendingUp,   x: 82, y: 22, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
+  { id: 'missed',   label: 'Missed follow-ups',  fixedLabel: 'Follow-up on rails',     icon: Unplug,       fixedIcon: Plug,         x: 14, y: 60, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
+  { id: 'cash',     label: 'Cash bleed',         fixedLabel: 'Cash reclaimed',         icon: Wallet,       fixedIcon: PiggyBank,    x: 86, y: 60, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
+  { id: 'burnout',  label: 'Team burnout',       fixedLabel: 'Load sequenced',         icon: Flame,        fixedIcon: ShieldCheck,  x: 28, y: 88, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
+  { id: 'handoff',  label: 'Broken handoffs',    fixedLabel: 'Clean handoffs',         icon: Zap,          fixedIcon: Link2,        x: 72, y: 88, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
+  { id: 'pipeline', label: 'Dead pipeline',      fixedLabel: 'Pipeline reads true',    icon: AlertTriangle,fixedIcon: LineChart,    x: 50, y: 10, anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
 ];
 
 const OPERATORS = [
@@ -126,8 +126,10 @@ export const ChaosMindMap: React.FC = () => {
       </div>
 
       {/* Map */}
-      <div className="relative w-full rounded-sm border border-border/50 bg-background/40 overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10]">
+      <div className="relative w-full rounded-sm border border-border/50 bg-background/40">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[4/3] lg:aspect-[16/10] px-8 py-10 sm:px-12 sm:py-12">
+          <div className="absolute inset-8 sm:inset-12">
+
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 100"
@@ -288,7 +290,7 @@ export const ChaosMindMap: React.FC = () => {
                   }`}>
                     <SIcon className={`w-6 h-6 md:w-7 md:h-7 ${isFixed ? 'text-amber' : isActive ? 'text-amber' : 'text-crimson'}`} />
                   </div>
-                  <div className={`mt-1.5 font-forensic text-xs md:text-sm font-bold leading-tight whitespace-nowrap ${
+                  <div className={`mt-1.5 font-forensic text-[11px] md:text-sm font-bold leading-tight text-center w-24 md:w-28 ${
                     isActive ? 'text-amber' : isFixed ? 'text-foreground' : 'text-foreground/85'
                   }`}>
                     {displayLabel}
@@ -297,8 +299,10 @@ export const ChaosMindMap: React.FC = () => {
               </button>
             );
           })}
+          </div>
         </div>
       </div>
+
 
       {/* Detail rail */}
       <div className="mt-4 grid gap-3 md:grid-cols-3">
