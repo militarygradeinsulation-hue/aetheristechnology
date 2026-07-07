@@ -107,6 +107,10 @@ const RepPortalPage: React.FC = () => {
         total_sales_cents: profile.total_sales_cents,
         total_commission_cents: profile.total_commission_cents,
         is_active: true,
+        certification_id: (profile as any).certification_id ?? null,
+        certification_image_url: (profile as any).certification_image_url ?? null,
+        certification_issued_at: (profile as any).certification_issued_at ?? null,
+        certification_valid_until: (profile as any).certification_valid_until ?? null,
       });
     } catch {
       toast({ title: 'Error', description: 'Something went wrong. Try again.', variant: 'destructive' });
