@@ -1,4 +1,4 @@
-/* Aetheris Forensic Cockpit — side panel styles (v0.4) */
+/* Chaos Theory Forensics — side panel styles (v0.9.9) */
 :root {
   --bg: #0a0a0a;
   --bg-2: #111111;
@@ -12,7 +12,8 @@
   --warn: #f59e0b;
   --info: #64748b;
   --ok: #10b981;
-  --mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --serif: "Fraunces", "Georgia", serif;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -35,8 +36,8 @@ body {
   background: var(--amber); color: #0a0a0a; font: 800 14px var(--mono);
   border-radius: 4px;
 }
-.brand-title { font-weight: 700; letter-spacing: 0.02em; }
-.brand-sub { font: 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.brand-title { font: 700 15px var(--serif); letter-spacing: 0.01em; font-style: italic; }
+.brand-sub { font: 10px var(--mono); color: var(--crimson); text-transform: uppercase; letter-spacing: 0.18em; }
 
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--bg-2); }
 .tab {
@@ -106,8 +107,8 @@ textarea { resize: vertical; font-family: inherit; }
 .leak.warning { border-left-color: var(--amber); }
 .leak.info { border-left-color: var(--info); }
 .leak-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.leak-title { font-weight: 700; font-size: 13px; }
-.leak-cat { font: 10px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.leak-title { font: 700 14px var(--serif); letter-spacing: 0.01em; }
+.leak-cat { font: 10px var(--mono); color: var(--crimson); text-transform: uppercase; letter-spacing: 0.14em; }
 .leak-why { color: var(--muted); margin: 4px 0; }
 .leak-fix { color: var(--fg); font-size: 13px; }
 .leak-fix b { color: var(--amber); }
@@ -149,7 +150,8 @@ textarea { resize: vertical; font-family: inherit; }
 .bubble-actions button { padding: 5px 8px; font-size: 10px; }
 
 .card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px; margin-bottom: 10px; }
-.card-title { font-weight: 700; margin-bottom: 8px; }
+.card-title { font: 700 15px var(--serif); letter-spacing: 0.01em; margin-bottom: 8px; color: var(--fg); }
+.card-title::before { content: "▸ "; color: var(--amber); font-family: var(--mono); font-size: 12px; }
 .out { background: var(--bg-3); border: 1px solid var(--line); padding: 10px; border-radius: 4px; white-space: pre-wrap; font: 12px/1.5 var(--mono); max-height: 360px; overflow: auto; margin-top: 8px; }
 
 /* Growth sub-tabs */
