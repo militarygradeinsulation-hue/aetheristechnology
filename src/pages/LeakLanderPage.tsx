@@ -432,7 +432,7 @@ const LeakLanderPage: React.FC = () => {
                     {[buildThumb1, buildThumb2, buildThumb3, buildThumb4, buildThumb5, buildThumb6].map((src, i) => (
                       <div
                         key={i}
-                        className="group relative aspect-[4/3] w-full max-w-[180px] sm:max-w-[200px] overflow-hidden rounded-sm border border-amber/20 bg-background/40 shadow-sm"
+                        className="group relative aspect-[4/3] w-full max-w-[180px] sm:max-w-[200px] overflow-hidden rounded-sm border border-amber/25 bg-background/40 shadow-[0_0_20px_-8px_rgba(0,0,0,0.6)]"
                       >
                         <img
                           src={src}
@@ -440,11 +440,11 @@ const LeakLanderPage: React.FC = () => {
                           loading="lazy"
                           width={400}
                           height={300}
-                          className="absolute inset-0 h-full w-full object-cover opacity-60 blur-[6px] transition-all duration-500 group-hover:opacity-80 group-hover:blur-[3px]"
+                          className="absolute inset-0 h-full w-full object-cover opacity-85 blur-[3px] brightness-90 transition-all duration-500 group-hover:opacity-100 group-hover:blur-[1px] group-hover:brightness-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson/80 border border-crimson/30 bg-background/70 px-2 py-1 rotate-[-2deg]">
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/20" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-60 group-hover:opacity-100 transition-opacity">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border border-crimson/40 bg-background/80 px-2 py-1 rotate-[-2deg] shadow-sm">
                             Redacted
                           </span>
                         </div>
