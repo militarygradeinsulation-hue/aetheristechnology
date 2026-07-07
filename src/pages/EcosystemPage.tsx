@@ -532,9 +532,6 @@ const EcosystemPage: React.FC = () => {
                   <h2 className="font-serif text-2xl md:text-3xl">{group.title}</h2>
                   <p className="text-sm text-muted-foreground/80 mt-1">{group.blurb}</p>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/50">
-                  {group.tools.length} tool{group.tools.length !== 1 && 's'}
-                </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {group.tools.map((tool, i) => (
