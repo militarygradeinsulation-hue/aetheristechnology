@@ -386,12 +386,27 @@ const PortalPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Master admin PIN — full access, route straight into Admin Console.
+      if (code.trim() === '9822') {
+        const { data: adm, error: admErr } = await supabase.functions.invoke('admin-pin-login', {
+          body: { pin: '9822' },
+        });
+        if (admErr || !adm?.ok || !adm?.token) {
+          throw new Error(admErr?.message || adm?.error || 'Admin login failed');
+        }
+        const { setAdminToken } = await import('@/lib/adminAuth');
+        setAdminToken(adm.token);
+        toast({ title: 'Admin access granted' });
+        navigate('/admin', { replace: true });
+        return;
+      }
       const { data, error } = await supabase.functions.invoke('rep-portal-login', {
         body: { code: code.trim() },
       });
       if (error || !data?.ok) {
         throw new Error(data?.error || error?.message || 'Invalid code');
       }
+
       setPortalSession(data.token, data.profile);
       setProfile(data.profile);
       // Fire-and-forget activity log; runs after token is in localStorage
