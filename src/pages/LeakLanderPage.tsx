@@ -7,6 +7,12 @@ import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
+import buildThumb1 from "@/assets/build-thumb-1.jpg";
+import buildThumb2 from "@/assets/build-thumb-2.jpg";
+import buildThumb3 from "@/assets/build-thumb-3.jpg";
+import buildThumb4 from "@/assets/build-thumb-4.jpg";
+import buildThumb5 from "@/assets/build-thumb-5.jpg";
+import buildThumb6 from "@/assets/build-thumb-6.jpg";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
@@ -417,39 +423,44 @@ const LeakLanderPage: React.FC = () => {
                   Scoped, priced, delivered — no ongoing retainers unless you want them.
                 </p>
 
-                {/* Tiny icon strip — placeholders for the kinds of builds shipped */}
-                <div className="mt-5 flex flex-col items-center gap-2">
+                {/* Redacted build thumbnails — visible but not identifiable or clickable */}
+                <div className="mt-6 flex flex-col items-center gap-3">
                   <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-foreground/45">
-                    ⌁ Built before · pick your poison ⌁
+                    ⌁ Built before · under seal ⌁
                   </span>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-md">
-                    {[
-                      { Icon: Bot, label: "AI Agents" },
-                      { Icon: Database, label: "Databases" },
-                      { Icon: LineChart, label: "Dashboards" },
-                      { Icon: Workflow, label: "Automations" },
-                      { Icon: Cpu, label: "AI Tools" },
-                      { Icon: Search, label: "Scrapers" },
-                      { Icon: Globe, label: "Web Apps" },
-                      { Icon: Terminal, label: "CLI / Scripts" },
-                      { Icon: Zap, label: "Integrations" },
-                      { Icon: Brain, label: "LLM Pipelines" },
-                      { Icon: Rocket, label: "MVPs" },
-                      { Icon: Code2, label: "Custom Code" },
-                      { Icon: Sparkles, label: "Generators" },
-                      { Icon: Radar, label: "Monitors" },
-                      { Icon: Wand2, label: "AI Studios" },
-                      { Icon: Boxes, label: "Internal Ops" },
-                    ].map(({ Icon, label }, i) => (
-                      <span
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-2xl mx-auto">
+                    {[buildThumb1, buildThumb2, buildThumb3, buildThumb4, buildThumb5, buildThumb6].map((src, i) => (
+                      <div
                         key={i}
-                        title={label}
-                        className="group/icon w-6 h-6 flex items-center justify-center rounded-sm border border-amber/20 bg-background/40 text-foreground/50 hover:text-amber hover:border-amber/70 hover:bg-amber/5 transition-all cursor-default"
+                        className="group relative aspect-[4/3] w-full max-w-[180px] sm:max-w-[200px] overflow-hidden rounded-sm border border-amber/20 bg-background/40 shadow-sm"
                       >
-                        <Icon className="w-3 h-3" />
-                      </span>
+                        <img
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          width={400}
+                          height={300}
+                          className="absolute inset-0 h-full w-full object-cover opacity-60 blur-[6px] transition-all duration-500 group-hover:opacity-80 group-hover:blur-[3px]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-crimson/80 border border-crimson/30 bg-background/70 px-2 py-1 rotate-[-2deg]">
+                            Redacted
+                          </span>
+                        </div>
+                      </div>
                     ))}
                   </div>
+                  <p className="mt-1 text-center text-xs sm:text-sm text-foreground/70 max-w-md">
+                    Want to see what’s underneath?{" "}
+                    <button
+                      onClick={() => setBookingOpen(true)}
+                      className="text-amber underline underline-offset-4 hover:text-amber/80 transition-colors"
+                    >
+                      Get in touch
+                    </button>{" "}
+                    and I’ll walk you through what I’ve built — or what I could build for you.
+                  </p>
                 </div>
               </div>
 
