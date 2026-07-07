@@ -37,13 +37,13 @@ type Symptom = {
 };
 
 const SYMPTOMS: Symptom[] = [
-  { id: 'ghosted',  label: 'Ghosted leads',      fixedLabel: 'Leads worked in-window', icon: Ghost,        fixedIcon: CheckCircle2, x: 14, y: 22, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
-  { id: 'churn',    label: 'Silent churn',       fixedLabel: 'Churn caught early',     icon: TrendingDown, fixedIcon: TrendingUp,   x: 86, y: 20, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
-  { id: 'missed',   label: 'Missed follow-ups',  fixedLabel: 'Follow-up on rails',     icon: Unplug,       fixedIcon: Plug,         x: 8,  y: 62, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
-  { id: 'cash',     label: 'Cash bleed',         fixedLabel: 'Cash reclaimed',         icon: Wallet,       fixedIcon: PiggyBank,    x: 92, y: 62, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
-  { id: 'burnout',  label: 'Team burnout',       fixedLabel: 'Load sequenced',         icon: Flame,        fixedIcon: ShieldCheck,  x: 24, y: 92, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
-  { id: 'handoff',  label: 'Broken handoffs',    fixedLabel: 'Clean handoffs',         icon: Zap,          fixedIcon: Link2,        x: 76, y: 92, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
-  { id: 'pipeline', label: 'Dead pipeline',      fixedLabel: 'Pipeline reads true',    icon: AlertTriangle,fixedIcon: LineChart,    x: 50, y: 6,  anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
+  { id: 'ghosted',  label: 'Ghosted leads',      fixedLabel: 'Leads worked in-window', icon: Ghost,        fixedIcon: CheckCircle2, x: 18, y: 24, anchor: 0, chaos: 'Hot leads die in the inbox before anyone touches them.', fixed: 'Every lead named, timed, and worked inside the window.' },
+  { id: 'churn',    label: 'Silent churn',       fixedLabel: 'Churn caught early',     icon: TrendingDown, fixedIcon: TrendingUp,   x: 82, y: 22, anchor: 2, chaos: 'Anchor accounts leave two weeks after they already decided.', fixed: 'Churn signals surface before the cancel email lands.' },
+  { id: 'missed',   label: 'Missed follow-ups',  fixedLabel: 'Follow-up on rails',     icon: Unplug,       fixedIcon: Plug,         x: 14, y: 60, anchor: 0, chaos: 'Quotes and bids sit in a truck, a phone, a sticky note.', fixed: 'Follow-up cadence runs on rails, not on memory.' },
+  { id: 'cash',     label: 'Cash bleed',         fixedLabel: 'Cash reclaimed',         icon: Wallet,       fixedIcon: PiggyBank,    x: 86, y: 60, anchor: 1, chaos: 'Profitable on paper. Broke in the account.', fixed: 'Every dollar the leak took is quantified and reclaimed.' },
+  { id: 'burnout',  label: 'Team burnout',       fixedLabel: 'Load sequenced',         icon: Flame,        fixedIcon: ShieldCheck,  x: 28, y: 88, anchor: 2, chaos: 'The best people carry the broken system on their backs.', fixed: 'Ops sequence the load. Nobody heroes at midnight.' },
+  { id: 'handoff',  label: 'Broken handoffs',    fixedLabel: 'Clean handoffs',         icon: Zap,          fixedIcon: Link2,        x: 72, y: 88, anchor: 0, chaos: 'Deals fall in the gap between sales and delivery.', fixed: 'Handoffs mapped, timed, and instrumented end-to-end.' },
+  { id: 'pipeline', label: 'Dead pipeline',      fixedLabel: 'Pipeline reads true',    icon: AlertTriangle,fixedIcon: LineChart,    x: 50, y: 10, anchor: 1, chaos: 'Forecast looks fine, until suddenly it doesn\'t.', fixed: 'Pipeline reads true. Leadership stops getting surprised.' },
 ];
 
 const OPERATORS = [
