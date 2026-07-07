@@ -559,6 +559,7 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
     wasDragged,
     clearDrag,
     resetAll,
+    shake,
   } = useChaosPhysics(positions, tuningRef, stageRef);
 
   const handleNodeClick = (_i: number, slug: string) => {
@@ -587,7 +588,9 @@ const MindMap: React.FC<{ industries: IndustryLeak[]; onOpenCaseFile: (v: Indust
         onChange={(patch) => setTuning((t) => ({ ...t, ...patch }))}
         onReset={() => setTuning(DEFAULT_TUNING)}
         onResetPositions={resetAll}
+        onShake={() => shake(800)}
       />
+
       <style>{`
         @keyframes industry-float-0 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(6px,-8px) rotate(0.6deg); } }
         @keyframes industry-float-1 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-7px,-5px) rotate(-0.8deg); } }
