@@ -980,13 +980,16 @@ const PortalPage: React.FC = () => {
             <LanguageToggle />
             <Button
               asChild
-              variant="outline"
               size="sm"
-              className="border-amber-400/40 text-amber-300 hover:bg-amber-400/10 font-mono uppercase tracking-wider text-[10px]"
+              className="relative bg-amber-400 hover:bg-amber-300 text-black font-mono uppercase tracking-wider text-[11px] font-bold shadow-[0_0_20px_rgba(251,191,36,0.5)] hover:shadow-[0_0_28px_rgba(251,191,36,0.7)] animate-pulse"
               title="Try the new clean portal layout"
               onClick={() => { try { localStorage.setItem('aetheris.portalStyle', 'new'); } catch {} }}
             >
-              <Link to="/portal/new">✨ New portal</Link>
+              <Link to="/portal/new">
+                <Sparkles className="w-4 h-4 mr-1.5" />
+                Try New Portal
+                <span className="ml-1.5 text-[9px] bg-black/80 text-amber-300 px-1.5 py-0.5 rounded font-bold">NEW</span>
+              </Link>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Log out</span>
