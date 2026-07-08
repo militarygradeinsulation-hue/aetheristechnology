@@ -131,6 +131,20 @@ export const REP_PRODUCTS: RepProduct[] = [
     forWho: 'Owners ready to install — not study — the full Aetheris operating system in their company.',
   },
 
+  // ── LEAK ECOSYSTEM TOOL SHOP (public /tools-shop — lifetime tool unlocks) ──
+  // Tiered commission applies (T1 / T2 / T3 by price band).
+  { name: 'Tool Shop · Single Tool ($40 lifetime)', priceCents: 4000, tier: 1,
+    description: 'Lifetime unlock for one Leak Ecosystem tool — unlimited runs + persistent memory attached to the buyer\'s code.',
+    forWho: 'Curious operators who tried the 3 free runs and want one tool for life.' },
+  { name: 'Tool Shop · 3-Tool Bundle ($100 lifetime)', priceCents: 10000, tier: 2,
+    description: 'Mix-and-match any 3 Leak Ecosystem tools, lifetime access, memory attached. Best per-tool price short of All Access.',
+    forWho: 'Owners who already know the 2-3 tools they will actually use every week.' },
+  { name: 'Tool Shop · All Access ($1,000 lifetime)', priceCents: 100000, tier: 3,
+    description: 'Every current + future Leak Ecosystem tool, unlimited runs, memory on all of them, one code for life.',
+    forWho: 'Power users, agencies, and reps who want the full toolbox with zero per-tool math.' },
+
+
+
 
   // ── LEGACY À LA CARTE (rep-portal internal only — NOT on public site) ──
   // Kept for back-compat with existing Stripe products + rep-led direct sales.
