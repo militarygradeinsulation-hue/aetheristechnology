@@ -101,14 +101,11 @@ export default function TryToolPage() {
           </Link>
 
           <div className="forensic-tile rounded-sm border border-amber/40 p-6 md:p-8">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">
-              Sandbox · demo run · nothing saved
-            </div>
             <h1 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-2">
               {meta.title}
             </h1>
             <p className="text-sm text-foreground/70 mb-5">
-              {tool.tagline} Runs on your input only — no Aetheris client data, no memory, no login.
+              {tool.tagline}
             </p>
 
             <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
