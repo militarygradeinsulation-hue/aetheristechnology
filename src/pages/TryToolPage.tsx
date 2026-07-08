@@ -142,7 +142,7 @@ export default function TryToolPage() {
             {output && (
               <div className="mt-6 border-t border-amber/20 pt-5">
                 <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-2">
-                  Demo output · discarded when you leave
+                  Output
                 </div>
                 <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed">
                   {output}
