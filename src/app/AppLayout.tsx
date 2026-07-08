@@ -33,8 +33,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  // Auth gate temporarily disabled — Revenue Recovery Engine is open access for now.
   useEffect(() => {
-    if (!loading && !user) navigate("/app/login", { replace: true });
+    // no-op
   }, [user, loading, navigate]);
 
   const handleSignOut = async () => {
@@ -42,15 +43,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     navigate("/app/login", { replace: true });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-2 w-32 bg-muted rounded animate-pulse" />
-      </div>
-    );
-  }
+  // Skip the loading gate — render the app immediately even without a session.
 
-  if (!user) return null;
 
   const sideNavItem = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
