@@ -709,6 +709,10 @@ const AdminDashboard: React.FC = () => {
               <Button variant="outline" size="sm" title="Download the Aetheris mobile app">
                 <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> App
               </Button>
+            <Link to="/test-portal">
+              <Button variant="outline" size="sm" title="Open the demo portal (sandbox clone of the rep portal)" className="border-amber-500/50 text-amber-300 hover:bg-amber-500/10">
+                <FlaskConical className="w-4 h-4 mr-1 text-amber" /> Demo Portal
+              </Button>
             </Link>
             <Button
               variant="outline"
