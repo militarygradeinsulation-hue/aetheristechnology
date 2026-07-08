@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw } from "lucide-react";
 import { Background } from "@/components/Background";
