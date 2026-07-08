@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
+import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
