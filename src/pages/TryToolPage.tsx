@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound } from "lucide-react";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -137,6 +137,7 @@ export default function TryToolPage() {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [runAt, setRunAt] = useState<Date | null>(null);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
@@ -372,77 +373,103 @@ export default function TryToolPage() {
                   </div>
                 </div>
 
-                {/* Case-file action dossier — buy the tool or become a licensed operator */}
+                {/* Case-file action dossier — collapsed by default */}
                 <div className="mt-6 print:hidden sticky bottom-3 z-20">
-                  <div className="relative rounded-sm border border-amber/40 bg-background/95 backdrop-blur overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.8)]">
-                    {/* Left rail — case-file spine */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber/70" />
-                    <div className="pl-4 pr-3 py-3 flex items-center justify-between border-b border-amber/20">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
-                        // next_move · file open
-                      </div>
-                      <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground hidden sm:block">
-                        two paths · one ecosystem
-                      </div>
-                    </div>
+                  <div className="relative rounded-sm border border-amber/40 bg-background/95 backdrop-blur-md overflow-hidden shadow-[0_20px_60px_-20px_rgba(0,0,0,0.9)]">
+                    {/* Amber spine */}
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber via-amber/70 to-crimson/60" />
 
-                    <div className="grid sm:grid-cols-2 gap-px bg-amber/15">
-                      {/* Primary — Own the tool */}
-                      <Link
-                        to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
-                        className="group relative bg-background hover:bg-amber/5 transition-colors p-4 flex flex-col gap-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/70">
-                            § 01 · Lifetime License
-                          </div>
-                          <div className="font-mono text-[10px] text-amber/60">USD</div>
+                    {/* Collapsed header — always visible, click to expand */}
+                    <button
+                      type="button"
+                      onClick={() => setDossierOpen((v) => !v)}
+                      className="w-full pl-5 pr-3 py-3 flex items-center gap-3 hover:bg-amber/[0.04] transition-colors text-left"
+                      aria-expanded={dossierOpen}
+                    >
+                      <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center shrink-0">
+                        <KeyRound className="w-3.5 h-3.5 text-amber" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70 leading-none mb-1">
+                          // next_move
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <div className="font-forensic text-2xl font-bold text-foreground group-hover:text-amber transition-colors">
-                            $40
-                          </div>
-                          <div className="text-[11px] text-muted-foreground">one-time · unlimited runs</div>
+                        <div className="font-forensic text-sm text-foreground leading-tight truncate">
+                          License this tool <span className="text-muted-foreground font-sans text-xs">— own it, or resell the whole ecosystem</span>
                         </div>
-                        <div className="text-xs text-foreground/80 leading-snug">
-                          Own this tool. Persistent memory attached to your account.
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber">
-                          <ShoppingCart className="w-3 h-3" /> Acquire the tool
-                          <span className="ml-auto opacity-60 group-hover:translate-x-0.5 transition-transform">→</span>
-                        </div>
-                      </Link>
+                      </div>
+                      <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber/80 shrink-0">
+                        <span>$40</span>
+                        <span className="text-amber/30">/</span>
+                        <span className="text-crimson/80">$100</span>
+                      </div>
+                      <div className="w-7 h-7 rounded-sm border border-amber/30 flex items-center justify-center text-amber shrink-0">
+                        {dossierOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                      </div>
+                    </button>
 
-                      {/* Secondary — Become an operator */}
-                      <Link
-                        to="/careers/license"
-                        className="group relative bg-background hover:bg-amber/5 transition-colors p-4 flex flex-col gap-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson/80">
-                            § 02 · Operator License
+                    {/* Expanded body */}
+                    {dossierOpen && (
+                      <div className="grid sm:grid-cols-2 gap-px bg-amber/15 border-t border-amber/20 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        {/* Own the tool */}
+                        <Link
+                          to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
+                          className="group relative bg-background hover:bg-amber/[0.06] transition-colors p-5 flex flex-col gap-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70">
+                              § 01 · Lifetime License
+                            </div>
+                            <div className="font-mono text-[9px] text-amber/50">USD</div>
                           </div>
-                          <div className="font-mono text-[10px] text-crimson/70 border border-crimson/40 px-1.5 py-0.5">
-                            RESELL
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <div className="font-forensic text-3xl font-bold text-amber leading-none">$40</div>
+                              <div className="text-[11px] text-muted-foreground">one-time</div>
+                            </div>
+                            <div className="text-xs text-foreground/75 leading-snug mt-2">
+                              Own this tool. Unlimited runs. Persistent memory on your account.
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <div className="font-forensic text-2xl font-bold text-foreground group-hover:text-amber transition-colors">
-                            $100
+                          <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber border-t border-amber/15">
+                            <ShoppingCart className="w-3 h-3" />
+                            <span>Acquire</span>
+                            <span className="ml-auto text-amber/60 group-hover:translate-x-1 transition-transform">→</span>
                           </div>
-                          <div className="text-[11px] text-muted-foreground">one-time · own rep code</div>
-                        </div>
-                        <div className="text-xs text-foreground/80 leading-snug">
-                          Sell the entire ecosystem under your own code. Instant activation.
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber">
-                          <Rocket className="w-3 h-3" /> Become an operator
-                          <span className="ml-auto opacity-60 group-hover:translate-x-0.5 transition-transform">→</span>
-                        </div>
-                      </Link>
-                    </div>
+                        </Link>
+
+                        {/* Become operator */}
+                        <Link
+                          to="/careers/license"
+                          className="group relative bg-background hover:bg-crimson/[0.05] transition-colors p-5 flex flex-col gap-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-crimson/80">
+                              § 02 · Operator License
+                            </div>
+                            <div className="font-mono text-[9px] text-crimson border border-crimson/40 px-1.5 py-0.5 leading-none">
+                              RESELL
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <div className="font-forensic text-3xl font-bold text-foreground leading-none">$100</div>
+                              <div className="text-[11px] text-muted-foreground">one-time</div>
+                            </div>
+                            <div className="text-xs text-foreground/75 leading-snug mt-2">
+                              Sell the entire ecosystem under your own rep code. Instant activation.
+                            </div>
+                          </div>
+                          <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border-t border-crimson/15">
+                            <Rocket className="w-3 h-3" />
+                            <span>Become an operator</span>
+                            <span className="ml-auto text-crimson/60 group-hover:translate-x-1 transition-transform">→</span>
+                          </div>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
+
               </div>
             )}
 
