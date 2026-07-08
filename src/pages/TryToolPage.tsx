@@ -269,24 +269,39 @@ export default function TryToolPage() {
             ) : (
               <>
                 <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-                  {meta.inputLabel}
+                  Your website URL <span className="text-crimson">*</span>
                 </label>
                 <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={meta.inputHint}
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://yourcompany.com"
                   className="bg-background/70 border-amber/30 font-mono text-sm"
-                  maxLength={800}
+                  maxLength={500}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1 font-mono">
+                  We scan your site to give every tool a baseline read of your company.
+                </p>
+
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2 mt-4">
+                  Extra context <span className="text-muted-foreground normal-case tracking-normal">(optional — {meta.inputLabel.toLowerCase()}, goal, or focus)</span>
+                </label>
+                <Textarea
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  placeholder={meta.inputHint}
+                  className="bg-background/70 border-amber/30 font-mono text-sm min-h-[70px]"
+                  maxLength={1500}
                   disabled={loading}
                 />
 
                 <div className="flex flex-col sm:flex-row gap-2 mt-4">
                   <Button
                     onClick={run}
-                    disabled={loading || !input.trim()}
+                    disabled={loading || !url.trim()}
                     className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
                   >
-                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
+                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Scanning + running…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Scan my site & run</>}
                   </Button>
                   <Button
                     type="button"
