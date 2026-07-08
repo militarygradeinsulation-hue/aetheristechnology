@@ -324,8 +324,14 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* THE LEAK ECOSYSTEM — interactive mind map */}
-          <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
+          {/* THE LEAK ECOSYSTEM — interactive mind map (email-gated after 1st use) */}
+          <MindMapEmailGate>
+            <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
+          </MindMapEmailGate>
+
+          {/* THE CHAOS ECOSYSTEM — per-tool try/buy grid */}
+          <HomeToolShopGrid />
+
 
 
 
