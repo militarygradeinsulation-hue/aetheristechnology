@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import operatorCertification from '@/assets/operator-certification.jpg.asset.json';
 import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
+import resellerLicense from '@/assets/reseller-license-cert.png.asset.json';
 
 const trackCareersCta = (cta: string) => {
   try {
@@ -166,7 +167,142 @@ const CareersPage = () => {
               </div>
             </div>
 
-            {/* FIT — THRIVE vs DON'T APPLY */}
+            {/* LICENSED RESELLER PROGRAM — separate track from operator */}
+            <div className="rounded-2xl border border-amber/40 bg-gradient-to-b from-amber/10 via-background/40 to-background/20 p-6 md:p-10 space-y-8">
+              <div className="text-center space-y-3">
+                <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Third door · Licensed Reseller Program</div>
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                  Don't want to operate? <span className="text-amber">Just sell the systems.</span>
+                </h2>
+                <p className="text-sm md:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
+                  Buy a one-year non-exclusive license to market, promote, and sell every Aetheris system. You don't diagnose. You don't deliver. You don't operate. You refer, we build, you get paid — every time, for a full year.
+                </p>
+              </div>
+
+              <div className="max-w-3xl mx-auto rounded-xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
+                <img
+                  src={resellerLicense.url}
+                  alt="Aetheris Technology Licensed To Sell certificate — one-year non-exclusive reseller license"
+                  className="w-full h-auto block"
+                  loading="lazy"
+                />
+              </div>
+              <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                What you get on day one. Your name. Your license ID. Valid 12 months.
+              </p>
+
+              {/* PRICE + SPLIT */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-amber/40 bg-background/50 p-5 text-center">
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">License fee</div>
+                  <div className="font-display text-4xl text-foreground font-bold">$500</div>
+                  <div className="text-xs text-muted-foreground mt-1">per year · non-refundable</div>
+                </div>
+                <div className="rounded-xl border border-emerald-500/40 bg-background/50 p-5 text-center">
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400 mb-2">Your cut</div>
+                  <div className="font-display text-4xl text-emerald-400 font-bold">25%</div>
+                  <div className="text-xs text-muted-foreground mt-1">of every sale tracked to your code</div>
+                </div>
+                <div className="rounded-xl border border-foreground/20 bg-background/50 p-5 text-center">
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris cut</div>
+                  <div className="font-display text-4xl text-foreground font-bold">75%</div>
+                  <div className="text-xs text-muted-foreground mt-1">we cover build, delivery, support</div>
+                </div>
+              </div>
+
+              {/* THE MATH */}
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">// the math, plainly</div>
+                <div className="rounded-xl border border-amber/20 bg-background/40 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-amber/10 text-foreground/80 font-mono text-[11px] uppercase tracking-wider">
+                      <tr>
+                        <th className="text-left p-3">Product referred</th>
+                        <th className="text-right p-3">Price</th>
+                        <th className="text-right p-3 text-emerald-400">You earn (25%)</th>
+                        <th className="text-right p-3 text-foreground/60">Aetheris (75%)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-amber/10">
+                      {[
+                        ['Content Engine (single tool)', 40, 10, 30],
+                        ['Chaos Ecosystem — 3-tool bundle', 60, 15, 45],
+                        ['All-Access Ecosystem', 200, 50, 150],
+                        ['Brand Voice Extension', 60, 15, 45],
+                        ['Smart Subscription (monthly)', 97, 24.25, 72.75],
+                        ['Forensic Diagnostic (flagship)', 2500, 625, 1875],
+                        ['Retainer engagement (monthly)', 15000, 3750, 11250],
+                      ].map(([label, price, you, us]) => (
+                        <tr key={label as string} className="hover:bg-amber/5">
+                          <td className="p-3 text-foreground/90">{label}</td>
+                          <td className="p-3 text-right font-mono text-foreground/80">${(price as number).toLocaleString()}</td>
+                          <td className="p-3 text-right font-mono text-emerald-400 font-semibold">${(you as number).toLocaleString()}</td>
+                          <td className="p-3 text-right font-mono text-foreground/60">${(us as number).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                  <strong className="text-amber">Break-even math:</strong> the $500 license pays for itself at <strong className="text-foreground">$2,000 in tracked sales</strong> — that's 34 Chaos Ecosystem referrals, 10 All-Access referrals, or <strong className="text-emerald-400">one</strong> Forensic Diagnostic referral. Every dollar after that is yours to keep for the rest of the license year.
+                </p>
+              </div>
+
+              {/* HOW IT WORKS — 5 steps */}
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">// how to succeed — 5 steps</div>
+                <div className="grid md:grid-cols-5 gap-3">
+                  {[
+                    { n: '01', t: 'Pay $500', d: 'One-time yearly fee. License ID + personalized certificate issued the same minute.' },
+                    { n: '02', t: 'Get your tracked link', d: 'A unique reseller URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
+                    { n: '03', t: 'Market on your channels', d: 'LinkedIn, email, referrals, in-person. Use our creative pack (screenshots, one-pagers, demo video links). No cold-call quota, no script gate.' },
+                    { n: '04', t: 'We deliver', d: 'When they buy, our team builds, ships, and supports. You never touch delivery, diagnosis, or operations.' },
+                    { n: '05', t: 'Get paid monthly', d: '25% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
+                  ].map(({ n, t, d }) => (
+                    <div key={n} className="rounded-xl border border-amber/20 bg-background/40 p-4">
+                      <div className="font-mono text-[10px] text-amber/70 mb-1">{n}</div>
+                      <h4 className="font-display text-foreground font-semibold text-sm mb-1.5">{t}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{d}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* GUARDRAILS — what you can/can't do */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+                  <h4 className="font-display text-emerald-400 font-semibold mb-3 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> You are authorized to</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1.5">
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Market and promote every Aetheris tool, ecosystem, and flagship</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Use the official "Aetheris Authorized Partner" seal on your site & LinkedIn</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Share your certificate publicly as proof of license</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Refer inbound leads directly to Joseph for flagship closes</li>
+                  </ul>
+                </div>
+                <div className="rounded-xl border border-crimson/30 bg-crimson/5 p-5">
+                  <h4 className="font-display text-crimson font-semibold mb-3 flex items-center gap-2"><XCircle className="w-4 h-4" /> You are NOT authorized to</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1.5">
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Diagnose, analyze, or perform forensic operator work</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Deliver, build, or fulfill any Aetheris system yourself</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Call yourself an "Aetheris Operator" or imply certification</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Resell the license, rep code, or IP to a third party</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="text-center space-y-3 pt-2">
+                <a href="/careers/license?tier=reseller" onClick={() => trackCareersCta('reseller_license_buy')} className="inline-block">
+                  <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold px-8">
+                    Get the yearly license — $500 →
+                  </Button>
+                </a>
+                <p className="text-xs text-muted-foreground">
+                  License auto-expires 12 months from issue date. Renew at the same rate. No auto-charge.
+                </p>
+              </div>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-5">
               <Card className="bg-card/60 backdrop-blur border-emerald-500/20">
                 <CardHeader>
