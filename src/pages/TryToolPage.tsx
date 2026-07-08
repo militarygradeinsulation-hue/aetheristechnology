@@ -482,18 +482,26 @@ export default function TryToolPage() {
                   <ShieldCheck className="w-4 h-4 text-amber" />
                   Same engine the operators run. Nothing saved. Nothing logged to your account.
                 </div>
-                <Link
-                  to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
+                <button
+                  type="button"
+                  onClick={() => setBuyOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 whitespace-nowrap"
                 >
                   <ShoppingCart className="w-3 h-3" /> Buy this tool — $40
-                </Link>
+                </button>
               </div>
             )}
           </div>
         </main>
         <Footer />
       </div>
+
+      <BuyToolDialog
+        open={buyOpen}
+        onOpenChange={setBuyOpen}
+        plan="single"
+        preselectedToolIds={[toolId]}
+      />
     </div>
   );
 }
