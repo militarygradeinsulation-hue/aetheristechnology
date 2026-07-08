@@ -74,7 +74,7 @@ export default function TryToolPage() {
       <div className="relative min-h-screen">
         <Background />
         <div className="relative z-10">
-          <Navbar />
+          <Navbar onContactClick={() => {}} />
           <main className="max-w-3xl mx-auto px-4 py-32 text-center">
             <h1 className="font-forensic text-3xl font-bold mb-4">Tool not found</h1>
             <Link to="/" className="text-amber underline">Back to the ecosystem</Link>
@@ -94,7 +94,7 @@ export default function TryToolPage() {
       />
       <Background />
       <div className="relative z-10">
-        <Navbar />
+        <Navbar onContactClick={() => {}} />
         <main className="max-w-3xl mx-auto px-4 pt-28 pb-16">
           <Link to="/" className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-widest text-amber/80 hover:text-amber mb-4">
             <ArrowLeft className="w-3 h-3" /> Back

@@ -10,6 +10,7 @@ import { PublicChaosScan } from '@/components/PublicChaosScan';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
+import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -118,6 +119,13 @@ const Home = () => {
               </div>
             </div>
           </section>
+
+          {/* Public sandbox — try every ecosystem tool, nothing saved */}
+          <section id="chaos-ecosystem-try" className="px-4 pb-14 scroll-mt-24">
+            <HomeToolShopGrid />
+          </section>
+
+
 
           {/* Email gate → full ecosystem of tools */}
           <section id="ecosystem-gate" className="px-4 pb-14 scroll-mt-24">
