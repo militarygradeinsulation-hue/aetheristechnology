@@ -214,6 +214,25 @@ const EcosystemPage: React.FC = () => {
     if (!trimmed) return;
     setLoading(true);
     try {
+      // Email path — anyone who drops an email gets in
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      if (isEmail) {
+        try {
+          await supabase.from('tool_leads').insert({
+            email: trimmed.toLowerCase(),
+            tool_slug: 'ecosystem',
+            tool_title: 'Aetheris Ecosystem',
+            source: 'ecosystem_email_gate',
+            user_agent: navigator.userAgent,
+          });
+        } catch (_) { /* non-fatal */ }
+        const label = `EMAIL ${trimmed.toLowerCase()}`;
+        sessionStorage.setItem(AUTH_KEY, '1');
+        sessionStorage.setItem(CODE_KEY, label);
+        setActiveCode(label);
+        setAuthed(true);
+        return;
+      }
       if (trimmed === '9822') {
         sessionStorage.setItem(AUTH_KEY, '1');
         sessionStorage.setItem(CODE_KEY, 'ADMIN');
@@ -229,7 +248,7 @@ const EcosystemPage: React.FC = () => {
         setActiveCode(trimmed);
         setAuthed(true);
       } else {
-        toast.error('Invalid rep code');
+        toast.error('Invalid rep code or email');
       }
     } catch (err: any) {
       toast.error(err?.message || 'Login failed');
@@ -237,6 +256,7 @@ const EcosystemPage: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const handleLogout = () => {
     sessionStorage.removeItem(AUTH_KEY);
@@ -418,18 +438,17 @@ const EcosystemPage: React.FC = () => {
                 <ShieldCheck className="w-6 h-6 text-amber-300" />
               </div>
               <h1 className="font-serif text-2xl">Ecosystem Access</h1>
-              <p className="text-sm text-muted-foreground mt-1">Enter your rep code.</p>
+              <p className="text-sm text-muted-foreground mt-1">Enter your email or rep code.</p>
             </div>
             <form onSubmit={handleLogin} className="space-y-3">
               <Input
                 type="text"
-                inputMode="numeric"
-                placeholder="Rep Code"
+                placeholder="you@company.com  or  Rep Code"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => setCode(e.target.value)}
                 autoFocus
                 required
-                className="bg-black/40 border-amber-400/30 text-center font-mono tracking-[0.5em] text-lg"
+                className="bg-black/40 border-amber-400/30 text-center font-mono text-sm"
               />
               <Button
                 type="submit"
@@ -438,7 +457,11 @@ const EcosystemPage: React.FC = () => {
               >
                 {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying</> : 'Engage'}
               </Button>
+              <p className="text-[10px] text-center text-muted-foreground/70 font-mono uppercase tracking-widest">
+                Drop an email — instant access.
+              </p>
             </form>
+
           </div>
         </main>
       </div>
@@ -468,10 +491,11 @@ const EcosystemPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             {activeCode && (
-              <Badge variant="outline" className="font-mono text-xs border-amber-400/40 text-amber-300 bg-amber-400/5">
-                {activeCode === 'ADMIN' ? '● ADMIN' : `● REP ${activeCode}`}
+              <Badge variant="outline" className="font-mono text-xs border-amber-400/40 text-amber-300 bg-amber-400/5 max-w-[220px] truncate">
+                {activeCode === 'ADMIN' ? '● ADMIN' : activeCode.startsWith('EMAIL ') ? `● ${activeCode.slice(6)}` : `● REP ${activeCode}`}
               </Badge>
             )}
+
             <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-amber-300">
               <LogOut className="w-4 h-4 mr-1.5" /> Sign out
             </Button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Search, Grid3x3, Loader2 } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,10 +8,46 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicChaosScan } from '@/components/PublicChaosScan';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
+  const navigate = useNavigate();
+
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!isEmail) {
+      toast.error('Enter a valid email');
+      return;
+    }
+    setUnlocking(true);
+    try {
+      try {
+        await supabase.from('tool_leads').insert({
+          email: trimmed,
+          tool_slug: 'ecosystem',
+          tool_title: 'Aetheris Ecosystem',
+          source: 'home_ecosystem_gate',
+          user_agent: navigator.userAgent,
+        });
+      } catch (_) { /* non-fatal */ }
+      sessionStorage.setItem('ecosystem_auth_v1', '1');
+      sessionStorage.setItem('ecosystem_code_v1', `EMAIL ${trimmed}`);
+      toast.success('Access granted. Loading the toolset…');
+      navigate('/ecosystem');
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
 
   useEffect(() => {
     const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
@@ -83,7 +119,49 @@ const Home = () => {
             </div>
           </section>
 
+          {/* Email gate → full ecosystem of tools */}
+          <section id="ecosystem-gate" className="px-4 pb-14 scroll-mt-24">
+            <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2 flex items-center gap-1.5">
+                <Grid3x3 className="w-3 h-3" /> The full toolset
+              </div>
+              <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
+                Want every forensic tool we use?
+              </h3>
+              <p className="text-sm md:text-base text-foreground/80 mb-5">
+                Drop your email and get instant access to the entire Aetheris ecosystem — scanners, diagnostics,
+                report generators, and closer kits. No password, no rep code required.
+              </p>
+              <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="email"
+                  required
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/70 border-amber/30 font-mono text-sm flex-1"
+                />
+                <Button
+                  type="submit"
+                  disabled={unlocking || !email}
+                  className="bg-amber text-background hover:bg-amber/90 font-semibold whitespace-nowrap"
+                >
+                  {unlocking ? (
+                    <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Unlocking</>
+                  ) : (
+                    <>Unlock the toolset <ArrowRight className="w-4 h-4 ml-1" /></>
+                  )}
+                </Button>
+              </form>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                One email · full access · no spam
+              </p>
+            </div>
+          </section>
+
           <PublicChaosScan />
+
+
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
             <div className="max-w-3xl mx-auto text-center">
