@@ -137,6 +137,7 @@ export default function TryToolPage() {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [runAt, setRunAt] = useState<Date | null>(null);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
