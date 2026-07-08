@@ -238,6 +238,29 @@ export default function TryToolPage() {
               {tool.tagline}
             </p>
 
+            {/* Plain-English summary + how-to — always visible above the input */}
+            <div className="rounded-sm border border-amber/30 bg-background/50 p-4 mb-5 grid md:grid-cols-2 gap-4">
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1.5">// What it does</div>
+                <p className="text-sm text-foreground/90 leading-relaxed">{meta.summary}</p>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mt-3 mb-1.5">// You'll get</div>
+                <ul className="text-xs text-foreground/80 space-y-0.5 list-disc list-inside marker:text-amber">
+                  {meta.delivers.map((d, i) => <li key={i}>{d}</li>)}
+                </ul>
+              </div>
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1.5">// How to use it</div>
+                <ol className="text-sm text-foreground/90 space-y-1.5">
+                  {meta.howTo.map((step, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="font-mono text-[11px] text-amber shrink-0 w-5">0{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+
             <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
               {meta.inputLabel}
             </label>
