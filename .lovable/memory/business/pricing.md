@@ -17,6 +17,15 @@ All three CTA "Talk to an operator" → ContactModal. **No public Buy/checkout b
 - **21-Day Revenue Diagnostic — $18,500.** Fit call required.
 - **Implementation Retainer — $15,000/mo, 3-month minimum.** Diagnostic clients only.
 
+### Leak Ecosystem Tool Shop (`/tools-shop`) — self-serve, lifetime unlocks
+Public shop with 3 free runs per tool (email-gated), then buy a lifetime code. Codes unlock unlimited runs + persistent AI memory per tool. Bundle: buy 3, get 1 free is baked into the 3-Tool price.
+- **Single Tool — $40 one-time (lifetime).** Tier 1 → Co $20 / Rep $12 / Partner $8.
+- **3-Tool Bundle — $100 one-time (lifetime, mix & match).** Tier 2 → Co $60 / Rep $25 / Partner $15.
+- **All Access — $1,000 one-time (lifetime, every current + future tool).** Tier 3 → Co $700 / Rep $200 / Partner $100.
+
+Stripe lookup_keys: `tool_single_lifetime`, `tool_triple_lifetime`, `tool_unlimited_lifetime`. Webhook mints a `LEAK-XXXX-XXXX` code on `checkout.session.completed` when `metadata.shop === "tools"` and emails it via the `tool-shop-license` template. Redeem at `/tools-shop/redeem`.
+
+
 ## Commission math — TWO models (source of truth)
 
 ### Model A — Tiered % (bundles + legacy catalog)
