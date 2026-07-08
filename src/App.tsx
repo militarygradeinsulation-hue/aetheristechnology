@@ -202,6 +202,10 @@ const App = () => (
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/test-portal" element={<TestPortalPage />} />
+                      <Route path="/demo" element={<Navigate to="/test-portal" replace />} />
+                      <Route path="/demo-portal" element={<Navigate to="/test-portal" replace />} />
+                      <Route path="/portal-demo" element={<Navigate to="/test-portal" replace />} />
+                      <Route path="/sandbox" element={<Navigate to="/test-portal" replace />} />
                       <Route path="/detective" element={<DetectiveModePage />} />
                       <Route path="/detective-mode" element={<DetectiveModePage />} />
                       <Route path="/ecosystem" element={<EcosystemPage />} />
