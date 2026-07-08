@@ -1,98 +1,56 @@
-# Forensic Scan All — Golden Standard Report
+## Goal
 
-A single "Scan All" button on the admin + rep tools that runs every diagnostic we have against one target (URL + optional company name + optional CRM/HubSpot account), then assembles a **~70-page chaptered forensic report** with a clickable index, professional typography, and a downloadable **Smart PDF** (text-indexed for native search + QR/link to "Ask this report" AI chat). Same flow ships inside the Chrome extension side panel.
+Give the careers page two clear paths ($40 test OR $100 instant license), make the public "Try tool" output look as polished as the admin/rep portal renderings, and make sure Easy Mode is a first-class buyable tool.
 
-## What "Scan All" runs (end-to-end)
+## 1. Careers page — two paths side by side
 
-A new edge function `scan-all-forensic` orchestrates the full battery in parallel where safe, sequenced where it must be. It writes a single `forensic_scans` row tracking status per stage and persists every raw payload as JSON for the report builder.
+Edit `src/pages/CareersPage.tsx`:
 
-Stages (every existing function reused — no logic re-invented):
-1. **Site + SEO + tech** — Firecrawl scrape (markdown/html/links/branding/screenshot), Firecrawl map, `generate-scan-report`, SEMrush domain_analysis + top_pages + backlink_analysis + competitive_analysis, tech-stack sniff from headers/HTML.
-2. **Copy forensics** — `generate-friction-audit`, BrandContradictionFinder logic, FrictionVocabularyAudit, repetition scan.
-3. **CRM / Deal leaks** (when HubSpot connected) — `detect_stalled_deals`, `detect_closed_lost_reactivation`, `detect_dead_leads`, `detect_slow_followup`, `detect_stuck_proposal`, `detect_missing_contact_info`, `detect_owner_overload`, `detect_high_intent_no_workflow`, mirror_* summaries.
-4. **Lead intelligence** — RocketReach enrichment on key contacts, competitor SERP scan, identified_visitors join, news cache lookup.
-5. **Synthesis** — Lovable AI (`google/gemini-3-flash-preview`) summarises each stage into chapter-ready prose using the forensic operator voice (memory: linkedin-voice-playbook + forensic-blueprint).
+- Replace the single "Buy the $40 certification test" gate card with a two-column gate:
+  - **Path A — $40 Certification Test** (existing flow → `/careers/test`). Copy: "Prove it, then get placed."
+  - **Path B — $100 Instant License** (new flow → `/careers/license`). Copy: "Skip the test. Get your rep code today. Sell every Aetheris tool at full commission without being an employee."
+- Keep the "You belong here if / Don't waste your time" and reality-check blocks.
+- Update final CTA to show both buttons.
+- Update SEO/hero copy to mention both options.
 
-## The Report (golden standard)
+## 2. New $100 Instant License flow
 
-`generate-forensic-report` edge function takes a `scan_id` and outputs structured JSON:
+- Add Stripe price via `payments--create_price`: `careers_instant_license_v1`, one-time, $10000 (cents), USD, on the same product as the test fee.
+- New page `src/pages/CareersLicensePage.tsx` (mirrors `CareersTestPage.tsx` payment shell):
+  - Explains what the license grants: personal rep code, ability to sell every catalog tool + flagships, standard commission (see Core memory split), no test required, no employment relationship (1099 independent).
+  - Embedded Stripe checkout using `create-checkout` with `priceId: 'careers_instant_license_v1'` and `metadata.purpose: 'careers_instant_license'`.
+  - On return (`?session_id=…`): calls new edge function `verify-careers-license` which:
+    1. Confirms Stripe session is paid.
+    2. Inserts a `rep_codes` row (auto-generates a 6-char code, stores `email`, `name`, `active: true`, `source: 'instant_license'`).
+    3. Returns the rep code + portal URL.
+  - Success screen: shows the rep code, one-click copy, "Open your rep portal" button (routes to existing rep portal entry), and a note that a confirmation email is sent.
+- New edge function `supabase/functions/verify-careers-license/index.ts` (verify_jwt=false, CORS, uses `createStripeClient`, inserts into `rep_codes` with service role, sends confirmation email via existing resend-based function pattern used by `verify-careers-test-payment`).
+- Route wiring in `src/App.tsx`: `/careers/license` → `CareersLicensePage`.
 
-```text
-Cover  →  Executive Summary  →  Index  →
-Ch 1  The Site Autopsy
-Ch 2  SEO & Discoverability Leaks
-Ch 3  Tech-Stack & Performance Friction
-Ch 4  Brand Voice & Copy Contradictions
-Ch 5  Vocabulary / Friction Vocabulary Audit
-Ch 6  Competitive Position
-Ch 7  Backlink & Authority Profile
-Ch 8  Pipeline Forensics (deals, stalled, closed-lost)
-Ch 9  Lead Hygiene & Workflow Gaps
-Ch 10 Lead Intelligence & Visitor Identification
-Ch 11 Owner / Capacity Diagnostics
-Ch 12 Top 10 Active Leaks (ranked by $ exposure)
-Ch 13 The 30/60/90 Remediation Plan
-Ch 14 Appendix — raw findings, sample IDs, source data
-```
+## 3. Portal-grade public tool output
 
-Each chapter: title page, 1-sentence verdict, "What we found", "Why it's leaking", "What it's costing", "What to do — this week / this month / this quarter", evidence table. Forensic case-file aesthetic (Fraunces serif headings, JetBrains Mono labels, dark charcoal + amber, crimson reserved for active leaks). USD only.
+Edit `src/pages/TryToolPage.tsx` so the sandbox output visually matches the admin/rep case-file rendering (currently it's a plain prose block):
 
-Rendered via **React + react-pdf** in a new `src/lib/generateForensicGoldenPdf.ts`. Generates a real text-layer PDF (so Ctrl+F + screen readers + AI ingestion all work) at ~70 pages, with TOC bookmarks (`<Link>` anchors + react-pdf outline) so the index is clickable in viewers.
+- Wrap the output in a "case file" shell: crimson `ACTIVE` stamp, mono header showing `// case_id`, tool name, timestamp, and a subtle scanline background — same forensic-tile aesthetic used in `LeakMindMap`.
+- Split rendered markdown into card sections when the AI emits `## Heading` blocks: parse the markdown into H2 sections client-side and render each as its own bordered card with an amber section label, so long outputs read like a structured report instead of a wall of prose.
+- Add a sticky action bar at the bottom of the output: "Buy this tool $40" and "Become a licensed rep $100" (routes to `/careers/license`).
+- Add print-friendly styles (`@media print`) and a "Download as PDF" button using existing `html2pdf`-style pattern already used elsewhere in the repo (reuse whatever the diagnostic PDF export uses; if none, use `window.print()`).
+- No changes to the edge function's prompts — presentation only.
 
-## Smart PDF (hybrid)
+## 4. Easy Mode as a featured tool
 
-- The PDF itself is fully searchable text (no rasterised pages).
-- Cover + footer of every page carries:
-  - A QR code linking to `https://aetheris.technology/report/:scan_id/ask`
-  - A "Ask this report" button (PDF link annotation) to the same URL.
-- New route `/report/:scan_id/ask` opens a chat UI scoped to that scan. Edge function `forensic-report-chat` loads the scan's stored JSON + chapter markdown, embeds via Lovable AI embeddings into a transient in-memory RAG context per request (or pgvector if scan > 30 days old), and answers questions with citations like *"Ch 8 — Pipeline Forensics, finding #3"*.
-- Watermark "Aetheris AI Studio" bottom-right per memory rule.
-
-## Chrome extension parity
-
-`extension/sidepanel.html` gets a new "Scan All" tab that:
-1. Captures the active tab URL.
-2. Calls `scan-all-forensic` with the admin/rep token.
-3. Streams progress (stage list with check-marks).
-4. Renders the full chaptered report inline (collapsible chapters, same typography) in the side panel.
-5. "Download Smart PDF" + "Ask this report" buttons that open the hosted chat in a new tab.
-
-## Data model
-
-New tables (migration, with GRANTs + RLS):
-
-- `forensic_scans` — id, account_id, requested_by, target_url, company_name, hubspot_account_id, status, stage_status jsonb, raw_payload jsonb, summary jsonb, created_at, completed_at
-- `forensic_report_chunks` — scan_id, chapter_no, chapter_slug, title, markdown, embedding vector(1536), metadata jsonb — used by the Ask chat
-- `forensic_report_qa_log` — scan_id, question, answer, citations jsonb, asked_at — for auditing
-
-Index `forensic_report_chunks` with HNSW on `embedding`.
-
-## New / edited files (high level)
-
-- `supabase/functions/scan-all-forensic/index.ts` (new) — orchestrator
-- `supabase/functions/generate-forensic-report/index.ts` (new) — chapter synthesis via Lovable AI
-- `supabase/functions/forensic-report-chat/index.ts` (new) — RAG chat for Smart PDF
-- `supabase/functions/_shared/forensicStages.ts` (new) — pure helpers calling each existing detector / scanner
-- `src/lib/generateForensicGoldenPdf.ts` (new) — react-pdf renderer w/ TOC, bookmarks, QR
-- `src/components/admin/ForensicScanAllPanel.tsx` (new) — admin UI: trigger, live progress, chapter viewer, download
-- `src/components/portal/ForensicScanAllPanel.tsx` (new) — rep version (gated to their account)
-- `src/components/workbench/toolRegistry.tsx` — register the new tool
-- `src/pages/ForensicReportAskPage.tsx` (new) + route in `AppRouter.tsx`
-- `extension/sidepanel.html` + `extension/sidepanel.css` + new `extension/scanAll.js` — extension panel
-- `extension/manifest.json` — add permissions if needed (already has activeTab)
+- Confirm `easy-mode` stays in `src/lib/tool-shop-catalog.ts` (it already is) and is surfaced on `HomeToolShopGrid` — if not pinned, mark it as a featured card at the top of the grid with copy: "One prompt. Full plan, calendar, assets, and next steps."
+- Ensure `TRY_META['easy-mode']` (already present) and the `try-tool-sandbox` PROMPTS for `easy-mode` return the full structured report (Snapshot → 30-Day Plan → Assets → Next Actions). If the current prompt is thin, extend it to match the depth of `website-scanner`.
+- Add an "Easy Mode" highlight tile on `CareersPage` under Path A/B: "New reps love this — one tool that does everything, easiest to demo and sell."
 
 ## Technical notes
 
-- Long jobs: orchestrator returns immediately with `scan_id`, runs stages with `EdgeRuntime.waitUntil` and writes progress; client polls `forensic_scans` row.
-- Concurrency-safe: each stage idempotent against `(scan_id, stage)`.
-- Costs: AI synthesis chunked per chapter; embeddings only run when Smart-PDF chat is enabled (default on).
-- Citations: each chunk stores `chapter_no`, `section_anchor` so the chat answers can deep-link back into the PDF.
-- Reuses memory: voice from `linkedin-voice-playbook`, design tokens from `forensic-identity`, USD lock from `currency-lock`.
+- All money stays USD (`$`) per Core memory currency lock.
+- `rep_codes` insert must include a `GRANT`-safe path via service role in the edge function; do not expose service role client-side.
+- New edge function follows `supabase/config.toml` auto-behavior (verify_jwt=false), CORS shared headers, Zod input validation.
+- No changes to admin/rep portals themselves — instant-license reps get a normal rep code and use the existing rep portal.
 
-## Out of scope (call out)
+## Out of scope
 
-- No new payment flow — Scan All is admin/rep-only.
-- No email delivery of the PDF on first ship (download + extension only). Easy follow-up.
-- No re-scan scheduling on first ship (manual trigger).
-
-I'll build this in one pass. Approve and I'll start with the DB migration → orchestrator → report renderer → UI → extension.
+- Changing commission structure for licensed reps (uses existing catalog split).
+- Building a full rep onboarding wizard behind the license — they get code + portal access, everything else is the existing flow.
