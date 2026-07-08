@@ -12,7 +12,9 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import {
   Cpu, ChevronDown, ChevronUp, Play, RefreshCw, Trash2, Activity, AlertCircle,
+  Database, Zap, Link2, Radio,
 } from 'lucide-react';
+import { installChipBridge, type ChipBridgeAPI } from '@/lib/chip-bridge';
 
 declare global {
   interface Window {
