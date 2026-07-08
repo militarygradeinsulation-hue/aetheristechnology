@@ -114,13 +114,20 @@ export default function ToolsShopPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
             {SHOP_TOOLS.map(t => {
               const on = plan === "unlimited" || selected.includes(t.id);
+              const buyThis = () => {
+                if (plan === "unlimited") {
+                  document.getElementById("shop-checkout")?.scrollIntoView({ behavior: "smooth" });
+                  return;
+                }
+                setSelected(prev => (prev.includes(t.id) ? prev : (plan === "single" ? [t.id] : [...prev.slice(-2), t.id])));
+                setTimeout(() => document.getElementById("shop-checkout")?.scrollIntoView({ behavior: "smooth" }), 60);
+              };
               return (
                 <Card
                   key={t.id}
-                  onClick={() => toggle(t.id)}
-                  className={`p-4 transition ${plan === "unlimited" ? "opacity-90" : "cursor-pointer"} ${on ? "border-amber-500 bg-amber-500/5" : "hover:border-amber-500/40"}`}
+                  className={`p-4 transition ${on ? "border-amber-500 bg-amber-500/5" : "hover:border-amber-500/40"}`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 mb-3">
                     {plan !== "unlimited" && (
                       <Checkbox checked={on} onCheckedChange={() => toggle(t.id)} className="mt-1" />
                     )}
@@ -129,23 +136,29 @@ export default function ToolsShopPage() {
                         <h3 className="font-semibold text-sm truncate">{t.name}</h3>
                         <Badge variant="secondary" className="text-[10px] uppercase">{t.category}</Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2">{t.tagline}</p>
-                      <Link
-                        to={t.route}
-                        onClick={e => e.stopPropagation()}
-                        className="text-xs text-amber-500 underline"
-                      >
-                        Try free →
-                      </Link>
+                      <p className="text-xs text-muted-foreground">{t.tagline}</p>
                     </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button asChild size="sm" variant="outline" className="flex-1">
+                      <Link to={t.route}>Try free (3 runs)</Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={buyThis}
+                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-black"
+                    >
+                      {plan === "unlimited" ? "Included" : on ? "Selected ✓" : `Buy $${(SHOP_PRICES.single.amount / 100).toFixed(0)}`}
+                    </Button>
                   </div>
                 </Card>
               );
             })}
           </div>
 
+
           {/* Checkout */}
-          <Card className="p-6 max-w-2xl mx-auto border-amber-500/40">
+          <Card id="shop-checkout" className="p-6 max-w-2xl mx-auto border-amber-500/40">
             <h3 className="font-semibold mb-4">Checkout — {price.label} · ${(price.amount / 100).toFixed(0)}</h3>
             <div className="space-y-3 mb-4">
               <div>
