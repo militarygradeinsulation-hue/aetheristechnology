@@ -413,9 +413,10 @@ export default function TryToolPage() {
                     {dossierOpen && (
                       <div className="grid sm:grid-cols-2 gap-px bg-amber/15 border-t border-amber/20 animate-in fade-in slide-in-from-bottom-2 duration-200">
                         {/* Own the tool */}
-                        <Link
-                          to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
-                          className="group relative bg-background hover:bg-amber/[0.06] transition-colors p-5 flex flex-col gap-3"
+                        <button
+                          type="button"
+                          onClick={() => setBuyOpen(true)}
+                          className="group relative bg-background hover:bg-amber/[0.06] transition-colors p-5 flex flex-col gap-3 text-left"
                         >
                           <div className="flex items-center justify-between">
                             <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70">
@@ -434,10 +435,10 @@ export default function TryToolPage() {
                           </div>
                           <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber border-t border-amber/15">
                             <ShoppingCart className="w-3 h-3" />
-                            <span>Acquire</span>
+                            <span>Buy now</span>
                             <span className="ml-auto text-amber/60 group-hover:translate-x-1 transition-transform">→</span>
                           </div>
-                        </Link>
+                        </button>
 
                         {/* Become operator */}
                         <Link
