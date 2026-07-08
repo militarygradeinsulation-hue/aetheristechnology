@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import operatorCertification from '@/assets/operator-certification.jpg.asset.json';
 import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
+import resellerLicense from '@/assets/reseller-license-cert.png.asset.json';
 
 const trackCareersCta = (cta: string) => {
   try {
