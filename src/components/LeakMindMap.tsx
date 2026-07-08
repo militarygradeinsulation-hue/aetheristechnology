@@ -127,6 +127,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
   const a = accentMap[accent];
 
   const [selected, setSelected] = useState<number | null>(null);
+  const [buyToolId, setBuyToolId] = useState<string | null>(null);
 
   // Chaos physics — draggable bubbles with ripples
   const stageRef = useRef<HTMLDivElement>(null);
