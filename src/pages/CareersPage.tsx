@@ -200,12 +200,12 @@ const CareersPage = () => {
                 </div>
                 <div className="rounded-xl border border-emerald-500/40 bg-background/50 p-5 text-center">
                   <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400 mb-2">Your cut</div>
-                  <div className="font-display text-4xl text-emerald-400 font-bold">25%</div>
+                  <div className="font-display text-4xl text-emerald-400 font-bold">40%</div>
                   <div className="text-xs text-muted-foreground mt-1">of every sale tracked to your code</div>
                 </div>
                 <div className="rounded-xl border border-foreground/20 bg-background/50 p-5 text-center">
                   <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris cut</div>
-                  <div className="font-display text-4xl text-foreground font-bold">75%</div>
+                  <div className="font-display text-4xl text-foreground font-bold">60%</div>
                   <div className="text-xs text-muted-foreground mt-1">we cover build, delivery, support</div>
                 </div>
               </div>
@@ -219,19 +219,20 @@ const CareersPage = () => {
                       <tr>
                         <th className="text-left p-3">Product referred</th>
                         <th className="text-right p-3">Price</th>
-                        <th className="text-right p-3 text-emerald-400">You earn (25%)</th>
-                        <th className="text-right p-3 text-foreground/60">Aetheris (75%)</th>
+                        <th className="text-right p-3 text-emerald-400">You earn (40%)</th>
+                        <th className="text-right p-3 text-foreground/60">Aetheris (60%)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-amber/10">
                       {[
-                        ['Content Engine (single tool)', 40, 10, 30],
-                        ['Chaos Ecosystem — 3-tool bundle', 60, 15, 45],
-                        ['All-Access Ecosystem', 200, 50, 150],
-                        ['Brand Voice Extension', 60, 15, 45],
-                        ['Smart Subscription (monthly)', 97, 24.25, 72.75],
-                        ['Forensic Diagnostic (flagship)', 2500, 625, 1875],
-                        ['Retainer engagement (monthly)', 15000, 3750, 11250],
+                        ['Chaos Ecosystem — Single Tool (lifetime)', 40, 16, 24],
+                        ['Chaos Ecosystem — 3-Tool Bundle (lifetime)', 100, 40, 60],
+                        ['Chaos Ecosystem — All Access (lifetime)', 1000, 400, 600],
+                        ['Signal Pack — One-day forensic snapshot', 2500, 1000, 1500],
+                        ['Revenue Pack — 2-week sales forensics', 5000, 2000, 3000],
+                        ['Operator Suite — 3-week embed', 10000, 4000, 6000],
+                        ['21-Day Revenue Diagnostic (flagship)', 18500, 7400, 11100],
+                        ['Active Case engagement (monthly)', 15000, 6000, 9000],
                       ].map(([label, price, you, us]) => (
                         <tr key={label as string} className="hover:bg-amber/5">
                           <td className="p-3 text-foreground/90">{label}</td>
@@ -244,7 +245,7 @@ const CareersPage = () => {
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                  <strong className="text-amber">Break-even math:</strong> the $500 license pays for itself at <strong className="text-foreground">$2,000 in tracked sales</strong> — that's 34 Chaos Ecosystem referrals, 10 All-Access referrals, or <strong className="text-emerald-400">one</strong> Forensic Diagnostic referral. Every dollar after that is yours to keep for the rest of the license year.
+                  <strong className="text-amber">Break-even math:</strong> the $500 license pays for itself at <strong className="text-foreground">$1,250 in tracked sales</strong> — that's 32 single-tool referrals, 2 All-Access referrals, or one Signal Pack. One 21-Day Diagnostic referral pays the license back almost 15 times over. Every dollar after that is yours to keep for the rest of the license year.
                 </p>
               </div>
 
@@ -257,7 +258,7 @@ const CareersPage = () => {
                     { n: '02', t: 'Get your tracked link', d: 'A unique reseller URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
                     { n: '03', t: 'Market on your channels', d: 'LinkedIn, email, referrals, in-person. Use our creative pack (screenshots, one-pagers, demo video links). No cold-call quota, no script gate.' },
                     { n: '04', t: 'We deliver', d: 'When they buy, our team builds, ships, and supports. You never touch delivery, diagnosis, or operations.' },
-                    { n: '05', t: 'Get paid monthly', d: '25% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
+                    { n: '05', t: 'Get paid monthly', d: '40% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
                   ].map(({ n, t, d }) => (
                     <div key={n} className="rounded-xl border border-amber/20 bg-background/40 p-4">
                       <div className="font-mono text-[10px] text-amber/70 mb-1">{n}</div>
@@ -267,6 +268,7 @@ const CareersPage = () => {
                   ))}
                 </div>
               </div>
+
 
               {/* GUARDRAILS — what you can/can't do */}
               <div className="grid md:grid-cols-2 gap-4">
