@@ -131,16 +131,17 @@ export default function TryToolPage() {
   const tool = useMemo(() => findTool(toolId), [toolId]);
   const meta = TRY_META[toolId];
 
-  const [input, setInput] = useState("");
+  const [url, setUrl] = useState("");
+  const [context, setContext] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [runAt, setRunAt] = useState<Date | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
-  useEffect(() => () => { setInput(""); setOutput(""); setRunAt(null); }, [toolId]);
+  useEffect(() => () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); }, [toolId]);
 
-  const reset = () => { setInput(""); setOutput(""); setRunAt(null); };
+  const reset = () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); };
 
   // Deterministic-ish case id from tool + timestamp for the case-file header.
   const caseId = useMemo(() => {
@@ -177,15 +178,16 @@ export default function TryToolPage() {
   };
   const printReport = () => window.print();
 
-
   const run = async () => {
-    const trimmed = input.trim();
-    if (!trimmed) { toast.error(`${meta?.inputLabel || "Input"} is required`); return; }
+    const cleanUrl = url.trim();
+    const cleanCtx = context.trim();
+    if (!cleanUrl) { toast.error("Enter your website URL"); return; }
+    if (!/^https?:\/\//i.test(cleanUrl)) { toast.error("URL must start with https://"); return; }
     setLoading(true);
     setOutput("");
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
-        body: { toolId, input: trimmed },
+        body: { toolId, url: cleanUrl, context: cleanCtx },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
