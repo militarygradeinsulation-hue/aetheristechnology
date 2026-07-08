@@ -417,23 +417,8 @@ const LeakLanderPage: React.FC = () => {
                   Scoped, priced, delivered — no ongoing retainers unless you want them.
                 </p>
 
-                {/* Build placeholders — small, unbranded tiles */}
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <div className="w-full max-w-xl rounded-md border border-amber/20 bg-background/60 p-3">
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 w-full">
-                      {Array.from({ length: 12 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="aspect-square w-full rounded-sm border border-amber/25 bg-black/40 flex items-center justify-center"
-                        >
-                          <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-foreground/40">
-                            #{String(i + 1).padStart(2, "0")}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="mt-1 text-center text-xs sm:text-sm text-foreground/70 max-w-md">
+                  <p className="text-center text-xs sm:text-sm text-foreground/70 max-w-md">
                     Want to see what's underneath?{" "}
                     <button
                       onClick={() => setBookingOpen(true)}
@@ -444,6 +429,7 @@ const LeakLanderPage: React.FC = () => {
                     and I'll walk you through what I've built.
                   </p>
                 </div>
+
 
               </div>
 
