@@ -46,7 +46,9 @@ type ChatMessage = {
   attachments?: Attachment[];
   tools?: ToolEvent[];
   images?: string[]; // generated image data URLs (already watermarked)
+  promptSuggestions?: string[]; // alternative image prompts the user can regen from
   createdAt: number;
+
 };
 
 type Thread = {
@@ -216,6 +218,21 @@ async function streamImage(prompt: string, onFrame: (dataUrl: string, isFinal: b
   if (!sawFinal) throw new Error("Image stream ended without final image");
 }
 
+// ─── Prompt-idea brainstorm ───────────────────────────────────────────────
+async function fetchPromptIdeas(prompt: string, signal: AbortSignal): Promise<string[]> {
+  const authHeader = await getUserAuthHeader();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/aetheris-nexus-prompt-ideas`, {
+    method: "POST",
+    signal,
+    headers: { "Content-Type": "application/json", Authorization: authHeader, apikey: ANON_KEY },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => ({}));
+  return Array.isArray(data?.prompts) ? data.prompts.filter((p: unknown): p is string => typeof p === "string") : [];
+}
+
+
 // ─── Component ────────────────────────────────────────────────────────────
 export default function AetherisNexusPage() {
   const navigate = useNavigate();
@@ -311,7 +328,55 @@ export default function AetherisNexusPage() {
     setPendingAttachments((prev) => [...prev, ...out]);
   }, []);
 
+  const runImageGen = useCallback(async (text: string, threadIdArg: string) => {
+    const assistantMsg: ChatMessage = {
+      id: uid(), role: "assistant", content: "Generating image…", images: [], promptSuggestions: [], createdAt: now(),
+    };
+    updateThread(threadIdArg, (t) => ({
+      ...t,
+      updatedAt: now(),
+      messages: [...t.messages, assistantMsg],
+    }));
+    setStreaming(true);
+    const ac = new AbortController();
+    abortRef.current = ac;
+    // Fetch alternative prompt ideas in parallel — don't block image render on it.
+    fetchPromptIdeas(text, ac.signal).then((prompts) => {
+      if (prompts.length === 0) return;
+      updateThread(threadIdArg, (t) => ({
+        ...t,
+        messages: t.messages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, promptSuggestions: prompts } : m,
+        ),
+      }));
+    }).catch(() => { /* non-fatal */ });
+    try {
+      await streamImage(text, async (dataUrl, isFinal) => {
+        const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
+        updateThread(threadIdArg, (t) => ({
+          ...t,
+          messages: t.messages.map((m) =>
+            m.id === assistantMsg.id
+              ? { ...m, images: [finalUrl], content: isFinal ? "" : "Generating image…" }
+              : m,
+          ),
+        }));
+      }, ac.signal);
+    } catch (e: any) {
+      updateThread(threadIdArg, (t) => ({
+        ...t,
+        messages: t.messages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: `Image generation failed: ${e.message}` } : m,
+        ),
+      }));
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }, [updateThread]);
+
   const handleSend = useCallback(async () => {
+
     const text = input.trim();
     if (!text && pendingAttachments.length === 0) return;
     if (streaming) return;
@@ -339,46 +404,19 @@ export default function AetherisNexusPage() {
 
     // Image mode: skip the chat — go straight to image gen
     if (imageMode && text) {
-      const assistantMsg: ChatMessage = {
-        id: uid(), role: "assistant", content: "Generating image…", images: [], createdAt: now(),
-      };
       updateThread(activeThreadLocal.id, (t) => ({
         ...t,
         title: t.messages.length === 0 ? text.slice(0, 60) : t.title,
         updatedAt: now(),
-        messages: [...t.messages, userMsg, assistantMsg],
+        messages: [...t.messages, userMsg],
       }));
       setInput("");
       setPendingAttachments([]);
-      setStreaming(true);
       setImageMode(false);
-      const ac = new AbortController();
-      abortRef.current = ac;
-      try {
-        await streamImage(text, async (dataUrl, isFinal) => {
-          const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
-          updateThread(activeThreadLocal.id, (t) => ({
-            ...t,
-            messages: t.messages.map((m) =>
-              m.id === assistantMsg.id
-                ? { ...m, images: [finalUrl], content: isFinal ? "" : "Generating image…" }
-                : m,
-            ),
-          }));
-        }, ac.signal);
-      } catch (e: any) {
-        updateThread(activeThreadLocal.id, (t) => ({
-          ...t,
-          messages: t.messages.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: `Image generation failed: ${e.message}` } : m,
-          ),
-        }));
-      } finally {
-        setStreaming(false);
-        abortRef.current = null;
-      }
+      await runImageGen(text, activeThreadLocal.id);
       return;
     }
+
 
     const assistantMsg: ChatMessage = {
       id: uid(), role: "assistant", content: "", tools: [], images: [], createdAt: now(),
@@ -657,7 +695,7 @@ export default function AetherisNexusPage() {
           ) : (
             <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6 space-y-6">
               {messages.map((m) => (
-                <MessageBubble key={m.id} msg={m} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} />
+                <MessageBubble key={m.id} msg={m} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} onUseSuggestion={(p) => { if (!streaming && threadId) runImageGen(p, threadId); }} />
               ))}
               {streaming && (
                 <div className="flex items-center gap-2 text-zinc-500 text-sm px-2">
@@ -741,11 +779,13 @@ export default function AetherisNexusPage() {
 }
 
 // ─── Message Bubble ───────────────────────────────────────────────────────
-function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
+function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }: {
   msg: ChatMessage; copyId: string | null;
   onCopy: (id: string, text: string) => void;
   onDownloadImage: (url: string, idx: number) => void;
+  onUseSuggestion?: (prompt: string) => void;
 }) {
+
   if (msg.role === "user") {
     return (
       <div className="flex justify-end animate-fade-in">
@@ -800,6 +840,25 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
             ))}
           </div>
         )}
+        {msg.promptSuggestions && msg.promptSuggestions.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-amber-400/80 font-mono flex items-center gap-1.5">
+              <Sparkles size={11} /> Try another angle
+            </div>
+            <div className="grid gap-1.5">
+              {msg.promptSuggestions.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => onUseSuggestion?.(p)}
+                  disabled={!onUseSuggestion}
+                  className="text-left text-xs text-zinc-300 hover:text-amber-300 border border-zinc-800 hover:border-amber-500/40 hover:bg-amber-500/[0.04] rounded-lg px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {msg.content && (
           <div className="opacity-0 group-hover:opacity-100 transition mt-2">
             <button onClick={() => onCopy(msg.id, msg.content)} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1">
@@ -807,6 +866,7 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );
