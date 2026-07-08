@@ -214,6 +214,25 @@ const EcosystemPage: React.FC = () => {
     if (!trimmed) return;
     setLoading(true);
     try {
+      // Email path — anyone who drops an email gets in
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      if (isEmail) {
+        try {
+          await supabase.from('tool_leads').insert({
+            email: trimmed.toLowerCase(),
+            tool_slug: 'ecosystem',
+            tool_title: 'Aetheris Ecosystem',
+            source: 'ecosystem_email_gate',
+            user_agent: navigator.userAgent,
+          });
+        } catch (_) { /* non-fatal */ }
+        const label = `EMAIL ${trimmed.toLowerCase()}`;
+        sessionStorage.setItem(AUTH_KEY, '1');
+        sessionStorage.setItem(CODE_KEY, label);
+        setActiveCode(label);
+        setAuthed(true);
+        return;
+      }
       if (trimmed === '9822') {
         sessionStorage.setItem(AUTH_KEY, '1');
         sessionStorage.setItem(CODE_KEY, 'ADMIN');
@@ -229,7 +248,7 @@ const EcosystemPage: React.FC = () => {
         setActiveCode(trimmed);
         setAuthed(true);
       } else {
-        toast.error('Invalid rep code');
+        toast.error('Invalid rep code or email');
       }
     } catch (err: any) {
       toast.error(err?.message || 'Login failed');
@@ -237,6 +256,7 @@ const EcosystemPage: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const handleLogout = () => {
     sessionStorage.removeItem(AUTH_KEY);
