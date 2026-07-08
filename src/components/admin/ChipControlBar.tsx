@@ -263,10 +263,44 @@ export const ChipControlBar: React.FC = () => {
                   />
                 </div>
               ))}
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Auto-perceive (sec)</span>
+                  <span className="text-[11px] font-mono text-amber-300">{settings.autoInterval ? `${settings.autoInterval}s` : 'off'}</span>
+                </div>
+                <Slider
+                  value={[settings.autoInterval]}
+                  onValueChange={([v]) => setSettings(s => ({ ...s, autoInterval: v }))}
+                  min={0} max={120} step={5}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Switch
+                  checked={settings.bridgeEnabled}
+                  onCheckedChange={(v) => setSettings(s => ({ ...s, bridgeEnabled: v }))}
+                  aria-label="Enable bridge"
+                />
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  ChipBridge (full app access)
+                </span>
+              </div>
               <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-                Values persist locally. Hit <span className="text-amber-300">Perceive</span> to send them through <code className="text-amber-300/80">chip.perceive()</code>.
+                Bridge exposes <code className="text-amber-300/80">window.ChipBridge</code> — DB queries, edge functions, UI tools, snapshots. Chip runs with your admin session.
               </p>
+
+              {/* Connected systems panel */}
+              <div className="mt-3 rounded-md border border-amber-400/15 bg-black/40 p-2.5 space-y-1.5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-400/80">// Connected //</div>
+                <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                  <div className="flex items-center gap-1.5"><Database className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Tables:</span><span className="text-amber-300">{systemCounts.tables}</span></div>
+                  <div className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Edge:</span><span className="text-amber-300">{systemCounts.edgeReachable ? 'live' : '…'}</span></div>
+                  <div className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Tools:</span><span className="text-amber-300">{systemCounts.tools}</span></div>
+                  <div className="flex items-center gap-1.5"><Radio className={`w-3 h-3 ${settings.autoInterval ? 'text-emerald-400 animate-pulse' : 'text-muted-foreground'}`} /><span className="text-muted-foreground">Auto:</span><span className="text-amber-300">{settings.autoInterval ? 'on' : 'off'}</span></div>
+                </div>
+              </div>
             </div>
+
 
             {/* History */}
             <div className="space-y-2">
