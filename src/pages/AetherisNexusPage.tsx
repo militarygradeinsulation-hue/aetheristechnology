@@ -218,6 +218,21 @@ async function streamImage(prompt: string, onFrame: (dataUrl: string, isFinal: b
   if (!sawFinal) throw new Error("Image stream ended without final image");
 }
 
+// ─── Prompt-idea brainstorm ───────────────────────────────────────────────
+async function fetchPromptIdeas(prompt: string, signal: AbortSignal): Promise<string[]> {
+  const authHeader = await getUserAuthHeader();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/aetheris-nexus-prompt-ideas`, {
+    method: "POST",
+    signal,
+    headers: { "Content-Type": "application/json", Authorization: authHeader, apikey: ANON_KEY },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => ({}));
+  return Array.isArray(data?.prompts) ? data.prompts.filter((p: unknown): p is string => typeof p === "string") : [];
+}
+
+
 // ─── Component ────────────────────────────────────────────────────────────
 export default function AetherisNexusPage() {
   const navigate = useNavigate();
