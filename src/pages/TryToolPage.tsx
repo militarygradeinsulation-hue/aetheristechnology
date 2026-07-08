@@ -107,10 +107,10 @@ const TRY_META: Record<string, ToolMeta> = {
     delivers: ["Concept", "Spec table (palette, lens, wardrobe…)", "Ready generator prompt"],
   },
   "creation-studio": {
-    title: "Creation Studio", inputLabel: "Asset request", inputHint: "e.g. 'launch kit for Q4'",
-    summary: "Plans a mixed-media launch kit — every asset with a purpose and a slot in the sequence.",
-    howTo: ["Describe the launch", "Run", "Get an inventory + 4-week sequence"],
-    delivers: ["Objective", "Asset inventory (8 rows)", "4-week sequence + must-ships"],
+    title: "Creation Studio", inputLabel: "Your website URL", inputHint: "https://yourbrand.com",
+    summary: "Paste your website — we scan your palette, fonts, and logo, then let you spin up on-brand marketing images, PDFs, social posts, and emails from a plain-English brief.",
+    howTo: ["Paste your website URL and click Scan", "Pick what to make (image / PDF / social / email) and describe it", "Download the on-brand result"],
+    delivers: ["Auto-extracted brand kit (colors + fonts + logo)", "On-brand marketing image (Nano Banana render)", "PDF one-pagers, social packs, emails in your voice"],
   },
   "easy-mode": {
     title: "Easy Mode", inputLabel: "One-line goal", inputHint: "e.g. 'get 10 booked calls this month'",
