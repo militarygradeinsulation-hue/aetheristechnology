@@ -51,6 +51,7 @@ const ReciprocationPage = lazy(() => import("./pages/ReciprocationPage"));
 const GoldenReportPage = lazy(() => import("./pages/GoldenReportPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
+const CareersLicensePage = lazy(() => import("./pages/CareersLicensePage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
