@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -17,6 +18,9 @@ import {
   Link2,
   LineChart,
   Target,
+  Chrome,
+  KeyRound,
+  ArrowRight,
 } from 'lucide-react';
 
 type Mode = 'chaos' | 'fixed';
