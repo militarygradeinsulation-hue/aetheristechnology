@@ -491,10 +491,11 @@ const EcosystemPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             {activeCode && (
-              <Badge variant="outline" className="font-mono text-xs border-amber-400/40 text-amber-300 bg-amber-400/5">
-                {activeCode === 'ADMIN' ? '● ADMIN' : `● REP ${activeCode}`}
+              <Badge variant="outline" className="font-mono text-xs border-amber-400/40 text-amber-300 bg-amber-400/5 max-w-[220px] truncate">
+                {activeCode === 'ADMIN' ? '● ADMIN' : activeCode.startsWith('EMAIL ') ? `● ${activeCode.slice(6)}` : `● REP ${activeCode}`}
               </Badge>
             )}
+
             <Button size="sm" variant="ghost" onClick={handleLogout} className="text-muted-foreground hover:text-amber-300">
               <LogOut className="w-4 h-4 mr-1.5" /> Sign out
             </Button>
