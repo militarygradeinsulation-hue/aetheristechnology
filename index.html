@@ -503,23 +503,28 @@
     <script type="text/javascript" id="hs-script-loader" async defer src="//js-na2.hs-scripts.com/244481481.js"></script>
     <!-- End of HubSpot Embed Code -->
 
-    <!-- Chip perceive attach -->
-    <script src="https://build-your-dreams-783.lovable.app/chip.js"></script>
+    <!-- Chip perceive attach — admin portal only -->
     <script>
-      (async () => {
-        try {
-          if (typeof Chip === "undefined" || !Chip?.attach) return;
-          const chip = Chip.attach({ system: "my-crm" });
-          const v = await chip.perceive(
-            { evidence: 0.7, leverage: 0.5, speed: 0.3 },
-            { target: "deal-42" }
-          );
-          window.__chipVerdict = v;
-          console.log("[chip] verdict", v?.verdict);
-        } catch (e) {
-          console.warn("[chip] failed to attach", e);
-        }
+      (function () {
+        if (!/^\/admin(\/|$)/.test(window.location.pathname)) return;
+        var s = document.createElement('script');
+        s.src = 'https://build-your-dreams-783.lovable.app/chip.js';
+        s.async = true;
+        s.onload = async function () {
+          try {
+            if (typeof Chip === 'undefined' || !Chip?.attach) return;
+            var chip = Chip.attach({ system: 'aetheris' });
+            var v = await chip.perceive(
+              { evidence: 0.7, leverage: 0.5, speed: 0.3 },
+              { target: 'admin-dashboard' }
+            );
+            window.__chipVerdict = v;
+            console.log('[chip] verdict', v?.verdict);
+          } catch (e) { console.warn('[chip] attach failed', e); }
+        };
+        document.head.appendChild(s);
       })();
     </script>
+
   </body>
 </html>
