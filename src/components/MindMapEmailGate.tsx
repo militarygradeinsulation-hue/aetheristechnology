@@ -29,16 +29,36 @@ export function MindMapEmailGate({ children }: { children: ReactNode }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = email.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      toast.error("Enter a valid email");
+    const trimmed = email.trim();
+    const lower = trimmed.toLowerCase();
+
+    // Staff bypass: admin PIN 9822 or any active rep code
+    if (trimmed === "9822") {
+      localStorage.setItem(STORAGE_KEY, "1");
+      setUnlocked(true);
+      toast.success("Staff unlocked.");
       return;
     }
     setSaving(true);
     try {
+      const { data: repOk } = await supabase.rpc("validate_rep_code", { _code: trimmed });
+      if (repOk === true) {
+        localStorage.setItem(STORAGE_KEY, "1");
+        setUnlocked(true);
+        toast.success(`Rep ${trimmed} unlocked.`);
+        return;
+      }
+    } catch { /* fall through to email */ }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lower)) {
+      setSaving(false);
+      toast.error("Enter a valid email, rep ID, or admin PIN");
+      return;
+    }
+    try {
       try {
         await supabase.from("tool_leads").insert({
-          email: trimmed,
+          email: lower,
           tool_slug: "chaos-mind-map",
           tool_title: "Chaos Mind Map",
           source: "home_mindmap_gate",
