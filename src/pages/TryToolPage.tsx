@@ -145,12 +145,12 @@ export default function TryToolPage() {
 
             {output && (
               <div className="mt-6 border-t border-amber/20 pt-5">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-2">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-3">
                   Output
                 </div>
-                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed">
-                  {output}
-                </pre>
+                <article className="prose prose-invert prose-sm max-w-none prose-headings:font-forensic prose-headings:text-amber prose-h2:mt-6 prose-h2:mb-2 prose-h3:mt-4 prose-h3:mb-1 prose-strong:text-amber prose-table:text-xs prose-td:border prose-td:border-amber/20 prose-th:border prose-th:border-amber/30 prose-th:text-amber prose-a:text-amber">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{output}</ReactMarkdown>
+                </article>
               </div>
             )}
 
