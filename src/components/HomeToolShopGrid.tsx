@@ -92,13 +92,18 @@ export function HomeToolShopGrid() {
                   § 02 · Operator License
                 </div>
               </div>
-              <div className="flex items-baseline gap-2 mt-2">
+              <div className="flex items-baseline gap-2 mt-2 flex-wrap">
                 <div className="font-forensic text-4xl font-bold text-foreground leading-none">$100</div>
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest font-mono">one-time · full ecosystem</div>
               </div>
+              <div className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber/90">
+                <span className="text-amber font-bold">+ $40</span>
+                <span className="text-muted-foreground">application fee</span>
+              </div>
               <p className="text-xs text-foreground/80 mt-3 leading-snug">
-                Sell every tool under your own rep code. Commissions on every sale. Instant activation.
+                Sell every tool under your own rep code. Commissions on every sale. $40 application confirms you're a fit, $100 license activates you.
               </p>
+
             </div>
             <div className="mt-4 pt-3 border-t border-crimson/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson">
               <Rocket className="w-3 h-3" />
