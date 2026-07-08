@@ -978,6 +978,16 @@ const PortalPage: React.FC = () => {
             )}
             <PortalCursorPicker />
             <LanguageToggle />
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-amber-400/40 text-amber-300 hover:bg-amber-400/10 font-mono uppercase tracking-wider text-[10px]"
+              title="Try the new clean portal layout"
+              onClick={() => { try { localStorage.setItem('aetheris.portalStyle', 'new'); } catch {} }}
+            >
+              <Link to="/portal/new">✨ New portal</Link>
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Log out</span>
             </Button>
