@@ -16,6 +16,38 @@ import { toast } from 'sonner';
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
+  const navigate = useNavigate();
+
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!isEmail) {
+      toast.error('Enter a valid email');
+      return;
+    }
+    setUnlocking(true);
+    try {
+      try {
+        await supabase.from('tool_leads').insert({
+          email: trimmed,
+          tool_slug: 'ecosystem',
+          tool_title: 'Aetheris Ecosystem',
+          source: 'home_ecosystem_gate',
+          user_agent: navigator.userAgent,
+        });
+      } catch (_) { /* non-fatal */ }
+      sessionStorage.setItem('ecosystem_auth_v1', '1');
+      sessionStorage.setItem('ecosystem_code_v1', `EMAIL ${trimmed}`);
+      toast.success('Access granted. Loading the toolset…');
+      navigate('/ecosystem');
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
 
   useEffect(() => {
     const existing = document.querySelector('script[src*="MeetingsEmbedCode.js"]');
