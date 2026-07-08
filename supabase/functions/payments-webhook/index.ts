@@ -487,6 +487,86 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         console.error("tool shop mint:", e);
       }
     }
+
+    // ---- Brand Voice Extension: scan URL, mint EXT- code, save brand kit ----
+    if ((session.metadata?.shop === "extension" || priceId === "brand_voice_extension") && email) {
+      try {
+        const brandUrl = String(session.metadata?.brand_url || "").trim();
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const rand = (n: number) => Array.from(crypto.getRandomValues(new Uint8Array(n)))
+          .map(b => alphabet[b % alphabet.length]).join("");
+        const code = `EXT-${rand(4)}-${rand(4)}`;
+
+        // Scan brand via Firecrawl (branding + summary) if URL provided + key present.
+        let brandTone = "";
+        let brandKit: Record<string, unknown> = {};
+        const fcKey = Deno.env.get("FIRECRAWL_API_KEY");
+        if (brandUrl && fcKey && /^https?:\/\//i.test(brandUrl)) {
+          try {
+            const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${fcKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                url: brandUrl,
+                formats: ["branding", "summary"],
+                onlyMainContent: true,
+              }),
+            });
+            const j = await r.json();
+            const branding = j?.branding || j?.data?.branding || {};
+            const summary = j?.summary || j?.data?.summary || "";
+            brandKit = {
+              name: j?.metadata?.title || branding?.name || brandUrl,
+              summary,
+              colors: branding?.colors || {},
+              fonts: branding?.fonts || [],
+              logo: branding?.images?.logo || branding?.logo || null,
+            };
+            brandTone = summary
+              ? `Voice pulled from ${brandUrl}: ${String(summary).slice(0, 400)}`
+              : `Voice pulled from ${brandUrl}. Speak like the brand's homepage.`;
+          } catch (e) {
+            console.error("brand scan failed:", e);
+            brandTone = `Scan pending. Default: professional, direct, no fluff. Source: ${brandUrl}`;
+          }
+        } else {
+          brandTone = `Default voice: professional, direct, human. Source: ${brandUrl || "not provided"}`;
+        }
+
+        const { data: lic, error: licErr } = await supabase.from("tool_licenses").insert({
+          code, email, plan: "extension",
+          tool_ids: ["brand-voice-extension"],
+          stripe_session_id: session.id,
+          amount_cents: session.amount_total ?? null,
+          brand_url: brandUrl || null,
+          brand_tone: brandTone,
+        }).select().single();
+
+        if (licErr) console.error("extension license insert:", licErr);
+
+        if (lic) {
+          await supabase.from("tool_memory").upsert({
+            license_code: code,
+            tool_id: "brand-voice-extension",
+            memory: brandKit,
+          });
+
+          triggerFunction("send-transactional-email", {
+            templateName: "tool-shop-license",
+            recipientEmail: email,
+            idempotencyKey: `ext-lic-${lic.id}`,
+            templateData: {
+              code, plan: "extension",
+              portalUrl: `${PUBLIC_SITE_URL}/brand-voice-extension`,
+              tools: ["Brand Voice Chrome Extension"],
+              name: name || undefined,
+            },
+          });
+        }
+      } catch (e) {
+        console.error("brand voice extension mint:", e);
+      }
+    }
   }
 }
 

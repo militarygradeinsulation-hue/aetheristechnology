@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -17,6 +18,9 @@ import {
   Link2,
   LineChart,
   Target,
+  Chrome,
+  KeyRound,
+  ArrowRight,
 } from 'lucide-react';
 
 type Mode = 'chaos' | 'fixed';
@@ -349,6 +353,37 @@ export const ChaosMindMap: React.FC = () => {
           </p>
         )}
       </div>
+
+      {/* Brand Voice Extension — companion to the ecosystem */}
+      <Link
+        to="/brand-voice-extension"
+        className="mt-6 group block rounded-sm border border-amber/40 bg-gradient-to-br from-amber/10 via-background to-background hover:border-amber transition-colors overflow-hidden"
+      >
+        <div className="grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center p-4 sm:p-5">
+          <div className="w-12 h-12 rounded-sm border border-amber/50 bg-background/70 flex items-center justify-center shrink-0">
+            <Chrome className="w-6 h-6 text-amber" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">§ Extension · $60 lifetime</span>
+              <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm border border-crimson/50 text-crimson">New</span>
+            </div>
+            <div className="font-forensic text-lg md:text-xl font-bold leading-tight">
+              Your brand voice, <span className="text-amber">in every text field on the web</span>.
+            </div>
+            <p className="text-xs md:text-sm text-foreground/70 mt-1 leading-snug">
+              We scan your site once, remember your URL + tone, hand you an activation code.
+              A <span className="text-amber font-semibold">Brand Voice</span> button appears on LinkedIn, X, Reddit, and any comment box —
+              one click drafts posts and replies that actually sound like you.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-amber group-hover:translate-x-0.5 transition-transform justify-self-start sm:justify-self-end">
+            <KeyRound className="w-3.5 h-3.5" />
+            Get code
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </div>
+      </Link>
     </div>
   );
 };

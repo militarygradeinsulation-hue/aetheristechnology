@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Aetheris Brand Voice",
+  "version": "1.0.0",
+  "description": "Post and comment as your brand on LinkedIn, X, Reddit, and any text field. One-time activation code. Remembers your URL, colors, and tone.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.x.com/*",
+    "https://*.twitter.com/*",
+    "https://*.reddit.com/*",
+    "https://ihdjpxhcaiaixmqxyqoe.supabase.co/*"
+  ],
+  "action": {
+    "default_title": "Brand Voice",
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "48": "icon.png", "128": "icon.png" }
+}

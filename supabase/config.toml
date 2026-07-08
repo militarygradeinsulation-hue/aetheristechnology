@@ -206,6 +206,9 @@ verify_jwt = false
 [functions.extension-leak-scan-ai]
 verify_jwt = false
 
+[functions.extension-brand-voice]
+verify_jwt = false
+
 
 
 

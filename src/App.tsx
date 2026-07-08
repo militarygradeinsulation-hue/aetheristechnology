@@ -87,6 +87,7 @@ const ImplementationPage = lazy(() => import("./pages/ImplementationPage"));
 const CatalogPage = lazy(() => import("./pages/CatalogPage"));
 const LocationPage = lazy(() => import("./pages/LocationPage"));
 const ExtensionPage = lazy(() => import("./pages/ExtensionPage"));
+const BrandVoiceExtensionPage = lazy(() => import("./pages/BrandVoiceExtensionPage"));
 const OperatorAppPage = lazy(() => import("./pages/OperatorAppPage"));
 const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
@@ -243,6 +244,8 @@ const App = () => (
                       <Route path="/indianapolis" element={<LocationPage />} />
                       <Route path="/indiana" element={<LocationPage />} />
                       <Route path="/extension" element={<ExtensionPage />} />
+                      <Route path="/brand-voice-extension" element={<BrandVoiceExtensionPage />} />
+                      <Route path="/brand-voice" element={<Navigate to="/brand-voice-extension" replace />} />
                       <Route path="/mobile-app" element={<MobileAppPage />} />
                       <Route path="/operator-app" element={<OperatorAppPage />} />
                       {/* AI Authority Playbook — Tier-1 pillars + Tier-2 question articles + glossary */}
