@@ -42,7 +42,7 @@ const CareersPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Independent Rep | Aetheris Chaos Theory Forensics"
-        description="2,500+ applications. Most turned down. One spot left. If you can't take a test, ask questions, or pay a $40 access fee, don't apply."
+        description="Two ways in: $40 certification test, or $100 instant rep license. 1099 independent, sell every Aetheris tool at standard commission."
         path="/careers"
       />
       <Background />
