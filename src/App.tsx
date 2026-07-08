@@ -215,6 +215,9 @@ const App = () => (
                       <Route path="/ecosystem" element={<EcosystemPage />} />
                       <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
+                      <Route path="/tools-shop" element={<ToolsShopPage />} />
+                      <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
+                      <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/portal/new" element={<NewPortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
