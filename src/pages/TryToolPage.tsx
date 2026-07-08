@@ -104,6 +104,7 @@ export default function TryToolPage() {
       const text = (data as any)?.output || "";
       if (!text) throw new Error("Empty response");
       setOutput(text);
+      setRunAt(new Date());
     } catch (e: any) {
       toast.error(e?.message || "Tool run failed. Try again.");
     } finally {
