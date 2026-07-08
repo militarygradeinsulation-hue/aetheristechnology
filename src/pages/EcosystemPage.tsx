@@ -438,18 +438,17 @@ const EcosystemPage: React.FC = () => {
                 <ShieldCheck className="w-6 h-6 text-amber-300" />
               </div>
               <h1 className="font-serif text-2xl">Ecosystem Access</h1>
-              <p className="text-sm text-muted-foreground mt-1">Enter your rep code.</p>
+              <p className="text-sm text-muted-foreground mt-1">Enter your email or rep code.</p>
             </div>
             <form onSubmit={handleLogin} className="space-y-3">
               <Input
                 type="text"
-                inputMode="numeric"
-                placeholder="Rep Code"
+                placeholder="you@company.com  or  Rep Code"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => setCode(e.target.value)}
                 autoFocus
                 required
-                className="bg-black/40 border-amber-400/30 text-center font-mono tracking-[0.5em] text-lg"
+                className="bg-black/40 border-amber-400/30 text-center font-mono text-sm"
               />
               <Button
                 type="submit"
@@ -458,7 +457,11 @@ const EcosystemPage: React.FC = () => {
               >
                 {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying</> : 'Engage'}
               </Button>
+              <p className="text-[10px] text-center text-muted-foreground/70 font-mono uppercase tracking-widest">
+                Drop an email — instant access.
+              </p>
             </form>
+
           </div>
         </main>
       </div>
