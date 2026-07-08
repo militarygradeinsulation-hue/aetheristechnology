@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
+import { BuyToolDialog } from "@/components/BuyToolDialog";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
