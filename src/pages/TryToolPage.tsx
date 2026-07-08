@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw } from "lucide-react";
 import { Background } from "@/components/Background";
@@ -55,24 +57,20 @@ export default function TryToolPage() {
     if (!trimmed) { toast.error(`${meta?.inputLabel || "Input"} is required`); return; }
     setLoading(true);
     setOutput("");
-    let text = "";
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
         body: { toolId, input: trimmed },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      text = (data as any)?.output || "";
-    } catch {
-      // Silent fallback — every tool must always produce output.
-      text = "";
+      const text = (data as any)?.output || "";
+      if (!text) throw new Error("Empty response");
+      setOutput(text);
+    } catch (e: any) {
+      toast.error(e?.message || "Tool run failed. Try again.");
+    } finally {
+      setLoading(false);
     }
-    if (!text) {
-      const { runToolLocally } = await import("@/lib/tryToolLocal");
-      text = runToolLocally(toolId, trimmed);
-    }
-    setOutput(text);
-    setLoading(false);
   };
 
   if (!tool || !meta) {
@@ -147,12 +145,12 @@ export default function TryToolPage() {
 
             {output && (
               <div className="mt-6 border-t border-amber/20 pt-5">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-2">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-3">
                   Output
                 </div>
-                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed">
-                  {output}
-                </pre>
+                <article className="prose prose-invert prose-sm max-w-none prose-headings:font-forensic prose-headings:text-amber prose-h2:mt-6 prose-h2:mb-2 prose-h3:mt-4 prose-h3:mb-1 prose-strong:text-amber prose-table:text-xs prose-td:border prose-td:border-amber/20 prose-th:border prose-th:border-amber/30 prose-th:text-amber prose-a:text-amber">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{output}</ReactMarkdown>
+                </article>
               </div>
             )}
 
