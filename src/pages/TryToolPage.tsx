@@ -261,36 +261,42 @@ export default function TryToolPage() {
               </div>
             </div>
 
-            <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-              {meta.inputLabel}
-            </label>
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={meta.inputHint}
-              className="bg-background/70 border-amber/30 font-mono text-sm"
-              maxLength={800}
-              disabled={loading}
-            />
+            {toolId === "creation-studio" ? (
+              <CreationStudioSandbox />
+            ) : (
+              <>
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
+                  {meta.inputLabel}
+                </label>
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={meta.inputHint}
+                  className="bg-background/70 border-amber/30 font-mono text-sm"
+                  maxLength={800}
+                  disabled={loading}
+                />
 
-            <div className="flex flex-col sm:flex-row gap-2 mt-4">
-              <Button
-                onClick={run}
-                disabled={loading || !input.trim()}
-                className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
-              >
-                {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={reset}
-                disabled={loading}
-                className="border-amber/40 text-amber hover:bg-amber/10"
-              >
-                <RefreshCw className="w-4 h-4 mr-1.5" /> Reset
-              </Button>
-            </div>
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                  <Button
+                    onClick={run}
+                    disabled={loading || !input.trim()}
+                    className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
+                  >
+                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={reset}
+                    disabled={loading}
+                    className="border-amber/40 text-amber hover:bg-amber/10"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1.5" /> Reset
+                  </Button>
+                </div>
+              </>
+            )}
 
             {output && (
               <div ref={printRef} className="mt-8 print:mt-0">
