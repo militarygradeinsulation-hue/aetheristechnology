@@ -98,7 +98,6 @@ const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
-const ToolsShopPage = lazy(() => import("./pages/ToolsShopPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
@@ -224,7 +223,7 @@ const App = () => (
                       <Route path="/ecosystem" element={<EcosystemPage />} />
                       <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
-                      <Route path="/tools-shop" element={<ToolsShopPage />} />
+                      <Route path="/tools-shop" element={<Navigate to="/" replace />} />
                       <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
                       <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
                       <Route path="/try/:toolId" element={<TryToolPage />} />

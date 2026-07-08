@@ -20,7 +20,7 @@ export default function ToolsShopReturnPage() {
           {sessionId && <p className="text-[10px] font-mono text-muted-foreground mb-4">ref: {sessionId.slice(0, 24)}…</p>}
           <div className="space-y-2">
             <Link to="/tools-shop/redeem"><Button className="w-full bg-amber-500 hover:bg-amber-600 text-black">Redeem my code</Button></Link>
-            <Link to="/tools-shop"><Button variant="outline" className="w-full">Back to shop</Button></Link>
+            <Link to="/"><Button variant="outline" className="w-full">Back to home</Button></Link>
           </div>
         </Card>
       </div>

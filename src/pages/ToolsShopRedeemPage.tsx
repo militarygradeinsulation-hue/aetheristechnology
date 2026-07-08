@@ -82,7 +82,7 @@ export default function ToolsShopRedeemPage() {
                     {busy ? "Checking..." : "Unlock"}
                   </Button>
                   <div className="text-xs text-muted-foreground text-center pt-2">
-                    Don't have one? <Link to="/tools-shop" className="underline text-amber-500">Buy a tool for $40</Link>
+                    Don't have one? <Link to="/" className="underline text-amber-500">Buy a tool for $40</Link>
                   </div>
                 </div>
               </>

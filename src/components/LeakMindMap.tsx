@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { X, Sparkles, ShoppingCart } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
 import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+import { BuyToolDialog } from "@/components/BuyToolDialog";
 
 // Keyword → tool-id map. When a node is opened we suggest tools whose
 // keywords match the node label/sublabel/id. Everything else falls back
@@ -126,6 +127,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
   const a = accentMap[accent];
 
   const [selected, setSelected] = useState<number | null>(null);
+  const [buyToolId, setBuyToolId] = useState<string | null>(null);
 
   // Chaos physics — draggable bubbles with ripples
   const stageRef = useRef<HTMLDivElement>(null);
@@ -460,14 +462,14 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                           >
                             <Sparkles className="w-2.5 h-2.5" /> Try
                           </Link>
-                          <Link
-                            to={`/tools-shop?tool=${t.id}`}
-                            onClick={(e) => e.stopPropagation()}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setBuyToolId(t.id); }}
                             className="inline-flex items-center gap-1 rounded-sm bg-amber text-background px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
                             title="Buy $40 lifetime"
                           >
                             <ShoppingCart className="w-2.5 h-2.5" /> $40
-                          </Link>
+                          </button>
                         </span>
                       </li>
                     ))}
@@ -483,6 +485,15 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
           </div>
         );
       })()}
+
+      {buyToolId && (
+        <BuyToolDialog
+          open={!!buyToolId}
+          onOpenChange={(o) => !o && setBuyToolId(null)}
+          plan="single"
+          preselectedToolIds={[buyToolId]}
+        />
+      )}
     </div>
   );
 };
