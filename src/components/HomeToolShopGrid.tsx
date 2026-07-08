@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { SHOP_TOOLS, SHOP_PRICES, type ShopTool } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, SHOP_PRICES, type ShopTool, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { BuyToolDialog } from "@/components/BuyToolDialog";
 
 /**
- * Public grid of every Leak Ecosystem tool.
- * Clicking a tile opens instant $40 checkout in a modal (no navigation).
- * Small "Try free" secondary link preserves sandbox access.
+ * Public grid of every Leak Ecosystem tool. Every buy action opens an inline
+ * checkout modal — no page navigation. Bundles pick tools inside the modal.
  */
 export function HomeToolShopGrid() {
-  const [buyTool, setBuyTool] = useState<ShopTool | null>(null);
+  const [buyPlan, setBuyPlan] = useState<ShopPlan | null>(null);
+  const [preselected, setPreselected] = useState<string[]>([]);
+
+  const openBuy = (plan: ShopPlan, tool?: ShopTool) => {
+    setPreselected(tool ? [tool.id] : []);
+    setBuyPlan(plan);
+  };
 
   return (
     <section className="mt-8 max-w-5xl mx-auto animate-fade-in">
@@ -26,36 +30,41 @@ export function HomeToolShopGrid() {
               Try every tool free. Own one, or resell them all.
             </h2>
             <p className="text-sm text-foreground/70 mt-1">
-              3 free runs on any tool. Then choose: buy the tool, or license the whole ecosystem.
+              3 free runs on any tool. Then buy the tool, grab a bundle, or license the whole ecosystem — all right here.
             </p>
           </div>
           <div className="flex flex-col sm:items-end gap-1.5">
             <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-amber/70">
-              Bundle & save · active
+              Bundle & save · instant checkout
             </div>
             <div className="flex flex-wrap gap-1.5">
-              <Link
-                to="/tools-shop"
+              <button
+                type="button"
+                onClick={() => openBuy("triple")}
                 className="inline-flex items-center gap-1.5 rounded-sm border border-amber/50 bg-amber/5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-widest text-amber hover:bg-amber/15 transition-colors"
               >
                 3 Tools <span className="text-foreground font-bold">${SHOP_PRICES.triple.amount/100}</span>
-              </Link>
-              <Link
-                to="/tools-shop"
+              </button>
+              <button
+                type="button"
+                onClick={() => openBuy("unlimited")}
                 className="inline-flex items-center gap-1.5 rounded-sm border border-crimson/50 bg-crimson/5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-widest text-crimson hover:bg-crimson/15 transition-colors"
               >
                 All-Access <span className="text-foreground font-bold">${SHOP_PRICES.unlimited.amount/100}</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Prominent pricing pillars */}
         <div className="grid sm:grid-cols-2 gap-3 mb-6">
-          {/* $40 — Own a tool */}
-          <Link
-            to="/tools-shop"
-            className="group relative overflow-hidden rounded-sm border border-amber/50 bg-gradient-to-br from-amber/10 via-background to-background hover:border-amber transition-colors p-5"
+          {/* $40 — Own a tool (click = pick a tool below) */}
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById("tool-catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="group relative overflow-hidden rounded-sm border border-amber/50 bg-gradient-to-br from-amber/10 via-background to-background hover:border-amber transition-colors p-5 text-left"
           >
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber/70" />
             <div className="flex items-start justify-between gap-3">
@@ -63,7 +72,7 @@ export function HomeToolShopGrid() {
                 <div className="flex items-center gap-2 mb-1">
                   <ShoppingCart className="w-3.5 h-3.5 text-amber" />
                   <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
-                    § 01 · Application License
+                    § 01 · Single Tool License
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2 mt-2">
@@ -76,10 +85,10 @@ export function HomeToolShopGrid() {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-amber/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-              <span>Buy a tool</span>
+              <span>Pick a tool below</span>
               <ArrowRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" />
             </div>
-          </Link>
+          </button>
 
           {/* $100 — Operator license */}
           <Link
@@ -119,15 +128,15 @@ export function HomeToolShopGrid() {
         </div>
 
         {/* Divider */}
-        <div className="flex items-center gap-3 mb-4">
+        <div id="tool-catalog" className="flex items-center gap-3 mb-4 scroll-mt-24">
           <div className="h-px flex-1 bg-amber/20" />
           <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/60">
-            The catalog · click any tool to buy · $40 instant
+            The catalog · click Buy for instant checkout
           </div>
           <div className="h-px flex-1 bg-amber/20" />
         </div>
 
-        {/* Tool tiles — click = instant checkout */}
+        {/* Tool tiles */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {SHOP_TOOLS.map((t) => (
             <div
@@ -160,7 +169,7 @@ export function HomeToolShopGrid() {
               </div>
               <button
                 type="button"
-                onClick={() => setBuyTool(t)}
+                onClick={() => openBuy("single", t)}
                 className="shrink-0 inline-flex flex-col items-center justify-center gap-0.5 rounded-sm border border-amber/60 bg-amber/10 hover:bg-amber hover:text-background transition-colors px-2.5 py-1.5 self-center"
                 aria-label={`Buy ${t.name} for $40`}
               >
@@ -176,34 +185,22 @@ export function HomeToolShopGrid() {
           ))}
         </div>
 
+        <div className="mt-4 text-center">
+          <Link to="/tools-shop/redeem" className="text-xs font-mono uppercase tracking-widest text-amber/70 hover:text-amber underline">
+            Already have a code? Redeem it →
+          </Link>
+        </div>
+
       </div>
 
-      {/* Instant checkout modal */}
-      <Dialog open={!!buyTool} onOpenChange={(o) => !o && setBuyTool(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-forensic">
-              {buyTool ? `Buy ${buyTool.name} — $40` : "Buy tool"}
-            </DialogTitle>
-            <DialogDescription>
-              Lifetime access. Unlimited runs. Persistent memory tied to your account.
-            </DialogDescription>
-          </DialogHeader>
-          {buyTool && (
-            <StripeEmbeddedCheckout
-              priceId={SHOP_PRICES.single.priceId}
-              returnUrl={`${window.location.origin}/tools-shop?checkout=success&session_id={CHECKOUT_SESSION_ID}`}
-              metadata={{
-                shop: "tools",
-                plan: "single",
-                tool_ids: JSON.stringify([buyTool.id]),
-                tool_id: buyTool.id,
-                product_name: `Leak Tool — ${buyTool.name}`,
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {buyPlan && (
+        <BuyToolDialog
+          open={!!buyPlan}
+          onOpenChange={(o) => !o && setBuyPlan(null)}
+          plan={buyPlan}
+          preselectedToolIds={preselected}
+        />
+      )}
     </section>
   );
 }
