@@ -509,13 +509,68 @@
       (function () {
         if (!/^\/admin(\/|$)/.test(window.location.pathname)) return;
 
-        // Local fallback Chip: deterministic verdict from evidence/leverage/speed.
+        // Local Chip: inspects the live app via window.ChipBridge and returns
+        // real findings (table health, stale records, empty systems) plus a
+        // weighted verdict. This is what powers the admin dashboard insights.
         function installFallback() {
           if (window.Chip && window.Chip.attach) return;
           var epoch = 0;
+
+          async function inspect(bridge) {
+            var findings = [];
+            if (!bridge) return findings;
+            // Sample a curated set of high-signal tables.
+            var probes = [
+              { table: 'crm_deals',        label: 'Deals in pipeline',       healthyMin: 1 },
+              { table: 'crm_contacts',     label: 'CRM contacts',            healthyMin: 5 },
+              { table: 'tool_leads',       label: 'Inbound tool leads',      healthyMin: 1 },
+              { table: 'rep_leads',        label: 'Rep leads assigned',      healthyMin: 1 },
+              { table: 'contact_submissions', label: 'Contact submissions',  healthyMin: 0 },
+              { table: 'purchases',        label: 'Purchases',               healthyMin: 0 },
+              { table: 'subscriptions',    label: 'Active subscriptions',    healthyMin: 0 },
+              { table: 'blog_posts',       label: 'Blog posts published',    healthyMin: 3 },
+              { table: 'activity_log',     label: 'Activity events',         healthyMin: 10 },
+              { table: 'hygiene_scans',    label: 'Hygiene scans',           healthyMin: 0 },
+            ];
+            for (var i = 0; i < probes.length; i++) {
+              var p = probes[i];
+              try {
+                var c = await bridge.count(p.table);
+                if (c === null) continue;
+                var sev = c === 0 && p.healthyMin > 0 ? 'critical'
+                        : c < p.healthyMin ? 'warn'
+                        : 'ok';
+                findings.push({
+                  kind: 'table', table: p.table, label: p.label,
+                  count: c, severity: sev,
+                  note: sev === 'critical' ? 'Empty — no data flowing in.'
+                      : sev === 'warn' ? 'Below healthy baseline (' + p.healthyMin + ').'
+                      : 'Healthy.',
+                });
+              } catch (e) {
+                findings.push({ kind: 'table', table: p.table, label: p.label, count: null, severity: 'warn', note: 'Query failed: ' + (e.message || e) });
+              }
+            }
+            // Recent activity check
+            try {
+              var recent = await bridge.query('activity_log', { limit: 1, order: { column: 'created_at', ascending: false } });
+              if (recent && recent[0]?.created_at) {
+                var ageH = (Date.now() - new Date(recent[0].created_at).getTime()) / 3600000;
+                findings.push({
+                  kind: 'freshness', label: 'Last activity event',
+                  ageHours: Number(ageH.toFixed(1)),
+                  severity: ageH > 72 ? 'warn' : 'ok',
+                  note: ageH > 72 ? 'No activity in 3+ days.' : 'Fresh (' + ageH.toFixed(1) + 'h ago).',
+                });
+              }
+            } catch (e) {}
+            return findings;
+          }
+
           window.Chip = {
             attach: function (opts) {
               var system = (opts && opts.system) || 'aetheris';
+              var bridge = opts && opts.bridge;
               return {
                 system: system,
                 perceive: async function (signals, ctx) {
@@ -523,23 +578,43 @@
                   var ev = Number(signals?.evidence ?? 0);
                   var lv = Number(signals?.leverage ?? 0);
                   var sp = Number(signals?.speed ?? 0);
-                  var score = Math.max(0, Math.min(1, ev * 0.55 + lv * 0.30 + sp * 0.15));
-                  var verdict = score >= 0.66 ? 'pursue' : score >= 0.4 ? 'hold' : 'drop';
+                  var findings = await inspect(bridge || (ctx && ctx.bridge));
+                  var critical = findings.filter(function (f) { return f.severity === 'critical'; }).length;
+                  var warn = findings.filter(function (f) { return f.severity === 'warn'; }).length;
+                  var ok = findings.filter(function (f) { return f.severity === 'ok'; }).length;
+                  var health = findings.length ? ok / findings.length : 0.5;
+                  // Blend user signals (30%) with real system health (70%).
+                  var score = Math.max(0, Math.min(1, health * 0.7 + (ev * 0.55 + lv * 0.30 + sp * 0.15) * 0.3));
+                  var verdict = critical > 0 ? 'drop'
+                              : warn > 2 ? 'hold'
+                              : score >= 0.66 ? 'pursue'
+                              : score >= 0.4 ? 'hold' : 'drop';
+                  var recommendations = [];
+                  findings.forEach(function (f) {
+                    if (f.severity === 'critical') recommendations.push('Fix: ' + f.label + ' is empty. Wire the ingestion path.');
+                    else if (f.severity === 'warn' && f.kind === 'table') recommendations.push('Grow: ' + f.label + ' at ' + f.count + '. Push toward baseline.');
+                    else if (f.severity === 'warn' && f.kind === 'freshness') recommendations.push('Investigate: no activity for ' + f.ageHours + 'h.');
+                  });
+                  if (!recommendations.length) recommendations.push('All probed systems healthy. Increase scope or raise thresholds.');
                   return {
                     verdict: verdict,
                     score: Number(score.toFixed(3)),
                     epoch: epoch,
                     system: system,
                     target: ctx?.target ?? null,
-                    source: 'local-fallback',
+                    source: 'local-inspector',
                     ts: Date.now(),
+                    stats: { critical: critical, warn: warn, ok: ok, total: findings.length },
+                    findings: findings,
+                    recommendations: recommendations,
                   };
                 },
               };
             },
           };
-          console.info('[chip] using local fallback');
+          console.info('[chip] using local inspector');
         }
+
 
         var s = document.createElement('script');
         s.src = 'https://build-your-dreams-783.lovable.app/chip.js';

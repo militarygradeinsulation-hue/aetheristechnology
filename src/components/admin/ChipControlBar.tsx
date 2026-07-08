@@ -343,8 +343,48 @@ export const ChipControlBar: React.FC = () => {
                       <span className="text-amber-300/80">{h.target}</span> · ev {h.inputs.evidence.toFixed(2)} · lv {h.inputs.leverage.toFixed(2)} · sp {h.inputs.speed.toFixed(2)}
                     </div>
                     {h.error && <div className="mt-1 text-[10px] text-red-400/80">{h.error}</div>}
+
+                    {/* Real inspection results — only on the newest entry to save space */}
+                    {i === 0 && h.verdict?.findings?.length > 0 && (
+                      <div className="mt-2 space-y-2">
+                        {h.verdict.stats && (
+                          <div className="flex gap-2 font-mono text-[10px]">
+                            <span className="text-emerald-400">ok {h.verdict.stats.ok}</span>
+                            <span className="text-amber-300">warn {h.verdict.stats.warn}</span>
+                            <span className="text-red-400">crit {h.verdict.stats.critical}</span>
+                            <span className="text-muted-foreground/70">of {h.verdict.stats.total}</span>
+                          </div>
+                        )}
+                        <div className="rounded border border-amber-400/10 divide-y divide-amber-400/10">
+                          {h.verdict.findings.map((f: any, k: number) => (
+                            <div key={k} className="px-2 py-1.5 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <div className="text-[11px] text-foreground/90 truncate">{f.label}</div>
+                                <div className="font-mono text-[10px] text-muted-foreground/70 truncate">{f.note}</div>
+                              </div>
+                              <span className={`font-mono text-[10px] uppercase px-1.5 py-0.5 rounded ${
+                                f.severity === 'critical' ? 'text-red-400 bg-red-400/10 border border-red-400/30' :
+                                f.severity === 'warn' ? 'text-amber-300 bg-amber-400/10 border border-amber-400/30' :
+                                'text-emerald-400 bg-emerald-400/10 border border-emerald-400/30'
+                              }`}>
+                                {typeof f.count === 'number' ? f.count : f.severity}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        {h.verdict.recommendations?.length > 0 && (
+                          <div className="rounded border border-amber-400/20 bg-amber-400/5 p-2 space-y-1">
+                            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-400/80">// Recommendations //</div>
+                            {h.verdict.recommendations.map((r: string, k: number) => (
+                              <div key={k} className="text-[11px] text-amber-100/90 leading-snug">→ {r}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
+
               </div>
             </div>
           </div>
