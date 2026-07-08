@@ -1,13 +1,18 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { SHOP_TOOLS, SHOP_PRICES } from "@/lib/tool-shop-catalog";
-import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket } from "lucide-react";
+import { SHOP_TOOLS, SHOP_PRICES, type ShopTool } from "@/lib/tool-shop-catalog";
+import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 
 /**
  * Public grid of every Leak Ecosystem tool.
- * - Prominent two-tier pricing banner: $40 per tool · $100 operator license.
- * - Per-tile CTAs minimized to a single "Try it free" primary + subtle $40 link.
+ * Clicking a tile opens instant $40 checkout in a modal (no navigation).
+ * Small "Try free" secondary link preserves sandbox access.
  */
 export function HomeToolShopGrid() {
+  const [buyTool, setBuyTool] = useState<ShopTool | null>(null);
+
   return (
     <section className="mt-8 max-w-5xl mx-auto animate-fade-in">
       <div className="rounded-sm border border-amber/40 bg-card/70 backdrop-blur-sm p-5 sm:p-7">
@@ -117,19 +122,17 @@ export function HomeToolShopGrid() {
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 bg-amber/20" />
           <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/60">
-            The catalog · try any tool free
+            The catalog · click any tool to buy · $40 instant
           </div>
           <div className="h-px flex-1 bg-amber/20" />
         </div>
 
-        {/* Minimized tool tiles */}
+        {/* Tool tiles — click = instant checkout */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {SHOP_TOOLS.map((t) => (
-            <Link
+            <div
               key={t.id}
-              to={`/try/${encodeURIComponent(t.id)}`}
               className="group rounded-sm border border-border/60 bg-background/60 p-3 flex items-start gap-3 hover:border-amber/60 hover:bg-amber/[0.03] transition-colors"
-              title="Sandbox run · no signup · nothing saved"
             >
               <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center shrink-0 group-hover:bg-amber/20 transition-colors">
                 <Sparkles className="w-3.5 h-3.5 text-amber" />
@@ -146,20 +149,61 @@ export function HomeToolShopGrid() {
                 <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
                   {t.tagline}
                 </p>
-              </div>
-              <div className="shrink-0 flex flex-col items-end gap-1">
-                <div className="font-mono text-[9px] uppercase tracking-widest text-amber group-hover:translate-x-0.5 transition-transform">
-                  Try →
+                <div className="mt-1.5 flex items-center gap-2">
+                  <Link
+                    to={`/try/${encodeURIComponent(t.id)}`}
+                    className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/70 hover:text-amber transition-colors"
+                  >
+                    Try free →
+                  </Link>
                 </div>
-                <div className="font-mono text-[8px] text-muted-foreground/70">
+              </div>
+              <button
+                type="button"
+                onClick={() => setBuyTool(t)}
+                className="shrink-0 inline-flex flex-col items-center justify-center gap-0.5 rounded-sm border border-amber/60 bg-amber/10 hover:bg-amber hover:text-background transition-colors px-2.5 py-1.5 self-center"
+                aria-label={`Buy ${t.name} for $40`}
+              >
+                <div className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-inherit">
+                  <Zap className="w-3 h-3" />
+                  Buy
+                </div>
+                <div className="font-forensic text-sm font-bold text-amber group-hover:text-inherit leading-none">
                   $40
                 </div>
-              </div>
-            </Link>
+              </button>
+            </div>
           ))}
         </div>
 
       </div>
+
+      {/* Instant checkout modal */}
+      <Dialog open={!!buyTool} onOpenChange={(o) => !o && setBuyTool(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-forensic">
+              {buyTool ? `Buy ${buyTool.name} — $40` : "Buy tool"}
+            </DialogTitle>
+            <DialogDescription>
+              Lifetime access. Unlimited runs. Persistent memory tied to your account.
+            </DialogDescription>
+          </DialogHeader>
+          {buyTool && (
+            <StripeEmbeddedCheckout
+              priceId={SHOP_PRICES.single.priceId}
+              returnUrl={`${window.location.origin}/tools-shop?checkout=success&session_id={CHECKOUT_SESSION_ID}`}
+              metadata={{
+                shop: "tools",
+                plan: "single",
+                tool_ids: JSON.stringify([buyTool.id]),
+                tool_id: buyTool.id,
+                product_name: `Leak Tool — ${buyTool.name}`,
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
