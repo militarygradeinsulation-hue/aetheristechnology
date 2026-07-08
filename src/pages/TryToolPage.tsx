@@ -20,22 +20,109 @@ import { toast } from "sonner";
  * - State clears on unmount and on manual "Reset".
  */
 
-const TRY_META: Record<string, { title: string; inputLabel: string; inputHint: string }> = {
-  "website-scanner":      { title: "Website Leak Scanner",      inputLabel: "Website URL",      inputHint: "https://example.com" },
-  "brand-contradictions": { title: "Brand Contradictions",      inputLabel: "Brand or URL",     inputHint: "brand.com or a tagline" },
-  "friction-audit":       { title: "Friction Audit",            inputLabel: "Funnel or URL",    inputHint: "Describe the buyer path or drop a URL" },
-  "strategic-questions":  { title: "Strategic Questions",       inputLabel: "Company / role",   inputHint: "e.g. 'Series A SaaS CEO'" },
-  "detective-mode":       { title: "Detective Mode",            inputLabel: "Business + URL",   inputHint: "e.g. 'Acme Co · acme.com'" },
-  "forensic-scan-all":    { title: "Forensic Scan (All)",       inputLabel: "Website URL",      inputHint: "https://example.com" },
-  "all-in-one":           { title: "All-In-One Content",        inputLabel: "Topic",            inputHint: "e.g. 'AI-powered onboarding'" },
-  "content-calendar":     { title: "Content Calendar Builder",  inputLabel: "Niche",            inputHint: "e.g. 'B2B fintech'" },
-  "playbook-generator":   { title: "Playbook Generator",        inputLabel: "Function or goal", inputHint: "e.g. 'Outbound SDR playbook'" },
-  "social-content":       { title: "Social Content Studio",     inputLabel: "Topic",            inputHint: "Punchy topic" },
-  "content-engine":       { title: "Content Engine",            inputLabel: "Core idea",        inputHint: "The one insight to expand" },
-  "image-studio":         { title: "Image Studio",              inputLabel: "Scene",            inputHint: "e.g. 'operator at forensic desk'" },
-  "creation-studio":      { title: "Creation Studio",           inputLabel: "Asset request",    inputHint: "e.g. 'launch kit for Q4'" },
-  "easy-mode":            { title: "Easy Mode",                 inputLabel: "One-line goal",    inputHint: "e.g. 'get 10 booked calls this month'" },
-  "tool-generator":       { title: "Tool Generator",            inputLabel: "Tool brief",       inputHint: "e.g. 'calculator for pipeline leak $'" },
+type ToolMeta = {
+  title: string;
+  inputLabel: string;
+  inputHint: string;
+  /** One-sentence, plain-English "what this tool does". */
+  summary: string;
+  /** 3-step how-to-use, plain-English. */
+  howTo: [string, string, string];
+  /** What you'll see in the PDF-style report. */
+  delivers: string[];
+};
+
+const TRY_META: Record<string, ToolMeta> = {
+  "website-scanner": {
+    title: "Website Leak Scanner", inputLabel: "Website URL", inputHint: "https://example.com",
+    summary: "Scans any live URL and returns the top revenue leaks costing you deals — with dollar impact and a fix for each.",
+    howTo: ["Paste any public website URL", "Click Run — no signup", "Get a 1-page PDF-style leak audit"],
+    delivers: ["Snapshot diagnosis", "Top 5 revenue leaks (table)", "30-day fix priority"],
+  },
+  "brand-contradictions": {
+    title: "Brand Contradictions", inputLabel: "Brand or URL", inputHint: "brand.com or a tagline",
+    summary: "Finds where your brand says one thing but does another — the gaps buyers notice and lose trust over.",
+    howTo: ["Enter a brand name, URL, or tagline", "Run the scan", "Get a contradiction table + fix-first move"],
+    delivers: ["Diagnosis", "5 contradictions with cost bands", "Which one to fix first"],
+  },
+  "friction-audit": {
+    title: "Friction Audit", inputLabel: "Funnel or URL", inputHint: "Describe the buyer path or drop a URL",
+    summary: "Maps every step a buyer takes and quantifies where you're leaking ready-to-buy traffic.",
+    howTo: ["Describe your funnel or paste a URL", "Run the audit", "Get a stage-by-stage friction log"],
+    delivers: ["Buyer path", "Friction log with drop-off %", "7-day repair plan"],
+  },
+  "strategic-questions": {
+    title: "Strategic Questions", inputLabel: "Company / role", inputHint: "e.g. 'Series A SaaS CEO'",
+    summary: "Generates the hard boardroom questions your leadership is quietly avoiding.",
+    howTo: ["Type your company + role", "Run", "Get 15 blunt questions across 5 truth categories"],
+    delivers: ["15 questions in 5 groups", "The 3 to open your next meeting with"],
+  },
+  "detective-mode": {
+    title: "Detective Mode", inputLabel: "Business + URL", inputHint: "e.g. 'Acme Co · acme.com'",
+    summary: "Opens a forensic case file on a business — suspects, evidence, motive, and next 72-hour moves.",
+    howTo: ["Enter business name + URL", "Run", "Get a case file with suspects and moves"],
+    delivers: ["Case opener", "5 suspected leaks (table)", "First 72-hour moves"],
+  },
+  "forensic-scan-all": {
+    title: "Forensic Scan (All)", inputLabel: "Website URL", inputHint: "https://example.com",
+    summary: "Runs every diagnostic layer on one URL — positioning, offer, proof, funnel, SEO, and ops.",
+    howTo: ["Paste your website URL", "Run the full sweep", "Get a graded layer report"],
+    delivers: ["Executive diagnosis", "Layer grades A–F", "Biggest unlock + 30-day repair"],
+  },
+  "all-in-one": {
+    title: "All-In-One Content", inputLabel: "Topic", inputHint: "e.g. 'AI-powered onboarding'",
+    summary: "Turns one topic into a ready-to-ship content set: post, email, thread, and hooks.",
+    howTo: ["Type any topic", "Run", "Copy the pack straight into your channels"],
+    delivers: ["Angle", "LinkedIn + Email + X thread", "3 hook variants"],
+  },
+  "content-calendar": {
+    title: "Content Calendar Builder", inputLabel: "Niche", inputHint: "e.g. 'B2B fintech'",
+    summary: "Builds a 14-day content calendar with hooks and CTAs, aligned to your niche.",
+    howTo: ["Enter your niche", "Run", "Get a table calendar + weekly themes"],
+    delivers: ["14-day table calendar", "Weekly themes", "2 flagship pieces"],
+  },
+  "playbook-generator": {
+    title: "Playbook Generator", inputLabel: "Function or goal", inputHint: "e.g. 'Outbound SDR playbook'",
+    summary: "Writes a compact operating playbook a new hire can run on day one.",
+    howTo: ["Describe the function or goal", "Run", "Get steps + KPIs + failure modes"],
+    delivers: ["Purpose & trigger", "7 steps (table)", "KPIs + kill-switches"],
+  },
+  "social-content": {
+    title: "Social Content Studio", inputLabel: "Topic", inputHint: "Punchy topic",
+    summary: "Punchy operator-voice social posts — no fluff, no corporate.",
+    howTo: ["Type a sharp topic", "Run", "Copy posts + thread + hooks"],
+    delivers: ["3 LinkedIn posts", "1 X thread", "5 hooks"],
+  },
+  "content-engine": {
+    title: "Content Engine", inputLabel: "Core idea", inputHint: "The one insight to expand",
+    summary: "Takes one insight and expands it into a compact content week.",
+    howTo: ["Enter the one insight", "Run", "Get an article + spinoffs + reuse map"],
+    delivers: ["Article outline + lead section", "4 spinoffs", "Repurposing map"],
+  },
+  "image-studio": {
+    title: "Image Studio", inputLabel: "Scene", inputHint: "e.g. 'operator at forensic desk'",
+    summary: "Turns a scene description into a production-grade image brief with a ready-to-paste generator prompt.",
+    howTo: ["Describe the scene", "Run", "Copy the brief or the ready prompt"],
+    delivers: ["Concept", "Spec table (palette, lens, wardrobe…)", "Ready generator prompt"],
+  },
+  "creation-studio": {
+    title: "Creation Studio", inputLabel: "Asset request", inputHint: "e.g. 'launch kit for Q4'",
+    summary: "Plans a mixed-media launch kit — every asset with a purpose and a slot in the sequence.",
+    howTo: ["Describe the launch", "Run", "Get an inventory + 4-week sequence"],
+    delivers: ["Objective", "Asset inventory (8 rows)", "4-week sequence + must-ships"],
+  },
+  "easy-mode": {
+    title: "Easy Mode", inputLabel: "One-line goal", inputHint: "e.g. 'get 10 booked calls this month'",
+    summary: "The simplest tool: type one goal, get the shortest actionable path a solo operator can start today.",
+    howTo: ["Type one goal", "Run", "Follow the 7-day plan"],
+    delivers: ["Strategy in one sentence", "7-day table plan", "Daily scorecard + kill-switch"],
+  },
+  "tool-generator": {
+    title: "Tool Generator", inputLabel: "Tool brief", inputHint: "e.g. 'calculator for pipeline leak $'",
+    summary: "Scopes a micro-tool spec from a plain-English brief — ready to hand to a builder.",
+    howTo: ["Describe the tool you want", "Run", "Get spec + UI copy + growth loops"],
+    delivers: ["Concept", "Spec table + UI copy", "Growth loops"],
+  },
 };
 
 export default function TryToolPage() {
