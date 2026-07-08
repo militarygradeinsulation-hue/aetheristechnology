@@ -41,15 +41,19 @@ interface Settings {
   evidence: number;
   leverage: number;
   speed: number;
+  autoInterval: number; // seconds, 0 = off
+  bridgeEnabled: boolean;
 }
 
 const DEFAULTS: Settings = {
   enabled: true,
-  system: 'my-crm',
-  target: 'deal-42',
+  system: 'aetheris',
+  target: 'admin-dashboard',
   evidence: 0.7,
   leverage: 0.5,
   speed: 0.3,
+  autoInterval: 0,
+  bridgeEnabled: true,
 };
 
 const loadSettings = (): Settings => {
