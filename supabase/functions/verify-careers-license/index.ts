@@ -50,11 +50,13 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    const idKey = `stripe:${session_id}`;
+
     // Idempotency: if we already provisioned a code for this session, return it.
     const { data: existing } = await sb
       .from("rep_codes")
       .select("code, rep_name, rep_email")
-      .eq("notes", `stripe_session:${session_id}`)
+      .eq("certification_id", idKey)
       .maybeSingle();
 
     if (existing?.code) {
@@ -91,7 +93,9 @@ Deno.serve(async (req) => {
       commission_rate: 0.15,
       role: "rep",
       is_active: true,
-      notes: `stripe_session:${session_id}`,
+      team_name: "Team 3 — Instant License",
+      certification_id: idKey,
+      certification_issued_at: new Date().toISOString().slice(0, 10),
     });
     if (insErr) return json({ error: insErr.message }, 500);
 
