@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Brand Voice</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; width: 340px; padding: 18px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0e0f12; color: #f2efe8;
+    }
+    .kicker { color: #f4a63a; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; }
+    h1 { font-size: 18px; margin: 6px 0 12px; font-weight: 700; }
+    label { font-size: 11px; color: #a09b8f; display: block; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.12em; }
+    input, button {
+      width: 100%; font: inherit; padding: 10px 12px; border-radius: 4px;
+      border: 1px solid #2a2b30; background: #17181c; color: #f2efe8;
+    }
+    input::placeholder { color: #5f5c56; }
+    button { background: #f4a63a; color: #0e0f12; border: none; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    button:hover { background: #ffbe56; }
+    button.ghost { background: transparent; color: #f2efe8; border: 1px solid #2a2b30; }
+    .ok { color: #62c98a; font-size: 12px; margin-top: 10px; }
+    .err { color: #e64f4f; font-size: 12px; margin-top: 10px; }
+    .brand {
+      margin-top: 12px; padding: 12px; border: 1px solid #2a2b30; border-radius: 4px;
+      background: #131418;
+    }
+    .brand .u { color: #f4a63a; font-size: 11px; word-break: break-all; }
+    .brand .t { color: #cfc9bd; font-size: 12px; margin-top: 4px; line-height: 1.4; }
+    .foot { margin-top: 16px; font-size: 10px; color: #7a766d; line-height: 1.5; }
+    a { color: #f4a63a; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="kicker">Aetheris</div>
+  <h1>Brand Voice Extension</h1>
+  <div id="unactivated">
+    <label>Activation Code</label>
+    <input id="code" placeholder="EXT-XXXX-XXXX" autocomplete="off" />
+    <button id="activate">Activate</button>
+    <div id="msg"></div>
+    <div class="foot">
+      Don't have a code? <a href="https://aetheris.technology/brand-voice-extension" target="_blank">Get one for $60</a>.
+    </div>
+  </div>
+  <div id="activated" style="display:none">
+    <div class="brand">
+      <div class="u" id="bUrl"></div>
+      <div class="t" id="bTone"></div>
+    </div>
+    <div class="foot">
+      Focus any comment box on LinkedIn, X, Reddit, or any site — a
+      <b style="color:#f4a63a">Brand Voice</b> button appears.
+    </div>
+    <button class="ghost" id="signout" style="margin-top:14px">Sign out</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
