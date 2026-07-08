@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
+import ChipControlBar from '@/components/admin/ChipControlBar';
 import NotificationBell from '@/components/admin/NotificationBell';
 import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
@@ -640,6 +641,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <ChipControlBar />
       <header className="border-b border-border px-4 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
