@@ -356,46 +356,19 @@ export default function AetherisNexusPage() {
 
     // Image mode: skip the chat — go straight to image gen
     if (imageMode && text) {
-      const assistantMsg: ChatMessage = {
-        id: uid(), role: "assistant", content: "Generating image…", images: [], createdAt: now(),
-      };
       updateThread(activeThreadLocal.id, (t) => ({
         ...t,
         title: t.messages.length === 0 ? text.slice(0, 60) : t.title,
         updatedAt: now(),
-        messages: [...t.messages, userMsg, assistantMsg],
+        messages: [...t.messages, userMsg],
       }));
       setInput("");
       setPendingAttachments([]);
-      setStreaming(true);
       setImageMode(false);
-      const ac = new AbortController();
-      abortRef.current = ac;
-      try {
-        await streamImage(text, async (dataUrl, isFinal) => {
-          const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
-          updateThread(activeThreadLocal.id, (t) => ({
-            ...t,
-            messages: t.messages.map((m) =>
-              m.id === assistantMsg.id
-                ? { ...m, images: [finalUrl], content: isFinal ? "" : "Generating image…" }
-                : m,
-            ),
-          }));
-        }, ac.signal);
-      } catch (e: any) {
-        updateThread(activeThreadLocal.id, (t) => ({
-          ...t,
-          messages: t.messages.map((m) =>
-            m.id === assistantMsg.id ? { ...m, content: `Image generation failed: ${e.message}` } : m,
-          ),
-        }));
-      } finally {
-        setStreaming(false);
-        abortRef.current = null;
-      }
+      await runImageGen(text, activeThreadLocal.id);
       return;
     }
+
 
     const assistantMsg: ChatMessage = {
       id: uid(), role: "assistant", content: "", tools: [], images: [], createdAt: now(),
