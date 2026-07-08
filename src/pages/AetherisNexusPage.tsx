@@ -328,7 +328,55 @@ export default function AetherisNexusPage() {
     setPendingAttachments((prev) => [...prev, ...out]);
   }, []);
 
+  const runImageGen = useCallback(async (text: string, threadIdArg: string) => {
+    const assistantMsg: ChatMessage = {
+      id: uid(), role: "assistant", content: "Generating image…", images: [], promptSuggestions: [], createdAt: now(),
+    };
+    updateThread(threadIdArg, (t) => ({
+      ...t,
+      updatedAt: now(),
+      messages: [...t.messages, assistantMsg],
+    }));
+    setStreaming(true);
+    const ac = new AbortController();
+    abortRef.current = ac;
+    // Fetch alternative prompt ideas in parallel — don't block image render on it.
+    fetchPromptIdeas(text, ac.signal).then((prompts) => {
+      if (prompts.length === 0) return;
+      updateThread(threadIdArg, (t) => ({
+        ...t,
+        messages: t.messages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, promptSuggestions: prompts } : m,
+        ),
+      }));
+    }).catch(() => { /* non-fatal */ });
+    try {
+      await streamImage(text, async (dataUrl, isFinal) => {
+        const finalUrl = isFinal ? await applyWatermark(dataUrl) : dataUrl;
+        updateThread(threadIdArg, (t) => ({
+          ...t,
+          messages: t.messages.map((m) =>
+            m.id === assistantMsg.id
+              ? { ...m, images: [finalUrl], content: isFinal ? "" : "Generating image…" }
+              : m,
+          ),
+        }));
+      }, ac.signal);
+    } catch (e: any) {
+      updateThread(threadIdArg, (t) => ({
+        ...t,
+        messages: t.messages.map((m) =>
+          m.id === assistantMsg.id ? { ...m, content: `Image generation failed: ${e.message}` } : m,
+        ),
+      }));
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }, [updateThread]);
+
   const handleSend = useCallback(async () => {
+
     const text = input.trim();
     if (!text && pendingAttachments.length === 0) return;
     if (streaming) return;
