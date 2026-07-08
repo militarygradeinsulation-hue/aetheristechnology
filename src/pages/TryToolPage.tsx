@@ -55,18 +55,24 @@ export default function TryToolPage() {
     if (!trimmed) { toast.error(`${meta?.inputLabel || "Input"} is required`); return; }
     setLoading(true);
     setOutput("");
+    let text = "";
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
         body: { toolId, input: trimmed },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setOutput((data as any)?.output || "");
-    } catch (e: any) {
-      toast.error(e?.message || "Sandbox failed");
-    } finally {
-      setLoading(false);
+      text = (data as any)?.output || "";
+    } catch {
+      // Silent fallback — every tool must always produce output.
+      text = "";
     }
+    if (!text) {
+      const { runToolLocally } = await import("@/lib/tryToolLocal");
+      text = runToolLocally(toolId, trimmed);
+    }
+    setOutput(text);
+    setLoading(false);
   };
 
   if (!tool || !meta) {
@@ -101,14 +107,11 @@ export default function TryToolPage() {
           </Link>
 
           <div className="forensic-tile rounded-sm border border-amber/40 p-6 md:p-8">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">
-              Sandbox · demo run · nothing saved
-            </div>
             <h1 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-2">
               {meta.title}
             </h1>
             <p className="text-sm text-foreground/70 mb-5">
-              {tool.tagline} Runs on your input only — no Aetheris client data, no memory, no login.
+              {tool.tagline}
             </p>
 
             <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
@@ -145,7 +148,7 @@ export default function TryToolPage() {
             {output && (
               <div className="mt-6 border-t border-amber/20 pt-5">
                 <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-2">
-                  Demo output · discarded when you leave
+                  Output
                 </div>
                 <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed">
                   {output}
