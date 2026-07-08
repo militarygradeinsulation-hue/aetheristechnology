@@ -505,9 +505,10 @@
 
     <!-- Chip perceive attach -->
     <script src="https://build-your-dreams-783.lovable.app/chip.js"></script>
-    <script type="module">
-      try {
-        if (typeof Chip !== "undefined" && Chip?.attach) {
+    <script>
+      (async () => {
+        try {
+          if (typeof Chip === "undefined" || !Chip?.attach) return;
           const chip = Chip.attach({ system: "my-crm" });
           const v = await chip.perceive(
             { evidence: 0.7, leverage: 0.5, speed: 0.3 },
@@ -515,10 +516,10 @@
           );
           window.__chipVerdict = v;
           console.log("[chip] verdict", v?.verdict);
+        } catch (e) {
+          console.warn("[chip] failed to attach", e);
         }
-      } catch (e) {
-        console.warn("[chip] failed to attach", e);
-      }
+      })();
     </script>
   </body>
 </html>
