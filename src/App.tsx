@@ -18,6 +18,8 @@ import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
+import { ToolBuyBar } from "@/components/ToolBuyBar";
+
 
 // Eager: home + 404 (always needed)
 import Home from "./pages/Home";
