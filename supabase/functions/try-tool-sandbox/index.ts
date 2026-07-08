@@ -168,6 +168,34 @@ async function callGateway(system: string, user: string): Promise<string> {
   return j?.choices?.[0]?.message?.content ?? "";
 }
 
+const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+
+// Lightweight per-request site context so every tool has a baseline read of
+// the company. Best-effort — a scrape failure never blocks the run.
+async function fetchSiteContext(url: string): Promise<string> {
+  if (!FIRECRAWL_API_KEY) return "";
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ url, formats: ["summary", "markdown"], onlyMainContent: true }),
+    });
+    if (!r.ok) return "";
+    const j = await r.json();
+    const summary = j?.data?.summary || j?.summary || "";
+    const md = (j?.data?.markdown || j?.markdown || "").slice(0, 1500);
+    const meta = j?.data?.metadata || j?.metadata || {};
+    const title = meta?.title || meta?.ogTitle || "";
+    const desc = meta?.description || "";
+    return [
+      title && `TITLE: ${title}`,
+      desc && `META: ${desc}`,
+      summary && `SUMMARY: ${summary}`,
+      md && `EXCERPT:\n${md}`,
+    ].filter(Boolean).join("\n").slice(0, 3500);
+  } catch { return ""; }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
@@ -178,18 +206,42 @@ serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
 
-  const toolId = String(body?.toolId || "").trim();
-  const input = String(body?.input || "").trim().slice(0, 2000);
+  const toolId  = String(body?.toolId  || "").trim();
+  const url     = String(body?.url     || "").trim().slice(0, 500);
+  const context = String(body?.context || "").trim().slice(0, 1500);
+  // Backward-compat: older callers sent { input }.
+  const legacy  = String(body?.input   || "").trim().slice(0, 2000);
   const cfg = PROMPTS[toolId];
   if (!cfg) return json({ error: "Unknown tool" }, 400);
-  if (!input) return json({ error: `${cfg.inputLabel} is required` }, 400);
+  if (!url && !context && !legacy) {
+    return json({ error: "Enter your website URL (and optional context)" }, 400);
+  }
+  if (url && !/^https?:\/\//i.test(url)) {
+    return json({ error: "URL must start with https://" }, 400);
+  }
 
   try {
-    const output = await callGateway(cfg.system, cfg.userWrap(input));
+    // Pull baseline site context in parallel with prompt assembly.
+    const siteContext = url ? await fetchSiteContext(url) : "";
+
+    // Assemble the operator input: URL is the anchor, context is the sharpening lens.
+    const anchor = url || legacy || context;
+    const userInput = cfg.userWrap(anchor);
+
+    const systemWithContext = cfg.system + (siteContext || context ? `\n\n## COMPANY CONTEXT (baseline read — treat as ground truth)\n${
+      [
+        url && `URL: ${url}`,
+        siteContext,
+        context && `USER-PROVIDED CONTEXT / GOAL:\n${context}`,
+      ].filter(Boolean).join("\n\n")
+    }` : "");
+
+    const output = await callGateway(systemWithContext, userInput);
     return json({
       ok: true,
       toolId,
       title: cfg.title,
+      contextUsed: Boolean(siteContext),
       output,
     });
   } catch (e: any) {

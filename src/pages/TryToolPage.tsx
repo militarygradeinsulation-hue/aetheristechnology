@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
@@ -131,16 +132,17 @@ export default function TryToolPage() {
   const tool = useMemo(() => findTool(toolId), [toolId]);
   const meta = TRY_META[toolId];
 
-  const [input, setInput] = useState("");
+  const [url, setUrl] = useState("");
+  const [context, setContext] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [runAt, setRunAt] = useState<Date | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
-  useEffect(() => () => { setInput(""); setOutput(""); setRunAt(null); }, [toolId]);
+  useEffect(() => () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); }, [toolId]);
 
-  const reset = () => { setInput(""); setOutput(""); setRunAt(null); };
+  const reset = () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); };
 
   // Deterministic-ish case id from tool + timestamp for the case-file header.
   const caseId = useMemo(() => {
@@ -177,15 +179,16 @@ export default function TryToolPage() {
   };
   const printReport = () => window.print();
 
-
   const run = async () => {
-    const trimmed = input.trim();
-    if (!trimmed) { toast.error(`${meta?.inputLabel || "Input"} is required`); return; }
+    const cleanUrl = url.trim();
+    const cleanCtx = context.trim();
+    if (!cleanUrl) { toast.error("Enter your website URL"); return; }
+    if (!/^https?:\/\//i.test(cleanUrl)) { toast.error("URL must start with https://"); return; }
     setLoading(true);
     setOutput("");
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
-        body: { toolId, input: trimmed },
+        body: { toolId, url: cleanUrl, context: cleanCtx },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -267,24 +270,39 @@ export default function TryToolPage() {
             ) : (
               <>
                 <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-                  {meta.inputLabel}
+                  Your website URL <span className="text-crimson">*</span>
                 </label>
                 <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={meta.inputHint}
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://yourcompany.com"
                   className="bg-background/70 border-amber/30 font-mono text-sm"
-                  maxLength={800}
+                  maxLength={500}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1 font-mono">
+                  We scan your site to give every tool a baseline read of your company.
+                </p>
+
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2 mt-4">
+                  Extra context <span className="text-muted-foreground normal-case tracking-normal">(optional — {meta.inputLabel.toLowerCase()}, goal, or focus)</span>
+                </label>
+                <Textarea
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  placeholder={meta.inputHint}
+                  className="bg-background/70 border-amber/30 font-mono text-sm min-h-[70px]"
+                  maxLength={1500}
                   disabled={loading}
                 />
 
                 <div className="flex flex-col sm:flex-row gap-2 mt-4">
                   <Button
                     onClick={run}
-                    disabled={loading || !input.trim()}
+                    disabled={loading || !url.trim()}
                     className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
                   >
-                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
+                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Scanning + running…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Scan my site & run</>}
                   </Button>
                   <Button
                     type="button"
@@ -314,7 +332,7 @@ export default function TryToolPage() {
                         {meta.title} — Forensic Report
                       </div>
                       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-                        Subject: <span className="text-foreground/90 normal-case tracking-normal">{input}</span>
+                        Subject: <span className="text-foreground/90 normal-case tracking-normal">{url}{context ? ` · ${context.slice(0, 60)}${context.length > 60 ? "…" : ""}` : ""}</span>
                       </div>
                       {runAt && (
                         <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
