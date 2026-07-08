@@ -47,19 +47,19 @@ export function HomeToolShopGrid() {
                   {t.tagline}
                 </p>
               </div>
-              <div className="mt-auto flex gap-2 pt-1">
+              <div className="mt-auto flex flex-col gap-1.5 pt-1">
                 <Link
                   to={`/try/${encodeURIComponent(t.id)}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded-sm border border-border px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider hover:border-amber/60 hover:text-amber transition-colors"
-                  title="Sandbox run · nothing saved"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 shadow-[0_0_18px_hsl(var(--amber)/0.35)] ring-1 ring-amber/60"
+                  title="Sandbox run · no signup · nothing saved"
                 >
-                  <Sparkles className="w-3 h-3" /> Try free
+                  <Sparkles className="w-3.5 h-3.5" /> Try it free — 1 click
                 </Link>
                 <Link
                   to={`/tools-shop?tool=${encodeURIComponent(t.id)}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded-sm bg-amber text-background hover:bg-amber/90 px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider font-bold"
+                  className="w-full inline-flex items-center justify-center gap-1 rounded-sm border border-amber/40 text-amber hover:bg-amber/10 px-2 py-1.5 text-[10px] font-mono uppercase tracking-widest"
                 >
-                  <ShoppingCart className="w-3 h-3" /> Buy $40
+                  <ShoppingCart className="w-3 h-3" /> Buy $40 lifetime
                 </Link>
               </div>
             </div>
