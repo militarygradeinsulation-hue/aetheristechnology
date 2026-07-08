@@ -839,6 +839,46 @@ const PortalPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen bg-background ${cursorClassName}`}>
+      {/* New Portal announcement — dismissible, sticky top */}
+      {(() => {
+        const [dismissed, setDismissed] = [
+          typeof window !== 'undefined' && localStorage.getItem('aetheris.newPortalBannerDismissed') === '1',
+          (v: boolean) => { try { localStorage.setItem('aetheris.newPortalBannerDismissed', v ? '1' : '0'); } catch {} },
+        ] as const;
+        if (dismissed) return null;
+        return (
+          <div className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-black border-b-2 border-amber-600 shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 min-w-0">
+                <Sparkles className="w-5 h-5 flex-shrink-0 animate-pulse" />
+                <p className="text-sm font-bold truncate">
+                  ✨ NEW: Cleaner portal with short how-to's on every tool — your leads carry over automatically.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-black text-amber-300 hover:bg-black/85 font-mono uppercase tracking-wider text-[11px] font-bold h-8"
+                  onClick={() => { try { localStorage.setItem('aetheris.portalStyle', 'new'); } catch {} }}
+                >
+                  <Link to="/portal/new">
+                    Try New Portal <span className="ml-1">→</span>
+                  </Link>
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setDismissed(true); window.location.reload(); }}
+                  className="text-black/70 hover:text-black p-1"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {showTopAppBanner && (
         <div className="w-full bg-amber text-background border-b border-amber/60">
           <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
