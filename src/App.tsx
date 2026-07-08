@@ -223,7 +223,7 @@ const App = () => (
                       <Route path="/ecosystem" element={<EcosystemPage />} />
                       <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
-                      <Route path="/tools-shop" element={<ToolsShopPage />} />
+                      <Route path="/tools-shop" element={<Navigate to="/" replace />} />
                       <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
                       <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
                       <Route path="/try/:toolId" element={<TryToolPage />} />
