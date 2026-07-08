@@ -180,6 +180,26 @@ Deno.serve(async (req) => {
     ...incoming,
   ];
 
+  // Gate tools by intent. Attaching tools on every call forces the model to
+  // spend latency deciding whether to invoke them, and often triggers a
+  // multi-second scan/search on plain chat. Only enable when the latest user
+  // turn actually signals a scan or a live-web question.
+  const lastUser = [...incoming].reverse().find((m) => m?.role === "user");
+  const lastText = typeof lastUser?.content === "string"
+    ? lastUser.content
+    : Array.isArray(lastUser?.content)
+      ? lastUser.content.map((p: any) => p?.text || "").join(" ")
+      : "";
+  const hasUrl = /https?:\/\/\S+|\bwww\.\S+\.\w{2,}/i.test(lastText);
+  const scanIntent = /\b(scan|audit|analyze|analyse|look\s+into|consult\s+on|forensic|leak\s+audit)\b/i.test(lastText);
+  const searchIntent = body.useSearch === true ||
+    /\b(search|google|latest|current|news|today|price of|stock|weather|who is|what is happening)\b/i.test(lastText);
+  const enabledTools = [
+    ...(scanIntent || hasUrl ? [TOOLS[1]] : []),
+    ...(searchIntent ? [TOOLS[0]] : []),
+  ];
+  const useTools = enabledTools.length > 0;
+
   // Tool-calling loop (server-side resolution), then final streaming reply.
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -188,9 +208,11 @@ Deno.serve(async (req) => {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
 
       try {
-        // Loop until model returns a non-tool response (max 5 rounds)
-        for (let round = 0; round < 5; round++) {
-          const isFinalRound = round === 4;
+        // Loop until model returns a non-tool response (max 5 rounds when
+        // tools are enabled; a single streaming call otherwise).
+        const maxRounds = useTools ? 5 : 1;
+        for (let round = 0; round < maxRounds; round++) {
+          const isFinalRound = round === maxRounds - 1;
           // Use streaming on every call so the user sees tokens immediately.
           const res = await fetch(AI_URL, {
             method: "POST",
@@ -201,7 +223,7 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
               model,
               messages,
-              tools: TOOLS,
+              ...(useTools ? { tools: enabledTools } : {}),
               stream: true,
             }),
           });
