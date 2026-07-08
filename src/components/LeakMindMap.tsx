@@ -341,72 +341,78 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                     </div>
                   )}
                 </div>
-
-                {/* Expanded connections panel */}
-                {isSel && (
-                  <div
-                    className="absolute top-full mt-3 left-1/2 -translate-x-1/2 w-[220px] md:w-[240px] rounded-sm border border-amber/40 bg-background/95 backdrop-blur-md p-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] animate-fade-in text-left"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber">
-                        Connections
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setSelected(null); }}
-                        className="text-foreground/60 hover:text-foreground"
-                        aria-label="Close"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    {n.connections && n.connections.length > 0 ? (
-                      <ul className="space-y-1.5">
-                        {n.connections.map((c, ci) => (
-                          <li key={ci} className="flex items-start gap-2 text-[11px] md:text-xs text-foreground/85 leading-snug">
-                            <span className={`mt-1 h-1 w-1 rounded-full shrink-0 ${accent === "crimson" ? "bg-crimson" : "bg-amber"}`} />
-                            <span>{c}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-[11px] text-foreground/70 leading-snug">
-                        Traces back to the hub. Click again for details.
-                      </p>
-                    )}
-                    {n.affects && n.affects.length > 0 && (
-                      <div className="mt-3 pt-2 border-t border-crimson/25">
-                        <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-crimson mb-1.5">
-                          Ripple effect
-                        </div>
-                        <ul className="space-y-1.5">
-                          {n.affects.map((f, fi) => {
-                            const target = nodes[idToIndex.get(f.id) ?? -1];
-                            return (
-                              <li key={fi} className="text-[11px] md:text-xs leading-snug">
-                                <span className="font-forensic font-bold text-crimson">
-                                  → {target?.label ?? f.id}:
-                                </span>{" "}
-                                <span className="text-foreground/80">{f.note}</span>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    )}
-                    {n.onClick && (
-                      <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">
-                        Tap again to open →
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </button>
         );
       })}
+
+      {/* Single centered detail panel — never clipped by node position */}
+      {selected !== null && nodes[selected] && (() => {
+        const n = nodes[selected];
+        return (
+          <div
+            className="absolute left-1/2 bottom-3 -translate-x-1/2 z-40 w-[min(92%,340px)] max-h-[55%] overflow-y-auto rounded-sm border border-amber/50 bg-background/95 backdrop-blur-md p-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] animate-fade-in text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <div className="font-forensic text-sm font-bold text-foreground truncate">
+                {n.label}
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setSelected(null); }}
+                className="text-foreground/60 hover:text-foreground shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber mb-1.5">
+              Connections
+            </div>
+            {n.connections && n.connections.length > 0 ? (
+              <ul className="space-y-1.5">
+                {n.connections.map((c, ci) => (
+                  <li key={ci} className="flex items-start gap-2 text-[11px] md:text-xs text-foreground/85 leading-snug">
+                    <span className="mt-1 h-1 w-1 rounded-full shrink-0 bg-amber" />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[11px] text-foreground/70 leading-snug">
+                Traces back to the hub. Click again for details.
+              </p>
+            )}
+            {n.affects && n.affects.length > 0 && (
+              <div className="mt-3 pt-2 border-t border-crimson/25">
+                <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-crimson mb-1.5">
+                  Ripple effect
+                </div>
+                <ul className="space-y-1.5">
+                  {n.affects.map((f, fi) => {
+                    const target = nodes[idToIndex.get(f.id) ?? -1];
+                    return (
+                      <li key={fi} className="text-[11px] md:text-xs leading-snug">
+                        <span className="font-forensic font-bold text-crimson">
+                          → {target?.label ?? f.id}:
+                        </span>{" "}
+                        <span className="text-foreground/80">{f.note}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+            {n.onClick && (
+              <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">
+                Tap again to open →
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };
