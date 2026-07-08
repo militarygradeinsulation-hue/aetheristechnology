@@ -99,6 +99,7 @@ const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 const ToolsShopPage = lazy(() => import("./pages/ToolsShopPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
+const TryToolPage = lazy(() => import("./pages/TryToolPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -223,6 +224,8 @@ const App = () => (
                       <Route path="/tools-shop" element={<ToolsShopPage />} />
                       <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
                       <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
+                      <Route path="/try/:toolId" element={<TryToolPage />} />
+
                       <Route path="/portal" element={<PortalPage />} />
                       <Route path="/portal/new" element={<NewPortalPage />} />
                       <Route path="/partner-portal" element={<PortalPage />} />
