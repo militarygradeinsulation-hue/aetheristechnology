@@ -83,7 +83,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <Link to="/admin" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back to Admin
           </Link>
-          <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+          <div className="text-xs text-muted-foreground truncate">{user?.email ?? "Guest access"}</div>
           <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <LogOut className="h-4 w-4" /> Sign out
           </button>
