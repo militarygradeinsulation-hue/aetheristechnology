@@ -502,5 +502,23 @@
     <!-- Start of HubSpot Embed Code -->
     <script type="text/javascript" id="hs-script-loader" async defer src="//js-na2.hs-scripts.com/244481481.js"></script>
     <!-- End of HubSpot Embed Code -->
+
+    <!-- Chip perceive attach -->
+    <script src="https://build-your-dreams-783.lovable.app/chip.js"></script>
+    <script type="module">
+      try {
+        if (typeof Chip !== "undefined" && Chip?.attach) {
+          const chip = Chip.attach({ system: "my-crm" });
+          const v = await chip.perceive(
+            { evidence: 0.7, leverage: 0.5, speed: 0.3 },
+            { target: "deal-42" }
+          );
+          window.__chipVerdict = v;
+          console.log("[chip] verdict", v?.verdict);
+        }
+      } catch (e) {
+        console.warn("[chip] failed to attach", e);
+      }
+    </script>
   </body>
 </html>
