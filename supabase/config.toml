@@ -228,6 +228,10 @@ verify_jwt = false
 [functions.aetheris-nexus-image]
 verify_jwt = false
 
+[functions.aetheris-nexus-prompt-ideas]
+verify_jwt = false
+
+
 [functions.admin-live-traffic]
 verify_jwt = false
 
