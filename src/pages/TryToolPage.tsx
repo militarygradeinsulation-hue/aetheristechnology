@@ -372,24 +372,75 @@ export default function TryToolPage() {
                   </div>
                 </div>
 
-                {/* Sticky action bar — buy the tool or become a licensed rep */}
-                <div className="mt-4 sticky bottom-3 z-20 rounded-sm border border-amber/40 bg-background/95 backdrop-blur p-3 flex flex-col sm:flex-row gap-2 items-center justify-between shadow-lg print:hidden">
-                  <div className="text-xs text-foreground/80 font-mono uppercase tracking-widest">
-                    Like the output? Own the tool — or sell it.
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
-                      className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
-                    >
-                      <ShoppingCart className="w-3 h-3" /> Buy tool · $40
-                    </Link>
-                    <Link
-                      to="/careers/license"
-                      className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-500 text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-emerald-500/90"
-                    >
-                      <Rocket className="w-3 h-3" /> Become a rep · $100
-                    </Link>
+                {/* Case-file action dossier — buy the tool or become a licensed operator */}
+                <div className="mt-6 print:hidden sticky bottom-3 z-20">
+                  <div className="relative rounded-sm border border-amber/40 bg-background/95 backdrop-blur overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.8)]">
+                    {/* Left rail — case-file spine */}
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber/70" />
+                    <div className="pl-4 pr-3 py-3 flex items-center justify-between border-b border-amber/20">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
+                        // next_move · file open
+                      </div>
+                      <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-muted-foreground hidden sm:block">
+                        two paths · one ecosystem
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-px bg-amber/15">
+                      {/* Primary — Own the tool */}
+                      <Link
+                        to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
+                        className="group relative bg-background hover:bg-amber/5 transition-colors p-4 flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/70">
+                            § 01 · Lifetime License
+                          </div>
+                          <div className="font-mono text-[10px] text-amber/60">USD</div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <div className="font-forensic text-2xl font-bold text-foreground group-hover:text-amber transition-colors">
+                            $40
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">one-time · unlimited runs</div>
+                        </div>
+                        <div className="text-xs text-foreground/80 leading-snug">
+                          Own this tool. Persistent memory attached to your account.
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber">
+                          <ShoppingCart className="w-3 h-3" /> Acquire the tool
+                          <span className="ml-auto opacity-60 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </div>
+                      </Link>
+
+                      {/* Secondary — Become an operator */}
+                      <Link
+                        to="/careers/license"
+                        className="group relative bg-background hover:bg-amber/5 transition-colors p-4 flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson/80">
+                            § 02 · Operator License
+                          </div>
+                          <div className="font-mono text-[10px] text-crimson/70 border border-crimson/40 px-1.5 py-0.5">
+                            RESELL
+                          </div>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <div className="font-forensic text-2xl font-bold text-foreground group-hover:text-amber transition-colors">
+                            $100
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">one-time · own rep code</div>
+                        </div>
+                        <div className="text-xs text-foreground/80 leading-snug">
+                          Sell the entire ecosystem under your own code. Instant activation.
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber">
+                          <Rocket className="w-3 h-3" /> Become an operator
+                          <span className="ml-auto opacity-60 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </div>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
