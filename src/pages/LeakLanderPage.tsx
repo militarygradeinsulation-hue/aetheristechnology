@@ -193,53 +193,60 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* THE FILTER — unmissable */}
+          {/* THE FILTER — unmissable, collapsible */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "200ms", animationFillMode: "both" }}
           >
-            <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-5 sm:p-6 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)]">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Read this before you contact us</div>
-              <h2 className="font-forensic text-xl sm:text-2xl font-bold leading-tight">
-                The Filter.
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-foreground/85 leading-relaxed">
-                If <span className="text-crimson font-semibold">$2,500</span> to find out exactly where your company is bleeding revenue sounds "expensive," you are not our client. Close this tab.
+            <details className="group relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-4 sm:p-5">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson">Read before contacting</div>
+                  <h2 className="font-forensic text-lg sm:text-xl font-bold leading-tight mt-0.5">
+                    The Filter — is $2,500 "expensive"?
+                  </h2>
+                </div>
+                <span className="font-mono text-xs text-crimson shrink-0 group-open:hidden">+</span>
+                <span className="font-mono text-xs text-crimson shrink-0 hidden group-open:inline">−</span>
+              </summary>
+              <p className="mt-3 text-sm text-foreground/85 leading-relaxed">
+                If $2,500 to find exactly where your revenue is bleeding sounds "expensive," close this tab. Our clients ask what the <span className="text-amber font-semibold">leak</span> costs — usually 10–40× our fee, every year unfixed.
               </p>
-              <p className="mt-3 text-sm text-foreground/70 leading-relaxed">
-                Our clients don't ask what it costs. They ask what the leak costs. Usually the answer is <span className="text-amber font-semibold">10 to 40 times our fee</span> — every year it stays unfixed.
-              </p>
-
-            </div>
+            </details>
           </section>
 
-          {/* WHO WE DON'T / DO WORK WITH */}
+          {/* WHO WE WORK WITH — condensed side-by-side */}
           <section
-            className="mt-6 max-w-4xl mx-auto grid md:grid-cols-2 gap-4 animate-fade-in"
+            className="mt-4 max-w-4xl mx-auto grid md:grid-cols-2 gap-3 animate-fade-in"
             style={{ animationDelay: "220ms", animationFillMode: "both" }}
           >
-            <div className="rounded-sm border border-crimson/40 bg-card/60 backdrop-blur-sm p-5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">We turn down more than we take</div>
-              <h3 className="font-forensic text-lg font-bold mb-3">We don't work with you if:</h3>
-              <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
-                <li>— You want to be told your marketing is fine and the problem is "the economy."</li>
-                <li>— You shop consultants by price instead of by findings.</li>
-                <li>— You need six stakeholders and a committee to approve fixing your own business.</li>
+            <details className="group rounded-sm border border-crimson/40 bg-card/60 p-4">
+              <summary className="cursor-pointer list-none flex items-center justify-between">
+                <span className="font-forensic text-sm font-bold">We don't work with you if…</span>
+                <span className="font-mono text-xs text-crimson group-open:hidden">+</span>
+                <span className="font-mono text-xs text-crimson hidden group-open:inline">−</span>
+              </summary>
+              <ul className="mt-3 space-y-1.5 text-xs text-foreground/80 leading-relaxed">
                 <li>— You want a cheerleader. We're the coroner.</li>
-                <li>— You'll argue with the evidence. The data doesn't care how long you've done it your way.</li>
+                <li>— You shop consultants by price, not by findings.</li>
+                <li>— You need a committee to fix your own business.</li>
+                <li>— You'll argue with the evidence.</li>
               </ul>
-            </div>
-            <div className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">Deliberately</div>
-              <h3 className="font-forensic text-lg font-bold mb-3">We work with you if:</h3>
-              <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
-                <li>— You run a real business — $5M to $50M — and you know something's broken but can't name it.</li>
-                <li>— You'd rather hear the ugly truth once than a comfortable lie every quarter.</li>
-                <li>— You can make a decision without a permission slip.</li>
+            </details>
+            <details className="group rounded-sm border border-amber/40 bg-card/60 p-4">
+              <summary className="cursor-pointer list-none flex items-center justify-between">
+                <span className="font-forensic text-sm font-bold">We do work with you if…</span>
+                <span className="font-mono text-xs text-amber group-open:hidden">+</span>
+                <span className="font-mono text-xs text-amber hidden group-open:inline">−</span>
+              </summary>
+              <ul className="mt-3 space-y-1.5 text-xs text-foreground/80 leading-relaxed">
+                <li>— Real business, $5M–$50M, something's broken you can't name.</li>
+                <li>— You'd rather hear ugly truth once than comfortable lies quarterly.</li>
                 <li>— You measure us on one thing: recovered revenue.</li>
               </ul>
-            </div>
+            </details>
           </section>
+
 
           {/* WHAT WE ACTUALLY DO */}
           <section
