@@ -51,6 +51,7 @@ const ReciprocationPage = lazy(() => import("./pages/ReciprocationPage"));
 const GoldenReportPage = lazy(() => import("./pages/GoldenReportPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
+const CareersLicensePage = lazy(() => import("./pages/CareersLicensePage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
@@ -180,6 +181,7 @@ const App = () => (
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
                       <Route path="/careers-test" element={<CareersTestPage />} />
+                      <Route path="/careers/license" element={<CareersLicensePage />} />
                       <Route path="/unsubscribe" element={<UnsubscribePage />} />
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
                       <Route path="/deliverable/:token" element={<DeliverablePage />} />

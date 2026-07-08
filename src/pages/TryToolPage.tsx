@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket } from "lucide-react";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -46,11 +46,49 @@ export default function TryToolPage() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [runAt, setRunAt] = useState<Date | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
-  useEffect(() => () => { setInput(""); setOutput(""); }, [toolId]);
+  useEffect(() => () => { setInput(""); setOutput(""); setRunAt(null); }, [toolId]);
 
-  const reset = () => { setInput(""); setOutput(""); };
+  const reset = () => { setInput(""); setOutput(""); setRunAt(null); };
+
+  // Deterministic-ish case id from tool + timestamp for the case-file header.
+  const caseId = useMemo(() => {
+    if (!runAt) return "";
+    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `AE-${toolId.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6)}-${rand}`;
+  }, [runAt, toolId]);
+
+  // Split markdown into H2 sections so long outputs read as a structured case
+  // file instead of one wall of prose. Anything before the first H2 becomes an
+  // "Executive Summary" card.
+  const sections = useMemo(() => {
+    if (!output) return [] as { title: string; body: string }[];
+    const lines = output.split("\n");
+    const out: { title: string; body: string }[] = [];
+    let current: { title: string; body: string } = { title: "Executive Summary", body: "" };
+    for (const line of lines) {
+      const m = line.match(/^##\s+(.+)$/);
+      if (m) {
+        if (current.body.trim() || current.title !== "Executive Summary") out.push(current);
+        current = { title: m[1].trim(), body: "" };
+      } else {
+        current.body += line + "\n";
+      }
+    }
+    if (current.body.trim()) out.push(current);
+    return out.filter(s => s.body.trim());
+  }, [output]);
+
+  const copyOutput = () => {
+    if (!output) return;
+    navigator.clipboard.writeText(output);
+    toast.success("Report copied to clipboard");
+  };
+  const printReport = () => window.print();
+
 
   const run = async () => {
     const trimmed = input.trim();
@@ -66,6 +104,7 @@ export default function TryToolPage() {
       const text = (data as any)?.output || "";
       if (!text) throw new Error("Empty response");
       setOutput(text);
+      setRunAt(new Date());
     } catch (e: any) {
       toast.error(e?.message || "Tool run failed. Try again.");
     } finally {
@@ -144,27 +183,97 @@ export default function TryToolPage() {
             </div>
 
             {output && (
-              <div className="mt-6 border-t border-amber/20 pt-5">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-amber/80 mb-3">
-                  Output
+              <div ref={printRef} className="mt-8 print:mt-0">
+                {/* Case-file header */}
+                <div className="relative rounded-sm border border-amber/40 bg-background/60 overflow-hidden">
+                  <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
+                       style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(255,191,0,0.25) 0 1px, transparent 1px 3px)" }} />
+                  <div className="relative flex items-start justify-between gap-3 p-4 border-b border-amber/30">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80">
+                        // case_file · {caseId}
+                      </div>
+                      <div className="font-forensic text-xl md:text-2xl font-bold text-foreground mt-1">
+                        {meta.title} — Forensic Report
+                      </div>
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+                        Subject: <span className="text-foreground/90 normal-case tracking-normal">{input}</span>
+                      </div>
+                      {runAt && (
+                        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
+                          Filed: {runAt.toISOString().slice(0, 19).replace("T", " ")}Z
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0 border-2 border-crimson text-crimson font-mono text-[10px] tracking-[0.3em] uppercase px-2 py-1 rotate-3 select-none">
+                      Active
+                    </div>
+                  </div>
+
+                  {/* Section cards */}
+                  <div className="p-4 md:p-5 space-y-4">
+                    {sections.map((s, i) => (
+                      <section key={i} className="rounded-sm border border-amber/25 bg-background/40 p-4">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-2">
+                          § {String(i + 1).padStart(2, "0")} · Section
+                        </div>
+                        <h2 className="font-forensic text-lg md:text-xl font-bold text-amber leading-tight mb-3">
+                          {s.title}
+                        </h2>
+                        <article className="prose prose-invert prose-sm max-w-none prose-headings:font-forensic prose-headings:text-amber prose-h3:mt-4 prose-h3:mb-1 prose-strong:text-amber prose-table:text-xs prose-td:border prose-td:border-amber/20 prose-td:px-2 prose-td:py-1 prose-th:border prose-th:border-amber/30 prose-th:text-amber prose-th:px-2 prose-th:py-1 prose-a:text-amber">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body.trim()}</ReactMarkdown>
+                        </article>
+                      </section>
+                    ))}
+                  </div>
+
+                  <div className="relative flex flex-wrap items-center gap-2 justify-end p-3 border-t border-amber/20 print:hidden">
+                    <Button variant="outline" size="sm" onClick={copyOutput} className="border-amber/40 text-amber hover:bg-amber/10">
+                      <Copy className="w-3 h-3 mr-1.5" /> Copy
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={printReport} className="border-amber/40 text-amber hover:bg-amber/10">
+                      <Printer className="w-3 h-3 mr-1.5" /> Print / PDF
+                    </Button>
+                  </div>
                 </div>
-                <article className="prose prose-invert prose-sm max-w-none prose-headings:font-forensic prose-headings:text-amber prose-h2:mt-6 prose-h2:mb-2 prose-h3:mt-4 prose-h3:mb-1 prose-strong:text-amber prose-table:text-xs prose-td:border prose-td:border-amber/20 prose-th:border prose-th:border-amber/30 prose-th:text-amber prose-a:text-amber">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{output}</ReactMarkdown>
-                </article>
+
+                {/* Sticky action bar — buy the tool or become a licensed rep */}
+                <div className="mt-4 sticky bottom-3 z-20 rounded-sm border border-amber/40 bg-background/95 backdrop-blur p-3 flex flex-col sm:flex-row gap-2 items-center justify-between shadow-lg print:hidden">
+                  <div className="text-xs text-foreground/80 font-mono uppercase tracking-widest">
+                    Like the output? Own the tool — or sell it.
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
+                      className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
+                    >
+                      <ShoppingCart className="w-3 h-3" /> Buy tool · $40
+                    </Link>
+                    <Link
+                      to="/careers/license"
+                      className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-500 text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-emerald-500/90"
+                    >
+                      <Rocket className="w-3 h-3" /> Become a rep · $100
+                    </Link>
+                  </div>
+                </div>
               </div>
             )}
 
-            <div className="mt-8 rounded-sm border border-amber/30 bg-background/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="text-xs text-foreground/70">
-                Like it? Buy it once — <span className="text-amber">$40 lifetime</span>, unlimited runs, persistent memory.
+            {!output && (
+              <div className="mt-8 rounded-sm border border-amber/30 bg-background/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs text-foreground/70 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber" />
+                  Same engine the operators run. Nothing saved. Nothing logged to your account.
+                </div>
+                <Link
+                  to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
+                  className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 whitespace-nowrap"
+                >
+                  <ShoppingCart className="w-3 h-3" /> Buy this tool — $40
+                </Link>
               </div>
-              <Link
-                to={`/tools-shop?tool=${encodeURIComponent(toolId)}`}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 whitespace-nowrap"
-              >
-                <ShoppingCart className="w-3 h-3" /> Buy this tool
-              </Link>
-            </div>
+            )}
           </div>
         </main>
         <Footer />
