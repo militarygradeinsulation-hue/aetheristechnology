@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
+import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
@@ -106,10 +107,10 @@ const TRY_META: Record<string, ToolMeta> = {
     delivers: ["Concept", "Spec table (palette, lens, wardrobe…)", "Ready generator prompt"],
   },
   "creation-studio": {
-    title: "Creation Studio", inputLabel: "Asset request", inputHint: "e.g. 'launch kit for Q4'",
-    summary: "Plans a mixed-media launch kit — every asset with a purpose and a slot in the sequence.",
-    howTo: ["Describe the launch", "Run", "Get an inventory + 4-week sequence"],
-    delivers: ["Objective", "Asset inventory (8 rows)", "4-week sequence + must-ships"],
+    title: "Creation Studio", inputLabel: "Your website URL", inputHint: "https://yourbrand.com",
+    summary: "Paste your website — we scan your palette, fonts, and logo, then let you spin up on-brand marketing images, PDFs, social posts, and emails from a plain-English brief.",
+    howTo: ["Paste your website URL and click Scan", "Pick what to make (image / PDF / social / email) and describe it", "Download the on-brand result"],
+    delivers: ["Auto-extracted brand kit (colors + fonts + logo)", "On-brand marketing image (Nano Banana render)", "PDF one-pagers, social packs, emails in your voice"],
   },
   "easy-mode": {
     title: "Easy Mode", inputLabel: "One-line goal", inputHint: "e.g. 'get 10 booked calls this month'",
@@ -261,36 +262,42 @@ export default function TryToolPage() {
               </div>
             </div>
 
-            <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-              {meta.inputLabel}
-            </label>
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={meta.inputHint}
-              className="bg-background/70 border-amber/30 font-mono text-sm"
-              maxLength={800}
-              disabled={loading}
-            />
+            {toolId === "creation-studio" ? (
+              <CreationStudioSandbox />
+            ) : (
+              <>
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
+                  {meta.inputLabel}
+                </label>
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={meta.inputHint}
+                  className="bg-background/70 border-amber/30 font-mono text-sm"
+                  maxLength={800}
+                  disabled={loading}
+                />
 
-            <div className="flex flex-col sm:flex-row gap-2 mt-4">
-              <Button
-                onClick={run}
-                disabled={loading || !input.trim()}
-                className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
-              >
-                {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={reset}
-                disabled={loading}
-                className="border-amber/40 text-amber hover:bg-amber/10"
-              >
-                <RefreshCw className="w-4 h-4 mr-1.5" /> Reset
-              </Button>
-            </div>
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                  <Button
+                    onClick={run}
+                    disabled={loading || !input.trim()}
+                    className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
+                  >
+                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Running sandbox…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run demo</>}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={reset}
+                    disabled={loading}
+                    className="border-amber/40 text-amber hover:bg-amber/10"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1.5" /> Reset
+                  </Button>
+                </div>
+              </>
+            )}
 
             {output && (
               <div ref={printRef} className="mt-8 print:mt-0">

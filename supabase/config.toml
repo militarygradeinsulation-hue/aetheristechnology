@@ -242,3 +242,6 @@ verify_jwt = false
 
 [functions.verify-careers-license]
 verify_jwt = false
+
+[functions.creation-studio-brand]
+verify_jwt = false
