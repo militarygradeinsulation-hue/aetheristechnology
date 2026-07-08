@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield, Crown,
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
-  X, Minimize2, Maximize2, Zap,
+  X, Minimize2, Maximize2, Zap, Sparkles,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { RepImageStudio } from '@/components/portal/RepImageStudio';
@@ -839,6 +839,46 @@ const PortalPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen bg-background ${cursorClassName}`}>
+      {/* New Portal announcement — dismissible, sticky top */}
+      {(() => {
+        const [dismissed, setDismissed] = [
+          typeof window !== 'undefined' && localStorage.getItem('aetheris.newPortalBannerDismissed') === '1',
+          (v: boolean) => { try { localStorage.setItem('aetheris.newPortalBannerDismissed', v ? '1' : '0'); } catch {} },
+        ] as const;
+        if (dismissed) return null;
+        return (
+          <div className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-black border-b-2 border-amber-600 shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 min-w-0">
+                <Sparkles className="w-5 h-5 flex-shrink-0 animate-pulse" />
+                <p className="text-sm font-bold truncate">
+                  ✨ NEW: Cleaner portal with short how-to's on every tool — your leads carry over automatically.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-black text-amber-300 hover:bg-black/85 font-mono uppercase tracking-wider text-[11px] font-bold h-8"
+                  onClick={() => { try { localStorage.setItem('aetheris.portalStyle', 'new'); } catch {} }}
+                >
+                  <Link to="/portal/new">
+                    Try New Portal <span className="ml-1">→</span>
+                  </Link>
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setDismissed(true); window.location.reload(); }}
+                  className="text-black/70 hover:text-black p-1"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {showTopAppBanner && (
         <div className="w-full bg-amber text-background border-b border-amber/60">
           <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
@@ -980,13 +1020,16 @@ const PortalPage: React.FC = () => {
             <LanguageToggle />
             <Button
               asChild
-              variant="outline"
               size="sm"
-              className="border-amber-400/40 text-amber-300 hover:bg-amber-400/10 font-mono uppercase tracking-wider text-[10px]"
+              className="relative bg-amber-400 hover:bg-amber-300 text-black font-mono uppercase tracking-wider text-[11px] font-bold shadow-[0_0_20px_rgba(251,191,36,0.5)] hover:shadow-[0_0_28px_rgba(251,191,36,0.7)] animate-pulse"
               title="Try the new clean portal layout"
               onClick={() => { try { localStorage.setItem('aetheris.portalStyle', 'new'); } catch {} }}
             >
-              <Link to="/portal/new">✨ New portal</Link>
+              <Link to="/portal/new">
+                <Sparkles className="w-4 h-4 mr-1.5" />
+                Try New Portal
+                <span className="ml-1.5 text-[9px] bg-black/80 text-amber-300 px-1.5 py-0.5 rounded font-bold">NEW</span>
+              </Link>
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Log out</span>
