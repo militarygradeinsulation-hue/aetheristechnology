@@ -12,7 +12,9 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import {
   Cpu, ChevronDown, ChevronUp, Play, RefreshCw, Trash2, Activity, AlertCircle,
+  Database, Zap, Link2, Radio,
 } from 'lucide-react';
+import { installChipBridge, type ChipBridgeAPI } from '@/lib/chip-bridge';
 
 declare global {
   interface Window {
@@ -39,15 +41,19 @@ interface Settings {
   evidence: number;
   leverage: number;
   speed: number;
+  autoInterval: number; // seconds, 0 = off
+  bridgeEnabled: boolean;
 }
 
 const DEFAULTS: Settings = {
   enabled: true,
-  system: 'my-crm',
-  target: 'deal-42',
+  system: 'aetheris',
+  target: 'admin-dashboard',
   evidence: 0.7,
   leverage: 0.5,
   speed: 0.3,
+  autoInterval: 0,
+  bridgeEnabled: true,
 };
 
 const loadSettings = (): Settings => {
@@ -83,9 +89,25 @@ export const ChipControlBar: React.FC = () => {
   const [running, setRunning] = useState(false);
   const [history, setHistory] = useState<VerdictEntry[]>(loadHistory);
   const [chipReady, setChipReady] = useState<boolean>(typeof window !== 'undefined' && !!window.Chip);
+  const [bridge, setBridge] = useState<ChipBridgeAPI | null>(null);
+  const [systemCounts, setSystemCounts] = useState<{ tables: number; tools: number; edgeReachable: boolean }>({
+    tables: 0, tools: 0, edgeReachable: false,
+  });
 
   useEffect(() => { saveSettings(settings); }, [settings]);
   useEffect(() => { saveHistory(history); }, [history]);
+
+  // Install the ChipBridge so window.ChipBridge exists for the chip.js script.
+  useEffect(() => {
+    if (!settings.bridgeEnabled) return;
+    const b = installChipBridge();
+    setBridge(b);
+    setSystemCounts(s => ({ ...s, tables: b.listTables().length, tools: b.listTools().length }));
+    // Probe an edge function existence quickly (non-blocking).
+    b.invoke('ping', {}).then(() => setSystemCounts(s => ({ ...s, edgeReachable: true }))).catch(() => {
+      setSystemCounts(s => ({ ...s, edgeReachable: true })); // reachable even if function 404s
+    });
+  }, [settings.bridgeEnabled]);
 
   // Poll for Chip global appearing (script loads async).
   useEffect(() => {
@@ -99,7 +121,7 @@ export const ChipControlBar: React.FC = () => {
     return () => clearInterval(id);
   }, [chipReady]);
 
-  const perceive = async () => {
+  const perceive = React.useCallback(async () => {
     if (!settings.enabled) return;
     if (!window.Chip?.attach) {
       setHistory(h => [{
@@ -111,12 +133,19 @@ export const ChipControlBar: React.FC = () => {
     }
     setRunning(true);
     try {
-      const chip = window.Chip.attach({ system: settings.system });
+      // Feed live snapshot into the attach options so Chip can see the whole app.
+      const snap = bridge ? await bridge.snapshot() : null;
+      const chip = window.Chip.attach({
+        system: settings.system,
+        bridge: bridge ?? undefined,
+        snapshot: snap,
+      });
       const v = await chip.perceive(
         { evidence: settings.evidence, leverage: settings.leverage, speed: settings.speed },
-        { target: settings.target },
+        { target: settings.target, snapshot: snap },
       );
       window.__chipVerdict = v;
+      bridge?.setVerdict(v);
       setHistory(h => [{
         ts: Date.now(), target: settings.target,
         inputs: { evidence: settings.evidence, leverage: settings.leverage, speed: settings.speed },
@@ -131,7 +160,15 @@ export const ChipControlBar: React.FC = () => {
     } finally {
       setRunning(false);
     }
-  };
+  }, [settings, bridge]);
+
+  // Auto-perceive loop for continuous enhancement.
+  useEffect(() => {
+    if (!settings.autoInterval || !settings.enabled || !chipReady) return;
+    const id = setInterval(() => { perceive(); }, settings.autoInterval * 1000);
+    return () => clearInterval(id);
+  }, [settings.autoInterval, settings.enabled, chipReady, perceive]);
+
 
   const lastVerdict = history[0]?.verdict;
   const lastScore = typeof lastVerdict?.score === 'number' ? lastVerdict.score : null;
@@ -226,10 +263,44 @@ export const ChipControlBar: React.FC = () => {
                   />
                 </div>
               ))}
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Auto-perceive (sec)</span>
+                  <span className="text-[11px] font-mono text-amber-300">{settings.autoInterval ? `${settings.autoInterval}s` : 'off'}</span>
+                </div>
+                <Slider
+                  value={[settings.autoInterval]}
+                  onValueChange={([v]) => setSettings(s => ({ ...s, autoInterval: v }))}
+                  min={0} max={120} step={5}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Switch
+                  checked={settings.bridgeEnabled}
+                  onCheckedChange={(v) => setSettings(s => ({ ...s, bridgeEnabled: v }))}
+                  aria-label="Enable bridge"
+                />
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  ChipBridge (full app access)
+                </span>
+              </div>
               <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-                Values persist locally. Hit <span className="text-amber-300">Perceive</span> to send them through <code className="text-amber-300/80">chip.perceive()</code>.
+                Bridge exposes <code className="text-amber-300/80">window.ChipBridge</code> — DB queries, edge functions, UI tools, snapshots. Chip runs with your admin session.
               </p>
+
+              {/* Connected systems panel */}
+              <div className="mt-3 rounded-md border border-amber-400/15 bg-black/40 p-2.5 space-y-1.5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-400/80">// Connected //</div>
+                <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                  <div className="flex items-center gap-1.5"><Database className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Tables:</span><span className="text-amber-300">{systemCounts.tables}</span></div>
+                  <div className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Edge:</span><span className="text-amber-300">{systemCounts.edgeReachable ? 'live' : '…'}</span></div>
+                  <div className="flex items-center gap-1.5"><Link2 className="w-3 h-3 text-emerald-400" /><span className="text-muted-foreground">Tools:</span><span className="text-amber-300">{systemCounts.tools}</span></div>
+                  <div className="flex items-center gap-1.5"><Radio className={`w-3 h-3 ${settings.autoInterval ? 'text-emerald-400 animate-pulse' : 'text-muted-foreground'}`} /><span className="text-muted-foreground">Auto:</span><span className="text-amber-300">{settings.autoInterval ? 'on' : 'off'}</span></div>
+                </div>
+              </div>
             </div>
+
 
             {/* History */}
             <div className="space-y-2">
