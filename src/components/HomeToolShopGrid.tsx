@@ -1,20 +1,53 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { SHOP_TOOLS, SHOP_PRICES, type ShopTool, type ShopPlan } from "@/lib/tool-shop-catalog";
-import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap } from "lucide-react";
+import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, X, Play } from "lucide-react";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
- * Public grid of every Leak Ecosystem tool. Every buy action opens an inline
- * checkout modal — no page navigation. Bundles pick tools inside the modal.
+ * Public grid of every Leak Ecosystem tool. Clicking a tile expands a
+ * center-screen info dialog with Try + Buy actions. Try preserves a
+ * `#tool-catalog` hash so browser Back drops the user right back at this
+ * section without extra scrolling.
  */
 export function HomeToolShopGrid() {
+  const navigate = useNavigate();
   const [buyPlan, setBuyPlan] = useState<ShopPlan | null>(null);
   const [preselected, setPreselected] = useState<string[]>([]);
+  const [infoTool, setInfoTool] = useState<ShopTool | null>(null);
+
+  // If we land here with #tool-catalog (e.g. from browser Back after Try),
+  // scroll the catalog into view automatically.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash === "#tool-catalog") {
+      // wait a frame for layout
+      requestAnimationFrame(() => {
+        document.getElementById("tool-catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, []);
 
   const openBuy = (plan: ShopPlan, tool?: ShopTool) => {
     setPreselected(tool ? [tool.id] : []);
     setBuyPlan(plan);
+  };
+
+  const handleTry = (tool: ShopTool) => {
+    // Stamp the current home entry with #tool-catalog so browser Back returns
+    // straight to this section — no scrolling required.
+    if (typeof window !== "undefined") {
+      const { pathname, search } = window.location;
+      window.history.replaceState(window.history.state, "", `${pathname}${search}#tool-catalog`);
+    }
+    setInfoTool(null);
+    navigate(`/try/${encodeURIComponent(tool.id)}`);
+  };
+
+  const handleBuyFromInfo = (tool: ShopTool) => {
+    setInfoTool(null);
+    openBuy("single", tool);
   };
 
   return (
@@ -117,7 +150,6 @@ export function HomeToolShopGrid() {
               <p className="text-xs text-foreground/80 mt-3 leading-snug">
                 Sell every tool under your own rep code. Commissions on every sale. $40 application confirms you're a fit, $100 license activates you.
               </p>
-
             </div>
             <div className="mt-4 pt-3 border-t border-crimson/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson">
               <Rocket className="w-3 h-3" />
@@ -127,21 +159,24 @@ export function HomeToolShopGrid() {
           </Link>
         </div>
 
-        {/* Divider */}
+        {/* Divider / catalog anchor */}
         <div id="tool-catalog" className="flex items-center gap-3 mb-4 scroll-mt-24">
           <div className="h-px flex-1 bg-amber/20" />
           <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/60">
-            The catalog · click Buy for instant checkout
+            The catalog · tap any tool to expand
           </div>
           <div className="h-px flex-1 bg-amber/20" />
         </div>
 
-        {/* Tool tiles */}
+        {/* Tool tiles — click opens info dialog */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {SHOP_TOOLS.map((t) => (
-            <div
+            <button
+              type="button"
               key={t.id}
-              className="group rounded-sm border border-border/60 bg-background/60 p-3 flex items-start gap-3 hover:border-amber/60 hover:bg-amber/[0.03] transition-colors"
+              onClick={() => setInfoTool(t)}
+              className="group text-left rounded-sm border border-border/60 bg-background/60 p-3 flex items-start gap-3 hover:border-amber/60 hover:bg-amber/[0.03] transition-colors"
+              aria-label={`Open details for ${t.name}`}
             >
               <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center shrink-0 group-hover:bg-amber/20 transition-colors">
                 <Sparkles className="w-3.5 h-3.5 text-amber" />
@@ -158,30 +193,12 @@ export function HomeToolShopGrid() {
                 <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
                   {t.tagline}
                 </p>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <Link
-                    to={`/try/${encodeURIComponent(t.id)}`}
-                    className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/70 hover:text-amber transition-colors"
-                  >
-                    Try free →
-                  </Link>
-                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => openBuy("single", t)}
-                className="shrink-0 inline-flex flex-col items-center justify-center gap-0.5 rounded-sm border border-amber/60 bg-amber/10 hover:bg-amber hover:text-background transition-colors px-2.5 py-1.5 self-center"
-                aria-label={`Buy ${t.name} for $40`}
-              >
-                <div className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-inherit">
-                  <Zap className="w-3 h-3" />
-                  Buy
-                </div>
-                <div className="font-forensic text-sm font-bold text-amber group-hover:text-inherit leading-none">
-                  $40
-                </div>
-              </button>
-            </div>
+              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber/70 group-hover:text-amber flex items-center gap-1">
+                Details
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </button>
           ))}
         </div>
 
@@ -190,8 +207,60 @@ export function HomeToolShopGrid() {
             Already have a code? Redeem it →
           </Link>
         </div>
-
       </div>
+
+      {/* Tool info dialog (expanded center-screen view) */}
+      <Dialog open={!!infoTool} onOpenChange={(o) => !o && setInfoTool(null)}>
+        <DialogContent className="max-w-lg">
+          {infoTool && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-amber" />
+                  </div>
+                  <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
+                    {infoTool.category}
+                  </div>
+                </div>
+                <DialogTitle className="font-forensic text-2xl">{infoTool.name}</DialogTitle>
+                <DialogDescription className="text-sm leading-relaxed pt-1">
+                  {infoTool.tagline}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 pt-1">
+                <div className="rounded-sm border border-border/60 bg-background/40 p-3 space-y-1.5">
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber/70">What you get</div>
+                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside marker:text-amber/60">
+                    <li>3 free sandbox runs — no signup, nothing saved.</li>
+                    <li>$40 lifetime license — unlimited runs after that.</li>
+                    <li>Persistent memory attached to your account.</li>
+                    <li>Same engine the operators run in the field.</li>
+                  </ul>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleTry(infoTool)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-amber/60 bg-amber/5 hover:bg-amber/15 text-amber px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold transition-colors"
+                  >
+                    <Play className="w-3.5 h-3.5" /> Try free
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleBuyFromInfo(infoTool)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-amber hover:bg-amber/90 text-background px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold transition-colors"
+                  >
+                    <Zap className="w-3.5 h-3.5" /> Buy $40
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {buyPlan && (
         <BuyToolDialog
