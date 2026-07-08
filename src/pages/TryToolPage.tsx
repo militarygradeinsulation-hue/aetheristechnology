@@ -46,11 +46,49 @@ export default function TryToolPage() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [runAt, setRunAt] = useState<Date | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
-  useEffect(() => () => { setInput(""); setOutput(""); }, [toolId]);
+  useEffect(() => () => { setInput(""); setOutput(""); setRunAt(null); }, [toolId]);
 
-  const reset = () => { setInput(""); setOutput(""); };
+  const reset = () => { setInput(""); setOutput(""); setRunAt(null); };
+
+  // Deterministic-ish case id from tool + timestamp for the case-file header.
+  const caseId = useMemo(() => {
+    if (!runAt) return "";
+    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `AE-${toolId.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6)}-${rand}`;
+  }, [runAt, toolId]);
+
+  // Split markdown into H2 sections so long outputs read as a structured case
+  // file instead of one wall of prose. Anything before the first H2 becomes an
+  // "Executive Summary" card.
+  const sections = useMemo(() => {
+    if (!output) return [] as { title: string; body: string }[];
+    const lines = output.split("\n");
+    const out: { title: string; body: string }[] = [];
+    let current: { title: string; body: string } = { title: "Executive Summary", body: "" };
+    for (const line of lines) {
+      const m = line.match(/^##\s+(.+)$/);
+      if (m) {
+        if (current.body.trim() || current.title !== "Executive Summary") out.push(current);
+        current = { title: m[1].trim(), body: "" };
+      } else {
+        current.body += line + "\n";
+      }
+    }
+    if (current.body.trim()) out.push(current);
+    return out.filter(s => s.body.trim());
+  }, [output]);
+
+  const copyOutput = () => {
+    if (!output) return;
+    navigator.clipboard.writeText(output);
+    toast.success("Report copied to clipboard");
+  };
+  const printReport = () => window.print();
+
 
   const run = async () => {
     const trimmed = input.trim();
