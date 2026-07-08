@@ -119,7 +119,49 @@ const Home = () => {
             </div>
           </section>
 
+          {/* Email gate → full ecosystem of tools */}
+          <section id="ecosystem-gate" className="px-4 pb-14 scroll-mt-24">
+            <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2 flex items-center gap-1.5">
+                <Grid3x3 className="w-3 h-3" /> The full toolset
+              </div>
+              <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
+                Want every forensic tool we use?
+              </h3>
+              <p className="text-sm md:text-base text-foreground/80 mb-5">
+                Drop your email and get instant access to the entire Aetheris ecosystem — scanners, diagnostics,
+                report generators, and closer kits. No password, no rep code required.
+              </p>
+              <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  type="email"
+                  required
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/70 border-amber/30 font-mono text-sm flex-1"
+                />
+                <Button
+                  type="submit"
+                  disabled={unlocking || !email}
+                  className="bg-amber text-background hover:bg-amber/90 font-semibold whitespace-nowrap"
+                >
+                  {unlocking ? (
+                    <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Unlocking</>
+                  ) : (
+                    <>Unlock the toolset <ArrowRight className="w-4 h-4 ml-1" /></>
+                  )}
+                </Button>
+              </form>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                One email · full access · no spam
+              </p>
+            </div>
+          </section>
+
           <PublicChaosScan />
+
+
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">
             <div className="max-w-3xl mx-auto text-center">
