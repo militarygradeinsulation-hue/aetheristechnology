@@ -158,7 +158,7 @@ export default function ToolsShopPage() {
 
 
           {/* Checkout */}
-          <Card className="p-6 max-w-2xl mx-auto border-amber-500/40">
+          <Card id="shop-checkout" className="p-6 max-w-2xl mx-auto border-amber-500/40">
             <h3 className="font-semibold mb-4">Checkout — {price.label} · ${(price.amount / 100).toFixed(0)}</h3>
             <div className="space-y-3 mb-4">
               <div>
