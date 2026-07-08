@@ -89,9 +89,25 @@ export const ChipControlBar: React.FC = () => {
   const [running, setRunning] = useState(false);
   const [history, setHistory] = useState<VerdictEntry[]>(loadHistory);
   const [chipReady, setChipReady] = useState<boolean>(typeof window !== 'undefined' && !!window.Chip);
+  const [bridge, setBridge] = useState<ChipBridgeAPI | null>(null);
+  const [systemCounts, setSystemCounts] = useState<{ tables: number; tools: number; edgeReachable: boolean }>({
+    tables: 0, tools: 0, edgeReachable: false,
+  });
 
   useEffect(() => { saveSettings(settings); }, [settings]);
   useEffect(() => { saveHistory(history); }, [history]);
+
+  // Install the ChipBridge so window.ChipBridge exists for the chip.js script.
+  useEffect(() => {
+    if (!settings.bridgeEnabled) return;
+    const b = installChipBridge();
+    setBridge(b);
+    setSystemCounts(s => ({ ...s, tables: b.listTables().length, tools: b.listTools().length }));
+    // Probe an edge function existence quickly (non-blocking).
+    b.invoke('ping', {}).then(() => setSystemCounts(s => ({ ...s, edgeReachable: true }))).catch(() => {
+      setSystemCounts(s => ({ ...s, edgeReachable: true })); // reachable even if function 404s
+    });
+  }, [settings.bridgeEnabled]);
 
   // Poll for Chip global appearing (script loads async).
   useEffect(() => {
@@ -105,7 +121,7 @@ export const ChipControlBar: React.FC = () => {
     return () => clearInterval(id);
   }, [chipReady]);
 
-  const perceive = async () => {
+  const perceive = React.useCallback(async () => {
     if (!settings.enabled) return;
     if (!window.Chip?.attach) {
       setHistory(h => [{
@@ -117,12 +133,19 @@ export const ChipControlBar: React.FC = () => {
     }
     setRunning(true);
     try {
-      const chip = window.Chip.attach({ system: settings.system });
+      // Feed live snapshot into the attach options so Chip can see the whole app.
+      const snap = bridge ? await bridge.snapshot() : null;
+      const chip = window.Chip.attach({
+        system: settings.system,
+        bridge: bridge ?? undefined,
+        snapshot: snap,
+      });
       const v = await chip.perceive(
         { evidence: settings.evidence, leverage: settings.leverage, speed: settings.speed },
-        { target: settings.target },
+        { target: settings.target, snapshot: snap },
       );
       window.__chipVerdict = v;
+      bridge?.setVerdict(v);
       setHistory(h => [{
         ts: Date.now(), target: settings.target,
         inputs: { evidence: settings.evidence, leverage: settings.leverage, speed: settings.speed },
@@ -137,7 +160,15 @@ export const ChipControlBar: React.FC = () => {
     } finally {
       setRunning(false);
     }
-  };
+  }, [settings, bridge]);
+
+  // Auto-perceive loop for continuous enhancement.
+  useEffect(() => {
+    if (!settings.autoInterval || !settings.enabled || !chipReady) return;
+    const id = setInterval(() => { perceive(); }, settings.autoInterval * 1000);
+    return () => clearInterval(id);
+  }, [settings.autoInterval, settings.enabled, chipReady, perceive]);
+
 
   const lastVerdict = history[0]?.verdict;
   const lastScore = typeof lastVerdict?.score === 'number' ? lastVerdict.score : null;
