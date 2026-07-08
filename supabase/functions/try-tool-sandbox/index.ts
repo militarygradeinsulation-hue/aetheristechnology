@@ -151,7 +151,7 @@ async function callGateway(system: string, user: string): Promise<string> {
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { role: "system", content: system + "\n\nPUBLIC-RUN GUARDRAIL: Do not reference any internal company, client, rep, or system by name. Work only from the user's input. But do produce the FULL depth of analysis — this is not a preview, this is the real tool without the persistent memory layer." },
+        { role: "system", content: system + "\n\nPUBLIC-RUN GUARDRAIL: Do not name any real company, client, or rep. Work only from user input. FOLLOW THE OUTPUT DISCIPLINE STRICTLY — this must read like a one-page PDF report, not a wall of text. Under 450 words total. No preamble." },
         { role: "user", content: user },
       ],
     }),
