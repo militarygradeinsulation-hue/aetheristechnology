@@ -244,6 +244,8 @@ const App = () => (
                       <Route path="/indianapolis" element={<LocationPage />} />
                       <Route path="/indiana" element={<LocationPage />} />
                       <Route path="/extension" element={<ExtensionPage />} />
+                      <Route path="/brand-voice-extension" element={<BrandVoiceExtensionPage />} />
+                      <Route path="/brand-voice" element={<Navigate to="/brand-voice-extension" replace />} />
                       <Route path="/mobile-app" element={<MobileAppPage />} />
                       <Route path="/operator-app" element={<OperatorAppPage />} />
                       {/* AI Authority Playbook — Tier-1 pillars + Tier-2 question articles + glossary */}
