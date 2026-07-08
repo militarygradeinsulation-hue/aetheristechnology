@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Search, Grid3x3, Loader2 } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,7 +8,11 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { PublicChaosScan } from '@/components/PublicChaosScan';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 
 const Home = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
