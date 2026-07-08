@@ -181,6 +181,7 @@ const App = () => (
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
                       <Route path="/careers-test" element={<CareersTestPage />} />
+                      <Route path="/careers/license" element={<CareersLicensePage />} />
                       <Route path="/unsubscribe" element={<UnsubscribePage />} />
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
                       <Route path="/deliverable/:token" element={<DeliverablePage />} />
