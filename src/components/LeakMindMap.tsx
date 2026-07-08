@@ -1,7 +1,36 @@
 import React, { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
-import { X } from "lucide-react";
+import { X, Sparkles, ShoppingCart } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
+import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+
+// Keyword → tool-id map. When a node is opened we suggest tools whose
+// keywords match the node label/sublabel/id. Everything else falls back
+// to the 3 flagship diagnostics so every bubble always has fix-options.
+const NODE_TOOL_KEYWORDS: { keys: string[]; tools: string[] }[] = [
+  { keys: ["website", "site", "url", "web", "landing"], tools: ["website-scanner", "friction-audit", "brand-contradictions"] },
+  { keys: ["brand", "promise", "contradiction", "vocab", "vocabulary", "words", "messaging"], tools: ["brand-contradictions", "social-content", "content-engine"] },
+  { keys: ["convert", "conversion", "drop", "funnel", "friction", "exit"], tools: ["friction-audit", "website-scanner", "detective-mode"] },
+  { keys: ["followup", "follow-up", "sales", "lead", "cold", "outbound"], tools: ["playbook-generator", "detective-mode", "strategic-questions"] },
+  { keys: ["system", "data", "integration", "bridge", "stack", "tech"], tools: ["forensic-scan-all", "tool-generator", "playbook-generator"] },
+  { keys: ["waste", "ops", "headcount", "operational", "team"], tools: ["playbook-generator", "easy-mode", "strategic-questions"] },
+  { keys: ["ceiling", "growth", "stuck", "scale"], tools: ["strategic-questions", "forensic-scan-all", "content-calendar"] },
+  { keys: ["content", "blog", "social", "post", "calendar", "creative", "image", "video", "asset"], tools: ["content-engine", "content-calendar", "social-content", "image-studio", "creation-studio", "all-in-one"] },
+  { keys: ["intake", "scope", "diagnostic", "audit", "prescan", "pre-scan", "scan", "report", "findings", "priority", "fix"], tools: ["forensic-scan-all", "website-scanner", "detective-mode"] },
+  { keys: ["playbook", "process", "workflow"], tools: ["playbook-generator", "easy-mode"] },
+  { keys: ["question", "strategy", "boardroom", "leadership"], tools: ["strategic-questions", "detective-mode"] },
+];
+
+function pickToolsForNode(n: { id: string; label: string; sublabel?: string }): string[] {
+  const hay = `${n.id} ${n.label} ${n.sublabel || ""}`.toLowerCase();
+  const hits = new Set<string>();
+  for (const row of NODE_TOOL_KEYWORDS) {
+    if (row.keys.some((k) => hay.includes(k))) row.tools.forEach((t) => hits.add(t));
+  }
+  const list = Array.from(hits).slice(0, 3);
+  return list.length ? list : ["forensic-scan-all", "website-scanner", "strategic-questions"];
+}
 
 export type MindMapNodeData = {
   id: string;
@@ -405,6 +434,47 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                 </ul>
               </div>
             )}
+            {(() => {
+              const toolIds = pickToolsForNode(n);
+              const tools = toolIds
+                .map((id) => SHOP_TOOLS.find((t) => t.id === id))
+                .filter(Boolean) as typeof SHOP_TOOLS;
+              if (!tools.length) return null;
+              return (
+                <div className="mt-3 pt-2 border-t border-amber/25">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.28em] text-amber mb-1.5">
+                    Tools that fix this
+                  </div>
+                  <ul className="space-y-1.5">
+                    {tools.map((t) => (
+                      <li key={t.id} className="flex items-center justify-between gap-2 rounded-sm border border-amber/20 bg-background/60 px-2 py-1.5">
+                        <span className="font-forensic text-[11px] font-bold text-foreground truncate">
+                          {t.name}
+                        </span>
+                        <span className="flex items-center gap-1 shrink-0">
+                          <Link
+                            to={`/try/${t.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 rounded-sm border border-amber/40 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest text-amber hover:bg-amber/10"
+                            title="Try free"
+                          >
+                            <Sparkles className="w-2.5 h-2.5" /> Try
+                          </Link>
+                          <Link
+                            to={`/tools-shop?tool=${t.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 rounded-sm bg-amber text-background px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
+                            title="Buy $40 lifetime"
+                          >
+                            <ShoppingCart className="w-2.5 h-2.5" /> $40
+                          </Link>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
             {n.onClick && (
               <div className="mt-2 pt-2 border-t border-amber/15 font-mono text-[9px] uppercase tracking-wider text-amber/80">
                 Tap again to open →
