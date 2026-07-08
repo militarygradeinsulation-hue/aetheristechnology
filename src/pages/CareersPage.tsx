@@ -10,8 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Target, CheckCircle, XCircle, Shield, Rocket, Users, Clock, Brain, Headphones, DollarSign, Lock,
 } from 'lucide-react';
-import careersHero from '@/assets/careers-hero.jpg';
-import careersIntroVideo from '@/assets/careers-intro.mp4';
+import operatorCertification from '@/assets/operator-certification.jpg.asset.json';
 import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
 
 const trackCareersCta = (cta: string) => {
@@ -67,25 +66,18 @@ const CareersPage = () => {
               </p>
             </div>
 
-            {/* INTRO VIDEO */}
+            {/* CERTIFICATION IMAGE */}
             <div>
               <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
-                <video
-                  src={careersIntroVideo}
-                  poster={careersHero}
-                  controls
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onEnded={(e) => {
-                    const v = e.currentTarget;
-                    v.pause(); v.currentTime = 0; v.load();
-                  }}
+                <img
+                  src={operatorCertification.url}
+                  alt="Official Aetheris Operator Certification — the credential applicants earn after passing the certification examination"
                   className="w-full h-auto block"
+                  loading="eager"
                 />
               </div>
               <p className="text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mt-3">
-                Watch this. Or don't — and move on.
+                This is what you're working toward. Pass the test, earn the credential.
               </p>
             </div>
 
