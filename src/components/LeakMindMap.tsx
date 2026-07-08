@@ -462,14 +462,14 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                           >
                             <Sparkles className="w-2.5 h-2.5" /> Try
                           </Link>
-                          <Link
-                            to={`/tools-shop?tool=${t.id}`}
-                            onClick={(e) => e.stopPropagation()}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setBuyToolId(t.id); }}
                             className="inline-flex items-center gap-1 rounded-sm bg-amber text-background px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
                             title="Buy $40 lifetime"
                           >
                             <ShoppingCart className="w-2.5 h-2.5" /> $40
-                          </Link>
+                          </button>
                         </span>
                       </li>
                     ))}
