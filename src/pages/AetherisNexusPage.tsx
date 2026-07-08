@@ -779,11 +779,13 @@ export default function AetherisNexusPage() {
 }
 
 // ─── Message Bubble ───────────────────────────────────────────────────────
-function MessageBubble({ msg, copyId, onCopy, onDownloadImage }: {
+function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }: {
   msg: ChatMessage; copyId: string | null;
   onCopy: (id: string, text: string) => void;
   onDownloadImage: (url: string, idx: number) => void;
+  onUseSuggestion?: (prompt: string) => void;
 }) {
+
   if (msg.role === "user") {
     return (
       <div className="flex justify-end animate-fade-in">
