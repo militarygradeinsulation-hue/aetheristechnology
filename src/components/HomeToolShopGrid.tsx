@@ -24,12 +24,25 @@ export function HomeToolShopGrid() {
               3 free runs on any tool. Then choose: buy the tool, or license the whole ecosystem.
             </p>
           </div>
-          <Link
-            to="/tools-shop"
-            className="inline-flex items-center gap-1.5 rounded-md border border-amber/50 px-3 py-2 text-xs font-mono uppercase tracking-widest text-amber hover:bg-amber/10 whitespace-nowrap"
-          >
-            Bundle & save <ArrowRight className="w-3 h-3" />
-          </Link>
+          <div className="flex flex-col sm:items-end gap-1.5">
+            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-amber/70">
+              Bundle & save · active
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Link
+                to="/tools-shop"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-amber/50 bg-amber/5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-widest text-amber hover:bg-amber/15 transition-colors"
+              >
+                3 Tools <span className="text-foreground font-bold">${SHOP_PRICES.triple.amount/100}</span>
+              </Link>
+              <Link
+                to="/tools-shop"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-crimson/50 bg-crimson/5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-widest text-crimson hover:bg-crimson/15 transition-colors"
+              >
+                All-Access <span className="text-foreground font-bold">${SHOP_PRICES.unlimited.amount/100}</span>
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Prominent pricing pillars */}
@@ -141,9 +154,6 @@ export function HomeToolShopGrid() {
           ))}
         </div>
 
-        <div className="mt-5 text-center text-xs text-foreground/60">
-          Bundle: <span className="text-amber">3 tools ${(SHOP_PRICES.triple.amount/100)}</span> · All-Access <span className="text-amber">${(SHOP_PRICES.unlimited.amount/100)}</span> lifetime.
-        </div>
       </div>
     </section>
   );
