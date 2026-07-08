@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,13 +13,24 @@ import { SHOP_TOOLS, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog"
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 
 export default function ToolsShopPage() {
+  const [searchParams] = useSearchParams();
+  const preselect = searchParams.get("tool");
   const [plan, setPlan] = useState<ShopPlan>("single");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(preselect ? [preselect] : []);
   const [email, setEmail] = useState("");
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
+  useEffect(() => {
+    if (preselect && SHOP_TOOLS.some(t => t.id === preselect)) {
+      setSelected([preselect]);
+      setPlan("single");
+      setTimeout(() => document.getElementById("shop-checkout")?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [preselect]);
+
   const maxSelect = plan === "single" ? 1 : plan === "triple" ? 3 : 0;
   const price = SHOP_PRICES[plan];
+
 
   const toggle = (id: string) => {
     if (plan === "unlimited") return;
