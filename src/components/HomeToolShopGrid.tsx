@@ -154,9 +154,6 @@ export function HomeToolShopGrid() {
           ))}
         </div>
 
-        <div className="mt-5 text-center text-xs text-foreground/60">
-          Bundle: <span className="text-amber">3 tools ${(SHOP_PRICES.triple.amount/100)}</span> · All-Access <span className="text-amber">${(SHOP_PRICES.unlimited.amount/100)}</span> lifetime.
-        </div>
       </div>
     </section>
   );
