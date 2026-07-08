@@ -6402,6 +6402,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_free_runs: {
+        Row: {
+          email: string
+          id: string
+          runs_used: number
+          tool_id: string
+          updated_at: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          runs_used?: number
+          tool_id: string
+          updated_at?: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          runs_used?: number
+          tool_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tool_generations: {
         Row: {
           created_at: string
@@ -6488,6 +6512,74 @@ export type Database = {
           visit_count?: number
         }
         Relationships: []
+      }
+      tool_licenses: {
+        Row: {
+          amount_cents: number | null
+          code: string
+          created_at: string
+          email: string
+          id: string
+          last_used_at: string | null
+          plan: string
+          stripe_session_id: string | null
+          tool_ids: string[]
+        }
+        Insert: {
+          amount_cents?: number | null
+          code: string
+          created_at?: string
+          email: string
+          id?: string
+          last_used_at?: string | null
+          plan: string
+          stripe_session_id?: string | null
+          tool_ids?: string[]
+        }
+        Update: {
+          amount_cents?: number | null
+          code?: string
+          created_at?: string
+          email?: string
+          id?: string
+          last_used_at?: string | null
+          plan?: string
+          stripe_session_id?: string | null
+          tool_ids?: string[]
+        }
+        Relationships: []
+      }
+      tool_memory: {
+        Row: {
+          id: string
+          license_code: string
+          memory: Json
+          tool_id: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          license_code: string
+          memory?: Json
+          tool_id: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          license_code?: string
+          memory?: Json
+          tool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_memory_license_code_fkey"
+            columns: ["license_code"]
+            isOneToOne: false
+            referencedRelation: "tool_licenses"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       training_attempts: {
         Row: {
