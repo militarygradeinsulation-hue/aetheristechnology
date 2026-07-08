@@ -6516,6 +6516,8 @@ export type Database = {
       tool_licenses: {
         Row: {
           amount_cents: number | null
+          brand_tone: string | null
+          brand_url: string | null
           code: string
           created_at: string
           email: string
@@ -6527,6 +6529,8 @@ export type Database = {
         }
         Insert: {
           amount_cents?: number | null
+          brand_tone?: string | null
+          brand_url?: string | null
           code: string
           created_at?: string
           email: string
@@ -6538,6 +6542,8 @@ export type Database = {
         }
         Update: {
           amount_cents?: number | null
+          brand_tone?: string | null
+          brand_url?: string | null
           code?: string
           created_at?: string
           email?: string
