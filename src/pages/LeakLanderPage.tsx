@@ -419,9 +419,6 @@ const LeakLanderPage: React.FC = () => {
 
                 {/* Build placeholders — small, unbranded tiles */}
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.35em] text-foreground/45">
-                    ⌁ Selected builds · under seal ⌁
-                  </span>
                   <div className="w-full max-w-xl rounded-md border border-amber/20 bg-background/60 p-3">
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 w-full">
                       {Array.from({ length: 12 }).map((_, i) => (
