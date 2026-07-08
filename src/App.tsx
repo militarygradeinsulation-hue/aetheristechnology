@@ -144,6 +144,9 @@ const App = () => (
                   <PageViewTracker />
                   <RetargetingPixel />
                   <FloatingWorkbench />
+                  <ToolBuyBar />
+
+
 
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
