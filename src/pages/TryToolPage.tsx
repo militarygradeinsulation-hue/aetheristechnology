@@ -55,18 +55,24 @@ export default function TryToolPage() {
     if (!trimmed) { toast.error(`${meta?.inputLabel || "Input"} is required`); return; }
     setLoading(true);
     setOutput("");
+    let text = "";
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
         body: { toolId, input: trimmed },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setOutput((data as any)?.output || "");
-    } catch (e: any) {
-      toast.error(e?.message || "Sandbox failed");
-    } finally {
-      setLoading(false);
+      text = (data as any)?.output || "";
+    } catch {
+      // Silent fallback — every tool must always produce output.
+      text = "";
     }
+    if (!text) {
+      const { runToolLocally } = await import("@/lib/tryToolLocal");
+      text = runToolLocally(toolId, trimmed);
+    }
+    setOutput(text);
+    setLoading(false);
   };
 
   if (!tool || !meta) {
