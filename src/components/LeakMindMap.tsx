@@ -1,7 +1,36 @@
 import React, { useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
-import { X } from "lucide-react";
+import { X, Sparkles, ShoppingCart } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
+import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+
+// Keyword → tool-id map. When a node is opened we suggest tools whose
+// keywords match the node label/sublabel/id. Everything else falls back
+// to the 3 flagship diagnostics so every bubble always has fix-options.
+const NODE_TOOL_KEYWORDS: { keys: string[]; tools: string[] }[] = [
+  { keys: ["website", "site", "url", "web", "landing"], tools: ["website-scanner", "friction-audit", "brand-contradictions"] },
+  { keys: ["brand", "promise", "contradiction", "vocab", "vocabulary", "words", "messaging"], tools: ["brand-contradictions", "social-content", "content-engine"] },
+  { keys: ["convert", "conversion", "drop", "funnel", "friction", "exit"], tools: ["friction-audit", "website-scanner", "detective-mode"] },
+  { keys: ["followup", "follow-up", "sales", "lead", "cold", "outbound"], tools: ["playbook-generator", "detective-mode", "strategic-questions"] },
+  { keys: ["system", "data", "integration", "bridge", "stack", "tech"], tools: ["forensic-scan-all", "tool-generator", "playbook-generator"] },
+  { keys: ["waste", "ops", "headcount", "operational", "team"], tools: ["playbook-generator", "easy-mode", "strategic-questions"] },
+  { keys: ["ceiling", "growth", "stuck", "scale"], tools: ["strategic-questions", "forensic-scan-all", "content-calendar"] },
+  { keys: ["content", "blog", "social", "post", "calendar", "creative", "image", "video", "asset"], tools: ["content-engine", "content-calendar", "social-content", "image-studio", "creation-studio", "all-in-one"] },
+  { keys: ["intake", "scope", "diagnostic", "audit", "prescan", "pre-scan", "scan", "report", "findings", "priority", "fix"], tools: ["forensic-scan-all", "website-scanner", "detective-mode"] },
+  { keys: ["playbook", "process", "workflow"], tools: ["playbook-generator", "easy-mode"] },
+  { keys: ["question", "strategy", "boardroom", "leadership"], tools: ["strategic-questions", "detective-mode"] },
+];
+
+function pickToolsForNode(n: { id: string; label: string; sublabel?: string }): string[] {
+  const hay = `${n.id} ${n.label} ${n.sublabel || ""}`.toLowerCase();
+  const hits = new Set<string>();
+  for (const row of NODE_TOOL_KEYWORDS) {
+    if (row.keys.some((k) => hay.includes(k))) row.tools.forEach((t) => hits.add(t));
+  }
+  const list = Array.from(hits).slice(0, 3);
+  return list.length ? list : ["forensic-scan-all", "website-scanner", "strategic-questions"];
+}
 
 export type MindMapNodeData = {
   id: string;
