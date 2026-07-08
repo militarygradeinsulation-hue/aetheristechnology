@@ -695,7 +695,7 @@ export default function AetherisNexusPage() {
           ) : (
             <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6 space-y-6">
               {messages.map((m) => (
-                <MessageBubble key={m.id} msg={m} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} />
+                <MessageBubble key={m.id} msg={m} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} onUseSuggestion={(p) => { if (!streaming && threadId) runImageGen(p, threadId); }} />
               ))}
               {streaming && (
                 <div className="flex items-center gap-2 text-zinc-500 text-sm px-2">
