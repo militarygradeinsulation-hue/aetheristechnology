@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound } from "lucide-react";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
