@@ -239,3 +239,6 @@ verify_jwt = false
 verify_jwt = false
 
 
+
+[functions.verify-careers-license]
+verify_jwt = false
