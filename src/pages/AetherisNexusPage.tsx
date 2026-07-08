@@ -840,7 +840,26 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }
             ))}
           </div>
         )}
-        {msg.content && (
+        {msg.promptSuggestions && msg.promptSuggestions.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-amber-400/80 font-mono flex items-center gap-1.5">
+              <Sparkles size={11} /> Try another angle
+            </div>
+            <div className="grid gap-1.5">
+              {msg.promptSuggestions.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => onUseSuggestion?.(p)}
+                  disabled={!onUseSuggestion}
+                  className="text-left text-xs text-zinc-300 hover:text-amber-300 border border-zinc-800 hover:border-amber-500/40 hover:bg-amber-500/[0.04] rounded-lg px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
           <div className="opacity-0 group-hover:opacity-100 transition mt-2">
             <button onClick={() => onCopy(msg.id, msg.content)} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1">
               {copyId === msg.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
