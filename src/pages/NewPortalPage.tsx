@@ -321,7 +321,7 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <PortalPlaybook profile={profile!} />
+              <PortalPlaybook />
             </ToolCard>
           </TabsContent>
 
@@ -338,7 +338,7 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <SalesCoachChat profile={profile!} />
+              <SalesCoachChat />
             </ToolCard>
           </TabsContent>
 
@@ -355,7 +355,7 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <TrainingPanel profile={profile!} />
+              <TrainingPanel />
             </ToolCard>
           </TabsContent>
 
@@ -372,7 +372,7 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <RepCreationStudio profile={profile!} />
+              <RepCreationStudio />
             </ToolCard>
           </TabsContent>
 
@@ -389,7 +389,7 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <WorkspaceTab profile={profile!} />
+              <WorkspaceTab />
             </ToolCard>
           </TabsContent>
         </Tabs>
@@ -405,7 +405,7 @@ const NewPortalPage: React.FC = () => {
               'Click a bar to see the exact deals rolled into it.',
             ]}
           >
-            <ForecastCenter profile={profile!} />
+            <ForecastCenter isPartner={isPartner} />
           </ToolCard>
         </section>
       </main>
