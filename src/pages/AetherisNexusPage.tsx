@@ -46,7 +46,9 @@ type ChatMessage = {
   attachments?: Attachment[];
   tools?: ToolEvent[];
   images?: string[]; // generated image data URLs (already watermarked)
+  promptSuggestions?: string[]; // alternative image prompts the user can regen from
   createdAt: number;
+
 };
 
 type Thread = {
