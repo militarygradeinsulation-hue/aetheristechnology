@@ -485,6 +485,15 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
           </div>
         );
       })()}
+
+      {buyToolId && (
+        <BuyToolDialog
+          open={!!buyToolId}
+          onOpenChange={(o) => !o && setBuyToolId(null)}
+          plan="single"
+          preselectedToolIds={[buyToolId]}
+        />
+      )}
     </div>
   );
 };
