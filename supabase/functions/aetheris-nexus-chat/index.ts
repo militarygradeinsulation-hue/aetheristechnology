@@ -133,9 +133,10 @@ async function scanCompany(url: string, company?: string, adminToken?: string) {
     const scanId = startData?.scan_id;
     if (!scanId) return { error: "Failed to start scan", detail: startData };
 
-    // Poll up to 120s
-    for (let i = 0; i < 60; i++) {
-      await new Promise((r) => setTimeout(r, 2000));
+    // Poll up to ~45s (scans that take longer will resolve async; we return
+    // scan_id so the model can tell the user to check back).
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 1500));
       const pollRes = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${scanId}`, {
         headers: { Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") || ""}` },
       });
@@ -145,7 +146,7 @@ async function scanCompany(url: string, company?: string, adminToken?: string) {
       }
       if (row?.status === "failed") return { error: "Scan failed", scan_id: scanId };
     }
-    return { error: "Scan timed out (still running)", scan_id: scanId, note: "Partial result may appear later." };
+    return { error: "Scan still running", scan_id: scanId, note: "Tell the user the scan is in progress and results will be available shortly at /report/" + scanId };
   } catch (e) {
     return { error: String(e) };
   }
