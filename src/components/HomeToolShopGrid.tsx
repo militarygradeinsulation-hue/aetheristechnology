@@ -49,8 +49,9 @@ export function HomeToolShopGrid() {
               </div>
               <div className="mt-auto flex gap-2 pt-1">
                 <Link
-                  to={t.route}
+                  to={`/try/${encodeURIComponent(t.id)}`}
                   className="flex-1 inline-flex items-center justify-center gap-1 rounded-sm border border-border px-2 py-1.5 text-[11px] font-mono uppercase tracking-wider hover:border-amber/60 hover:text-amber transition-colors"
+                  title="Sandbox run · nothing saved"
                 >
                   <Sparkles className="w-3 h-3" /> Try free
                 </Link>

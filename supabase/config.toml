@@ -235,3 +235,7 @@ verify_jwt = false
 [functions.book-writer]
 verify_jwt = false
 
+[functions.try-tool-sandbox]
+verify_jwt = false
+
+
