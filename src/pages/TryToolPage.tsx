@@ -332,7 +332,7 @@ export default function TryToolPage() {
                         {meta.title} — Forensic Report
                       </div>
                       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-                        Subject: <span className="text-foreground/90 normal-case tracking-normal">{input}</span>
+                        Subject: <span className="text-foreground/90 normal-case tracking-normal">{url}{context ? ` · ${context.slice(0, 60)}${context.length > 60 ? "…" : ""}` : ""}</span>
                       </div>
                       {runAt && (
                         <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">
