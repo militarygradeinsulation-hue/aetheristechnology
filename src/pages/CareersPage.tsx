@@ -84,46 +84,63 @@ const CareersPage = () => {
             {/* LIVE PRESSURE — applicant count + pass/fail ticker + spots */}
             <ApplicantPressure />
 
-            {/* GATE — PAID TEST */}
-            <Card className="bg-amber/10 border-amber/40">
-              <CardContent className="p-6 sm:p-7 space-y-4">
-                <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Lock className="w-3.5 h-3.5" /> One door in
-                </div>
-                <h2 className="font-display text-2xl sm:text-3xl text-foreground leading-tight">
-                  Buy the test. Earn the certification. Then we talk.
-                </h2>
-                <p className="text-sm text-foreground/85">
-                  We don't read resumes from people who skip the test. We don't interview people who won't spend 10 minutes learning what we do. The $40 certification fee is the cheapest filter we have — and the only way to prove you can operate at the level this role demands. If that offends you, this isn't the place.
-                </p>
-                <div className="grid sm:grid-cols-3 gap-3 text-sm">
-                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
-                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 1</p>
-                    <p className="font-semibold text-foreground">Buy the test</p>
-                    <p className="text-muted-foreground text-xs mt-1">$40. No exceptions. No "I'll pay later." No comp codes.</p>
+            {/* GATE — TWO PATHS IN */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* PATH A — $40 test */}
+              <Card className="bg-amber/10 border-amber/40 flex flex-col">
+                <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
+                    <Lock className="w-3.5 h-3.5" /> Path A · $40
                   </div>
-                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
-                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 2</p>
-                    <p className="font-semibold text-foreground">Pass the test</p>
-                    <p className="text-muted-foreground text-xs mt-1">25 of 60 randomized questions · 50 min · 80% to pass · 5 attempts/day.</p>
+                  <h2 className="font-display text-2xl text-foreground leading-tight">
+                    Certification test
+                  </h2>
+                  <p className="text-sm text-foreground/85 flex-1">
+                    Pay $40, sit the 25-question forensic exam, upload your resume, get reviewed. If you pass and Joseph likes what he sees, you get placed with a rep code, a spot on a team, and the full playbook. This is the vetted path.
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>· 25 of 60 randomized questions · 50 min · 80% to pass</li>
+                    <li>· 5 attempts per day · fee is non-refundable</li>
+                    <li>· Resume + pitch reviewed by Joseph personally</li>
+                  </ul>
+                  <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block mt-auto">
+                    <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
+                      Buy the $40 test →
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+
+              {/* PATH B — $100 instant license */}
+              <Card className="bg-emerald-500/10 border-emerald-500/40 flex flex-col">
+                <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
+                    <Rocket className="w-3.5 h-3.5" /> Path B · $100 · Instant
                   </div>
-                  <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
-                    <p className="font-mono uppercase text-[10px] tracking-[0.25em] text-amber mb-1">Step 3</p>
-                    <p className="font-semibold text-foreground">Earn the credential</p>
-                    <p className="text-muted-foreground text-xs mt-1">Resume + short pitch. Joseph reviews every passing app. Most don't pass.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
-                  <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span><strong className="text-foreground">The fee isn't the problem. You are.</strong> You pay for a driver's license, college, and certifications. This is no different — except the companies you'll sit across from do $50 million a year. If $40 is too much, you aren't ready.</span>
-                </div>
-                <a href="/careers/test" onClick={() => trackCareersCta('gate_take_test')} className="block">
-                  <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                    Buy the $40 certification test →
-                  </Button>
-                </a>
-              </CardContent>
-            </Card>
+                  <h2 className="font-display text-2xl text-foreground leading-tight">
+                    Skip the test. Get licensed today.
+                  </h2>
+                  <p className="text-sm text-foreground/85 flex-1">
+                    Pay $100, get your personal rep code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>· Personal rep code issued instantly on payment</li>
+                    <li>· Sell every tool + flagship at the standard split</li>
+                    <li>· Full rep portal access (playbooks, leads, coach)</li>
+                  </ul>
+                  <a href="/careers/license" onClick={() => trackCareersCta('gate_instant_license')} className="block mt-auto">
+                    <Button size="lg" className="w-full bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold">
+                      Get licensed — $100 →
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
+              <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+              <span><strong className="text-foreground">Neither price is the problem. You are.</strong> $40 tests you. $100 skips the test and hands you the license. Both are cheaper than one afternoon with a bad hire — and the companies you'll sit across from do $50M a year.</span>
+            </div>
 
             {/* WHY + PERKS (merged) */}
             <div>
