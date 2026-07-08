@@ -19,24 +19,23 @@ const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-async function requireAuth(req: Request): Promise<{ userId: string } | Response> {
+// Aetheris IQ is a public tool — auth is OPTIONAL. If a signed-in user's JWT is
+// present we resolve their id (useful for future rate-limit / attribution), but
+// anonymous visitors are allowed through as well.
+async function optionalAuth(req: Request): Promise<{ userId: string | null }> {
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  if (!authHeader?.startsWith("Bearer ")) return { userId: null };
   const token = authHeader.replace("Bearer ", "");
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const { data, error } = await supabase.auth.getClaims(token);
-  if (error || !data?.claims?.sub) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  // Skip the JWT round-trip when the client sent the anon key itself.
+  if (token === SUPABASE_ANON_KEY) return { userId: null };
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data, error } = await supabase.auth.getClaims(token);
+    if (error || !data?.claims?.sub) return { userId: null };
+    return { userId: data.claims.sub as string };
+  } catch {
+    return { userId: null };
   }
-  return { userId: data.claims.sub as string };
 }
 
 const SYSTEM_PROMPT = `You are Aetheris Nexus — the premium AI operator built by Aetheris Technology / Chaos Theory Forensics. You are a forensic business operator, not a generic assistant. Tone: direct, sharp, useful. No corporate fluff.
