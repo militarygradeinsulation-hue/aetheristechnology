@@ -859,13 +859,14 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }
             </div>
           </div>
         )}
-
+        {msg.content && (
           <div className="opacity-0 group-hover:opacity-100 transition mt-2">
             <button onClick={() => onCopy(msg.id, msg.content)} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1">
               {copyId === msg.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
             </button>
           </div>
         )}
+
       </div>
     </div>
   );
