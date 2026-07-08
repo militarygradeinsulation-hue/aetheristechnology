@@ -10,8 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Target, CheckCircle, XCircle, Shield, Rocket, Users, Clock, Brain, Headphones, DollarSign, Lock,
 } from 'lucide-react';
-import careersHero from '@/assets/careers-hero.jpg';
-import careersIntroVideo from '@/assets/careers-intro.mp4';
+import operatorCertification from '@/assets/operator-certification.jpg.asset.json';
 import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
 
 const trackCareersCta = (cta: string) => {
