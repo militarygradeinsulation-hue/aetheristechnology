@@ -1,5 +1,8 @@
 project_id = "ihdjpxhcaiaixmqxyqoe"
 
+[functions.tool-shop]
+verify_jwt = false
+
 [functions.detective-prep]
 verify_jwt = false
 

@@ -444,6 +444,49 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         templateData: { testUrl, name: name || undefined },
       });
     }
+
+    // ---- Tool Shop: mint lifetime license code ----
+    if (session.metadata?.shop === "tools" && email) {
+      try {
+        const plan = String(session.metadata.plan || "single");
+        let toolIds: string[] = [];
+        try { toolIds = JSON.parse(session.metadata.tool_ids || "[]"); } catch { toolIds = []; }
+        if (!["single","triple","unlimited"].includes(plan)) throw new Error("bad plan");
+        if (plan === "single" && toolIds.length !== 1) throw new Error("single requires 1 tool");
+        if (plan === "triple" && (toolIds.length < 1 || toolIds.length > 3)) throw new Error("triple requires up to 3 tools");
+        if (plan === "unlimited") toolIds = [];
+
+        // Generate a friendly 12-char code: LEAK-XXXX-XXXX
+        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const rand = (n: number) => Array.from(crypto.getRandomValues(new Uint8Array(n)))
+          .map(b => alphabet[b % alphabet.length]).join("");
+        const code = `LEAK-${rand(4)}-${rand(4)}`;
+
+        const { data: lic, error: licErr } = await supabase.from("tool_licenses").insert({
+          code, email, plan, tool_ids: toolIds,
+          stripe_session_id: session.id,
+          amount_cents: session.amount_total ?? null,
+        }).select().single();
+
+        if (licErr) console.error("tool_licenses insert:", licErr);
+
+        if (lic) {
+          const portalUrl = `${PUBLIC_SITE_URL}/tools-shop/redeem?code=${encodeURIComponent(code)}`;
+          triggerFunction("send-transactional-email", {
+            templateName: "tool-shop-license",
+            recipientEmail: email,
+            idempotencyKey: `tool-lic-${lic.id}`,
+            templateData: {
+              code, plan, portalUrl,
+              tools: toolIds,
+              name: name || undefined,
+            },
+          });
+        }
+      } catch (e) {
+        console.error("tool shop mint:", e);
+      }
+    }
   }
 }
 
