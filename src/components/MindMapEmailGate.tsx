@@ -92,9 +92,9 @@ export function MindMapEmailGate({ children }: { children: ReactNode }) {
               You already saw one thread. Drop your email to trace every leak in the ecosystem.
             </p>
             <Input
-              type="email"
+              type="text"
               required
-              placeholder="you@company.com"
+              placeholder="you@company.com  ·  rep ID  ·  PIN"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-background/70 border-amber/30 font-mono text-sm mb-2"
@@ -103,7 +103,7 @@ export function MindMapEmailGate({ children }: { children: ReactNode }) {
               {saving ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Unlocking</> : "Unlock the map"}
             </Button>
             <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-foreground/50 text-center">
-              One email · full access · no spam
+              Email · rep ID · staff PIN — all work
             </p>
           </form>
         </div>
