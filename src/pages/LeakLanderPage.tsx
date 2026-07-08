@@ -13,6 +13,9 @@ import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
 import { HomeFreeTrialArsenal } from "@/components/HomeFreeTrialArsenal";
+import { HomeToolShopGrid } from "@/components/HomeToolShopGrid";
+import { MindMapEmailGate } from "@/components/MindMapEmailGate";
+
 
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
