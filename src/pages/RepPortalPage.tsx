@@ -236,17 +236,7 @@ const RepPortalPage: React.FC = () => {
               </Card>
             )}
 
-            {operatorFlag.enabled && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-display">Operator Console</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-muted-foreground">
-                  <p>The full operator cockpit — scans, agents, contradictions, friction audit, growth signals — is live in the web app.</p>
-                  <Button asChild size="sm"><Link to="/app/operator">Open Operator Console</Link></Button>
-                </CardContent>
-              </Card>
-            )}
+            {/* Operator Console removed for reps — Golden Report is their one tool. */}
 
             <div className="grid grid-cols-2 gap-4">
               <Card>
