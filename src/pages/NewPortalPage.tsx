@@ -241,26 +241,33 @@ const NewPortalPage: React.FC = () => {
       {/* Tabs */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 pb-24">
         <Tabs defaultValue="start" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 md:grid-cols-7 bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1">
-            {[
-              ['start', 'Start', LayoutGrid],
-              ['leads', 'Leads', Users],
-              ['playbook', 'Playbook', ClipboardList],
-              ['coach', 'Coach', MessageSquare],
-              ['training', 'Training', GraduationCap],
-              ['studio', 'Studio', Palette],
-              ['workspace', 'Workspace', Sparkles],
-            ].map(([val, label, Icon]: any) => (
-              <TabsTrigger
-                key={val}
-                value={val}
-                className="data-[state=active]:bg-amber-400/15 data-[state=active]:text-amber-200 font-mono text-[10px] md:text-xs uppercase tracking-wider py-2"
-              >
-                <Icon className="w-3.5 h-3.5 mr-1.5" />
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {(() => {
+            const allTabs: Array<[string, string, any, boolean]> = [
+              ['start', 'Start', LayoutGrid, true],
+              ['leads', 'Leads', Users, true],
+              ['playbook', 'Playbook', ClipboardList, showAdvanced],
+              ['coach', 'Coach', MessageSquare, true],
+              ['training', 'Training', GraduationCap, showAdvanced],
+              ['studio', 'Studio', Palette, showAdvanced],
+              ['workspace', 'Workspace', Sparkles, true],
+            ];
+            const visible = allTabs.filter(([, , , show]) => show);
+            const gridCols = `md:grid-cols-${visible.length}`;
+            return (
+              <TabsList className={`w-full grid grid-cols-3 ${gridCols} bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1`}>
+                {visible.map(([val, label, Icon]) => (
+                  <TabsTrigger
+                    key={val}
+                    value={val}
+                    className="data-[state=active]:bg-amber-400/15 data-[state=active]:text-amber-200 font-mono text-[10px] md:text-xs uppercase tracking-wider py-2"
+                  >
+                    <Icon className="w-3.5 h-3.5 mr-1.5" />
+                    {label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            );
+          })()}
 
           {/* START — Getting Started overview */}
           <TabsContent value="start" className="mt-8 space-y-4">
