@@ -204,7 +204,7 @@ export default function DeliverablePage() {
                 Generate my deliverable
               </Button>
               <p className="text-xs text-muted-foreground">
-                Builds in 30-90 seconds. You can close this tab, your link stays active.
+                Builds in 30–90 seconds. Safe to leave this page — your link stays active and results are emailed when ready.
               </p>
             </form>
           </Card>
