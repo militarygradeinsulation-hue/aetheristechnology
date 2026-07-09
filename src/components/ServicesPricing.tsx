@@ -312,7 +312,7 @@ const services: ServiceTile[] = [
     whyValuable: 'Marketing and sales hate each other in 90% of companies and that misalignment costs 6+ figures/year. Premium high-touch workshop that usually leads into bigger combined active cases.',
   },
   {
-    icon: TrendingUp, title: 'Sales Coaching Engagement', thumbnail: salesCoachingActiveCaseThumb, pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_active case_monthly', badge: 'RECURRING',
+    icon: TrendingUp, title: 'Sales Coaching Engagement', thumbnail: salesCoachingActiveCaseThumb, pricing: '$499/mo', priceRaw: 49900, pricingDetail: 'monthly · cancel anytime', priceId: 'sales_coaching_active_case_monthly', badge: 'RECURRING',
     description: 'Ongoing sales team coaching, pipeline reviews, and CRM optimization.',
     successStat: 'Average client stays 12-18 months, recurring revenue engine',
     longDescription: 'Ongoing sales team coaching and optimization. Weekly team call, 1:1 coaching for each rep (30-60 min), deal reviews on stuck pipeline, CRM optimization, playbook/script updates, quarterly strategy refresh, and a monthly performance dashboard. Tier B ($699) and Tier C ($999) add daily Slack support and a dedicated account manager.',
