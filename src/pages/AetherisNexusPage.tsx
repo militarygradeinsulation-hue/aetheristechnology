@@ -775,6 +775,11 @@ export default function AetherisNexusPage() {
           </div>
         </div>
       </main>
+      <PublicToolLock
+        fullscreen
+        toolLabel="Aetheris IQ"
+        blurb="Aetheris IQ — the forensic AI operator — is preview-only on the public site. Everything it would tell you shows up inside the Golden Report, tied to your actual URL and dollar-quantified."
+      />
     </div>
   );
 }
