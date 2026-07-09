@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SHOP_TOOLS, SHOP_PRICES, type ShopTool, type ShopPlan } from "@/lib/tool-shop-catalog";
-import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, X, Play } from "lucide-react";
+import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, Play } from "lucide-react";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
