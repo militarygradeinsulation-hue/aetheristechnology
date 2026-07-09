@@ -73,19 +73,37 @@ const Home = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
-          <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
-            Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
-            Aetheris Chaos Theory Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
-          </h1>
-
-          <section className="px-4 py-8 max-w-3xl mx-auto text-center">
-            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              We are in the business of{" "}
-              <span className="text-crimson italic">Chaos Theory Forensic</span>.
-            </h2>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Find what causes the random chaos. Remove it where it begins.
-            </p>
+          <section className="px-4 pt-28 md:pt-36 pb-12 md:pb-16 max-w-4xl mx-auto text-center">
+            <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
+              Business is chaos.
+              <br />
+              <span className="text-amber">Chaos always has cause.</span>
+            </h1>
+            <div className="mt-6 space-y-4 text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
+              <p>
+                One small talk with us could have massive changes in your business. Aetheris practices Chaos Theory Forensics. We investigate established businesses, trace the damage back to where it begins, and remove it at the source.
+              </p>
+              <p className="text-foreground">
+                We can fix <span className="text-crimson font-bold uppercase tracking-wide">any problem</span> you have with <span className="text-crimson font-bold uppercase tracking-wide">any department or team</span>. Our fix automatically lifts ROI and closes losses by <span className="text-amber font-bold">30% on average</span>.
+              </p>
+              <p className="font-forensic text-xl md:text-2xl text-foreground">
+                If we can't find or fix a problem, there's <span className="text-crimson">NO COST</span> guaranteed.
+              </p>
+            </div>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/leak-audit">
+                <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-bold shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                  Run the free Leak Audit <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <button
+                type="button"
+                onClick={() => document.getElementById('booking-embed')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10 font-semibold"
+              >
+                Book a 30-minute call
+              </button>
+            </div>
           </section>
 
           {/* One offer · The Leak Audit */}
