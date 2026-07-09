@@ -154,8 +154,8 @@ const ServicesPage: React.FC = () => {
               </div>
 
               <div className="mt-6 text-center">
-                <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                  Send us a referral <ArrowRight className="w-4 h-4 ml-2" />
+                <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
+                  Send us a warm intro — get $500 the day they show up <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
                   Reps and partners on the internal program follow the fixed-dollar split in the rep portal, this public bonus is for outside referrers.
