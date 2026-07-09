@@ -57,13 +57,13 @@ export function HomeToolShopGrid() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">
-              The Chaos Ecosystem · Two ways in
+              The Chaos Ecosystem · Stop guessing. Start closing.
             </div>
             <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight">
-              Try every tool free. Own one, or resell them all.
+              Every tool. Free to try. <span className="text-crimson">$40</span> to own for life.
             </h2>
             <p className="text-sm text-foreground/70 mt-1">
-              3 free runs on any tool. Then buy the tool, grab a bundle, or license the whole ecosystem — all right here.
+              3 free runs — nothing to sign, nothing to install. Own one tool for less than a steak dinner, or license the entire ecosystem and undercut the $2k/mo agency doing worse work. 7-day money-back on every purchase.
             </p>
           </div>
           <div className="flex flex-col sm:items-end gap-1.5">
