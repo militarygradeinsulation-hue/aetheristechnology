@@ -5,44 +5,8 @@ import { ExternalLink, Search, FileText, Wrench } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
+import { CASE_DELIVERY } from '@/data/caseDelivery';
 
-// How Aetheris actually delivers each class of outcome — concrete tools from
-// the arsenal + the operator experience that runs them. Shown on every card so
-// prospects see the mechanism, not just the parallel.
-const AETHERIS_DELIVERY: Record<RealCaseCategory, { tools: string[]; experience: string }> = {
-  'Data & CRM Hygiene': {
-    tools: ['HubSpot Mirror + Hygiene Scan', 'Detective Mode', 'Forensic Leak Scan', 'Owner-Overload / Stalled-Deal SQL detectors'],
-    experience: 'We rebuild CRMs live inside HubSpot — dedupe, enrichment, real-time validation, governance rules — the same pattern proven on 840K-lead audits.',
-  },
-  'Lead Gen & Conversion': {
-    tools: ['Website Scanner', 'Friction Audit', 'Brand Contradictions', 'Golden Report', 'Playbook Generator'],
-    experience: 'The Leak Audit™ maps every drop-off between traffic and booked call, then the Playbook Generator ships the exact fix per page.',
-  },
-  'Sales Funnel & CRO': {
-    tools: ['Friction Audit', 'Forensic Leak Scan', 'Detective Mode', 'AI Landing Studio', 'Content Engine'],
-    experience: 'We run forensic funnel teardowns like Restroworks and Indochino — headline, CTA, form, checkout — then rewrite copy and structure with the Content Engine.',
-  },
-  'Sales Operations': {
-    tools: ['Rep Portal + Time Clock', 'Sales Coach AI', 'Owner-Overload detector', 'Stalled-Deal detector', 'Team Training'],
-    experience: 'Operator-led sales ops: quotas, coaching, forecasting, rep efficiency ($/hr) — the same discipline behind Miller Heiman-style pipeline overhauls.',
-  },
-  'Marketing Operations': {
-    tools: ['Content Calendar', 'Content Engine', 'Social Content generator', 'Brand Contradictions', 'HubSpot Mirror'],
-    experience: 'MOps rebuild: lead scoring, nurture, attribution, brand-voice enforcement — automated end-to-end and audited weekly.',
-  },
-  'Custom AI & Automation': {
-    tools: ['Tool Generator', 'AI Creation Studio', 'Edge Function fleet (Lovable Cloud)', 'Aetheris AI Gateway'],
-    experience: 'We ship custom AI agents and internal tools in days — the same way we built our own 40+ edge functions and the Forensic Scan All engine.',
-  },
-  'Financial & Operational Efficiency': {
-    tools: ['Forensic Diagnostic ($2,500)', 'Golden Report', 'P&L / commission engine', 'Ops SQL detectors'],
-    experience: 'We forensically price every leak in dollars — revenue lost, hours burned, margin decay — then deliver a signed 90-day recovery plan.',
-  },
-  'Customer Experience & Retention': {
-    tools: ['Sales Coach AI', 'Drip Sequences', 'Rep Notes + Follow-up automation', 'Detective Mode'],
-    experience: 'Retention playbooks: churn signals surfaced live, drip cadences auto-shipped, rep follow-ups scored — recovery loops built in.',
-  },
-};
 
 
 const CategoryPill: React.FC<{
@@ -96,21 +60,23 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => (
         <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Why it mirrors Aetheris</div>
         <div className="italic text-foreground/75">{c.mirrors}</div>
       </div>
-      <div className="rounded-sm border border-amber/20 bg-amber/5 p-2.5">
-        <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-          <Wrench className="w-3 h-3" /> How Aetheris delivers this
+      {CASE_DELIVERY[c.id] && (
+        <div className="rounded-sm border border-amber/20 bg-amber/5 p-2.5">
+          <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+            <Wrench className="w-3 h-3" /> How Aetheris delivers this
+          </div>
+          <div className="text-foreground/85 text-[12px] leading-relaxed mb-1.5">
+            {CASE_DELIVERY[c.id].experience}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {CASE_DELIVERY[c.id].tools.map((t) => (
+              <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="text-foreground/85 text-[12px] leading-relaxed mb-1.5">
-          {AETHERIS_DELIVERY[c.category].experience}
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {AETHERIS_DELIVERY[c.category].tools.map((t) => (
-            <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
       <a
         href={c.link}
         target="_blank"
