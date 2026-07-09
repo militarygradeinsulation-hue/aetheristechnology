@@ -46,6 +46,8 @@ export async function consumeStudioQuota(
 ): Promise<{ ok: true; remaining: number } | { ok: false; error: string; limit: number; used: number }> {
   // Admin-pushed shared library writes etc. — never gate the SHARED bucket.
   if (!repCode || repCode === "SHARED") return { ok: true, remaining: 9999 };
+  // Unlimited access: admins + Dean Young (rep 482917).
+  if (repCode === "ADMIN" || repCode === "482917") return { ok: true, remaining: 9999 };
   const limit = STUDIO_DAILY_LIMITS[action];
   if (!limit) return { ok: true, remaining: 9999 };
 
