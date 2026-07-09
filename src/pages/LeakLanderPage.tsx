@@ -64,10 +64,10 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Business is chaos. Chaos always has cause. | Aetheris"
-          description="Aetheris practices Chaos Theory Forensics. We fix any problem in any department, lift ROI and close losses by 30% on average — or it costs you nothing. Guaranteed."
+          title="Revenue Leak Audit for $5M–$25M Businesses | Aetheris — Chaos Theory Forensics"
+          description="Aetheris investigates where growth-stage businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. Named leaks. Dollar impact. Written guarantee."
           path="/"
-          keywords="chaos theory forensics, business forensics, fix any business problem, 30% ROI lift, no cost guarantee consulting, revenue leak audit, operational diagnostics Indianapolis, department fix, business autopsy"
+          keywords="revenue leak audit, revenue forensics, chaos theory forensics, forensic diagnostic Indianapolis, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology"
         />
 
 
