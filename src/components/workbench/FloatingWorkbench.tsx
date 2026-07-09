@@ -119,22 +119,26 @@ export const FloatingWorkbench: React.FC = () => {
   }, [visible, restricted]);
 
 
-  useEffect(() => { if (hydrated.current) wb.setStack(stack); }, [stack]);
-  useEffect(() => { if (hydrated.current) wb.setLayouts(layouts); }, [layouts]);
-  useEffect(() => { if (hydrated.current) wb.setActive(active); }, [active]);
-  useEffect(() => { if (hydrated.current) wb.setWidth(width); }, [width]);
-  useEffect(() => { if (hydrated.current) wb.setOpen(open); }, [open]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setStack(stack); }, [stack, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setLayouts(layouts); }, [layouts, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setActive(active); }, [active, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setWidth(width); }, [width, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setOpen(open); }, [open, restricted]);
 
 
   const grouped = useMemo(() => {
     const g: Record<ToolGroup, typeof TOOL_REGISTRY> = {
       Outreach: [], Diagnostics: [], Content: [], Briefs: [],
     };
-    TOOL_REGISTRY.forEach(t => g[t.group].push(t));
+    const source = restricted
+      ? TOOL_REGISTRY.filter(t => t.id === GOLDEN_ONLY_TOOL_ID)
+      : TOOL_REGISTRY;
+    source.forEach(t => g[t.group].push(t));
     return g;
-  }, []);
+  }, [restricted]);
 
   const persistStack = (next: WidgetEntry[]) => {
+    if (restricted) return; // Reps can't reshape the stack.
     wb.setStack(next);
     if (active !== "default") {
       setLayouts(wb.upsertLayout(active, next));
@@ -143,6 +147,7 @@ export const FloatingWorkbench: React.FC = () => {
   };
 
   const addTool = (toolId: string) => {
+    if (restricted && toolId !== GOLDEN_ONLY_TOOL_ID) return;
     if (stack.some(s => s.toolId === toolId)) {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
@@ -151,9 +156,11 @@ export const FloatingWorkbench: React.FC = () => {
     persistStack(next);
   };
   const removeAt = (idx: number) => {
+    if (restricted) return; // Golden Report stays pinned.
     const next = stack.filter((_, i) => i !== idx);
     persistStack(next);
   };
+
   const toggleAt = (idx: number) => {
     const next = stack.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w);
     persistStack(next);
