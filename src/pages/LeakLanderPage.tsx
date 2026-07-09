@@ -151,6 +151,12 @@ const LeakLanderPage: React.FC = () => {
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
               Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace the damage back to where it begins, and remove it at the source.
             </p>
+            <p className="mt-4 text-base sm:text-lg text-foreground max-w-2xl mx-auto">
+              We can fix <span className="text-amber font-bold uppercase tracking-wide">any problem</span> you have with <span className="text-amber font-bold uppercase tracking-wide">any department or team</span>. Our fix automatically lifts ROI and closes losses by <span className="text-crimson font-bold">30% on average</span>.
+            </p>
+            <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-2xl mx-auto">
+              If we can't find or fix a problem, there's <span className="text-crimson">NO COST</span> guaranteed.
+            </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
               Real Findings. No Sugar.
             </p>
