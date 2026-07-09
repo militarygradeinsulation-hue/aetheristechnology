@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { ReciprocationDoctrineTool } from "@/components/ReciprocationDoctrineTool";
+import { PublicToolLock } from "@/components/PublicToolLock";
 import { Handshake } from "lucide-react";
 
 const ReciprocationPage: React.FC = () => {
@@ -40,7 +41,9 @@ const ReciprocationPage: React.FC = () => {
                 nobody can weaponize it against you.
               </p>
             </div>
-            <ReciprocationDoctrineTool />
+            <PublicToolLock toolLabel="Reciprocation Engine">
+              <ReciprocationDoctrineTool />
+            </PublicToolLock>
           </div>
         </div>
         <Footer />

@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import HeadToHeadTool from "@/components/admin/HeadToHeadTool";
+import { PublicToolLock } from "@/components/PublicToolLock";
 import { Swords } from "lucide-react";
 
 const HeadToHeadPage: React.FC = () => {
@@ -40,7 +41,9 @@ const HeadToHeadPage: React.FC = () => {
                 plus the Takeover Playbook to flip the score.
               </p>
             </div>
-            <HeadToHeadTool />
+            <PublicToolLock toolLabel="Head-to-Head">
+              <HeadToHeadTool />
+            </PublicToolLock>
           </div>
         </div>
         <Footer />
