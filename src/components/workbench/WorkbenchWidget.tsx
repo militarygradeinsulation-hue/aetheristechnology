@@ -14,6 +14,7 @@ interface Props {
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  locked?: boolean;
 }
 
 // Per-widget body height. Drives the inner scroll area.
