@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   hasValidPortalSession, getPortalProfile, clearPortalSession,
 } from '@/lib/portalAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 import { fmtUsd } from '@/lib/repProducts';
 
 // Live tool components — reused verbatim so leads/data are identical.
@@ -154,6 +155,13 @@ const NewPortalPage: React.FC = () => {
   }
 
   const isPartner = profile!.role === 'partner';
+  const isAdmin = hasValidAdminToken();
+  const repName = (profile!.rep_name || '').toLowerCase();
+  const repCode = (profile!.code || '').toLowerCase();
+  const isDean = repName.includes('dean') || repCode.includes('dean');
+  // Studio / Forecast / Training / Playbook are gated to admins, partners,
+  // and Dean. Everyone else sees a leaner surface for the demo rollout.
+  const showAdvanced = isAdmin || isPartner || isDean;
   const commission = fmtUsd(profile!.total_commission_cents || 0);
   const sales = fmtUsd(profile!.total_sales_cents || 0);
 
@@ -233,26 +241,36 @@ const NewPortalPage: React.FC = () => {
       {/* Tabs */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 pb-24">
         <Tabs defaultValue="start" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 md:grid-cols-7 bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1">
-            {[
-              ['start', 'Start', LayoutGrid],
-              ['leads', 'Leads', Users],
-              ['playbook', 'Playbook', ClipboardList],
-              ['coach', 'Coach', MessageSquare],
-              ['training', 'Training', GraduationCap],
-              ['studio', 'Studio', Palette],
-              ['workspace', 'Workspace', Sparkles],
-            ].map(([val, label, Icon]: any) => (
-              <TabsTrigger
-                key={val}
-                value={val}
-                className="data-[state=active]:bg-amber-400/15 data-[state=active]:text-amber-200 font-mono text-[10px] md:text-xs uppercase tracking-wider py-2"
-              >
-                <Icon className="w-3.5 h-3.5 mr-1.5" />
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {(() => {
+            const allTabs: Array<[string, string, any, boolean]> = [
+              ['start', 'Start', LayoutGrid, true],
+              ['leads', 'Leads', Users, true],
+              ['playbook', 'Playbook', ClipboardList, showAdvanced],
+              ['coach', 'Coach', MessageSquare, true],
+              ['training', 'Training', GraduationCap, showAdvanced],
+              ['studio', 'Studio', Palette, showAdvanced],
+              ['workspace', 'Workspace', Sparkles, true],
+            ];
+            const visible = allTabs.filter(([, , , show]) => show);
+            const gridColsMap: Record<number, string> = {
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7',
+            };
+            const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
+            return (
+              <TabsList className={`w-full grid grid-cols-3 ${gridCols} bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1`}>
+                {visible.map(([val, label, Icon]) => (
+                  <TabsTrigger
+                    key={val}
+                    value={val}
+                    className="data-[state=active]:bg-amber-400/15 data-[state=active]:text-amber-200 font-mono text-[10px] md:text-xs uppercase tracking-wider py-2"
+                  >
+                    <Icon className="w-3.5 h-3.5 mr-1.5" />
+                    {label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            );
+          })()}
 
           {/* START — Getting Started overview */}
           <TabsContent value="start" className="mt-8 space-y-4">
@@ -261,7 +279,9 @@ const NewPortalPage: React.FC = () => {
               title="You're in the new portal"
               summary="Everything you used before is still here — this layout just makes it easier to see what each tool does before you open it."
               howTo={[
-                'Click any tab above (Leads, Playbook, Coach, Training, Studio, Workspace) to jump straight to that tool.',
+                showAdvanced
+                  ? 'Click any tab above (Leads, Playbook, Coach, Training, Studio, Workspace) to jump straight to that tool.'
+                  : 'Click any tab above (Leads, Coach, Workspace) to jump straight to that tool.',
                 'On every tool card, the "How to use" button opens a short step-by-step so you never have to guess.',
                 'Your leads, commissions and history are the same data as the classic portal — nothing was moved or copied.',
                 'Prefer the old view? Hit "Classic view" in the top bar; the portal remembers your choice.',
@@ -274,9 +294,16 @@ const NewPortalPage: React.FC = () => {
                 <h3 className="font-serif text-xl mt-1">First 5 minutes</h3>
                 <ol className="mt-3 space-y-2 text-sm text-muted-foreground/95">
                   <li>1. Open <span className="text-amber-300">Leads</span> → work today's top row.</li>
-                  <li>2. Open <span className="text-amber-300">Playbook</span> → grab the exact script.</li>
-                  <li>3. Stuck? Ask <span className="text-amber-300">Coach</span>.</li>
-                  <li>4. New here? Do one <span className="text-amber-300">Training</span> module.</li>
+                  {showAdvanced && (
+                    <li>2. Open <span className="text-amber-300">Playbook</span> → grab the exact script.</li>
+                  )}
+                  <li>{showAdvanced ? '3' : '2'}. Stuck? Ask <span className="text-amber-300">Coach</span>.</li>
+                  {showAdvanced && (
+                    <li>4. New here? Do one <span className="text-amber-300">Training</span> module.</li>
+                  )}
+                  {!showAdvanced && (
+                    <li>3. Drop notes or files in <span className="text-amber-300">Workspace</span> so the team can see them.</li>
+                  )}
                 </ol>
               </GlassCard>
               <GlassCard className="p-5">
@@ -308,22 +335,24 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
-          {/* PLAYBOOK */}
-          <TabsContent value="playbook" className="mt-8">
-            <ToolCard
-              eyebrow="// Scripts //"
-              title="Portal Playbook"
-              summary="Ready-to-send scripts, openers and objection handlers pulled from what's actually closing right now."
-              howTo={[
-                'Pick the situation (cold outreach, follow-up, price objection…).',
-                'Copy the block, tweak one line to match the lead, send.',
-                'Star the ones that convert — those get surfaced first next time.',
-              ]}
-              defaultOpen
-            >
-              <PortalPlaybook />
-            </ToolCard>
-          </TabsContent>
+          {/* PLAYBOOK — gated */}
+          {showAdvanced && (
+            <TabsContent value="playbook" className="mt-8">
+              <ToolCard
+                eyebrow="// Scripts //"
+                title="Portal Playbook"
+                summary="Ready-to-send scripts, openers and objection handlers pulled from what's actually closing right now."
+                howTo={[
+                  'Pick the situation (cold outreach, follow-up, price objection…).',
+                  'Copy the block, tweak one line to match the lead, send.',
+                  'Star the ones that convert — those get surfaced first next time.',
+                ]}
+                defaultOpen
+              >
+                <PortalPlaybook />
+              </ToolCard>
+            </TabsContent>
+          )}
 
           {/* COACH */}
           <TabsContent value="coach" className="mt-8">
@@ -342,39 +371,43 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
-          {/* TRAINING */}
-          <TabsContent value="training" className="mt-8">
-            <ToolCard
-              eyebrow="// Certification //"
-              title="Training Modules"
-              summary="Short modules + quick quizzes. Passing one unlocks the next tier of leads and commission bonuses."
-              howTo={[
-                'Do one module a day — most take 5–10 minutes.',
-                'The quiz at the end is scored by AI; you can retake it.',
-                'Your admin sees pass/fail live — you don\'t need to send anything.',
-              ]}
-              defaultOpen
-            >
-              <TrainingPanel />
-            </ToolCard>
-          </TabsContent>
+          {/* TRAINING — gated */}
+          {showAdvanced && (
+            <TabsContent value="training" className="mt-8">
+              <ToolCard
+                eyebrow="// Certification //"
+                title="Training Modules"
+                summary="Short modules + quick quizzes. Passing one unlocks the next tier of leads and commission bonuses."
+                howTo={[
+                  'Do one module a day — most take 5–10 minutes.',
+                  'The quiz at the end is scored by AI; you can retake it.',
+                  'Your admin sees pass/fail live — you don\'t need to send anything.',
+                ]}
+                defaultOpen
+              >
+                <TrainingPanel />
+              </ToolCard>
+            </TabsContent>
+          )}
 
-          {/* STUDIO */}
-          <TabsContent value="studio" className="mt-8">
-            <ToolCard
-              eyebrow="// Creation //"
-              title="Rep Creation Studio"
-              summary="Generate personalized images, one-pagers and social posts branded for you and tied to the leads you're working."
-              howTo={[
-                'Pick the format (image, post, one-pager).',
-                'Describe who it\'s for in one line — the studio pulls the lead\'s context automatically.',
-                'Everything you generate is saved to your library so you can reuse it.',
-              ]}
-              defaultOpen
-            >
-              <RepCreationStudio />
-            </ToolCard>
-          </TabsContent>
+          {/* STUDIO — gated */}
+          {showAdvanced && (
+            <TabsContent value="studio" className="mt-8">
+              <ToolCard
+                eyebrow="// Creation //"
+                title="Rep Creation Studio"
+                summary="Generate personalized images, one-pagers and social posts branded for you and tied to the leads you're working."
+                howTo={[
+                  'Pick the format (image, post, one-pager).',
+                  'Describe who it\'s for in one line — the studio pulls the lead\'s context automatically.',
+                  'Everything you generate is saved to your library so you can reuse it.',
+                ]}
+                defaultOpen
+              >
+                <RepCreationStudio />
+              </ToolCard>
+            </TabsContent>
+          )}
 
           {/* WORKSPACE */}
           <TabsContent value="workspace" className="mt-8">
@@ -394,20 +427,22 @@ const NewPortalPage: React.FC = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Forecast strip at the bottom of every page */}
-        <section className="mt-14">
-          <ToolCard
-            eyebrow="// Numbers //"
-            title="Forecast Center"
-            summary="Your projected commission this month and the deals driving it. Updates as the underlying leads move."
-            howTo={[
-              'Green = on track vs. quota. Amber = at risk. Red = miss unless something changes today.',
-              'Click a bar to see the exact deals rolled into it.',
-            ]}
-          >
-            <ForecastCenter isPartner={isPartner} />
-          </ToolCard>
-        </section>
+        {/* Forecast strip — gated to admins, partners, Dean */}
+        {showAdvanced && (
+          <section className="mt-14">
+            <ToolCard
+              eyebrow="// Numbers //"
+              title="Forecast Center"
+              summary="Your projected commission this month and the deals driving it. Updates as the underlying leads move."
+              howTo={[
+                'Green = on track vs. quota. Amber = at risk. Red = miss unless something changes today.',
+                'Click a bar to see the exact deals rolled into it.',
+              ]}
+            >
+              <ForecastCenter isPartner={isPartner} />
+            </ToolCard>
+          </section>
+        )}
       </main>
     </div>
   );
