@@ -293,15 +293,15 @@ const TestPortalPage: React.FC = () => {
             </GlassCard>
           </TabsContent>
 
-          {/* INSTRUMENTS */}
+          {/* INSTRUMENTS — Golden Report only */}
           <TabsContent value="instruments" className="mt-8">
             <SectionHeader
-              eyebrow="// Free-Trial Arsenal //"
-              title="Instruments"
-              blurb="Live components — the same tools reps hand prospects on discovery calls."
+              eyebrow="// The One Tool //"
+              title="Golden Report"
+              blurb="Drop a URL. Get the full 14-chapter forensic case file with dollar-quantified leaks."
             />
             <GlassCard className="p-4 md:p-6">
-              <HomeFreeTrialArsenal />
+              <ForensicScanAllPanel />
             </GlassCard>
           </TabsContent>
 
