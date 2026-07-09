@@ -64,10 +64,10 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Revenue Leak Audit for $5M–$25M Businesses | Aetheris — Chaos Theory Forensics"
-          description="Aetheris investigates where growth-stage businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. Named leaks. Dollar impact. Written guarantee."
+          title="Revenue Leak Audit for $5M–$50M Businesses | Aetheris — Chaos Theory Forensics"
+          description="Aetheris investigates where US $5M–$50M businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. 30% average recovery on named leaks. Written guarantee. Indianapolis + nationwide."
           path="/"
-          keywords="revenue leak audit, revenue forensics, chaos theory forensics, forensic diagnostic Indianapolis, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology"
+          keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
         />
 
 
@@ -129,6 +129,34 @@ const LeakLanderPage: React.FC = () => {
                 width={1920}
                 height={640}
               />
+            </div>
+          </section>
+
+          {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
+          <section
+            className="mt-4 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "80ms", animationFillMode: "both" }}
+            aria-label="Aetheris outcomes and credentials"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+              {[
+                { stat: "30%", label: "Avg. recovery on named leaks", tone: "amber" },
+                { stat: "10–40×", label: "Typical leak / fee ratio", tone: "amber" },
+                { stat: "20 yrs", label: "Building revenue systems", tone: "amber" },
+                { stat: "USMC + PhD", label: "Marine vet · Digital Forensics doctorate", tone: "crimson" },
+              ].map((it) => (
+                <div
+                  key={it.label}
+                  className={`rounded-sm border ${it.tone === "crimson" ? "border-crimson/40" : "border-amber/30"} bg-card/60 backdrop-blur-sm p-2.5 sm:p-3 text-center`}
+                >
+                  <div className={`font-forensic text-base sm:text-xl font-bold leading-none ${it.tone === "crimson" ? "text-crimson" : "text-amber"}`}>
+                    {it.stat}
+                  </div>
+                  <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/70 leading-tight">
+                    {it.label}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -196,6 +224,98 @@ const LeakLanderPage: React.FC = () => {
               Or generate the free Chaos Scan report <ArrowRight className="w-3 h-3" />
             </Link>
           </section>
+
+          {/* ENGAGEMENT LADDER — visible three-tier tile (not buried in details) */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "195ms", animationFillMode: "both" }}
+            aria-label="Aetheris engagement ladder"
+          >
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="h-px w-8 bg-amber/50" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat</span>
+              <span className="h-px w-8 bg-amber/50" />
+            </div>
+            <div className="grid md:grid-cols-3 gap-2 sm:gap-3">
+              {[
+                {
+                  tier: "01",
+                  name: "Leak Audit",
+                  price: "$2,500",
+                  sub: "Named leaks + dollar exposure",
+                  note: "Fastest way in.",
+                },
+                {
+                  tier: "02",
+                  name: "21-Day Revenue Diagnostic",
+                  price: "$18,500",
+                  sub: "Full forensic dig",
+                  note: "Credited 1:1 to Active Case.",
+                  featured: true,
+                },
+                {
+                  tier: "03",
+                  name: "Active Case",
+                  price: "$15,000/mo",
+                  sub: "Operator-led implementation",
+                  note: "3-month minimum · Diagnostic clients.",
+                },
+              ].map((t) => (
+                <div
+                  key={t.tier}
+                  className={`relative rounded-sm border ${t.featured ? "border-amber/70 bg-amber/[0.06] shadow-[0_0_30px_-15px_hsl(var(--amber)/0.6)]" : "border-amber/25 bg-card/60"} p-4`}
+                >
+                  {t.featured && (
+                    <span className="absolute -top-2 right-3 font-mono text-[9px] uppercase tracking-[0.28em] bg-amber text-background px-1.5 py-0.5 rounded-sm">
+                      Most named
+                    </span>
+                  )}
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80">Tier {t.tier}</div>
+                  <div className="mt-1 font-forensic text-lg font-bold leading-tight">{t.name}</div>
+                  <div className="mt-1 font-forensic text-2xl font-bold text-amber leading-none">{t.price}</div>
+                  <div className="mt-1.5 text-xs text-foreground/80">{t.sub}</div>
+                  <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-foreground/60">{t.note}</div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-center text-[11px] text-foreground/60 italic">
+              If we can't name a leak worth more than our fee, you pay nothing. Written guarantee.
+            </p>
+          </section>
+
+          {/* AETHERIS VS OTHERS — visible competitive strip */}
+          <section
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "205ms", animationFillMode: "both" }}
+            aria-label="Aetheris versus agencies, consultants, and software"
+          >
+            <div className="rounded-sm border border-crimson/30 bg-card/70 backdrop-blur-sm overflow-hidden">
+              <div className="px-4 py-2 border-b border-crimson/20 bg-crimson/[0.04]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-crimson">Anti-Positioning · Read before comparing bids</div>
+                <div className="font-forensic text-base sm:text-lg font-bold leading-tight mt-0.5">
+                  Not an agency. Not a consultant. Not a software pitch.
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-xs">
+                {[
+                  { h: "Agencies", body: "Sell effort — retainers, activity reports, deliverables that measure motion instead of results.", tone: "muted" },
+                  { h: "Consultants", body: "Sell opinions — frameworks and slide decks that describe your problem back to you.", tone: "muted" },
+                  { h: "Software", body: "Sell tools — one more login, one more subscription your team won't use.", tone: "muted" },
+                  { h: "Aetheris", body: "Sells findings + removal. Named leaks. Dollar figures. Systems that eliminate the cause. Then the engagement ends.", tone: "amber" },
+                ].map((c) => (
+                  <div key={c.h} className={`p-3 ${c.tone === "amber" ? "bg-amber/[0.05]" : ""}`}>
+                    <div className={`font-mono text-[10px] uppercase tracking-widest mb-1 ${c.tone === "amber" ? "text-amber" : "text-foreground/60"}`}>
+                      {c.h}
+                    </div>
+                    <p className={`leading-snug ${c.tone === "amber" ? "text-foreground" : "text-foreground/75"}`}>{c.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+
+
 
 
 
