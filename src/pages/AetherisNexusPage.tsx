@@ -9,6 +9,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import aetherisLogo from "@/assets/aetheris-new-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { PublicToolLock } from "@/components/PublicToolLock";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
