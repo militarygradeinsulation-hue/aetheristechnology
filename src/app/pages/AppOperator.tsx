@@ -76,6 +76,8 @@ const AppOperator = () => {
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Record<string, JobState>>({});
+  const lastAutoUrl = useRef<string>("");
 
   // Operator chat
   const [chat, setChat] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
