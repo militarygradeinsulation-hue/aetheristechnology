@@ -29,6 +29,7 @@ import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
+import { RepCalendarView } from '@/components/portal/RepCalendarView';
 
 const STYLE_KEY = 'aetheris.portalStyle';
 export const setPortalStylePref = (v: 'new' | 'classic') => {
