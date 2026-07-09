@@ -132,7 +132,11 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
+          <HomeToolShopGrid />
+
           {/* HERO — Chaos Theory Forensics */}
+
           <section
             className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
