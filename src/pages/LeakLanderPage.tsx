@@ -132,6 +132,34 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
+          <section
+            className="mt-4 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "80ms", animationFillMode: "both" }}
+            aria-label="Aetheris outcomes and credentials"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+              {[
+                { stat: "30%", label: "Avg. recovery on named leaks", tone: "amber" },
+                { stat: "10–40×", label: "Typical leak / fee ratio", tone: "amber" },
+                { stat: "20 yrs", label: "Building revenue systems", tone: "amber" },
+                { stat: "USMC + PhD", label: "Marine vet · Digital Forensics doctorate", tone: "crimson" },
+              ].map((it) => (
+                <div
+                  key={it.label}
+                  className={`rounded-sm border ${it.tone === "crimson" ? "border-crimson/40" : "border-amber/30"} bg-card/60 backdrop-blur-sm p-2.5 sm:p-3 text-center`}
+                >
+                  <div className={`font-forensic text-base sm:text-xl font-bold leading-none ${it.tone === "crimson" ? "text-crimson" : "text-amber"}`}>
+                    {it.stat}
+                  </div>
+                  <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/70 leading-tight">
+                    {it.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
           <HomeToolShopGrid />
 
