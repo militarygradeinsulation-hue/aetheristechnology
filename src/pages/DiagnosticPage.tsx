@@ -167,6 +167,21 @@ const DiagnosticPage: React.FC = () => {
                     whyBody:
                       'Three weeks of operator time running all 9 forensic instruments against live data — CRM, pipeline, site, brand, follow-up, content, AI-readiness. Replaces $82K–$215K worth of separate audits. Every dollar credits 1:1 toward the Active Case, so it costs nothing if you continue.',
                     scope: ['21 days · 1 operator', 'All 9 instruments run live', '15–30 page report + roadmap', 'Fully credited to Tier 03'],
+                    toolsLabel: 'Tools & access you keep',
+                    tools: [
+                      'Website Leak Scanner — unlimited re-runs',
+                      'CRM Bleed Analyzer (HubSpot / Pipedrive / Sheets export)',
+                      'Pipeline Stall Autopsy dashboard',
+                      'Follow-Up Gap Timeline (per-lead SLA breach map)',
+                      'Brand & Positioning Audit report',
+                      'AI-Readiness Scorecard + remediation checklist',
+                      'Content & SEO Decay tracker (Semrush-powered)',
+                      'Competitor Delta Report (top 3 tracked)',
+                      '90-day Rep Portal seats (up to 3 users)',
+                      'Forensic Playbook Library (SOPs, scripts, email frames)',
+                      'Priority Slack channel with the operator for 21 days',
+                      'Recorded weekly readouts + editable Notion workspace',
+                    ],
                   },
                   {
                     tier: '03',
@@ -178,6 +193,21 @@ const DiagnosticPage: React.FC = () => {
                     whyBody:
                       'Operator-led removal of the leaks named in the Diagnostic — not a retainer, not seat-based software, not activity theatre. Fee is a fraction of a mid-level ops hire ($180K+ fully-loaded) and typically pays for itself in month one from a single recovered deal or plugged CRM bleed.',
                     scope: ['~40 hrs/mo senior operator', '3-month minimum, no auto-renew', 'Weekly readout + fix log', 'Ends when the leak ends'],
+                    toolsLabel: 'What you get every month',
+                    tools: [
+                      'Everything in the Diagnostic — kept live & re-run monthly',
+                      'Dedicated senior operator (~40 hrs/mo hands-on)',
+                      'CRM rebuild & pipeline hygiene execution (not just advice)',
+                      'Follow-up sequences written, installed, and monitored',
+                      'AI agents deployed into your stack (intake, triage, follow-up)',
+                      'Sales enablement: scripts, objection frames, call reviews',
+                      'Weekly leak-closure report with $ recovered / $ still bleeding',
+                      'Unlimited Rep Portal seats + monthly team training module',
+                      'Smart Subscription: monthly AI-personalized playbook drop',
+                      'Direct Slack + 24h response SLA with the operator',
+                      'Quarterly Business Forensics review with owner + partner',
+                      'Cancel any month after the 3-month floor — no auto-renew',
+                    ],
                   },
                 ].map((t) => (
                   <div
@@ -212,6 +242,22 @@ const DiagnosticPage: React.FC = () => {
                         </li>
                       ))}
                     </ul>
+
+                    {'tools' in t && Array.isArray((t as any).tools) && (
+                      <div className="mt-4 pt-3 border-t border-amber/15">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber mb-2">
+                          {(t as any).toolsLabel ?? 'Included tools & access'}
+                        </div>
+                        <ul className="space-y-1 text-[11px] text-foreground/80 leading-snug">
+                          {((t as any).tools as string[]).map((item) => (
+                            <li key={item} className="flex gap-1.5">
+                              <span className="text-amber/80 font-mono text-[10px] mt-0.5">▸</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
