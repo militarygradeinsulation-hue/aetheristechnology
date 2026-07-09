@@ -418,20 +418,22 @@ const NewPortalPage: React.FC = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Forecast strip at the bottom of every page */}
-        <section className="mt-14">
-          <ToolCard
-            eyebrow="// Numbers //"
-            title="Forecast Center"
-            summary="Your projected commission this month and the deals driving it. Updates as the underlying leads move."
-            howTo={[
-              'Green = on track vs. quota. Amber = at risk. Red = miss unless something changes today.',
-              'Click a bar to see the exact deals rolled into it.',
-            ]}
-          >
-            <ForecastCenter isPartner={isPartner} />
-          </ToolCard>
-        </section>
+        {/* Forecast strip — gated to admins, partners, Dean */}
+        {showAdvanced && (
+          <section className="mt-14">
+            <ToolCard
+              eyebrow="// Numbers //"
+              title="Forecast Center"
+              summary="Your projected commission this month and the deals driving it. Updates as the underlying leads move."
+              howTo={[
+                'Green = on track vs. quota. Amber = at risk. Red = miss unless something changes today.',
+                'Click a bar to see the exact deals rolled into it.',
+              ]}
+            >
+              <ForecastCenter isPartner={isPartner} />
+            </ToolCard>
+          </section>
+        )}
       </main>
     </div>
   );
