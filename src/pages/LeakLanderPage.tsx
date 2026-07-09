@@ -208,17 +208,22 @@ const LeakLanderPage: React.FC = () => {
             <details className="group relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-4 sm:p-5">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson">Read before contacting</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson">Fit check · read before booking</div>
                   <h2 className="font-forensic text-lg sm:text-xl font-bold leading-tight mt-0.5">
-                    The Filter — is $2,500 "expensive"?
+                    Is this the right engagement for you?
                   </h2>
                 </div>
                 <span className="font-mono text-xs text-crimson shrink-0 group-open:hidden">+</span>
                 <span className="font-mono text-xs text-crimson shrink-0 hidden group-open:inline">−</span>
               </summary>
-              <p className="mt-3 text-sm text-foreground/85 leading-relaxed">
-                If $2,500 to find exactly where your revenue is bleeding sounds "expensive," close this tab. Our clients ask what the <span className="text-amber font-semibold">leak</span> costs — usually 10–40× our fee, every year unfixed.
-              </p>
+              <div className="mt-3 space-y-2.5 text-sm text-foreground/85 leading-relaxed">
+                <p>
+                  Our engagement ladder: <span className="text-amber font-semibold">Leak Audit $2,500</span> (named leaks + dollar exposure) → <span className="text-amber font-semibold">21-Day Revenue Diagnostic $18,500</span> (full forensic dig, credited 1:1 toward the Active Case) → <span className="text-amber font-semibold">Active Case $15,000/mo</span> (operator-led implementation, 3-month minimum).
+                </p>
+                <p>
+                  A right-fit client operates a <span className="text-amber font-semibold">$5M–$25M business</span>, wants leaks named with dollar figures, and treats a $2,500 audit as a rounding error against a leak that usually costs 10–40× the fee every year unfixed. If the entry fee reads as the largest number on the page, this is the wrong engagement — and we'll say so on the call.
+                </p>
+              </div>
             </details>
           </section>
 
