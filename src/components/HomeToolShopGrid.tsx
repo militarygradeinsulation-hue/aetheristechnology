@@ -113,12 +113,12 @@ export function HomeToolShopGrid() {
                   <div className="text-[11px] text-muted-foreground uppercase tracking-widest font-mono">one-time · per tool</div>
                 </div>
                 <p className="text-xs text-foreground/80 mt-3 leading-snug">
-                  Own any single tool for life. Unlimited runs. Persistent memory tied to your account.
+                  Own it for life. Unlimited runs. Your data, your memory, your account. Replaces a $200/mo SaaS with one flat $40 — pays for itself the first time you use it.
                 </p>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-amber/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-              <span>Pick a tool below</span>
+              <span className="font-bold">Pick a tool ↓ Own it in 60 seconds</span>
               <ArrowRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
