@@ -105,15 +105,15 @@ export default function CareersLicensePage() {
             <Card className="bg-card/60 backdrop-blur border-amber/40 forensic-tile">
               <CardHeader>
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Lock className="w-3.5 h-3.5" /> Instant License · $100 · No test
+                  <Lock className="w-3.5 h-3.5" /> Instant License · $100 · No test · No interview
                 </div>
                 <CardTitle className="font-display text-3xl mt-2">
-                  Skip the test. Get your rep code today.
+                  Skip the gatekeepers. <span className="text-crimson">Print your own paycheck.</span>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  $100, one-time. You get a personal rep code, the right to sell every Aetheris tool
-                  in the Chaos Ecosystem, and standard commission on everything you close. 1099 independent
-                  — you are not an employee, you don't answer to a manager, and there is no employment relationship.
+                  $100 one-time gets you a personal rep code and the right to resell every Aetheris tool in the Chaos Ecosystem.
+                  <span className="text-amber font-semibold"> One $2,500 diagnostic pays your license back 10x.</span> One $18,500 flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
+                  1099 independent — no employment, no manager, no quotas.
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -121,17 +121,17 @@ export default function CareersLicensePage() {
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <ShieldCheck className="w-4 h-4 text-amber mb-1" />
                     <p className="font-semibold text-foreground">Personal rep code</p>
-                    <p className="text-muted-foreground text-xs mt-1">Every sale tied to you. Every commission tracked.</p>
+                    <p className="text-muted-foreground text-xs mt-1">Every sale tracked. Every commission auto-paid within 7 days of clearing.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <Rocket className="w-4 h-4 text-amber mb-1" />
-                    <p className="font-semibold text-foreground">Sell everything</p>
-                    <p className="text-muted-foreground text-xs mt-1">Every tool, every flagship, at standard commission split.</p>
+                    <p className="font-semibold text-foreground">Sell the whole stack</p>
+                    <p className="text-muted-foreground text-xs mt-1">Every tool, every flagship, every retainer. Highest split in the category.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <DollarSign className="w-4 h-4 text-amber mb-1" />
-                    <p className="font-semibold text-foreground">No test, no interview</p>
-                    <p className="text-muted-foreground text-xs mt-1">Pay, get your code, start selling. Portal access included.</p>
+                    <p className="font-semibold text-foreground">Live in 5 minutes</p>
+                    <p className="text-muted-foreground text-xs mt-1">Pay, get your code, portal + playbook unlock instantly. Start selling today.</p>
                   </div>
                 </div>
                 <div className="space-y-2">
