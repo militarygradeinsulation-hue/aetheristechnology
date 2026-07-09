@@ -337,6 +337,24 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
+          {/* CALENDAR — available to every rep + partner */}
+          <TabsContent value="calendar" className="mt-8">
+            <ToolCard
+              eyebrow="// Schedule //"
+              title="My Calendar"
+              summary="Your personal rep calendar — meetings, follow-ups, demos and tasks tied to the leads you're working."
+              howTo={[
+                'Click any day to add a meeting, call, follow-up or task.',
+                'Link an event to a lead so the clue trail updates automatically.',
+                'Check items off as they happen; admin sees your activity trail live.',
+              ]}
+              defaultOpen
+            >
+              <RepCalendarView isAdmin={false} />
+            </ToolCard>
+          </TabsContent>
+
+
           {/* PLAYBOOK — gated */}
           {showAdvanced && (
             <TabsContent value="playbook" className="mt-8">
