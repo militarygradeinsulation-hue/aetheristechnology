@@ -60,21 +60,23 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => (
         <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Why it mirrors Aetheris</div>
         <div className="italic text-foreground/75">{c.mirrors}</div>
       </div>
-      <div className="rounded-sm border border-amber/20 bg-amber/5 p-2.5">
-        <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-          <Wrench className="w-3 h-3" /> How Aetheris delivers this
+      {CASE_DELIVERY[c.id] && (
+        <div className="rounded-sm border border-amber/20 bg-amber/5 p-2.5">
+          <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+            <Wrench className="w-3 h-3" /> How Aetheris delivers this
+          </div>
+          <div className="text-foreground/85 text-[12px] leading-relaxed mb-1.5">
+            {CASE_DELIVERY[c.id].experience}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {CASE_DELIVERY[c.id].tools.map((t) => (
+              <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="text-foreground/85 text-[12px] leading-relaxed mb-1.5">
-          {AETHERIS_DELIVERY[c.category].experience}
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {AETHERIS_DELIVERY[c.category].tools.map((t) => (
-            <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
       <a
         href={c.link}
         target="_blank"
