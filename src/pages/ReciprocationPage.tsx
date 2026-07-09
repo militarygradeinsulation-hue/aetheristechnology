@@ -41,7 +41,9 @@ const ReciprocationPage: React.FC = () => {
                 nobody can weaponize it against you.
               </p>
             </div>
-            <ReciprocationDoctrineTool />
+            <PublicToolLock toolLabel="Reciprocation Engine">
+              <ReciprocationDoctrineTool />
+            </PublicToolLock>
           </div>
         </div>
         <Footer />
