@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   hasValidPortalSession, getPortalProfile, clearPortalSession,
 } from '@/lib/portalAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 import { fmtUsd } from '@/lib/repProducts';
 
 // Live tool components — reused verbatim so leads/data are identical.
