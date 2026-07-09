@@ -213,13 +213,11 @@ export function HomeToolShopGrid() {
           {infoTool && (
             <>
               <DialogHeader>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-amber" />
-                  </div>
-                  <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
-                    {infoTool.category}
-                  </div>
+                <div className="mb-3 -mx-1">
+                  <ToolThumbnail id={infoTool.id} />
+                </div>
+                <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/80">
+                  {infoTool.category}
                 </div>
                 <DialogTitle className="font-forensic text-2xl">{infoTool.name}</DialogTitle>
                 <DialogDescription className="text-sm leading-relaxed pt-1">
