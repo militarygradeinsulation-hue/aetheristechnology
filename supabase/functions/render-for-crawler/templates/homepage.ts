@@ -17,16 +17,16 @@ export async function renderHomepage(
   const path = "/";
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
-  const title = override?.title || "Your Business Is Leaking | Aetheris AI — Chaos Theory Forensics Operator";
-  const description = override?.description || "Indianapolis Chaos Theory Forensics Operator. The Leak Audit™ methodology finds the silent revenue leaks killing your business — quotes that never close, leads that ghost, ops that bleed margin.";
-  const keywords = override?.keywords || "business forensics, revenue leak audit, AI consulting Indianapolis, operational diagnostics, leak audit, business autopsy, conversion forensics";
+  const title = override?.title || "Business is chaos. Chaos always has cause. | Aetheris — Chaos Theory Forensics";
+  const description = override?.description || "Aetheris practices Chaos Theory Forensics. We fix any problem in any department or team, lift ROI and close losses by 30% on average — or it costs you nothing. Guaranteed. Indianapolis-based.";
+  const keywords = override?.keywords || "chaos theory forensics, business forensics, fix any business problem, 30% ROI lift consulting, no cost guarantee consulting, revenue leak audit, operational diagnostics Indianapolis, business autopsy, department fix";
 
   const defaultFaqs = [
-    { question: "What is a Chaos Theory Forensics Operator?", answer: "A forensic operator examines the working parts of your business — sales motion, ops, marketing, fulfillment — and finds the specific places where revenue, time, or trust is leaking. Unlike a generalist consultant, the deliverable is named leaks with dollar costs, not slide decks." },
-    { question: "What is The Leak Audit™?", answer: "A 7-step forensic methodology: 1) Intake autopsy, 2) Funnel pressure test, 3) Quote-to-close inspection, 4) Follow-up pulse check, 5) Ops friction map, 6) Tooling drag analysis, 7) Leak ledger with prioritized fixes. Self-scan free at /leak-audit. Operator-led Forensic Diagnostic is $2,500 flat, applied toward engagement." },
-    { question: "Why hire Aetheris instead of a typical consultant?", answer: "Most consultants bring frameworks. We bring a forensic posture: assume the leak exists, find it, prove it with numbers, then close it. No 90-day discovery phases, no slide-deck deliverables. The first deliverable is a named leak with a dollar figure attached." },
-    { question: "Where is Aetheris based?", answer: "Indianapolis, Indiana. We work with operators across the U.S., but Indy is home base." },
-    { question: "How do I get started?", answer: "Run the free self-scan at aetheris.technology/leak-audit — about 10 minutes. If you want a forensic operator on your business, the $2,500 Forensic Diagnostic is the front door. Call (317) 376-2110 or email aetheris.technology@outlook.com." },
+    { question: "What is Chaos Theory Forensics?", answer: "Chaos Theory Forensics is Aetheris's practice: business is chaos, and chaos always has a cause. We investigate established businesses, trace the damage back to where it begins, and remove it at the source — not the symptom." },
+    { question: "What kinds of problems can Aetheris fix?", answer: "Any problem in any department or team — sales, marketing, operations, fulfillment, follow-up, hiring, tooling, cash flow. If there's a business unit bleeding money, time, or trust, we find the cause and remove it." },
+    { question: "What results do clients see?", answer: "Our fix automatically lifts ROI and closes losses by 30% on average. One short conversation is often enough to identify massive changes waiting to happen inside your business." },
+    { question: "What is the guarantee?", answer: "If we can't find or fix a problem, there is NO COST — guaranteed. You only pay when we've located the cause and removed it." },
+    { question: "How do I get started?", answer: "Book one small conversation. Call (317) 376-2110, email aetheris.technology@outlook.com, or start the free self-scan at aetheris.technology/leak-audit." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 
@@ -58,8 +58,8 @@ export async function renderHomepage(
   <body>
     <main>
       <header>
-        <h1>Your business is leaking. You just can't see it from the inside.</h1>
-        <p class="tldr"><strong>TL;DR:</strong> Most businesses bleed 15–40% of available revenue through silent operational leaks — quotes that never close, leads that ghost, follow-ups that never fire, ops that hemorrhage margin. We find them. We name them in dollars. We close them.</p>
+        <h1>Business is chaos. Chaos always has cause.</h1>
+        <p class="tldr"><strong>TL;DR:</strong> One small conversation with Aetheris could unlock massive changes in your business. We practice Chaos Theory Forensics: we investigate established businesses, trace the damage back to where it begins, and remove it at the source. We fix any problem in any department or team — and our fix automatically lifts ROI and closes losses by 30% on average. If we can't find or fix a problem, there is NO COST. Guaranteed.</p>
       </header>
 
       <section>

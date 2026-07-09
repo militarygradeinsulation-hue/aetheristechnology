@@ -64,9 +64,10 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Chaos Theory Forensics — find the cause. Remove it. | Aetheris"
-          description="Aetheris practices Chaos Theory Forensics. We investigate established businesses, trace the damage to its origin, and remove it at the source. Real findings. No sugar."
+          title="Business is chaos. Chaos always has cause. | Aetheris"
+          description="Aetheris practices Chaos Theory Forensics. We fix any problem in any department, lift ROI and close losses by 30% on average — or it costs you nothing. Guaranteed."
           path="/"
+          keywords="chaos theory forensics, business forensics, fix any business problem, 30% ROI lift, no cost guarantee consulting, revenue leak audit, operational diagnostics Indianapolis, department fix, business autopsy"
         />
 
 
