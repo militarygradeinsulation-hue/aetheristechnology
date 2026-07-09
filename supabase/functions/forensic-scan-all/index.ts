@@ -389,7 +389,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("crm", "skipped", "no account_id");
     }
 
-    await stage("synth", "running", { cap_seconds: 40, mode: "parallel-batches" });
+    await stage("synth", "running", { cap_seconds: 55, mode: "per-chapter-parallel" });
     let report;
     try {
       report = await synthesizeReport(findings, url, company);
