@@ -146,16 +146,16 @@ export default function CareersLicensePage() {
                   />
                 </div>
                 <Button
-                  size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold"
+                  size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.4)]"
                   onClick={() => {
                     if (!payerName.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
                     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail.trim())) { toast({ title: 'Valid email required', variant: 'destructive' }); return; }
                     setPhase('checkout');
                   }}
                 >
-                  Continue to payment — $100 →
+                  Activate my license — $100 →
                 </Button>
-                <p className="text-xs text-center text-muted-foreground">Secure checkout by Stripe · Non-refundable · 1099 independent contractor</p>
+                <p className="text-xs text-center text-muted-foreground">Secure Stripe checkout · Rep code in your inbox in 60 seconds · 1099 independent</p>
               </CardContent>
             </Card>
           )}
