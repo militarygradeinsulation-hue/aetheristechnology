@@ -256,6 +256,7 @@ const NewPortalPage: React.FC = () => {
               4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7',
             };
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
+            return (
               <TabsList className={`w-full grid grid-cols-3 ${gridCols} bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1`}>
                 {visible.map(([val, label, Icon]) => (
                   <TabsTrigger
