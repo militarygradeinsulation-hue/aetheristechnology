@@ -1043,17 +1043,16 @@ const IndustriesPage: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-crimson/10 border border-crimson/30 text-crimson text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
-              The Leak Audit · By Industry
+              Case Studies
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
-              Every owner <span className="text-amber">feels it the same way.</span>
+              Real cases. Real leaks. <span className="text-crimson">Real money</span> recovered.
             </h1>
             <p className="text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto mb-4">
-              Tap any industry to open the case file. Type your niche below if you don't see it &mdash; the methodology travels.
+              Tap any case study to open the file. Type your niche below if you don't see it &mdash; the methodology travels.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
-              One offer fixes every industry on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
+              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
             </p>
 
             <div className="max-w-xl mx-auto relative">
