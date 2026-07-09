@@ -64,10 +64,10 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Business is chaos. Chaos always has cause. | Aetheris"
-          description="Aetheris practices Chaos Theory Forensics. We fix any problem in any department, lift ROI and close losses by 30% on average — or it costs you nothing. Guaranteed."
+          title="Revenue Leak Audit for $5M–$25M Businesses | Aetheris — Chaos Theory Forensics"
+          description="Aetheris investigates where growth-stage businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. Named leaks. Dollar impact. Written guarantee."
           path="/"
-          keywords="chaos theory forensics, business forensics, fix any business problem, 30% ROI lift, no cost guarantee consulting, revenue leak audit, operational diagnostics Indianapolis, department fix, business autopsy"
+          keywords="revenue leak audit, revenue forensics, chaos theory forensics, forensic diagnostic Indianapolis, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology"
         />
 
 
@@ -147,19 +147,19 @@ const LeakLanderPage: React.FC = () => {
               Chaos always has <span className="text-crimson italic">cause</span>.
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
-              One small talk with us could have massive changes in your business.
+              One 20-minute forensic call names your top three revenue leaks and their annual dollar cost — before you spend a cent.
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
-              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace the damage back to where it begins, and remove it at the source.
+              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace every dollar of bleed back to its origin, and remove the cause at the source.
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground max-w-2xl mx-auto">
-              We can fix <span className="text-amber font-bold uppercase tracking-wide">any problem</span> you have with <span className="text-amber font-bold uppercase tracking-wide">any department or team</span>. Our fix automatically lifts ROI and closes losses by <span className="text-crimson font-bold">30% on average</span>.
+              We investigate <span className="text-amber font-bold uppercase tracking-wide">revenue leaks</span> across sales, CRM, follow-up, and lead flow. Documented client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
             </p>
             <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-2xl mx-auto">
-              If we can't find or fix a problem, there's <span className="text-crimson">NO COST</span> guaranteed.
+              If we can't name a leak worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Real Findings. No Sugar.
+              Named leaks. Dollar figures. No fluff.
             </p>
           </section>
 
@@ -172,7 +172,7 @@ const LeakLanderPage: React.FC = () => {
               <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
                 <Link to="/leak-audit">
                   <FileText className="w-4 h-4 mr-2 text-amber" />
-                  Free 60-sec Pre-Scan
+                  Run the 60-second Leak Scan
                 </Link>
               </Button>
               <Button
@@ -181,7 +181,7 @@ const LeakLanderPage: React.FC = () => {
                 className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
               >
                 <Calendar className="w-4 h-4 mr-2" />
-                Request an Investigation
+                Book the Forensic Call
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
@@ -189,7 +189,7 @@ const LeakLanderPage: React.FC = () => {
               to="/chaos-scan"
               className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber hover:underline underline-offset-4"
             >
-              Or run the free Chaos Scan <ArrowRight className="w-3 h-3" />
+              Or generate the free Chaos Scan report <ArrowRight className="w-3 h-3" />
             </Link>
           </section>
 
@@ -208,17 +208,22 @@ const LeakLanderPage: React.FC = () => {
             <details className="group relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-4 sm:p-5">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson">Read before contacting</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson">Fit check · read before booking</div>
                   <h2 className="font-forensic text-lg sm:text-xl font-bold leading-tight mt-0.5">
-                    The Filter — is $2,500 "expensive"?
+                    Is this the right engagement for you?
                   </h2>
                 </div>
                 <span className="font-mono text-xs text-crimson shrink-0 group-open:hidden">+</span>
                 <span className="font-mono text-xs text-crimson shrink-0 hidden group-open:inline">−</span>
               </summary>
-              <p className="mt-3 text-sm text-foreground/85 leading-relaxed">
-                If $2,500 to find exactly where your revenue is bleeding sounds "expensive," close this tab. Our clients ask what the <span className="text-amber font-semibold">leak</span> costs — usually 10–40× our fee, every year unfixed.
-              </p>
+              <div className="mt-3 space-y-2.5 text-sm text-foreground/85 leading-relaxed">
+                <p>
+                  Our engagement ladder: <span className="text-amber font-semibold">Leak Audit $2,500</span> (named leaks + dollar exposure) → <span className="text-amber font-semibold">21-Day Revenue Diagnostic $18,500</span> (full forensic dig, credited 1:1 toward the Active Case) → <span className="text-amber font-semibold">Active Case $15,000/mo</span> (operator-led implementation, 3-month minimum).
+                </p>
+                <p>
+                  A right-fit client operates a <span className="text-amber font-semibold">$5M–$25M business</span>, wants leaks named with dollar figures, and treats a $2,500 audit as a rounding error against a leak that usually costs 10–40× the fee every year unfixed. If the entry fee reads as the largest number on the page, this is the wrong engagement — and we'll say so on the call.
+                </p>
+              </div>
             </details>
           </section>
 
