@@ -113,9 +113,9 @@ const CareersPage = () => {
               </Card>
 
               {/* PATH B — $100 instant license */}
-              <Card className="bg-emerald-500/10 border-emerald-500/40 flex flex-col">
+              <Card className="bg-amber/15 border-amber/60 flex flex-col shadow-[0_0_24px_-6px_rgba(245,158,11,0.25)]">
                 <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
-                  <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
+                  <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
                     <Rocket className="w-3.5 h-3.5" /> Path B · $100 · Instant
                   </div>
                   <h2 className="font-display text-2xl text-foreground leading-tight">
@@ -130,7 +130,7 @@ const CareersPage = () => {
                     <li>· Full rep portal access (playbooks, leads, coach)</li>
                   </ul>
                   <a href="/careers/license" onClick={() => trackCareersCta('gate_instant_license')} className="block mt-auto">
-                    <Button size="lg" className="w-full bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold">
+                    <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
                       Get licensed — $100 →
                     </Button>
                   </a>
