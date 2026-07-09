@@ -155,6 +155,13 @@ const NewPortalPage: React.FC = () => {
   }
 
   const isPartner = profile!.role === 'partner';
+  const isAdmin = hasValidAdminToken();
+  const repName = (profile!.rep_name || '').toLowerCase();
+  const repCode = (profile!.code || '').toLowerCase();
+  const isDean = repName.includes('dean') || repCode.includes('dean');
+  // Studio / Forecast / Training / Playbook are gated to admins, partners,
+  // and Dean. Everyone else sees a leaner surface for the demo rollout.
+  const showAdvanced = isAdmin || isPartner || isDean;
   const commission = fmtUsd(profile!.total_commission_cents || 0);
   const sales = fmtUsd(profile!.total_sales_cents || 0);
 
