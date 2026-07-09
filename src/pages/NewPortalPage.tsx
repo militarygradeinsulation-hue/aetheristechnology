@@ -279,7 +279,9 @@ const NewPortalPage: React.FC = () => {
               title="You're in the new portal"
               summary="Everything you used before is still here — this layout just makes it easier to see what each tool does before you open it."
               howTo={[
-                'Click any tab above (Leads, Playbook, Coach, Training, Studio, Workspace) to jump straight to that tool.',
+                showAdvanced
+                  ? 'Click any tab above (Leads, Playbook, Coach, Training, Studio, Workspace) to jump straight to that tool.'
+                  : 'Click any tab above (Leads, Coach, Workspace) to jump straight to that tool.',
                 'On every tool card, the "How to use" button opens a short step-by-step so you never have to guess.',
                 'Your leads, commissions and history are the same data as the classic portal — nothing was moved or copied.',
                 'Prefer the old view? Hit "Classic view" in the top bar; the portal remembers your choice.',
@@ -292,9 +294,16 @@ const NewPortalPage: React.FC = () => {
                 <h3 className="font-serif text-xl mt-1">First 5 minutes</h3>
                 <ol className="mt-3 space-y-2 text-sm text-muted-foreground/95">
                   <li>1. Open <span className="text-amber-300">Leads</span> → work today's top row.</li>
-                  <li>2. Open <span className="text-amber-300">Playbook</span> → grab the exact script.</li>
-                  <li>3. Stuck? Ask <span className="text-amber-300">Coach</span>.</li>
-                  <li>4. New here? Do one <span className="text-amber-300">Training</span> module.</li>
+                  {showAdvanced && (
+                    <li>2. Open <span className="text-amber-300">Playbook</span> → grab the exact script.</li>
+                  )}
+                  <li>{showAdvanced ? '3' : '2'}. Stuck? Ask <span className="text-amber-300">Coach</span>.</li>
+                  {showAdvanced && (
+                    <li>4. New here? Do one <span className="text-amber-300">Training</span> module.</li>
+                  )}
+                  {!showAdvanced && (
+                    <li>3. Drop notes or files in <span className="text-amber-300">Workspace</span> so the team can see them.</li>
+                  )}
                 </ol>
               </GlassCard>
               <GlassCard className="p-5">
