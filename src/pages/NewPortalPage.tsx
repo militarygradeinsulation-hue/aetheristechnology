@@ -362,39 +362,43 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
-          {/* TRAINING */}
-          <TabsContent value="training" className="mt-8">
-            <ToolCard
-              eyebrow="// Certification //"
-              title="Training Modules"
-              summary="Short modules + quick quizzes. Passing one unlocks the next tier of leads and commission bonuses."
-              howTo={[
-                'Do one module a day — most take 5–10 minutes.',
-                'The quiz at the end is scored by AI; you can retake it.',
-                'Your admin sees pass/fail live — you don\'t need to send anything.',
-              ]}
-              defaultOpen
-            >
-              <TrainingPanel />
-            </ToolCard>
-          </TabsContent>
+          {/* TRAINING — gated */}
+          {showAdvanced && (
+            <TabsContent value="training" className="mt-8">
+              <ToolCard
+                eyebrow="// Certification //"
+                title="Training Modules"
+                summary="Short modules + quick quizzes. Passing one unlocks the next tier of leads and commission bonuses."
+                howTo={[
+                  'Do one module a day — most take 5–10 minutes.',
+                  'The quiz at the end is scored by AI; you can retake it.',
+                  'Your admin sees pass/fail live — you don\'t need to send anything.',
+                ]}
+                defaultOpen
+              >
+                <TrainingPanel />
+              </ToolCard>
+            </TabsContent>
+          )}
 
-          {/* STUDIO */}
-          <TabsContent value="studio" className="mt-8">
-            <ToolCard
-              eyebrow="// Creation //"
-              title="Rep Creation Studio"
-              summary="Generate personalized images, one-pagers and social posts branded for you and tied to the leads you're working."
-              howTo={[
-                'Pick the format (image, post, one-pager).',
-                'Describe who it\'s for in one line — the studio pulls the lead\'s context automatically.',
-                'Everything you generate is saved to your library so you can reuse it.',
-              ]}
-              defaultOpen
-            >
-              <RepCreationStudio />
-            </ToolCard>
-          </TabsContent>
+          {/* STUDIO — gated */}
+          {showAdvanced && (
+            <TabsContent value="studio" className="mt-8">
+              <ToolCard
+                eyebrow="// Creation //"
+                title="Rep Creation Studio"
+                summary="Generate personalized images, one-pagers and social posts branded for you and tied to the leads you're working."
+                howTo={[
+                  'Pick the format (image, post, one-pager).',
+                  'Describe who it\'s for in one line — the studio pulls the lead\'s context automatically.',
+                  'Everything you generate is saved to your library so you can reuse it.',
+                ]}
+                defaultOpen
+              >
+                <RepCreationStudio />
+              </ToolCard>
+            </TabsContent>
+          )}
 
           {/* WORKSPACE */}
           <TabsContent value="workspace" className="mt-8">
