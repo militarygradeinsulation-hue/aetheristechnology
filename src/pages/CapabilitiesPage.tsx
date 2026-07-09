@@ -138,6 +138,38 @@ const CapabilitiesPage = () => {
                 );
               })}
             </div>
+
+            {/* Bottom conversion band */}
+            <RevealOnScroll>
+              <div className="mt-16 max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
+                <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
+                  Skip the tools — go straight to the fix
+                </div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fastest path</div>
+                <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-3">
+                  Don't have time to run every tool? <span className="text-crimson">We'll do it in 14 days.</span>
+                </h3>
+                <p className="text-sm md:text-base text-foreground/80 mb-5 max-w-2xl">
+                  The Leak Audit runs every one of these tools on your business, hands you a written report with prioritized fixes and ROI on each, and applies 100% of the $2,500 fee toward implementation. <span className="text-amber font-semibold">If we don't find leaks worth more than the fee, you don't pay.</span>
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/leak-audit">
+                    <button className="inline-flex items-center justify-center gap-2 rounded-md bg-amber text-background hover:bg-amber/90 px-5 py-2.5 text-sm font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
+                      Book my Leak Audit — $2,500 <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => setIsContactModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 text-amber hover:bg-amber/10 px-5 py-2.5 text-sm font-semibold"
+                  >
+                    Talk to the operator first
+                  </button>
+                </div>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Guaranteed ROI · Applied to implementation · Limited slots this month
+                </p>
+              </div>
+            </RevealOnScroll>
           </div>
         </div>
         <Footer />
