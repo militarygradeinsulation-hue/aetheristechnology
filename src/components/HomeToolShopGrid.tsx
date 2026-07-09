@@ -169,39 +169,36 @@ export function HomeToolShopGrid() {
           <div className="h-px flex-1 bg-amber/20" />
         </div>
 
-        {/* Tool tiles — click opens info dialog */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        {/* Tool tiles — custom thumbnail + click opens info dialog */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {SHOP_TOOLS.map((t) => (
             <button
               type="button"
               key={t.id}
               onClick={() => setInfoTool(t)}
-              className="group text-left rounded-sm border border-border/60 bg-background/60 p-3 flex items-start gap-3 hover:border-amber/60 hover:bg-amber/[0.03] transition-colors"
+              className="group text-left rounded-sm border border-border/60 bg-background/60 overflow-hidden hover:border-amber/70 hover:bg-amber/[0.03] transition-colors flex flex-col"
               aria-label={`Open details for ${t.name}`}
             >
-              <div className="w-8 h-8 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center shrink-0 group-hover:bg-amber/20 transition-colors">
-                <Sparkles className="w-3.5 h-3.5 text-amber" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <div className="font-mono text-[8px] uppercase tracking-widest text-amber/70">
-                    {t.category}
-                  </div>
+              <ToolThumbnail id={t.id} />
+              <div className="p-2.5 flex flex-col gap-1 flex-1">
+                <div className="font-mono text-[8px] uppercase tracking-widest text-amber/70">
+                  {t.category}
                 </div>
-                <div className="font-forensic text-sm font-bold leading-tight truncate">
+                <div className="font-forensic text-[13px] font-bold leading-tight">
                   {t.name}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                <p className="text-[10.5px] text-muted-foreground leading-snug line-clamp-2">
                   {t.tagline}
                 </p>
-              </div>
-              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-crimson flex items-center gap-1 font-bold">
-                Try free
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                <div className="mt-auto pt-1.5 font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-crimson flex items-center gap-1 font-bold">
+                  Try free
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </div>
               </div>
             </button>
           ))}
         </div>
+
 
         <div className="mt-4 text-center">
           <Link to="/tools-shop/redeem" className="text-xs font-mono uppercase tracking-widest text-amber/70 hover:text-amber underline">
