@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   AlertTriangle,
   CheckCircle2,
   FileSearch,
@@ -326,33 +333,56 @@ export const ChaosMindMap: React.FC = () => {
         })}
       </div>
 
-      {/* Active symptom trace card */}
-      <div className="mt-3 min-h-[92px]">
-        {active ? (
-          <div className={`grid gap-2 ${isFixed ? '' : 'sm:grid-cols-2'} animate-fade-in`}>
-            {!isFixed && (
-              <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
-                <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
-                  <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+      {/* Active symptom info dialog — center-screen every time a bubble is clicked */}
+      <Dialog open={!!active} onOpenChange={(o) => !o && setActiveId(null)}>
+        <DialogContent className="max-w-lg">
+          {active && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  {React.createElement(isFixed ? active.fixedIcon : active.icon, { className: 'w-5 h-5 text-amber' })}
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                    {isFixed ? 'Source closed' : 'Leak signal'}
+                  </div>
                 </div>
-                <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
+                <DialogTitle className="font-forensic text-2xl">
+                  {isFixed ? active.fixedLabel : active.label}
+                </DialogTitle>
+                <DialogDescription className="text-sm leading-relaxed pt-1">
+                  {isFixed
+                    ? 'This thread now runs clean to a named source.'
+                    : 'Tap any symptom to trace the chain back to the source of the chaos.'}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 pt-1">
+                {!isFixed && (
+                  <div className="rounded-sm border border-crimson/40 bg-crimson/5 p-3">
+                    <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-crimson mb-1.5">
+                      <AlertTriangle className="w-3 h-3" /> {active.label} — the chaos
+                    </div>
+                    <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.chaos}</p>
+                  </div>
+                )}
+                <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
+                  <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
+                    <CheckCircle2 className="w-3 h-3" /> {isFixed ? `${active.fixedLabel} — source closed` : 'Source closed'}
+                  </div>
+                  <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.fixed}</p>
+                </div>
               </div>
-            )}
-            <div className="rounded-sm border border-amber/40 bg-amber/5 p-3">
-              <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-                <CheckCircle2 className="w-3 h-3" /> {isFixed ? `${active.fixedLabel} — source closed` : 'Source closed'}
-              </div>
-              <p className="text-xs sm:text-sm text-foreground/90 leading-snug">{active.fixed}</p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 py-6">
-            {isFixed
-              ? 'Every symptom now runs a clean line to a named source. Tap one to compare.'
-              : 'Tap a symptom to trace its chain back to the source of the chaos.'}
-          </p>
-        )}
-      </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {!active && (
+        <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 py-6">
+          {isFixed
+            ? 'Every symptom now runs a clean line to a named source. Tap one to compare.'
+            : 'Tap a symptom to trace its chain back to the source of the chaos.'}
+        </p>
+      )}
 
       {/* Brand Voice Extension — companion to the ecosystem */}
       <Link
