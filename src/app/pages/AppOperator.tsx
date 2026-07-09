@@ -9,12 +9,30 @@ import {
 } from "lucide-react";
 
 // Tools that auto-fire the moment a valid URL lands in the target bar.
-const AUTO_JOBS: { key: string; label: string; fn: string; tab: TabKey }[] = [
-  { key: "scan",       label: "Forensic Leak Scan",   fn: "extension-leak-scan",         tab: "scan" },
-  { key: "golden",     label: "Golden Report",        fn: "forensic-scan-all",           tab: "golden" },
-  { key: "contra",     label: "Brand Contradictions", fn: "generate-brand-contradictions", tab: "contradictions" },
-  { key: "friction",   label: "Friction Audit",       fn: "generate-friction-audit",     tab: "friction" },
-  { key: "contacts",   label: "Contacts",             fn: "extension-contacts",          tab: "contacts" },
+// `body` returns the invoke payload — some scanners require extra fields,
+// so we pass sensible operator-mode defaults instead of only `url`.
+const AUTO_JOBS: {
+  key: string;
+  label: string;
+  fn: string;
+  tab: TabKey;
+  body: (url: string) => Record<string, unknown>;
+}[] = [
+  { key: "scan",     label: "Forensic Leak Scan",   fn: "extension-leak-scan",           tab: "scan",           body: (url) => ({ url }) },
+  { key: "golden",   label: "Golden Report",        fn: "forensic-scan-all",             tab: "golden",         body: (url) => ({ url }) },
+  { key: "contra",   label: "Brand Contradictions", fn: "generate-brand-contradictions", tab: "contradictions", body: (url) => ({
+      url,
+      socialLinks: [],
+      idealCustomer: "Operators and decision-makers evaluating this brand for a purchase or partnership.",
+      desiredPerception: ["trustworthy", "expert", "premium", "clear"],
+    }) },
+  { key: "friction", label: "Friction Audit",       fn: "generate-friction-audit",       tab: "friction",       body: (url) => ({
+      url,
+      desiredTone: ["confident", "clear", "human"],
+      industry: "General / auto-detect",
+      targetCustomer: "Decision-makers evaluating this site for the first time.",
+    }) },
+  { key: "contacts", label: "Contacts",             fn: "extension-contacts",            tab: "contacts",       body: (url) => ({ url }) },
 ];
 
 type JobStatus = "idle" | "running" | "done" | "error";
