@@ -229,16 +229,16 @@ export const FloatingWorkbench: React.FC = () => {
     <>
       {/* Floating launcher — hidden for admin (Joseph opens via tab/button) */}
       {!open && !isAdmin && (
-        <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={60}>
+        <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={restricted ? 180 : 160} height={48} zIndex={60}>
           <button
             onClick={() => setOpen(true)}
             className="h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
-            title="Open Workbench"
-            aria-label="Open Workbench"
+            title={restricted ? "Open Golden Report" : "Open Workbench"}
+            aria-label={restricted ? "Open Golden Report" : "Open Workbench"}
           >
             <Wrench className="w-4 h-4" />
-            Workbench
-            {stack.length > 0 && (
+            {restricted ? "Golden Report" : "Workbench"}
+            {!restricted && stack.length > 0 && (
               <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
                 {stack.length}
               </span>
@@ -266,29 +266,44 @@ export const FloatingWorkbench: React.FC = () => {
       >
           <div className="px-4 py-3 border-b border-border/40 bg-card/40">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="font-display flex items-center gap-2 text-lg font-semibold">
-                <Wrench className="w-4 h-4 text-amber" />
-                Workbench
-              </h2>
+              {restricted ? (
+                <div className="space-y-1">
+                  <p className="font-case text-[10px] uppercase tracking-[0.2em] text-amber">
+                    Demo Portal · One Tool
+                  </p>
+                  <h2 className="font-forensic text-xl italic font-bold tracking-tight">
+                    Golden Report
+                  </h2>
+                </div>
+              ) : (
+                <h2 className="font-display flex items-center gap-2 text-lg font-semibold">
+                  <Wrench className="w-4 h-4 text-amber" />
+                  Workbench
+                </h2>
+              )}
               <div className="flex items-center gap-1">
-                <Select value={width} onValueChange={(v) => setWidth(v as typeof width)}>
-                  <SelectTrigger className="h-8 w-[88px]" title="Panel width">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[100]">
-                    <SelectItem value="sm">Small</SelectItem>
-                    <SelectItem value="md">Medium</SelectItem>
-                    <SelectItem value="lg">Large</SelectItem>
-                    <SelectItem value="full">Full</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="ghost" size="icon" className="h-8 w-8"
-                  onClick={() => setShowTips(t => !t)}
-                  title="How the Workbench works"
-                >
-                  <HelpCircle className={`w-4 h-4 ${showTips ? "text-amber" : ""}`} />
-                </Button>
+                {!restricted && (
+                  <>
+                    <Select value={width} onValueChange={(v) => setWidth(v as typeof width)}>
+                      <SelectTrigger className="h-8 w-[88px]" title="Panel width">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100]">
+                        <SelectItem value="sm">Small</SelectItem>
+                        <SelectItem value="md">Medium</SelectItem>
+                        <SelectItem value="lg">Large</SelectItem>
+                        <SelectItem value="full">Full</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="ghost" size="icon" className="h-8 w-8"
+                      onClick={() => setShowTips(t => !t)}
+                      title="How the Workbench works"
+                    >
+                      <HelpCircle className={`w-4 h-4 ${showTips ? "text-amber" : ""}`} />
+                    </Button>
+                  </>
+                )}
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setOpen(false)} title="Hide (keeps work)">
                   <X className="w-4 h-4" />
                 </Button>
@@ -434,6 +449,7 @@ export const FloatingWorkbench: React.FC = () => {
                   onDragStart={onDragStart(idx)}
                   onDragOver={onDragOver}
                   onDrop={onDrop(idx)}
+                  locked={restricted}
                 />
               ))
             )}
