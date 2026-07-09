@@ -465,10 +465,8 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* THE LEAK ECOSYSTEM — interactive mind map (email-gated after 1st use) */}
-          <MindMapEmailGate>
-            <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
-          </MindMapEmailGate>
+          {/* THE LEAK ECOSYSTEM — always unlocked, no email gate */}
+          <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
 
           {/* Golden Report CTA now lives above; no duplicate here. */}
 
