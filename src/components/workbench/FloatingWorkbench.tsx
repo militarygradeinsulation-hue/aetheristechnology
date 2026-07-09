@@ -449,6 +449,7 @@ export const FloatingWorkbench: React.FC = () => {
                   onDragStart={onDragStart(idx)}
                   onDragOver={onDragOver}
                   onDrop={onDrop(idx)}
+                  locked={restricted}
                 />
               ))
             )}
