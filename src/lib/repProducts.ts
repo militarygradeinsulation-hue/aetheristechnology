@@ -1,23 +1,30 @@
 // Single source of truth for rep commission tables.
 // Prices in cents to avoid float math.
 //
-// TWO MODELS LIVE HERE — read this before touching anything:
+// PUBLIC OFFER = the Reciprocity Engine 4-rung funnel. Only these are for sale
+// on the public site (see aetheris-reciprocity-engine-spec.pdf, Parts 2 & 3):
+//   Free  · The Leak Audit
+//   $3,500 · Single-Leak Investigation (tiered % split, Tier 3)
+//   $18,500 · Chaos Diagnostic (flagship fixed-dollar split)
+//   $15,000/mo · Implementation (flagship fixed-dollar split)
 //
-// 1) TIERED COMMISSION (catalog tools + the 3 public bundles)
+// TWO COMMISSION MODELS LIVE HERE — read before touching anything:
+//
+// 1) TIERED COMMISSION (Single-Leak Investigation + legacy à-la-carte + Tool Shop)
 //    Tier 1, Entry ($29-$59):   Company 50% · Rep 30% · Partner 20%
 //    Tier 2, Mid   ($79-$349):  Company 60% · Rep 25% · Partner 15%
 //    Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
-//    The 3 bundles ($2,500 / $5,000 / $10,000) all land in Tier 3.
 //
-// 2) FLAGSHIP FIXED-DOLLAR (Diagnostic + Active Case ONLY)
-//    21-Day Revenue Diagnostic ($18,500 one-time)
+// 2) FLAGSHIP FIXED-DOLLAR (Chaos Diagnostic + Implementation ONLY)
+//    Chaos Diagnostic ($18,500 one-time)
 //      → Company $10,500 · Rep $5,000 · Partner $3,000
-//    Active Case ($15,000/mo, paid every month client stays)
+//    Implementation ($15,000/mo, paid every month client stays)
 //      → Company $8,000  · Rep $4,000 · Partner $3,000
 //    Enforced server-side in payments-webhook flagshipFixedSplit().
 //
-// Anything NOT on the public site (legacy à la carte tools) is kept here for
-// rep-portal internal sales and back-compat only — marked `legacy: true`.
+// The old operator-led bundles (Signal / Revenue / Operator Suite) and every
+// à-la-carte tool are now `legacy: true` — kept for back-compat with existing
+// Stripe products and rep-portal internal sales, but hidden from public catalog.
 
 export type CommissionTier = 1 | 2 | 3;
 
