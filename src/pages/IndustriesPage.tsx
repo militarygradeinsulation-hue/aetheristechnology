@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { INFOGRAPHICS } from '@/lib/infographics';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { RealCaseStudiesSection } from '@/components/RealCaseStudiesSection';
 
 
 interface IndustryLeak {
