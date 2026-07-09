@@ -20,7 +20,7 @@ import {
   AlertTriangle, ArrowLeft, Beaker, Loader2, Radar, Crosshair,
   Users, Rocket, RefreshCw,
 } from 'lucide-react';
-import { HomeFreeTrialArsenal } from '@/components/HomeFreeTrialArsenal';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import AppOperator from '@/app/pages/AppOperator';
 
