@@ -140,11 +140,10 @@ const Home = () => {
                 <Grid3x3 className="w-3 h-3" /> The full toolset
               </div>
               <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
-                Want every forensic tool we use?
+                Want every forensic tool we use? <span className="text-amber">Free.</span>
               </h3>
               <p className="text-sm md:text-base text-foreground/80 mb-5">
-                Drop your email and get instant access to the entire Aetheris ecosystem — scanners, diagnostics,
-                report generators, and closer kits. No password, no rep code required.
+                One email unlocks the whole vault — scanners, diagnostics, report generators, closer kits, the same weapons we bill $2,500/session with. <span className="text-amber font-semibold">No card. No password. No spam.</span> You'll be inside in 3 seconds.
               </p>
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
                 <Input
@@ -158,17 +157,17 @@ const Home = () => {
                 <Button
                   type="submit"
                   disabled={unlocking || !email}
-                  className="bg-amber text-background hover:bg-amber/90 font-semibold whitespace-nowrap"
+                  className="bg-amber text-background hover:bg-amber/90 font-bold whitespace-nowrap shadow-[0_0_20px_rgba(217,169,58,0.35)]"
                 >
                   {unlocking ? (
                     <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Unlocking</>
                   ) : (
-                    <>Unlock the toolset <ArrowRight className="w-4 h-4 ml-1" /></>
+                    <>Give me the whole vault <ArrowRight className="w-4 h-4 ml-1" /></>
                   )}
                 </Button>
               </form>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
-                One email · full access · no spam
+                Instant access · Every tool · Unsubscribe anytime
               </p>
             </div>
           </section>
