@@ -151,7 +151,7 @@ const AppOperator = () => {
   async function runOneAuto(job: typeof AUTO_JOBS[number], url: string) {
     setJobs((j) => ({ ...j, [job.key]: { status: "running", startedAt: Date.now() } }));
     try {
-      const { data, error } = await supabase.functions.invoke(job.fn, { body: { url } });
+      const { data, error } = await supabase.functions.invoke(job.fn, { body: job.body(url) });
       if (error) throw error;
       setJobs((j) => ({
         ...j,
