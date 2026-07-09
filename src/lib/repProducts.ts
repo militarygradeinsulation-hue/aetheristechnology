@@ -88,55 +88,73 @@ export const companyCentsForProduct = (p: RepProduct) =>
   p.priceCents - repCentsForProduct(p) - partnerCentsForProduct(p);
 
 export const REP_PRODUCTS: RepProduct[] = [
-  // ── FLAGSHIPS — FIXED-DOLLAR SPLIT (not tiered) ──
+  // ── RECIPROCITY ENGINE — PUBLIC FUNNEL (in ascending order) ──
+
+  // Tier 1 — $3,500 Single-Leak Investigation (percent split, Tier 3 rates).
+  // 100% credited toward the Chaos Diagnostic within 90 days.
   {
-    name: '21-Day Revenue Diagnostic',
+    name: 'Single-Leak Investigation',
+    priceCents: 350_000,
+    tier: 3,
+    highlight: true,
+    description: 'One leak, traced to origin in 5 business days. Written trace + true annual cost + removal plan. 100% credited toward the Chaos Diagnostic within 90 days.',
+    forWho: 'Operators who already know where it hurts and want proof before committing to a full Diagnostic.',
+  },
+
+  // Tier 2 — $18,500 Chaos Diagnostic (flagship fixed-dollar split).
+  {
+    name: 'Chaos Diagnostic',
     priceCents: 1_850_000,
     tier: 3,
     flagship: 'diagnostic',
     highlight: true,
-    description: 'Operator-led 3-week forensic teardown of the client\'s revenue system. Ends with a written leak report, a 90-day remediation plan, and a redesigned funnel.',
-    forWho: 'Owners doing $1M-$25M who know money is leaking but cannot pinpoint where. Pre-requisite to the Active Case.',
+    description: '21-day forensic examination of the entire business. Findings Report + Removal Roadmap + live Findings Presentation. Guarantee: recoverable losses of at least 3x the fee, in writing. 100% credited toward Implementation.',
+    forWho: 'Owners $1M-$25M who need every leak traced to origin before spending on a fix.',
   },
+
+  // Tier 3 — $15,000/mo Implementation (flagship fixed-dollar split, recurring).
   {
-    name: 'Active Case',
+    name: 'Implementation',
     priceCents: 1_500_000,
     tier: 3,
     recurring: true,
     flagship: 'activeCase',
     highlight: true,
-    description: 'Monthly embedded operator. We rebuild and run the systems the Diagnostic exposed — sales follow-up, CRM hygiene, content engine, dashboards.',
-    forWho: 'Diagnostic graduates who want the operator to ship the fixes, not hand them a PDF.',
+    description: 'Monthly embedded operator. Removes causes and builds what belongs in their place: custom AI systems, automation, and strategic infrastructure. 3-month minimum. Only proposed inside a completed Diagnostic.',
+    forWho: 'Diagnostic graduates ready to install the fixes, not read another PDF.',
   },
 
-  // ── PUBLIC OPERATOR-LED BUNDLES (the only things publicly for sale) ──
+  // ── LEGACY OPERATOR-LED BUNDLES (not for public sale — spec Part 2 demoted these) ──
+  // Kept for back-compat with existing Stripe products + rep-portal internal sales.
   {
     name: 'Signal Pack',
     priceCents: 250_000,
     tier: 3,
     bundle: true,
-    highlight: true,
+    legacy: true,
     description: 'One-day forensic snapshot: website scan, CRM data audit, top-of-funnel leak map. Operator walks the report with you.',
-    forWho: 'Owners $500k-$3M who need a directional read before committing to a full Diagnostic.',
+    forWho: 'Legacy bundle — replaced by the Single-Leak Investigation in the public funnel.',
   },
   {
     name: 'Revenue Pack',
     priceCents: 500_000,
     tier: 3,
     bundle: true,
-    highlight: true,
+    legacy: true,
     description: 'Signal Pack + 2-week sales-cycle teardown. Includes call-recording review, deal-stage forensics, and 3 hands-on rebuilds.',
-    forWho: 'Teams $1M-$10M with a sales motion that worked once and stopped scaling.',
+    forWho: 'Legacy bundle — replaced by the Chaos Diagnostic in the public funnel.',
   },
   {
     name: 'Operator Suite',
     priceCents: 1_000_000,
     tier: 3,
     bundle: true,
-    highlight: true,
+    legacy: true,
     description: 'Operator embeds for 3 weeks. Runs every tool against your live business, ships fixes, hands you a working revenue system.',
-    forWho: 'Owners ready to install — not study — the full Aetheris operating system in their company.',
+    forWho: 'Legacy bundle — folded into Implementation in the public funnel.',
   },
+
+
 
   // ── LEAK ECOSYSTEM TOOL SHOP (public /tools-shop — lifetime tool unlocks) ──
   // Tiered commission applies (T1 / T2 / T3 by price band).
