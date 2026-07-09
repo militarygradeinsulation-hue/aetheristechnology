@@ -58,8 +58,8 @@ export async function renderHomepage(
   <body>
     <main>
       <header>
-        <h1>Your business is leaking. You just can't see it from the inside.</h1>
-        <p class="tldr"><strong>TL;DR:</strong> Most businesses bleed 15–40% of available revenue through silent operational leaks — quotes that never close, leads that ghost, follow-ups that never fire, ops that hemorrhage margin. We find them. We name them in dollars. We close them.</p>
+        <h1>Business is chaos. Chaos always has cause.</h1>
+        <p class="tldr"><strong>TL;DR:</strong> One small conversation with Aetheris could unlock massive changes in your business. We practice Chaos Theory Forensics: we investigate established businesses, trace the damage back to where it begins, and remove it at the source. We fix any problem in any department or team — and our fix automatically lifts ROI and closes losses by 30% on average. If we can't find or fix a problem, there is NO COST. Guaranteed.</p>
       </header>
 
       <section>
