@@ -26,7 +26,9 @@ const ChaosScanPage = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-20">
-          <PublicChaosScan />
+          <PublicToolLock toolLabel="Chaos Scan">
+            <PublicChaosScan />
+          </PublicToolLock>
         </div>
         <Footer />
       </div>
