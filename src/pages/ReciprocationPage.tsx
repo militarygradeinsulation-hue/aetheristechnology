@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { ReciprocationDoctrineTool } from "@/components/ReciprocationDoctrineTool";
+import { PublicToolLock } from "@/components/PublicToolLock";
 import { Handshake } from "lucide-react";
 
 const ReciprocationPage: React.FC = () => {
