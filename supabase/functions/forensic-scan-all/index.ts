@@ -353,8 +353,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     })();
 
     const websiteTask = (async () => {
-      findings.scan_website = await invokeFn("scan-website", { url, company }, 24_000);
-      await stage("scan_website", "done", { cap_seconds: 24 });
+      findings.scan_website = await invokeFn("scan-website", { url, company }, 55_000);
+      await stage("scan_website", "done", { cap_seconds: 55 });
     })();
 
     const frictionTask = (async () => {
@@ -364,18 +364,19 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           desiredTone: ["direct", "credible", "trustworthy"],
           industry: company || "business services",
           targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 20_000),
+        }, 45_000),
         invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 20_000),
+        }, 45_000),
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 20 });
+      await stage("friction", "done", { cap_seconds: 45 });
     })();
+
 
     await Promise.all([siteTask, websiteTask, frictionTask]);
     await stageQueue;
