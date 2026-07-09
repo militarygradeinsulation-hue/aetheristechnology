@@ -229,16 +229,16 @@ export const FloatingWorkbench: React.FC = () => {
     <>
       {/* Floating launcher — hidden for admin (Joseph opens via tab/button) */}
       {!open && !isAdmin && (
-        <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={60}>
+        <PinnableFloater storageKey="floater.workbench.launcher" defaultCorner="bottom-right" width={restricted ? 180 : 160} height={48} zIndex={60}>
           <button
             onClick={() => setOpen(true)}
             className="h-12 px-4 rounded-full bg-amber text-background font-mono text-xs uppercase tracking-wider font-semibold shadow-[0_8px_32px_rgba(0,0,0,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
-            title="Open Workbench"
-            aria-label="Open Workbench"
+            title={restricted ? "Open Golden Report" : "Open Workbench"}
+            aria-label={restricted ? "Open Golden Report" : "Open Workbench"}
           >
             <Wrench className="w-4 h-4" />
-            Workbench
-            {stack.length > 0 && (
+            {restricted ? "Golden Report" : "Workbench"}
+            {!restricted && stack.length > 0 && (
               <span className="ml-1 bg-background/20 text-background rounded-full px-1.5 py-0.5 text-[10px]">
                 {stack.length}
               </span>
