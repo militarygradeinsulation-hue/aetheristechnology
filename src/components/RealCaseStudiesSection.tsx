@@ -5,44 +5,8 @@ import { ExternalLink, Search, FileText, Wrench } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
+import { CASE_DELIVERY } from '@/data/caseDelivery';
 
-// How Aetheris actually delivers each class of outcome — concrete tools from
-// the arsenal + the operator experience that runs them. Shown on every card so
-// prospects see the mechanism, not just the parallel.
-const AETHERIS_DELIVERY: Record<RealCaseCategory, { tools: string[]; experience: string }> = {
-  'Data & CRM Hygiene': {
-    tools: ['HubSpot Mirror + Hygiene Scan', 'Detective Mode', 'Forensic Leak Scan', 'Owner-Overload / Stalled-Deal SQL detectors'],
-    experience: 'We rebuild CRMs live inside HubSpot — dedupe, enrichment, real-time validation, governance rules — the same pattern proven on 840K-lead audits.',
-  },
-  'Lead Gen & Conversion': {
-    tools: ['Website Scanner', 'Friction Audit', 'Brand Contradictions', 'Golden Report', 'Playbook Generator'],
-    experience: 'The Leak Audit™ maps every drop-off between traffic and booked call, then the Playbook Generator ships the exact fix per page.',
-  },
-  'Sales Funnel & CRO': {
-    tools: ['Friction Audit', 'Forensic Leak Scan', 'Detective Mode', 'AI Landing Studio', 'Content Engine'],
-    experience: 'We run forensic funnel teardowns like Restroworks and Indochino — headline, CTA, form, checkout — then rewrite copy and structure with the Content Engine.',
-  },
-  'Sales Operations': {
-    tools: ['Rep Portal + Time Clock', 'Sales Coach AI', 'Owner-Overload detector', 'Stalled-Deal detector', 'Team Training'],
-    experience: 'Operator-led sales ops: quotas, coaching, forecasting, rep efficiency ($/hr) — the same discipline behind Miller Heiman-style pipeline overhauls.',
-  },
-  'Marketing Operations': {
-    tools: ['Content Calendar', 'Content Engine', 'Social Content generator', 'Brand Contradictions', 'HubSpot Mirror'],
-    experience: 'MOps rebuild: lead scoring, nurture, attribution, brand-voice enforcement — automated end-to-end and audited weekly.',
-  },
-  'Custom AI & Automation': {
-    tools: ['Tool Generator', 'AI Creation Studio', 'Edge Function fleet (Lovable Cloud)', 'Aetheris AI Gateway'],
-    experience: 'We ship custom AI agents and internal tools in days — the same way we built our own 40+ edge functions and the Forensic Scan All engine.',
-  },
-  'Financial & Operational Efficiency': {
-    tools: ['Forensic Diagnostic ($2,500)', 'Golden Report', 'P&L / commission engine', 'Ops SQL detectors'],
-    experience: 'We forensically price every leak in dollars — revenue lost, hours burned, margin decay — then deliver a signed 90-day recovery plan.',
-  },
-  'Customer Experience & Retention': {
-    tools: ['Sales Coach AI', 'Drip Sequences', 'Rep Notes + Follow-up automation', 'Detective Mode'],
-    experience: 'Retention playbooks: churn signals surfaced live, drip cadences auto-shipped, rep follow-ups scored — recovery loops built in.',
-  },
-};
 
 
 const CategoryPill: React.FC<{
