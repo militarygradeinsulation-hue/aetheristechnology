@@ -12,11 +12,25 @@ import { Wrench, Plus, Save, Trash2, X, HelpCircle, GripVertical, ChevronDown, E
 import { wb, type WidgetEntry, type WorkbenchLayout } from "@/lib/workbench";
 import { TOOL_REGISTRY, type ToolGroup } from "./toolRegistry";
 import { WorkbenchWidget } from "./WorkbenchWidget";
-import { hasValidPortalSession } from "@/lib/portalAuth";
+import { hasValidPortalSession, getPortalProfile } from "@/lib/portalAuth";
 import { hasValidAdminToken } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 import { PinnableFloater } from "@/components/ui/PinnableFloater";
 import { useActiveLead, clearActiveLead } from "@/lib/activeLead";
+
+// Reps see ONLY the Golden Report. Admin (Joseph), Dean (482917), and
+// Braden (963169) keep the full workbench. Everyone else is locked to
+// forensic-scan-all so their demo portal stays front-and-center on the
+// one tool that matters.
+const GOLDEN_ONLY_TOOL_ID = "forensic-scan-all";
+const FULL_ACCESS_REP_CODES = new Set(["482917", "963169"]);
+function isRepRestrictedToGolden(): boolean {
+  if (hasValidAdminToken()) return false;
+  const p = getPortalProfile();
+  if (!p) return false;
+  if (FULL_ACCESS_REP_CODES.has(p.code)) return false;
+  return true;
+}
 
 // Widths applied at ALL viewports (no sm: prefix) so mobile users can
 // resize too. Sheet base has w-3/4 + sm:max-w-sm — we override both via
