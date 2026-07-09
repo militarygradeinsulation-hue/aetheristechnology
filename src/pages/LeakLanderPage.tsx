@@ -197,8 +197,6 @@ const LeakLanderPage: React.FC = () => {
             </Link>
           </section>
 
-          {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
-          <HomeToolShopGrid />
 
 
 
