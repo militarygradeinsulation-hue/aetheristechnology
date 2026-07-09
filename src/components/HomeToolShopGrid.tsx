@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SHOP_TOOLS, SHOP_PRICES, type ShopTool, type ShopPlan } from "@/lib/tool-shop-catalog";
-import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, X, Play } from "lucide-react";
+import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, Play } from "lucide-react";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
@@ -14,15 +14,17 @@ import { ToolThumbnail } from "@/components/ToolThumbnail";
  */
 export function HomeToolShopGrid() {
   const navigate = useNavigate();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
   const [buyPlan, setBuyPlan] = useState<ShopPlan | null>(null);
   const [preselected, setPreselected] = useState<string[]>([]);
   const [infoTool, setInfoTool] = useState<ShopTool | null>(null);
 
   // If we land here with #tool-catalog (e.g. from browser Back after Try),
-  // scroll the catalog into view automatically.
+  // expand the section and scroll the catalog into view automatically.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.location.hash === "#tool-catalog") {
+      detailsRef.current?.setAttribute("open", "");
       // wait a frame for layout
       requestAnimationFrame(() => {
         document.getElementById("tool-catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -53,7 +55,18 @@ export function HomeToolShopGrid() {
 
   return (
     <section className="mt-8 max-w-5xl mx-auto animate-fade-in">
-      <div className="rounded-sm border border-amber/40 bg-card/70 backdrop-blur-sm p-5 sm:p-7">
+      <details ref={detailsRef} className="group rounded-sm border border-amber/40 bg-card/70 backdrop-blur-sm overflow-hidden">
+        <summary className="cursor-pointer list-none p-5 sm:p-7 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">Tech solutions</div>
+            <div className="font-forensic text-lg sm:text-xl font-bold leading-tight truncate">
+              Aetheris Tech Solutions
+            </div>
+          </div>
+          <span className="font-mono text-xs text-amber shrink-0 group-open:hidden">+ expand</span>
+          <span className="font-mono text-xs text-amber shrink-0 hidden group-open:inline">− collapse</span>
+        </summary>
+        <div className="px-5 sm:px-7 pb-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
           <div>
@@ -205,7 +218,8 @@ export function HomeToolShopGrid() {
             Already have a code? Redeem it →
           </Link>
         </div>
-      </div>
+        </div>
+      </details>
 
       {/* Tool info dialog (expanded center-screen view) */}
       <Dialog open={!!infoTool} onOpenChange={(o) => !o && setInfoTool(null)}>
