@@ -258,22 +258,8 @@ serve(async (req) => {
     if (action === "fetch_article") {
       const url = String(body.url || "");
       if (!url || !/^https?:\/\//i.test(url)) return json(400, { error: "Invalid url" });
-      try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 10000);
-        const res = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0; +https://aetheris.technology)",
-            "Accept": "text/html,application/xhtml+xml",
-          },
-          signal: ctrl.signal,
-          redirect: "follow",
-        });
-        clearTimeout(t);
-        if (!res.ok) return json(200, { ok: false, status: res.status, content: null });
-        const html = await res.text();
 
-        // Try to find <article> or main content; fall back to <body>
+      const parseHtmlBlocks = (html: string): { blocks: { tag: string; text: string }[]; hero: string | null; siteName: string | null } => {
         let region = "";
         const articleMatch = html.match(/<article[\s\S]*?<\/article>/i);
         if (articleMatch) region = articleMatch[0];
@@ -281,9 +267,7 @@ serve(async (req) => {
           const mainMatch = html.match(/<main[\s\S]*?<\/main>/i);
           region = mainMatch ? mainMatch[0] : html;
         }
-
-        // Pull paragraphs and headings
-        const blocks: string[] = [];
+        const blocks: { tag: string; text: string }[] = [];
         const regex = /<(p|h[1-3]|li|blockquote)\b[^>]*>([\s\S]*?)<\/\1>/gi;
         let m: RegExpExecArray | null;
         while ((m = regex.exec(region)) !== null) {
@@ -293,29 +277,111 @@ serve(async (req) => {
             .replace(/<script[\s\S]*?<\/script>/gi, "")
             .replace(/<[^>]+>/g, " ")
             .replace(/&nbsp;/g, " ")
-            .replace(/&amp;/g, "&")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'")
-            .replace(/&apos;/g, "'")
+            .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'")
             .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
-            .replace(/\s+/g, " ")
-            .trim();
-          if (inner.length < 20 && tag === "p") continue;
+            .replace(/\s+/g, " ").trim();
           if (inner.length === 0) continue;
-          blocks.push(JSON.stringify({ tag, text: inner }));
+          if (inner.length < 20 && tag === "p") continue;
+          blocks.push({ tag, text: inner });
         }
-        // Cap and parse
-        const parsed = blocks.slice(0, 80).map(b => JSON.parse(b));
-        // Hero image
         const ogImg = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
         const hero = ogImg ? ogImg[1] : null;
         const siteName = (html.match(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)["']/i) || [])[1] || null;
-        return json(200, { ok: true, blocks: parsed, hero_image: hero, site_name: siteName });
+        return { blocks: blocks.slice(0, 120), hero, siteName };
+      };
+
+      const markdownToBlocks = (md: string): { tag: string; text: string }[] => {
+        const out: { tag: string; text: string }[] = [];
+        const lines = md.split(/\r?\n/);
+        let buf: string[] = [];
+        const flush = () => {
+          if (!buf.length) return;
+          const text = buf.join(" ").replace(/\s+/g, " ").trim();
+          if (text.length >= 20) out.push({ tag: "p", text });
+          buf = [];
+        };
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line) { flush(); continue; }
+          const h = line.match(/^(#{1,3})\s+(.+)$/);
+          if (h) { flush(); out.push({ tag: `h${h[1].length}`, text: h[2].replace(/[*_`]/g, "").trim() }); continue; }
+          if (/^[-*]\s+/.test(line)) { flush(); out.push({ tag: "li", text: line.replace(/^[-*]\s+/, "").replace(/[*_`]/g, "").trim() }); continue; }
+          if (/^>\s?/.test(line)) { flush(); out.push({ tag: "blockquote", text: line.replace(/^>\s?/, "").trim() }); continue; }
+          if (/^!?\[.*\]\(.*\)$/.test(line)) continue;
+          buf.push(line.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*_`]/g, ""));
+        }
+        flush();
+        return out.slice(0, 120);
+      };
+
+      let blocks: { tag: string; text: string }[] = [];
+      let hero: string | null = null;
+      let siteName: string | null = null;
+      let directStatus: number | null = null;
+
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; AetherisNewsBot/1.0; +https://aetheris.technology)",
+            "Accept": "text/html,application/xhtml+xml",
+          },
+          signal: ctrl.signal, redirect: "follow",
+        });
+        clearTimeout(t);
+        directStatus = res.status;
+        if (res.ok) {
+          const html = await res.text();
+          const parsed = parseHtmlBlocks(html);
+          blocks = parsed.blocks;
+          hero = parsed.hero;
+          siteName = parsed.siteName;
+        } else {
+          console.warn("fetch_article direct non-ok", res.status, url);
+        }
       } catch (e) {
-        return json(200, { ok: false, error: (e as Error).message });
+        console.warn("fetch_article direct fail", (e as Error).message, url);
       }
+
+      // Firecrawl fallback for blocked / paywalled / JS-rendered pages
+      if (blocks.length < 5) {
+        const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+        if (FIRECRAWL_API_KEY) {
+          try {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 20000);
+            const fr = await fetch("https://api.firecrawl.dev/v2/scrape", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true, waitFor: 1500 }),
+              signal: ctrl.signal,
+            });
+            clearTimeout(t);
+            const fj = await fr.json().catch(() => ({}));
+            const md: string = fj?.data?.markdown || fj?.markdown || "";
+            const meta = fj?.data?.metadata || fj?.metadata || {};
+            if (md) {
+              const fcBlocks = markdownToBlocks(md);
+              if (fcBlocks.length > blocks.length) blocks = fcBlocks;
+              if (!hero && meta.ogImage) hero = meta.ogImage;
+              if (!siteName && meta.ogSiteName) siteName = meta.ogSiteName;
+            } else {
+              console.warn("firecrawl empty", fr.status, JSON.stringify(fj).slice(0, 200));
+            }
+          } catch (e) {
+            console.warn("firecrawl fail", (e as Error).message);
+          }
+        } else {
+          console.warn("FIRECRAWL_API_KEY missing — cannot fallback for", url);
+        }
+      }
+
+      if (blocks.length === 0) {
+        return json(200, { ok: false, status: directStatus, content: null });
+      }
+      return json(200, { ok: true, blocks, hero_image: hero, site_name: siteName });
     }
 
     if (action === "aetheris_take") {
