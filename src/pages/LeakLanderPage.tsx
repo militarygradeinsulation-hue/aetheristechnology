@@ -225,62 +225,30 @@ const LeakLanderPage: React.FC = () => {
             </Link>
           </section>
 
-          {/* ENGAGEMENT LADDER — visible three-tier tile (not buried in details) */}
+          {/* ENGAGEMENT LADDER — one-line teaser; full ladder + price explainers live on /diagnostic */}
           <section
             className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "195ms", animationFillMode: "both" }}
-            aria-label="Aetheris engagement ladder"
+            aria-label="Engagement ladder teaser"
           >
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <span className="h-px w-8 bg-amber/50" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat</span>
-              <span className="h-px w-8 bg-amber/50" />
-            </div>
-            <div className="grid md:grid-cols-3 gap-2 sm:gap-3">
-              {[
-                {
-                  tier: "01",
-                  name: "Leak Audit",
-                  price: "$2,500",
-                  sub: "Named leaks + dollar exposure",
-                  note: "Fastest way in.",
-                },
-                {
-                  tier: "02",
-                  name: "21-Day Revenue Diagnostic",
-                  price: "$18,500",
-                  sub: "Full forensic dig",
-                  note: "Credited 1:1 to Active Case.",
-                  featured: true,
-                },
-                {
-                  tier: "03",
-                  name: "Active Case",
-                  price: "$15,000/mo",
-                  sub: "Operator-led implementation",
-                  note: "3-month minimum · Diagnostic clients.",
-                },
-              ].map((t) => (
-                <div
-                  key={t.tier}
-                  className={`relative rounded-sm border ${t.featured ? "border-amber/70 bg-amber/[0.06] shadow-[0_0_30px_-15px_hsl(var(--amber)/0.6)]" : "border-amber/25 bg-card/60"} p-4`}
-                >
-                  {t.featured && (
-                    <span className="absolute -top-2 right-3 font-mono text-[9px] uppercase tracking-[0.28em] bg-amber text-background px-1.5 py-0.5 rounded-sm">
-                      Most named
-                    </span>
-                  )}
-                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80">Tier {t.tier}</div>
-                  <div className="mt-1 font-forensic text-lg font-bold leading-tight">{t.name}</div>
-                  <div className="mt-1 font-forensic text-2xl font-bold text-amber leading-none">{t.price}</div>
-                  <div className="mt-1.5 text-xs text-foreground/80">{t.sub}</div>
-                  <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-foreground/60">{t.note}</div>
+            <Link
+              to="/diagnostic"
+              className="group block rounded-sm border border-amber/30 bg-card/60 hover:bg-amber/[0.06] hover:border-amber/60 transition p-3 sm:p-4"
+            >
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat</div>
+                  <div className="mt-1 text-sm sm:text-base text-foreground/85">
+                    <span className="text-amber font-semibold">$2,500</span> Leak Audit →{" "}
+                    <span className="text-amber font-semibold">$18,500</span> 21-Day Diagnostic →{" "}
+                    <span className="text-amber font-semibold">$15,000/mo</span> Active Case
+                  </div>
                 </div>
-              ))}
-            </div>
-            <p className="mt-3 text-center text-[11px] text-foreground/60 italic">
-              If we can't name a leak worth more than our fee, you pay nothing. Written guarantee.
-            </p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-amber inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  See why each price <ArrowRight className="w-3 h-3" />
+                </span>
+              </div>
+            </Link>
           </section>
 
           {/* AETHERIS VS OTHERS — visible competitive strip */}
