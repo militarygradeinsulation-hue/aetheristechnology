@@ -4,6 +4,7 @@ import { SHOP_TOOLS, SHOP_PRICES, type ShopTool, type ShopPlan } from "@/lib/too
 import { ArrowRight, ShoppingCart, Sparkles, KeyRound, Rocket, Zap, X, Play } from "lucide-react";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ToolThumbnail } from "@/components/ToolThumbnail";
 
 /**
  * Public grid of every Leak Ecosystem tool. Clicking a tile expands a
