@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -341,7 +342,7 @@ export const ChaosMindMap: React.FC = () => {
                 <div className="flex items-center gap-2 mb-1">
                   {React.createElement(isFixed ? active.fixedIcon : active.icon, { className: 'w-5 h-5 text-amber' })}
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                    {active.category ? 'Leak signal' : isFixed ? 'Source closed' : 'Leak signal'}
+                    {isFixed ? 'Source closed' : 'Leak signal'}
                   </div>
                 </div>
                 <DialogTitle className="font-forensic text-2xl">
