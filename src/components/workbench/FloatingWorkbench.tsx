@@ -316,7 +316,9 @@ export const FloatingWorkbench: React.FC = () => {
             )}
 
 
+            {!restricted && (
             <div className="flex items-center gap-2 flex-wrap pt-2">
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" className="h-8 bg-amber text-background hover:bg-amber/90">
