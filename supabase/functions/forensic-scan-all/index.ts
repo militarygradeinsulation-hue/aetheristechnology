@@ -258,27 +258,31 @@ const CHAPTER_SHAPE = `{
   "evidence": [{ "label": "<short>", "value": "<datum>" }]
 }`;
 
-async function synthesizeChapterBatch(
-  batch: typeof CHAPTERS,
+async function synthesizeOneChapter(
+  chapter: typeof CHAPTERS[number],
   findingsStr: string,
   target: string,
   company: string,
 ) {
-  const list = batch.map((c) => `${c.no}. ${c.title} [slug:${c.slug}]`).join("\n");
-  const prompt = `Write these forensic report chapters for **${company || target}** (${target}).
+  const name = company || target;
+  const prompt = `Write ONE chapter of a Chaos Theory Forensics report for **${name}** (${target}).
 
-RAW FINDINGS (use only what is here, do not fabricate):
+RAW FINDINGS (use only what is here — quote real numbers, real copy strings, real errors. Do NOT fabricate. If a tool returned an error, say so directly and pivot to what the other tools DID show):
 ${findingsStr}
 
-Chapters to write (in order):
-${list}
+CHAPTER TO WRITE:
+${chapter.no}. ${chapter.title}  [slug: ${chapter.slug}]
 
-For EACH chapter return an object shaped exactly:
-${CHAPTER_SHAPE}
+Requirements:
+- Every section must be SPECIFIC to this chapter's topic. Do not reuse generic "leaks are interconnected" prose across chapters.
+- "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
+- "what_its_costing": give a USD range grounded in the specific leak type for this chapter, not a template.
+- "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
+- "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
 
-Respond ONLY as JSON: { "chapters": [ ...${batch.length} chapter objects ] }`;
-  const out = await aiJson(prompt, 6000, 40_000);
-  return Array.isArray(out.chapters) ? out.chapters : [];
+Return JSON shaped EXACTLY:
+${CHAPTER_SHAPE}`;
+  return await aiJson(prompt, 2200, 55_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -289,27 +293,38 @@ ${findingsStr}
 
 Return JSON:
 {
-  "executive_summary": "<4-6 paragraphs, markdown, operator voice>",
-  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one line>" } ]  // up to 10, sorted by dollars_high desc
+  "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
+  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 30_000);
+  return await aiJson(prompt, 3500, 45_000);
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
   const findingsStr = JSON.stringify(findings).slice(0, 28_000);
-  // Split 14 chapters into 3 parallel batches for speed.
-  const batches = [CHAPTERS.slice(0, 5), CHAPTERS.slice(5, 10), CHAPTERS.slice(10, 14)];
-  const [summary, ...chapterBatches] = await Promise.all([
+  const fb = fallbackReport(findings, target, company);
+  // Run summary + 14 per-chapter calls in parallel so one failure doesn't poison the whole report.
+  const [summaryResult, ...chapterResults] = await Promise.allSettled([
     synthesizeSummary(findingsStr, target, company),
-    ...batches.map((b) => synthesizeChapterBatch(b, findingsStr, target, company)),
+    ...CHAPTERS.map((c) => synthesizeOneChapter(c, findingsStr, target, company)),
   ]);
-  const chapters = chapterBatches.flat();
+
+  const chapters = CHAPTERS.map((c, i) => {
+    const r = chapterResults[i];
+    if (r.status === "fulfilled" && r.value && (r.value.what_we_found || r.value.verdict)) {
+      return { no: c.no, slug: c.slug, title: c.title, ...r.value };
+    }
+    console.error(`chapter ${c.slug} synth failed:`, r.status === "rejected" ? r.reason : "empty result");
+    return fb.chapters.find((x) => x.slug === c.slug);
+  });
+
+  const summary = summaryResult.status === "fulfilled" ? summaryResult.value : {};
   return {
-    executive_summary: summary.executive_summary || "",
-    top_leaks: Array.isArray(summary.top_leaks) ? summary.top_leaks : [],
+    executive_summary: summary.executive_summary || fb.executive_summary,
+    top_leaks: Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks,
     chapters,
   };
 }
+
 
 // ──────────────────────────── background worker ─────────────────────────────
 async function runScan(id: string, url: string, company: string, accountId: string | null) {
@@ -338,8 +353,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     })();
 
     const websiteTask = (async () => {
-      findings.scan_website = await invokeFn("scan-website", { url, company }, 24_000);
-      await stage("scan_website", "done", { cap_seconds: 24 });
+      findings.scan_website = await invokeFn("scan-website", { url, company }, 55_000);
+      await stage("scan_website", "done", { cap_seconds: 55 });
     })();
 
     const frictionTask = (async () => {
@@ -349,18 +364,19 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           desiredTone: ["direct", "credible", "trustworthy"],
           industry: company || "business services",
           targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 20_000),
+        }, 45_000),
         invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 20_000),
+        }, 45_000),
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 20 });
+      await stage("friction", "done", { cap_seconds: 45 });
     })();
+
 
     await Promise.all([siteTask, websiteTask, frictionTask]);
     await stageQueue;
@@ -373,7 +389,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("crm", "skipped", "no account_id");
     }
 
-    await stage("synth", "running", { cap_seconds: 40, mode: "parallel-batches" });
+    await stage("synth", "running", { cap_seconds: 55, mode: "per-chapter-parallel" });
     let report;
     try {
       report = await synthesizeReport(findings, url, company);
