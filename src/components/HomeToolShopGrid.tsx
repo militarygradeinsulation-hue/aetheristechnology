@@ -14,15 +14,17 @@ import { ToolThumbnail } from "@/components/ToolThumbnail";
  */
 export function HomeToolShopGrid() {
   const navigate = useNavigate();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
   const [buyPlan, setBuyPlan] = useState<ShopPlan | null>(null);
   const [preselected, setPreselected] = useState<string[]>([]);
   const [infoTool, setInfoTool] = useState<ShopTool | null>(null);
 
   // If we land here with #tool-catalog (e.g. from browser Back after Try),
-  // scroll the catalog into view automatically.
+  // expand the section and scroll the catalog into view automatically.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.location.hash === "#tool-catalog") {
+      detailsRef.current?.setAttribute("open", "");
       // wait a frame for layout
       requestAnimationFrame(() => {
         document.getElementById("tool-catalog")?.scrollIntoView({ behavior: "smooth", block: "start" });
