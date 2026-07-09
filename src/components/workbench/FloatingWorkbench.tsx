@@ -12,11 +12,25 @@ import { Wrench, Plus, Save, Trash2, X, HelpCircle, GripVertical, ChevronDown, E
 import { wb, type WidgetEntry, type WorkbenchLayout } from "@/lib/workbench";
 import { TOOL_REGISTRY, type ToolGroup } from "./toolRegistry";
 import { WorkbenchWidget } from "./WorkbenchWidget";
-import { hasValidPortalSession } from "@/lib/portalAuth";
+import { hasValidPortalSession, getPortalProfile } from "@/lib/portalAuth";
 import { hasValidAdminToken } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 import { PinnableFloater } from "@/components/ui/PinnableFloater";
 import { useActiveLead, clearActiveLead } from "@/lib/activeLead";
+
+// Reps see ONLY the Golden Report. Admin (Joseph), Dean (482917), and
+// Braden (963169) keep the full workbench. Everyone else is locked to
+// forensic-scan-all so their demo portal stays front-and-center on the
+// one tool that matters.
+const GOLDEN_ONLY_TOOL_ID = "forensic-scan-all";
+const FULL_ACCESS_REP_CODES = new Set(["482917", "963169"]);
+function isRepRestrictedToGolden(): boolean {
+  if (hasValidAdminToken()) return false;
+  const p = getPortalProfile();
+  if (!p) return false;
+  if (FULL_ACCESS_REP_CODES.has(p.code)) return false;
+  return true;
+}
 
 // Widths applied at ALL viewports (no sm: prefix) so mobile users can
 // resize too. Sheet base has w-3/4 + sm:max-w-sm — we override both via
@@ -33,6 +47,7 @@ export const FloatingWorkbench: React.FC = () => {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [restricted, setRestricted] = useState(false);
   const [open, setOpen] = useState(false);
   const [stack, setStack] = useState<WidgetEntry[]>([]);
   const [layouts, setLayouts] = useState<WorkbenchLayout[]>([]);
@@ -62,6 +77,7 @@ export const FloatingWorkbench: React.FC = () => {
     const check = () => {
       const admin = hasValidAdminToken();
       setIsAdmin(admin);
+      setRestricted(isRepRestrictedToGolden());
       setVisible(isBackendRoute() && (hasValidPortalSession() || admin));
     };
     check();
@@ -83,30 +99,46 @@ export const FloatingWorkbench: React.FC = () => {
   // so the write effects below don't clobber saved values with initial defaults.
   useEffect(() => {
     if (!visible) return;
+    if (restricted) {
+      // Restricted reps: only Golden Report, always pinned, panel open.
+      const goldenStack: WidgetEntry[] = [{ toolId: GOLDEN_ONLY_TOOL_ID, collapsed: false, size: "lg" }];
+      setStack(goldenStack);
+      setLayouts([]);
+      setActive("default");
+      setWidth("lg");
+      setOpen(true);
+      hydrated.current = true;
+      return;
+    }
     setStack(wb.getStack());
     setLayouts(wb.getLayouts());
     setActive(wb.getActive());
     setWidth(wb.getWidth());
     setOpen(wb.getOpen());
     hydrated.current = true;
-  }, [visible]);
+  }, [visible, restricted]);
 
-  useEffect(() => { if (hydrated.current) wb.setStack(stack); }, [stack]);
-  useEffect(() => { if (hydrated.current) wb.setLayouts(layouts); }, [layouts]);
-  useEffect(() => { if (hydrated.current) wb.setActive(active); }, [active]);
-  useEffect(() => { if (hydrated.current) wb.setWidth(width); }, [width]);
-  useEffect(() => { if (hydrated.current) wb.setOpen(open); }, [open]);
+
+  useEffect(() => { if (hydrated.current && !restricted) wb.setStack(stack); }, [stack, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setLayouts(layouts); }, [layouts, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setActive(active); }, [active, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setWidth(width); }, [width, restricted]);
+  useEffect(() => { if (hydrated.current && !restricted) wb.setOpen(open); }, [open, restricted]);
 
 
   const grouped = useMemo(() => {
     const g: Record<ToolGroup, typeof TOOL_REGISTRY> = {
       Outreach: [], Diagnostics: [], Content: [], Briefs: [],
     };
-    TOOL_REGISTRY.forEach(t => g[t.group].push(t));
+    const source = restricted
+      ? TOOL_REGISTRY.filter(t => t.id === GOLDEN_ONLY_TOOL_ID)
+      : TOOL_REGISTRY;
+    source.forEach(t => g[t.group].push(t));
     return g;
-  }, []);
+  }, [restricted]);
 
   const persistStack = (next: WidgetEntry[]) => {
+    if (restricted) return; // Reps can't reshape the stack.
     wb.setStack(next);
     if (active !== "default") {
       setLayouts(wb.upsertLayout(active, next));
@@ -115,6 +147,7 @@ export const FloatingWorkbench: React.FC = () => {
   };
 
   const addTool = (toolId: string) => {
+    if (restricted && toolId !== GOLDEN_ONLY_TOOL_ID) return;
     if (stack.some(s => s.toolId === toolId)) {
       toast({ title: "Already in workbench", description: "Scroll to find it." });
       return;
@@ -123,9 +156,11 @@ export const FloatingWorkbench: React.FC = () => {
     persistStack(next);
   };
   const removeAt = (idx: number) => {
+    if (restricted) return; // Golden Report stays pinned.
     const next = stack.filter((_, i) => i !== idx);
     persistStack(next);
   };
+
   const toggleAt = (idx: number) => {
     const next = stack.map((w, i) => i === idx ? { ...w, collapsed: !w.collapsed } : w);
     persistStack(next);
@@ -281,7 +316,9 @@ export const FloatingWorkbench: React.FC = () => {
             )}
 
 
+            {!restricted && (
             <div className="flex items-center gap-2 flex-wrap pt-2">
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" className="h-8 bg-amber text-background hover:bg-amber/90">
@@ -346,6 +383,8 @@ export const FloatingWorkbench: React.FC = () => {
                 )}
               </div>
             </div>
+            )}
+
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
