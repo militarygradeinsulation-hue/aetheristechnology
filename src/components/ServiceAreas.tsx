@@ -171,14 +171,14 @@ export const ServiceAreas: React.FC = () => {
               consultations throughout the Midwest.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/contact">
+              <Link to="/leak-audit">
                 <Button className="bg-primary hover:bg-primary/90 gap-2">
-                  Contact Us <ArrowRight className="w-4 h-4" />
+                  Open Your Case File <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Link to="/services">
+              <Link to="/catalog">
                 <Button variant="outline" className="gap-2">
-                  View Our Services
+                  View Pricing
                 </Button>
               </Link>
             </div>
