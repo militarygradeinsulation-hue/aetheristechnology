@@ -64,10 +64,10 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Revenue Leak Audit for $5M–$25M Businesses | Aetheris — Chaos Theory Forensics"
-          description="Aetheris investigates where growth-stage businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. Named leaks. Dollar impact. Written guarantee."
+          title="Revenue Leak Audit for $5M–$50M Businesses | Aetheris — Chaos Theory Forensics"
+          description="Aetheris investigates where US $5M–$50M businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. 30% average recovery on named leaks. Written guarantee. Indianapolis + nationwide."
           path="/"
-          keywords="revenue leak audit, revenue forensics, chaos theory forensics, forensic diagnostic Indianapolis, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology"
+          keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
         />
 
 
