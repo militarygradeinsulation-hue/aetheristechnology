@@ -47,6 +47,7 @@ export const FloatingWorkbench: React.FC = () => {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [restricted, setRestricted] = useState(false);
   const [open, setOpen] = useState(false);
   const [stack, setStack] = useState<WidgetEntry[]>([]);
   const [layouts, setLayouts] = useState<WorkbenchLayout[]>([]);
