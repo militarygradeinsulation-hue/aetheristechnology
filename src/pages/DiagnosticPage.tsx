@@ -131,6 +131,95 @@ const DiagnosticPage: React.FC = () => {
                 </div>
               </div>
             </section>
+            {/* ENGAGEMENT LADDER — three tiers with per-price explainers */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '140ms', animationFillMode: 'both' }}
+              aria-label="Aetheris engagement ladder"
+            >
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <span className="h-px w-8 bg-amber/50" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat · Why each price</span>
+                <span className="h-px w-8 bg-amber/50" />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-3">
+                {[
+                  {
+                    tier: '01',
+                    name: 'Leak Audit',
+                    price: '$2,500',
+                    sub: 'Named leaks + dollar exposure',
+                    note: 'Fastest way in.',
+                    why: 'Why $2,500',
+                    whyBody:
+                      'One operator, 8–12 focused hours across your CRM export, site, funnels, and follow-up. You get a written leak map with dollar figures — enough to prove the bleed is real without committing to a full engagement. Priced as a rounding error against a leak that typically costs 10–40× the fee every year unfixed.',
+                    scope: ['8–12 operator hours', '5–10 named leaks, $-tagged', 'Written report + 30-min readout', '100% credited to Tier 02 or 03'],
+                  },
+                  {
+                    tier: '02',
+                    name: '21-Day Revenue Diagnostic',
+                    price: '$18,500',
+                    sub: 'Full forensic dig',
+                    note: 'Credited 1:1 to Active Case.',
+                    featured: true,
+                    why: 'Why $18,500',
+                    whyBody:
+                      'Three weeks of operator time running all 9 forensic instruments against live data — CRM, pipeline, site, brand, follow-up, content, AI-readiness. Replaces $82K–$215K worth of separate audits. Every dollar credits 1:1 toward the Active Case, so it costs nothing if you continue.',
+                    scope: ['21 days · 1 operator', 'All 9 instruments run live', '15–30 page report + roadmap', 'Fully credited to Tier 03'],
+                  },
+                  {
+                    tier: '03',
+                    name: 'Active Case',
+                    price: '$15,000/mo',
+                    sub: 'Operator-led implementation',
+                    note: '3-month minimum · Diagnostic clients.',
+                    why: 'Why $15,000/mo',
+                    whyBody:
+                      'Operator-led removal of the leaks named in the Diagnostic — not a retainer, not seat-based software, not activity theatre. Fee is a fraction of a mid-level ops hire ($180K+ fully-loaded) and typically pays for itself in month one from a single recovered deal or plugged CRM bleed.',
+                    scope: ['~40 hrs/mo senior operator', '3-month minimum, no auto-renew', 'Weekly readout + fix log', 'Ends when the leak ends'],
+                  },
+                ].map((t) => (
+                  <div
+                    key={t.tier}
+                    className={`relative rounded-sm border p-5 flex flex-col ${
+                      t.featured
+                        ? 'border-amber/70 bg-amber/[0.06] shadow-[0_0_30px_-15px_hsl(var(--amber)/0.6)]'
+                        : 'border-amber/25 bg-card/60'
+                    }`}
+                  >
+                    {t.featured && (
+                      <span className="absolute -top-2 right-3 font-mono text-[9px] uppercase tracking-[0.28em] bg-amber text-background px-1.5 py-0.5 rounded-sm">
+                        Most named
+                      </span>
+                    )}
+                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80">Tier {t.tier}</div>
+                    <div className="mt-1 font-forensic text-lg font-bold leading-tight">{t.name}</div>
+                    <div className="mt-1 font-forensic text-3xl font-bold text-amber leading-none">{t.price}</div>
+                    <div className="mt-2 text-xs text-foreground/80">{t.sub}</div>
+                    <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-foreground/60">{t.note}</div>
+
+                    <div className="mt-4 pt-4 border-t border-amber/15">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber mb-1.5">{t.why}</div>
+                      <p className="text-xs text-foreground/80 leading-relaxed">{t.whyBody}</p>
+                    </div>
+
+                    <ul className="mt-3 space-y-1 text-[11px] text-foreground/75">
+                      {t.scope.map((s) => (
+                        <li key={s} className="flex gap-1.5">
+                          <Check className="w-3 h-3 text-amber shrink-0 mt-0.5" />
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-4 text-center text-[11px] text-foreground/60 italic">
+                If we can't name a leak worth more than our fee, you pay nothing. Written guarantee.
+              </p>
+            </section>
 
             {/* THEM vs AETHERIS */}
             <section
