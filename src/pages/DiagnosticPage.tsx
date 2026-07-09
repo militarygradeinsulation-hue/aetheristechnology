@@ -242,6 +242,22 @@ const DiagnosticPage: React.FC = () => {
                         </li>
                       ))}
                     </ul>
+
+                    {'tools' in t && Array.isArray((t as any).tools) && (
+                      <div className="mt-4 pt-3 border-t border-amber/15">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber mb-2">
+                          {(t as any).toolsLabel ?? 'Included tools & access'}
+                        </div>
+                        <ul className="space-y-1 text-[11px] text-foreground/80 leading-snug">
+                          {((t as any).tools as string[]).map((item) => (
+                            <li key={item} className="flex gap-1.5">
+                              <span className="text-amber/80 font-mono text-[10px] mt-0.5">▸</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
