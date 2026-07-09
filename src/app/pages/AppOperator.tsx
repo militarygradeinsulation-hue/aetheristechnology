@@ -1,11 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { AppLayout } from "../AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
   Radar, Bot, ScanLine, MessageSquare, Wrench, Sparkles,
   FileText, Zap, AlertTriangle, ArrowUpRight, Loader2, Send, Users,
+  CheckCircle2, XCircle, Clock,
 } from "lucide-react";
+
+// Tools that auto-fire the moment a valid URL lands in the target bar.
+const AUTO_JOBS: { key: string; label: string; fn: string; tab: TabKey }[] = [
+  { key: "scan",       label: "Forensic Leak Scan",   fn: "extension-leak-scan",         tab: "scan" },
+  { key: "golden",     label: "Golden Report",        fn: "forensic-scan-all",           tab: "golden" },
+  { key: "contra",     label: "Brand Contradictions", fn: "generate-brand-contradictions", tab: "contradictions" },
+  { key: "friction",   label: "Friction Audit",       fn: "generate-friction-audit",     tab: "friction" },
+  { key: "contacts",   label: "Contacts",             fn: "extension-contacts",          tab: "contacts" },
+];
+
+type JobStatus = "idle" | "running" | "done" | "error";
+type JobState = { status: JobStatus; data?: unknown; error?: string; startedAt?: number; finishedAt?: number };
 
 type TabKey =
   | "instruments" | "agents" | "scan" | "operator"
@@ -63,6 +76,8 @@ const AppOperator = () => {
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Record<string, JobState>>({});
+  const lastAutoUrl = useRef<string>("");
 
   // Operator chat
   const [chat, setChat] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
@@ -114,6 +129,55 @@ const AppOperator = () => {
     }
   }
 
+  // Auto-fire every scanner in parallel the moment a valid URL is entered.
+  async function runOneAuto(job: typeof AUTO_JOBS[number], url: string) {
+    setJobs((j) => ({ ...j, [job.key]: { status: "running", startedAt: Date.now() } }));
+    try {
+      const { data, error } = await supabase.functions.invoke(job.fn, { body: { url } });
+      if (error) throw error;
+      setJobs((j) => ({
+        ...j,
+        [job.key]: { status: "done", data, startedAt: j[job.key]?.startedAt, finishedAt: Date.now() },
+      }));
+    } catch (e) {
+      setJobs((j) => ({
+        ...j,
+        [job.key]: {
+          status: "error",
+          error: e instanceof Error ? e.message : String(e),
+          startedAt: j[job.key]?.startedAt,
+          finishedAt: Date.now(),
+        },
+      }));
+    }
+  }
+
+  function runAllAuto(rawUrl: string) {
+    const url = normalizeUrl(rawUrl);
+    if (!url || !/^https?:\/\/[^\s.]+\.[^\s]+/i.test(url)) return;
+    if (lastAutoUrl.current === url) return;
+    lastAutoUrl.current = url;
+    // Reset states and fan out in parallel — operator just watches results land.
+    setJobs(Object.fromEntries(AUTO_JOBS.map((j) => [j.key, { status: "running", startedAt: Date.now() } as JobState])));
+    AUTO_JOBS.forEach((j) => { void runOneAuto(j, url); });
+  }
+
+  // Debounce URL input → auto-scan.
+  useEffect(() => {
+    const t = setTimeout(() => runAllAuto(targetUrl), 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetUrl]);
+
+  const runningCount = useMemo(
+    () => Object.values(jobs).filter((j) => j.status === "running").length,
+    [jobs]
+  );
+  const doneCount = useMemo(
+    () => Object.values(jobs).filter((j) => j.status === "done").length,
+    [jobs]
+  );
+
   const urlBar = (
     <div className="forensic-tile rounded-sm border border-amber/30 p-3 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
       <label className="font-case text-[10px] uppercase tracking-widest text-amber shrink-0">
@@ -122,12 +186,60 @@ const AppOperator = () => {
       <input
         value={targetUrl}
         onChange={(e) => setTargetUrl(e.target.value)}
-        placeholder="https://example.com"
+        onKeyDown={(e) => { if (e.key === "Enter") runAllAuto(targetUrl); }}
+        placeholder="https://example.com  — every instrument fires automatically"
         className="flex-1 bg-background/60 border border-border rounded-sm px-3 py-1.5 text-sm font-mono"
       />
       <span className="font-case text-[9px] uppercase tracking-widest text-crimson">
         Case №2026-CT-{new Date().getMonth() + 1}{new Date().getDate()}
       </span>
+    </div>
+  );
+
+  const autoDashboard = Object.keys(jobs).length > 0 && (
+    <div className="forensic-tile rounded-sm border border-amber/30 p-3 mb-5">
+      <div className="flex items-center justify-between mb-2">
+        <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+          Auto-Scan · All Instruments Firing
+        </div>
+        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+          {doneCount}/{AUTO_JOBS.length} complete · {runningCount} running
+        </div>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {AUTO_JOBS.map((j) => {
+          const s = jobs[j.key];
+          const status = s?.status ?? "idle";
+          const elapsed = s?.startedAt ? Math.round(((s.finishedAt ?? Date.now()) - s.startedAt) / 1000) : 0;
+          return (
+            <button
+              key={j.key}
+              onClick={() => { setTab(j.tab); setResult((s?.data as Record<string, unknown>) ?? null); setError(s?.error ?? null); }}
+              className={`text-left rounded-sm border p-2.5 transition-colors ${
+                status === "done" ? "border-amber/50 bg-amber/5 hover:bg-amber/10"
+                : status === "error" ? "border-crimson/50 bg-crimson/5 hover:bg-crimson/10"
+                : status === "running" ? "border-amber/30 bg-background/40"
+                : "border-border bg-background/40"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {status === "running" && <Loader2 className="h-3.5 w-3.5 animate-spin text-amber" />}
+                {status === "done" && <CheckCircle2 className="h-3.5 w-3.5 text-amber" />}
+                {status === "error" && <XCircle className="h-3.5 w-3.5 text-crimson" />}
+                {status === "idle" && <Clock className="h-3.5 w-3.5 text-muted-foreground" />}
+                <div className="font-forensic text-sm font-bold flex-1">{j.label}</div>
+                <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">{elapsed}s</div>
+              </div>
+              <div className="font-case text-[9px] uppercase tracking-widest mt-1 opacity-70">
+                {status === "done" ? "Data ready · click to view"
+                  : status === "error" ? (s?.error?.slice(0, 60) ?? "Failed")
+                  : status === "running" ? "Scanning target…"
+                  : "Queued"}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 
@@ -146,6 +258,7 @@ const AppOperator = () => {
       </div>
 
       {urlBar}
+      {autoDashboard}
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 border-b border-border mb-5">
