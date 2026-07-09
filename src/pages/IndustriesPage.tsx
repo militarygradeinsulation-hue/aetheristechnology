@@ -1098,6 +1098,8 @@ const IndustriesPage: React.FC = () => {
           </div>
         </section>
 
+        <RealCaseStudiesSection />
+
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto text-center forensic-tile rounded-sm p-10 border border-amber/30">
             <div className="font-case text-xs uppercase tracking-widest text-amber mb-3">
