@@ -228,10 +228,10 @@ const RepPortalPage: React.FC = () => {
             {instrumentsFlag.enabled && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-display">Instruments — Free forensic tools</CardTitle>
+                  <CardTitle className="font-display">Golden Report — Your one tool</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <HomeFreeTrialArsenal />
+                  <ForensicScanAllPanel />
                 </CardContent>
               </Card>
             )}
