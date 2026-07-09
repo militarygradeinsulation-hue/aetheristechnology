@@ -1,56 +1,62 @@
-## Goal
+# Reciprocity Engine Rebuild
 
-Give the careers page two clear paths ($40 test OR $100 instant license), make the public "Try tool" output look as polished as the admin/rep portal renderings, and make sure Easy Mode is a first-class buyable tool.
+The uploaded spec is the new source of truth. It replaces the old catalog/bundle model with a single funnel. Below is exactly what changes, in the order the spec's own Build Order calls for.
 
-## 1. Careers page — two paths side by side
+## The new public offer (only these exist for sale)
 
-Edit `src/pages/CareersPage.tsx`:
+| Rung | Price | Product | Split model |
+|---|---|---|---|
+| Free | $0 | Leak Audit (existing) | n/a |
+| Tier 1 | **$3,500 one-time** | **Single-Leak Investigation** (NEW) | Tier 3 percent split — 70/20/10 |
+| Tier 2 | $18,500 one-time | Chaos Diagnostic (rename of "21-Day Revenue Diagnostic") | Flagship fixed: Co $10,500 / Rep $5,000 / Partner $3,000 |
+| Tier 3 | $15,000/mo | Implementation (rename of "Active Case") | Flagship fixed: Co $8,000 / Rep $4,000 / Partner $3,000 |
 
-- Replace the single "Buy the $40 certification test" gate card with a two-column gate:
-  - **Path A — $40 Certification Test** (existing flow → `/careers/test`). Copy: "Prove it, then get placed."
-  - **Path B — $100 Instant License** (new flow → `/careers/license`). Copy: "Skip the test. Get your rep code today. Sell every Aetheris tool at full commission without being an employee."
-- Keep the "You belong here if / Don't waste your time" and reality-check blocks.
-- Update final CTA to show both buttons.
-- Update SEO/hero copy to mention both options.
+Signal / Revenue / Operator Suite bundles and the ~30 legacy à-la-carte items are **removed from public sale** and kept in the portal for back-compat only (marked `legacy: true` — already the pattern).
 
-## 2. New $100 Instant License flow
+The Tool Shop ($40 / $100 / $1,000 lifetime) is what the spec calls the "Evidence Kit" — same products, new positioning, unlocked on the Leak Audit results page.
 
-- Add Stripe price via `payments--create_price`: `careers_instant_license_v1`, one-time, $10000 (cents), USD, on the same product as the test fee.
-- New page `src/pages/CareersLicensePage.tsx` (mirrors `CareersTestPage.tsx` payment shell):
-  - Explains what the license grants: personal rep code, ability to sell every catalog tool + flagships, standard commission (see Core memory split), no test required, no employment relationship (1099 independent).
-  - Embedded Stripe checkout using `create-checkout` with `priceId: 'careers_instant_license_v1'` and `metadata.purpose: 'careers_instant_license'`.
-  - On return (`?session_id=…`): calls new edge function `verify-careers-license` which:
-    1. Confirms Stripe session is paid.
-    2. Inserts a `rep_codes` row (auto-generates a 6-char code, stores `email`, `name`, `active: true`, `source: 'instant_license'`).
-    3. Returns the rep code + portal URL.
-  - Success screen: shows the rep code, one-click copy, "Open your rep portal" button (routes to existing rep portal entry), and a note that a confirmation email is sent.
-- New edge function `supabase/functions/verify-careers-license/index.ts` (verify_jwt=false, CORS, uses `createStripeClient`, inserts into `rep_codes` with service role, sends confirmation email via existing resend-based function pattern used by `verify-careers-test-payment`).
-- Route wiring in `src/App.tsx`: `/careers/license` → `CareersLicensePage`.
+## Build order (matches spec Part 9)
 
-## 3. Portal-grade public tool output
+### Step 1 — Pricing + product data (foundation)
+- `src/lib/repProducts.ts`: rename `21-Day Revenue Diagnostic` → `Chaos Diagnostic`, `Active Case` → `Implementation`. Add `Single-Leak Investigation` @ $3,500 (tier 3, non-legacy). Mark Signal/Revenue/Operator Suite bundles `legacy: true` so they drop out of `PUBLIC_BUNDLES`.
+- `src/components/ServicesPricing.tsx`: delete the outdated "14-Day Diagnostic $2,900" entry; add the three paid rungs with correct copy from Part 3.
+- Fix the `sales_coaching_active case_monthly` priceId typo (space → underscore).
 
-Edit `src/pages/TryToolPage.tsx` so the sandbox output visually matches the admin/rep case-file rendering (currently it's a plain prose block):
+### Step 2 — Rewrite `/catalog` (new pricing page)
+Replace `src/pages/CatalogPage.tsx` + `src/components/PackageTiers.tsx` with the exact structure from spec Part 3:
+- Page title "Every engagement starts with evidence."
+- Tier 0 slim strip: Leak Audit (Free) — CTA "Open Your Case File"
+- Tier 1 card: Single-Leak Investigation $3,500 — CTA "Trace One Leak"
+- Tier 2 dominant gold-border card: Chaos Diagnostic $18,500 — CTA "Request the Full Investigation" — includes the written guarantee paragraph
+- Tier 3 quiet card: Implementation from $15,000/mo — no CTA button (Diagnostic is the door)
+- Closing strip with "Open Your Case File"
+- No em-dashes anywhere.
 
-- Wrap the output in a "case file" shell: crimson `ACTIVE` stamp, mono header showing `// case_id`, tool name, timestamp, and a subtle scanline background — same forensic-tile aesthetic used in `LeakMindMap`.
-- Split rendered markdown into card sections when the AI emits `## Heading` blocks: parse the markdown into H2 sections client-side and render each as its own bordered card with an amber section label, so long outputs read like a structured report instead of a wall of prose.
-- Add a sticky action bar at the bottom of the output: "Buy this tool $40" and "Become a licensed rep $100" (routes to `/careers/license`).
-- Add print-friendly styles (`@media print`) and a "Download as PDF" button using existing `html2pdf`-style pattern already used elsewhere in the repo (reuse whatever the diagnostic PDF export uses; if none, use `window.print()`).
-- No changes to the edge function's prompts — presentation only.
+### Step 3 — Site-wide CTA cleanup (Part 7)
+Grep-and-replace the banned CTAs (`Learn More`, `Get Started`, `Contact Us`, `Book a Demo`, `Sign Up`) on public marketing pages only, replaced with the correct rung CTA for the surface they sit on. Auth/portal buttons keep their labels.
 
-## 4. Easy Mode as a featured tool
+### Step 4 — Leak Audit results page: Evidence Kit unlock (Part 5)
+- Add an "Evidence Kit" section to `LeakAuditResultsPage` (or equivalent) that surfaces the 7 tools (Friction Audit, Brand Contradictions, Follow-Up Plan, Sales Scripts, Question Engine, Content Calendar, Gap Scanner) only after the Leak Audit is completed.
+- Reduce public nav to link to only ONE free tool (the Leak Audit).
 
-- Confirm `easy-mode` stays in `src/lib/tool-shop-catalog.ts` (it already is) and is surfaced on `HomeToolShopGrid` — if not pinned, mark it as a featured card at the top of the grid with copy: "One prompt. Full plan, calendar, assets, and next steps."
-- Ensure `TRY_META['easy-mode']` (already present) and the `try-tool-sandbox` PROMPTS for `easy-mode` return the full structured report (Snapshot → 30-Day Plan → Assets → Next Actions). If the current prompt is thin, extend it to match the depth of `website-scanner`.
-- Add an "Easy Mode" highlight tile on `CareersPage` under Path A/B: "New reps love this — one tool that does everything, easiest to demo and sell."
+### Step 5 — Stripe catalog
+Register `single_leak_investigation_once` at $3,500 via `payments--create_product`. No other Stripe changes; existing prices already match `repProducts.ts`.
 
-## Technical notes
+### Step 6 — Portals sanity check (display + math only, per your earlier answer)
+- Rep portal, admin portal, POS Terminal: verify Single-Leak Investigation appears in rep-sellable list; verify Chaos Diagnostic / Implementation renames don't break lookups. No payout logic changes.
 
-- All money stays USD (`$`) per Core memory currency lock.
-- `rep_codes` insert must include a `GRANT`-safe path via service role in the edge function; do not expose service role client-side.
-- New edge function follows `supabase/config.toml` auto-behavior (verify_jwt=false), CORS shared headers, Zod input validation.
-- No changes to admin/rep portals themselves — instant-license reps get a normal rep code and use the existing rep portal.
+## Deferred (explicitly NOT in this pass)
 
-## Out of scope
+- Preliminary Findings PDF artifact (Part 4) — will build after pricing/funnel lands.
+- Results page dossier layout with case #, exhibits, redactions (Part 5 visual) — separate build.
+- HubSpot/ADAS follow-up sequence + T+48 Loom queue (Part 6) — needs its own scope.
+- Legal review of guarantee wording — flagged in copy as `TODO(matt)` until you confirm.
+- Case-numbering system (starting from real count) — need your current true case count before wiring.
 
-- Changing commission structure for licensed reps (uses existing catalog split).
-- Building a full rep onboarding wizard behind the license — they get code + portal access, everything else is the existing flow.
+## Confirm before I build
+
+1. **Rename OK?** "21-Day Revenue Diagnostic" → "Chaos Diagnostic" and "Active Case" → "Implementation" across UI and portals. Product IDs stay the same (`fourteen_day_diagnostic_once` etc. are already legacy names in Stripe — keep IDs, rename display).
+2. **Bundles killed publicly?** Signal / Revenue / Operator Suite disappear from `/catalog` and any homepage grids.
+3. **Guarantee copy** goes live with `TODO(matt)` note next to it, or hold the Diagnostic card until Matt signs off?
+
+Reply "go" (or with any edits) and I'll ship Steps 1–3 first, then loop back for Steps 4–6.
