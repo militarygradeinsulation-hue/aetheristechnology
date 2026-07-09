@@ -148,12 +148,12 @@ export function HomeToolShopGrid() {
                 <span className="text-muted-foreground">application fee</span>
               </div>
               <p className="text-xs text-foreground/80 mt-3 leading-snug">
-                Sell every tool under your own rep code. Commissions on every sale. $40 application confirms you're a fit, $100 license activates you.
+                Resell every tool under your own rep code. Keep <span className="text-amber font-bold">40%</span> on every sale — one $2,500 diagnostic pays back your license 10x. No quotas, no manager, no employment contract.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-crimson/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson">
               <Rocket className="w-3 h-3" />
-              <span>Become an operator</span>
+              <span className="font-bold">Activate my rep code →</span>
               <ArrowRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
