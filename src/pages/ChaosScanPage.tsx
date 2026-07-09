@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { PublicChaosScan } from "@/components/PublicChaosScan";
+import { PublicToolLock } from "@/components/PublicToolLock";
 
 const ChaosScanPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
