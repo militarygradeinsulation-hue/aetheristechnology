@@ -1,11 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { AppLayout } from "../AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
   Radar, Bot, ScanLine, MessageSquare, Wrench, Sparkles,
   FileText, Zap, AlertTriangle, ArrowUpRight, Loader2, Send, Users,
+  CheckCircle2, XCircle, Clock,
 } from "lucide-react";
+
+// Tools that auto-fire the moment a valid URL lands in the target bar.
+const AUTO_JOBS: { key: string; label: string; fn: string; tab: TabKey }[] = [
+  { key: "scan",       label: "Forensic Leak Scan",   fn: "extension-leak-scan",         tab: "scan" },
+  { key: "golden",     label: "Golden Report",        fn: "forensic-scan-all",           tab: "golden" },
+  { key: "contra",     label: "Brand Contradictions", fn: "generate-brand-contradictions", tab: "contradictions" },
+  { key: "friction",   label: "Friction Audit",       fn: "generate-friction-audit",     tab: "friction" },
+  { key: "contacts",   label: "Contacts",             fn: "extension-contacts",          tab: "contacts" },
+];
+
+type JobStatus = "idle" | "running" | "done" | "error";
+type JobState = { status: JobStatus; data?: unknown; error?: string; startedAt?: number; finishedAt?: number };
 
 type TabKey =
   | "instruments" | "agents" | "scan" | "operator"
