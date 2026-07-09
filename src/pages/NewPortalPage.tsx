@@ -326,22 +326,24 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
-          {/* PLAYBOOK */}
-          <TabsContent value="playbook" className="mt-8">
-            <ToolCard
-              eyebrow="// Scripts //"
-              title="Portal Playbook"
-              summary="Ready-to-send scripts, openers and objection handlers pulled from what's actually closing right now."
-              howTo={[
-                'Pick the situation (cold outreach, follow-up, price objection…).',
-                'Copy the block, tweak one line to match the lead, send.',
-                'Star the ones that convert — those get surfaced first next time.',
-              ]}
-              defaultOpen
-            >
-              <PortalPlaybook />
-            </ToolCard>
-          </TabsContent>
+          {/* PLAYBOOK — gated */}
+          {showAdvanced && (
+            <TabsContent value="playbook" className="mt-8">
+              <ToolCard
+                eyebrow="// Scripts //"
+                title="Portal Playbook"
+                summary="Ready-to-send scripts, openers and objection handlers pulled from what's actually closing right now."
+                howTo={[
+                  'Pick the situation (cold outreach, follow-up, price objection…).',
+                  'Copy the block, tweak one line to match the lead, send.',
+                  'Star the ones that convert — those get surfaced first next time.',
+                ]}
+                defaultOpen
+              >
+                <PortalPlaybook />
+              </ToolCard>
+            </TabsContent>
+          )}
 
           {/* COACH */}
           <TabsContent value="coach" className="mt-8">
