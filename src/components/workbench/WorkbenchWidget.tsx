@@ -28,7 +28,7 @@ const sizeLabel: Record<WidgetSize, string> = { sm: "S", md: "M", lg: "L", xl: "
 
 export const WorkbenchWidget: React.FC<Props> = ({
   toolId, collapsed, size, onToggle, onRemove, onCycleSize,
-  onDragStart, onDragOver, onDrop,
+  onDragStart, onDragOver, onDrop, locked = false,
 }) => {
   const tool = TOOL_BY_ID[toolId];
   if (!tool) return null;
