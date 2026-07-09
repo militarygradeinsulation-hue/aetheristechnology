@@ -92,31 +92,37 @@ const Home = () => {
           <section id="the-leak-audit" className="px-4 pb-10 scroll-mt-24">
             <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
-                Active case
+                Active case · limited slots this month
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                 The offer
               </div>
-              <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-6">
-                The Leak Audit — $2,500 flat.
+              <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-3">
+                The Leak Audit — <span className="text-crimson">$2,500 flat.</span>
               </h2>
+              <p className="text-sm md:text-base text-foreground/80 mb-6 max-w-2xl">
+                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. We find every one in 14 days — written report, ROI on every fix, applied 100% toward implementation. <span className="text-amber font-semibold">If the leaks we find don't exceed $2,500, you don't pay.</span>
+              </p>
 
               <ChaosMindMap />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/leak-audit" className="w-full sm:w-auto">
-                  <Button className="bg-amber text-background hover:bg-amber/90 font-semibold w-full">
-                    Start the Leak Audit <ArrowRight className="w-4 h-4 ml-1" />
+                  <Button className="bg-amber text-background hover:bg-amber/90 font-bold w-full shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                    Book my Leak Audit — $2,500 <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
                 <button
                   type="button"
                   onClick={() => document.getElementById('public-leak-scan')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10 font-semibold"
                 >
-                  <Search className="w-4 h-4" /> Free 60-second pre-scan
+                  <Search className="w-4 h-4" /> Free 60-second pre-scan first
                 </button>
               </div>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Guaranteed ROI · Applied to implementation · Payment plan available
+              </p>
             </div>
           </section>
 
@@ -134,11 +140,10 @@ const Home = () => {
                 <Grid3x3 className="w-3 h-3" /> The full toolset
               </div>
               <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
-                Want every forensic tool we use?
+                Want every forensic tool we use? <span className="text-amber">Free.</span>
               </h3>
               <p className="text-sm md:text-base text-foreground/80 mb-5">
-                Drop your email and get instant access to the entire Aetheris ecosystem — scanners, diagnostics,
-                report generators, and closer kits. No password, no rep code required.
+                One email unlocks the whole vault — scanners, diagnostics, report generators, closer kits, the same weapons we bill $2,500/session with. <span className="text-amber font-semibold">No card. No password. No spam.</span> You'll be inside in 3 seconds.
               </p>
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
                 <Input
@@ -152,17 +157,17 @@ const Home = () => {
                 <Button
                   type="submit"
                   disabled={unlocking || !email}
-                  className="bg-amber text-background hover:bg-amber/90 font-semibold whitespace-nowrap"
+                  className="bg-amber text-background hover:bg-amber/90 font-bold whitespace-nowrap shadow-[0_0_20px_rgba(217,169,58,0.35)]"
                 >
                   {unlocking ? (
                     <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Unlocking</>
                   ) : (
-                    <>Unlock the toolset <ArrowRight className="w-4 h-4 ml-1" /></>
+                    <>Give me the whole vault <ArrowRight className="w-4 h-4 ml-1" /></>
                   )}
                 </Button>
               </form>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
-                One email · full access · no spam
+                Instant access · Every tool · Unsubscribe anytime
               </p>
             </div>
           </section>

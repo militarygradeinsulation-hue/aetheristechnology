@@ -54,10 +54,13 @@ const ServicesPage: React.FC = () => {
                   ))}
                 </ul>
                 <Link to="/diagnostic" className="mt-6">
-                  <Button className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                    See the Diagnostic <ArrowRight className="w-4 h-4 ml-2" />
+                  <Button className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
+                    Book my Diagnostic — $18,500 <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
+                <p className="text-[10px] text-center text-muted-foreground mt-2 font-mono uppercase tracking-widest">
+                  Findings guaranteed to exceed 3x the fee · or refunded
+                </p>
               </div>
 
               <div className="forensic-tile rounded-sm border border-border/60 p-7 flex flex-col">
@@ -77,8 +80,8 @@ const ServicesPage: React.FC = () => {
                   ))}
                 </ul>
                 <Link to="/implementation" className="mt-6">
-                  <Button variant="outline" className="w-full glass-hover border-amber/40 text-amber">
-                    How the case works <ArrowRight className="w-4 h-4 ml-2" />
+                  <Button variant="outline" className="w-full glass-hover border-amber/40 text-amber font-bold">
+                    Seal the leaks — see the case <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -151,8 +154,8 @@ const ServicesPage: React.FC = () => {
               </div>
 
               <div className="mt-6 text-center">
-                <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                  Send us a referral <ArrowRight className="w-4 h-4 ml-2" />
+                <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
+                  Send us a warm intro — get $500 the day they show up <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
                   Reps and partners on the internal program follow the fixed-dollar split in the rep portal, this public bonus is for outside referrers.

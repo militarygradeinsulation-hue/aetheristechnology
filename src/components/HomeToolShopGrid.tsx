@@ -57,13 +57,13 @@ export function HomeToolShopGrid() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">
-              The Chaos Ecosystem · Two ways in
+              The Chaos Ecosystem · Stop guessing. Start closing.
             </div>
             <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight">
-              Try every tool free. Own one, or resell them all.
+              Every tool. Free to try. <span className="text-crimson">$40</span> to own for life.
             </h2>
             <p className="text-sm text-foreground/70 mt-1">
-              3 free runs on any tool. Then buy the tool, grab a bundle, or license the whole ecosystem — all right here.
+              3 free runs — nothing to sign, nothing to install. Own one tool for less than a steak dinner, or license the entire ecosystem and undercut the $2k/mo agency doing worse work. 7-day money-back on every purchase.
             </p>
           </div>
           <div className="flex flex-col sm:items-end gap-1.5">
@@ -113,12 +113,12 @@ export function HomeToolShopGrid() {
                   <div className="text-[11px] text-muted-foreground uppercase tracking-widest font-mono">one-time · per tool</div>
                 </div>
                 <p className="text-xs text-foreground/80 mt-3 leading-snug">
-                  Own any single tool for life. Unlimited runs. Persistent memory tied to your account.
+                  Own it for life. Unlimited runs. Your data, your memory, your account. Replaces a $200/mo SaaS with one flat $40 — pays for itself the first time you use it.
                 </p>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-amber/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-              <span>Pick a tool below</span>
+              <span className="font-bold">Pick a tool ↓ Own it in 60 seconds</span>
               <ArrowRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -148,12 +148,12 @@ export function HomeToolShopGrid() {
                 <span className="text-muted-foreground">application fee</span>
               </div>
               <p className="text-xs text-foreground/80 mt-3 leading-snug">
-                Sell every tool under your own rep code. Commissions on every sale. $40 application confirms you're a fit, $100 license activates you.
+                Resell every tool under your own rep code. Keep <span className="text-amber font-bold">40%</span> on every sale — one $2,500 diagnostic pays back your license 10x. No quotas, no manager, no employment contract.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-crimson/20 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson">
               <Rocket className="w-3 h-3" />
-              <span>Become an operator</span>
+              <span className="font-bold">Activate my rep code →</span>
               <ArrowRight className="w-3 h-3 ml-auto group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
@@ -194,8 +194,8 @@ export function HomeToolShopGrid() {
                   {t.tagline}
                 </p>
               </div>
-              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber/70 group-hover:text-amber flex items-center gap-1">
-                Details
+              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-crimson flex items-center gap-1 font-bold">
+                Try free
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </button>
@@ -230,13 +230,14 @@ export function HomeToolShopGrid() {
               </DialogHeader>
 
               <div className="space-y-3 pt-1">
-                <div className="rounded-sm border border-border/60 bg-background/40 p-3 space-y-1.5">
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber/70">What you get</div>
-                  <ul className="text-xs text-foreground/80 space-y-1 list-disc list-inside marker:text-amber/60">
-                    <li>3 free sandbox runs — no signup, nothing saved.</li>
-                    <li>$40 lifetime license — unlimited runs after that.</li>
-                    <li>Persistent memory attached to your account.</li>
-                    <li>Same engine the operators run in the field.</li>
+                <div className="rounded-sm border border-amber/40 bg-amber/[0.04] p-3 space-y-1.5">
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber">What $40 gets you</div>
+                  <ul className="text-xs text-foreground/85 space-y-1 list-disc list-inside marker:text-amber">
+                    <li><span className="font-bold">3 free runs right now</span> — no signup, no card, nothing saved.</li>
+                    <li><span className="font-bold">$40 lifetime license</span> — unlimited runs, forever. No subscription.</li>
+                    <li>Persistent memory tied to your account — it gets sharper every use.</li>
+                    <li>Same engine the operators bill $2,500/session with.</li>
+                    <li><span className="text-amber font-bold">7-day money back</span> if it doesn't earn its keep.</li>
                   </ul>
                 </div>
 
@@ -246,16 +247,19 @@ export function HomeToolShopGrid() {
                     onClick={() => handleTry(infoTool)}
                     className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-amber/60 bg-amber/5 hover:bg-amber/15 text-amber px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold transition-colors"
                   >
-                    <Play className="w-3.5 h-3.5" /> Try free
+                    <Play className="w-3.5 h-3.5" /> Try 3 runs free
                   </button>
                   <button
                     type="button"
                     onClick={() => handleBuyFromInfo(infoTool)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-amber hover:bg-amber/90 text-background px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold transition-colors"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-sm bg-amber hover:bg-amber/90 text-background px-3 py-2.5 text-xs font-mono uppercase tracking-widest font-bold transition-colors shadow-[0_0_20px_rgba(217,169,58,0.35)]"
                   >
-                    <Zap className="w-3.5 h-3.5" /> Buy $40
+                    <Zap className="w-3.5 h-3.5" /> Own it — $40
                   </button>
                 </div>
+                <p className="text-center font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                  Instant access · 7-day money back · No subscription
+                </p>
               </div>
             </>
           )}
