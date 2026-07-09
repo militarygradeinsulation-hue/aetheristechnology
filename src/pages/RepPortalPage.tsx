@@ -12,7 +12,7 @@ import { EasyModeWrapper } from '@/components/EasyModeBar';
 import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
 import { setPortalSession, type PortalProfile } from '@/lib/portalAuth';
 import { useFeatureFlag } from '@/lib/portalFeatureFlags';
-import { HomeFreeTrialArsenal } from '@/components/HomeFreeTrialArsenal';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { RepToolLinks } from '@/components/portal/RepToolLinks';
 import {
@@ -228,10 +228,10 @@ const RepPortalPage: React.FC = () => {
             {instrumentsFlag.enabled && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-display">Instruments — Free forensic tools</CardTitle>
+                  <CardTitle className="font-display">Golden Report — Your one tool</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <HomeFreeTrialArsenal />
+                  <ForensicScanAllPanel />
                 </CardContent>
               </Card>
             )}
