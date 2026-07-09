@@ -218,7 +218,8 @@ export function HomeToolShopGrid() {
             Already have a code? Redeem it →
           </Link>
         </div>
-      </div>
+        </div>
+      </details>
 
       {/* Tool info dialog (expanded center-screen view) */}
       <Dialog open={!!infoTool} onOpenChange={(o) => !o && setInfoTool(null)}>
