@@ -383,6 +383,8 @@ export const FloatingWorkbench: React.FC = () => {
                 )}
               </div>
             </div>
+            )}
+
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
