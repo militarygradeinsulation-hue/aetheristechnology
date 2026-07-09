@@ -194,8 +194,8 @@ export function HomeToolShopGrid() {
                   {t.tagline}
                 </p>
               </div>
-              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber/70 group-hover:text-amber flex items-center gap-1">
-                Details
+              <div className="shrink-0 self-center font-mono text-[9px] uppercase tracking-widest text-amber group-hover:text-crimson flex items-center gap-1 font-bold">
+                Try free
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </button>
