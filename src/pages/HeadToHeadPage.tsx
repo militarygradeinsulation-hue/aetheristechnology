@@ -41,7 +41,9 @@ const HeadToHeadPage: React.FC = () => {
                 plus the Takeover Playbook to flip the score.
               </p>
             </div>
-            <HeadToHeadTool />
+            <PublicToolLock toolLabel="Head-to-Head">
+              <HeadToHeadTool />
+            </PublicToolLock>
           </div>
         </div>
         <Footer />
