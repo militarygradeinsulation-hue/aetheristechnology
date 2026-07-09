@@ -1007,14 +1007,14 @@ const IndustriesPage: React.FC = () => {
 
   const jsonLd = combineSchemas(
     serviceSchema(
-      'The Leak Audit, by Industry',
+      'Case Studies',
       'Forensic Diagnostic ($2,500 flat) applied across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'What does the Leak Audit deliver per industry?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these vertical pages document.' },
+    { question: 'What does the Leak Audit deliver per case study?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these case studies document.' },
     { question: 'How much is the Leak Audit?', answer: '$2,500 flat fee, operator-led. Applied 1:1 toward any engagement that follows.' },
     { question: 'What if my industry is not listed?', answer: 'The methodology travels. Type your niche in the search bar above, or book a 15-minute call and we will scope it.' },
     { question: 'How fast do you find the first leak?', answer: 'Free self-scan at /leak-audit runs in minutes. Operator-led Leak Audit surfaces first leaks inside Week 1.' },
@@ -1023,13 +1023,13 @@ const IndustriesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="The Leak Audit by Industry | 20+ Verticals | Aetheris"
-        description="Forensic Diagnostic by industry. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
+        title="Case Studies | Aetheris"
+        description="Forensic Diagnostic case studies by industry. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
         path="/industries"
-        keywords="revenue leak audit by industry, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
+        keywords="revenue leak audit case studies, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'Industries', path: '/industries' },
+          { name: 'Case Studies', path: '/industries' },
         ]}
         faqs={faqs}
         speakable={['h1', '.tldr', 'h2']}
@@ -1043,17 +1043,16 @@ const IndustriesPage: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-crimson/10 border border-crimson/30 text-crimson text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
-              The Leak Audit · By Industry
+              Case Studies
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Every industry leaks <span className="text-crimson">differently</span>.<br className="hidden md:block" />
-              Every owner <span className="text-amber">feels it the same way.</span>
+              Real cases. Real leaks. <span className="text-crimson">Real money</span> recovered.
             </h1>
             <p className="text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto mb-4">
-              Tap any industry to open the case file. Type your niche below if you don't see it &mdash; the methodology travels.
+              Tap any case study to open the file. Type your niche below if you don't see it &mdash; the methodology travels.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
-              One offer fixes every industry on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
+              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
             </p>
 
             <div className="max-w-xl mx-auto relative">
