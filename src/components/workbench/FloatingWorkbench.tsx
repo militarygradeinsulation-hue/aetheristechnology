@@ -77,6 +77,7 @@ export const FloatingWorkbench: React.FC = () => {
     const check = () => {
       const admin = hasValidAdminToken();
       setIsAdmin(admin);
+      setRestricted(isRepRestrictedToGolden());
       setVisible(isBackendRoute() && (hasValidPortalSession() || admin));
     };
     check();
@@ -98,13 +99,25 @@ export const FloatingWorkbench: React.FC = () => {
   // so the write effects below don't clobber saved values with initial defaults.
   useEffect(() => {
     if (!visible) return;
+    if (restricted) {
+      // Restricted reps: only Golden Report, always pinned, panel open.
+      const goldenStack: WidgetEntry[] = [{ toolId: GOLDEN_ONLY_TOOL_ID, collapsed: false, size: "lg" }];
+      setStack(goldenStack);
+      setLayouts([]);
+      setActive("default");
+      setWidth("lg");
+      setOpen(true);
+      hydrated.current = true;
+      return;
+    }
     setStack(wb.getStack());
     setLayouts(wb.getLayouts());
     setActive(wb.getActive());
     setWidth(wb.getWidth());
     setOpen(wb.getOpen());
     hydrated.current = true;
-  }, [visible]);
+  }, [visible, restricted]);
+
 
   useEffect(() => { if (hydrated.current) wb.setStack(stack); }, [stack]);
   useEffect(() => { if (hydrated.current) wb.setLayouts(layouts); }, [layouts]);
