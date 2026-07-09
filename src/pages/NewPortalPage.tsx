@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +29,7 @@ import { SalesCoachChat } from '@/components/portal/SalesCoachChat';
 import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
+import { RepCalendarView } from '@/components/portal/RepCalendarView';
 
 const STYLE_KEY = 'aetheris.portalStyle';
 export const setPortalStylePref = (v: 'new' | 'classic') => {
@@ -245,6 +246,7 @@ const NewPortalPage: React.FC = () => {
             const allTabs: Array<[string, string, any, boolean]> = [
               ['start', 'Start', LayoutGrid, true],
               ['leads', 'Leads', Users, true],
+              ['calendar', 'Calendar', CalendarDays, true],
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
               ['training', 'Training', GraduationCap, showAdvanced],
@@ -253,7 +255,7 @@ const NewPortalPage: React.FC = () => {
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7',
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8',
             };
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
             return (
@@ -334,6 +336,24 @@ const NewPortalPage: React.FC = () => {
               <LeadsBoard />
             </ToolCard>
           </TabsContent>
+
+          {/* CALENDAR — available to every rep + partner */}
+          <TabsContent value="calendar" className="mt-8">
+            <ToolCard
+              eyebrow="// Schedule //"
+              title="My Calendar"
+              summary="Your personal rep calendar — meetings, follow-ups, demos and tasks tied to the leads you're working."
+              howTo={[
+                'Click any day to add a meeting, call, follow-up or task.',
+                'Link an event to a lead so the clue trail updates automatically.',
+                'Check items off as they happen; admin sees your activity trail live.',
+              ]}
+              defaultOpen
+            >
+              <RepCalendarView isAdmin={false} />
+            </ToolCard>
+          </TabsContent>
+
 
           {/* PLAYBOOK — gated */}
           {showAdvanced && (
