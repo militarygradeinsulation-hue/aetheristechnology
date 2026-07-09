@@ -143,7 +143,7 @@ const LeakLanderPage: React.FC = () => {
                 { stat: "30%", label: "Avg. recovery on named leaks", tone: "amber" },
                 { stat: "10–40×", label: "Typical leak / fee ratio", tone: "amber" },
                 { stat: "20 yrs", label: "Building revenue systems", tone: "amber" },
-                { stat: "USMC + PhD", label: "Marine vet · Digital Forensics doctorate", tone: "crimson" },
+                { stat: "USMC + MS + BA + IBM", label: "MARINE VET · DIGITAL FORENSICS", tone: "crimson" },
               ].map((it) => (
                 <div
                   key={it.label}
