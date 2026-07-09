@@ -258,6 +258,7 @@ const AppOperator = () => {
       </div>
 
       {urlBar}
+      {autoDashboard}
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 border-b border-border mb-5">
