@@ -343,8 +343,7 @@ const LeakLanderPage: React.FC = () => {
             <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
           </MindMapEmailGate>
 
-          {/* THE CHAOS ECOSYSTEM — per-tool try/buy grid */}
-          <HomeToolShopGrid />
+          {/* Golden Report CTA now lives above; no duplicate here. */}
 
 
 
