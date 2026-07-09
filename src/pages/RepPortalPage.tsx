@@ -12,7 +12,7 @@ import { EasyModeWrapper } from '@/components/EasyModeBar';
 import { AndroidApkDownloadCard } from '@/components/portal/AndroidApkDownloadCard';
 import { setPortalSession, type PortalProfile } from '@/lib/portalAuth';
 import { useFeatureFlag } from '@/lib/portalFeatureFlags';
-import { HomeFreeTrialArsenal } from '@/components/HomeFreeTrialArsenal';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { RepToolLinks } from '@/components/portal/RepToolLinks';
 import {
