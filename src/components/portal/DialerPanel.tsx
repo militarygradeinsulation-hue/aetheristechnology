@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
 const HUBSPOT_CONTACTS_URL = 'https://app-na2.hubspot.com/contacts/244481481/objects/0-1/views/all/list';
+const POPTOX_URL = 'https://www.poptox.com/dialpad';
 
 function normalizeNumber(raw: string): string {
   const digits = raw.replace(/[^\d+]/g, '');
