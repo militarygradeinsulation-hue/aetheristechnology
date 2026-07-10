@@ -220,19 +220,72 @@ export function HomeToolShopGrid() {
                   case file with verdicts, dollar leaks, and evidence you can query.
                 </p>
 
-                {/* CTA — the "activation" contact */}
-                <Link
-                  to="/golden-report"
-                  className="group/btn relative inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background px-8 sm:px-12 py-4 text-sm sm:text-base font-mono uppercase tracking-widest font-bold transition-all duration-300 shadow-[0_0_30px_-4px_hsl(var(--amber)/0.6),inset_0_1px_0_hsl(0_0%_100%/0.4),inset_0_-2px_0_hsl(0_0%_0%/0.25)] hover:shadow-[0_0_50px_-2px_hsl(var(--amber)/0.8),inset_0_1px_0_hsl(0_0%_100%/0.5)] active:translate-y-px active:scale-[0.99]"
-                >
-                  {/* corner solder points */}
-                  <span className="absolute -top-1 -left-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -bottom-1 -left-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -bottom-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span>Run the Golden Report</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </Link>
+                {/* CTA — hex activation key with arc-discharge halo */}
+                <div className="relative inline-block group/cta">
+                  {/* Rotating conic halo */}
+                  <span
+                    aria-hidden
+                    className="absolute -inset-3 rounded-2xl opacity-70 blur-md pointer-events-none animate-[spin_8s_linear_infinite]"
+                    style={{
+                      background:
+                        "conic-gradient(from 0deg, transparent 0deg, hsl(48 100% 60% / 0.6) 60deg, transparent 120deg, hsl(45 100% 55% / 0.5) 200deg, transparent 260deg, hsl(50 100% 65% / 0.6) 320deg, transparent 360deg)",
+                    }}
+                  />
+                  {/* Arc lightning ring */}
+                  <svg aria-hidden className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none" viewBox="0 0 200 60" preserveAspectRatio="none">
+                    <defs>
+                      <filter id="arc-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="0.6" />
+                      </filter>
+                    </defs>
+                    <path
+                      d="M4 30 L14 26 L22 34 L32 28 L44 32 L58 26 L70 34 L84 28 L98 32 L112 26 L126 34 L140 28 L154 32 L168 26 L180 34 L190 28 L196 30"
+                      fill="none"
+                      stroke="hsl(50 100% 70%)"
+                      strokeWidth="0.8"
+                      strokeLinecap="round"
+                      filter="url(#arc-glow)"
+                      className="opacity-0 group-hover/cta:opacity-100 transition-opacity"
+                      style={{ animation: "neuron-fire 0.6s ease-in-out infinite" }}
+                    />
+                  </svg>
+
+                  <Link
+                    to="/golden-report"
+                    className="group/btn relative inline-flex items-center justify-center gap-3 px-10 sm:px-14 py-4 sm:py-5 text-sm sm:text-base font-mono uppercase tracking-[0.25em] font-bold text-background transition-all duration-300 active:translate-y-px active:scale-[0.99]"
+                    style={{
+                      clipPath:
+                        "polygon(18px 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 18px 100%, 0 50%)",
+                      background:
+                        "linear-gradient(180deg, hsl(48 100% 65%) 0%, hsl(45 100% 50%) 55%, hsl(38 100% 40%) 100%)",
+                      boxShadow:
+                        "0 0 40px -4px hsl(var(--amber)/0.8), inset 0 1px 0 hsl(0 0% 100% / 0.55), inset 0 -3px 0 hsl(0 0% 0% / 0.3)",
+                    }}
+                  >
+                    {/* Inner etched line following hex */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-[3px] pointer-events-none"
+                      style={{
+                        clipPath:
+                          "polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%)",
+                        background:
+                          "linear-gradient(180deg, transparent 0%, transparent 40%, hsl(0 0% 0% / 0.08) 50%, transparent 60%, transparent 100%)",
+                        border: "1px solid hsl(0 0% 0% / 0.15)",
+                      }}
+                    />
+                    {/* Bolt indicator */}
+                    <svg aria-hidden viewBox="0 0 24 24" className="relative w-4 h-4 drop-shadow-[0_0_3px_hsl(0_0%_0%/0.35)]" fill="currentColor">
+                      <path d="M13 2 L4 14 L11 14 L10 22 L20 9 L13 9 Z" />
+                    </svg>
+                    <span className="relative">Activate Golden Report</span>
+                    <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+
+                    {/* Corner solder terminals */}
+                    <span className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" />
+                    <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" style={{ animationDelay: "0.6s" }} />
+                  </Link>
+                </div>
 
                 {/* Data bus line */}
                 <div className="mt-6 flex items-center gap-3">
