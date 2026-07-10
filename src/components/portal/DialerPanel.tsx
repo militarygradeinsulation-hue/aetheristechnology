@@ -23,17 +23,20 @@ function normalizeNumber(raw: string): string {
   return `+${digits}`;
 }
 
-function openHubspotPopup(url: string) {
+function openCenteredPopup(url: string, name: string) {
   const w = 460, h = 720;
-  const y = window.top?.outerHeight
-    ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
-    : 100;
-  const x = window.top?.outerWidth
-    ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
-    : 100;
+  // window.top is cross-origin inside the Lovable preview iframe, so reading
+  // outerHeight/screenY throws. Fall back to window.screen safely.
+  let x = 100, y = 100;
+  try {
+    const sw = window.screen?.availWidth ?? window.innerWidth;
+    const sh = window.screen?.availHeight ?? window.innerHeight;
+    x = Math.max(0, Math.round((sw - w) / 2));
+    y = Math.max(0, Math.round((sh - h) / 2));
+  } catch { /* ignore */ }
   return window.open(
     url,
-    'hubspot-calling',
+    name,
     `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
   );
 }
@@ -44,7 +47,7 @@ export const DialerPanel: React.FC = () => {
   const [contactSearch, setContactSearch] = useState('');
 
   const launchDialer = () => {
-    const win = openHubspotPopup(HUBSPOT_CALLING_URL);
+    const win = openCenteredPopup(HUBSPOT_CALLING_URL, 'hubspot-calling');
     if (!win) {
       toast({
         title: 'Popup blocked',
@@ -67,18 +70,7 @@ export const DialerPanel: React.FC = () => {
   };
 
   const launchPoptox = () => {
-    const w = 460, h = 720;
-    const y = window.top?.outerHeight
-      ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
-      : 100;
-    const x = window.top?.outerWidth
-      ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
-      : 100;
-    const win = window.open(
-      POPTOX_URL,
-      'poptox-dialer',
-      `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
-    );
+    const win = openCenteredPopup(POPTOX_URL, 'poptox-dialer');
     if (!win) {
       toast({
         title: 'Popup blocked',
