@@ -89,8 +89,8 @@ serve(async (req) => {
       const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
 
       let finalPrompt = rawPrompt;
-      if (aetherisStyle) finalPrompt = `${rawPrompt}${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
-      else if (cartoon) finalPrompt = `${rawPrompt}${CARTOON_SUFFIX} ${rawPrompt}`;
+      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
+      else if (cartoon) finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
       if (action === "edit" && sourceImageUrl) {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
