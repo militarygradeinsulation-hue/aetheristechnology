@@ -394,6 +394,25 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
+          {/* GOLDEN REPORT — full forensic scan for every rep */}
+          <TabsContent value="golden" className="mt-8">
+            <ToolCard
+              eyebrow="// Forensic Instrument //"
+              title="Golden Report — Full Forensic Scan"
+              summary="Drop a prospect's URL. Aetheris runs the full 14-chapter forensic scan and hands you the report you can walk into any pitch with."
+              howTo={[
+                'Paste the target company website (any URL works — with or without https).',
+                'Hit Run — the scan takes a few minutes; leave the tab open.',
+                'Download the PDF and lead the next call with the leaks you found.',
+              ]}
+              defaultOpen
+            >
+              <ForensicScanAllPanel />
+            </ToolCard>
+          </TabsContent>
+
+
+
 
           {/* TRAINING — gated */}
           {showAdvanced && (
