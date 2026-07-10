@@ -289,8 +289,9 @@ const CareersPage = () => {
                   <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li className="flex gap-2"><span className="text-crimson">✗</span>Diagnose, analyze, or perform forensic operator work</li>
                     <li className="flex gap-2"><span className="text-crimson">✗</span>Deliver, build, or fulfill any Aetheris system yourself</li>
-                    <li className="flex gap-2"><span className="text-crimson">✗</span>Call yourself an "Aetheris Operator" or imply certification</li>
-                    <li className="flex gap-2"><span className="text-crimson">✗</span>Resell the license, rep code, or IP to a third party</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Call yourself an "Aetheris Operator" or imply certification (you're a Connector)</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Resell the license, Connector code, or IP to a third party</li>
+
                   </ul>
                 </div>
               </div>
