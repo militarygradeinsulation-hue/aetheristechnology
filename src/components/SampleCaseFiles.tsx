@@ -352,7 +352,7 @@ function DossierCard({ file }: { file: CaseFile }) {
 }
 
 export function SampleCaseFiles() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [active, setActive] = useState(0);
 
   return (
