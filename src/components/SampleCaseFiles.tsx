@@ -27,18 +27,31 @@ type CaseFile = {
   exhibits: Exhibit[];
 };
 
-// Deterministic "Date Opened" per case: spread from Jan 2023 through ~3 weeks
-// before today, so every dossier looks like an aged, real file.
+// Deterministic, unique "Date Opened" per case. Hand-picked spread across
+// 2023, 2024, several in 2025, and a few from the last weeks of 2026 —
+// no two cases ever share a date.
+const CASE_DATES: Record<string, string> = {
+  "#0451": "02.14.2023",
+  "#0453": "05.03.2023",
+  "#0456": "09.21.2023",
+  "#0459": "11.08.2023",
+  "#0462": "01.30.2024",
+  "#0464": "04.17.2024",
+  "#0467": "08.05.2024",
+  "#0469": "02.11.2025",
+  "#0471": "05.29.2025",
+  "#0474": "07.16.2025",
+  "#0476": "09.04.2025",
+  "#0478": "10.22.2025",
+  "#0481": "12.09.2025",
+  "#0483": "05.18.2026",
+  "#0486": "06.12.2026",
+};
 function caseOpenedDate(caseNo: string): string {
-  const seed = Array.from(caseNo).reduce((a, c) => a + c.charCodeAt(0) * 31, 0);
-  const start = new Date(2023, 0, 1).getTime();
-  const end = Date.now() - 21 * 24 * 60 * 60 * 1000;
-  const t = start + (seed * 2654435761) % (end - start);
-  const d = new Date(t);
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${mm}.${dd}.${d.getFullYear()}`;
+  return CASE_DATES[caseNo] ?? "01.01.2024";
 }
+
+
 
 
 const CASES: CaseFile[] = [
