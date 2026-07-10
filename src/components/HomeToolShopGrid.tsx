@@ -24,80 +24,111 @@ export function HomeToolShopGrid() {
               "radial-gradient(ellipse at 50% 0%, hsl(220 15% 10%) 0%, hsl(220 15% 5%) 55%, hsl(0 0% 0%) 100%)",
           }}
         >
-          {/* Floating die outlines (circuit field) */}
+          {/* Neural circuit field — yellow synaptic connectors */}
           <svg
             aria-hidden
-            className="absolute inset-0 w-full h-full opacity-60 pointer-events-none"
+            className="absolute inset-0 w-full h-full pointer-events-none"
             viewBox="0 0 400 200"
             preserveAspectRatio="none"
           >
             <defs>
               <filter id="chip-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.2" result="b" />
+                <feGaussianBlur stdDeviation="1.4" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              <radialGradient id="synapse-node" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="hsl(48 100% 70%)" stopOpacity="1" />
+                <stop offset="60%" stopColor="hsl(45 100% 55%)" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="hsl(45 100% 50%)" stopOpacity="0" />
+              </radialGradient>
               <style>{`
-                @keyframes chip-drift {
-                  0%, 100% { transform: translate(0, 0); }
-                  50% { transform: translate(var(--dx, 4px), var(--dy, -3px)); }
+                @keyframes neuron-fire {
+                  0%, 100% { stroke-opacity: 0.12; stroke-width: 0.4; }
+                  40% { stroke-opacity: 0.85; stroke-width: 0.7; }
+                  60% { stroke-opacity: 0.4; stroke-width: 0.5; }
                 }
-                @keyframes chip-pulse {
-                  0%, 100% { stroke-opacity: 0.18; }
-                  50% { stroke-opacity: 0.42; }
-                }
-                @keyframes chip-flow {
-                  from { stroke-dashoffset: 80; }
+                @keyframes neuron-flow {
+                  from { stroke-dashoffset: 120; }
                   to { stroke-dashoffset: 0; }
                 }
-                .die-frame {
-                  fill: none;
-                  stroke: hsl(var(--amber));
-                  stroke-width: 0.5;
-                  stroke-opacity: 0.22;
-                  filter: url(#chip-glow);
-                  animation: chip-drift 18s ease-in-out infinite;
+                @keyframes synapse-pulse {
+                  0%, 100% { opacity: 0.35; }
+                  50% { opacity: 1; }
                 }
-                .die-flow {
+                @keyframes spark-travel {
+                  0% { offset-distance: 0%; opacity: 0; }
+                  10% { opacity: 1; }
+                  90% { opacity: 1; }
+                  100% { offset-distance: 100%; opacity: 0; }
+                }
+                .axon {
                   fill: none;
-                  stroke: hsl(var(--amber-glow));
-                  stroke-width: 0.4;
-                  stroke-dasharray: 3 40;
+                  stroke: hsl(48 100% 60%);
+                  stroke-width: 0.5;
                   stroke-linecap: round;
                   filter: url(#chip-glow);
-                  animation: chip-flow 10s linear infinite;
+                  animation: neuron-fire 3.2s ease-in-out infinite;
                 }
-                .die-node {
-                  fill: hsl(var(--amber-glow));
-                  animation: chip-pulse 4s ease-in-out infinite;
+                .dendrite {
+                  fill: none;
+                  stroke: hsl(45 100% 55%);
+                  stroke-width: 0.35;
+                  stroke-dasharray: 2 8;
+                  stroke-linecap: round;
+                  opacity: 0.55;
+                  filter: url(#chip-glow);
+                  animation: neuron-flow 6s linear infinite;
+                }
+                .soma {
+                  fill: url(#synapse-node);
+                  animation: synapse-pulse 2.4s ease-in-out infinite;
+                }
+                .spark {
+                  fill: hsl(50 100% 78%);
+                  filter: url(#chip-glow);
+                  animation: spark-travel 4s linear infinite;
                 }
                 @media (prefers-reduced-motion: reduce) {
-                  .die-frame, .die-flow, .die-node { animation: none !important; }
+                  .axon, .dendrite, .soma, .spark { animation: none !important; }
                 }
               `}</style>
             </defs>
 
-            {/* Floating rectangular die outlines */}
-            <rect className="die-frame" x="6" y="10" width="70" height="45" rx="1" style={{ ["--dx" as string]: "3px", ["--dy" as string]: "-2px", animationDelay: "-2s" }} />
-            <rect className="die-frame" x="324" y="12" width="70" height="40" rx="1" style={{ ["--dx" as string]: "-3px", ["--dy" as string]: "2px", animationDelay: "-7s" }} />
-            <rect className="die-frame" x="18" y="125" width="55" height="60" rx="1" style={{ ["--dx" as string]: "2px", ["--dy" as string]: "3px", animationDelay: "-12s" }} />
-            <rect className="die-frame" x="335" y="130" width="55" height="55" rx="1" style={{ ["--dx" as string]: "-2px", ["--dy" as string]: "-3px", animationDelay: "-5s" }} />
-            <rect className="die-frame" x="90" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "4px", ["--dy" as string]: "-1px", animationDelay: "-9s" }} />
-            <rect className="die-frame" x="230" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "-4px", ["--dy" as string]: "1px", animationDelay: "-15s" }} />
+            {/* Long myelinated axons — trunk lines pulsing like neurons firing */}
+            <path className="axon" d="M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70" style={{ animationDelay: "-0.2s" }} />
+            <path className="axon" d="M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100" style={{ animationDelay: "-1.4s" }} />
+            <path className="axon" d="M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60" style={{ animationDelay: "-2.6s" }} />
+            <path className="axon" d="M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155" style={{ animationDelay: "-0.9s" }} />
 
-            {/* Inter-die traces */}
-            <path className="die-flow" d="M76 32 L110 32 L130 50 L200 50" style={{ animationDelay: "-1s" }} />
-            <path className="die-flow" d="M324 32 L290 32 L270 50 L200 50" style={{ animationDelay: "-3s" }} />
-            <path className="die-flow" d="M73 155 L120 155 L140 140 L200 140" style={{ animationDelay: "-5s" }} />
-            <path className="die-flow" d="M327 155 L280 155 L260 140 L200 140" style={{ animationDelay: "-7s" }} />
+            {/* Branching dendrites */}
+            <path className="dendrite" d="M80 100 C 100 90, 110 70, 140 70" style={{ animationDelay: "-0.5s" }} />
+            <path className="dendrite" d="M80 100 C 100 110, 110 130, 160 130" style={{ animationDelay: "-1.2s" }} />
+            <path className="dendrite" d="M200 60 C 210 80, 230 90, 260 100" style={{ animationDelay: "-2.1s" }} />
+            <path className="dendrite" d="M200 140 C 220 130, 240 115, 260 100" style={{ animationDelay: "-3s" }} />
+            <path className="dendrite" d="M300 40 C 310 60, 330 75, 340 90" style={{ animationDelay: "-1.7s" }} />
+            <path className="dendrite" d="M320 170 C 310 155, 290 140, 260 135" style={{ animationDelay: "-2.8s" }} />
+            <path className="dendrite" d="M140 70 C 150 55, 170 45, 200 60" style={{ animationDelay: "-3.4s" }} />
+            <path className="dendrite" d="M160 130 C 175 145, 190 155, 220 150" style={{ animationDelay: "-0.7s" }} />
 
-            {/* Small nodes */}
-            <circle className="die-node" cx="110" cy="32" r="1" style={{ animationDelay: "0s" }} />
-            <circle className="die-node" cx="290" cy="32" r="1" style={{ animationDelay: "0.8s" }} />
-            <circle className="die-node" cx="120" cy="155" r="1" style={{ animationDelay: "1.6s" }} />
-            <circle className="die-node" cx="280" cy="155" r="1" style={{ animationDelay: "2.4s" }} />
+            {/* Synapse nodes */}
+            <circle className="soma" cx="80" cy="100" r="2.2" style={{ animationDelay: "0s" }} />
+            <circle className="soma" cx="140" cy="70" r="1.8" style={{ animationDelay: "0.3s" }} />
+            <circle className="soma" cx="160" cy="130" r="2" style={{ animationDelay: "0.6s" }} />
+            <circle className="soma" cx="200" cy="60" r="1.6" style={{ animationDelay: "0.9s" }} />
+            <circle className="soma" cx="200" cy="140" r="1.6" style={{ animationDelay: "1.2s" }} />
+            <circle className="soma" cx="260" cy="100" r="2.4" style={{ animationDelay: "1.5s" }} />
+            <circle className="soma" cx="300" cy="40" r="1.8" style={{ animationDelay: "1.8s" }} />
+            <circle className="soma" cx="320" cy="170" r="1.8" style={{ animationDelay: "2.1s" }} />
+            <circle className="soma" cx="340" cy="90" r="2" style={{ animationDelay: "0.4s" }} />
+
+            {/* Traveling electrical sparks along axons */}
+            <circle className="spark" r="1.4" style={{ offsetPath: "path('M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70')", animationDelay: "0s" } as React.CSSProperties} />
+            <circle className="spark" r="1.2" style={{ offsetPath: "path('M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100')", animationDelay: "-1.6s", animationDuration: "5s" } as React.CSSProperties} />
+            <circle className="spark" r="1.3" style={{ offsetPath: "path('M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60')", animationDelay: "-2.8s", animationDuration: "4.5s" } as React.CSSProperties} />
+            <circle className="spark" r="1.1" style={{ offsetPath: "path('M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155')", animationDelay: "-0.7s", animationDuration: "5.5s" } as React.CSSProperties} />
           </svg>
 
           {/* Fine trace grid (etched substrate) */}
@@ -189,19 +220,72 @@ export function HomeToolShopGrid() {
                   case file with verdicts, dollar leaks, and evidence you can query.
                 </p>
 
-                {/* CTA — the "activation" contact */}
-                <Link
-                  to="/golden-report"
-                  className="group/btn relative inline-flex items-center justify-center gap-2 rounded-sm bg-amber text-background px-8 sm:px-12 py-4 text-sm sm:text-base font-mono uppercase tracking-widest font-bold transition-all duration-300 shadow-[0_0_30px_-4px_hsl(var(--amber)/0.6),inset_0_1px_0_hsl(0_0%_100%/0.4),inset_0_-2px_0_hsl(0_0%_0%/0.25)] hover:shadow-[0_0_50px_-2px_hsl(var(--amber)/0.8),inset_0_1px_0_hsl(0_0%_100%/0.5)] active:translate-y-px active:scale-[0.99]"
-                >
-                  {/* corner solder points */}
-                  <span className="absolute -top-1 -left-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -bottom-1 -left-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span className="absolute -bottom-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber/80" />
-                  <span>Run the Golden Report</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </Link>
+                {/* CTA — hex activation key with arc-discharge halo */}
+                <div className="relative inline-block group/cta">
+                  {/* Rotating conic halo */}
+                  <span
+                    aria-hidden
+                    className="absolute -inset-3 rounded-2xl opacity-70 blur-md pointer-events-none animate-[spin_8s_linear_infinite]"
+                    style={{
+                      background:
+                        "conic-gradient(from 0deg, transparent 0deg, hsl(48 100% 60% / 0.6) 60deg, transparent 120deg, hsl(45 100% 55% / 0.5) 200deg, transparent 260deg, hsl(50 100% 65% / 0.6) 320deg, transparent 360deg)",
+                    }}
+                  />
+                  {/* Arc lightning ring */}
+                  <svg aria-hidden className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none" viewBox="0 0 200 60" preserveAspectRatio="none">
+                    <defs>
+                      <filter id="arc-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="0.6" />
+                      </filter>
+                    </defs>
+                    <path
+                      d="M4 30 L14 26 L22 34 L32 28 L44 32 L58 26 L70 34 L84 28 L98 32 L112 26 L126 34 L140 28 L154 32 L168 26 L180 34 L190 28 L196 30"
+                      fill="none"
+                      stroke="hsl(50 100% 70%)"
+                      strokeWidth="0.8"
+                      strokeLinecap="round"
+                      filter="url(#arc-glow)"
+                      className="opacity-0 group-hover/cta:opacity-100 transition-opacity"
+                      style={{ animation: "neuron-fire 0.6s ease-in-out infinite" }}
+                    />
+                  </svg>
+
+                  <Link
+                    to="/golden-report"
+                    className="group/btn relative inline-flex items-center justify-center gap-3 px-10 sm:px-14 py-4 sm:py-5 text-sm sm:text-base font-mono uppercase tracking-[0.25em] font-bold text-background transition-all duration-300 active:translate-y-px active:scale-[0.99]"
+                    style={{
+                      clipPath:
+                        "polygon(18px 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 18px 100%, 0 50%)",
+                      background:
+                        "linear-gradient(180deg, hsl(48 100% 65%) 0%, hsl(45 100% 50%) 55%, hsl(38 100% 40%) 100%)",
+                      boxShadow:
+                        "0 0 40px -4px hsl(var(--amber)/0.8), inset 0 1px 0 hsl(0 0% 100% / 0.55), inset 0 -3px 0 hsl(0 0% 0% / 0.3)",
+                    }}
+                  >
+                    {/* Inner etched line following hex */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-[3px] pointer-events-none"
+                      style={{
+                        clipPath:
+                          "polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%)",
+                        background:
+                          "linear-gradient(180deg, transparent 0%, transparent 40%, hsl(0 0% 0% / 0.08) 50%, transparent 60%, transparent 100%)",
+                        border: "1px solid hsl(0 0% 0% / 0.15)",
+                      }}
+                    />
+                    {/* Bolt indicator */}
+                    <svg aria-hidden viewBox="0 0 24 24" className="relative w-4 h-4 drop-shadow-[0_0_3px_hsl(0_0%_0%/0.35)]" fill="currentColor">
+                      <path d="M13 2 L4 14 L11 14 L10 22 L20 9 L13 9 Z" />
+                    </svg>
+                    <span className="relative">Activate Golden Report</span>
+                    <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+
+                    {/* Corner solder terminals */}
+                    <span className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" />
+                    <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" style={{ animationDelay: "0.6s" }} />
+                  </Link>
+                </div>
 
                 {/* Data bus line */}
                 <div className="mt-6 flex items-center gap-3">
