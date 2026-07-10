@@ -24,80 +24,111 @@ export function HomeToolShopGrid() {
               "radial-gradient(ellipse at 50% 0%, hsl(220 15% 10%) 0%, hsl(220 15% 5%) 55%, hsl(0 0% 0%) 100%)",
           }}
         >
-          {/* Floating die outlines (circuit field) */}
+          {/* Neural circuit field — yellow synaptic connectors */}
           <svg
             aria-hidden
-            className="absolute inset-0 w-full h-full opacity-60 pointer-events-none"
+            className="absolute inset-0 w-full h-full pointer-events-none"
             viewBox="0 0 400 200"
             preserveAspectRatio="none"
           >
             <defs>
               <filter id="chip-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.2" result="b" />
+                <feGaussianBlur stdDeviation="1.4" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              <radialGradient id="synapse-node" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="hsl(48 100% 70%)" stopOpacity="1" />
+                <stop offset="60%" stopColor="hsl(45 100% 55%)" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="hsl(45 100% 50%)" stopOpacity="0" />
+              </radialGradient>
               <style>{`
-                @keyframes chip-drift {
-                  0%, 100% { transform: translate(0, 0); }
-                  50% { transform: translate(var(--dx, 4px), var(--dy, -3px)); }
+                @keyframes neuron-fire {
+                  0%, 100% { stroke-opacity: 0.12; stroke-width: 0.4; }
+                  40% { stroke-opacity: 0.85; stroke-width: 0.7; }
+                  60% { stroke-opacity: 0.4; stroke-width: 0.5; }
                 }
-                @keyframes chip-pulse {
-                  0%, 100% { stroke-opacity: 0.18; }
-                  50% { stroke-opacity: 0.42; }
-                }
-                @keyframes chip-flow {
-                  from { stroke-dashoffset: 80; }
+                @keyframes neuron-flow {
+                  from { stroke-dashoffset: 120; }
                   to { stroke-dashoffset: 0; }
                 }
-                .die-frame {
-                  fill: none;
-                  stroke: hsl(var(--amber));
-                  stroke-width: 0.5;
-                  stroke-opacity: 0.22;
-                  filter: url(#chip-glow);
-                  animation: chip-drift 18s ease-in-out infinite;
+                @keyframes synapse-pulse {
+                  0%, 100% { opacity: 0.35; }
+                  50% { opacity: 1; }
                 }
-                .die-flow {
+                @keyframes spark-travel {
+                  0% { offset-distance: 0%; opacity: 0; }
+                  10% { opacity: 1; }
+                  90% { opacity: 1; }
+                  100% { offset-distance: 100%; opacity: 0; }
+                }
+                .axon {
                   fill: none;
-                  stroke: hsl(var(--amber-glow));
-                  stroke-width: 0.4;
-                  stroke-dasharray: 3 40;
+                  stroke: hsl(48 100% 60%);
+                  stroke-width: 0.5;
                   stroke-linecap: round;
                   filter: url(#chip-glow);
-                  animation: chip-flow 10s linear infinite;
+                  animation: neuron-fire 3.2s ease-in-out infinite;
                 }
-                .die-node {
-                  fill: hsl(var(--amber-glow));
-                  animation: chip-pulse 4s ease-in-out infinite;
+                .dendrite {
+                  fill: none;
+                  stroke: hsl(45 100% 55%);
+                  stroke-width: 0.35;
+                  stroke-dasharray: 2 8;
+                  stroke-linecap: round;
+                  opacity: 0.55;
+                  filter: url(#chip-glow);
+                  animation: neuron-flow 6s linear infinite;
+                }
+                .soma {
+                  fill: url(#synapse-node);
+                  animation: synapse-pulse 2.4s ease-in-out infinite;
+                }
+                .spark {
+                  fill: hsl(50 100% 78%);
+                  filter: url(#chip-glow);
+                  animation: spark-travel 4s linear infinite;
                 }
                 @media (prefers-reduced-motion: reduce) {
-                  .die-frame, .die-flow, .die-node { animation: none !important; }
+                  .axon, .dendrite, .soma, .spark { animation: none !important; }
                 }
               `}</style>
             </defs>
 
-            {/* Floating rectangular die outlines */}
-            <rect className="die-frame" x="6" y="10" width="70" height="45" rx="1" style={{ ["--dx" as string]: "3px", ["--dy" as string]: "-2px", animationDelay: "-2s" }} />
-            <rect className="die-frame" x="324" y="12" width="70" height="40" rx="1" style={{ ["--dx" as string]: "-3px", ["--dy" as string]: "2px", animationDelay: "-7s" }} />
-            <rect className="die-frame" x="18" y="125" width="55" height="60" rx="1" style={{ ["--dx" as string]: "2px", ["--dy" as string]: "3px", animationDelay: "-12s" }} />
-            <rect className="die-frame" x="335" y="130" width="55" height="55" rx="1" style={{ ["--dx" as string]: "-2px", ["--dy" as string]: "-3px", animationDelay: "-5s" }} />
-            <rect className="die-frame" x="90" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "4px", ["--dy" as string]: "-1px", animationDelay: "-9s" }} />
-            <rect className="die-frame" x="230" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "-4px", ["--dy" as string]: "1px", animationDelay: "-15s" }} />
+            {/* Long myelinated axons — trunk lines pulsing like neurons firing */}
+            <path className="axon" d="M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70" style={{ animationDelay: "-0.2s" }} />
+            <path className="axon" d="M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100" style={{ animationDelay: "-1.4s" }} />
+            <path className="axon" d="M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60" style={{ animationDelay: "-2.6s" }} />
+            <path className="axon" d="M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155" style={{ animationDelay: "-0.9s" }} />
 
-            {/* Inter-die traces */}
-            <path className="die-flow" d="M76 32 L110 32 L130 50 L200 50" style={{ animationDelay: "-1s" }} />
-            <path className="die-flow" d="M324 32 L290 32 L270 50 L200 50" style={{ animationDelay: "-3s" }} />
-            <path className="die-flow" d="M73 155 L120 155 L140 140 L200 140" style={{ animationDelay: "-5s" }} />
-            <path className="die-flow" d="M327 155 L280 155 L260 140 L200 140" style={{ animationDelay: "-7s" }} />
+            {/* Branching dendrites */}
+            <path className="dendrite" d="M80 100 C 100 90, 110 70, 140 70" style={{ animationDelay: "-0.5s" }} />
+            <path className="dendrite" d="M80 100 C 100 110, 110 130, 160 130" style={{ animationDelay: "-1.2s" }} />
+            <path className="dendrite" d="M200 60 C 210 80, 230 90, 260 100" style={{ animationDelay: "-2.1s" }} />
+            <path className="dendrite" d="M200 140 C 220 130, 240 115, 260 100" style={{ animationDelay: "-3s" }} />
+            <path className="dendrite" d="M300 40 C 310 60, 330 75, 340 90" style={{ animationDelay: "-1.7s" }} />
+            <path className="dendrite" d="M320 170 C 310 155, 290 140, 260 135" style={{ animationDelay: "-2.8s" }} />
+            <path className="dendrite" d="M140 70 C 150 55, 170 45, 200 60" style={{ animationDelay: "-3.4s" }} />
+            <path className="dendrite" d="M160 130 C 175 145, 190 155, 220 150" style={{ animationDelay: "-0.7s" }} />
 
-            {/* Small nodes */}
-            <circle className="die-node" cx="110" cy="32" r="1" style={{ animationDelay: "0s" }} />
-            <circle className="die-node" cx="290" cy="32" r="1" style={{ animationDelay: "0.8s" }} />
-            <circle className="die-node" cx="120" cy="155" r="1" style={{ animationDelay: "1.6s" }} />
-            <circle className="die-node" cx="280" cy="155" r="1" style={{ animationDelay: "2.4s" }} />
+            {/* Synapse nodes */}
+            <circle className="soma" cx="80" cy="100" r="2.2" style={{ animationDelay: "0s" }} />
+            <circle className="soma" cx="140" cy="70" r="1.8" style={{ animationDelay: "0.3s" }} />
+            <circle className="soma" cx="160" cy="130" r="2" style={{ animationDelay: "0.6s" }} />
+            <circle className="soma" cx="200" cy="60" r="1.6" style={{ animationDelay: "0.9s" }} />
+            <circle className="soma" cx="200" cy="140" r="1.6" style={{ animationDelay: "1.2s" }} />
+            <circle className="soma" cx="260" cy="100" r="2.4" style={{ animationDelay: "1.5s" }} />
+            <circle className="soma" cx="300" cy="40" r="1.8" style={{ animationDelay: "1.8s" }} />
+            <circle className="soma" cx="320" cy="170" r="1.8" style={{ animationDelay: "2.1s" }} />
+            <circle className="soma" cx="340" cy="90" r="2" style={{ animationDelay: "0.4s" }} />
+
+            {/* Traveling electrical sparks along axons */}
+            <circle className="spark" r="1.4" style={{ offsetPath: "path('M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70')", animationDelay: "0s" } as React.CSSProperties} />
+            <circle className="spark" r="1.2" style={{ offsetPath: "path('M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100')", animationDelay: "-1.6s", animationDuration: "5s" } as React.CSSProperties} />
+            <circle className="spark" r="1.3" style={{ offsetPath: "path('M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60')", animationDelay: "-2.8s", animationDuration: "4.5s" } as React.CSSProperties} />
+            <circle className="spark" r="1.1" style={{ offsetPath: "path('M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155')", animationDelay: "-0.7s", animationDuration: "5.5s" } as React.CSSProperties} />
           </svg>
 
           {/* Fine trace grid (etched substrate) */}
