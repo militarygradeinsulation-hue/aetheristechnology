@@ -320,14 +320,14 @@ export function HomeToolShopGrid() {
                   }}
                 >
                   {/* Left perforation column */}
-                  <div className="absolute inset-y-0 left-0 w-6 flex flex-col items-center justify-around py-3 border-r border-dashed border-charcoal/40 bg-charcoal/[0.04]">
+                  <div className="absolute inset-y-0 left-0 w-6 flex flex-col items-center justify-around py-3 border-r border-dashed border-[hsl(0_0%_12%)]/40 bg-[hsl(0_0%_12%)]/[0.05]">
                     {[0,1,2,3,4,5].map((i) => (
                       <span key={i} className="w-2 h-2 rounded-full bg-background shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.4)]" />
                     ))}
                   </div>
 
                   {/* Grommet hole top-right */}
-                  <span className="absolute top-2 right-3 w-3 h-3 rounded-full bg-background border border-charcoal/30 shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.5)]" />
+                  <span className="absolute top-2 right-3 w-3 h-3 rounded-full bg-background border border-[hsl(0_0%_12%)]/40 shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.5)]" />
 
                   {/* Diagonal EVIDENCE stripes strip */}
                   <div
@@ -353,19 +353,19 @@ export function HomeToolShopGrid() {
                   <div className="relative pl-10 pr-6 py-5">
                     {/* Case-file header line */}
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-case text-[9px] uppercase tracking-[0.35em] text-charcoal/70">
+                      <span className="font-case text-[9px] uppercase tracking-[0.35em] text-[hsl(0_0%_12%)]/80">
                         Exhibit · A
                       </span>
-                      <span className="font-case text-[9px] uppercase tracking-[0.3em] text-charcoal/60">
+                      <span className="font-case text-[9px] uppercase tracking-[0.3em] text-[hsl(0_0%_12%)]/70">
                         No. GR-014
                       </span>
                     </div>
 
                     {/* Big handwritten-forensic label */}
-                    <div className="font-forensic text-lg sm:text-xl font-black leading-none text-charcoal">
+                    <div className="font-forensic text-lg sm:text-xl font-black leading-none text-[hsl(0_0%_10%)]">
                       Golden Report
                     </div>
-                    <div className="font-case text-[10px] uppercase tracking-[0.28em] text-charcoal/70 mt-1">
+                    <div className="font-case text-[10px] uppercase tracking-[0.28em] text-[hsl(0_0%_12%)]/80 mt-1">
                       14-Chapter Forensic Case File
                     </div>
 
@@ -379,7 +379,7 @@ export function HomeToolShopGrid() {
                             "repeating-linear-gradient(90deg, hsl(0 0% 8%) 0 1px, transparent 1px 3px, hsl(0 0% 8%) 3px 5px, transparent 5px 4px, hsl(0 0% 8%) 4px 7px, transparent 7px 10px)",
                         }}
                       />
-                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-charcoal/60">
+                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-[hsl(0_0%_12%)]/70">
                         FREE
                       </div>
                     </div>
@@ -400,11 +400,11 @@ export function HomeToolShopGrid() {
                         >
                           Open File
                         </span>
-                        <span className="font-case text-[9px] uppercase tracking-widest text-charcoal/60">
+                        <span className="font-case text-[9px] uppercase tracking-widest text-[hsl(0_0%_12%)]/70">
                           → aetheris.technology/golden
                         </span>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-charcoal transition-transform duration-300 group-hover/tag:translate-x-1 group-hover/tag:text-[hsl(0_72%_42%)]" />
+                      <ArrowRight className="w-5 h-5 text-[hsl(0_0%_10%)] transition-transform duration-300 group-hover/tag:translate-x-1 group-hover/tag:text-[hsl(0_72%_42%)]" />
                     </div>
                   </div>
                 </Link>
