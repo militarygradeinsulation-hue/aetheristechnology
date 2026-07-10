@@ -80,12 +80,12 @@ export function HomeToolShopGrid() {
             </defs>
 
             {/* Floating rectangular die outlines */}
-            <rect className="die-frame" x="6" y="10" width="70" height="45" rx="1" style={{ "--dx": "3px", "--dy": "-2px", animationDelay: "-2s" }} />
-            <rect className="die-frame" x="324" y="12" width="70" height="40" rx="1" style={{ "--dx": "-3px", "--dy": "2px", animationDelay: "-7s" }} />
-            <rect className="die-frame" x="18" y="125" width="55" height="60" rx="1" style={{ "--dx": "2px", "--dy": "3px", animationDelay: "-12s" }} />
-            <rect className="die-frame" x="335" y="130" width="55" height="55" rx="1" style={{ "--dx": "-2px", "--dy": "-3px", animationDelay: "-5s" }} />
-            <rect className="die-frame" x="90" y="160" width="80" height="30" rx="1" style={{ "--dx": "4px", "--dy": "-1px", animationDelay: "-9s" }} />
-            <rect className="die-frame" x="230" y="160" width="80" height="30" rx="1" style={{ "--dx": "-4px", "--dy": "1px", animationDelay: "-15s" }} />
+            <rect className="die-frame" x="6" y="10" width="70" height="45" rx="1" style={{ ["--dx" as string]: "3px", ["--dy" as string]: "-2px", animationDelay: "-2s" }} />
+            <rect className="die-frame" x="324" y="12" width="70" height="40" rx="1" style={{ ["--dx" as string]: "-3px", ["--dy" as string]: "2px", animationDelay: "-7s" }} />
+            <rect className="die-frame" x="18" y="125" width="55" height="60" rx="1" style={{ ["--dx" as string]: "2px", ["--dy" as string]: "3px", animationDelay: "-12s" }} />
+            <rect className="die-frame" x="335" y="130" width="55" height="55" rx="1" style={{ ["--dx" as string]: "-2px", ["--dy" as string]: "-3px", animationDelay: "-5s" }} />
+            <rect className="die-frame" x="90" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "4px", ["--dy" as string]: "-1px", animationDelay: "-9s" }} />
+            <rect className="die-frame" x="230" y="160" width="80" height="30" rx="1" style={{ ["--dx" as string]: "-4px", ["--dy" as string]: "1px", animationDelay: "-15s" }} />
 
             {/* Inter-die traces */}
             <path className="die-flow" d="M76 32 L110 32 L130 50 L200 50" style={{ animationDelay: "-1s" }} />
