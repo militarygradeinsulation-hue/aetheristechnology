@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ExternalLink, Search, PhoneCall } from 'lucide-react';
+import { Phone, ExternalLink, Search, PhoneCall, Monitor, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
@@ -65,6 +65,24 @@ export const DialerPanel: React.FC = () => {
     }
   };
 
+  const launchDesktopDialer = () => {
+    const raw = number.trim();
+    if (!raw) {
+      toast({ title: 'Enter a number first', description: 'The desktop dialer needs a number to auto-fill PopTox.' });
+      return;
+    }
+    const normalized = normalizeNumber(raw);
+    const deepLink = `aetheris-dialer://call?number=${encodeURIComponent(normalized)}`;
+    // Navigate the current tab to the custom scheme. Browsers hand it off to
+    // the OS silently if the Aetheris Dialer app is installed; if it isn't,
+    // nothing visible happens — the toast tells the rep what to do.
+    window.location.href = deepLink;
+    toast({
+      title: 'Handed off to desktop dialer',
+      description: `${normalized} sent to Aetheris Dialer. If nothing opened, install the desktop app first.`,
+    });
+  };
+
   const openContactSearch = () => {
     const q = contactSearch.trim();
     const url = q
@@ -104,22 +122,37 @@ export const DialerPanel: React.FC = () => {
                 className="mt-1 font-mono bg-black/60 border-amber-400/30 text-amber-50"
               />
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-2">
               <Button
                 onClick={launchDialer}
                 className="w-full md:w-auto h-10 bg-amber-500 hover:bg-amber-600 text-black font-semibold"
               >
                 <Phone className="w-4 h-4 mr-2" />
-                Open HubSpot Dialer
+                HubSpot Dialer
+              </Button>
+              <Button
+                onClick={launchDesktopDialer}
+                variant="outline"
+                className="w-full md:w-auto h-10 border-amber-400/40 text-amber-100 hover:bg-amber-400/10"
+                title="Requires the Aetheris Desktop Dialer app (PopTox wrapper)"
+              >
+                <Monitor className="w-4 h-4 mr-2" />
+                PopTox Desktop
               </Button>
             </div>
           </div>
 
-          <div className="text-[11px] text-amber-100/50 border-t border-amber-400/15 pt-3">
-            <strong className="text-amber-200/70">How it works:</strong> HubSpot blocks embedding
-            its calling window inside other sites (security rule they set). So we open it in a small
-            popup instead — same dialer, same call logging, same HubSpot number. Keep the popup open
-            while you work and switch back to the portal any time.
+          <div className="text-[11px] text-amber-100/50 border-t border-amber-400/15 pt-3 space-y-2">
+            <p>
+              <strong className="text-amber-200/70">HubSpot Dialer:</strong> Opens HubSpot's calling
+              window in a popup. Calls auto-log to the contact record.
+            </p>
+            <p>
+              <strong className="text-amber-200/70">PopTox Desktop:</strong> Hands the number off to
+              the Aetheris Dialer desktop app (Electron wrapper around PopTox that stays signed in).
+              Install once per machine from the <code className="text-amber-300">desktop-dialer/</code> folder
+              in the repo — see its README for build steps.
+            </p>
           </div>
         </CardContent>
       </Card>
