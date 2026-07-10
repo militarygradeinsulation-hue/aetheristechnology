@@ -38,7 +38,8 @@ const NexusIQPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setUnlock(loadUnlock());
+    const existing = loadUnlock();
+    if (existing) setUnlock(existing);
   }, []);
 
   const valid = useMemo(() => isEmail(email) && isPhone(phone), [email, phone]);
