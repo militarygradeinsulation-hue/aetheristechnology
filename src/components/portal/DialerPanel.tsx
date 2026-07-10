@@ -1,20 +1,13 @@
-// Launches HubSpot's native calling window in a popup. This is the only way
-// to embed HubSpot calling — their app blocks iframes (X-Frame-Options).
-// Reps sign in to HubSpot once, then every launch reuses that session.
+// Launches HubSpot's native calling window and PopTox in popups. Both apps
+// block iframes (X-Frame-Options), so popups are the only in-browser option.
+// Reps sign in once per popup; the browser keeps the session between launches.
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ExternalLink, Search, PhoneCall, Monitor, Download, Apple } from 'lucide-react';
+import { Phone, ExternalLink, Search, PhoneCall, PhoneOutgoing } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import dialerArm64Asset from '@/assets/AetherisDialer-mac-AppleSilicon.zip.asset.json';
-import dialerIntelAsset from '@/assets/AetherisDialer-mac-Intel.zip.asset.json';
-
-const DIALER_DOWNLOADS = {
-  appleSilicon: (dialerArm64Asset as { url: string }).url,
-  intel: (dialerIntelAsset as { url: string }).url,
-};
 
 const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
 const HUBSPOT_CONTACTS_URL = 'https://app-na2.hubspot.com/contacts/244481481/objects/0-1/views/all/list';
