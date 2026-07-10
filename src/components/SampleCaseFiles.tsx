@@ -284,7 +284,7 @@ function DossierCard({ file }: { file: CaseFile }) {
           ["Subject", file.subject],
           ["Industry", file.industry],
           ["Revenue Class", file.revenue],
-          ["Date Opened", "07.09.2026"],
+          ["Date Opened", caseOpenedDate(file.caseNo)],
           ["Examiner", "J. Toney"],
           ["Method", "Leak Audit v2"],
         ].map(([k, v], i) => (
