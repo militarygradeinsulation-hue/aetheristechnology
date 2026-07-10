@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-react";
+import aetherisLogo from "@/assets/aetheris-a-logo.png.asset.json";
 
 /**
  * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
@@ -260,7 +261,9 @@ function DossierCard({ file }: { file: CaseFile }) {
       <div className="absolute inset-2 border border-amber/10 pointer-events-none" />
       <header className="flex items-center justify-between px-5 py-4 border-b border-amber/15">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 border border-amber/60 text-amber flex items-center justify-center font-forensic text-xl font-semibold">A</div>
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img src={aetherisLogo.url} alt="Aetheris" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,169,58,0.35)]" />
+          </div>
           <div className="font-case text-[10px] tracking-[0.28em] text-amber uppercase leading-tight">
             AETHERIS
             <div className="text-muted-foreground/80 text-[9px] tracking-[0.22em]">Chaos Theory Forensics</div>
