@@ -23,10 +23,9 @@ export const BuildMeASystemSection: React.FC = () => {
       const { error } = await supabase.from('contact_submissions').insert({
         name: form.name || 'Custom system request',
         email: form.email.trim(),
-        message: form.message.trim(),
+        message: `[home_build_me_a_system]\n\n${form.message.trim()}`,
         service_interest: 'custom_system_request',
-        source: 'home_build_me_a_system',
-      } as any);
+      });
       if (error) throw error;
       setDone(true);
       toast({ title: 'Got it — I\'ll be in touch personally.' });
