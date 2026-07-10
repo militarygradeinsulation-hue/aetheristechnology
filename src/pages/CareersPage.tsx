@@ -257,7 +257,7 @@ const CareersPage = () => {
                 <div className="grid md:grid-cols-5 gap-3">
                   {[
                     { n: '01', t: 'Pay $500', d: 'One-time yearly fee. License ID + personalized certificate issued the same minute.' },
-                    { n: '02', t: 'Get your tracked link', d: 'A unique reseller URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
+                    { n: '02', t: 'Get your tracked link', d: 'A unique Connector URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
                     { n: '03', t: 'Market on your channels', d: 'LinkedIn, email, referrals, in-person. Use our creative pack (screenshots, one-pagers, demo video links). No cold-call quota, no script gate.' },
                     { n: '04', t: 'We deliver', d: 'When they buy, our team builds, ships, and supports. You never touch delivery, diagnosis, or operations.' },
                     { n: '05', t: 'Get paid monthly', d: '40% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
