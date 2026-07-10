@@ -368,7 +368,7 @@ export function SampleCaseFiles() {
           <div>
             <div className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Companies Reviewed</div>
             <div className="font-forensic text-base md:text-lg mt-0.5">
-              Sample Preliminary Findings — <span className="text-amber">5 industries</span>
+              Sample Preliminary Findings — <span className="text-amber">15 industries</span>
             </div>
           </div>
         </div>
