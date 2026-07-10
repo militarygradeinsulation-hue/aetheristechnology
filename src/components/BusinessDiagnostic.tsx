@@ -449,7 +449,7 @@ export const BusinessDiagnostic: React.FC = () => {
             <p className="text-muted-foreground text-sm">
               Friction Audit · Brand Contradictions · Follow-Up Plan · Sales Scripts · Question Engine · Content Calendar · Gap Scanner. Run any of them against your business, now that we have your case open.
             </p>
-            <a href="/tools-shop">
+            <a href="/ecosystem">
               <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
                 Open the Evidence Kit <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
