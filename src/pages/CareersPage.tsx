@@ -300,8 +300,9 @@ const CareersPage = () => {
               <div className="text-center space-y-3 pt-2">
                 <a href="/careers/license?tier=reseller" onClick={() => trackCareersCta('reseller_license_buy')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold px-8">
-                    Get the yearly license — $500 →
+                    Become a Connector — $500/yr →
                   </Button>
+
                 </a>
                 <p className="text-xs text-muted-foreground">
                   License auto-expires 12 months from issue date. Renew at the same rate. No auto-charge.
