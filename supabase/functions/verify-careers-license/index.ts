@@ -1,4 +1,4 @@
-// Verifies a Stripe Checkout Session for the $100 Aetheris Instant Rep License.
+// Verifies a Stripe Checkout Session for the $500 Aetheris Instant Rep License.
 // On success: generates a unique rep_code, inserts into public.rep_codes, and
 // returns { paid, code, email } so the client can show the credential.
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
