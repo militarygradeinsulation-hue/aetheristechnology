@@ -44,11 +44,11 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const initialMessage: Msg = {
     role: 'assistant',
     content: isPartner
-      ? "**Sales Coach + Company View online.** Ask me anything, coaching, scripts, objections, OR live company stats (leads, reps, submissions). I pull live data when you ask for numbers."
-      : "**Sales Coach online.** Ask me anything: how to handle an objection, what to pitch a specific prospect, exact words for a follow-up email, commission math, or how to explain any service.",
+      ? "**Aetheris Nexus online — Advisor + Coach + Trainer + Company View, one chat.**\n\nAsk me to pitch, coach a live objection, drill you on a script, quiz you on the playbook, rewrite an email, or pull live company numbers (leads, reps, submissions, forecast). I route myself — you just talk."
+      : "**Aetheris Nexus online — Advisor + Coach + Trainer, one chat.**\n\nAsk me to pitch a specific prospect, coach you through an objection, drill you on a script, quiz you on the playbook, rewrite an email, or explain commission math. I route myself — you just talk.",
     suggestions: isPartner
-      ? ['Give me a company summary', 'Show recent leads', 'Coach me through a price objection']
-      : ['Coach me through "too expensive"', 'Write a cold LinkedIn DM', 'What should I pitch a 10-person operator?'],
+      ? ['Give me a company summary', 'Coach me through "too expensive"', 'Quiz me on the 21-Day Diagnostic']
+      : ['Pitch a 10-person operator', 'Coach me through "too expensive"', 'Quiz me on the Leak Audit'],
   };
 
   const [isOpen, setIsOpen] = useState(embedded);
