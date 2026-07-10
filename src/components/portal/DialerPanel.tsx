@@ -65,6 +65,24 @@ export const DialerPanel: React.FC = () => {
     }
   };
 
+  const launchDesktopDialer = () => {
+    const raw = number.trim();
+    if (!raw) {
+      toast({ title: 'Enter a number first', description: 'The desktop dialer needs a number to auto-fill PopTox.' });
+      return;
+    }
+    const normalized = normalizeNumber(raw);
+    const deepLink = `aetheris-dialer://call?number=${encodeURIComponent(normalized)}`;
+    // Navigate the current tab to the custom scheme. Browsers hand it off to
+    // the OS silently if the Aetheris Dialer app is installed; if it isn't,
+    // nothing visible happens — the toast tells the rep what to do.
+    window.location.href = deepLink;
+    toast({
+      title: 'Handed off to desktop dialer',
+      description: `${normalized} sent to Aetheris Dialer. If nothing opened, install the desktop app first.`,
+    });
+  };
+
   const openContactSearch = () => {
     const q = contactSearch.trim();
     const url = q
