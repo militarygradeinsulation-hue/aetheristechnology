@@ -1,242 +1,158 @@
-// Browser-based dialer for reps. Uses Twilio Voice SDK to place calls worldwide
-// through the account's Twilio number. Gated by portal HMAC token.
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Device, Call } from '@twilio/voice-sdk';
+// Launches HubSpot's native calling window in a popup. This is the only way
+// to embed HubSpot calling — their app blocks iframes (X-Frame-Options).
+// Reps sign in to HubSpot once, then every launch reuses that session.
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Phone, ExternalLink, Search, PhoneCall } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getPortalToken } from '@/lib/portalAuth';
-import { Phone, PhoneOff, MicOff, Mic, Loader2, Delete } from 'lucide-react';
 
-const FN = (name: string) =>
-  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`;
+const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
+const HUBSPOT_CONTACTS_URL = 'https://app-na2.hubspot.com/contacts/244481481/objects/0-1/views/all/list';
 
-const DIGITS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
+function normalizeNumber(raw: string): string {
+  const digits = raw.replace(/[^\d+]/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('+')) return digits;
+  // Assume US if 10 digits
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return `+${digits}`;
+}
 
-function formatDuration(sec: number) {
-  const m = Math.floor(sec / 60).toString().padStart(2, '0');
-  const s = (sec % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
+function openHubspotPopup(url: string) {
+  const w = 460, h = 720;
+  const y = window.top?.outerHeight
+    ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
+    : 100;
+  const x = window.top?.outerWidth
+    ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
+    : 100;
+  return window.open(
+    url,
+    'hubspot-calling',
+    `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
+  );
 }
 
 export const DialerPanel: React.FC = () => {
   const { toast } = useToast();
-  const [device, setDevice] = useState<Device | null>(null);
-  const [ready, setReady] = useState(false);
-  const [initializing, setInitializing] = useState(false);
-  const [number, setNumber] = useState('+1');
-  const [notes, setNotes] = useState('');
-  const [call, setCall] = useState<Call | null>(null);
-  const [status, setStatus] = useState<'idle' | 'connecting' | 'in-call'>('idle');
-  const [muted, setMuted] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-  const startRef = useRef<number>(0);
-  const tickRef = useRef<number | null>(null);
-  const currentToRef = useRef<string>('');
+  const [number, setNumber] = useState('');
+  const [contactSearch, setContactSearch] = useState('');
 
-  const initDevice = useCallback(async () => {
-    setInitializing(true);
-    try {
-      const portalToken = getPortalToken();
-      if (!portalToken) throw new Error('Not signed in to the portal');
-      const res = await fetch(FN('twilio-voice-token'), {
-        method: 'POST',
-        headers: { 'x-portal-token': portalToken, 'Content-Type': 'application/json' },
-        body: '{}',
+  const launchDialer = () => {
+    const win = openHubspotPopup(HUBSPOT_CALLING_URL);
+    if (!win) {
+      toast({
+        title: 'Popup blocked',
+        description: 'Allow popups for this site and click again.',
+        variant: 'destructive',
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`Token fetch failed: ${res.status} ${txt.slice(0, 200)}`);
-      }
-      const { token } = await res.json();
-      const dev = new Device(token, {
-        logLevel: 'warn',
-        codecPreferences: ['opus' as any, 'pcmu' as any],
-      });
-      dev.on('registered', () => setReady(true));
-      dev.on('error', (err) => {
-        console.error('Twilio Device error:', err);
-        toast({ title: 'Dialer error', description: err?.message || 'Unknown error', variant: 'destructive' });
-      });
-      await dev.register();
-      setDevice(dev);
-    } catch (e: any) {
-      toast({ title: 'Could not start dialer', description: e?.message || String(e), variant: 'destructive' });
-    } finally {
-      setInitializing(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    return () => {
-      if (tickRef.current) window.clearInterval(tickRef.current);
-      device?.destroy();
-    };
-  }, [device]);
-
-  const startTimer = () => {
-    startRef.current = Date.now();
-    setElapsed(0);
-    tickRef.current = window.setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
-    }, 1000);
-  };
-  const stopTimer = () => {
-    if (tickRef.current) { window.clearInterval(tickRef.current); tickRef.current = null; }
-  };
-
-  const logCall = useCallback(async (to: string, durationSec: number, finalStatus: string) => {
-    try {
-      const portalToken = getPortalToken();
-      if (!portalToken) return;
-      await fetch(FN('twilio-call-log'), {
-        method: 'POST',
-        headers: { 'x-portal-token': portalToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to_number: to,
-          duration_seconds: durationSec,
-          status: finalStatus,
-          notes,
-        }),
-      });
-    } catch (e) { console.error('call log failed', e); }
-  }, [notes]);
-
-  const placeCall = useCallback(async () => {
-    if (!device) return;
-    const to = number.trim();
-    if (!/^\+[1-9]\d{6,15}$/.test(to)) {
-      toast({ title: 'Invalid number', description: 'Use E.164 format, e.g. +14155550123', variant: 'destructive' });
       return;
     }
-    setStatus('connecting');
-    currentToRef.current = to;
-    try {
-      const c = await device.connect({ params: { To: to } });
-      setCall(c);
-      c.on('accept', () => { setStatus('in-call'); startTimer(); });
-      c.on('disconnect', () => {
-        stopTimer();
-        const dur = Math.floor((Date.now() - startRef.current) / 1000);
-        logCall(currentToRef.current, dur, 'completed');
-        setCall(null); setStatus('idle'); setMuted(false);
-        toast({ title: 'Call ended', description: `${formatDuration(dur)} — logged to HubSpot` });
+    if (number.trim()) {
+      const normalized = normalizeNumber(number);
+      // Copy to clipboard so the rep can paste into HubSpot's dial field
+      navigator.clipboard?.writeText(normalized).catch(() => {});
+      toast({
+        title: 'HubSpot dialer opened',
+        description: `${normalized} copied to clipboard — paste it into HubSpot's dial field.`,
       });
-      c.on('cancel', () => { stopTimer(); setCall(null); setStatus('idle'); });
-      c.on('error', (err) => {
-        console.error('call error', err);
-        stopTimer(); setCall(null); setStatus('idle');
-        toast({ title: 'Call failed', description: err?.message || 'Unknown', variant: 'destructive' });
-      });
-    } catch (e: any) {
-      setStatus('idle');
-      toast({ title: 'Could not place call', description: e?.message || String(e), variant: 'destructive' });
+    } else {
+      toast({ title: 'HubSpot dialer opened', description: 'Sign in if prompted, then dial.' });
     }
-  }, [device, number, toast, logCall]);
-
-  const hangup = () => { call?.disconnect(); };
-  const toggleMute = () => { if (call) { const n = !muted; call.mute(n); setMuted(n); } };
-  const sendDigit = (d: string) => {
-    if (call && status === 'in-call') { call.sendDigits(d); return; }
-    setNumber((prev) => prev + d);
   };
-  const backspace = () => setNumber((p) => p.slice(0, -1) || '+');
+
+  const openContactSearch = () => {
+    const q = contactSearch.trim();
+    const url = q
+      ? `${HUBSPOT_CONTACTS_URL}?query=${encodeURIComponent(q)}`
+      : HUBSPOT_CONTACTS_URL;
+    window.open(url, '_blank', 'noopener');
+  };
 
   return (
-    <div className="space-y-6">
-      {!ready && (
-        <Card className="bg-black/40 border-amber-400/25">
-          <CardContent className="p-6 text-center space-y-4">
-            <Phone className="w-10 h-10 mx-auto text-amber-400" />
+    <div className="space-y-4">
+      {/* Primary: launch the HubSpot dialer */}
+      <Card className="bg-black/40 border-amber-400/25">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-400/15 border border-amber-400/30 flex items-center justify-center flex-shrink-0">
+              <PhoneCall className="w-5 h-5 text-amber-400" />
+            </div>
             <div>
-              <h3 className="text-lg font-semibold text-amber-100">Browser dialer</h3>
+              <h3 className="text-lg font-semibold text-amber-100">HubSpot Calling Window</h3>
               <p className="text-sm text-amber-100/60 mt-1">
-                Call any number worldwide from your laptop. Your browser will ask for mic permission.
+                Launch HubSpot's built-in dialer in a popup. Every call is auto-logged to
+                the contact record inside HubSpot. First launch will ask you to sign in;
+                after that it stays signed in.
               </p>
             </div>
-            <Button onClick={initDevice} disabled={initializing} className="bg-amber-500 hover:bg-amber-600 text-black font-semibold">
-              {initializing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Starting…</> : 'Start dialer'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
 
-      {ready && (
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Dial pad */}
-          <Card className="bg-black/40 border-amber-400/25">
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <Label className="text-xs uppercase tracking-wider text-amber-100/70">Number (E.164)</Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-                    placeholder="+14155550123"
-                    className="font-mono text-lg bg-black/60 border-amber-400/30 text-amber-50"
-                    disabled={status !== 'idle'}
-                  />
-                  <Button variant="outline" size="icon" onClick={backspace} disabled={status !== 'idle'}>
-                    <Delete className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {DIGITS.map((d) => (
-                  <Button
-                    key={d}
-                    variant="outline"
-                    onClick={() => sendDigit(d)}
-                    className="h-14 text-xl font-mono bg-black/40 border-amber-400/20 hover:bg-amber-400/10 text-amber-50"
-                  >
-                    {d}
-                  </Button>
-                ))}
-              </div>
-
-              {status === 'idle' ? (
-                <Button onClick={placeCall} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold">
-                  <Phone className="w-5 h-5 mr-2" /> Call
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="text-center text-amber-100">
-                    {status === 'connecting' ? 'Connecting…' : `On call — ${formatDuration(elapsed)}`}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={toggleMute} variant="outline" className="flex-1" disabled={status !== 'in-call'}>
-                      {muted ? <><MicOff className="w-4 h-4 mr-2" />Muted</> : <><Mic className="w-4 h-4 mr-2" />Mute</>}
-                    </Button>
-                    <Button onClick={hangup} className="flex-1 bg-red-600 hover:bg-red-700 text-white">
-                      <PhoneOff className="w-4 h-4 mr-2" /> Hang up
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Notes */}
-          <Card className="bg-black/40 border-amber-400/25">
-            <CardContent className="p-6 space-y-3">
-              <Label className="text-xs uppercase tracking-wider text-amber-100/70">Call notes</Label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="What did you learn? Objections? Next steps? — Saved to HubSpot when the call ends."
-                className="min-h-[220px] bg-black/60 border-amber-400/30 text-amber-50"
+          <div className="grid md:grid-cols-[1fr,auto] gap-2">
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-amber-100/70">
+                Optional — pre-copy a number to your clipboard
+              </Label>
+              <Input
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                placeholder="+14155550123 or 415-555-0123"
+                className="mt-1 font-mono bg-black/60 border-amber-400/30 text-amber-50"
               />
-              <p className="text-[11px] text-amber-100/50">
-                On hangup, notes + duration are attached to the matching HubSpot contact (by phone) as a Call engagement, and logged to your rep activity.
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={launchDialer}
+                className="w-full md:w-auto h-10 bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Open HubSpot Dialer
+              </Button>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-amber-100/50 border-t border-amber-400/15 pt-3">
+            <strong className="text-amber-200/70">How it works:</strong> HubSpot blocks embedding
+            its calling window inside other sites (security rule they set). So we open it in a small
+            popup instead — same dialer, same call logging, same HubSpot number. Keep the popup open
+            while you work and switch back to the portal any time.
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Secondary: jump to a HubSpot contact and dial from there */}
+      <Card className="bg-black/40 border-amber-400/25">
+        <CardContent className="p-6 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center flex-shrink-0">
+              <Search className="w-5 h-5 text-amber-300" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-amber-100">Or call straight from a contact</h3>
+              <p className="text-xs text-amber-100/60 mt-1">
+                Jump to the HubSpot contact record and hit "Call" there — that method
+                links the call to the contact automatically without any clipboard step.
               </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={contactSearch}
+              onChange={(e) => setContactSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') openContactSearch(); }}
+              placeholder="Search contacts by name, email, or company"
+              className="bg-black/60 border-amber-400/30 text-amber-50"
+            />
+            <Button onClick={openContactSearch} variant="outline" className="border-amber-400/30 text-amber-100">
+              <ExternalLink className="w-4 h-4 mr-2" /> Open in HubSpot
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
