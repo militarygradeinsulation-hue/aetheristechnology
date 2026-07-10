@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ExternalLink, Search, PhoneCall } from 'lucide-react';
+import { Phone, ExternalLink, Search, PhoneCall, Monitor, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
