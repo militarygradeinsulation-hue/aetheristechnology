@@ -47,7 +47,7 @@ export const DialerPanel: React.FC = () => {
   const [contactSearch, setContactSearch] = useState('');
 
   const launchDialer = () => {
-    const win = openHubspotPopup(HUBSPOT_CALLING_URL);
+    const win = openCenteredPopup(HUBSPOT_CALLING_URL, 'hubspot-calling');
     if (!win) {
       toast({
         title: 'Popup blocked',
