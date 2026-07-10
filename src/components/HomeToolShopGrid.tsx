@@ -309,7 +309,7 @@ export function HomeToolShopGrid() {
                 <Link
                   to="/golden-report"
                   aria-label="Open the free Golden Report"
-                  className="group/tag relative block mx-auto max-w-md text-left overflow-hidden rounded-[2px] transition-transform duration-300 hover:-translate-y-0.5"
+                  className="group/tag relative block mx-auto max-w-md text-left overflow-hidden rounded-[2px] text-[hsl(0_0%_0%)] transition-transform duration-300 hover:-translate-y-0.5"
                   style={{
                     background:
                       "linear-gradient(135deg, hsl(45 25% 92%) 0%, hsl(42 30% 85%) 55%, hsl(38 30% 78%) 100%)",
@@ -317,6 +317,7 @@ export function HomeToolShopGrid() {
                       "0 24px 60px -20px hsl(0 0% 0% / 0.7), 0 2px 0 hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.7)",
                     clipPath:
                       "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))",
+                    color: "hsl(0 0% 0%)",
                   }}
                 >
                   {/* Left perforation column */}
@@ -353,19 +354,19 @@ export function HomeToolShopGrid() {
                   <div className="relative pl-10 pr-6 py-5">
                     {/* Case-file header line */}
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-case text-[9px] uppercase tracking-[0.35em] text-[hsl(0_0%_12%)]/80">
+                      <span className="font-case text-[9px] uppercase tracking-[0.35em] text-[hsl(0_0%_0%)]">
                         Exhibit · A
                       </span>
-                      <span className="font-case text-[9px] uppercase tracking-[0.3em] text-[hsl(0_0%_12%)]/70">
+                      <span className="font-case text-[9px] uppercase tracking-[0.3em] text-[hsl(0_0%_0%)]">
                         No. GR-014
                       </span>
                     </div>
 
                     {/* Big handwritten-forensic label */}
-                    <div className="font-forensic text-lg sm:text-xl font-black leading-none text-[hsl(0_0%_10%)]">
+                    <div className="font-forensic text-lg sm:text-xl font-black leading-none text-[hsl(0_0%_0%)]">
                       Golden Report
                     </div>
-                    <div className="font-case text-[10px] uppercase tracking-[0.28em] text-[hsl(0_0%_12%)]/80 mt-1">
+                    <div className="font-case text-[10px] uppercase tracking-[0.28em] text-[hsl(0_0%_0%)] mt-1">
                       14-Chapter Forensic Case File
                     </div>
 
@@ -379,7 +380,7 @@ export function HomeToolShopGrid() {
                             "repeating-linear-gradient(90deg, hsl(0 0% 8%) 0 1px, transparent 1px 3px, hsl(0 0% 8%) 3px 5px, transparent 5px 4px, hsl(0 0% 8%) 4px 7px, transparent 7px 10px)",
                         }}
                       />
-                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-[hsl(0_0%_12%)]/70">
+                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-[hsl(0_0%_0%)]">
                         FREE
                       </div>
                     </div>
@@ -391,20 +392,20 @@ export function HomeToolShopGrid() {
                         <span
                           className="inline-block px-2 py-1 border-2 rounded-sm font-case text-[10px] font-black uppercase tracking-[0.3em] transition-transform group-hover/tag:scale-105"
                           style={{
-                            borderColor: "hsl(0 72% 42%)",
-                            color: "hsl(0 72% 42%)",
+                            borderColor: "hsl(0 0% 0%)",
+                            color: "hsl(0 0% 0%)",
                             transform: "rotate(-4deg)",
                             fontFamily: "var(--font-case, ui-monospace)",
-                            textShadow: "0 0 1px hsl(0 72% 42% / 0.4)",
+                            textShadow: "none",
                           }}
                         >
                           Open File
                         </span>
-                        <span className="font-case text-[9px] uppercase tracking-widest text-[hsl(0_0%_12%)]/70">
+                        <span className="font-case text-[9px] uppercase tracking-widest text-[hsl(0_0%_0%)]">
                           → aetheris.technology/golden
                         </span>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-[hsl(0_0%_10%)] transition-transform duration-300 group-hover/tag:translate-x-1 group-hover/tag:text-[hsl(0_72%_42%)]" />
+                      <ArrowRight className="w-5 h-5 text-[hsl(0_0%_0%)] transition-transform duration-300 group-hover/tag:translate-x-1" />
                     </div>
                   </div>
                 </Link>
