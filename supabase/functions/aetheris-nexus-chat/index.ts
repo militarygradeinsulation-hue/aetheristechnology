@@ -207,13 +207,13 @@ Deno.serve(async (req) => {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
 
       try {
-        // Loop until model returns a non-tool response (max 5 rounds when
-        // tools are enabled; a single streaming call otherwise).
-        const maxRounds = useTools ? 8 : 1;
+        // No hard cap on tool rounds — Nexus can chain as many tool calls as
+        // it needs. We use a large soft ceiling (safety net against infinite
+        // loops) and on the last iteration drop tools so the model is forced
+        // to produce a final text answer instead of erroring out.
+        const maxRounds = useTools ? 40 : 1;
         for (let round = 0; round < maxRounds; round++) {
           const isFinalRound = round === maxRounds - 1;
-          // On the final round, drop tools so the model MUST produce a text answer
-          // instead of another tool call (which would trip "Max tool rounds exceeded").
           const includeTools = useTools && !isFinalRound;
           // Use streaming on every call so the user sees tokens immediately.
           const res = await fetch(AI_URL, {
@@ -289,7 +289,9 @@ Deno.serve(async (req) => {
           }
 
           if (isFinalRound) {
-            send({ type: "error", error: "Max tool rounds exceeded" });
+            // Tools were dropped this round; whatever text we got is the final answer.
+            if (!started) { send({ type: "message_start" }); send({ type: "delta", text: finalContent }); }
+            send({ type: "done" });
             controller.close();
             return;
           }
@@ -323,7 +325,7 @@ Deno.serve(async (req) => {
         }
 
 
-        send({ type: "error", error: "Max tool rounds exceeded" });
+        send({ type: "done" });
         controller.close();
       } catch (e) {
         send({ type: "error", error: String(e) });
