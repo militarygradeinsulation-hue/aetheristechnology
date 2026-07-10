@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
+import { DialerPanel } from '@/components/portal/DialerPanel';
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
@@ -249,14 +250,14 @@ const NewPortalPage: React.FC = () => {
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
               ['golden', 'Golden Report', ScrollText, true],
+              ['dialer', 'Dialer', Phone, true],
               ['training', 'Training', GraduationCap, showAdvanced],
               ['studio', 'Studio', Palette, showAdvanced],
               ['workspace', 'Workspace', Sparkles, true],
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9',
-
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9', 10: 'md:grid-cols-10',
             };
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
             return (
@@ -410,6 +411,24 @@ const NewPortalPage: React.FC = () => {
               <ForensicScanAllPanel />
             </ToolCard>
           </TabsContent>
+
+          {/* DIALER — browser-based worldwide calling via Twilio */}
+          <TabsContent value="dialer" className="mt-8">
+            <ToolCard
+              eyebrow="// Voice //"
+              title="Browser Dialer — Call Anywhere"
+              summary="Place calls to any number worldwide from your laptop. Auto-logs to HubSpot when you hang up."
+              howTo={[
+                'Click Start dialer and allow mic access (one-time per session).',
+                'Type or paste a number in E.164 format (+ country code, e.g. +14155550123).',
+                'Take notes as you talk — they save to the HubSpot contact automatically.',
+              ]}
+              defaultOpen
+            >
+              <DialerPanel />
+            </ToolCard>
+          </TabsContent>
+
 
 
 
