@@ -1132,6 +1132,15 @@ const PortalPage: React.FC = () => {
       </header>
 
       <main className={`${(wideMode || WIDE_TABS.has(tab)) ? 'max-w-none w-full' : 'max-w-7xl'} mx-auto px-4 py-6 space-y-6`}>
+        {/* Always-on browser dialer */}
+        <div className="rounded-xl border border-amber/30 bg-black/40 backdrop-blur-sm p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <PhoneIcon className="w-4 h-4 text-amber" />
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber">Browser Dialer</h2>
+          </div>
+          <DialerPanel />
+        </div>
+
         <div className={`rounded-lg border px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${extensionOutdated ? 'border-red-500/60 bg-red-500/10' : 'border-amber/30 bg-amber/5'}`}>
           <div className="min-w-0">
             <p className="font-display font-bold text-foreground flex items-center gap-2">
