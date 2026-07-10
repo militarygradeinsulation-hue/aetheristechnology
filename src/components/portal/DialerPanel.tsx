@@ -70,18 +70,7 @@ export const DialerPanel: React.FC = () => {
   };
 
   const launchPoptox = () => {
-    const w = 460, h = 720;
-    const y = window.top?.outerHeight
-      ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
-      : 100;
-    const x = window.top?.outerWidth
-      ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
-      : 100;
-    const win = window.open(
-      POPTOX_URL,
-      'poptox-dialer',
-      `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
-    );
+    const win = openCenteredPopup(POPTOX_URL, 'poptox-dialer');
     if (!win) {
       toast({
         title: 'Popup blocked',
