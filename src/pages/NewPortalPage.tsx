@@ -239,9 +239,21 @@ const NewPortalPage: React.FC = () => {
         </div>
       </header>
 
+      {/* Always-on dialer at top of portal */}
+      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4">
+        <div className="rounded-xl border border-amber-400/25 bg-black/40 backdrop-blur-sm p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Phone className="w-4 h-4 text-amber-400" />
+            <h2 className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-400">Browser Dialer</h2>
+          </div>
+          <DialerPanel />
+        </div>
+      </section>
+
       {/* Tabs */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 pb-24">
         <Tabs defaultValue="start" className="w-full">
+
           {(() => {
             const allTabs: Array<[string, string, any, boolean]> = [
               ['start', 'Start', LayoutGrid, true],
