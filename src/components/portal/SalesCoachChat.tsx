@@ -327,7 +327,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     }>
       <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
-          Case File · Sales Coach{isPartner ? ' + Company View' : ''}
+          Case File · Aetheris Nexus{isPartner ? ' · Company View' : ''}
         </span>
         <div className="flex items-center gap-1">
           <button
