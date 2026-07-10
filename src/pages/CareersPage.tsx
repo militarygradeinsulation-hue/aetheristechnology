@@ -278,9 +278,10 @@ const CareersPage = () => {
                   <h4 className="font-display text-emerald-400 font-semibold mb-3 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> You are authorized to</h4>
                   <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li className="flex gap-2"><span className="text-emerald-500">✓</span>Market and promote every Aetheris tool, ecosystem, and flagship</li>
-                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Use the official "Aetheris Authorized Partner" seal on your site & LinkedIn</li>
-                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Share your certificate publicly as proof of license</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Use the official "Aetheris Authorized Connector" seal on your site & LinkedIn</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Share your certificate publicly as proof of your Connector license</li>
                     <li className="flex gap-2"><span className="text-emerald-500">✓</span>Refer inbound leads directly to Joseph for flagship closes</li>
+
                   </ul>
                 </div>
                 <div className="rounded-xl border border-crimson/30 bg-crimson/5 p-5">
