@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ChevronDown, FileText, Lock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ChevronDown, FileText, Lock, ArrowRight } from "lucide-react";
 
 /**
  * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
@@ -354,6 +355,17 @@ function DossierCard({ file }: { file: CaseFile }) {
 export function SampleCaseFiles() {
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(0);
+  const [tickerIdx, setTickerIdx] = useState(0);
+
+  // Cycle a live ticker of "recent" reviewed companies on the trigger card
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setTickerIdx(i => (i + 1) % CASES.length);
+    }, 2600);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const ticker = CASES[tickerIdx];
 
   return (
     <section className="mt-6 max-w-5xl mx-auto px-4">
@@ -361,25 +373,80 @@ export function SampleCaseFiles() {
         type="button"
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 border border-amber/40 bg-background/60 hover:bg-amber/5 transition-colors px-5 py-4 rounded-sm group"
+        className="group relative w-full flex items-center justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)]"
       >
-        <div className="flex items-center gap-3 text-left">
-          <FileText className="w-4 h-4 text-amber" />
-          <div>
-            <div className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Companies Reviewed</div>
-            <div className="font-forensic text-base md:text-lg mt-0.5">
+        {/* Ambient scanning shimmer */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-amber/15 to-transparent motion-safe:animate-[scfShimmer_3.4s_linear_infinite]"
+        />
+        {/* Corner solder marks */}
+        <span aria-hidden className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+        <span aria-hidden className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+        <span aria-hidden className="absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+        <span aria-hidden className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+
+        <style>{`
+          @keyframes scfShimmer { 0% { transform: translateX(0); } 100% { transform: translateX(500%); } }
+          @keyframes scfTickerIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+          @keyframes scfLivePulse { 0%,100% { opacity:.4; transform: scale(1); } 50% { opacity:1; transform: scale(1.4); } }
+          @media (prefers-reduced-motion: reduce) {
+            .scf-shimmer, .scf-ticker, .scf-live { animation: none !important; }
+          }
+        `}</style>
+
+        <div className="relative flex items-center gap-3 text-left min-w-0 flex-1">
+          <div className="relative flex-shrink-0">
+            <FileText className="w-5 h-5 text-amber" />
+            <span
+              aria-hidden
+              className="scf-live absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-crimson motion-safe:animate-[scfLivePulse_1.6s_ease-in-out_infinite]"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Companies Reviewed</span>
+              <span className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson/90 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Live · 15 cases</span>
+            </div>
+            <div className="font-forensic text-base md:text-lg mt-1 truncate">
               Sample Preliminary Findings — <span className="text-amber">15 industries</span>
+            </div>
+            {/* Rolling ticker of a "most-recent" case */}
+            <div
+              key={tickerIdx}
+              className="scf-ticker mt-1.5 font-case text-[11px] tracking-wider text-muted-foreground truncate motion-safe:animate-[scfTickerIn_.5s_ease-out]"
+            >
+              <span className="text-amber/80">◉ {ticker.caseNo}</span>
+              <span className="mx-2 text-amber/40">/</span>
+              <span className="text-foreground/80">{ticker.industry}</span>
+              <span className="mx-2 text-amber/40">·</span>
+              <span className="text-crimson font-semibold">{ticker.total}/yr</span>
+              <span className="ml-2 text-muted-foreground/70 hidden sm:inline">leakage found</span>
             </div>
           </div>
         </div>
-        <ChevronDown className={`w-5 h-5 text-amber transition-transform ${open ? "rotate-180" : ""}`} />
+
+        <div className="relative flex items-center gap-3 flex-shrink-0">
+          <span className="hidden md:inline font-case text-[10px] uppercase tracking-[0.24em] text-amber/80 group-hover:text-amber transition-colors">
+            {open ? "Collapse" : "Open the files"}
+          </span>
+          <ChevronDown className={`w-5 h-5 text-amber transition-transform duration-300 ${open ? "rotate-180" : "group-hover:translate-y-0.5"}`} />
+        </div>
       </button>
 
       {open && (
         <div className="mt-4 border border-amber/25 bg-background/50 p-4 md:p-6 animate-fade-in">
-          <p className="font-case text-[10px] uppercase tracking-[0.24em] text-muted-foreground text-center mb-4 leading-relaxed">
-            Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <p className="font-case text-[10px] uppercase tracking-[0.24em] text-muted-foreground leading-relaxed flex-1">
+              Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
+            </p>
+            <Link
+              to="/industries"
+              className="inline-flex items-center gap-1.5 font-case text-[10px] uppercase tracking-[0.22em] text-amber hover:text-background hover:bg-amber border border-amber/50 px-3 py-2 rounded-sm transition-colors whitespace-nowrap self-start md:self-auto"
+            >
+              See all industries <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
 
           <div className="flex flex-wrap gap-2 justify-center mb-5">
             {CASES.map((c, i) => (
@@ -398,6 +465,15 @@ export function SampleCaseFiles() {
           </div>
 
           <DossierCard file={CASES[active]} />
+
+          <div className="text-center mt-6">
+            <Link
+              to="/industries"
+              className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
+            >
+              Browse the full industry index <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       )}
     </section>
