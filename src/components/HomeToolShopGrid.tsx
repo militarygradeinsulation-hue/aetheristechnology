@@ -46,50 +46,57 @@ export function HomeToolShopGrid() {
               </radialGradient>
               <style>{`
                 @keyframes neuron-fire {
-                  0%, 100% { stroke-opacity: 0.12; stroke-width: 0.4; }
-                  40% { stroke-opacity: 0.85; stroke-width: 0.7; }
-                  60% { stroke-opacity: 0.4; stroke-width: 0.5; }
+                  0%, 100% { stroke-opacity: 0.05; }
+                  45% { stroke-opacity: 0.32; }
+                  55% { stroke-opacity: 0.14; }
                 }
                 @keyframes neuron-flow {
-                  from { stroke-dashoffset: 120; }
+                  from { stroke-dashoffset: 240; }
                   to { stroke-dashoffset: 0; }
                 }
                 @keyframes synapse-pulse {
-                  0%, 100% { opacity: 0.35; }
-                  50% { opacity: 1; }
+                  0%, 100% { opacity: 0.18; }
+                  50% { opacity: 0.55; }
                 }
                 @keyframes spark-travel {
                   0% { offset-distance: 0%; opacity: 0; }
-                  10% { opacity: 1; }
-                  90% { opacity: 1; }
+                  8% { opacity: 0.9; }
+                  92% { opacity: 0.9; }
                   100% { offset-distance: 100%; opacity: 0; }
                 }
                 .axon {
                   fill: none;
-                  stroke: hsl(48 100% 60%);
-                  stroke-width: 0.5;
+                  stroke: hsl(48 90% 62%);
+                  stroke-width: 0.22;
                   stroke-linecap: round;
-                  filter: url(#chip-glow);
-                  animation: neuron-fire 3.2s ease-in-out infinite;
+                  stroke-opacity: 0.14;
+                  animation: neuron-fire 5.5s ease-in-out infinite;
                 }
                 .dendrite {
                   fill: none;
-                  stroke: hsl(45 100% 55%);
-                  stroke-width: 0.35;
-                  stroke-dasharray: 2 8;
+                  stroke: hsl(45 85% 58%);
+                  stroke-width: 0.18;
+                  stroke-dasharray: 1 6;
                   stroke-linecap: round;
-                  opacity: 0.55;
-                  filter: url(#chip-glow);
-                  animation: neuron-flow 6s linear infinite;
+                  opacity: 0.32;
+                  animation: neuron-flow 9s linear infinite;
+                }
+                .filament {
+                  fill: none;
+                  stroke: hsl(46 90% 60%);
+                  stroke-width: 0.14;
+                  stroke-linecap: round;
+                  opacity: 0.22;
                 }
                 .soma {
                   fill: url(#synapse-node);
-                  animation: synapse-pulse 2.4s ease-in-out infinite;
+                  animation: synapse-pulse 3.4s ease-in-out infinite;
                 }
                 .spark {
                   fill: hsl(50 100% 78%);
                   filter: url(#chip-glow);
-                  animation: spark-travel 4s linear infinite;
+                  animation: spark-travel 6s linear infinite;
+                  opacity: 0.75;
                 }
                 @media (prefers-reduced-motion: reduce) {
                   .axon, .dendrite, .soma, .spark { animation: none !important; }
@@ -97,38 +104,51 @@ export function HomeToolShopGrid() {
               `}</style>
             </defs>
 
-            {/* Long myelinated axons — trunk lines pulsing like neurons firing */}
-            <path className="axon" d="M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70" style={{ animationDelay: "-0.2s" }} />
-            <path className="axon" d="M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100" style={{ animationDelay: "-1.4s" }} />
-            <path className="axon" d="M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60" style={{ animationDelay: "-2.6s" }} />
-            <path className="axon" d="M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155" style={{ animationDelay: "-0.9s" }} />
+            {/* Chaotic axons — jittered, meandering trunks */}
+            <path className="axon" d="M0 38 Q 22 44, 38 36 T 74 42 T 118 32 Q 138 46, 162 40 T 208 52 T 254 44 Q 278 58, 302 46 T 348 54 T 400 44" style={{ animationDelay: "-0.2s" }} />
+            <path className="axon" d="M0 128 Q 26 118, 48 132 T 92 122 T 138 138 Q 162 126, 186 140 T 232 128 T 280 144 Q 306 132, 332 146 T 400 132" style={{ animationDelay: "-1.4s" }} />
+            <path className="axon" d="M0 88 Q 18 78, 44 92 T 88 76 T 132 90 Q 158 74, 184 88 T 230 72 T 276 86 Q 302 70, 330 84 T 400 74" style={{ animationDelay: "-2.6s" }} />
+            <path className="axon" d="M0 168 Q 24 156, 52 172 T 96 158 T 148 174 Q 174 160, 200 176 T 250 162 T 302 178 Q 328 164, 356 180 T 400 168" style={{ animationDelay: "-0.9s" }} />
+            <path className="axon" d="M0 62 Q 30 72, 56 58 T 104 68 T 154 54 Q 182 68, 208 56 T 262 66 T 316 52 Q 344 66, 400 56" style={{ animationDelay: "-3.7s" }} />
+            <path className="axon" d="M0 108 Q 34 96, 62 112 T 110 100 T 162 116 Q 190 100, 220 118 T 274 102 T 328 118 Q 360 104, 400 116" style={{ animationDelay: "-4.4s" }} />
 
-            {/* Branching dendrites */}
-            <path className="dendrite" d="M80 100 C 100 90, 110 70, 140 70" style={{ animationDelay: "-0.5s" }} />
-            <path className="dendrite" d="M80 100 C 100 110, 110 130, 160 130" style={{ animationDelay: "-1.2s" }} />
-            <path className="dendrite" d="M200 60 C 210 80, 230 90, 260 100" style={{ animationDelay: "-2.1s" }} />
-            <path className="dendrite" d="M200 140 C 220 130, 240 115, 260 100" style={{ animationDelay: "-3s" }} />
-            <path className="dendrite" d="M300 40 C 310 60, 330 75, 340 90" style={{ animationDelay: "-1.7s" }} />
-            <path className="dendrite" d="M320 170 C 310 155, 290 140, 260 135" style={{ animationDelay: "-2.8s" }} />
-            <path className="dendrite" d="M140 70 C 150 55, 170 45, 200 60" style={{ animationDelay: "-3.4s" }} />
-            <path className="dendrite" d="M160 130 C 175 145, 190 155, 220 150" style={{ animationDelay: "-0.7s" }} />
+            {/* Scattered branching dendrites */}
+            <path className="dendrite" d="M62 88 Q 78 70, 96 58 T 128 42" style={{ animationDelay: "-0.5s" }} />
+            <path className="dendrite" d="M74 108 Q 90 122, 108 132 T 148 148" style={{ animationDelay: "-1.2s" }} />
+            <path className="dendrite" d="M196 54 Q 210 72, 232 82 T 270 96" style={{ animationDelay: "-2.1s" }} />
+            <path className="dendrite" d="M204 142 Q 224 132, 244 122 T 272 108" style={{ animationDelay: "-3s" }} />
+            <path className="dendrite" d="M292 46 Q 306 62, 322 74 T 348 92" style={{ animationDelay: "-1.7s" }} />
+            <path className="dendrite" d="M318 168 Q 300 154, 282 142 T 254 132" style={{ animationDelay: "-2.8s" }} />
+            <path className="dendrite" d="M132 68 Q 148 52, 168 44 T 198 58" style={{ animationDelay: "-3.4s" }} />
+            <path className="dendrite" d="M162 130 Q 178 146, 194 154 T 226 152" style={{ animationDelay: "-0.7s" }} />
+            <path className="dendrite" d="M46 148 Q 60 158, 78 162 T 108 160" style={{ animationDelay: "-4.1s" }} />
+            <path className="dendrite" d="M348 118 Q 362 126, 376 132 T 396 138" style={{ animationDelay: "-2.4s" }} />
+            <path className="dendrite" d="M228 172 Q 240 158, 254 148 T 280 138" style={{ animationDelay: "-5s" }} />
+            <path className="dendrite" d="M112 30 Q 128 20, 146 18 T 178 24" style={{ animationDelay: "-3.9s" }} />
 
-            {/* Synapse nodes */}
-            <circle className="soma" cx="80" cy="100" r="2.2" style={{ animationDelay: "0s" }} />
-            <circle className="soma" cx="140" cy="70" r="1.8" style={{ animationDelay: "0.3s" }} />
-            <circle className="soma" cx="160" cy="130" r="2" style={{ animationDelay: "0.6s" }} />
-            <circle className="soma" cx="200" cy="60" r="1.6" style={{ animationDelay: "0.9s" }} />
-            <circle className="soma" cx="200" cy="140" r="1.6" style={{ animationDelay: "1.2s" }} />
-            <circle className="soma" cx="260" cy="100" r="2.4" style={{ animationDelay: "1.5s" }} />
-            <circle className="soma" cx="300" cy="40" r="1.8" style={{ animationDelay: "1.8s" }} />
-            <circle className="soma" cx="320" cy="170" r="1.8" style={{ animationDelay: "2.1s" }} />
-            <circle className="soma" cx="340" cy="90" r="2" style={{ animationDelay: "0.4s" }} />
+            {/* Fine capillary filaments — static, adds density without weight */}
+            <path className="filament" d="M22 22 Q 40 30, 58 24 T 92 30" />
+            <path className="filament" d="M280 22 Q 296 30, 314 24 T 348 30" />
+            <path className="filament" d="M18 182 Q 36 174, 54 180 T 90 174" />
+            <path className="filament" d="M296 186 Q 314 178, 330 184 T 368 178" />
+            <path className="filament" d="M164 22 Q 180 30, 196 24 T 228 30" />
+            <path className="filament" d="M154 184 Q 170 176, 188 182 T 220 176" />
 
-            {/* Traveling electrical sparks along axons */}
-            <circle className="spark" r="1.4" style={{ offsetPath: "path('M0 40 C 60 40, 90 70, 140 70 S 220 100, 260 100 S 340 70, 400 70')", animationDelay: "0s" } as React.CSSProperties} />
-            <circle className="spark" r="1.2" style={{ offsetPath: "path('M0 130 C 70 130, 100 100, 160 100 S 240 130, 300 130 S 360 100, 400 100')", animationDelay: "-1.6s", animationDuration: "5s" } as React.CSSProperties} />
-            <circle className="spark" r="1.3" style={{ offsetPath: "path('M0 90 C 50 90, 80 60, 130 60 S 210 40, 260 40 S 340 60, 400 60')", animationDelay: "-2.8s", animationDuration: "4.5s" } as React.CSSProperties} />
-            <circle className="spark" r="1.1" style={{ offsetPath: "path('M0 165 C 60 165, 110 150, 170 150 S 260 170, 320 170 S 370 155, 400 155')", animationDelay: "-0.7s", animationDuration: "5.5s" } as React.CSSProperties} />
+            {/* Sparse synapse nodes */}
+            <circle className="soma" cx="80" cy="100" r="1.4" style={{ animationDelay: "0s" }} />
+            <circle className="soma" cx="140" cy="70" r="1.1" style={{ animationDelay: "0.4s" }} />
+            <circle className="soma" cx="200" cy="60" r="1" style={{ animationDelay: "0.9s" }} />
+            <circle className="soma" cx="260" cy="100" r="1.5" style={{ animationDelay: "1.5s" }} />
+            <circle className="soma" cx="320" cy="150" r="1.2" style={{ animationDelay: "2.1s" }} />
+            <circle className="soma" cx="340" cy="90" r="1.1" style={{ animationDelay: "0.6s" }} />
+            <circle className="soma" cx="110" cy="140" r="0.9" style={{ animationDelay: "1.8s" }} />
+            <circle className="soma" cx="230" cy="140" r="1" style={{ animationDelay: "2.6s" }} />
+
+            {/* Traveling sparks along a few axons */}
+            <circle className="spark" r="0.9" style={{ offsetPath: "path('M0 38 Q 22 44, 38 36 T 74 42 T 118 32 Q 138 46, 162 40 T 208 52 T 254 44 Q 278 58, 302 46 T 348 54 T 400 44')", animationDelay: "0s" } as React.CSSProperties} />
+            <circle className="spark" r="0.8" style={{ offsetPath: "path('M0 128 Q 26 118, 48 132 T 92 122 T 138 138 Q 162 126, 186 140 T 232 128 T 280 144 Q 306 132, 332 146 T 400 132')", animationDelay: "-2.3s", animationDuration: "7s" } as React.CSSProperties} />
+            <circle className="spark" r="0.9" style={{ offsetPath: "path('M0 88 Q 18 78, 44 92 T 88 76 T 132 90 Q 158 74, 184 88 T 230 72 T 276 86 Q 302 70, 330 84 T 400 74')", animationDelay: "-4.1s", animationDuration: "6.5s" } as React.CSSProperties} />
+            <circle className="spark" r="0.7" style={{ offsetPath: "path('M0 168 Q 24 156, 52 172 T 96 158 T 148 174 Q 174 160, 200 176 T 250 162 T 302 178 Q 328 164, 356 180 T 400 168')", animationDelay: "-1.2s", animationDuration: "7.5s" } as React.CSSProperties} />
           </svg>
 
           {/* Fine trace grid (etched substrate) */}
