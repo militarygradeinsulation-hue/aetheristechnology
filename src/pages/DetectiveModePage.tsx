@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 const AUTH_KEY = 'detective_mode_auth_v1';
 
 const DetectiveModePage: React.FC = () => {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(true);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
 

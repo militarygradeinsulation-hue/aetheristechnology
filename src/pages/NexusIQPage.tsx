@@ -30,7 +30,7 @@ const loadUnlock = (): Unlock | null => {
 
 const NexusIQPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [unlock, setUnlock] = useState<Unlock | null>(null);
+  const [unlock, setUnlock] = useState<Unlock | null>({ email: "public@aetheris.technology", phone: "", ts: Date.now() });
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +38,8 @@ const NexusIQPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setUnlock(loadUnlock());
+    const existing = loadUnlock();
+    if (existing) setUnlock(existing);
   }, []);
 
   const valid = useMemo(() => isEmail(email) && isPhone(phone), [email, phone]);

@@ -42,27 +42,8 @@ const Card: React.FC<Pick<Props, "toolLabel" | "blurb">> = ({ toolLabel, blurb }
   </div>
 );
 
-export const PublicToolLock: React.FC<Props> = ({ toolLabel, blurb, children, fullscreen }) => {
-  if (fullscreen) {
-    return (
-      <div
-        className="fixed inset-0 z-[90] flex items-center justify-center bg-background/70 backdrop-blur-md p-4"
-        aria-label={`${toolLabel} is locked on the public site`}
-      >
-        <Card toolLabel={toolLabel} blurb={blurb} />
-      </div>
-    );
-  }
-  return (
-    <div className="relative">
-      <div aria-hidden className="pointer-events-none select-none opacity-60 blur-[2px]">
-        {children}
-      </div>
-      <div className="absolute inset-0 z-10 flex items-start justify-center pt-10 sm:pt-16 bg-background/40 backdrop-blur-[2px]">
-        <Card toolLabel={toolLabel} blurb={blurb} />
-      </div>
-    </div>
-  );
+export const PublicToolLock: React.FC<Props> = ({ children }) => {
+  return <>{children}</>;
 };
 
 export default PublicToolLock;
