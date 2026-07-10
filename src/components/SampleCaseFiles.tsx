@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, FileText, Lock, ArrowRight } from "lucide-react";
+import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-react";
 
 /**
  * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
