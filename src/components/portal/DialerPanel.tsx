@@ -66,22 +66,37 @@ export const DialerPanel: React.FC = () => {
     }
   };
 
-  const launchDesktopDialer = () => {
-    const raw = number.trim();
-    if (!raw) {
-      toast({ title: 'Enter a number first', description: 'The desktop dialer needs a number to auto-fill PopTox.' });
+  const launchPoptox = () => {
+    const w = 460, h = 720;
+    const y = window.top?.outerHeight
+      ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
+      : 100;
+    const x = window.top?.outerWidth
+      ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
+      : 100;
+    const win = window.open(
+      POPTOX_URL,
+      'poptox-dialer',
+      `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
+    );
+    if (!win) {
+      toast({
+        title: 'Popup blocked',
+        description: 'Allow popups for this site and click again.',
+        variant: 'destructive',
+      });
       return;
     }
-    const normalized = normalizeNumber(raw);
-    const deepLink = `aetheris-dialer://call?number=${encodeURIComponent(normalized)}`;
-    // Navigate the current tab to the custom scheme. Browsers hand it off to
-    // the OS silently if the Aetheris Dialer app is installed; if it isn't,
-    // nothing visible happens — the toast tells the rep what to do.
-    window.location.href = deepLink;
-    toast({
-      title: 'Handed off to desktop dialer',
-      description: `${normalized} sent to Aetheris Dialer. If nothing opened, install the desktop app first.`,
-    });
+    if (number.trim()) {
+      const normalized = normalizeNumber(number);
+      navigator.clipboard?.writeText(normalized).catch(() => {});
+      toast({
+        title: 'PopTox opened',
+        description: `${normalized} copied to clipboard — paste it into PopTox's dial field.`,
+      });
+    } else {
+      toast({ title: 'PopTox opened', description: 'Sign in if prompted, then dial.' });
+    }
   };
 
   const openContactSearch = () => {
