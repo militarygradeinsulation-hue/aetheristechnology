@@ -31,6 +31,8 @@ import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
+
 
 const STYLE_KEY = 'aetheris.portalStyle';
 export const setPortalStylePref = (v: 'new' | 'classic') => {
