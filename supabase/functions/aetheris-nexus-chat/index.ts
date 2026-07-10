@@ -325,7 +325,7 @@ Deno.serve(async (req) => {
         }
 
 
-        send({ type: "error", error: "Max tool rounds exceeded" });
+        send({ type: "done" });
         controller.close();
       } catch (e) {
         send({ type: "error", error: String(e) });
