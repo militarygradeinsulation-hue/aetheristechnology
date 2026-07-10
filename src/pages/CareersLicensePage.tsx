@@ -70,7 +70,7 @@ export default function CareersLicensePage() {
   const fetchClientSecret = async (): Promise<string> => {
     const { data, error } = await supabase.functions.invoke('create-checkout', {
       body: {
-        priceId: 'careers_instant_license_v1',
+        priceId: 'careers_instant_license_v2',
         customerEmail: payerEmail || undefined,
         returnUrl: `${window.location.origin}/careers/license?session_id={CHECKOUT_SESSION_ID}`,
         environment: getStripeEnvironment(),
@@ -105,14 +105,14 @@ export default function CareersLicensePage() {
             <Card className="bg-card/60 backdrop-blur border-amber/40 forensic-tile">
               <CardHeader>
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Lock className="w-3.5 h-3.5" /> Instant License · $100 · No test · No interview
+                  <Lock className="w-3.5 h-3.5" /> Instant License · $500 · No test · No interview
                 </div>
                 <CardTitle className="font-display text-3xl mt-2">
                   Skip the gatekeepers. <span className="text-crimson">Print your own paycheck.</span>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  $100 one-time gets you a personal rep code and the right to resell every Aetheris tool in the Chaos Ecosystem.
-                  <span className="text-amber font-semibold"> One $2,500 diagnostic pays your license back 10x.</span> One $18,500 flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
+                  $500 one-time gets you a personal rep code and the right to resell every Aetheris tool in the Chaos Ecosystem.
+                  <span className="text-amber font-semibold"> One $2,500 diagnostic pays your license back 5x.</span> One $18,500 flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
                   1099 independent — no employment, no manager, no quotas.
                 </p>
               </CardHeader>
@@ -153,7 +153,7 @@ export default function CareersLicensePage() {
                     setPhase('checkout');
                   }}
                 >
-                  Activate my license — $100 →
+                  Activate my license — $500 →
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">Secure Stripe checkout · Rep code in your inbox in 60 seconds · 1099 independent</p>
               </CardContent>
@@ -165,7 +165,7 @@ export default function CareersLicensePage() {
               <Card className="bg-card/60 backdrop-blur border-border/50">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
-                    <p className="font-display text-lg">Instant Rep License — $100</p>
+                    <p className="font-display text-lg">Instant Rep License — $500</p>
                     <p className="text-xs text-muted-foreground">Paying as {payerEmail}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setPhase('pitch')}>Change</Button>
