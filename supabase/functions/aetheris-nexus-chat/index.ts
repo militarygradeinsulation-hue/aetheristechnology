@@ -289,7 +289,9 @@ Deno.serve(async (req) => {
           }
 
           if (isFinalRound) {
-            send({ type: "error", error: "Max tool rounds exceeded" });
+            // Tools were dropped this round; whatever text we got is the final answer.
+            if (!started) { send({ type: "message_start" }); send({ type: "delta", text: finalContent }); }
+            send({ type: "done" });
             controller.close();
             return;
           }
