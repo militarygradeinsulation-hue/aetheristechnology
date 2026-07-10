@@ -209,9 +209,12 @@ Deno.serve(async (req) => {
       try {
         // Loop until model returns a non-tool response (max 5 rounds when
         // tools are enabled; a single streaming call otherwise).
-        const maxRounds = useTools ? 5 : 1;
+        const maxRounds = useTools ? 8 : 1;
         for (let round = 0; round < maxRounds; round++) {
           const isFinalRound = round === maxRounds - 1;
+          // On the final round, drop tools so the model MUST produce a text answer
+          // instead of another tool call (which would trip "Max tool rounds exceeded").
+          const includeTools = useTools && !isFinalRound;
           // Use streaming on every call so the user sees tokens immediately.
           const res = await fetch(AI_URL, {
             method: "POST",
@@ -222,10 +225,11 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
               model,
               messages,
-              ...(useTools ? { tools: enabledTools } : {}),
+              ...(includeTools ? { tools: enabledTools } : {}),
               stream: true,
             }),
           });
+
 
           if (!res.ok || !res.body) {
             const txt = await res.text().catch(() => "");
