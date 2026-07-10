@@ -147,13 +147,13 @@ export const DialerPanel: React.FC = () => {
                 HubSpot Dialer
               </Button>
               <Button
-                onClick={launchDesktopDialer}
+                onClick={launchPoptox}
                 variant="outline"
                 className="w-full md:w-auto h-10 border-amber-400/40 text-amber-100 hover:bg-amber-400/10"
-                title="Requires the Aetheris Desktop Dialer app (PopTox wrapper)"
+                title="Opens PopTox in a popup — no install needed"
               >
-                <Monitor className="w-4 h-4 mr-2" />
-                PopTox Desktop
+                <PhoneOutgoing className="w-4 h-4 mr-2" />
+                PopTox (Popup)
               </Button>
             </div>
           </div>
@@ -164,44 +164,9 @@ export const DialerPanel: React.FC = () => {
               window in a popup. Calls auto-log to the contact record.
             </p>
             <p>
-              <strong className="text-amber-200/70">PopTox Desktop:</strong> Hands the number off to
-              the Aetheris Dialer desktop app (Electron wrapper around PopTox that stays signed in).
-              Download and install it once per machine using the buttons below.
-            </p>
-          </div>
-
-          <div className="border-t border-amber-400/15 pt-3 space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-amber-100/70">
-              Download Aetheris Desktop Dialer (macOS)
-            </Label>
-            <div className="grid sm:grid-cols-2 gap-2">
-              <Button asChild variant="outline" className="h-auto py-2 border-amber-400/40 text-amber-100 hover:bg-amber-400/10 justify-start">
-                <a href={DIALER_DOWNLOADS.appleSilicon} download>
-                  <Apple className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="text-left">
-                    <span className="block text-sm font-semibold">Apple Silicon</span>
-                    <span className="block text-[10px] text-amber-100/60">M1 / M2 / M3 / M4 · ~281 MB</span>
-                  </span>
-                  <Download className="w-4 h-4 ml-auto" />
-                </a>
-              </Button>
-              <Button asChild variant="outline" className="h-auto py-2 border-amber-400/40 text-amber-100 hover:bg-amber-400/10 justify-start">
-                <a href={DIALER_DOWNLOADS.intel} download>
-                  <Apple className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="text-left">
-                    <span className="block text-sm font-semibold">Intel Mac</span>
-                    <span className="block text-[10px] text-amber-100/60">x64 · ~294 MB</span>
-                  </span>
-                  <Download className="w-4 h-4 ml-auto" />
-                </a>
-              </Button>
-            </div>
-            <p className="text-[10px] text-amber-100/50 leading-relaxed">
-              Unzip → drag <code className="text-amber-300">AetherisDialer.app</code> into Applications →
-              right-click → <em>Open</em> the first time to bypass the unsigned-app warning. This
-              registers the <code className="text-amber-300">aetheris-dialer://</code> handler so the
-              <strong className="text-amber-200/70"> PopTox Desktop</strong> button above works.
-              Windows build coming soon.
+              <strong className="text-amber-200/70">PopTox (Popup):</strong> Opens PopTox in a browser
+              popup with your number copied to the clipboard. Sign in once — the popup stays signed
+              in for future launches. No install, no download.
             </p>
           </div>
         </CardContent>
