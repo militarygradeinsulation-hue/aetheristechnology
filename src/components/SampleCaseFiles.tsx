@@ -404,10 +404,43 @@ export function SampleCaseFiles() {
         @keyframes scfTickerIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes scfLivePulse { 0%,100% { opacity:.4; transform: scale(1); } 50% { opacity:1; transform: scale(1.4); } }
         @keyframes scfCounter { 0% { opacity:.6; } 50% { opacity:1; } 100% { opacity:.6; } }
+        @keyframes scfMarquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .scf-marquee-track { animation: scfMarquee 90s linear infinite; }
+        .scf-marquee:hover .scf-marquee-track { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
-          .scf-shimmer, .scf-ticker, .scf-live, .scf-counter { animation: none !important; }
+          .scf-shimmer, .scf-ticker, .scf-live, .scf-counter, .scf-marquee-track { animation: none !important; }
         }
       `}</style>
+
+      {/* ── Slow-scrolling case-file ticker ── */}
+      <div className="scf-marquee relative mb-4 border border-amber/25 bg-background/60 overflow-hidden rounded-sm">
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-amber/15 bg-black/30">
+          <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-crimson motion-safe:animate-[scfLivePulse_1.6s_ease-in-out_infinite]" />
+          <span className="font-case text-[9px] uppercase tracking-[0.28em] text-amber">Case Docket · Live Feed</span>
+          <span className="font-case text-[9px] uppercase tracking-[0.22em] text-muted-foreground ml-auto">{CASES.length} on record</span>
+        </div>
+        <div className="scf-marquee-track flex whitespace-nowrap py-3 w-max">
+          {[...CASES, ...CASES].map((c, i) => (
+            <button
+              key={`${c.caseNo}-${i}`}
+              type="button"
+              onClick={() => { setActive(i % CASES.length); setOpen(true); }}
+              className="inline-flex items-center gap-3 px-5 border-r border-amber/15 hover:bg-amber/[0.06] transition-colors"
+              aria-label={`Open case ${c.caseNo} — ${c.subject}`}
+            >
+              <span className="font-case text-[10px] tracking-[0.24em] text-amber">{c.caseNo}</span>
+              <span className="font-case text-[10px] tracking-[0.2em] text-foreground/85 uppercase">{c.subject}</span>
+              <span className="font-case text-[9px] tracking-[0.2em] text-muted-foreground uppercase">{c.industry}</span>
+              <span className="font-case text-[10px] tracking-[0.2em] text-crimson font-semibold">{c.total}/yr</span>
+              <span className="font-case text-[9px] tracking-[0.22em] text-amber/60 uppercase">{caseOpenedDate(c.caseNo)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* ── LEFT: Companies Reviewed (samples, expandable) ── */}
