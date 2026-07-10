@@ -195,7 +195,7 @@ export default function CareersLicensePage() {
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
                   <CheckCircle2 className="w-3.5 h-3.5" /> License granted
                 </div>
-                <CardTitle className="font-display text-3xl mt-2">You're a licensed Aetheris rep.</CardTitle>
+                <CardTitle className="font-display text-3xl mt-2">You're an Aetheris Connector.</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
                   {grantedEmail && <>Receipt sent to <strong className="text-foreground">{grantedEmail}</strong>. </>}
                   Save this code — it's how every sale is tied to you.
