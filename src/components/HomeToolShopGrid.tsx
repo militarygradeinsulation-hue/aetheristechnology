@@ -305,72 +305,109 @@ export function HomeToolShopGrid() {
                   case file with verdicts, dollar leaks, and evidence you can query.
                 </p>
 
-                {/* CTA — hex activation key with arc-discharge halo */}
-                <div className="relative inline-block group/cta">
-                  {/* Rotating conic halo */}
-                  <span
+                {/* CTA — case-file evidence tag with perforation + scan sweep */}
+                <Link
+                  to="/golden-report"
+                  aria-label="Open the free Golden Report"
+                  className="group/tag relative block mx-auto max-w-md text-left overflow-hidden rounded-[2px] transition-transform duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, hsl(45 25% 92%) 0%, hsl(42 30% 85%) 55%, hsl(38 30% 78%) 100%)",
+                    boxShadow:
+                      "0 24px 60px -20px hsl(0 0% 0% / 0.7), 0 2px 0 hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.7)",
+                    clipPath:
+                      "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))",
+                  }}
+                >
+                  {/* Left perforation column */}
+                  <div className="absolute inset-y-0 left-0 w-6 flex flex-col items-center justify-around py-3 border-r border-dashed border-charcoal/40 bg-charcoal/[0.04]">
+                    {[0,1,2,3,4,5].map((i) => (
+                      <span key={i} className="w-2 h-2 rounded-full bg-background shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.4)]" />
+                    ))}
+                  </div>
+
+                  {/* Grommet hole top-right */}
+                  <span className="absolute top-2 right-3 w-3 h-3 rounded-full bg-background border border-charcoal/30 shadow-[inset_0_1px_2px_hsl(0_0%_0%/0.5)]" />
+
+                  {/* Diagonal EVIDENCE stripes strip */}
+                  <div
                     aria-hidden
-                    className="absolute -inset-3 rounded-2xl opacity-70 blur-md pointer-events-none animate-[spin_8s_linear_infinite]"
+                    className="absolute inset-x-0 top-0 h-2 opacity-60"
                     style={{
-                      background:
-                        "conic-gradient(from 0deg, transparent 0deg, hsl(48 100% 60% / 0.6) 60deg, transparent 120deg, hsl(45 100% 55% / 0.5) 200deg, transparent 260deg, hsl(50 100% 65% / 0.6) 320deg, transparent 360deg)",
+                      backgroundImage:
+                        "repeating-linear-gradient(-45deg, hsl(var(--amber)) 0 6px, hsl(0 0% 0%) 6px 12px)",
                     }}
                   />
-                  {/* Arc lightning ring */}
-                  <svg aria-hidden className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none" viewBox="0 0 200 60" preserveAspectRatio="none">
-                    <defs>
-                      <filter id="arc-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="0.6" />
-                      </filter>
-                    </defs>
-                    <path
-                      d="M4 30 L14 26 L22 34 L32 28 L44 32 L58 26 L70 34 L84 28 L98 32 L112 26 L126 34 L140 28 L154 32 L168 26 L180 34 L190 28 L196 30"
-                      fill="none"
-                      stroke="hsl(50 100% 70%)"
-                      strokeWidth="0.8"
-                      strokeLinecap="round"
-                      filter="url(#arc-glow)"
-                      className="opacity-0 group-hover/cta:opacity-100 transition-opacity"
-                      style={{ animation: "neuron-fire 0.6s ease-in-out infinite" }}
-                    />
-                  </svg>
 
-                  <Link
-                    to="/golden-report"
-                    className="group/btn relative inline-flex items-center justify-center gap-3 px-10 sm:px-14 py-4 sm:py-5 text-sm sm:text-base font-mono uppercase tracking-[0.25em] font-bold text-background transition-all duration-300 active:translate-y-px active:scale-[0.99]"
+                  {/* Scan sweep line — moves on hover */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 pointer-events-none opacity-0 group-hover/tag:opacity-100 transition-opacity"
                     style={{
-                      clipPath:
-                        "polygon(18px 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 18px 100%, 0 50%)",
                       background:
-                        "linear-gradient(180deg, hsl(48 100% 65%) 0%, hsl(45 100% 50%) 55%, hsl(38 100% 40%) 100%)",
-                      boxShadow:
-                        "0 0 40px -4px hsl(var(--amber)/0.8), inset 0 1px 0 hsl(0 0% 100% / 0.55), inset 0 -3px 0 hsl(0 0% 0% / 0.3)",
+                        "linear-gradient(90deg, transparent 0%, hsl(48 100% 60% / 0.35) 45%, hsl(48 100% 70% / 0.55) 50%, hsl(48 100% 60% / 0.35) 55%, transparent 100%)",
+                      animation: "spark-travel 1.6s linear infinite",
                     }}
-                  >
-                    {/* Inner etched line following hex */}
-                    <span
-                      aria-hidden
-                      className="absolute inset-[3px] pointer-events-none"
-                      style={{
-                        clipPath:
-                          "polygon(16px 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 16px 100%, 0 50%)",
-                        background:
-                          "linear-gradient(180deg, transparent 0%, transparent 40%, hsl(0 0% 0% / 0.08) 50%, transparent 60%, transparent 100%)",
-                        border: "1px solid hsl(0 0% 0% / 0.15)",
-                      }}
-                    />
-                    {/* Bolt indicator */}
-                    <svg aria-hidden viewBox="0 0 24 24" className="relative w-4 h-4 drop-shadow-[0_0_3px_hsl(0_0%_0%/0.35)]" fill="currentColor">
-                      <path d="M13 2 L4 14 L11 14 L10 22 L20 9 L13 9 Z" />
-                    </svg>
-                    <span className="relative">Activate Golden Report</span>
-                    <ArrowRight className="relative w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  />
 
-                    {/* Corner solder terminals */}
-                    <span className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" />
-                    <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-amber shadow-[0_0_8px_hsl(var(--amber))] animate-pulse" style={{ animationDelay: "0.6s" }} />
-                  </Link>
-                </div>
+                  <div className="relative pl-10 pr-6 py-5">
+                    {/* Case-file header line */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-case text-[9px] uppercase tracking-[0.35em] text-charcoal/70">
+                        Exhibit · A
+                      </span>
+                      <span className="font-case text-[9px] uppercase tracking-[0.3em] text-charcoal/60">
+                        No. GR-014
+                      </span>
+                    </div>
+
+                    {/* Big handwritten-forensic label */}
+                    <div className="font-forensic text-lg sm:text-xl font-black leading-none text-charcoal">
+                      Golden Report
+                    </div>
+                    <div className="font-case text-[10px] uppercase tracking-[0.28em] text-charcoal/70 mt-1">
+                      14-Chapter Forensic Case File
+                    </div>
+
+                    {/* Divider with barcode */}
+                    <div className="mt-3 flex items-center gap-3">
+                      <div
+                        aria-hidden
+                        className="flex-1 h-5"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(90deg, hsl(0 0% 8%) 0 1px, transparent 1px 3px, hsl(0 0% 8%) 3px 5px, transparent 5px 4px, hsl(0 0% 8%) 4px 7px, transparent 7px 10px)",
+                        }}
+                      />
+                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-charcoal/60">
+                        FREE
+                      </div>
+                    </div>
+
+                    {/* Action row — stamped */}
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        {/* Red-ink stamp */}
+                        <span
+                          className="inline-block px-2 py-1 border-2 rounded-sm font-case text-[10px] font-black uppercase tracking-[0.3em] transition-transform group-hover/tag:scale-105"
+                          style={{
+                            borderColor: "hsl(0 72% 42%)",
+                            color: "hsl(0 72% 42%)",
+                            transform: "rotate(-4deg)",
+                            fontFamily: "var(--font-case, ui-monospace)",
+                            textShadow: "0 0 1px hsl(0 72% 42% / 0.4)",
+                          }}
+                        >
+                          Open File
+                        </span>
+                        <span className="font-case text-[9px] uppercase tracking-widest text-charcoal/60">
+                          → aetheris.technology/golden
+                        </span>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-charcoal transition-transform duration-300 group-hover/tag:translate-x-1 group-hover/tag:text-[hsl(0_72%_42%)]" />
+                    </div>
+                  </div>
+                </Link>
 
                 {/* Data bus line */}
                 <div className="mt-6 flex items-center gap-3">
