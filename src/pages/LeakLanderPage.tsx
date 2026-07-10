@@ -164,6 +164,11 @@ const LeakLanderPage: React.FC = () => {
           {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
           <HomeToolShopGrid />
 
+          {/* Companies Reviewed — sample Preliminary Findings dossiers */}
+          <SampleCaseFiles />
+
+
+
           {/* HERO — Chaos Theory Forensics */}
 
           <section
