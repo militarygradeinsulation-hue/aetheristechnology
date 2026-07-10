@@ -248,13 +248,15 @@ const NewPortalPage: React.FC = () => {
               ['calendar', 'Calendar', CalendarDays, true],
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
+              ['golden', 'Golden Report', ScrollText, true],
               ['training', 'Training', GraduationCap, showAdvanced],
               ['studio', 'Studio', Palette, showAdvanced],
               ['workspace', 'Workspace', Sparkles, true],
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8',
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9',
+
             };
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
             return (
