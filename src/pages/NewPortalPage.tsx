@@ -10,8 +10,9 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
