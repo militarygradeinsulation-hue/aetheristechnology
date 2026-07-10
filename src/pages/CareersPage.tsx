@@ -168,17 +168,18 @@ const CareersPage = () => {
               </div>
             </div>
 
-            {/* LICENSED RESELLER PROGRAM — separate track from operator */}
+            {/* CONNECTOR PROGRAM — separate track from operator */}
             <div className="rounded-2xl border border-amber/40 bg-gradient-to-b from-amber/10 via-background/40 to-background/20 p-6 md:p-10 space-y-8">
               <div className="text-center space-y-3">
-                <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Third door · Licensed Reseller Program</div>
+                <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Third door · Connector Program</div>
                 <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Don't want to operate? <span className="text-amber">Just sell the systems.</span>
+                  Don't want to operate? <span className="text-amber">Just connect the deals.</span>
                 </h2>
                 <p className="text-sm md:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-                  Buy a one-year non-exclusive license to market, promote, and sell every Aetheris system. You don't diagnose. You don't deliver. You don't operate. You refer, we build, you get paid — every time, for a full year.
+                  Become a Connector: buy a one-year non-exclusive license to market, promote, and sell every Aetheris system. You don't diagnose. You don't deliver. You don't operate. You connect, we build, you get paid — every time, for a full year.
                 </p>
               </div>
+
 
               <div className="max-w-3xl mx-auto rounded-xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
                 <img
