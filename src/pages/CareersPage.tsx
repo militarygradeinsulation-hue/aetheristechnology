@@ -119,21 +119,22 @@ const CareersPage = () => {
                     <Rocket className="w-3.5 h-3.5" /> Path B · $500 · Instant
                   </div>
                   <h2 className="font-display text-2xl text-foreground leading-tight">
-                    Skip the test. Get licensed today.
+                    Skip the test. Become a Connector today.
                   </h2>
                   <p className="text-sm text-foreground/85 flex-1">
-                    Pay $500, get your personal rep code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
+                    Pay $500, get your personal Connector code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>· Personal rep code issued instantly on payment</li>
+                    <li>· Personal Connector code issued instantly on payment</li>
                     <li>· Sell every tool + flagship at the standard split</li>
-                    <li>· Full rep portal access (playbooks, leads, coach)</li>
+                    <li>· Full Connector portal access (playbooks, leads, coach)</li>
                   </ul>
                   <a href="/careers/license" onClick={() => trackCareersCta('gate_instant_license')} className="block mt-auto">
                     <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                      Get licensed — $500 →
+                      Become a Connector — $500 →
                     </Button>
                   </a>
+
                 </CardContent>
               </Card>
             </div>
@@ -167,17 +168,18 @@ const CareersPage = () => {
               </div>
             </div>
 
-            {/* LICENSED RESELLER PROGRAM — separate track from operator */}
+            {/* CONNECTOR PROGRAM — separate track from operator */}
             <div className="rounded-2xl border border-amber/40 bg-gradient-to-b from-amber/10 via-background/40 to-background/20 p-6 md:p-10 space-y-8">
               <div className="text-center space-y-3">
-                <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Third door · Licensed Reseller Program</div>
+                <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">Third door · Connector Program</div>
                 <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                  Don't want to operate? <span className="text-amber">Just sell the systems.</span>
+                  Don't want to operate? <span className="text-amber">Just connect the deals.</span>
                 </h2>
                 <p className="text-sm md:text-base text-foreground/85 max-w-2xl mx-auto leading-relaxed">
-                  Buy a one-year non-exclusive license to market, promote, and sell every Aetheris system. You don't diagnose. You don't deliver. You don't operate. You refer, we build, you get paid — every time, for a full year.
+                  Become a Connector: buy a one-year non-exclusive license to market, promote, and sell every Aetheris system. You don't diagnose. You don't deliver. You don't operate. You connect, we build, you get paid — every time, for a full year.
                 </p>
               </div>
+
 
               <div className="max-w-3xl mx-auto rounded-xl overflow-hidden border border-amber/30 bg-black shadow-2xl">
                 <img
@@ -255,7 +257,7 @@ const CareersPage = () => {
                 <div className="grid md:grid-cols-5 gap-3">
                   {[
                     { n: '01', t: 'Pay $500', d: 'One-time yearly fee. License ID + personalized certificate issued the same minute.' },
-                    { n: '02', t: 'Get your tracked link', d: 'A unique reseller URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
+                    { n: '02', t: 'Get your tracked link', d: 'A unique Connector URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
                     { n: '03', t: 'Market on your channels', d: 'LinkedIn, email, referrals, in-person. Use our creative pack (screenshots, one-pagers, demo video links). No cold-call quota, no script gate.' },
                     { n: '04', t: 'We deliver', d: 'When they buy, our team builds, ships, and supports. You never touch delivery, diagnosis, or operations.' },
                     { n: '05', t: 'Get paid monthly', d: '40% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
@@ -276,9 +278,10 @@ const CareersPage = () => {
                   <h4 className="font-display text-emerald-400 font-semibold mb-3 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> You are authorized to</h4>
                   <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li className="flex gap-2"><span className="text-emerald-500">✓</span>Market and promote every Aetheris tool, ecosystem, and flagship</li>
-                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Use the official "Aetheris Authorized Partner" seal on your site & LinkedIn</li>
-                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Share your certificate publicly as proof of license</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Use the official "Aetheris Authorized Connector" seal on your site & LinkedIn</li>
+                    <li className="flex gap-2"><span className="text-emerald-500">✓</span>Share your certificate publicly as proof of your Connector license</li>
                     <li className="flex gap-2"><span className="text-emerald-500">✓</span>Refer inbound leads directly to Joseph for flagship closes</li>
+
                   </ul>
                 </div>
                 <div className="rounded-xl border border-crimson/30 bg-crimson/5 p-5">
@@ -286,8 +289,9 @@ const CareersPage = () => {
                   <ul className="text-sm text-muted-foreground space-y-1.5">
                     <li className="flex gap-2"><span className="text-crimson">✗</span>Diagnose, analyze, or perform forensic operator work</li>
                     <li className="flex gap-2"><span className="text-crimson">✗</span>Deliver, build, or fulfill any Aetheris system yourself</li>
-                    <li className="flex gap-2"><span className="text-crimson">✗</span>Call yourself an "Aetheris Operator" or imply certification</li>
-                    <li className="flex gap-2"><span className="text-crimson">✗</span>Resell the license, rep code, or IP to a third party</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Call yourself an "Aetheris Operator" or imply certification (you're a Connector)</li>
+                    <li className="flex gap-2"><span className="text-crimson">✗</span>Resell the license, Connector code, or IP to a third party</li>
+
                   </ul>
                 </div>
               </div>
@@ -296,8 +300,9 @@ const CareersPage = () => {
               <div className="text-center space-y-3 pt-2">
                 <a href="/careers/license?tier=reseller" onClick={() => trackCareersCta('reseller_license_buy')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold px-8">
-                    Get the yearly license — $500 →
+                    Become a Connector — $500/yr →
                   </Button>
+
                 </a>
                 <p className="text-xs text-muted-foreground">
                   License auto-expires 12 months from issue date. Renew at the same rate. No auto-charge.
@@ -365,7 +370,7 @@ const CareersPage = () => {
                   Two doors. Pick one.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  $40 to prove it with a test. $100 to skip it and get your rep code today. Everything else is noise.
+                  $40 to prove it with a test. $500 to skip it and become a Connector today. Everything else is noise.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
@@ -375,10 +380,11 @@ const CareersPage = () => {
                   </a>
                   <a href="/careers/license" onClick={() => trackCareersCta('final_instant_license')} className="inline-block">
                     <Button size="lg" className="bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold">
-                      Get licensed for $100 →
+                      Become a Connector — $500 →
                     </Button>
                   </a>
                 </div>
+
               </CardContent>
             </Card>
 
