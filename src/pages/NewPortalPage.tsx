@@ -10,8 +10,9 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -30,6 +31,8 @@ import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
+
 
 const STYLE_KEY = 'aetheris.portalStyle';
 export const setPortalStylePref = (v: 'new' | 'classic') => {
@@ -245,13 +248,15 @@ const NewPortalPage: React.FC = () => {
               ['calendar', 'Calendar', CalendarDays, true],
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
+              ['golden', 'Golden Report', ScrollText, true],
               ['training', 'Training', GraduationCap, showAdvanced],
               ['studio', 'Studio', Palette, showAdvanced],
               ['workspace', 'Workspace', Sparkles, true],
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8',
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9',
+
             };
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
             return (
@@ -388,6 +393,25 @@ const NewPortalPage: React.FC = () => {
               <SalesCoachChat embedded />
             </ToolCard>
           </TabsContent>
+
+          {/* GOLDEN REPORT — full forensic scan for every rep */}
+          <TabsContent value="golden" className="mt-8">
+            <ToolCard
+              eyebrow="// Forensic Instrument //"
+              title="Golden Report — Full Forensic Scan"
+              summary="Drop a prospect's URL. Aetheris runs the full 14-chapter forensic scan and hands you the report you can walk into any pitch with."
+              howTo={[
+                'Paste the target company website (any URL works — with or without https).',
+                'Hit Run — the scan takes a few minutes; leave the tab open.',
+                'Download the PDF and lead the next call with the leaks you found.',
+              ]}
+              defaultOpen
+            >
+              <ForensicScanAllPanel />
+            </ToolCard>
+          </TabsContent>
+
+
 
 
           {/* TRAINING — gated */}
