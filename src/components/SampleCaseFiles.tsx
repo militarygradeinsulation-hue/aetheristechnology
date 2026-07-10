@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, FileText, Lock, ArrowRight } from "lucide-react";
+import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-react";
 
 /**
  * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
@@ -369,70 +369,115 @@ export function SampleCaseFiles() {
 
   return (
     <section className="mt-6 max-w-5xl mx-auto px-4">
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        aria-expanded={open}
-        className="group relative w-full flex items-center justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)]"
-      >
-        {/* Ambient scanning shimmer */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-amber/15 to-transparent motion-safe:animate-[scfShimmer_3.4s_linear_infinite]"
-        />
-        {/* Corner solder marks */}
-        <span aria-hidden className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
-        <span aria-hidden className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
-        <span aria-hidden className="absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
-        <span aria-hidden className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+      <style>{`
+        @keyframes scfShimmer { 0% { transform: translateX(0); } 100% { transform: translateX(500%); } }
+        @keyframes scfTickerIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes scfLivePulse { 0%,100% { opacity:.4; transform: scale(1); } 50% { opacity:1; transform: scale(1.4); } }
+        @keyframes scfCounter { 0% { opacity:.6; } 50% { opacity:1; } 100% { opacity:.6; } }
+        @media (prefers-reduced-motion: reduce) {
+          .scf-shimmer, .scf-ticker, .scf-live, .scf-counter { animation: none !important; }
+        }
+      `}</style>
 
-        <style>{`
-          @keyframes scfShimmer { 0% { transform: translateX(0); } 100% { transform: translateX(500%); } }
-          @keyframes scfTickerIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-          @keyframes scfLivePulse { 0%,100% { opacity:.4; transform: scale(1); } 50% { opacity:1; transform: scale(1.4); } }
-          @media (prefers-reduced-motion: reduce) {
-            .scf-shimmer, .scf-ticker, .scf-live { animation: none !important; }
-          }
-        `}</style>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* ── LEFT: Companies Reviewed (samples, expandable) ── */}
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          aria-expanded={open}
+          className="group relative flex items-stretch justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)] text-left"
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-amber/15 to-transparent motion-safe:animate-[scfShimmer_3.4s_linear_infinite]"
+          />
+          <span aria-hidden className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
 
-        <div className="relative flex items-center gap-3 text-left min-w-0 flex-1">
-          <div className="relative flex-shrink-0">
-            <FileText className="w-5 h-5 text-amber" />
-            <span
-              aria-hidden
-              className="scf-live absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-crimson motion-safe:animate-[scfLivePulse_1.6s_ease-in-out_infinite]"
-            />
+          <div className="relative flex items-start gap-3 min-w-0 flex-1">
+            <div className="relative flex-shrink-0 mt-0.5">
+              <FileText className="w-5 h-5 text-amber" />
+              <span
+                aria-hidden
+                className="scf-live absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-crimson motion-safe:animate-[scfLivePulse_1.6s_ease-in-out_infinite]"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Companies Reviewed</span>
+                <span className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson/90 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Samples · 15</span>
+              </div>
+              <div className="font-forensic text-base md:text-lg mt-1">
+                Sample Preliminary Findings
+              </div>
+              <div
+                key={tickerIdx}
+                className="scf-ticker mt-1.5 font-case text-[11px] tracking-wider text-muted-foreground truncate motion-safe:animate-[scfTickerIn_.5s_ease-out]"
+              >
+                <span className="text-amber/80">◉ {ticker.caseNo}</span>
+                <span className="mx-2 text-amber/40">/</span>
+                <span className="text-foreground/80">{ticker.industry}</span>
+                <span className="mx-2 text-amber/40">·</span>
+                <span className="text-crimson font-semibold">{ticker.total}/yr</span>
+              </div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Companies Reviewed</span>
-              <span className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson/90 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Live · 15 cases</span>
+
+          <div className="relative flex items-center gap-2 flex-shrink-0 self-center">
+            <span className="hidden md:inline font-case text-[10px] uppercase tracking-[0.24em] text-amber/80 group-hover:text-amber transition-colors">
+              {open ? "Collapse" : "Open"}
+            </span>
+            <ChevronDown className={`w-5 h-5 text-amber transition-transform duration-300 ${open ? "rotate-180" : "group-hover:translate-y-0.5"}`} />
+          </div>
+        </button>
+
+        {/* ── RIGHT: 50 Sourced Case Files (real, links to /industries) ── */}
+        <Link
+          to="/industries#real-case-files"
+          className="group relative flex items-stretch justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)] text-left"
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-amber/15 to-transparent motion-safe:animate-[scfShimmer_4.2s_linear_infinite]"
+          />
+          <span aria-hidden className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute bottom-1 left-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+          <span aria-hidden className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-amber/70" />
+
+          <div className="relative flex items-start gap-3 min-w-0 flex-1">
+            <div className="relative flex-shrink-0 mt-0.5">
+              <FolderArchive className="w-5 h-5 text-amber" />
+              <span
+                aria-hidden
+                className="scf-live absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber motion-safe:animate-[scfLivePulse_2s_ease-in-out_infinite]"
+              />
             </div>
-            <div className="font-forensic text-base md:text-lg mt-1 truncate">
-              Sample Preliminary Findings — <span className="text-amber">15 industries</span>
-            </div>
-            {/* Rolling ticker of a "most-recent" case */}
-            <div
-              key={tickerIdx}
-              className="scf-ticker mt-1.5 font-case text-[11px] tracking-wider text-muted-foreground truncate motion-safe:animate-[scfTickerIn_.5s_ease-out]"
-            >
-              <span className="text-amber/80">◉ {ticker.caseNo}</span>
-              <span className="mx-2 text-amber/40">/</span>
-              <span className="text-foreground/80">{ticker.industry}</span>
-              <span className="mx-2 text-amber/40">·</span>
-              <span className="text-crimson font-semibold">{ticker.total}/yr</span>
-              <span className="ml-2 text-muted-foreground/70 hidden sm:inline">leakage found</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">Sourced Archive</span>
+                <span className="font-case text-[9px] uppercase tracking-[0.22em] text-amber/90 border border-amber/50 px-1.5 py-0.5 rounded-sm">Real · Cited</span>
+              </div>
+              <div className="font-forensic text-base md:text-lg mt-1">
+                <span className="scf-counter text-amber motion-safe:animate-[scfCounter_2.4s_ease-in-out_infinite]">50</span> Sourced Case Files
+              </div>
+              <div className="mt-1.5 font-case text-[11px] tracking-wider text-muted-foreground truncate">
+                Named companies · Public sources · Dollar-tied outcomes
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="relative flex items-center gap-3 flex-shrink-0">
-          <span className="hidden md:inline font-case text-[10px] uppercase tracking-[0.24em] text-amber/80 group-hover:text-amber transition-colors">
-            {open ? "Collapse" : "Open the files"}
-          </span>
-          <ChevronDown className={`w-5 h-5 text-amber transition-transform duration-300 ${open ? "rotate-180" : "group-hover:translate-y-0.5"}`} />
-        </div>
-      </button>
+          <div className="relative flex items-center gap-2 flex-shrink-0 self-center">
+            <span className="hidden md:inline font-case text-[10px] uppercase tracking-[0.24em] text-amber/80 group-hover:text-amber transition-colors">
+              Open archive
+            </span>
+            <ArrowRight className="w-5 h-5 text-amber transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </Link>
+      </div>
+
 
       {open && (
         <div className="mt-4 border border-amber/25 bg-background/50 p-4 md:p-6 animate-fade-in">

@@ -122,7 +122,8 @@ export const RealCaseStudiesSection: React.FC = () => {
   const visible = expanded ? filtered : filtered.slice(0, 9);
 
   return (
-    <section className="py-16 px-4" id="real-cases">
+    <section className="py-16 px-4 scroll-mt-24" id="real-case-files">
+      <span id="real-cases" className="sr-only" aria-hidden="true" />
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-case uppercase tracking-widest mb-5">
