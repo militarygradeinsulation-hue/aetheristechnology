@@ -1,23 +1,17 @@
-// Launches HubSpot's native calling window in a popup. This is the only way
-// to embed HubSpot calling — their app blocks iframes (X-Frame-Options).
-// Reps sign in to HubSpot once, then every launch reuses that session.
+// Launches HubSpot's native calling window and PopTox in popups. Both apps
+// block iframes (X-Frame-Options), so popups are the only in-browser option.
+// Reps sign in once per popup; the browser keeps the session between launches.
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ExternalLink, Search, PhoneCall, Monitor, Download, Apple } from 'lucide-react';
+import { Phone, ExternalLink, Search, PhoneCall, PhoneOutgoing } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import dialerArm64Asset from '@/assets/AetherisDialer-mac-AppleSilicon.zip.asset.json';
-import dialerIntelAsset from '@/assets/AetherisDialer-mac-Intel.zip.asset.json';
-
-const DIALER_DOWNLOADS = {
-  appleSilicon: (dialerArm64Asset as { url: string }).url,
-  intel: (dialerIntelAsset as { url: string }).url,
-};
 
 const HUBSPOT_CALLING_URL = 'https://app-na2.hubspot.com/calling-window-ui/244481481';
 const HUBSPOT_CONTACTS_URL = 'https://app-na2.hubspot.com/contacts/244481481/objects/0-1/views/all/list';
+const POPTOX_URL = 'https://www.poptox.com/dialpad';
 
 function normalizeNumber(raw: string): string {
   const digits = raw.replace(/[^\d+]/g, '');
@@ -72,22 +66,37 @@ export const DialerPanel: React.FC = () => {
     }
   };
 
-  const launchDesktopDialer = () => {
-    const raw = number.trim();
-    if (!raw) {
-      toast({ title: 'Enter a number first', description: 'The desktop dialer needs a number to auto-fill PopTox.' });
+  const launchPoptox = () => {
+    const w = 460, h = 720;
+    const y = window.top?.outerHeight
+      ? Math.round((window.top.outerHeight - h) / 2 + (window.top.screenY || 0))
+      : 100;
+    const x = window.top?.outerWidth
+      ? Math.round((window.top.outerWidth - w) / 2 + (window.top.screenX || 0))
+      : 100;
+    const win = window.open(
+      POPTOX_URL,
+      'poptox-dialer',
+      `width=${w},height=${h},left=${x},top=${y},toolbar=no,menubar=no,location=no`,
+    );
+    if (!win) {
+      toast({
+        title: 'Popup blocked',
+        description: 'Allow popups for this site and click again.',
+        variant: 'destructive',
+      });
       return;
     }
-    const normalized = normalizeNumber(raw);
-    const deepLink = `aetheris-dialer://call?number=${encodeURIComponent(normalized)}`;
-    // Navigate the current tab to the custom scheme. Browsers hand it off to
-    // the OS silently if the Aetheris Dialer app is installed; if it isn't,
-    // nothing visible happens — the toast tells the rep what to do.
-    window.location.href = deepLink;
-    toast({
-      title: 'Handed off to desktop dialer',
-      description: `${normalized} sent to Aetheris Dialer. If nothing opened, install the desktop app first.`,
-    });
+    if (number.trim()) {
+      const normalized = normalizeNumber(number);
+      navigator.clipboard?.writeText(normalized).catch(() => {});
+      toast({
+        title: 'PopTox opened',
+        description: `${normalized} copied to clipboard — paste it into PopTox's dial field.`,
+      });
+    } else {
+      toast({ title: 'PopTox opened', description: 'Sign in if prompted, then dial.' });
+    }
   };
 
   const openContactSearch = () => {
@@ -138,13 +147,13 @@ export const DialerPanel: React.FC = () => {
                 HubSpot Dialer
               </Button>
               <Button
-                onClick={launchDesktopDialer}
+                onClick={launchPoptox}
                 variant="outline"
                 className="w-full md:w-auto h-10 border-amber-400/40 text-amber-100 hover:bg-amber-400/10"
-                title="Requires the Aetheris Desktop Dialer app (PopTox wrapper)"
+                title="Opens PopTox in a popup — no install needed"
               >
-                <Monitor className="w-4 h-4 mr-2" />
-                PopTox Desktop
+                <PhoneOutgoing className="w-4 h-4 mr-2" />
+                PopTox (Popup)
               </Button>
             </div>
           </div>
@@ -155,44 +164,9 @@ export const DialerPanel: React.FC = () => {
               window in a popup. Calls auto-log to the contact record.
             </p>
             <p>
-              <strong className="text-amber-200/70">PopTox Desktop:</strong> Hands the number off to
-              the Aetheris Dialer desktop app (Electron wrapper around PopTox that stays signed in).
-              Download and install it once per machine using the buttons below.
-            </p>
-          </div>
-
-          <div className="border-t border-amber-400/15 pt-3 space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-amber-100/70">
-              Download Aetheris Desktop Dialer (macOS)
-            </Label>
-            <div className="grid sm:grid-cols-2 gap-2">
-              <Button asChild variant="outline" className="h-auto py-2 border-amber-400/40 text-amber-100 hover:bg-amber-400/10 justify-start">
-                <a href={DIALER_DOWNLOADS.appleSilicon} download>
-                  <Apple className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="text-left">
-                    <span className="block text-sm font-semibold">Apple Silicon</span>
-                    <span className="block text-[10px] text-amber-100/60">M1 / M2 / M3 / M4 · ~281 MB</span>
-                  </span>
-                  <Download className="w-4 h-4 ml-auto" />
-                </a>
-              </Button>
-              <Button asChild variant="outline" className="h-auto py-2 border-amber-400/40 text-amber-100 hover:bg-amber-400/10 justify-start">
-                <a href={DIALER_DOWNLOADS.intel} download>
-                  <Apple className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="text-left">
-                    <span className="block text-sm font-semibold">Intel Mac</span>
-                    <span className="block text-[10px] text-amber-100/60">x64 · ~294 MB</span>
-                  </span>
-                  <Download className="w-4 h-4 ml-auto" />
-                </a>
-              </Button>
-            </div>
-            <p className="text-[10px] text-amber-100/50 leading-relaxed">
-              Unzip → drag <code className="text-amber-300">AetherisDialer.app</code> into Applications →
-              right-click → <em>Open</em> the first time to bypass the unsigned-app warning. This
-              registers the <code className="text-amber-300">aetheris-dialer://</code> handler so the
-              <strong className="text-amber-200/70"> PopTox Desktop</strong> button above works.
-              Windows build coming soon.
+              <strong className="text-amber-200/70">PopTox (Popup):</strong> Opens PopTox in a browser
+              popup with your number copied to the clipboard. Sign in once — the popup stays signed
+              in for future launches. No install, no download.
             </p>
           </div>
         </CardContent>
