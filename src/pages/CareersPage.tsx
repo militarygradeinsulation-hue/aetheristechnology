@@ -119,21 +119,22 @@ const CareersPage = () => {
                     <Rocket className="w-3.5 h-3.5" /> Path B · $500 · Instant
                   </div>
                   <h2 className="font-display text-2xl text-foreground leading-tight">
-                    Skip the test. Get licensed today.
+                    Skip the test. Become a Connector today.
                   </h2>
                   <p className="text-sm text-foreground/85 flex-1">
-                    Pay $500, get your personal rep code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
+                    Pay $500, get your personal Connector code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>· Personal rep code issued instantly on payment</li>
+                    <li>· Personal Connector code issued instantly on payment</li>
                     <li>· Sell every tool + flagship at the standard split</li>
-                    <li>· Full rep portal access (playbooks, leads, coach)</li>
+                    <li>· Full Connector portal access (playbooks, leads, coach)</li>
                   </ul>
                   <a href="/careers/license" onClick={() => trackCareersCta('gate_instant_license')} className="block mt-auto">
                     <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                      Get licensed — $500 →
+                      Become a Connector — $500 →
                     </Button>
                   </a>
+
                 </CardContent>
               </Card>
             </div>
