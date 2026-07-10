@@ -370,22 +370,25 @@ const NewPortalPage: React.FC = () => {
             </TabsContent>
           )}
 
-          {/* COACH */}
+          {/* COACH — unified Advisor + Coach + Trainer + Nexus chat */}
           <TabsContent value="coach" className="mt-8">
             <ToolCard
-              eyebrow="// AI Sales Coach //"
-              title="Coach Chat"
-              summary="Ask any sales question in plain English. The coach knows your leads, your products and the Aetheris playbook."
+              eyebrow="// AI Command Chat //"
+              title="Aetheris Nexus — All-in-One Chat"
+              summary="One chat, four brains: the Sales Advisor (pitch + close), your Coach (scripts + objections), your Trainer (drills + certification prep), and Aetheris Nexus (live company + lead intelligence). Ask anything — it routes itself."
               howTo={[
-                'Type the exact situation — "prospect ghosted after demo" is better than "help".',
-                'Paste the last email or DM for a rewrite; ask for two versions to A/B.',
-                'End with "what would you do next?" to get a concrete next step.',
+                'Pitch help? Ask "how do I open a $12M manufacturer" — it answers as the Advisor.',
+                'Stuck on a call? Ask "coach me through \'too expensive\'" — it flips into Coach mode with the exact words.',
+                'Learning? Ask "quiz me on the 21-Day Diagnostic" or "explain the commission split" — Trainer mode drills you.',
+                'Need numbers? Ask "show my open leads" or "company summary this week" — Nexus pulls live data.',
+                'Attach a screenshot, paste an email, or hit the mic — everything stays in this one thread.',
               ]}
               defaultOpen
             >
-              <SalesCoachChat />
+              <SalesCoachChat embedded />
             </ToolCard>
           </TabsContent>
+
 
           {/* TRAINING — gated */}
           {showAdvanced && (
