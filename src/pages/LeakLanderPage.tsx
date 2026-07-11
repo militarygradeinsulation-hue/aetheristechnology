@@ -141,7 +141,7 @@ const LeakLanderPage: React.FC = () => {
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
               {[
-                { stat: "30%", label: "Avg. recovery on named leaks", tone: "amber" },
+                { stat: "30%", label: "AVG. RECOVERY ON NAMED LEAKS\n\n\nFREE FORENSIC SCAN\n\n\nMONEY BACK GUARANTEE IF WE CAN'T HELP", tone: "amber" },,
                 { stat: "10–40×", label: "Typical leak / fee ratio", tone: "amber" },
                 { stat: "20 yrs", label: "Building revenue systems", tone: "amber" },
                 { stat: "USMC + MS + BA + IBM", label: "MARINE VET · DIGITAL FORENSICS", tone: "crimson" },
