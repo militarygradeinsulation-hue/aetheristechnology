@@ -288,7 +288,7 @@ function DossierCard({ file }: { file: CaseFile }) {
       <div className="absolute inset-2 border border-amber/10 pointer-events-none" />
       <header className="flex items-center justify-between px-4 py-3 border-b border-amber/15">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 flex items-center justify-center">
+          <div className="w-8 h-8 flex items-center justify-center">
             <img src={aetherisLogo.url} alt="Aetheris" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,169,58,0.35)]" />
           </div>
           <div className="font-case text-[10px] tracking-[0.28em] text-amber uppercase leading-tight">
@@ -302,7 +302,7 @@ function DossierCard({ file }: { file: CaseFile }) {
       </header>
 
       <div className="px-5 pt-5 flex flex-wrap items-baseline justify-between gap-2">
-        <div className="font-case text-xl md:text-2xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
+        <div className="font-case text-lg md:text-xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
         <div className="font-case text-[10px] tracking-[0.24em] text-muted-foreground uppercase">STATUS: <b className="text-amber font-medium">OPEN</b> · RETAINED 30 DAYS</div>
       </div>
 
@@ -315,7 +315,7 @@ function DossierCard({ file }: { file: CaseFile }) {
           ["Examiner", "J. Toney"],
           ["Method", "Leak Audit v2"],
         ].map(([k, v], i) => (
-          <div key={k} className={`py-3 pr-3 ${i % 3 !== 2 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r md:border-r" : ""} border-amber/10 ${i >= 3 ? "border-t md:border-t" : ""} ${i >= 2 ? "border-t md:border-t-0" : ""}`}>
+          <div key={k} className={`py-2 pr-3 ${i % 3 !== 2 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r md:border-r" : ""} border-amber/10 ${i >= 3 ? "border-t md:border-t" : ""} ${i >= 2 ? "border-t md:border-t-0" : ""}`}>
             <dt className="font-case text-[9px] tracking-[0.24em] uppercase text-amber/70 mb-1">{k}</dt>
             <dd className="font-case text-[12px]">{v}</dd>
           </div>
@@ -323,12 +323,12 @@ function DossierCard({ file }: { file: CaseFile }) {
       </dl>
 
       <div className="px-5 pt-6 text-center">
-        <h4 className="font-forensic text-base md:text-xl">{file.headline}</h4>
+        <h4 className="font-forensic text-sm md:text-lg">{file.headline}</h4>
       </div>
 
       <div className="px-5 pt-4 text-center">
         <div className="font-case text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Estimated Annual Leakage</div>
-        <div className="font-case text-3xl md:text-4xl font-semibold text-amber mt-2 drop-shadow-[0_0_24px_rgba(217,169,58,0.28)]">
+        <div className="font-case text-2xl md:text-3xl font-semibold text-amber mt-2 drop-shadow-[0_0_18px_rgba(217,169,58,0.24)]">
           {file.total}<span className="text-sm text-amber/60 tracking-widest"> /YR</span>
         </div>
         <p className="text-xs text-muted-foreground max-w-md mx-auto mt-3 leading-relaxed">
