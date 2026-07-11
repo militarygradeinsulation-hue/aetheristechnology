@@ -117,6 +117,20 @@ const LeakLanderPage: React.FC = () => {
               />
             </button>
           </div>
+
+          {/* Anti-AI positioning — first thing they read */}
+          <section className="mt-4 max-w-4xl mx-auto text-center animate-fade-in">
+            <h2 className="font-forensic text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight">
+              Sick of AI everywhere and just want something simple that actually works?
+            </h2>
+            <p className="mt-3 text-lg sm:text-xl md:text-2xl text-amber font-bold tracking-tight">
+              This is us.
+            </p>
+            <p className="mt-3 text-sm sm:text-base md:text-lg text-muted-foreground">
+              We’re the most anti-AI, AI company you’ll ever meet.
+            </p>
+          </section>
+
           {/* Signature banner — gentle float + golden shimmer edge */}
           <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Technology">
             <div className="shimmer-gold-border">
