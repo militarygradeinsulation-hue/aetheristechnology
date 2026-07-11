@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, ShoppingCart, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 import { PinnableFloater } from '@/components/ui/PinnableFloater';
+import { getOpenerForPath, pageContextLabel } from '@/lib/nexusOpeners';
 
 type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
-const INITIAL_MESSAGE: Msg = {
-  role: 'assistant',
-  content: "I'm the Aetheris Sales Advisor. We help specialty manufacturers ($5M-$25M) find the $200K-$2M they're leaking through broken CRM, sales follow-up, and lead flow — then fix it.\n\nWhat do you make, and where do you think the leak is?",
-};
+// Auto-open delay for the Nexus proactive greeting.
+const AUTO_OPEN_MS = 10_000;
+// Session flag key — set once per browser session so we don't re-pop on every route change.
+const AUTO_OPENED_KEY = 'nexus_auto_opened_session';
 
 const STARTER_PROBLEMS = [
   "We're a $12M manufacturer",
