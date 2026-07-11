@@ -118,7 +118,14 @@ export const SalesChat: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages }),
+        body: JSON.stringify({
+          messages: allMessages,
+          pageContext: {
+            pathname,
+            title: typeof document !== 'undefined' ? document.title : '',
+            section: opener.label,
+          },
+        }),
       });
 
       if (!resp.ok || !resp.body) throw new Error('Failed to start stream');
