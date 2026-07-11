@@ -389,6 +389,14 @@ export function SampleCaseFiles() {
   const location = useLocation();
   const isCaseStudiesPage = location.pathname === "/case-studies";
 
+  const ArchiveCard = ({ children, className }: { children: React.ReactNode; className: string }) =>
+    isCaseStudiesPage ? (
+      <a href="#real-case-files" className={className}>{children}</a>
+    ) : (
+      <Link to="/case-studies#real-case-files" className={className}>{children}</Link>
+    );
+
+
 
   // Cycle a live ticker of "recent" reviewed companies on the trigger card
   useEffect(() => {
