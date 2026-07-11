@@ -576,10 +576,10 @@ export function SampleCaseFiles() {
 
           <div className="text-center mt-6">
             <Link
-              to="/industries"
+              to="/case-studies"
               className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
             >
-              Browse the full industry index <ArrowRight className="w-3.5 h-3.5" />
+              Browse all case files <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
