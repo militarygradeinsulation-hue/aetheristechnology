@@ -49,7 +49,8 @@ async function firecrawlMap(url: string): Promise<string[]> {
     });
     if (!r.ok) return [];
     const j = await r.json();
-    return (j?.links || j?.data?.links || []) as string[];
+    const raw = (j?.links || j?.data?.links || []) as any[];
+    return raw.map((l) => (typeof l === "string" ? l : l?.url || l?.href || "")).filter(Boolean);
   } catch { return []; }
 }
 
