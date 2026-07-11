@@ -302,7 +302,7 @@ function DossierCard({ file }: { file: CaseFile }) {
       </header>
 
       <div className="px-5 pt-5 flex flex-wrap items-baseline justify-between gap-2">
-        <div className="font-case text-2xl md:text-3xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
+        <div className="font-case text-xl md:text-2xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
         <div className="font-case text-[10px] tracking-[0.24em] text-muted-foreground uppercase">STATUS: <b className="text-amber font-medium">OPEN</b> · RETAINED 30 DAYS</div>
       </div>
 
