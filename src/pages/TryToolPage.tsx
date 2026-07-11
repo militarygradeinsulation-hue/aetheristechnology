@@ -194,12 +194,15 @@ export default function TryToolPage() {
   const [runAt, setRunAt] = useState<Date | null>(null);
   const [dossierOpen, setDossierOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  // Resume-forensics-only state:
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [targetRole, setTargetRole] = useState("");
   const printRef = useRef<HTMLDivElement>(null);
 
   // Clear everything when leaving the page — nothing persists.
-  useEffect(() => () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); }, [toolId]);
+  useEffect(() => () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); setResumeFile(null); setTargetRole(""); }, [toolId]);
 
-  const reset = () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); };
+  const reset = () => { setUrl(""); setContext(""); setOutput(""); setRunAt(null); setResumeFile(null); setTargetRole(""); };
 
   // Deterministic-ish case id from tool + timestamp for the case-file header.
   const caseId = useMemo(() => {
