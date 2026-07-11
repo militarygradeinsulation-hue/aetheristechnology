@@ -27,22 +27,34 @@ const STARTER_PROBLEMS = [
 ];
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
-const STREAMING_STRIP_RE = /\s*<suggestions>[\s\S]*$/i;
+const CAPTURE_LEAD_RE = /<capture_lead>\s*(\{[\s\S]*?\})\s*<\/capture_lead>/i;
+const STREAMING_STRIP_RE = /\s*(<suggestions>|<capture_lead>)[\s\S]*$/i;
 
 const stripSuggestionsForDisplay = (text: string) => text.replace(STREAMING_STRIP_RE, '').trim();
 
 const parseSuggestions = (text: string): { clean: string; suggestions?: string[] } => {
-  const m = text.match(SUGGESTIONS_RE);
-  if (!m) return { clean: text };
+  let clean = text.replace(CAPTURE_LEAD_RE, '').trim();
+  const m = clean.match(SUGGESTIONS_RE);
+  if (!m) return { clean };
   try {
     const arr = JSON.parse(m[1]);
     if (Array.isArray(arr) && arr.every((s) => typeof s === 'string')) {
-      return { clean: text.replace(SUGGESTIONS_RE, '').trim(), suggestions: arr.slice(0, 3) };
+      return { clean: clean.replace(SUGGESTIONS_RE, '').trim(), suggestions: arr.slice(0, 3) };
     }
-  } catch {
-    // ignore
-  }
-  return { clean: text.replace(SUGGESTIONS_RE, '').trim() };
+  } catch { /* ignore */ }
+  return { clean: clean.replace(SUGGESTIONS_RE, '').trim() };
+};
+
+const parseCaptureLead = (text: string): { name?: string; email?: string; company?: string; note?: string } | null => {
+  const m = text.match(CAPTURE_LEAD_RE);
+  if (!m) return null;
+  try {
+    const obj = JSON.parse(m[1]);
+    if (obj && typeof obj === 'object' && typeof obj.email === 'string' && /.+@.+\..+/.test(obj.email)) {
+      return obj;
+    }
+  } catch { /* ignore */ }
+  return null;
 };
 
 const CONTACT_LINKS = [
@@ -179,6 +191,20 @@ export const SalesChat: React.FC = () => {
         if (last?.role !== 'assistant') return prev;
         return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, suggestions } : m));
       });
+
+      // Silent lead capture → HubSpot + contact_submissions.
+      const lead = parseCaptureLead(assistantSoFar);
+      if (lead?.email) {
+        trackEvent('nexus_lead_captured', { has_name: !!lead.name, has_company: !!lead.company });
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nexus-capture-lead`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ ...lead, pathname }),
+        }).catch((err) => console.warn('nexus-capture-lead failed', err));
+      }
     } catch (e) {
       console.error(e);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Try again or call us at (317) 376-2110.' }]);
