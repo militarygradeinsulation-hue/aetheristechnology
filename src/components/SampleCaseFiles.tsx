@@ -328,7 +328,7 @@ function DossierCard({ file }: { file: CaseFile }) {
 
       <div className="px-5 pt-4 text-center">
         <div className="font-case text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Estimated Annual Leakage</div>
-        <div className="font-case text-4xl md:text-5xl font-semibold text-amber mt-2 drop-shadow-[0_0_40px_rgba(217,169,58,0.35)]">
+        <div className="font-case text-3xl md:text-4xl font-semibold text-amber mt-2 drop-shadow-[0_0_24px_rgba(217,169,58,0.28)]">
           {file.total}<span className="text-sm text-amber/60 tracking-widest"> /YR</span>
         </div>
         <p className="text-xs text-muted-foreground max-w-md mx-auto mt-3 leading-relaxed">
