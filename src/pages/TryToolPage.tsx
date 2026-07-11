@@ -126,6 +126,60 @@ const TRY_META: Record<string, ToolMeta> = {
     howTo: ["Describe the tool you want", "Run", "Get spec + UI copy + growth loops"],
     delivers: ["Concept", "Spec table + UI copy", "Growth loops"],
   },
+  "golden-report": {
+    title: "Golden Report", inputLabel: "Business + URL", inputHint: "e.g. 'Acme Co · acme.com'",
+    summary: "The flagship forensic case-file report — retainer-grade, boardroom-ready, built to close monthly engagements.",
+    howTo: ["Enter business name + URL", "Run the forensic sweep", "Get a full case file with evidence & fixes"],
+    delivers: ["Case opener", "Evidence log (table)", "Retainer play + first 72 hours"],
+  },
+  "head-to-head": {
+    title: "Head-to-Head Report", inputLabel: "You vs. Competitor", inputHint: "e.g. 'acme.com vs. competitor.com'",
+    summary: "Side-by-side competitor teardown that shows exactly where you win, where you lose, and how to pull ahead.",
+    howTo: ["Enter your URL and a competitor's", "Run the comparison", "Get a category-by-category scorecard"],
+    delivers: ["Verdict", "6-category scorecard", "Pull-ahead move list"],
+  },
+  "resume-forensics": {
+    title: "Resume Forensics", inputLabel: "Role + resume summary", inputHint: "Target role, then paste highlights",
+    summary: "Audits and rewrites a resume to beat ATS filters and land more interviews — quantified, keyword-loaded, hand-off ready.",
+    howTo: ["Enter target role + resume highlights", "Run", "Get ATS diagnosis and rewritten bullets"],
+    delivers: ["ATS diagnosis", "Rewritten summary + bullets", "Keyword injection list"],
+  },
+  "reciprocation": {
+    title: "Reciprocation Gift", inputLabel: "Target company + URL", inputHint: "e.g. 'Prospect Co · prospect.com'",
+    summary: "Generates a high-value custom report to send cold — the door-opener cold email can't match.",
+    howTo: ["Enter target company + URL", "Run", "Send the report as your first touch"],
+    delivers: ["Cover note", "3 leaks table", "Soft next-step CTA"],
+  },
+  "ai-checklist": {
+    title: "AI Readiness Checklist", inputLabel: "Company + industry", inputHint: "e.g. 'B2B SaaS, 40 employees'",
+    summary: "Scores any business on AI readiness in one pass — perfect opener for selling automation and AI services.",
+    howTo: ["Enter company + industry", "Run", "Get graded layer scores + 30-day unlock"],
+    delivers: ["Readiness grade A–F", "6-layer scorecard", "30-day unlock plan"],
+  },
+  "nexus-iq": {
+    title: "Prospect Intel · Nexus IQ", inputLabel: "Target company + URL", inputHint: "e.g. 'Target Co · target.com'",
+    summary: "Builds the pre-meeting dossier that makes you the smartest person in the room before you walk in.",
+    howTo: ["Enter target company + URL", "Run", "Walk in with talking points and traps mapped"],
+    delivers: ["Snapshot", "Likely-pain table", "Talking points + traps"],
+  },
+  "sales-scripts": {
+    title: "Sales Scripts", inputLabel: "Offer + audience", inputHint: "e.g. 'diagnostic for CMOs'",
+    summary: "Battle-tested cold, warm, and follow-up scripts so you always know exactly what to say on every call.",
+    howTo: ["Describe your offer + audience", "Run", "Copy scripts into your outreach"],
+    delivers: ["Cold + warm + follow-up scripts", "Objection volley table"],
+  },
+  "follow-up-plan": {
+    title: "Follow-Up Sequences", inputLabel: "Meeting recap", inputHint: "Who you met, what was discussed, next step",
+    summary: "Plug-and-play post-meeting email sequences that keep deals alive when prospects go quiet.",
+    howTo: ["Paste your meeting recap", "Run", "Send the 4-touch sequence"],
+    delivers: ["Day-0/3/7/14 emails", "Silence-breaker angles"],
+  },
+  "linkedin-playbook": {
+    title: "LinkedIn Playbook", inputLabel: "Role + niche", inputHint: "e.g. 'fractional CMO for SaaS'",
+    summary: "The complete LinkedIn system that turns a profile into a lead-generating machine — profile, posts, and DMs.",
+    howTo: ["Enter your role + niche", "Run", "Install the profile, post plan, and DM sequence"],
+    delivers: ["Profile rewrite table", "7-day post plan", "DM sequence + weekly metrics"],
+  },
 };
 
 export default function TryToolPage() {
