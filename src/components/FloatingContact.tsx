@@ -78,18 +78,23 @@ export const FloatingContact: React.FC = () => {
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`relative w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 ${
+          className={`relative w-16 h-16 rounded-full bg-background border-2 border-amber/60 shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 overflow-hidden ${
             showPulse ? 'animate-pulse' : ''
           }`}
-          aria-label="Contact us"
+          aria-label="Contact Aetheris"
         >
           {showPulse && (
-            <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+            <span className="absolute inset-0 rounded-full bg-amber/30 animate-ping" />
           )}
           {isExpanded ? (
-            <X className="w-7 h-7 text-primary-foreground relative z-10" />
+            <X className="w-7 h-7 text-amber relative z-10" />
           ) : (
-            <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
+            <img
+              src="/aetheris-logo.png"
+              alt="Aetheris"
+              className="w-12 h-12 object-contain relative z-10 pointer-events-none"
+              draggable={false}
+            />
           )}
         </button>
       </div>
