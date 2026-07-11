@@ -139,10 +139,10 @@ const TRY_META: Record<string, ToolMeta> = {
     delivers: ["Verdict", "6-category scorecard", "Pull-ahead move list"],
   },
   "resume-forensics": {
-    title: "Resume Forensics", inputLabel: "Role + resume summary", inputHint: "Target role, then paste highlights",
-    summary: "Audits and rewrites a resume to beat ATS filters and land more interviews — quantified, keyword-loaded, hand-off ready.",
-    howTo: ["Enter target role + resume highlights", "Run", "Get ATS diagnosis and rewritten bullets"],
-    delivers: ["ATS diagnosis", "Rewritten summary + bullets", "Keyword injection list"],
+    title: "Resume Forensics", inputLabel: "Company URL", inputHint: "https://targetcompany.com",
+    summary: "Upload a resume + drop the company URL. We scan the company site, then produce a full candidate-vs-company fit report — score, gaps, ATS rewrite, and cover-note opener.",
+    howTo: ["Upload the resume (PDF, DOCX, or TXT)", "Paste the target company's website URL", "Get a deep fit report with rewrites and interview prep"],
+    delivers: ["Fit verdict + score /100", "7-dimension fit scorecard", "ATS diagnosis + rewritten bullets", "Interview prep + cover-note opener"],
   },
   "reciprocation": {
     title: "Reciprocation Gift", inputLabel: "Target company + URL", inputHint: "e.g. 'Prospect Co · prospect.com'",
