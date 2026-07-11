@@ -17,6 +17,15 @@ import imageStudio from "@/assets/tools/image-studio.jpg";
 import creationStudio from "@/assets/tools/creation-studio.jpg";
 import easyMode from "@/assets/tools/easy-mode.jpg";
 import toolGenerator from "@/assets/tools/tool-generator.jpg";
+import goldenReport from "@/assets/tools/golden-report.jpg";
+import headToHead from "@/assets/tools/head-to-head.jpg";
+import resumeForensics from "@/assets/tools/resume-forensics.jpg";
+import reciprocation from "@/assets/tools/reciprocation.jpg";
+import aiChecklist from "@/assets/tools/ai-checklist.jpg";
+import nexusIq from "@/assets/tools/nexus-iq.jpg";
+import salesScripts from "@/assets/tools/sales-scripts.jpg";
+import followUpPlan from "@/assets/tools/follow-up-plan.jpg";
+import linkedinPlaybook from "@/assets/tools/linkedin-playbook.jpg";
 
 const IMAGES: Record<string, string> = {
   "website-scanner": websiteScanner,
@@ -34,6 +43,15 @@ const IMAGES: Record<string, string> = {
   "creation-studio": creationStudio,
   "easy-mode": easyMode,
   "tool-generator": toolGenerator,
+  "golden-report": goldenReport,
+  "head-to-head": headToHead,
+  "resume-forensics": resumeForensics,
+  "reciprocation": reciprocation,
+  "ai-checklist": aiChecklist,
+  "nexus-iq": nexusIq,
+  "sales-scripts": salesScripts,
+  "follow-up-plan": followUpPlan,
+  "linkedin-playbook": linkedinPlaybook,
 };
 
 type Props = { id: string; className?: string; alt?: string };
