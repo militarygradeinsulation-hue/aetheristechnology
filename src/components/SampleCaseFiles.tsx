@@ -578,12 +578,21 @@ export function SampleCaseFiles() {
           <DossierCard file={CASES[active]} />
 
           <div className="text-center mt-6">
-            <Link
-              to="/case-studies"
-              className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
-            >
-              Browse all case files <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            {isCaseStudiesPage ? (
+              <a
+                href="#real-case-files"
+                className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
+              >
+                Browse all case files <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            ) : (
+              <Link
+                to="/case-studies#real-case-files"
+                className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
+              >
+                Browse all case files <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
           </div>
         </div>
       )}
