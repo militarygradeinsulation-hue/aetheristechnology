@@ -286,7 +286,7 @@ function DossierCard({ file }: { file: CaseFile }) {
   return (
     <article className="relative border border-amber/25 bg-background/70 mt-3 first:mt-0">
       <div className="absolute inset-2 border border-amber/10 pointer-events-none" />
-      <header className="flex items-center justify-between px-5 py-4 border-b border-amber/15">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-amber/15">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center">
             <img src={aetherisLogo.url} alt="Aetheris" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,169,58,0.35)]" />
