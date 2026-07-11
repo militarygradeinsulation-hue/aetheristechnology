@@ -123,8 +123,52 @@ RULES
     const aiData = await aiRes.json();
     let raw = aiData.choices?.[0]?.message?.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) => ch === "\n" || ch === "\r" || ch === "\t" ? ch : "");
-    const result = JSON.parse(raw);
+    // Slice to the outermost { ... } in case the model wrapped it.
+    const first = raw.indexOf("{");
+    const last = raw.lastIndexOf("}");
+    if (first !== -1 && last > first) raw = raw.slice(first, last + 1);
+
+    function tryParse(s: string) { try { return JSON.parse(s); } catch { return null; } };
+
+    let result: any = tryParse(raw);
+
+    // Fallback 1: strip control chars (except \n \r \t).
+    if (!result) {
+      const cleaned = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) =>
+        ch === "\n" || ch === "\r" || ch === "\t" ? ch : "");
+      result = tryParse(cleaned);
+    }
+
+    // Fallback 2: escape raw newlines/tabs *inside* JSON strings — the common
+    // failure mode when a model puts a multi-line mermaid block in one field.
+    if (!result) {
+      let out = "";
+      let inStr = false;
+      let esc = false;
+      for (const ch of raw) {
+        if (inStr) {
+          if (esc) { out += ch; esc = false; continue; }
+          if (ch === "\\") { out += ch; esc = true; continue; }
+          if (ch === '"') { out += ch; inStr = false; continue; }
+          if (ch === "\n") { out += "\\n"; continue; }
+          if (ch === "\r") { out += "\\r"; continue; }
+          if (ch === "\t") { out += "\\t"; continue; }
+          out += ch;
+        } else {
+          if (ch === '"') { inStr = true; out += ch; continue; }
+          out += ch;
+        }
+      }
+      result = tryParse(out);
+    }
+
+    if (!result) {
+      console.error("generate-lead-flow-map: unparseable model output. First 400 chars:", raw.slice(0, 400));
+      return new Response(
+        JSON.stringify({ error: "AI returned malformed JSON. Try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
