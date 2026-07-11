@@ -40,14 +40,20 @@ serve(async (req) => {
     }
 
     // Scrape website content + branding (with fallbacks for tough sites)
-    async function fcScrape(body: Record<string, unknown>) {
-      const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      return r.json().catch(() => ({}));
+    async function fcScrape(body: Record<string, unknown>, timeoutMs = 15_000) {
+      try {
+        const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+          method: "POST",
+          signal: AbortSignal.timeout(timeoutMs),
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return await r.json().catch(() => ({}));
+      } catch (_e) {
+        return {};
+      }
     }
+
 
     const stripHtml = (html: string) =>
       html
