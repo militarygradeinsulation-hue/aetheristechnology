@@ -289,8 +289,8 @@ export const SalesChat: React.FC = () => {
           <div className="px-4 py-3 border-b border-border bg-card">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="font-bold text-foreground text-sm">Aetheris Sales Advisor</h3>
-                <p className="text-[10px] text-muted-foreground">Ask me anything or reach out directly</p>
+                <h3 className="font-bold text-foreground text-sm">Aetheris Nexus</h3>
+                <p className="text-[10px] text-muted-foreground">AI operator · viewing {opener.label}</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
