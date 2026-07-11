@@ -100,6 +100,7 @@ const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
+const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const CaseStudiesPage = lazy(() => import("./pages/CaseStudiesPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
