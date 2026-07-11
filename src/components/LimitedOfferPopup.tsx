@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,25 +40,34 @@ export function LimitedOfferPopup() {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const dismissedRef = useRef(false);
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
-  useEffect(() => {
-    if (hidden) return;
+  const isSuppressed = () => {
+    if (dismissedRef.current) return true;
     try {
-      if (localStorage.getItem(STORAGE_KEY)) return;
+      if (localStorage.getItem(STORAGE_KEY)) return true;
     } catch {
       /* ignore */
     }
+    return false;
+  };
 
-    const timer = window.setTimeout(() => setOpen(true), 8000);
+  useEffect(() => {
+    if (hidden) return;
+    if (isSuppressed()) return;
+
+    const timer = window.setTimeout(() => {
+      if (!isSuppressed()) setOpen(true);
+    }, 8000);
 
     const onExit = (e: MouseEvent) => {
-      if (e.clientY <= 0) {
+      if (e.clientY <= 0 && !isSuppressed()) {
         setOpen(true);
-        window.clearTimeout(timer);
-        document.removeEventListener("mouseleave", onExit);
       }
+      // Always stop listening once the cursor has left the viewport.
+      document.removeEventListener("mouseleave", onExit);
     };
     document.addEventListener("mouseleave", onExit);
 
@@ -69,6 +78,7 @@ export function LimitedOfferPopup() {
   }, [hidden]);
 
   const dismiss = (persist: boolean) => {
+    dismissedRef.current = true;
     if (persist) {
       try {
         localStorage.setItem(STORAGE_KEY, String(Date.now()));
