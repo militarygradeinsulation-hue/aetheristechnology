@@ -183,13 +183,13 @@ const LeakLanderPage: React.FC = () => {
               Chaos always has <span className="text-crimson italic">cause</span>.
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
-              One 20-minute forensic call names your top three revenue leaks and their annual dollar cost — before you spend a cent.
+              <br />
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
               Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace every dollar of bleed back to its origin, and remove the cause at the source.
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground max-w-2xl mx-auto">
-              We investigate <span className="text-amber font-bold uppercase tracking-wide">revenue leaks</span> across sales, CRM, follow-up, and lead flow. Documented client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
+              Across sales, CRM, follow-up, and lead flow, document client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
             </p>
             <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-2xl mx-auto">
               If we can't name a leak worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
