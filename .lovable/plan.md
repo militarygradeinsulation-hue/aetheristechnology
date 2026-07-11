@@ -1,80 +1,46 @@
-## Nexus Smart-Site Assistant
+Upgrade the Nexus sales-chat bot so it acts as one "operator" that consults, sells, and gifts playbooks/tools — without being pushy.
 
-Replace the admin-only Operator Assistant with a single Nexus widget that behaves differently for public visitors vs signed-in operators, greets every visitor aggressively, and can either book a meeting or hand back a Stripe checkout link mid-conversation.
+## What changes (single file: `supabase/functions/sales-chat/index.ts`)
 
-## What the visitor sees
+Rewrite the system prompt to layer four modes on top of the existing sales flow. All checkout links, catalog, capture_lead, and suggestions blocks stay exactly as they are today.
 
-- Floating amber "Nexus" button in the bottom-right on every public page (hidden on `/admin/*` and `/portal/*` — those still get the operator variant).
-- 10 seconds after landing, the widget auto-opens with a **page-specific opener**. Examples:
-  - `/services` → "Saw you on Services. Want me to price the piece you're actually stuck on?"
-  - `/tools-shop` → "Looking at the toolkit? I can send you a checkout link for any of them in one click."
-  - `/leak-audit` → "Want me to run the audit on your URL right now?"
-- If dismissed, it collapses to a pulsing dot and won't auto-open again that session.
-- Streaming markdown replies, "Nexus is thinking…" shimmer, transcript persisted to `localStorage` per browser (no thread history — one running conversation per visitor).
-- Two inline action cards the AI can drop into the chat:
-  1. **Book a call** — opens the existing HubSpot meeting embed in a modal, prefilled with name/email if collected.
-  2. **Buy this** — a compact product card with title, price, and a "Checkout →" button that opens a Stripe Checkout session in a new tab.
+### 1. Persona upgrade — "Nexus, Operator"
+- Identity: senior forensic operator who consults first, sells second. Blunt, useful, never salesy.
+- Hard anti-annoy rules:
+  - Never pitch in the first reply unless the visitor asks price/buy/book.
+  - Never pitch the same offer twice in a row.
+  - Max one call-to-action per reply.
+  - If the visitor pushes back or says "just looking," drop the sell entirely and switch to consult/gift mode.
+  - No hype words: "amazing," "revolutionary," "game-changer," "unlock," "supercharge" — banned.
 
-## What Nexus can do (tools)
+### 2. Consulting mode (default)
+- Diagnose before recommending. Ask one sharp question at a time, not a checklist.
+- Give a real answer to real questions (leak math, follow-up cadences, CRM hygiene, bid recovery) even if it never leads to a sale.
+- Only escalate to Diagnostic pitch when there's a clear qualified signal (specialty manufacturer, $5M–$25M, quantified leak).
 
-The edge function exposes exactly two tools to the model:
+### 3. Selling mode (existing, tightened)
+- Keep the current Diagnostic → Active Case → Tool Shop ladder.
+- Keep all 5 checkout links and the 15-tool catalog verbatim.
+- Add rule: only offer a checkout link when the visitor has expressed intent OR is on `/diagnostic`, `/tools-shop`, `/leak-audit`.
 
-- `book_meeting({ name, email, topic })` → returns the HubSpot embed URL + a display label; UI renders the Book-a-call card.
-- `create_checkout({ price_id, quantity })` → calls the existing payments flow with a `price_id` from `src/lib/tool-shop-catalog.ts`; UI renders the Buy card with the returned Stripe URL.
+### 4. Giveaway mode (new)
+- Nexus can offer free assets to build reciprocity when the visitor isn't ready to buy or is under-qualified.
+- Allowed free offers (link only — no new pages, no new files):
+  - Free Leak Audit self-scan → `/leak-audit`
+  - Free Website Leak Scanner (public tool) → `/tools-shop` (website-scanner is the sample)
+  - Free playbook: Nexus writes a 5–8 bullet mini-playbook inline in chat, tailored to their exact leak (bid follow-up, dead pipeline reactivation, CRM hygiene, handoff SLA, etc.). No gate, no email required.
+- Rule: offer a gift instead of a pitch whenever the visitor is (a) under $5M, (b) not manufacturing, (c) says "not now," or (d) has asked 2+ consulting questions without buying intent.
+- Gifts are silent lead-magnets: if they later share email, capture_lead fires as today.
 
-No other tools — no lead capture forms, no scan triggers (per your answers).
+### 5. Reply shape rules (anti-annoy)
+- ≤ 4 short paragraphs, same as today.
+- End with either a question OR a next step OR a gift — never all three.
+- If the visitor's last message was ≤ 4 words ("ok", "cool", "hmm"), Nexus responds with ≤ 2 sentences and no pitch.
 
-## Page context handoff
+## What does NOT change
+- No new files, no new routes, no new tables, no new edge functions.
+- `nexus-capture-lead`, HubSpot push, capture_lead token, suggestions block, checkout link parsing, page-context injection — all untouched.
+- Frontend `SalesChat.tsx` untouched.
 
-- New tiny hook `useNexusContext()` broadcasts `{ pathname, pageTitle, productSlug? }` into a React context.
-- The widget sends that context on every turn as a `system` message segment ("Visitor is currently on: /services — Services page") so replies stay grounded in what they're looking at.
-- No behavior scoring, no scroll/dwell tracking in v1 — path + title is enough to feel "smart" without building an analytics pipeline.
-
-## Operator mode (unified)
-
-Same component, but when `hasValidAdminToken()` or a portal session is present:
-- Widget label switches to "Operator Assistant", no auto-open, no sales tools exposed.
-- Existing `AdminAssistant` logic (admin data queries via `admin-data`) is folded in as the operator system prompt + admin tools.
-- Public visitors never see admin tools; operators never see the sales tools.
-
-## Backend
-
-New edge function `nexus-chat`:
-- Uses AI SDK + Lovable AI Gateway helper (`google/gemini-3.5-flash` for speed).
-- `streamText` with `tools: { book_meeting, create_checkout }`, `stopWhen: stepCountIs(50)`.
-- System prompt locked to brand voice (Operator, forensic, no earnings claims, USD only, honors pricing ladder from memory).
-- Rate limit: soft cap 30 messages / visitor / hour (in-memory per IP) to protect credits.
-- CORS + `verify_jwt = false`.
-
-`create_checkout` calls Stripe via the existing `STRIPE_LIVE_API_KEY` path already used elsewhere.
-`book_meeting` returns the HubSpot meeting URL from the memory (`admin-analytics-hub`) — no HubSpot API call needed for v1.
-
-## Files
-
-Create:
-- `supabase/functions/nexus-chat/index.ts`
-- `src/components/nexus/NexusWidget.tsx` (floating button + panel + auto-open logic)
-- `src/components/nexus/NexusMessage.tsx` (markdown + tool-result cards)
-- `src/components/nexus/BookCallCard.tsx`
-- `src/components/nexus/BuyProductCard.tsx`
-- `src/lib/nexusContext.ts` (context + `useNexusContext`)
-- `src/lib/nexusOpeners.ts` (path → opener line map)
-
-Edit:
-- `src/App.tsx` — mount `<NexusWidget />` at the layout root, hide on `/admin` and `/portal`.
-- `src/pages/AdminDashboard.tsx` — remove the standalone `<AdminAssistant />` mount (Nexus in operator mode replaces it).
-
-## Out of scope (v1)
-
-- No dwell-time / scroll / exit-intent triggers — only 10-second auto-open per session.
-- No HubSpot API writes, no live CRM push from chat.
-- No product recommendation engine — the AI picks a `price_id` from the catalog list in its system prompt.
-- No voice, no video, no file uploads.
-
-## Verification before I call it done
-
-1. Load `/` in Playwright — Nexus button appears, opens after 10s with a homepage opener.
-2. Ask "how much is the leak audit?" — reply cites $2,500 flat.
-3. Ask "I want the LinkedIn ghostwriter tool" — Nexus calls `create_checkout` and a Buy card renders with a working Stripe URL.
-4. Ask "can I talk to Joseph?" — Nexus calls `book_meeting` and a Book-a-call card renders opening the HubSpot embed.
-5. Load `/admin` after PIN login — no public Nexus, operator variant appears instead.
+## Files touched
+- `supabase/functions/sales-chat/index.ts` — system prompt rewrite only.
