@@ -271,7 +271,7 @@ export const SalesChat: React.FC = () => {
             className={`w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative ${
               showPulse ? 'animate-pulse' : ''
             }`}
-            aria-label="Chat with us"
+            aria-label="Open Aetheris Nexus"
           >
             {showPulse && (
               <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
