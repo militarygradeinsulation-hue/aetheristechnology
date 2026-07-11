@@ -171,6 +171,13 @@ const TechSolutionsPage: React.FC = () => {
               Every diagnostic and content system in the Aetheris stack. Same free-run rules
               as the ecosystem — no signup, nothing saved. Ready to keep one? Buy it right here.
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 text-xs text-amber/80 font-mono border border-amber/20 bg-amber/5 px-3 py-2 rounded-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber"></span>
+              </span>
+              We are always updating our tools. Bear with us if there are some that don't work momentarily.
+            </div>
           </div>
 
           {/* Pricing tiers */}
