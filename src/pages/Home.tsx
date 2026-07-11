@@ -79,18 +79,8 @@ const Home = () => {
             Aetheris Chaos Theory Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
           </h1>
 
-          {/* Anti-AI positioning — first thing they read */}
-          <section className="px-4 pt-24 md:pt-32 pb-4 max-w-4xl mx-auto text-center">
-            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              Sick of AI everywhere and just want something simple that actually works?
-            </h2>
-            <p className="mt-4 text-xl md:text-2xl text-amber font-bold tracking-tight">
-              This is us.
-            </p>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              We’re the most anti-AI, AI company you’ll ever meet.
-            </p>
-          </section>
+          {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
+
 
           <section className="px-4 py-8 max-w-3xl mx-auto text-center">
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
