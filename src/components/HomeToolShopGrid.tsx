@@ -294,9 +294,9 @@ export function HomeToolShopGrid() {
                 </div>
 
                 <h2 className="font-forensic text-2xl sm:text-4xl font-extrabold leading-tight mb-3">
-                  Check your{" "}
+                  Scan your{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber to-amber/50">
-                    company.
+                    company for FREE
                   </span>
                 </h2>
 
