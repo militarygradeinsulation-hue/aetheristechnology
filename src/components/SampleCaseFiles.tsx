@@ -386,6 +386,9 @@ export function SampleCaseFiles() {
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(0);
   const [tickerIdx, setTickerIdx] = useState(0);
+  const location = useLocation();
+  const isCaseStudiesPage = location.pathname === "/case-studies";
+
 
   // Cycle a live ticker of "recent" reviewed companies on the trigger card
   useEffect(() => {
