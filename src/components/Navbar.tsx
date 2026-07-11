@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
-import aetherisLogo from '@/assets/aetheris-new-logo.png';
+
 
 interface NavbarProps {
   onContactClick: () => void;
@@ -82,7 +82,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          <Link to="/home" className="flex items-center shrink-0" onClick={handleLogoTap} aria-label="Aetheris home" />
 
 
           {/* Desktop nav, quiet text rail */}
@@ -126,6 +125,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
               );
             })}
           </div>
+
+          <Link to="/home" className="flex items-center shrink-0 ml-auto" onClick={handleLogoTap} aria-label="Aetheris home">
+            <img src="/aetheris-logo.png" alt="Aetheris" className="h-12 w-auto object-contain rounded-full" />
+          </Link>
 
           {/* CTA removed per operator request */}
 

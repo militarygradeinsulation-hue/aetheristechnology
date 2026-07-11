@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
-import aetherisLogo from "@/assets/aetheris-new-logo.png";
+
 import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
@@ -110,7 +110,7 @@ const LeakLanderPage: React.FC = () => {
               className="rounded-full focus:outline-none focus:ring-2 focus:ring-amber/60 select-none"
             >
               <img
-                src={aetherisLogo}
+                src="/aetheris-logo.png"
                 alt="Aetheris"
                 className="h-16 sm:h-24 md:h-32 w-auto opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
                 draggable={false}

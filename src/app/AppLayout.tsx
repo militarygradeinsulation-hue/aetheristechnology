@@ -7,7 +7,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AssistantPanel } from "./components/AssistantPanel";
-import aetherisLogo from "@/assets/aetheris-new-logo.png";
+
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -66,7 +66,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             Main Website
           </Link>
           <Link to="/app/dashboard" className="flex items-center gap-2">
-            <img src={aetherisLogo} alt="Aetheris" className="h-8 w-auto" />
+            <img src="/aetheris-logo.png" alt="Aetheris" className="h-8 w-auto" />
             <span className="font-forensic italic text-base font-bold tracking-tight">Chaos Theory</span>
           </Link>
           <p className="font-case text-[10px] uppercase tracking-[0.2em] text-crimson">Case File · Operator</p>
@@ -96,7 +96,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         <header className="md:hidden sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border safe-top no-select">
           <div className="flex items-center justify-between px-4 h-14">
             <Link to="/app/dashboard" className="flex items-center gap-2 min-w-0">
-              <img src={aetherisLogo} alt="Aetheris" className="h-7 w-auto shrink-0" />
+              <img src="/aetheris-logo.png" alt="Aetheris" className="h-7 w-auto shrink-0" />
               <span className="font-forensic italic font-bold text-sm truncate">Chaos Theory</span>
             </Link>
             <div className="flex items-center gap-1">
