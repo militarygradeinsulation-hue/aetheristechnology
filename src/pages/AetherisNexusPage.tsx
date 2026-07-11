@@ -7,7 +7,7 @@ import {
   Loader2, Sparkles, Globe, FileText, X, Download, Copy, Check, Menu, Home,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import aetherisLogo from "@/assets/aetheris-new-logo.png";
+
 import { supabase } from "@/integrations/supabase/client";
 import { PublicToolLock } from "@/components/PublicToolLock";
 
@@ -107,7 +107,7 @@ async function applyWatermark(imgDataUrl: string): Promise<string> {
         resolve(canvas.toDataURL("image/png"));
       };
       logo.onerror = () => resolve(imgDataUrl);
-      logo.src = aetherisLogo;
+      logo.src = "/aetheris-logo.png";
     };
     img.onerror = () => resolve(imgDataUrl);
     img.src = imgDataUrl;
@@ -599,7 +599,7 @@ export default function AetherisNexusPage() {
           ))}
         </div>
         <div className="p-3 border-t border-white/[0.06] text-xs text-zinc-500 flex items-center gap-2">
-          <img src={aetherisLogo} alt="Aetheris" className="h-5 w-auto opacity-80" />
+          <img src="/aetheris-logo.png" alt="Aetheris" className="h-5 w-auto opacity-80" />
           <span className="tracking-wide">Nexus AI · v1</span>
           <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-emerald-400/80">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> live
@@ -620,7 +620,7 @@ export default function AetherisNexusPage() {
             </button>
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-amber-500/30 blur-md" />
-              <img src={aetherisLogo} alt="Aetheris" className="relative h-8 w-auto" />
+              <img src="/aetheris-logo.png" alt="Aetheris" className="relative h-8 w-auto" />
             </div>
             <div>
               <div className="font-semibold tracking-tight text-[15px]">Aetheris Nexus</div>
@@ -666,7 +666,7 @@ export default function AetherisNexusPage() {
               <div className="text-center mb-12">
                 <div className="relative inline-block mb-6">
                   <div className="absolute inset-0 rounded-full bg-amber-500/40 blur-2xl animate-pulse" />
-                  <img src={aetherisLogo} alt="Aetheris" className="relative h-20 w-auto mx-auto drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]" />
+                  <img src="/aetheris-logo.png" alt="Aetheris" className="relative h-20 w-auto mx-auto drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]" />
                 </div>
                 <h1 className="font-serif text-4xl lg:text-5xl font-semibold tracking-tight mb-4 leading-tight">
                   What is your business{" "}
