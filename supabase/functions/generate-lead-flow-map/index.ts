@@ -93,7 +93,8 @@ RULES
 - USD only. Never use €, £, or other currencies.
 - Find 4-7 leak points, 3-5 top fixes ranked by ROI, exactly 7 days in the plan.
 - Every number must be defensible from the data provided.
-- The mermaid diagram MUST be syntactically valid: start with "flowchart TD" and use --> arrows. Do not include emojis.`;
+- The mermaid diagram MUST be syntactically valid: start with "flowchart TD" and use --> arrows. Do not include emojis.
+- CRITICAL JSON RULES: return ONLY a raw JSON object. Every string value must be JSON-safe: escape every internal double-quote as \\", every newline as \\n, and every backslash as \\\\. The "mermaid" value is ONE single JSON string — use \\n between diagram lines, never a real newline. Do not include markdown fences or comments.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -105,9 +106,10 @@ RULES
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a revenue operations forensics operator. Return only valid JSON, no markdown fences." },
+          { role: "system", content: "You are a revenue operations forensics operator. Return only valid JSON matching the requested schema. No markdown fences, no prose outside the JSON." },
           { role: "user", content: prompt },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
