@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import {
   Mail, Globe, Sparkles, FileText, MessageSquare, Calendar, BookOpen,
   Target, Eye, Image as ImageIcon, AlertTriangle, Search, ScrollText,
-  Film, Wand2, Zap, Languages, History,
+  Film, Wand2, Zap, Languages, History, GitBranch,
 } from "lucide-react";
 
 import { getPortalToken, getPortalProfile } from "@/lib/portalAuth";
@@ -77,6 +77,8 @@ const DetectiveModeStandalone = lazy(() =>
   import("@/components/DetectiveModeStandalone").then(m => ({ default: m.DetectiveModeStandalone })));
 const ForensicScanAllPanel = lazy(() =>
   import("@/components/ForensicScanAllPanel").then(m => ({ default: m.ForensicScanAllPanel })));
+const LeadFlowMapper = lazy(() =>
+  import("@/components/LeadFlowMapper").then(m => ({ default: m.LeadFlowMapper })));
 
 const AllInOneGenerator = lazy(() =>
   import("@/components/AllInOneGenerator").then(m => ({ default: m.AllInOneGenerator })));
@@ -158,6 +160,9 @@ export const TOOL_REGISTRY: ToolDef[] = [
   { id: "detective", label: "Detective Mode", group: "Diagnostics", icon: Eye,
     accent: "320 70% 60%",
     render: () => wrap(<DetectiveModeStandalone />) },
+  { id: "lead-flow-mapper", label: "Lead Flow Mapper", group: "Diagnostics", icon: GitBranch,
+    accent: "355 80% 58%",
+    render: () => wrap(<LeadFlowMapper adminMode />) },
   { id: "forensic-scan-all", label: "Forensic Scan All (Golden Report)", group: "Diagnostics", icon: ScrollText,
     accent: "0 78% 62%",
     render: () => wrap(<ForensicScanAllPanel />) },
