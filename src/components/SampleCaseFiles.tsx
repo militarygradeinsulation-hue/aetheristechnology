@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-react";
 import aetherisLogo from "@/assets/aetheris-a-logo.png.asset.json";
 
