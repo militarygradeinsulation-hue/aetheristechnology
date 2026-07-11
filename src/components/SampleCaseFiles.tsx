@@ -360,12 +360,12 @@ function DossierCard({ file }: { file: CaseFile }) {
         </div>
       </section>
 
-      <div className="mx-5 mt-6 p-4 bg-background/40 border border-amber/10 text-xs text-muted-foreground leading-relaxed">
+      <div className="mx-5 mt-6 p-3 bg-background/40 border border-amber/10 text-xs text-muted-foreground leading-relaxed">
         <b className="text-foreground font-medium">Written guarantee:</b> if a full investigation does not identify recoverable losses of at least three times its fee, the follow-on engagement is discounted by the shortfall.
       </div>
 
       <div className="px-5 py-6 text-center">
-        <a href="/leak-audit" className="inline-block font-case text-xs font-semibold tracking-[0.18em] uppercase text-background bg-amber px-8 py-4 hover:bg-amber/90 transition-colors">
+        <a href="/leak-audit" className="inline-block font-case text-xs font-semibold tracking-[0.18em] uppercase text-background bg-amber px-6 py-3 hover:bg-amber/90 transition-colors">
           Book the Findings Read-Out
         </a>
         <div className="font-case text-[10px] text-amber/60 tracking-[0.22em] mt-3 uppercase">
@@ -373,7 +373,7 @@ function DossierCard({ file }: { file: CaseFile }) {
         </div>
       </div>
 
-      <footer className="border-t border-amber/10 px-5 py-3 flex flex-wrap justify-between gap-2 font-case text-[9px] tracking-[0.24em] uppercase text-muted-foreground">
+      <footer className="border-t border-amber/10 px-5 py-2 flex flex-wrap justify-between gap-2 font-case text-[9px] tracking-[0.24em] uppercase text-muted-foreground">
         <span>AETHERIS.TECHNOLOGY</span>
         <span className="text-amber">Real Findings. No Sugar.</span>
         <span>File {file.caseNo} · Page 1 of 1</span>
