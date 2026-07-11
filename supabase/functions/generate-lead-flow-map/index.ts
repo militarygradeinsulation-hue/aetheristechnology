@@ -93,7 +93,8 @@ RULES
 - USD only. Never use €, £, or other currencies.
 - Find 4-7 leak points, 3-5 top fixes ranked by ROI, exactly 7 days in the plan.
 - Every number must be defensible from the data provided.
-- The mermaid diagram MUST be syntactically valid: start with "flowchart TD" and use --> arrows. Do not include emojis.`;
+- The mermaid diagram MUST be syntactically valid: start with "flowchart TD" and use --> arrows. Do not include emojis.
+- CRITICAL JSON RULES: return ONLY a raw JSON object. Every string value must be JSON-safe: escape every internal double-quote as \\", every newline as \\n, and every backslash as \\\\. The "mermaid" value is ONE single JSON string — use \\n between diagram lines, never a real newline. Do not include markdown fences or comments.`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -105,9 +106,10 @@ RULES
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a revenue operations forensics operator. Return only valid JSON, no markdown fences." },
+          { role: "system", content: "You are a revenue operations forensics operator. Return only valid JSON matching the requested schema. No markdown fences, no prose outside the JSON." },
           { role: "user", content: prompt },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -121,8 +123,52 @@ RULES
     const aiData = await aiRes.json();
     let raw = aiData.choices?.[0]?.message?.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) => ch === "\n" || ch === "\r" || ch === "\t" ? ch : "");
-    const result = JSON.parse(raw);
+    // Slice to the outermost { ... } in case the model wrapped it.
+    const first = raw.indexOf("{");
+    const last = raw.lastIndexOf("}");
+    if (first !== -1 && last > first) raw = raw.slice(first, last + 1);
+
+    function tryParse(s: string) { try { return JSON.parse(s); } catch { return null; } };
+
+    let result: any = tryParse(raw);
+
+    // Fallback 1: strip control chars (except \n \r \t).
+    if (!result) {
+      const cleaned = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) =>
+        ch === "\n" || ch === "\r" || ch === "\t" ? ch : "");
+      result = tryParse(cleaned);
+    }
+
+    // Fallback 2: escape raw newlines/tabs *inside* JSON strings — the common
+    // failure mode when a model puts a multi-line mermaid block in one field.
+    if (!result) {
+      let out = "";
+      let inStr = false;
+      let esc = false;
+      for (const ch of raw) {
+        if (inStr) {
+          if (esc) { out += ch; esc = false; continue; }
+          if (ch === "\\") { out += ch; esc = true; continue; }
+          if (ch === '"') { out += ch; inStr = false; continue; }
+          if (ch === "\n") { out += "\\n"; continue; }
+          if (ch === "\r") { out += "\\r"; continue; }
+          if (ch === "\t") { out += "\\t"; continue; }
+          out += ch;
+        } else {
+          if (ch === '"') { inStr = true; out += ch; continue; }
+          out += ch;
+        }
+      }
+      result = tryParse(out);
+    }
+
+    if (!result) {
+      console.error("generate-lead-flow-map: unparseable model output. First 400 chars:", raw.slice(0, 400));
+      return new Response(
+        JSON.stringify({ error: "AI returned malformed JSON. Try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
