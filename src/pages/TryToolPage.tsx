@@ -263,6 +263,49 @@ export default function TryToolPage() {
     }
   };
 
+  const runResumeFit = async () => {
+    const cleanUrl = url.trim();
+    if (!resumeFile) { toast.error("Upload the resume file"); return; }
+    if (!cleanUrl) { toast.error("Enter the target company URL"); return; }
+    if (!/^https?:\/\//i.test(cleanUrl)) { toast.error("URL must start with https://"); return; }
+    if (resumeFile.size > 7 * 1024 * 1024) { toast.error("Resume must be under 7MB"); return; }
+    setLoading(true);
+    setOutput("");
+    try {
+      // Read file → base64
+      const b64: string = await new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => {
+          const s = String(fr.result || "");
+          const comma = s.indexOf(",");
+          resolve(comma >= 0 ? s.slice(comma + 1) : s);
+        };
+        fr.onerror = () => reject(new Error("Could not read file"));
+        fr.readAsDataURL(resumeFile);
+      });
+      const { data, error } = await supabase.functions.invoke("try-resume-fit", {
+        body: {
+          companyUrl: cleanUrl,
+          resumeBase64: b64,
+          resumeMime: resumeFile.type || "application/pdf",
+          resumeName: resumeFile.name,
+          targetRole: targetRole.trim(),
+          notes: context.trim(),
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const text = (data as any)?.output || "";
+      if (!text) throw new Error("Empty response");
+      setOutput(text);
+      setRunAt(new Date());
+    } catch (e: any) {
+      toast.error(e?.message || "Resume fit run failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!tool || !meta) {
     return (
       <div className="relative min-h-screen">
