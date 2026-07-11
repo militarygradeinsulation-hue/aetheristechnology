@@ -53,8 +53,15 @@ const CONTACT_LINKS = [
 ];
 
 export const SalesChat: React.FC = () => {
+  const { pathname } = useLocation();
+  const opener = useMemo(() => getOpenerForPath(pathname), [pathname]);
+  const initialMessage = useMemo<Msg>(
+    () => ({ role: 'assistant', content: opener.greeting }),
+    [opener.greeting],
+  );
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<Msg[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
@@ -62,10 +69,32 @@ export const SalesChat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { trackEvent } = useTrackEvent();
 
+  // If the visitor hasn't sent anything yet, keep the intro line in sync with the page.
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [initialMessage];
+      }
+      return prev;
+    });
+  }, [initialMessage]);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Aggressive auto-open: once per browser session, ~10s after landing.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem(AUTO_OPENED_KEY) === '1') return;
+    const t = setTimeout(() => {
+      setIsOpen(true);
+      sessionStorage.setItem(AUTO_OPENED_KEY, '1');
+      trackEvent('nexus_auto_open', { path: pathname, section: opener.label });
+    }, AUTO_OPEN_MS);
+    return () => clearTimeout(t);
+  }, [pathname, opener.label, trackEvent]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
