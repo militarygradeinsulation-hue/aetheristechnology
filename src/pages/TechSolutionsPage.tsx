@@ -57,6 +57,8 @@ const TechSolutionsPage: React.FC = () => {
 
   const diagnostics = SHOP_TOOLS.filter(t => t.category === "diagnostics");
   const content = SHOP_TOOLS.filter(t => t.category === "content");
+  const reports = SHOP_TOOLS.filter(t => t.category === "reports");
+  const sales = SHOP_TOOLS.filter(t => t.category === "sales");
 
   const Section = ({ title, tools, icon: Icon }: { title: string; tools: typeof SHOP_TOOLS; icon: any }) => (
     <section className="mb-16">
