@@ -191,6 +191,20 @@ export const SalesChat: React.FC = () => {
         if (last?.role !== 'assistant') return prev;
         return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, suggestions } : m));
       });
+
+      // Silent lead capture → HubSpot + contact_submissions.
+      const lead = parseCaptureLead(assistantSoFar);
+      if (lead?.email) {
+        trackEvent('nexus_lead_captured', { has_name: !!lead.name, has_company: !!lead.company });
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nexus-capture-lead`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ ...lead, pathname }),
+        }).catch((err) => console.warn('nexus-capture-lead failed', err));
+      }
     } catch (e) {
       console.error(e);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Try again or call us at (317) 376-2110.' }]);
