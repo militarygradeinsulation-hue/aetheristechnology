@@ -18,6 +18,7 @@ const SalesChatGate = () => {
   return <SalesChat />;
 };
 import { BookMeetingGate } from "@/components/BookMeetingGate";
+import { LimitedOfferPopup } from "@/components/LimitedOfferPopup";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { RetargetingPixel } from "@/components/RetargetingPixel";
 import { AuthProvider } from "@/contexts/AuthContext";
