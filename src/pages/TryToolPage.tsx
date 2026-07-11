@@ -538,7 +538,7 @@ export default function TryToolPage() {
                   {/* Section cards */}
                   <div className="p-4 md:p-5 space-y-4">
                     {sections.map((s, i) => (
-                      <section key={i} className="rounded-sm border border-amber/25 bg-background/40 p-4">
+                      <section key={i} className="rounded-sm border border-amber/25 bg-background/40 p-4 overflow-x-auto">
                         <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-2">
                           § {String(i + 1).padStart(2, "0")} · Section
                         </div>
