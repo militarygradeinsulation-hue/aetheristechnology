@@ -462,7 +462,7 @@ export const BusinessDiagnostic: React.FC = () => {
           <div className="rounded-2xl border border-border bg-card p-6 text-center space-y-4">
             <h3 className="text-xl font-semibold text-foreground">👉 Recommendation: {tier.rec}</h3>
             <p className="text-muted-foreground text-sm">
-              Ready to trace your worst leak to origin? The Single-Leak Investigation is $3,500, delivered in 5 business days, and every dollar is credited toward the Chaos Diagnostic within 90 days.
+              Ready to trace your worst leak to origin? The Single-Leak Investigation is $2,500, delivered in 5 business days, and every dollar is credited toward the Chaos Diagnostic within 90 days.
             </p>
             <a href="/catalog">
               <Button size="lg" variant="outline">
