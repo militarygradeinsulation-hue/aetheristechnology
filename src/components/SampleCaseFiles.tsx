@@ -284,7 +284,7 @@ const CASES: CaseFile[] = [
 
 function DossierCard({ file }: { file: CaseFile }) {
   return (
-    <article className="relative border border-amber/25 bg-background/70 mt-3 first:mt-0">
+    <article className="relative max-w-4xl mx-auto border border-amber/25 bg-background/70 mt-3 first:mt-0">
       <div className="absolute inset-2 border border-amber/10 pointer-events-none" />
       <header className="flex items-center justify-between px-4 py-3 border-b border-amber/15">
         <div className="flex items-center gap-3">
