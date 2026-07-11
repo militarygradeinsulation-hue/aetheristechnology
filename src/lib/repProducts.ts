@@ -4,7 +4,7 @@
 // PUBLIC OFFER = the Reciprocity Engine 4-rung funnel. Only these are for sale
 // on the public site (see aetheris-reciprocity-engine-spec.pdf, Parts 2 & 3):
 //   Free  · The Leak Audit
-//   $3,500 · Single-Leak Investigation (tiered % split, Tier 3)
+//   $2,500 · Single-Leak Investigation (tiered % split, Tier 3)
 //   $18,500 · Chaos Diagnostic (flagship fixed-dollar split)
 //   $15,000/mo · Implementation (flagship fixed-dollar split)
 //
@@ -90,11 +90,11 @@ export const companyCentsForProduct = (p: RepProduct) =>
 export const REP_PRODUCTS: RepProduct[] = [
   // ── RECIPROCITY ENGINE — PUBLIC FUNNEL (in ascending order) ──
 
-  // Tier 1 — $3,500 Single-Leak Investigation (percent split, Tier 3 rates).
+  // Tier 1 — $2,500 Single-Leak Investigation (percent split, Tier 3 rates).
   // 100% credited toward the Chaos Diagnostic within 90 days.
   {
     name: 'Single-Leak Investigation',
-    priceCents: 350_000,
+    priceCents: 250_000,
     tier: 3,
     highlight: true,
     description: 'One leak, traced to origin in 5 business days. Written trace + true annual cost + removal plan. 100% credited toward the Chaos Diagnostic within 90 days.',

@@ -41,7 +41,7 @@ const RUNGS: Rung[] = [
     icon: FileSearch,
     label: 'Tier 1',
     name: 'Single-Leak Investigation',
-    price: '$3,500',
+    price: '$2,500',
     priceNote: '5 business days · one leak, traced to origin',
     lead: 'You already know where it hurts, or your preliminary findings named it. We take your single worst leak and trace it to its origin. Not the symptom. The cause.',
     bullets: [
