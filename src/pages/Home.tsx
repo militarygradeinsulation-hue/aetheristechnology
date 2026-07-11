@@ -132,10 +132,6 @@ const Home = () => {
             <HomeToolShopGrid />
           </section>
 
-          {/* Companies Reviewed — sample Preliminary Findings dossiers */}
-          <section id="companies-reviewed" className="px-4 pb-14 scroll-mt-24">
-            <SampleCaseFiles />
-          </section>
 
 
 
