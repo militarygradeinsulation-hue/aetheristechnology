@@ -46,43 +46,76 @@ const TechSolutionsPage: React.FC = () => {
   const content = SHOP_TOOLS.filter(t => t.category === "content");
 
   const Section = ({ title, tools, icon: Icon }: { title: string; tools: typeof SHOP_TOOLS; icon: any }) => (
-    <section className="mb-14">
-      <div className="flex items-center gap-2 mb-5">
+    <section className="mb-16">
+      <div className="flex items-center gap-2 mb-6 pb-3 border-b border-amber/15">
         <Icon className="w-4 h-4 text-amber" />
         <h2 className="font-forensic text-2xl md:text-3xl font-bold">{title}</h2>
+        <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          {tools.length} systems
+        </span>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map(t => (
-          <div
-            key={t.id}
-            className="forensic-tile rounded-sm border border-amber/25 hover:border-amber/60 transition-colors p-5 flex flex-col"
-          >
-            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/70 mb-1">
-              // {t.category}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {tools.map(t => {
+          const info = TOOL_SUMMARIES[t.id];
+          return (
+            <div
+              key={t.id}
+              className="group forensic-tile relative rounded-sm border border-amber/25 hover:border-amber/70 transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.35)]"
+            >
+              {/* Thumbnail */}
+              <ToolThumbnail id={t.id} alt={t.name} />
+
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/70">
+                    // {t.category}
+                  </div>
+                  <div className="font-mono text-[9px] uppercase tracking-widest text-amber/60">
+                    ${SHOP_PRICES.single.amount / 100} · lifetime
+                  </div>
+                </div>
+
+                <h3 className="font-forensic text-lg font-bold mb-2 leading-tight group-hover:text-amber transition-colors">
+                  {t.name}
+                </h3>
+                <p className="text-sm text-foreground/80 leading-relaxed mb-3">
+                  {info?.summary ?? t.tagline}
+                </p>
+
+                {info && (
+                  <ul className="mb-4 space-y-1">
+                    {info.bullets.map(b => (
+                      <li key={b} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Check className="w-3 h-3 text-amber shrink-0" /> {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div className="mt-auto flex gap-2 pt-2 border-t border-amber/10">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                  >
+                    <Link to={`/try/${t.id}`}>
+                      <Sparkles className="w-3 h-3 mr-1" /> Try free
+                      <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => openBuy("single", [t.id])}
+                    className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
+                  >
+                    <ShoppingCart className="w-3 h-3 mr-1" /> Own it
+                  </Button>
+                </div>
+              </div>
             </div>
-            <h3 className="font-forensic text-lg font-bold mb-1.5 leading-tight">{t.name}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">{t.tagline}</p>
-            <div className="flex gap-2">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
-              >
-                <Link to={`/try/${t.id}`}>
-                  <Sparkles className="w-3 h-3 mr-1" /> Try free
-                </Link>
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => openBuy("single", [t.id])}
-                className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
-              >
-                <ShoppingCart className="w-3 h-3 mr-1" /> ${SHOP_PRICES.single.amount / 100}
-              </Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
