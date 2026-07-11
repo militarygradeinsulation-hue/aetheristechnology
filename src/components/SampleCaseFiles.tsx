@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-react";
 import aetherisLogo from "@/assets/aetheris-a-logo.png.asset.json";
 
@@ -284,11 +284,11 @@ const CASES: CaseFile[] = [
 
 function DossierCard({ file }: { file: CaseFile }) {
   return (
-    <article className="relative border border-amber/25 bg-background/70 mt-3 first:mt-0">
+    <article className="relative max-w-4xl mx-auto border border-amber/25 bg-background/70 mt-3 first:mt-0">
       <div className="absolute inset-2 border border-amber/10 pointer-events-none" />
-      <header className="flex items-center justify-between px-5 py-4 border-b border-amber/15">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-amber/15">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 flex items-center justify-center">
+          <div className="w-8 h-8 flex items-center justify-center">
             <img src={aetherisLogo.url} alt="Aetheris" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(217,169,58,0.35)]" />
           </div>
           <div className="font-case text-[10px] tracking-[0.28em] text-amber uppercase leading-tight">
@@ -302,7 +302,7 @@ function DossierCard({ file }: { file: CaseFile }) {
       </header>
 
       <div className="px-5 pt-5 flex flex-wrap items-baseline justify-between gap-2">
-        <div className="font-case text-2xl md:text-3xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
+        <div className="font-case text-lg md:text-xl font-semibold tracking-wider">CASE FILE <span className="text-amber">{file.caseNo}</span></div>
         <div className="font-case text-[10px] tracking-[0.24em] text-muted-foreground uppercase">STATUS: <b className="text-amber font-medium">OPEN</b> · RETAINED 30 DAYS</div>
       </div>
 
@@ -315,7 +315,7 @@ function DossierCard({ file }: { file: CaseFile }) {
           ["Examiner", "J. Toney"],
           ["Method", "Leak Audit v2"],
         ].map(([k, v], i) => (
-          <div key={k} className={`py-3 pr-3 ${i % 3 !== 2 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r md:border-r" : ""} border-amber/10 ${i >= 3 ? "border-t md:border-t" : ""} ${i >= 2 ? "border-t md:border-t-0" : ""}`}>
+          <div key={k} className={`py-2 pr-3 ${i % 3 !== 2 ? "md:border-r" : ""} ${i % 2 === 0 ? "border-r md:border-r" : ""} border-amber/10 ${i >= 3 ? "border-t md:border-t" : ""} ${i >= 2 ? "border-t md:border-t-0" : ""}`}>
             <dt className="font-case text-[9px] tracking-[0.24em] uppercase text-amber/70 mb-1">{k}</dt>
             <dd className="font-case text-[12px]">{v}</dd>
           </div>
@@ -323,12 +323,12 @@ function DossierCard({ file }: { file: CaseFile }) {
       </dl>
 
       <div className="px-5 pt-6 text-center">
-        <h4 className="font-forensic text-lg md:text-2xl">{file.headline}</h4>
+        <h4 className="font-forensic text-sm md:text-lg">{file.headline}</h4>
       </div>
 
       <div className="px-5 pt-4 text-center">
         <div className="font-case text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Estimated Annual Leakage</div>
-        <div className="font-case text-4xl md:text-5xl font-semibold text-amber mt-2 drop-shadow-[0_0_40px_rgba(217,169,58,0.35)]">
+        <div className="font-case text-2xl md:text-3xl font-semibold text-amber mt-2 drop-shadow-[0_0_18px_rgba(217,169,58,0.24)]">
           {file.total}<span className="text-sm text-amber/60 tracking-widest"> /YR</span>
         </div>
         <p className="text-xs text-muted-foreground max-w-md mx-auto mt-3 leading-relaxed">
@@ -336,44 +336,44 @@ function DossierCard({ file }: { file: CaseFile }) {
         </p>
       </div>
 
-      <section className="px-5 pt-6">
-        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-amber/70 mb-3">Findings on file · 5 exhibits</div>
+      <section className="px-5 pt-5">
+        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-amber/70 mb-1.5">Findings on file · 5 exhibits</div>
         {file.exhibits.map((ex, i) => (
-          <div key={i} className={`grid grid-cols-[54px_1fr_auto] gap-3 items-baseline py-3 border-t border-amber/10 ${i === file.exhibits.length - 1 ? "border-b" : ""}`}>
+          <div key={i} className={`grid grid-cols-[54px_1fr_auto] gap-3 items-baseline py-1.5 border-t border-amber/10 ${i === file.exhibits.length - 1 ? "border-b" : ""}`}>
             <div className="font-case text-[11px] tracking-widest text-amber">{ex.num}</div>
-            <div className="text-sm">
+            <div className="text-xs">
               {ex.redacted ? (
-                <span className="inline-block h-3 bg-black border border-amber/20 align-middle" style={{ width: `${ex.barWidth}%` }} />
+                <span className="inline-block h-2.5 bg-black border border-amber/20 align-middle" style={{ width: `${ex.barWidth}%` }} />
               ) : (
                 <>
                   <div className="font-medium">{ex.name}</div>
-                  <div className="text-muted-foreground text-xs mt-1 leading-relaxed">{ex.detail}</div>
+                  <div className="text-muted-foreground text-[11px] mt-1 leading-relaxed">{ex.detail}</div>
                 </>
               )}
             </div>
-            <div className={`font-case text-sm font-semibold whitespace-nowrap ${ex.redacted ? "text-amber" : ""}`}>{ex.cost}</div>
+            <div className={`font-case text-xs font-semibold whitespace-nowrap ${ex.redacted ? "text-amber" : ""}`}>{ex.cost}</div>
           </div>
         ))}
-        <div className="font-case text-[11px] text-crimson tracking-wider pt-4 leading-relaxed flex items-start gap-2">
+        <div className="font-case text-[10px] text-crimson tracking-wider pt-3 leading-relaxed flex items-start gap-2">
           <Lock className="w-3 h-3 mt-0.5 flex-shrink-0" />
           <span>EXHIBITS 03–05 ARE NAMED IN FULL ON YOUR FINDINGS READ-OUT. 15 MINUTES. NO COST. NO PITCH.</span>
         </div>
       </section>
 
-      <div className="mx-5 mt-6 p-4 bg-background/40 border border-amber/10 text-xs text-muted-foreground leading-relaxed">
+      <div className="mx-5 mt-5 p-2.5 bg-background/40 border border-amber/10 text-[11px] text-muted-foreground leading-relaxed">
         <b className="text-foreground font-medium">Written guarantee:</b> if a full investigation does not identify recoverable losses of at least three times its fee, the follow-on engagement is discounted by the shortfall.
       </div>
 
-      <div className="px-5 py-6 text-center">
-        <a href="/leak-audit" className="inline-block font-case text-xs font-semibold tracking-[0.18em] uppercase text-background bg-amber px-8 py-4 hover:bg-amber/90 transition-colors">
+      <div className="px-5 py-5 text-center">
+        <a href="/leak-audit" className="inline-block font-case text-xs font-semibold tracking-[0.18em] uppercase text-background bg-amber px-5 py-2.5 hover:bg-amber/90 transition-colors">
           Book the Findings Read-Out
         </a>
-        <div className="font-case text-[10px] text-amber/60 tracking-[0.22em] mt-3 uppercase">
+        <div className="font-case text-[10px] text-amber/60 tracking-[0.22em] mt-2.5 uppercase">
           or request the full investigation · aetheris.technology
         </div>
       </div>
 
-      <footer className="border-t border-amber/10 px-5 py-3 flex flex-wrap justify-between gap-2 font-case text-[9px] tracking-[0.24em] uppercase text-muted-foreground">
+      <footer className="border-t border-amber/10 px-5 py-1.5 flex flex-wrap justify-between gap-2 font-case text-[9px] tracking-[0.24em] uppercase text-muted-foreground">
         <span>AETHERIS.TECHNOLOGY</span>
         <span className="text-amber">Real Findings. No Sugar.</span>
         <span>File {file.caseNo} · Page 1 of 1</span>
@@ -386,6 +386,17 @@ export function SampleCaseFiles() {
   const [open, setOpen] = useState(true);
   const [active, setActive] = useState(0);
   const [tickerIdx, setTickerIdx] = useState(0);
+  const location = useLocation();
+  const isCaseStudiesPage = location.pathname === "/case-studies";
+
+  const ArchiveCard = ({ children, className }: { children: React.ReactNode; className: string }) =>
+    isCaseStudiesPage ? (
+      <a href="#real-case-files" className={className}>{children}</a>
+    ) : (
+      <Link to="/case-studies#real-case-files" className={className}>{children}</Link>
+    );
+
+
 
   // Cycle a live ticker of "recent" reviewed companies on the trigger card
   useEffect(() => {
@@ -497,8 +508,7 @@ export function SampleCaseFiles() {
         </button>
 
         {/* ── RIGHT: 50 Sourced Case Files (real, links to /case-studies) ── */}
-        <Link
-          to="/case-studies#real-case-files"
+        <ArchiveCard
           className="group relative flex items-stretch justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)] text-left"
         >
           <span
@@ -538,12 +548,12 @@ export function SampleCaseFiles() {
             </span>
             <ArrowRight className="w-5 h-5 text-amber transition-transform duration-300 group-hover:translate-x-1" />
           </div>
-        </Link>
+        </ArchiveCard>
       </div>
 
 
       {open && (
-        <div className="mt-4 border border-amber/25 bg-background/50 p-4 md:p-6 animate-fade-in">
+        <div className="mt-4 border border-amber/25 bg-background/50 p-2 md:p-3 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <p className="font-case text-[10px] uppercase tracking-[0.24em] text-muted-foreground leading-relaxed flex-1">
               Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
@@ -575,12 +585,21 @@ export function SampleCaseFiles() {
           <DossierCard file={CASES[active]} />
 
           <div className="text-center mt-6">
-            <Link
-              to="/case-studies"
-              className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
-            >
-              Browse all case files <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            {isCaseStudiesPage ? (
+              <a
+                href="#real-case-files"
+                className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
+              >
+                Browse all case files <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            ) : (
+              <Link
+                to="/case-studies#real-case-files"
+                className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
+              >
+                Browse all case files <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
           </div>
         </div>
       )}
