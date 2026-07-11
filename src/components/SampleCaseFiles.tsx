@@ -546,7 +546,7 @@ export function SampleCaseFiles() {
 
 
       {open && (
-        <div className="mt-4 border border-amber/25 bg-background/50 p-3 md:p-4 animate-fade-in">
+        <div className="mt-4 border border-amber/25 bg-background/50 p-2 md:p-3 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <p className="font-case text-[10px] uppercase tracking-[0.24em] text-muted-foreground leading-relaxed flex-1">
               Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
