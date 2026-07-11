@@ -60,11 +60,11 @@ const DetectiveModePage: React.FC = () => {
       <header className="border-b border-border/60 bg-card/40 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
           <Link
-            to="/"
+            to="/tech-solutions"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Aetheris
+            Back to Tech Solutions
           </Link>
           <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-400/80">
             <FileSearch className="w-4 h-4" />

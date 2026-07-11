@@ -287,8 +287,8 @@ export default function TryToolPage() {
       <div className="relative z-10">
         <Navbar onContactClick={() => {}} />
         <main className="max-w-3xl mx-auto px-4 pt-28 pb-16">
-          <Link to="/" className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-widest text-amber/80 hover:text-amber mb-4">
-            <ArrowLeft className="w-3 h-3" /> Back
+          <Link to="/tech-solutions" className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-widest text-amber/80 hover:text-amber mb-4">
+            <ArrowLeft className="w-3 h-3" /> Back to Tech Solutions
           </Link>
 
           <div className="forensic-tile rounded-sm border border-amber/40 p-6 md:p-8">
