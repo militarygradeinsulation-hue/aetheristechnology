@@ -473,7 +473,7 @@ export function SampleCaseFiles() {
                 <span className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson/90 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Samples · 15</span>
               </div>
               <div className="font-forensic text-base md:text-lg mt-1">
-                Sample Preliminary Findings
+                Past Preliminary Findings
               </div>
               <div
                 key={tickerIdx}
