@@ -496,9 +496,9 @@ export function SampleCaseFiles() {
           </div>
         </button>
 
-        {/* ── RIGHT: 50 Sourced Case Files (real, links to /industries) ── */}
+        {/* ── RIGHT: 50 Sourced Case Files (real, links to /case-studies) ── */}
         <Link
-          to="/industries#real-case-files"
+          to="/case-studies#real-case-files"
           className="group relative flex items-stretch justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)] text-left"
         >
           <span
