@@ -370,6 +370,93 @@ export default function TryToolPage() {
 
             {toolId === "creation-studio" ? (
               <CreationStudioSandbox />
+            ) : toolId === "resume-forensics" ? (
+              <>
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
+                  Upload resume <span className="text-crimson">*</span>
+                  <span className="text-muted-foreground normal-case tracking-normal ml-1">(PDF, DOCX, or TXT — max 7MB)</span>
+                </label>
+                <div
+                  className="rounded-sm border border-dashed border-amber/40 bg-background/50 p-4 hover:border-amber/70 transition-colors"
+                  onDragOver={(e) => { e.preventDefault(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const f = e.dataTransfer.files?.[0];
+                    if (f) setResumeFile(f);
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                    disabled={loading}
+                    className="block w-full text-xs text-foreground/80 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border file:border-amber/40 file:bg-amber/10 file:text-amber file:font-mono file:text-[10px] file:uppercase file:tracking-widest file:cursor-pointer file:hover:bg-amber/20"
+                  />
+                  {resumeFile && (
+                    <div className="mt-2 font-mono text-[11px] text-amber/90">
+                      // loaded: {resumeFile.name} ({(resumeFile.size / 1024).toFixed(1)} KB)
+                    </div>
+                  )}
+                </div>
+
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2 mt-4">
+                  Target company URL <span className="text-crimson">*</span>
+                </label>
+                <Input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://targetcompany.com"
+                  className="bg-background/70 border-amber/30 font-mono text-sm"
+                  maxLength={500}
+                  disabled={loading}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1 font-mono">
+                  We'll scrape their About / Careers / Values pages and compare against the resume.
+                </p>
+
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2 mt-4">
+                  Target role <span className="text-muted-foreground normal-case tracking-normal">(optional)</span>
+                </label>
+                <Input
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  placeholder="e.g. 'Senior Product Manager — Growth'"
+                  className="bg-background/70 border-amber/30 font-mono text-sm"
+                  maxLength={300}
+                  disabled={loading}
+                />
+
+                <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2 mt-4">
+                  Candidate notes / goals <span className="text-muted-foreground normal-case tracking-normal">(optional)</span>
+                </label>
+                <Textarea
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  placeholder="e.g. 'Career switcher from ops → product. Want to highlight measurable customer wins.'"
+                  className="bg-background/70 border-amber/30 font-mono text-sm min-h-[70px]"
+                  maxLength={1000}
+                  disabled={loading}
+                />
+
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                  <Button
+                    onClick={runResumeFit}
+                    disabled={loading || !resumeFile || !url.trim()}
+                    className="bg-amber text-background hover:bg-amber/90 font-semibold flex-1"
+                  >
+                    {loading ? <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Analyzing resume vs. company…</> : <><Sparkles className="w-4 h-4 mr-1.5" /> Run fit analysis</>}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={reset}
+                    disabled={loading}
+                    className="border-amber/40 text-amber hover:bg-amber/10"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1.5" /> Reset
+                  </Button>
+                </div>
+              </>
             ) : (
               <>
                 <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
