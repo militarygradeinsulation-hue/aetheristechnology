@@ -25,6 +25,19 @@ export const SHOP_TOOLS: ShopTool[] = [
   { id: "creation-studio",      name: "Creation Studio",            tagline: "Mixed-media asset generator with memory.",             category: "content",     route: "/try/creation-studio" },
   { id: "easy-mode",            name: "Easy Mode",                  tagline: "Rewrites any output in plain-English, paste-ready copy.", category: "content",     route: "/try/easy-mode" },
   { id: "tool-generator",       name: "Tool Generator",             tagline: "Build a mini-tool from a plain-English brief.",        category: "content",     route: "/try/tool-generator" },
+
+  // Reports — polished deliverables
+  { id: "golden-report",        name: "Golden Report",              tagline: "The flagship forensic report that closes retainers.", category: "reports",     route: "/golden-report" },
+  { id: "head-to-head",         name: "Head-to-Head Report",        tagline: "Side-by-side competitor comparison, evidence-backed.", category: "reports",     route: "/head-to-head" },
+  { id: "resume-forensics",     name: "Resume Forensics",           tagline: "Rewrites resumes to beat ATS filters and land interviews.", category: "reports",  route: "/resume-forensics" },
+  { id: "reciprocation",        name: "Reciprocation Gift",         tagline: "Free custom door-opener report cold email can't match.", category: "reports",    route: "/reciprocation" },
+  { id: "ai-checklist",         name: "AI Readiness Checklist",     tagline: "Score a business on AI-readiness in one pass.",        category: "reports",     route: "/ai-checklist" },
+  { id: "nexus-iq",             name: "Prospect Intel · Nexus IQ",  tagline: "Full pre-meeting dossier on any target company.",       category: "reports",     route: "/nexus-iq" },
+
+  // Sales enablement
+  { id: "sales-scripts",        name: "Sales Scripts",              tagline: "Cold, warm, and follow-up scripts for every scenario.", category: "sales",       route: "/sales-scripts" },
+  { id: "follow-up-plan",       name: "Follow-Up Sequences",        tagline: "Post-meeting email plays that keep deals alive.",       category: "sales",       route: "/follow-up-plan" },
+  { id: "linkedin-playbook",    name: "LinkedIn Playbook",          tagline: "The system that turns a profile into a lead machine.",  category: "sales",       route: "/playbook/linkedin" },
 ];
 
 export const SHOP_PRICES = {
