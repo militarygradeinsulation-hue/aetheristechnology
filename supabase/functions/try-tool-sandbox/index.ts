@@ -143,6 +143,60 @@ const PROMPTS: Record<string, { system: string; userWrap: (input: string) => str
     system: `${VOICE}\n\nMicro-tool product spec.`,
     userWrap: (i) => `Brief: ${i}\n\nOutput EXACTLY:\n\n## Concept\n(2 bullets — what + who + when-used)\n\n## Spec\nTable: Field · Detail\nRows: Inputs, Core Formula, Output, Empty State, Result State\n\n## UI Copy\n(4 bullets — headline, sub, button, post-run CTA)\n\n## Growth Loops\n(3 bullets)`,
   },
+  "golden-report": {
+    title: "Golden Report",
+    inputLabel: "Business + URL", inputHint: "e.g. 'Acme Co · acme.com'",
+    system: `${VOICE}\n\nFlagship forensic case-file report — retainer-grade deliverable.`,
+    userWrap: (i) => `Subject: ${i}\n\nOutput EXACTLY:\n\n## Case Opener\n(3 noir bullets — diagnosis, biggest bleed, opportunity)\n\n## Evidence Log\nTable: # · Leak · Evidence · Est. $/mo · Fix\n(6 rows)\n\n## Chain Reaction\n(3 bullets — how leaks feed each other)\n\n## Retainer Play\n(4 bullets — what a 90-day engagement seals first)\n\n## First 72 Hours\n(numbered, 4 moves)`,
+  },
+  "head-to-head": {
+    title: "Head-to-Head Report",
+    inputLabel: "You vs. Competitor", inputHint: "e.g. 'acme.com vs. competitor.com'",
+    system: `${VOICE}\n\nSide-by-side competitor teardown with evidence.`,
+    userWrap: (i) => `Matchup: ${i}\n\nOutput EXACTLY:\n\n## Verdict\n(2 bullets — who wins today, and by how much)\n\n## Scorecard\nTable: Category · You · Them · Edge\nRows: Positioning, Offer, Proof, Funnel, Content, Pricing\n\n## Where You Win\n(3 bullets)\n\n## Where You Lose\n(3 bullets)\n\n## Pull-Ahead Moves\n(numbered, 4 items — action + expected shift)`,
+  },
+  "resume-forensics": {
+    title: "Resume Forensics",
+    inputLabel: "Role + resume summary", inputHint: "Target role, then paste highlights",
+    system: `${VOICE}\n\nATS-proof resume rewrite. Blunt, quantified, interview-triggering.`,
+    userWrap: (i) => `Candidate brief: ${i}\n\nOutput EXACTLY:\n\n## ATS Diagnosis\n(3 bullets — keyword gaps, format risks, tone)\n\n## Rewritten Summary\n(~60 words, first-person, quantified)\n\n## Bullet Rewrites\nTable: Original Weakness · Rewritten Bullet · Metric Anchored\n(6 rows)\n\n## Keywords to Inject\n(bullets — role-specific)\n\n## Interview Traps to Prep\n(3 bullets)`,
+  },
+  "reciprocation": {
+    title: "Reciprocation Gift",
+    inputLabel: "Target company + URL", inputHint: "e.g. 'Prospect Co · prospect.com'",
+    system: `${VOICE}\n\nHigh-value free custom door-opener report. Reciprocity by design.`,
+    userWrap: (i) => `Prospect: ${i}\n\nOutput EXACTLY:\n\n## The Gift (Cover Note)\n(~70 words — why you built this unprompted)\n\n## 3 Leaks Found\nTable: # · Leak · Evidence · Est. $/mo\n\n## The One Move\n(1 bullet — the fastest fix, ~40 words)\n\n## If You Want More\n(2 bullets — soft next-step CTA, no pressure)`,
+  },
+  "ai-checklist": {
+    title: "AI Readiness Checklist",
+    inputLabel: "Company + industry", inputHint: "e.g. 'B2B SaaS, 40 employees'",
+    system: `${VOICE}\n\nAI-readiness scoring — sales-opener grade.`,
+    userWrap: (i) => `Company: ${i}\n\nOutput EXACTLY:\n\n## Readiness Score\n(1 bullet — grade A–F + one-line rationale)\n\n## Layer Scores\nTable: Layer · Score /10 · Gap · Quick Win\nRows: Data, Ops, Sales, Marketing, Product, Leadership\n\n## Top 3 Blockers\n(3 bullets)\n\n## 30-Day Unlock\n(4 numbered moves)`,
+  },
+  "nexus-iq": {
+    title: "Prospect Intel · Nexus IQ",
+    inputLabel: "Target company + URL", inputHint: "e.g. 'Target Co · target.com'",
+    system: `${VOICE}\n\nPre-meeting dossier. Make the operator smartest in the room.`,
+    userWrap: (i) => `Target: ${i}\n\nOutput EXACTLY:\n\n## Snapshot\n(3 bullets — what they do, size signals, momentum)\n\n## Likely Pain\nTable: Signal · Inferred Pain · Confidence\n(5 rows)\n\n## Power Map\n(3 bullets — likely decision-makers + gatekeepers)\n\n## Talking Points\n(5 bullets — open with these)\n\n## Traps to Avoid\n(3 bullets)`,
+  },
+  "sales-scripts": {
+    title: "Sales Scripts",
+    inputLabel: "Offer + audience", inputHint: "e.g. 'diagnostic for CMOs'",
+    system: `${VOICE}\n\nCold, warm, follow-up scripts. Operator voice, no cheese.`,
+    userWrap: (i) => `Context: ${i}\n\nOutput EXACTLY:\n\n## Cold Opener\n(≤60 words — pattern-interrupt open, one-sentence value, soft ask)\n\n## Warm Reply\n(≤60 words — for a maybe/looking-into-it)\n\n## Follow-Up (Day 3)\n(≤50 words — reframe, add value)\n\n## Objection Volleys\nTable: Objection · One-Line Answer\n(5 rows: price, timing, no budget, already have vendor, ghost)`,
+  },
+  "follow-up-plan": {
+    title: "Follow-Up Sequences",
+    inputLabel: "Meeting recap", inputHint: "Who you met, what was discussed, next step",
+    system: `${VOICE}\n\nPost-meeting email plays that keep deals alive.`,
+    userWrap: (i) => `Meeting: ${i}\n\nOutput EXACTLY:\n\n## Day-0 Recap Email\n(≤80 words — subject line first, then body)\n\n## Day-3 Value Ping\n(≤60 words)\n\n## Day-7 Reframe\n(≤60 words)\n\n## Day-14 Break-Up\n(≤50 words)\n\n## Silence-Breakers\n(3 bullets — angles to try if all 4 land silent)`,
+  },
+  "linkedin-playbook": {
+    title: "LinkedIn Playbook",
+    inputLabel: "Role + niche", inputHint: "e.g. 'fractional CMO for SaaS'",
+    system: `${VOICE}\n\nLinkedIn lead-engine system: profile → posts → DMs.`,
+    userWrap: (i) => `Operator: ${i}\n\nOutput EXACTLY:\n\n## Positioning Line\n(1 bullet — the headline that filters right buyers)\n\n## Profile Fixes\nTable: Field · Current Weakness · Rewrite\nRows: Headline, About, Featured, Experience\n\n## 7-Day Post Plan\nTable: Day · Format · Hook · CTA\n(7 rows)\n\n## DM Sequence\n(3 bullets — connect note, first DM, follow-up)\n\n## Weekly Metrics\n(3 bullets — the only 3 numbers)`,
+  },
 };
 
 async function callGateway(system: string, user: string): Promise<string> {

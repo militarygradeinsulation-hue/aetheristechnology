@@ -107,26 +107,37 @@ const TechSolutionsPage: React.FC = () => {
                   </ul>
                 )}
 
-                <div className="mt-auto flex gap-2 pt-2 border-t border-amber/10">
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
-                  >
-                    <Link to={`/try/${t.id}`}>
-                      <Sparkles className="w-3 h-3 mr-1" /> Try free
-                      <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-amber/10">
+                  <div className="flex gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                    >
+                      <Link to={`/try/${t.id}`}>
+                        <Sparkles className="w-3 h-3 mr-1" /> Try free
+                        <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => openBuy("single", [t.id])}
+                      className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" /> Own it
+                    </Button>
+                  </div>
+                  {t.route && t.route !== `/try/${t.id}` && (
+                    <Link
+                      to={t.route}
+                      className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-amber/70 hover:text-amber transition-colors"
+                    >
+                      → View full page
                     </Link>
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => openBuy("single", [t.id])}
-                    className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
-                  >
-                    <ShoppingCart className="w-3 h-3 mr-1" /> Own it
-                  </Button>
+                  )}
                 </div>
+
               </div>
             </div>
           );
