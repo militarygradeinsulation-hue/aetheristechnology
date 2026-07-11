@@ -323,7 +323,7 @@ function DossierCard({ file }: { file: CaseFile }) {
       </dl>
 
       <div className="px-5 pt-6 text-center">
-        <h4 className="font-forensic text-lg md:text-2xl">{file.headline}</h4>
+        <h4 className="font-forensic text-base md:text-xl">{file.headline}</h4>
       </div>
 
       <div className="px-5 pt-4 text-center">
