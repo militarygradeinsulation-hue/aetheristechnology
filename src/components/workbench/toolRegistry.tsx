@@ -77,6 +77,8 @@ const DetectiveModeStandalone = lazy(() =>
   import("@/components/DetectiveModeStandalone").then(m => ({ default: m.DetectiveModeStandalone })));
 const ForensicScanAllPanel = lazy(() =>
   import("@/components/ForensicScanAllPanel").then(m => ({ default: m.ForensicScanAllPanel })));
+const LeadFlowMapper = lazy(() =>
+  import("@/components/LeadFlowMapper").then(m => ({ default: m.LeadFlowMapper })));
 
 const AllInOneGenerator = lazy(() =>
   import("@/components/AllInOneGenerator").then(m => ({ default: m.AllInOneGenerator })));
