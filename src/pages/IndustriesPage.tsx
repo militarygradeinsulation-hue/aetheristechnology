@@ -1098,31 +1098,19 @@ const IndustriesPage: React.FC = () => {
           </div>
         </section>
 
-        <RealCaseStudiesSection />
-
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto text-center forensic-tile rounded-sm p-10 border border-amber/30">
-            <div className="font-case text-xs uppercase tracking-widest text-amber mb-3">
-              Industry not listed?
-            </div>
-            <h2 className="font-forensic text-3xl md:text-4xl font-bold mb-4">
-              The methodology travels.
+            <h2 className="font-forensic text-2xl md:text-3xl font-bold mb-3">
+              Want the verified case files?
             </h2>
-            <p className="text-foreground/85 text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. $2,500 flat. Applied 1:1 toward engagement.
+            <p className="text-foreground/85 text-lg mb-6">
+              See sample preliminary dossiers and 50 real, sourced case studies on the Case Studies page.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/leak-audit">
-                <Button size="lg" className="bg-crimson hover:bg-crimson/90 text-foreground font-semibold">
-                  Open The Leak Audit <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-              <Link to="/leak-audit">
-                <Button size="lg" variant="outline">
-                  Run the free self-scan
-                </Button>
-              </Link>
-            </div>
+            <Link to="/case-studies">
+              <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
+                Open Case Studies <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </section>
 
