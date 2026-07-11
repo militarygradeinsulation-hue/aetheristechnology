@@ -40,14 +40,20 @@ serve(async (req) => {
     }
 
     // Scrape website content + branding (with fallbacks for tough sites)
-    async function fcScrape(body: Record<string, unknown>) {
-      const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      return r.json().catch(() => ({}));
+    async function fcScrape(body: Record<string, unknown>, timeoutMs = 15_000) {
+      try {
+        const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+          method: "POST",
+          signal: AbortSignal.timeout(timeoutMs),
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return await r.json().catch(() => ({}));
+      } catch (_e) {
+        return {};
+      }
     }
+
 
     const stripHtml = (html: string) =>
       html
@@ -68,17 +74,18 @@ serve(async (req) => {
     let summary: string = scrapeData?.data?.summary || scrapeData?.summary || "";
     let html: string = scrapeData?.data?.html || scrapeData?.html || "";
 
-    // Fallback 1: retry with waitFor for JS-heavy sites
+    // Fallback 1: retry with waitFor for JS-heavy sites (tighter budget)
     if ((!siteContent || siteContent.length < 50) && (!html || html.length < 200)) {
       scrapeData = await fcScrape({
         url: formattedUrl,
         formats: ["markdown", "html"],
         onlyMainContent: false,
-        waitFor: 2500,
-      });
+        waitFor: 1500,
+      }, 10_000);
       siteContent = scrapeData?.data?.markdown || scrapeData?.markdown || siteContent;
       html = scrapeData?.data?.html || scrapeData?.html || html;
     }
+
 
     // Fallback 2: derive content from HTML if markdown is empty
     if ((!siteContent || siteContent.length < 50) && html && html.length > 200) {
@@ -152,6 +159,7 @@ RULES:
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(25_000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -164,6 +172,7 @@ RULES:
         ],
       }),
     });
+
 
     if (!aiRes.ok) {
       const status = aiRes.status;

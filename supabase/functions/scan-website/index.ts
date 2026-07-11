@@ -351,32 +351,37 @@ serve(async (req) => {
 
     console.log("Scraping URL:", formattedUrl);
 
-    async function firecrawlScrape(opts: { onlyMainContent: boolean; waitFor: number; timeout: number; }) {
-      const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: formattedUrl,
-          formats: ["markdown", "links"],
-          onlyMainContent: opts.onlyMainContent,
-          waitFor: opts.waitFor,
-          timeout: opts.timeout,
-          blockAds: true,
-          removeBase64Images: true,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      return { ok: res.ok && data?.success !== false, data };
+    async function firecrawlScrape(opts: { onlyMainContent: boolean; waitFor: number; timeout: number; }, wallMs = 18_000) {
+      try {
+        const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
+          method: "POST",
+          signal: AbortSignal.timeout(wallMs),
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: formattedUrl,
+            formats: ["markdown", "links"],
+            onlyMainContent: opts.onlyMainContent,
+            waitFor: opts.waitFor,
+            timeout: opts.timeout,
+            blockAds: true,
+            removeBase64Images: true,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok && data?.success !== false, data };
+      } catch (e) {
+        return { ok: false, data: { error: (e as Error)?.message || "scrape_aborted", code: "SCRAPE_TIMEOUT" } };
+      }
     }
 
-    let attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 20000 });
+    let attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 15000 }, 18_000);
 
     if (!attempt.ok) {
       console.warn("Firecrawl first attempt failed, retrying:", attempt.data?.code || attempt.data?.error);
-      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 15000 });
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 10000 }, 12_000);
     }
 
     // DNS fallback: toggle www. prefix and retry once
@@ -389,9 +394,10 @@ serve(async (req) => {
         const altUrl = u.toString();
         console.warn("DNS failed, retrying with alternate hostname:", altUrl);
         formattedUrl = altUrl;
-        attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 25000 });
+        attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 12000 }, 15_000);
       } catch (_) { /* ignore */ }
     }
+
 
     const scrapeData = attempt.data;
 
