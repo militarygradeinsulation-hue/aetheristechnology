@@ -354,7 +354,7 @@ function DossierCard({ file }: { file: CaseFile }) {
             <div className={`font-case text-xs font-semibold whitespace-nowrap ${ex.redacted ? "text-amber" : ""}`}>{ex.cost}</div>
           </div>
         ))}
-        <div className="font-case text-[11px] text-crimson tracking-wider pt-4 leading-relaxed flex items-start gap-2">
+        <div className="font-case text-[10px] text-crimson tracking-wider pt-3 leading-relaxed flex items-start gap-2">
           <Lock className="w-3 h-3 mt-0.5 flex-shrink-0" />
           <span>EXHIBITS 03–05 ARE NAMED IN FULL ON YOUR FINDINGS READ-OUT. 15 MINUTES. NO COST. NO PITCH.</span>
         </div>
