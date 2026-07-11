@@ -5,7 +5,7 @@ export type ShopTool = {
   id: string;
   name: string;
   tagline: string;
-  category: "diagnostics" | "content";
+  category: "diagnostics" | "content" | "reports" | "sales";
   route: string; // where a licensed user is sent to run the tool
 };
 
