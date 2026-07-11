@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
 import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
-import { SampleCaseFiles } from '@/components/SampleCaseFiles';
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
