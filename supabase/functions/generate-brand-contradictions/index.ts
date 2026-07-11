@@ -74,17 +74,18 @@ serve(async (req) => {
     let summary: string = scrapeData?.data?.summary || scrapeData?.summary || "";
     let html: string = scrapeData?.data?.html || scrapeData?.html || "";
 
-    // Fallback 1: retry with waitFor for JS-heavy sites
+    // Fallback 1: retry with waitFor for JS-heavy sites (tighter budget)
     if ((!siteContent || siteContent.length < 50) && (!html || html.length < 200)) {
       scrapeData = await fcScrape({
         url: formattedUrl,
         formats: ["markdown", "html"],
         onlyMainContent: false,
-        waitFor: 2500,
-      });
+        waitFor: 1500,
+      }, 10_000);
       siteContent = scrapeData?.data?.markdown || scrapeData?.markdown || siteContent;
       html = scrapeData?.data?.html || scrapeData?.html || html;
     }
+
 
     // Fallback 2: derive content from HTML if markdown is empty
     if ((!siteContent || siteContent.length < 50) && html && html.length > 200) {
