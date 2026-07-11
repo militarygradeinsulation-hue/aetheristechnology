@@ -337,9 +337,9 @@ function DossierCard({ file }: { file: CaseFile }) {
       </div>
 
       <section className="px-5 pt-6">
-        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-amber/70 mb-3">Findings on file · 5 exhibits</div>
+        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-amber/70 mb-2">Findings on file · 5 exhibits</div>
         {file.exhibits.map((ex, i) => (
-          <div key={i} className={`grid grid-cols-[54px_1fr_auto] gap-3 items-baseline py-3 border-t border-amber/10 ${i === file.exhibits.length - 1 ? "border-b" : ""}`}>
+          <div key={i} className={`grid grid-cols-[54px_1fr_auto] gap-3 items-baseline py-2 border-t border-amber/10 ${i === file.exhibits.length - 1 ? "border-b" : ""}`}>
             <div className="font-case text-[11px] tracking-widest text-amber">{ex.num}</div>
             <div className="text-sm">
               {ex.redacted ? (
