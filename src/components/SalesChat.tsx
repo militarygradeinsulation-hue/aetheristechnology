@@ -294,15 +294,20 @@ export const SalesChat: React.FC = () => {
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => setIsOpen(true)}
-            className={`w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative ${
+            className={`w-16 h-16 rounded-full bg-background border-2 border-amber/60 shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative overflow-hidden ${
               showPulse ? 'animate-pulse' : ''
             }`}
             aria-label="Open Aetheris Nexus"
           >
             {showPulse && (
-              <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+              <span className="absolute inset-0 rounded-full bg-amber/30 animate-ping" />
             )}
-            <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
+            <img
+              src="/aetheris-logo.png"
+              alt="Aetheris"
+              className="w-12 h-12 object-contain relative z-10 pointer-events-none"
+              draggable={false}
+            />
           </button>
         </div>
       )}
