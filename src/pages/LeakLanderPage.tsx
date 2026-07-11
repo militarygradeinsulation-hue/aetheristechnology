@@ -14,7 +14,7 @@ import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
 import { HomeFreeTrialArsenal } from "@/components/HomeFreeTrialArsenal";
 import { HomeToolShopGrid } from "@/components/HomeToolShopGrid";
-import { SampleCaseFiles } from "@/components/SampleCaseFiles";
+
 
 
 
@@ -164,8 +164,6 @@ const LeakLanderPage: React.FC = () => {
           {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
           <HomeToolShopGrid />
 
-          {/* Companies Reviewed — sample Preliminary Findings dossiers */}
-          <SampleCaseFiles />
 
 
 

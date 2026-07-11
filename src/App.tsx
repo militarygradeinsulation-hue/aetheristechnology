@@ -101,6 +101,7 @@ const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
+const CaseStudiesPage = lazy(() => import("./pages/CaseStudiesPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
@@ -211,6 +212,7 @@ const App = () => (
                       <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
                       <Route path="/my-subscription" element={<MySubscriptionPage />} />
                       <Route path="/industries" element={<IndustriesPage />} />
+                      <Route path="/case-studies" element={<CaseStudiesPage />} />
                       <Route path="/ai-for-:slug" element={<VerticalLandingPage />} />
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />

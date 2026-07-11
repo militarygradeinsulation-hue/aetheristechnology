@@ -496,9 +496,9 @@ export function SampleCaseFiles() {
           </div>
         </button>
 
-        {/* ── RIGHT: 50 Sourced Case Files (real, links to /industries) ── */}
+        {/* ── RIGHT: 50 Sourced Case Files (real, links to /case-studies) ── */}
         <Link
-          to="/industries#real-case-files"
+          to="/case-studies#real-case-files"
           className="group relative flex items-stretch justify-between gap-3 border border-amber/50 bg-background/70 hover:bg-amber/[0.06] transition-colors px-5 py-4 rounded-sm overflow-hidden shadow-[0_0_40px_-15px_hsl(var(--amber)/0.5)] text-left"
         >
           <span
@@ -549,10 +549,10 @@ export function SampleCaseFiles() {
               Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
             </p>
             <Link
-              to="/industries"
+              to="/case-studies"
               className="inline-flex items-center gap-1.5 font-case text-[10px] uppercase tracking-[0.22em] text-amber hover:text-background hover:bg-amber border border-amber/50 px-3 py-2 rounded-sm transition-colors whitespace-nowrap self-start md:self-auto"
             >
-              See all industries <ArrowRight className="w-3 h-3" />
+              See all case studies <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -576,10 +576,10 @@ export function SampleCaseFiles() {
 
           <div className="text-center mt-6">
             <Link
-              to="/industries"
+              to="/case-studies"
               className="inline-flex items-center gap-2 font-case text-[11px] uppercase tracking-[0.24em] text-amber border-b border-amber/40 hover:border-amber pb-0.5 transition-colors"
             >
-              Browse the full industry index <ArrowRight className="w-3.5 h-3.5" />
+              Browse all case files <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>

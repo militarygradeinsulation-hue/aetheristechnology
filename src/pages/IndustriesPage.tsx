@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { INFOGRAPHICS } from '@/lib/infographics';
 import { BOOK_MEETING_URL } from '@/lib/links';
-import { RealCaseStudiesSection } from '@/components/RealCaseStudiesSection';
+
 
 
 interface IndustryLeak {
@@ -1008,14 +1008,14 @@ const IndustriesPage: React.FC = () => {
 
   const jsonLd = combineSchemas(
     serviceSchema(
-      'Case Studies',
-      'Forensic Diagnostic ($2,500 flat) applied across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
+      'Industries',
+      'Forensic Diagnostic ($2,500 flat) across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'What does the Leak Audit deliver per case study?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these case studies document.' },
+    { question: 'What does the Leak Audit deliver per industry?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these industry files document.' },
     { question: 'How much is the Leak Audit?', answer: '$2,500 flat fee, operator-led. Applied 1:1 toward any engagement that follows.' },
     { question: 'What if my industry is not listed?', answer: 'The methodology travels. Type your niche in the search bar above, or book a 15-minute call and we will scope it.' },
     { question: 'How fast do you find the first leak?', answer: 'Free self-scan at /leak-audit runs in minutes. Operator-led Leak Audit surfaces first leaks inside Week 1.' },
@@ -1024,13 +1024,13 @@ const IndustriesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Case Studies | Aetheris"
-        description="Forensic Diagnostic case studies by industry. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
+        title="Industries | Aetheris"
+        description="Forensic Diagnostic industries we investigate. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
         path="/industries"
-        keywords="revenue leak audit case studies, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
+        keywords="revenue leak audit industries, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'Case Studies', path: '/industries' },
+          { name: 'Industries', path: '/industries' },
         ]}
         faqs={faqs}
         speakable={['h1', '.tldr', 'h2']}
@@ -1044,13 +1044,13 @@ const IndustriesPage: React.FC = () => {
           <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-crimson/10 border border-crimson/30 text-crimson text-sm font-case uppercase tracking-widest mb-6">
               <Building2 className="w-4 h-4" />
-              Case Studies
+              Industries
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Real cases. Real leaks. <span className="text-crimson">Real money</span> recovered.
+              Industries we investigate
             </h1>
             <p className="text-lg md:text-xl text-foreground/85 max-w-3xl mx-auto mb-4">
-              Tap any case study to open the file. Type your niche below if you don't see it &mdash; the methodology travels.
+              Tap any industry to open the file. Type your niche below if you don't see it &mdash; the methodology travels.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
               One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $2,500 flat.</span>
@@ -1098,31 +1098,19 @@ const IndustriesPage: React.FC = () => {
           </div>
         </section>
 
-        <RealCaseStudiesSection />
-
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto text-center forensic-tile rounded-sm p-10 border border-amber/30">
-            <div className="font-case text-xs uppercase tracking-widest text-amber mb-3">
-              Industry not listed?
-            </div>
-            <h2 className="font-forensic text-3xl md:text-4xl font-bold mb-4">
-              The methodology travels.
+            <h2 className="font-forensic text-2xl md:text-3xl font-bold mb-3">
+              Want the verified case files?
             </h2>
-            <p className="text-foreground/85 text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. $2,500 flat. Applied 1:1 toward engagement.
+            <p className="text-foreground/85 text-lg mb-6">
+              See sample preliminary dossiers and 50 real, sourced case studies on the Case Studies page.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/leak-audit">
-                <Button size="lg" className="bg-crimson hover:bg-crimson/90 text-foreground font-semibold">
-                  Open The Leak Audit <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </Link>
-              <Link to="/leak-audit">
-                <Button size="lg" variant="outline">
-                  Run the free self-scan
-                </Button>
-              </Link>
-            </div>
+            <Link to="/case-studies">
+              <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
+                Open Case Studies <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </section>
 
