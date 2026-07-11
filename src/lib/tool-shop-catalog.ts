@@ -23,7 +23,7 @@ export const SHOP_TOOLS: ShopTool[] = [
   { id: "content-engine",       name: "Content Engine",             tagline: "Long-form + short-form pipeline in one place.",        category: "content",     route: "/try/content-engine" },
   { id: "image-studio",         name: "Image Studio",               tagline: "On-brand imagery + watermarks in seconds.",            category: "content",     route: "/try/image-studio" },
   { id: "creation-studio",      name: "Creation Studio",            tagline: "Mixed-media asset generator with memory.",             category: "content",     route: "/try/creation-studio" },
-  { id: "easy-mode",            name: "Easy Mode",                  tagline: "One prompt, everything published.",                    category: "content",     route: "/try/easy-mode" },
+  { id: "easy-mode",            name: "Easy Mode",                  tagline: "Rewrites any output in plain-English, paste-ready copy.", category: "content",     route: "/try/easy-mode" },
   { id: "tool-generator",       name: "Tool Generator",             tagline: "Build a mini-tool from a plain-English brief.",        category: "content",     route: "/try/tool-generator" },
 ];
 
