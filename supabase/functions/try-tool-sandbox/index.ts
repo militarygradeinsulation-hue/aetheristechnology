@@ -207,9 +207,9 @@ async function callGateway(system: string, user: string): Promise<string> {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-2.5-pro",
       messages: [
-        { role: "system", content: system + "\n\nPUBLIC-RUN GUARDRAIL: Do not name any real company, client, or rep. Work only from user input. FOLLOW THE OUTPUT DISCIPLINE STRICTLY — this must read like a one-page PDF report, not a wall of text. Under 450 words total. No preamble." },
+        { role: "system", content: system + "\n\nPUBLIC-RUN GUARDRAIL: Do not name any real internal Aetheris client, rep, or system. Work only from user input + scraped context. This is FULL OPERATOR OUTPUT — comprehensive, dense, no compression. End with the required 'Do This Monday Morning' section." },
         { role: "user", content: user },
       ],
     }),
