@@ -10,9 +10,11 @@ import { SalesChat } from "@/components/SalesChat";
 const SalesChatGate = () => {
   const { pathname } = useLocation();
   if (pathname.startsWith("/aetheris-iq") || pathname.startsWith("/aetheris-ai") || pathname === "/iq") return null;
-  // Hide the site-wide Sales Advisor bubble inside the new rep/partner portal —
+  // Hide the site-wide Nexus bubble inside the new rep/partner portal —
   // the Coach tab there is now the unified Advisor + Coach + Trainer + Nexus chat.
   if (pathname.startsWith("/portal/new") || pathname.startsWith("/partner-portal/new")) return null;
+  // Admin surface has its own Operator Assistant; don't stack two floating chats.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/staff")) return null;
   return <SalesChat />;
 };
 import { BookMeetingGate } from "@/components/BookMeetingGate";

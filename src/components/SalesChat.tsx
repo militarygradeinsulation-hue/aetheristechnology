@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, ShoppingCart, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 import { PinnableFloater } from '@/components/ui/PinnableFloater';
+import { getOpenerForPath, pageContextLabel } from '@/lib/nexusOpeners';
 
 type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
-const INITIAL_MESSAGE: Msg = {
-  role: 'assistant',
-  content: "I'm the Aetheris Sales Advisor. We help specialty manufacturers ($5M-$25M) find the $200K-$2M they're leaking through broken CRM, sales follow-up, and lead flow — then fix it.\n\nWhat do you make, and where do you think the leak is?",
-};
+// Auto-open delay for the Nexus proactive greeting.
+const AUTO_OPEN_MS = 10_000;
+// Session flag key — set once per browser session so we don't re-pop on every route change.
+const AUTO_OPENED_KEY = 'nexus_auto_opened_session';
 
 const STARTER_PROBLEMS = [
   "We're a $12M manufacturer",
@@ -51,8 +53,15 @@ const CONTACT_LINKS = [
 ];
 
 export const SalesChat: React.FC = () => {
+  const { pathname } = useLocation();
+  const opener = useMemo(() => getOpenerForPath(pathname), [pathname]);
+  const initialMessage = useMemo<Msg>(
+    () => ({ role: 'assistant', content: opener.greeting }),
+    [opener.greeting],
+  );
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<Msg[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
@@ -60,10 +69,32 @@ export const SalesChat: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { trackEvent } = useTrackEvent();
 
+  // If the visitor hasn't sent anything yet, keep the intro line in sync with the page.
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [initialMessage];
+      }
+      return prev;
+    });
+  }, [initialMessage]);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Aggressive auto-open: once per browser session, ~10s after landing.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem(AUTO_OPENED_KEY) === '1') return;
+    const t = setTimeout(() => {
+      setIsOpen(true);
+      sessionStorage.setItem(AUTO_OPENED_KEY, '1');
+      trackEvent('nexus_auto_open', { path: pathname, section: opener.label });
+    }, AUTO_OPEN_MS);
+    return () => clearTimeout(t);
+  }, [pathname, opener.label, trackEvent]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,7 +118,14 @@ export const SalesChat: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages }),
+        body: JSON.stringify({
+          messages: allMessages,
+          pageContext: {
+            pathname,
+            title: typeof document !== 'undefined' ? document.title : '',
+            section: opener.label,
+          },
+        }),
       });
 
       if (!resp.ok || !resp.body) throw new Error('Failed to start stream');
@@ -147,7 +185,7 @@ export const SalesChat: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages]);
+  }, [isLoading, messages, pathname, opener.label]);
 
   const sendMessage = useCallback(() => {
     runChat(input.trim());
@@ -233,7 +271,7 @@ export const SalesChat: React.FC = () => {
             className={`w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative ${
               showPulse ? 'animate-pulse' : ''
             }`}
-            aria-label="Chat with us"
+            aria-label="Open Aetheris Nexus"
           >
             {showPulse && (
               <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
@@ -251,8 +289,8 @@ export const SalesChat: React.FC = () => {
           <div className="px-4 py-3 border-b border-border bg-card">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="font-bold text-foreground text-sm">Aetheris Sales Advisor</h3>
-                <p className="text-[10px] text-muted-foreground">Ask me anything or reach out directly</p>
+                <h3 className="font-bold text-foreground text-sm">Aetheris Nexus</h3>
+                <p className="text-[10px] text-muted-foreground">AI operator · viewing {opener.label}</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />

@@ -1,62 +1,80 @@
-# Reciprocity Engine Rebuild
+## Nexus Smart-Site Assistant
 
-The uploaded spec is the new source of truth. It replaces the old catalog/bundle model with a single funnel. Below is exactly what changes, in the order the spec's own Build Order calls for.
+Replace the admin-only Operator Assistant with a single Nexus widget that behaves differently for public visitors vs signed-in operators, greets every visitor aggressively, and can either book a meeting or hand back a Stripe checkout link mid-conversation.
 
-## The new public offer (only these exist for sale)
+## What the visitor sees
 
-| Rung | Price | Product | Split model |
-|---|---|---|---|
-| Free | $0 | Leak Audit (existing) | n/a |
-| Tier 1 | **$3,500 one-time** | **Single-Leak Investigation** (NEW) | Tier 3 percent split — 70/20/10 |
-| Tier 2 | $18,500 one-time | Chaos Diagnostic (rename of "21-Day Revenue Diagnostic") | Flagship fixed: Co $10,500 / Rep $5,000 / Partner $3,000 |
-| Tier 3 | $15,000/mo | Implementation (rename of "Active Case") | Flagship fixed: Co $8,000 / Rep $4,000 / Partner $3,000 |
+- Floating amber "Nexus" button in the bottom-right on every public page (hidden on `/admin/*` and `/portal/*` — those still get the operator variant).
+- 10 seconds after landing, the widget auto-opens with a **page-specific opener**. Examples:
+  - `/services` → "Saw you on Services. Want me to price the piece you're actually stuck on?"
+  - `/tools-shop` → "Looking at the toolkit? I can send you a checkout link for any of them in one click."
+  - `/leak-audit` → "Want me to run the audit on your URL right now?"
+- If dismissed, it collapses to a pulsing dot and won't auto-open again that session.
+- Streaming markdown replies, "Nexus is thinking…" shimmer, transcript persisted to `localStorage` per browser (no thread history — one running conversation per visitor).
+- Two inline action cards the AI can drop into the chat:
+  1. **Book a call** — opens the existing HubSpot meeting embed in a modal, prefilled with name/email if collected.
+  2. **Buy this** — a compact product card with title, price, and a "Checkout →" button that opens a Stripe Checkout session in a new tab.
 
-Signal / Revenue / Operator Suite bundles and the ~30 legacy à-la-carte items are **removed from public sale** and kept in the portal for back-compat only (marked `legacy: true` — already the pattern).
+## What Nexus can do (tools)
 
-The Tool Shop ($40 / $100 / $1,000 lifetime) is what the spec calls the "Evidence Kit" — same products, new positioning, unlocked on the Leak Audit results page.
+The edge function exposes exactly two tools to the model:
 
-## Build order (matches spec Part 9)
+- `book_meeting({ name, email, topic })` → returns the HubSpot embed URL + a display label; UI renders the Book-a-call card.
+- `create_checkout({ price_id, quantity })` → calls the existing payments flow with a `price_id` from `src/lib/tool-shop-catalog.ts`; UI renders the Buy card with the returned Stripe URL.
 
-### Step 1 — Pricing + product data (foundation)
-- `src/lib/repProducts.ts`: rename `21-Day Revenue Diagnostic` → `Chaos Diagnostic`, `Active Case` → `Implementation`. Add `Single-Leak Investigation` @ $3,500 (tier 3, non-legacy). Mark Signal/Revenue/Operator Suite bundles `legacy: true` so they drop out of `PUBLIC_BUNDLES`.
-- `src/components/ServicesPricing.tsx`: delete the outdated "14-Day Diagnostic $2,900" entry; add the three paid rungs with correct copy from Part 3.
-- Fix the `sales_coaching_active case_monthly` priceId typo (space → underscore).
+No other tools — no lead capture forms, no scan triggers (per your answers).
 
-### Step 2 — Rewrite `/catalog` (new pricing page)
-Replace `src/pages/CatalogPage.tsx` + `src/components/PackageTiers.tsx` with the exact structure from spec Part 3:
-- Page title "Every engagement starts with evidence."
-- Tier 0 slim strip: Leak Audit (Free) — CTA "Open Your Case File"
-- Tier 1 card: Single-Leak Investigation $3,500 — CTA "Trace One Leak"
-- Tier 2 dominant gold-border card: Chaos Diagnostic $18,500 — CTA "Request the Full Investigation" — includes the written guarantee paragraph
-- Tier 3 quiet card: Implementation from $15,000/mo — no CTA button (Diagnostic is the door)
-- Closing strip with "Open Your Case File"
-- No em-dashes anywhere.
+## Page context handoff
 
-### Step 3 — Site-wide CTA cleanup (Part 7)
-Grep-and-replace the banned CTAs (`Learn More`, `Get Started`, `Contact Us`, `Book a Demo`, `Sign Up`) on public marketing pages only, replaced with the correct rung CTA for the surface they sit on. Auth/portal buttons keep their labels.
+- New tiny hook `useNexusContext()` broadcasts `{ pathname, pageTitle, productSlug? }` into a React context.
+- The widget sends that context on every turn as a `system` message segment ("Visitor is currently on: /services — Services page") so replies stay grounded in what they're looking at.
+- No behavior scoring, no scroll/dwell tracking in v1 — path + title is enough to feel "smart" without building an analytics pipeline.
 
-### Step 4 — Leak Audit results page: Evidence Kit unlock (Part 5)
-- Add an "Evidence Kit" section to `LeakAuditResultsPage` (or equivalent) that surfaces the 7 tools (Friction Audit, Brand Contradictions, Follow-Up Plan, Sales Scripts, Question Engine, Content Calendar, Gap Scanner) only after the Leak Audit is completed.
-- Reduce public nav to link to only ONE free tool (the Leak Audit).
+## Operator mode (unified)
 
-### Step 5 — Stripe catalog
-Register `single_leak_investigation_once` at $3,500 via `payments--create_product`. No other Stripe changes; existing prices already match `repProducts.ts`.
+Same component, but when `hasValidAdminToken()` or a portal session is present:
+- Widget label switches to "Operator Assistant", no auto-open, no sales tools exposed.
+- Existing `AdminAssistant` logic (admin data queries via `admin-data`) is folded in as the operator system prompt + admin tools.
+- Public visitors never see admin tools; operators never see the sales tools.
 
-### Step 6 — Portals sanity check (display + math only, per your earlier answer)
-- Rep portal, admin portal, POS Terminal: verify Single-Leak Investigation appears in rep-sellable list; verify Chaos Diagnostic / Implementation renames don't break lookups. No payout logic changes.
+## Backend
 
-## Deferred (explicitly NOT in this pass)
+New edge function `nexus-chat`:
+- Uses AI SDK + Lovable AI Gateway helper (`google/gemini-3.5-flash` for speed).
+- `streamText` with `tools: { book_meeting, create_checkout }`, `stopWhen: stepCountIs(50)`.
+- System prompt locked to brand voice (Operator, forensic, no earnings claims, USD only, honors pricing ladder from memory).
+- Rate limit: soft cap 30 messages / visitor / hour (in-memory per IP) to protect credits.
+- CORS + `verify_jwt = false`.
 
-- Preliminary Findings PDF artifact (Part 4) — will build after pricing/funnel lands.
-- Results page dossier layout with case #, exhibits, redactions (Part 5 visual) — separate build.
-- HubSpot/ADAS follow-up sequence + T+48 Loom queue (Part 6) — needs its own scope.
-- Legal review of guarantee wording — flagged in copy as `TODO(matt)` until you confirm.
-- Case-numbering system (starting from real count) — need your current true case count before wiring.
+`create_checkout` calls Stripe via the existing `STRIPE_LIVE_API_KEY` path already used elsewhere.
+`book_meeting` returns the HubSpot meeting URL from the memory (`admin-analytics-hub`) — no HubSpot API call needed for v1.
 
-## Confirm before I build
+## Files
 
-1. **Rename OK?** "21-Day Revenue Diagnostic" → "Chaos Diagnostic" and "Active Case" → "Implementation" across UI and portals. Product IDs stay the same (`fourteen_day_diagnostic_once` etc. are already legacy names in Stripe — keep IDs, rename display).
-2. **Bundles killed publicly?** Signal / Revenue / Operator Suite disappear from `/catalog` and any homepage grids.
-3. **Guarantee copy** goes live with `TODO(matt)` note next to it, or hold the Diagnostic card until Matt signs off?
+Create:
+- `supabase/functions/nexus-chat/index.ts`
+- `src/components/nexus/NexusWidget.tsx` (floating button + panel + auto-open logic)
+- `src/components/nexus/NexusMessage.tsx` (markdown + tool-result cards)
+- `src/components/nexus/BookCallCard.tsx`
+- `src/components/nexus/BuyProductCard.tsx`
+- `src/lib/nexusContext.ts` (context + `useNexusContext`)
+- `src/lib/nexusOpeners.ts` (path → opener line map)
 
-Reply "go" (or with any edits) and I'll ship Steps 1–3 first, then loop back for Steps 4–6.
+Edit:
+- `src/App.tsx` — mount `<NexusWidget />` at the layout root, hide on `/admin` and `/portal`.
+- `src/pages/AdminDashboard.tsx` — remove the standalone `<AdminAssistant />` mount (Nexus in operator mode replaces it).
+
+## Out of scope (v1)
+
+- No dwell-time / scroll / exit-intent triggers — only 10-second auto-open per session.
+- No HubSpot API writes, no live CRM push from chat.
+- No product recommendation engine — the AI picks a `price_id` from the catalog list in its system prompt.
+- No voice, no video, no file uploads.
+
+## Verification before I call it done
+
+1. Load `/` in Playwright — Nexus button appears, opens after 10s with a homepage opener.
+2. Ask "how much is the leak audit?" — reply cites $2,500 flat.
+3. Ask "I want the LinkedIn ghostwriter tool" — Nexus calls `create_checkout` and a Buy card renders with a working Stripe URL.
+4. Ask "can I talk to Joseph?" — Nexus calls `book_meeting` and a Book-a-call card renders opening the HubSpot embed.
+5. Load `/admin` after PIN login — no public Nexus, operator variant appears instead.

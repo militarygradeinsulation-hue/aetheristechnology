@@ -57,9 +57,22 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, pageContext } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    // Inject page context so Nexus knows exactly what the visitor is looking at.
+    const contextMsg = pageContext && typeof pageContext === "object"
+      ? {
+          role: "system" as const,
+          content: `VISITOR CONTEXT (live, updated each turn):
+- Current page: ${pageContext.pathname || "unknown"}
+- Page title: ${pageContext.title || "unknown"}
+- Section: ${pageContext.section || "General"}
+
+Reference what they're viewing when relevant. If they're on /diagnostic, price it directly. If they're on /tools-shop, offer a checkout link. If they're on /leak-audit, offer to run it on their URL. Do not repeat the page label in every message — just be aware of it.`,
+        }
+      : null;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -71,6 +84,7 @@ serve(async (req) => {
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
+          ...(contextMsg ? [contextMsg] : []),
           ...messages,
         ],
         stream: true,
