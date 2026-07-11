@@ -63,9 +63,10 @@ export async function renderHomepage(
       </header>
 
       <section>
-        <h2>Sick of AI everywhere?</h2>
-        <p>Most AI companies sell complexity. We don't. We're the most anti-AI, AI company you'll ever meet — built to make your business simpler, not noisier.</p>
+        <h2>Sick of AI everywhere and just want something simple that actually works?</h2>
+        <p><strong>This is us.</strong> We're the most anti-AI, AI company you'll ever meet — built to make your business simpler, not noisier.</p>
       </section>
+
 
       <section>
         <h2>The Leak Audit™ — 7-step forensic methodology</h2>
