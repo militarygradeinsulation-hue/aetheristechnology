@@ -8,7 +8,27 @@ import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SHOP_TOOLS, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog";
-import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu } from "lucide-react";
+import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight } from "lucide-react";
+import { ToolThumbnail } from "@/components/ToolThumbnail";
+
+// Rich per-tool summaries — what it does, who it's for, what you walk away with.
+const TOOL_SUMMARIES: Record<string, { summary: string; bullets: string[] }> = {
+  "website-scanner":      { summary: "Point it at any URL and get a live forensic sweep of the revenue leaks costing that site money right now.",  bullets: ["Live URL scan", "Ranked leak list", "Fix-first order"] },
+  "brand-contradictions": { summary: "Surfaces every spot where a brand's promise and its actual buyer experience don't match — trust killers, exposed.", bullets: ["Promise vs. reality", "Trust-gap map", "Copy fixes"] },
+  "friction-audit":       { summary: "Walks the buyer journey click-by-click and pins the exact steps where prospects quietly bail on the sale.",     bullets: ["Step-by-step audit", "Drop-off flags", "Priority fixes"] },
+  "strategic-questions":  { summary: "Generates the boardroom-grade questions leadership keeps avoiding — the ones that actually move the P&L.",       bullets: ["Custom to biz", "Boardroom tier", "Instant deck-ready"] },
+  "detective-mode":       { summary: "A deep forensic sweep on a single business surface — one target, full case file, no fluff.",                     bullets: ["Deep single-target", "Case file output", "Evidence-backed"] },
+  "forensic-scan-all":    { summary: "Runs every diagnostic tool at once and stitches the findings into one unified leak report.",                     bullets: ["All diagnostics", "One report", "Save hours"] },
+  "all-in-one":           { summary: "One prompt → blog post, social pack, and email sequence, all voice-locked and ready to publish.",                bullets: ["Blog + social + email", "One prompt", "On-brand"] },
+  "content-calendar":     { summary: "Builds 30 days of aligned, on-brand content in minutes so you never stare at a blank calendar again.",           bullets: ["30-day plan", "Voice-locked", "Auto-scheduled"] },
+  "playbook-generator":   { summary: "Turn a plain-English brief into a custom operating playbook for any function — sales, ops, hiring, anything.",   bullets: ["Any function", "Step-by-step", "Team-ready"] },
+  "social-content":       { summary: "An endless feed of voice-locked social posts that sound like you wrote them — because it learned how you write.",bullets: ["Voice-locked", "Endless supply", "Post-ready"] },
+  "content-engine":       { summary: "Long-form + short-form pipeline in one place. Feed it a topic, get a full content stack out.",                   bullets: ["Long + short form", "One pipeline", "Repurpose built-in"] },
+  "image-studio":         { summary: "On-brand imagery generated and watermarked in seconds — no stock photos, no designer bottleneck.",               bullets: ["On-brand images", "Auto-watermark", "Seconds not days"] },
+  "creation-studio":      { summary: "Mixed-media asset generator with memory — remembers your brand across every image, doc, and post.",              bullets: ["Mixed media", "Brand memory", "One workspace"] },
+  "easy-mode":            { summary: "Paste any output and it rewrites it in plain-English, paste-ready copy your team can actually use.",             bullets: ["Plain English", "Paste-ready", "Any input"] },
+  "tool-generator":       { summary: "Describe a mini-tool in plain English and it builds it — your own custom instrument in minutes.",                bullets: ["Plain-English brief", "Custom tools", "Minutes to build"] },
+};
 
 const TechSolutionsPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
