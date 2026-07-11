@@ -202,6 +202,8 @@ const TechSolutionsPage: React.FC = () => {
           </section>
 
           <Section title="Diagnostics" tools={diagnostics} icon={Cpu} />
+          <Section title="Reports & Deliverables" tools={reports} icon={Trophy} />
+          <Section title="Sales Enablement" tools={sales} icon={Users} />
           <Section title="Content Systems" tools={content} icon={Sparkles} />
 
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
