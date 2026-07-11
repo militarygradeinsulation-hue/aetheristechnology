@@ -282,6 +282,7 @@ const App = () => (
 
                   <SalesChatGate />
                   <BookMeetingGate />
+                  <LimitedOfferPopup />
                 </AuthProvider>
               }
             />
