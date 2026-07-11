@@ -332,7 +332,7 @@ export default function TryToolPage() {
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => {}} />
-        <main className="max-w-3xl mx-auto px-4 pt-28 pb-16">
+        <main className="max-w-6xl mx-auto px-4 pt-28 pb-16">
           <Link to="/tech-solutions" className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-widest text-amber/80 hover:text-amber mb-4">
             <ArrowLeft className="w-3 h-3" /> Back to Tech Solutions
           </Link>
