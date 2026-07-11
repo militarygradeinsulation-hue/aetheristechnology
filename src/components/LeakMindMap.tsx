@@ -383,7 +383,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
         const n = nodes[selected];
         return (
           <div
-            className="absolute left-1/2 bottom-3 -translate-x-1/2 z-40 w-[min(92%,340px)] max-h-[55%] overflow-y-auto rounded-sm border border-amber/50 bg-background/95 backdrop-blur-md p-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] animate-fade-in text-left"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-[min(92%,340px)] max-h-[70%] overflow-y-auto rounded-sm border border-amber/60 bg-background/95 backdrop-blur-md p-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] animate-fade-in text-left"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2 gap-2">
