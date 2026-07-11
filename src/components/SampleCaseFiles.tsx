@@ -549,10 +549,10 @@ export function SampleCaseFiles() {
               Illustrative specimens · Subjects fictional · Figures reflect typical leakage patterns for each industry and revenue class
             </p>
             <Link
-              to="/industries"
+              to="/case-studies"
               className="inline-flex items-center gap-1.5 font-case text-[10px] uppercase tracking-[0.22em] text-amber hover:text-background hover:bg-amber border border-amber/50 px-3 py-2 rounded-sm transition-colors whitespace-nowrap self-start md:self-auto"
             >
-              See all industries <ArrowRight className="w-3 h-3" />
+              See all case studies <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
