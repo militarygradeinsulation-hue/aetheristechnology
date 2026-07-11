@@ -380,7 +380,7 @@ export function HomeToolShopGrid() {
                             "repeating-linear-gradient(90deg, hsl(0 0% 8%) 0 1px, transparent 1px 3px, hsl(0 0% 8%) 3px 5px, transparent 5px 4px, hsl(0 0% 8%) 4px 7px, transparent 7px 10px)",
                         }}
                       />
-                      <div className="font-case text-[9px] uppercase tracking-[0.25em] text-[hsl(0_0%_0%)]">
+                      <div className="font-case text-sm sm:text-base md:text-lg uppercase tracking-[0.18em] font-black text-[hsl(0_0%_0%)]">
                         FREE
                       </div>
                     </div>
