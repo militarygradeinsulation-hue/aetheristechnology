@@ -23,6 +23,10 @@ const HIDDEN_PREFIXES = [
   "/reset-password",
   "/unsubscribe",
   "/subscribe-onboarding",
+  "/try",
+  "/nexus-iq",
+  "/detective-mode",
+  "/tech-solutions",
 ];
 
 const schema = z.object({
