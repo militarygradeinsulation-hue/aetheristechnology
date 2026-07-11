@@ -548,7 +548,7 @@ export function SampleCaseFiles() {
             </span>
             <ArrowRight className="w-5 h-5 text-amber transition-transform duration-300 group-hover:translate-x-1" />
           </div>
-        </Link>
+        </ArchiveCard>
       </div>
 
 
