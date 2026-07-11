@@ -28,8 +28,8 @@ const GoldenReportPage: React.FC = () => {
         <div className="pt-24 px-4 pb-16">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-1.5 font-case text-[9px] uppercase tracking-[0.2em] text-amber mb-4 px-2 py-1 rounded-full border border-amber/30 bg-amber/10">
-                <ScrollText className="w-2.5 h-2.5" /> Free · 14-chapter case file
+              <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
+                <ScrollText className="w-2 h-2" /> Free · 14-ch case file
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.1]">
                 The <span className="text-amber italic">Golden</span> Report
