@@ -289,7 +289,7 @@ export function HomeToolShopGrid() {
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Cpu className="w-4 h-4 text-amber/80" />
                   <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
-                    Free · 14-chapter case file
+                    FREE · 14-CHAPTER CASE FILE
                   </span>
                 </div>
 
