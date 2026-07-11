@@ -1008,14 +1008,14 @@ const IndustriesPage: React.FC = () => {
 
   const jsonLd = combineSchemas(
     serviceSchema(
-      'Case Studies',
-      'Forensic Diagnostic ($2,500 flat) applied across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
+      'Industries',
+      'Forensic Diagnostic ($2,500 flat) across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
-    { question: 'What does the Leak Audit deliver per case study?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these case studies document.' },
+    { question: 'What does the Leak Audit deliver per industry?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these industry files document.' },
     { question: 'How much is the Leak Audit?', answer: '$2,500 flat fee, operator-led. Applied 1:1 toward any engagement that follows.' },
     { question: 'What if my industry is not listed?', answer: 'The methodology travels. Type your niche in the search bar above, or book a 15-minute call and we will scope it.' },
     { question: 'How fast do you find the first leak?', answer: 'Free self-scan at /leak-audit runs in minutes. Operator-led Leak Audit surfaces first leaks inside Week 1.' },
@@ -1024,13 +1024,13 @@ const IndustriesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Case Studies | Aetheris"
-        description="Forensic Diagnostic case studies by industry. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
+        title="Industries | Aetheris"
+        description="Forensic Diagnostic industries we investigate. $2,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
         path="/industries"
-        keywords="revenue leak audit case studies, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
+        keywords="revenue leak audit industries, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'Case Studies', path: '/industries' },
+          { name: 'Industries', path: '/industries' },
         ]}
         faqs={faqs}
         speakable={['h1', '.tldr', 'h2']}
