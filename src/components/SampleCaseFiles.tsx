@@ -341,17 +341,17 @@ function DossierCard({ file }: { file: CaseFile }) {
         {file.exhibits.map((ex, i) => (
           <div key={i} className={`grid grid-cols-[54px_1fr_auto] gap-3 items-baseline py-1.5 border-t border-amber/10 ${i === file.exhibits.length - 1 ? "border-b" : ""}`}>
             <div className="font-case text-[11px] tracking-widest text-amber">{ex.num}</div>
-            <div className="text-sm">
+            <div className="text-xs">
               {ex.redacted ? (
-                <span className="inline-block h-3 bg-black border border-amber/20 align-middle" style={{ width: `${ex.barWidth}%` }} />
+                <span className="inline-block h-2.5 bg-black border border-amber/20 align-middle" style={{ width: `${ex.barWidth}%` }} />
               ) : (
                 <>
                   <div className="font-medium">{ex.name}</div>
-                  <div className="text-muted-foreground text-xs mt-1 leading-relaxed">{ex.detail}</div>
+                  <div className="text-muted-foreground text-[11px] mt-1 leading-relaxed">{ex.detail}</div>
                 </>
               )}
             </div>
-            <div className={`font-case text-sm font-semibold whitespace-nowrap ${ex.redacted ? "text-amber" : ""}`}>{ex.cost}</div>
+            <div className={`font-case text-xs font-semibold whitespace-nowrap ${ex.redacted ? "text-amber" : ""}`}>{ex.cost}</div>
           </div>
         ))}
         <div className="font-case text-[11px] text-crimson tracking-wider pt-4 leading-relaxed flex items-start gap-2">
