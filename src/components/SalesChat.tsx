@@ -185,7 +185,7 @@ export const SalesChat: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages]);
+  }, [isLoading, messages, pathname, opener.label]);
 
   const sendMessage = useCallback(() => {
     runChat(input.trim());
