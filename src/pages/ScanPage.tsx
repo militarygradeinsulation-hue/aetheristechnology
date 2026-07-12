@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { combineSchemas, howToSchema, softwareAppSchema } from '@/lib/schemas';
+import websiteLeakScannerHero from '@/assets/website-leak-scanner-hero.png.asset.json';
 
 const ScanPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
