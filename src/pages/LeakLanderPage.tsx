@@ -104,8 +104,7 @@ const LeakLanderPage: React.FC = () => {
           {/* TOP PITCH — money-back guarantee framing */}
           <section className="mt-2 max-w-4xl mx-auto text-center animate-fade-in">
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              If I can't save you money,&nbsp;
-              <span className="text-crimson italic">I don't want to do business with you.</span>
+              {"\n"}
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
               {"\n"}
