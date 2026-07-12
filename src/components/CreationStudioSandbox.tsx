@@ -27,13 +27,14 @@ type Brand = {
   sourceURL: string;
 };
 
-type Kind = "image" | "one-pager" | "social-pack" | "email";
+type Kind = "image" | "one-pager" | "social-pack" | "email" | "calendar";
 
 const KIND_META: Record<Kind, { label: string; hint: string; icon: any }> = {
-  "image":       { label: "Marketing Image",  hint: "e.g. 'Instagram post announcing our Q4 launch'",       icon: ImageIcon },
-  "one-pager":   { label: "One-Pager PDF",    hint: "e.g. 'Investor one-pager for our new pricing tier'",   icon: FileText },
-  "social-pack": { label: "Social Pack",      hint: "e.g. 'Product hunt launch — 3 channels'",              icon: Sparkles },
-  "email":       { label: "Marketing Email",  hint: "e.g. 'Re-engage lapsed trial users this week'",        icon: FileText },
+  "image":       { label: "Marketing Image",  hint: "e.g. 'Instagram post announcing our Q4 launch'",                                   icon: ImageIcon },
+  "one-pager":   { label: "One-Pager PDF",    hint: "e.g. 'Investor one-pager for our new pricing tier'",                               icon: FileText },
+  "social-pack": { label: "Social Pack",      hint: "e.g. 'Product hunt launch — 3 channels'",                                          icon: Sparkles },
+  "email":       { label: "Marketing Email",  hint: "e.g. 'Re-engage lapsed trial users this week'",                                    icon: FileText },
+  "calendar":    { label: "30-Day Calendar",  hint: "Goals + audience, e.g. 'Book 20 demos with mid-market ops leaders in November'",   icon: CalendarDays },
 };
 
 export function CreationStudioSandbox() {
