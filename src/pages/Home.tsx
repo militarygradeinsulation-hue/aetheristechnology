@@ -64,7 +64,7 @@ const Home = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Chaos Theory Forensics Operator | Aetheris"
-        description="Most growth-stage businesses are bleeding time, leads, and revenue without knowing where. I help established businesses uncover what is actually broken beneath the surface and build the systems to fix it."
+        description="We scan your company for its biggest weaknesses using tools that don't exist anywhere, then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it."
         path="/home"
         keywords="business forensics, revenue leak audit, True Cost Forensics, Indianapolis, operator"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
@@ -75,8 +75,8 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
           <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
-            Most growth-stage businesses are bleeding time, leads, and revenue without knowing where.
-            Aetheris Chaos Theory Forensics finds the leak, quantifies the cost, and builds the systems to fix it.
+            We scan your company for its biggest weaknesses using tools that don't exist anywhere,
+            then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it.
           </h1>
 
           {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
@@ -87,12 +87,17 @@ const Home = () => {
               The Operator's Standard
             </p>
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              If I can't save you <span className="text-crimson">MONEY</span>,{" "}
-              <span className="text-crimson italic">I don't want to do <span className="not-italic">BUSINESS</span> with you.</span>
+              We scan your company for its biggest weaknesses using tools that{" "}
+              <span className="text-crimson">don't exist anywhere.</span>
             </h2>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              We find the silent leaks, remove the chaos at the source, and build systems that keep your margin where it belongs.
-            </p>
+            <div className="mt-6 max-w-3xl mx-auto space-y-4 text-base md:text-lg text-muted-foreground">
+              <p>
+                Next we fix those weaknesses so you don't have to.
+              </p>
+              <p className="text-foreground text-lg md:text-xl">
+                Tell us your biggest issue and let's see if we can fix it.
+              </p>
+            </div>
           </section>
 
           {/* One offer · The Leak Audit */}

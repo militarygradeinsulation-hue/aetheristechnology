@@ -180,7 +180,10 @@ const LeakLanderPage: React.FC = () => {
                 // What We Sell
               </div>
               <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-medium leading-relaxed max-w-3xl mx-auto">
-                We scan your company for its biggest weaknesses using our tools that don't exist anywhere. Next we fix those weaknesses so you don't have too.
+                We scan your company for its biggest weaknesses using our tools that don't exist anywhere. Next we fix those weaknesses so you don't have to.
+              </p>
+              <p className="mt-4 text-base sm:text-lg md:text-xl text-foreground font-bold leading-relaxed max-w-3xl mx-auto">
+                Tell me what your biggest issue is and let's see if I can fix it.
               </p>
             </div>
           </section>
