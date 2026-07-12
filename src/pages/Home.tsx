@@ -82,13 +82,16 @@ const Home = () => {
           {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
 
 
-          <section className="px-4 py-8 max-w-3xl mx-auto text-center">
+          <section className="px-4 py-8 max-w-5xl mx-auto text-center">
+            <p className="font-case text-[11px] uppercase tracking-[0.2em] text-amber mb-3">
+              The Operator's Standard
+            </p>
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              We are in the business of{" "}
-              <span className="text-crimson italic">Chaos Theory Forensic</span>.
+              If I can't save you money,{" "}
+              <span className="text-crimson italic">I don't want to do business with you.</span>
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
-              Find what causes the random chaos. Remove it where it begins.
+              We find the silent leaks, remove the chaos at the source, and build systems that keep your margin where it belongs.
             </p>
           </section>
 
