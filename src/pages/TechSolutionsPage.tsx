@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
@@ -55,6 +55,46 @@ const TechSolutionsPage: React.FC = () => {
     setBuyOpen(true);
   };
 
+  // Throttle: after trying 3 different tools, lock the rest for 24h.
+  const LOCK_KEY = "tech_solutions_tries_v1";
+  const LOCK_WINDOW_MS = 24 * 60 * 60 * 1000;
+  type TriesState = { ids: string[]; firstAt: number };
+  const readTries = (): TriesState => {
+    try {
+      const raw = localStorage.getItem(LOCK_KEY);
+      if (!raw) return { ids: [], firstAt: 0 };
+      const p = JSON.parse(raw) as TriesState;
+      if (!p.firstAt || Date.now() - p.firstAt > LOCK_WINDOW_MS) return { ids: [], firstAt: 0 };
+      return { ids: Array.isArray(p.ids) ? p.ids : [], firstAt: p.firstAt };
+    } catch { return { ids: [], firstAt: 0 }; }
+  };
+  const [tries, setTries] = useState<TriesState>(readTries);
+  const [now, setNow] = useState<number>(Date.now());
+  useEffect(() => {
+    const i = setInterval(() => {
+      setNow(Date.now());
+      const fresh = readTries();
+      setTries(prev => (prev.firstAt !== fresh.firstAt || prev.ids.length !== fresh.ids.length ? fresh : prev));
+    }, 60_000);
+    return () => clearInterval(i);
+  }, []);
+  const isLockedActive = tries.ids.length >= 3 && (now - tries.firstAt) < LOCK_WINDOW_MS;
+  const isToolLocked = (id: string) => isLockedActive && !tries.ids.includes(id);
+  const recordTry = useCallback((id: string) => {
+    setTries(prev => {
+      if (prev.ids.includes(id)) return prev;
+      if (prev.ids.length >= 3 && (Date.now() - prev.firstAt) < LOCK_WINDOW_MS) return prev;
+      const next: TriesState = {
+        ids: [...prev.ids, id],
+        firstAt: prev.ids.length === 0 ? Date.now() : prev.firstAt,
+      };
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+  const unlockMs = Math.max(0, tries.firstAt + LOCK_WINDOW_MS - now);
+  const unlockHrs = Math.ceil(unlockMs / (60 * 60 * 1000));
+
   const diagnostics = SHOP_TOOLS.filter(t => t.category === "diagnostics");
   const content = SHOP_TOOLS.filter(t => t.category === "content");
   const reports = SHOP_TOOLS.filter(t => t.category === "reports");
@@ -72,10 +112,15 @@ const TechSolutionsPage: React.FC = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {tools.map(t => {
           const info = TOOL_SUMMARIES[t.id];
+          const locked = isToolLocked(t.id);
           return (
             <div
               key={t.id}
-              className="group forensic-tile relative rounded-sm border border-amber/25 hover:border-amber/70 transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.35)]"
+              className={`group forensic-tile relative rounded-sm border transition-all duration-300 overflow-hidden flex flex-col ${
+                locked
+                  ? "border-muted/20 opacity-50 grayscale"
+                  : "border-amber/25 hover:border-amber/70 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.35)]"
+              }`}
             >
               {/* Thumbnail */}
               <ToolThumbnail id={t.id} alt={t.name} />
@@ -109,17 +154,29 @@ const TechSolutionsPage: React.FC = () => {
 
                 <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-amber/10">
                   <div className="flex gap-2">
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
-                    >
-                      <Link to={`/try/${t.id}`}>
-                        <Sparkles className="w-3 h-3 mr-1" /> Try free
-                        <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </Link>
-                    </Button>
+                    {locked ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="flex-1 border-muted/30 text-muted-foreground cursor-not-allowed"
+                        title={`Daily free-try limit reached. Come back in ~${unlockHrs}h.`}
+                      >
+                        <Sparkles className="w-3 h-3 mr-1 opacity-50" /> Back in {unlockHrs}h
+                      </Button>
+                    ) : (
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                      >
+                        <Link to={`/try/${t.id}`} onClick={() => recordTry(t.id)}>
+                          <Sparkles className="w-3 h-3 mr-1" /> Try free
+                          <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        </Link>
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       onClick={() => openBuy("single", [t.id])}
@@ -178,6 +235,12 @@ const TechSolutionsPage: React.FC = () => {
               </span>
               We are always updating our tools. Bear with us if there are some that don't work momentarily.
             </div>
+            {isLockedActive && (
+              <div className="mt-3 inline-flex items-center gap-2 text-xs text-crimson font-mono border border-crimson/30 bg-crimson/5 px-3 py-2 rounded-sm">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-crimson" />
+                Daily limit reached — you've tried 3 tools. The rest unlock in ~{unlockHrs}h.
+              </div>
+            )}
           </div>
 
           {/* Pricing tiers */}
