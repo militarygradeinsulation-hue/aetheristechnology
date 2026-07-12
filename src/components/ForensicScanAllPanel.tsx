@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, ScanLine, FileDown, MessageSquare, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { downloadForensicGoldenPdf, type ForensicReport, type Chapter } from "@/lib/generateForensicGoldenPdf";
+import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationKit";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
