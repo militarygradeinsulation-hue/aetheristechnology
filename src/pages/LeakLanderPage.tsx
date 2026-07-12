@@ -131,8 +131,11 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-4 text-lg sm:text-xl md:text-2xl text-crimson font-bold tracking-tight">
                 This is us.
               </p>
+              <p className="mt-3 text-sm sm:text-base md:text-lg text-foreground/90 font-medium">
+                We make a system that <span className="text-amber font-semibold">YOUR</span> person can follow daily — customized to <span className="text-amber font-semibold">YOUR</span> company — for any department. From social to sales to leadership.
+              </p>
               <p className="mt-3 text-sm sm:text-base md:text-lg text-muted-foreground">
-                We’re the most <span className="text-amber font-semibold">anti-AI, AI company</span> you’ll ever meet.
+                We're the most <span className="text-amber font-semibold">anti-AI, AI company</span> you'll ever meet.
               </p>
             </div>
           </section>
