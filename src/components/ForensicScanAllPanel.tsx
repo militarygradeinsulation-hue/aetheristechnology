@@ -16,6 +16,8 @@ type Row = {
   company_name: string | null;
   status: string;
   stage_status: Record<string, { state: string; at: string; extra?: unknown }>;
+  brand_kit_status?: Record<string, { state: string; at: string; extra?: unknown }> | null;
+  brand_kit?: BrandKit | null;
   report: ForensicReport | null;
   error_message: string | null;
   created_at?: string;
@@ -30,6 +32,14 @@ const STAGES: { key: string; label: string }[] = [
   { key: "friction",      label: "Brand contradictions + friction audit" },
   { key: "crm",           label: "CRM / pipeline forensics" },
   { key: "synth",         label: "Synthesizing 14-chapter report" },
+];
+
+const BRAND_KIT_STAGES: { key: string; label: string }[] = [
+  { key: "brand_scan", label: "Brand kit scan (colors, fonts, logo)" },
+  { key: "message",    label: "Positioning message" },
+  { key: "imagery",    label: "On-brand hero imagery" },
+  { key: "social",     label: "Per-platform social posts" },
+  { key: "calendar",   label: "30-day content schedule" },
 ];
 
 const SCAN_STORAGE_KEY = "aetheris:golden-report:scan-id";
