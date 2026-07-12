@@ -71,7 +71,7 @@ export function CreationStudioSandbox() {
 
   const [pack, setPack] = useState<Pack>(emptyPack());
 
-  const runOne = async (b: Brand, k: Exclude<Kind, "calendar">, briefText: string) => {
+  const runOne = async (b: Brand, k: Kind, briefText: string) => {
     setPack(prev => ({ ...prev, [k]: { ...prev[k], brief: briefText, loading: true, error: undefined } }));
     try {
       const { data, error } = await supabase.functions.invoke("creation-studio-brand", {
