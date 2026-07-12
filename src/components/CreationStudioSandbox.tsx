@@ -38,22 +38,24 @@ const KIND_META: Record<Kind, { label: string; hint: string; icon: any }> = {
 };
 
 type PackItem = { image?: string; markdown?: string; brief: string; loading: boolean; error?: string };
-type Pack = Record<Exclude<Kind, "calendar">, PackItem>;
+type Pack = Record<Kind, PackItem>;
 
-const DEFAULT_BRIEFS: Record<Exclude<Kind, "calendar">, string> = {
+const DEFAULT_BRIEFS: Record<Kind, string> = {
   "image":       "Flagship on-brand hero image announcing our current offer. Square 1:1, clean, high-end.",
   "one-pager":   "One-page overview PDF for prospects — what we do, who it's for, why choose us, and a clear CTA.",
   "social-pack": "This week's launch pack — Instagram, LinkedIn, X, story overlay, hashtags. Match our brand voice.",
   "email":       "Warm outreach email to re-engage prospects who visited but didn't convert. Lead with value, one CTA.",
+  "calendar":    "30-day content calendar with daily topics, hooks, captions, and best post times for our audience.",
 };
 
-const AUTO_KINDS: Exclude<Kind, "calendar">[] = ["image", "one-pager", "social-pack", "email"];
+const AUTO_KINDS: Kind[] = ["image", "one-pager", "social-pack", "email", "calendar"];
 
 const emptyPack = (): Pack => ({
   image:         { brief: DEFAULT_BRIEFS["image"],       loading: false },
   "one-pager":   { brief: DEFAULT_BRIEFS["one-pager"],   loading: false },
   "social-pack": { brief: DEFAULT_BRIEFS["social-pack"], loading: false },
   email:         { brief: DEFAULT_BRIEFS["email"],       loading: false },
+  calendar:      { brief: DEFAULT_BRIEFS["calendar"],    loading: false },
 });
 
 export function CreationStudioSandbox() {
