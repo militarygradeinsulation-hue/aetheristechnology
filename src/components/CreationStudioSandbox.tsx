@@ -176,7 +176,7 @@ export function CreationStudioSandbox() {
           <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
             Step 02 · What do you want to make?
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-3">
             {(Object.keys(KIND_META) as Kind[]).map((k) => {
               const Icon = KIND_META[k].icon;
               const active = kind === k;
