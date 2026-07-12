@@ -222,6 +222,100 @@ export function CreationStudioSandbox() {
         </div>
       )}
 
+      {/* Auto-generated Starter Pack */}
+      {brand && (
+        <div>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <label className="block font-mono text-[10px] uppercase tracking-widest text-amber">
+              Auto · Your On-Brand Starter Pack
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => runStarterPack(brand)}
+              disabled={AUTO_KINDS.some(k => pack[k].loading)}
+              className="border-amber/40 text-amber hover:bg-amber/10 h-7"
+            >
+              <RefreshCw className="w-3 h-3 mr-1.5" /> Regenerate all
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {AUTO_KINDS.map((k) => {
+              const item = pack[k];
+              const Icon = KIND_META[k].icon;
+              return (
+                <div key={k} className="rounded-sm border border-amber/30 bg-background/50 p-3 flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber">
+                      <Icon className="w-3 h-3" /> {KIND_META[k].label}
+                    </div>
+                    {item.loading && <Loader2 className="w-3 h-3 animate-spin text-amber" />}
+                  </div>
+
+                  {/* Output */}
+                  <div className="min-h-[120px]">
+                    {item.error && <div className="text-xs text-crimson font-mono">{item.error}</div>}
+                    {!item.error && item.loading && !item.image && !item.markdown && (
+                      <div className="text-xs text-muted-foreground font-mono">Generating on-brand {KIND_META[k].label.toLowerCase()}…</div>
+                    )}
+                    {item.image && (
+                      <img src={item.image} alt={KIND_META[k].label} className="w-full rounded-sm border border-amber/20" />
+                    )}
+                    {item.markdown && (
+                      <div className="rounded-sm border border-amber/20 bg-background/70 p-3 max-h-56 overflow-y-auto">
+                        <article className="prose prose-invert prose-xs max-w-none prose-headings:font-bold prose-headings:text-sm prose-p:text-xs prose-li:text-xs">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.markdown}</ReactMarkdown>
+                        </article>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Customize */}
+                  <Textarea
+                    value={item.brief}
+                    onChange={(e) => setPack(prev => ({ ...prev, [k]: { ...prev[k], brief: e.target.value } }))}
+                    placeholder={`Customize the ${KIND_META[k].label.toLowerCase()} — tone, offer, audience…`}
+                    className="bg-background/70 border-amber/20 font-mono text-xs min-h-[54px]"
+                    maxLength={800}
+                    disabled={item.loading}
+                  />
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      size="sm"
+                      onClick={() => runOne(brand, k, item.brief)}
+                      disabled={item.loading || !item.brief.trim()}
+                      className="bg-amber text-background hover:bg-amber/90 font-semibold h-7"
+                    >
+                      <Wand2 className="w-3 h-3 mr-1.5" /> {item.image || item.markdown ? "Regenerate" : "Generate"}
+                    </Button>
+                    {item.image && (
+                      <a
+                        href={item.image}
+                        download={`${(brand.name || "brand").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${k}.png`}
+                        className="inline-flex items-center gap-1.5 rounded-sm border border-amber/40 text-amber hover:bg-amber/10 px-2.5 h-7 text-[10px] font-mono uppercase tracking-widest"
+                      >
+                        <Download className="w-3 h-3" /> PNG
+                      </a>
+                    )}
+                    {item.markdown && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { navigator.clipboard.writeText(item.markdown!); toast.success("Copied"); }}
+                        className="border-amber/40 text-amber hover:bg-amber/10 h-7"
+                      >
+                        Copy
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Stage 2 — Generate */}
       {brand && (
         <div>
