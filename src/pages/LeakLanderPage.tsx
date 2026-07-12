@@ -154,17 +154,6 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Tagline under the Aetheris Field Note */}
-          <section className="mt-4 max-w-4xl mx-auto text-center animate-fade-in">
-            <h2 className="font-forensic text-2xl sm:text-4xl md:text-5xl font-bold leading-tight">
-              If I can't save you money,{" "}
-              <span className="text-crimson italic">I don't want to do business with you.</span>
-            </h2>
-            <p className="mt-3 text-sm sm:text-base md:text-lg text-foreground/85 max-w-2xl mx-auto">
-              Named leaks. Dollar figures. Systems that actually work.
-            </p>
-          </section>
-
 
           {/* Signature calling card — gentle float + golden shimmer edge */}
           <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
