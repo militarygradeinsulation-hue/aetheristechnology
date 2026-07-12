@@ -1,46 +1,60 @@
-Upgrade the Nexus sales-chat bot so it acts as one "operator" that consults, sells, and gifts playbooks/tools — without being pushy.
+# Golden Report ↔ Creation Studio: One URL, Two Outputs
 
-## What changes (single file: `supabase/functions/sales-chat/index.ts`)
+## Goal
+When a user enters a URL in the Golden Report on the home page, it should trigger **both**:
+1. The existing 14-chapter forensic company report (already works).
+2. A new **Branded Creation Kit**: brand message, hero imagery, 30-day content schedule, and per-platform social posts (LinkedIn, X, Instagram, Facebook, TikTok) with correct length + hashtags + tone matched to the company's real brand voice.
 
-Rewrite the system prompt to layer four modes on top of the existing sales flow. All checkout links, catalog, capture_lead, and suggestions blocks stay exactly as they are today.
+Both run from the same submit — no extra button, no second URL.
 
-### 1. Persona upgrade — "Nexus, Operator"
-- Identity: senior forensic operator who consults first, sells second. Blunt, useful, never salesy.
-- Hard anti-annoy rules:
-  - Never pitch in the first reply unless the visitor asks price/buy/book.
-  - Never pitch the same offer twice in a row.
-  - Max one call-to-action per reply.
-  - If the visitor pushes back or says "just looking," drop the sell entirely and switch to consult/gift mode.
-  - No hype words: "amazing," "revolutionary," "game-changer," "unlock," "supercharge" — banned.
+## What the user will see
+On `/golden-report` after submitting a URL:
+- Existing stage progress (site crawl → forensics → synth) — unchanged.
+- **New second progress lane** below it: `Brand Kit → Message → Imagery → Schedule → Social Posts`.
+- When both finish, page shows:
+  - The existing "Download Smart PDF" report button.
+  - A new **Branded Creation Kit** panel with tabs:
+    - **Brand** — extracted colors, fonts, logo, one-line positioning message.
+    - **Imagery** — hero image generated in the brand's style.
+    - **Schedule** — 30-day calendar table (date, channel, theme, post, visual, CTA).
+    - **Posts** — one card per platform showing the post copy, character count vs platform limit, hashtag block, and best-time-to-post note.
+  - "Download Kit" button that bundles the above into a second PDF/zip.
 
-### 2. Consulting mode (default)
-- Diagnose before recommending. Ask one sharp question at a time, not a checklist.
-- Give a real answer to real questions (leak math, follow-up cadences, CRM hygiene, bid recovery) even if it never leads to a sale.
-- Only escalate to Diagnostic pitch when there's a clear qualified signal (specialty manufacturer, $5M–$25M, quantified leak).
+## Implementation
 
-### 3. Selling mode (existing, tightened)
-- Keep the current Diagnostic → Active Case → Tool Shop ladder.
-- Keep all 5 checkout links and the 15-tool catalog verbatim.
-- Add rule: only offer a checkout link when the visitor has expressed intent OR is on `/diagnostic`, `/tools-shop`, `/leak-audit`.
+### 1. Edge function: extend `forensic-scan-all`
+Add a new pipeline stage `brand_kit` that runs after the existing `branding` stage (we already crawl the site there — reuse that output; do not double-scan). It calls the same underlying logic as `creation-studio-brand` `generate` action for each `kind` in parallel:
+- `one-pager` → stores as `report.brand.message`
+- `image` → stores as `report.brand.hero_image_url` (Gemini 2.5 flash image)
+- `calendar` → stores as `report.brand.calendar_md`
+- New `kind: "social-posts"` → returns structured JSON: `{ linkedin: {copy, hashtags[], char_count}, x: {...}, instagram: {...}, facebook: {...}, tiktok: {...} }` with platform-specific length rules baked into the prompt (LinkedIn ≤3000, X ≤280, IG ≤2200 + 30 hashtags, FB ≤500, TikTok ≤150 caption).
 
-### 4. Giveaway mode (new)
-- Nexus can offer free assets to build reciprocity when the visitor isn't ready to buy or is under-qualified.
-- Allowed free offers (link only — no new pages, no new files):
-  - Free Leak Audit self-scan → `/leak-audit`
-  - Free Website Leak Scanner (public tool) → `/tools-shop` (website-scanner is the sample)
-  - Free playbook: Nexus writes a 5–8 bullet mini-playbook inline in chat, tailored to their exact leak (bid follow-up, dead pipeline reactivation, CRM hygiene, handoff SLA, etc.). No gate, no email required.
-- Rule: offer a gift instead of a pitch whenever the visitor is (a) under $5M, (b) not manufacturing, (c) says "not now," or (d) has asked 2+ consulting questions without buying intent.
-- Gifts are silent lead-magnets: if they later share email, capture_lead fires as today.
+Persist on the same `forensic_scans` row under a new `brand_kit` JSONB column and a `brand_kit_status` column mirroring `stage_status`.
 
-### 5. Reply shape rules (anti-annoy)
-- ≤ 4 short paragraphs, same as today.
-- End with either a question OR a next step OR a gift — never all three.
-- If the visitor's last message was ≤ 4 words ("ok", "cool", "hmm"), Nexus responds with ≤ 2 sentences and no pitch.
+### 2. Shared brand-prompt module
+Extract the `brandPromptBlock` + per-platform templates from `creation-studio-brand` into `supabase/functions/_shared/brand-prompts.ts` so both `forensic-scan-all` and the existing `creation-studio-brand` edge function use the same voice rules. No behavior change to the existing public sandbox.
 
-## What does NOT change
-- No new files, no new routes, no new tables, no new edge functions.
-- `nexus-capture-lead`, HubSpot push, capture_lead token, suggestions block, checkout link parsing, page-context injection — all untouched.
-- Frontend `SalesChat.tsx` untouched.
+### 3. Client: `ForensicScanAllPanel.tsx`
+- Add a second `STAGES` array for the brand kit lane.
+- Polling already returns the full row — read `brand_kit_status` and `brand_kit` alongside `report`.
+- Render new `<BrandedCreationKit kit={row.brand_kit} />` component below the existing report actions when `brand_kit_status.all === "done"`.
 
-## Files touched
-- `supabase/functions/sales-chat/index.ts` — system prompt rewrite only.
+### 4. New component: `src/components/BrandedCreationKit.tsx`
+Tabs (Brand / Imagery / Schedule / Posts) built with existing shadcn `Tabs`. Post cards show live character-count vs platform cap in amber/crimson if over. "Copy" button per post. "Download Kit" hits a new small client-side PDF generator (mirrors `generateForensicGoldenPdf.ts` style).
+
+### 5. Home page CTA copy
+`HomeToolShopGrid` — update the Golden Report card subtitle to: *"One URL. Full company report + fully branded content kit ready to post."*
+
+## Technical notes
+- Model choice: text kinds → `google/gemini-2.5-flash` (fast, cheap, already used by `creation-studio-brand`). Image → `google/gemini-2.5-flash-image`. All via Lovable AI Gateway — no new secrets.
+- Structured output for social posts: use `Output.object` with a small Zod schema (5 platforms × {copy, hashtags, char_count}); include the length rules in the prompt text, not as schema bounds, per the AI SDK constraint rules.
+- DB migration: `ALTER TABLE public.forensic_scans ADD COLUMN brand_kit jsonb, ADD COLUMN brand_kit_status jsonb;` — existing GRANTs cover it.
+- No new tables, no new auth, no new secrets. Runs on the same anonymous scan flow as the current Golden Report.
+- Cost per URL roughly doubles (5 extra text calls + 1 image). Acceptable given this is the hero tool.
+
+## Out of scope
+- Saving the kit into `admin_library` / `rep_library` — the Golden Report itself doesn't save there today; keeping symmetry. Can be added later as a separate ask.
+- Auto-posting to social networks.
+- Editing the generated posts in-app (v1 is copy-out).
+
+Ready to build on approval.

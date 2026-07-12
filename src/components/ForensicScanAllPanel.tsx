@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, ScanLine, FileDown, MessageSquare, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { downloadForensicGoldenPdf, type ForensicReport, type Chapter } from "@/lib/generateForensicGoldenPdf";
+import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationKit";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +16,8 @@ type Row = {
   company_name: string | null;
   status: string;
   stage_status: Record<string, { state: string; at: string; extra?: unknown }>;
+  brand_kit_status?: Record<string, { state: string; at: string; extra?: unknown }> | null;
+  brand_kit?: BrandKit | null;
   report: ForensicReport | null;
   error_message: string | null;
   created_at?: string;
@@ -29,6 +32,14 @@ const STAGES: { key: string; label: string }[] = [
   { key: "friction",      label: "Brand contradictions + friction audit" },
   { key: "crm",           label: "CRM / pipeline forensics" },
   { key: "synth",         label: "Synthesizing 14-chapter report" },
+];
+
+const BRAND_KIT_STAGES: { key: string; label: string }[] = [
+  { key: "brand_scan", label: "Brand kit scan (colors, fonts, logo)" },
+  { key: "message",    label: "Positioning message" },
+  { key: "imagery",    label: "On-brand hero imagery" },
+  { key: "social",     label: "Per-platform social posts" },
+  { key: "calendar",   label: "30-day content schedule" },
 ];
 
 const SCAN_STORAGE_KEY = "aetheris:golden-report:scan-id";
@@ -230,7 +241,44 @@ export function ForensicScanAllPanel() {
         </Card>
       )}
 
+      {scanId && (
+        <Card className="p-4 bg-card border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-amber-500 text-lg">✦</span>
+            <h4 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Branded Creation Kit · Progress</h4>
+          </div>
+          <ul className="space-y-1.5">
+            {BRAND_KIT_STAGES.map((s) => {
+              const st = row?.brand_kit_status?.[s.key]?.state || "pending";
+              const stamp = row?.brand_kit_status?.[s.key]?.at;
+              const dot =
+                st === "done" ? "bg-green-500" :
+                st === "running" ? "bg-amber-500 animate-pulse" :
+                st === "failed" ? "bg-red-500" : "bg-zinc-700";
+              return (
+                <li key={s.key} className="flex items-center gap-2 text-sm">
+                  <span className={`w-2 h-2 rounded-full ${dot}`} />
+                  <span>{s.label}</span>
+                  {st === "running" && <Loader2 className="w-3 h-3 animate-spin text-amber-500" />}
+                  {st === "failed" && <span className="text-xs text-red-400">(failed)</span>}
+                  {stamp && st !== "pending" && (
+                    <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                      {new Date(stamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+            One URL. Full company report <span className="text-amber-500">and</span> a fully branded content kit — positioning message, hero imagery, per-platform social posts with hashtags, and a 30-day schedule.
+          </p>
+        </Card>
+      )}
 
+      {row?.brand_kit && (
+        <BrandedCreationKit kit={row.brand_kit} company={row.company_name || row.target_url} />
+      )}
 
       {report && row && (
         <Card className="p-0 bg-card border-border overflow-hidden">
