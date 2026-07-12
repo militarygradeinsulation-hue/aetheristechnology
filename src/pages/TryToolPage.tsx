@@ -75,6 +75,8 @@ const TRY_META: Record<string, ToolMeta> = {
     summary: "Runs every diagnostic layer on one URL — positioning, offer, proof, funnel, SEO, and ops.",
     howTo: ["Paste your website URL", "Run the full sweep", "Get a graded layer report"],
     delivers: ["Executive diagnosis", "Layer grades A–F", "Biggest unlock + 30-day repair"],
+    seoTitle: "Forensic Scan (All) — Full Leak Audit Tool | Aetheris",
+    keywords: "forensic scan all, full leak audit, business diagnostics, revenue leak audit, free business scanner",
   },
   "all-in-one": {
     title: "All-In-One Content", inputLabel: "Topic", inputHint: "e.g. 'AI-powered onboarding'",
