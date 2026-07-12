@@ -6,7 +6,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
-import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
+import callingCard from "@/assets/joseph-toney-calling-card.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
