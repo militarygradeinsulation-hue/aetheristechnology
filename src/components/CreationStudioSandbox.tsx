@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { CalendarView, calendarToCsv } from "@/components/CalendarView";
 
 /**
  * Brand-aware Creation Studio sandbox.
@@ -246,8 +247,9 @@ export function CreationStudioSandbox() {
             {AUTO_KINDS.map((k) => {
               const item = pack[k];
               const Icon = KIND_META[k].icon;
+              const isCalendar = k === "calendar";
               return (
-                <div key={k} className="rounded-sm border border-amber/30 bg-background/50 p-3 flex flex-col gap-2">
+                <div key={k} className={`rounded-sm border border-amber/30 bg-background/50 p-3 flex flex-col gap-2 ${isCalendar ? "lg:col-span-2" : ""}`}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber">
                       <Icon className="w-3 h-3" /> {KIND_META[k].label}
@@ -264,7 +266,10 @@ export function CreationStudioSandbox() {
                     {item.image && (
                       <img src={item.image} alt={KIND_META[k].label} className="w-full rounded-sm border border-amber/20" />
                     )}
-                    {item.markdown && (
+                    {item.markdown && isCalendar && (
+                      <CalendarView markdown={item.markdown} />
+                    )}
+                    {item.markdown && !isCalendar && (
                       <div className="rounded-sm border border-amber/20 bg-background/70 p-3 max-h-56 overflow-y-auto">
                         <article className="prose prose-invert prose-xs max-w-none prose-headings:font-bold prose-headings:text-sm prose-p:text-xs prose-li:text-xs">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.markdown}</ReactMarkdown>
@@ -299,6 +304,24 @@ export function CreationStudioSandbox() {
                       >
                         <Download className="w-3 h-3" /> PNG
                       </a>
+                    )}
+                    {item.markdown && isCalendar && (
+                      <button
+                        onClick={() => {
+                          const csv = calendarToCsv(item.markdown!);
+                          const blob = new Blob([csv], { type: "text/csv" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `${(brand.name || "brand").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-30-day-calendar.csv`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          toast.success("Calendar CSV downloaded");
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-sm border border-amber/40 text-amber hover:bg-amber/10 px-2.5 h-7 text-[10px] font-mono uppercase tracking-widest"
+                      >
+                        <Download className="w-3 h-3" /> CSV
+                      </button>
                     )}
                     {item.markdown && (
                       <Button
