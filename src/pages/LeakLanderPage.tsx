@@ -6,7 +6,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
-import signatureBanner from "@/assets/joseph-toney-signature-banner.png.asset.json";
+import callingCard from "@/assets/joseph-toney-calling-card.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
@@ -138,18 +138,18 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Signature banner — gentle float + golden shimmer edge */}
-          <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Technology">
+          {/* Signature calling card — gentle float + golden shimmer edge */}
+          <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
             <div className="shimmer-gold-border">
               <img
-                src={signatureBanner.url}
-                alt="Joseph Toney, AI Architect — Aetheris Technology. Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins."
+                src={callingCard.url}
+                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
                 className="w-full h-auto animate-float rounded-sm"
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                width={1920}
-                height={640}
+                width={1280}
+                height={731}
               />
             </div>
           </section>
