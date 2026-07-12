@@ -2,9 +2,12 @@
  * Custom AI-generated forensic-noir thumbnails, one per catalog tool.
  * Framed as an evidence photo with corner brackets + micro case label.
  */
-import websiteScanner from "@/assets/tools/website-scanner.jpg";
-import brandContradictions from "@/assets/tools/brand-contradictions.jpg";
-import frictionAudit from "@/assets/tools/friction-audit.jpg";
+import websiteScannerAsset from "@/assets/tools/website-scanner.png.asset.json";
+import brandContradictionsAsset from "@/assets/tools/brand-contradictions.png.asset.json";
+import frictionAuditAsset from "@/assets/tools/friction-audit.png.asset.json";
+const websiteScanner = websiteScannerAsset.url;
+const brandContradictions = brandContradictionsAsset.url;
+const frictionAudit = frictionAuditAsset.url;
 import strategicQuestions from "@/assets/tools/strategic-questions.jpg";
 import detectiveMode from "@/assets/tools/detective-mode.jpg";
 import forensicScanAll from "@/assets/tools/forensic-scan-all.jpg";
