@@ -293,6 +293,3 @@ function downloadCalendarCsv(md: string, brandName?: string) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
-    </div>
-  );
-}
