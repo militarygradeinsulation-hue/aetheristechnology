@@ -7,6 +7,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { ReciprocationDoctrineTool } from "@/components/ReciprocationDoctrineTool";
 import { PublicToolLock } from "@/components/PublicToolLock";
 import { Handshake } from "lucide-react";
+import reciprocationAsset from "@/assets/tools/reciprocation.jpg.asset.json";
 
 const ReciprocationPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -29,6 +30,14 @@ const ReciprocationPage: React.FC = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-24 px-4 pb-16">
           <div className="max-w-6xl mx-auto">
+            <div className="mb-8 rounded-xl overflow-hidden border border-border max-w-3xl mx-auto">
+              <img
+                src={reciprocationAsset.url}
+                alt="Reciprocation Gift — Free Cold Outreach Report"
+                className="w-full h-auto object-cover"
+                loading="eager"
+              />
+            </div>
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 <Handshake className="w-3 h-3" /> Free · Doctrine Engine
