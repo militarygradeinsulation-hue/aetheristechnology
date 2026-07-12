@@ -87,8 +87,8 @@ const Home = () => {
               The Operator's Standard
             </p>
             <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              If I can't save you money,{" "}
-              <span className="text-crimson italic">I don't want to do business with you.</span>
+              If I can't save you <span className="text-crimson">MONEY</span>,{" "}
+              <span className="text-crimson italic">I don't want to do <span className="not-italic">BUSINESS</span> with you.</span>
             </h2>
             <p className="mt-4 text-base md:text-lg text-muted-foreground">
               We find the silent leaks, remove the chaos at the source, and build systems that keep your margin where it belongs.
