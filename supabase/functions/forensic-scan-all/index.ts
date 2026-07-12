@@ -8,6 +8,15 @@
 //   → 200 forensic_scans row
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import {
+  brandPromptBlock,
+  parseFirecrawlBranding,
+  imagePrompt,
+  ONE_PAGER_PROMPT,
+  CALENDAR_PROMPT,
+  SOCIAL_POST_RULES,
+  type Brand,
+} from "../_shared/brand-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
