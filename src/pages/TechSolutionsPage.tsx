@@ -154,17 +154,29 @@ const TechSolutionsPage: React.FC = () => {
 
                 <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-amber/10">
                   <div className="flex gap-2">
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
-                    >
-                      <Link to={`/try/${t.id}`}>
-                        <Sparkles className="w-3 h-3 mr-1" /> Try free
-                        <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </Link>
-                    </Button>
+                    {locked ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="flex-1 border-muted/30 text-muted-foreground cursor-not-allowed"
+                        title={`Daily free-try limit reached. Come back in ~${unlockHrs}h.`}
+                      >
+                        <Sparkles className="w-3 h-3 mr-1 opacity-50" /> Back in {unlockHrs}h
+                      </Button>
+                    ) : (
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                      >
+                        <Link to={`/try/${t.id}`} onClick={() => recordTry(t.id)}>
+                          <Sparkles className="w-3 h-3 mr-1" /> Try free
+                          <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        </Link>
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       onClick={() => openBuy("single", [t.id])}
