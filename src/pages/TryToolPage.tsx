@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound, Download, FileText, AlertTriangle, Target, Wrench, TrendingUp, ClipboardList } from "lucide-react";
+import { downloadTryToolPdf } from "@/lib/generateTryToolPdf";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -244,6 +245,22 @@ export default function TryToolPage() {
     toast.success("Report copied to clipboard");
   };
   const printReport = () => window.print();
+
+  const downloadPdf = () => {
+    if (!output || !runAt) return;
+    try {
+      downloadTryToolPdf({
+        toolTitle: meta?.title || "Aetheris Report",
+        subject: `${url}${context ? ` · ${context.slice(0, 120)}` : ""}`,
+        caseId,
+        runAt,
+        output,
+      });
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error(e?.message || "PDF export failed");
+    }
+  };
 
   const run = async () => {
     const cleanUrl = url.trim();
@@ -543,32 +560,74 @@ export default function TryToolPage() {
                     </div>
                   </div>
 
-                  {/* Section cards */}
-                  <div className="p-4 md:p-5 space-y-4">
-                    {sections.map((s, i) => (
-                      <section key={i} className="rounded-sm border border-amber/25 bg-background/40 p-4 overflow-x-auto">
-                        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-2">
-                          § {String(i + 1).padStart(2, "0")} · Section
-                        </div>
-                        <h2 className="font-forensic text-lg md:text-xl font-bold text-amber leading-tight mb-3">
-                          {s.title}
-                        </h2>
-                        <article className="prose prose-invert prose-sm max-w-none prose-headings:font-forensic prose-headings:text-amber prose-h3:mt-4 prose-h3:mb-1 prose-strong:text-amber prose-table:text-xs prose-td:border prose-td:border-amber/20 prose-td:px-2 prose-td:py-1 prose-th:border prose-th:border-amber/30 prose-th:text-amber prose-th:px-2 prose-th:py-1 prose-a:text-amber">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body.trim()}</ReactMarkdown>
-                        </article>
-                      </section>
-                    ))}
+                  {/* Section cards — rotating accent spines + info tiles */}
+                  <div className="p-4 md:p-5 space-y-5">
+                    {sections.map((s, i) => {
+                      const palette = [
+                        { spine: "from-amber via-amber/70 to-amber/30", chip: "text-amber border-amber/40 bg-amber/10", Icon: Target },
+                        { spine: "from-crimson via-crimson/70 to-crimson/30", chip: "text-crimson border-crimson/40 bg-crimson/10", Icon: AlertTriangle },
+                        { spine: "from-emerald-400 via-emerald-500/70 to-emerald-600/30", chip: "text-emerald-300 border-emerald-400/40 bg-emerald-400/10", Icon: TrendingUp },
+                        { spine: "from-sky-400 via-sky-500/70 to-sky-600/30", chip: "text-sky-300 border-sky-400/40 bg-sky-400/10", Icon: Wrench },
+                        { spine: "from-violet-400 via-violet-500/70 to-violet-600/30", chip: "text-violet-300 border-violet-400/40 bg-violet-400/10", Icon: ClipboardList },
+                      ];
+                      const p = palette[i % palette.length];
+                      const Icon = p.Icon;
+                      return (
+                        <section
+                          key={i}
+                          className="relative rounded-sm border border-amber/20 bg-background/50 overflow-hidden shadow-[0_2px_20px_-8px_rgba(0,0,0,0.5)]"
+                        >
+                          {/* Left accent spine */}
+                          <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${p.spine}`} />
+                          <div className="pl-5 pr-4 py-4 md:pl-6 md:pr-5 md:py-5 overflow-x-auto">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className={`inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.25em] px-2 py-0.5 rounded-sm border ${p.chip}`}>
+                                <Icon className="w-2.5 h-2.5" />
+                                § {String(i + 1).padStart(2, "0")}
+                              </span>
+                              <div className="h-px flex-1 bg-gradient-to-r from-amber/20 to-transparent" />
+                            </div>
+                            <h2 className="font-forensic text-xl md:text-2xl font-bold text-foreground leading-tight mb-4">
+                              {s.title}
+                            </h2>
+                            <article className="prose prose-invert max-w-none
+                              prose-p:my-3 prose-p:leading-[1.75] prose-p:text-foreground/85
+                              prose-headings:font-forensic prose-headings:text-amber prose-headings:mt-5 prose-headings:mb-2
+                              prose-h3:text-base prose-h3:uppercase prose-h3:tracking-wider
+                              prose-strong:text-amber prose-strong:font-semibold
+                              prose-em:text-foreground/90
+                              prose-ul:my-3 prose-li:my-1.5 prose-li:leading-relaxed prose-li:marker:text-amber
+                              prose-ol:my-3 prose-ol:marker:text-amber
+                              prose-blockquote:border-l-2 prose-blockquote:border-crimson prose-blockquote:bg-crimson/[0.06] prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:not-italic prose-blockquote:text-foreground/90 prose-blockquote:my-4
+                              prose-code:text-amber prose-code:bg-amber/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:before:content-none prose-code:after:content-none
+                              prose-hr:border-amber/20
+                              prose-table:text-sm prose-table:my-4 prose-table:border prose-table:border-amber/25 prose-table:rounded-sm prose-table:overflow-hidden
+                              prose-thead:bg-amber/15
+                              prose-th:text-amber prose-th:font-mono prose-th:text-[10px] prose-th:uppercase prose-th:tracking-widest prose-th:px-3 prose-th:py-2 prose-th:border-b prose-th:border-amber/30 prose-th:text-left
+                              prose-td:border-t prose-td:border-amber/10 prose-td:px-3 prose-td:py-2 prose-td:text-foreground/85
+                              [&_tbody_tr:nth-child(even)]:bg-amber/[0.03]
+                              prose-a:text-amber prose-a:no-underline hover:prose-a:underline">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body.trim()}</ReactMarkdown>
+                            </article>
+                          </div>
+                        </section>
+                      );
+                    })}
                   </div>
 
                   <div className="relative flex flex-wrap items-center gap-2 justify-end p-3 border-t border-amber/20 print:hidden">
+                    <Button size="sm" onClick={downloadPdf} className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                      <Download className="w-3 h-3 mr-1.5" /> Download PDF
+                    </Button>
                     <Button variant="outline" size="sm" onClick={copyOutput} className="border-amber/40 text-amber hover:bg-amber/10">
                       <Copy className="w-3 h-3 mr-1.5" /> Copy
                     </Button>
                     <Button variant="outline" size="sm" onClick={printReport} className="border-amber/40 text-amber hover:bg-amber/10">
-                      <Printer className="w-3 h-3 mr-1.5" /> Print / PDF
+                      <Printer className="w-3 h-3 mr-1.5" /> Print
                     </Button>
                   </div>
                 </div>
+
 
                 {/* Case-file action dossier — collapsed by default */}
                 <div className="mt-6 print:hidden sticky bottom-3 z-20">
