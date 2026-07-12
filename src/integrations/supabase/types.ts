@@ -2513,6 +2513,8 @@ export type Database = {
       }
       forensic_scans: {
         Row: {
+          brand_kit: Json | null
+          brand_kit_status: Json | null
           company_name: string | null
           completed_at: string | null
           created_at: string
@@ -2530,6 +2532,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_kit?: Json | null
+          brand_kit_status?: Json | null
           company_name?: string | null
           completed_at?: string | null
           created_at?: string
@@ -2547,6 +2551,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_kit?: Json | null
+          brand_kit_status?: Json | null
           company_name?: string | null
           completed_at?: string | null
           created_at?: string
