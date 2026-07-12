@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Loader2, Sparkles, Globe, Wand2, Download, RefreshCw, Palette, Type as TypeIcon, Image as ImageIcon, FileText, Printer } from "lucide-react";
+import { Loader2, Sparkles, Globe, Wand2, Download, RefreshCw, Palette, Type as TypeIcon, Image as ImageIcon, FileText, Printer, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
