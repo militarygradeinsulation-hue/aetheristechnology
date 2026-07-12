@@ -95,6 +95,25 @@ const TechSolutionsPage: React.FC = () => {
   const unlockMs = Math.max(0, tries.firstAt + LOCK_WINDOW_MS - now);
   const unlockHrs = Math.ceil(unlockMs / (60 * 60 * 1000));
 
+  // Staff bypass: triple-tap the header, then enter code 9822 to clear the lock.
+  const tapsRef = React.useRef<number[]>([]);
+  const handleSecretTap = () => {
+    const t = Date.now();
+    tapsRef.current = [...tapsRef.current.filter(x => t - x < 1200), t];
+    if (tapsRef.current.length >= 3) {
+      tapsRef.current = [];
+      const code = window.prompt("Enter unlock code:");
+      if (code && code.trim() === "9822") {
+        try { localStorage.removeItem(LOCK_KEY); } catch {}
+        setTries({ ids: [], firstAt: 0 });
+        window.alert("Unlocked. All tools available again.");
+      } else if (code !== null) {
+        window.alert("Invalid code.");
+      }
+    }
+  };
+
+
   const diagnostics = SHOP_TOOLS.filter(t => t.category === "diagnostics");
   const content = SHOP_TOOLS.filter(t => t.category === "content");
   const reports = SHOP_TOOLS.filter(t => t.category === "reports");
@@ -220,7 +239,10 @@ const TechSolutionsPage: React.FC = () => {
             <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
               <Cpu className="w-2 h-2" /> Tech · Store
             </div>
-            <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] mb-4">
+            <h1
+              onClick={handleSecretTap}
+              className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] mb-4 select-none cursor-default"
+            >
               Our systems, <span className="text-amber italic">free to try.</span>
               <br />Or own them for life.
             </h1>
