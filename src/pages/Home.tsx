@@ -140,6 +140,11 @@ const Home = () => {
 
           {/* Public sandbox — try every ecosystem tool, nothing saved */}
           <section id="chaos-ecosystem-try" className="px-4 pb-6 scroll-mt-24">
+            <div className="max-w-4xl mx-auto text-center mb-6">
+              <p className="text-base md:text-lg text-muted-foreground">
+                You don't need every tool. You just need the right one that makes the difference.
+              </p>
+            </div>
             <HomeToolShopGrid />
           </section>
 
