@@ -428,9 +428,13 @@ export function CreationStudioSandbox() {
               fontFamily: brand?.fonts[0] ? `"${brand.fonts[0]}", ui-sans-serif, system-ui` : undefined,
             }}
           >
-            <article className={`prose prose-invert prose-sm ${kind === "calendar" ? "max-w-none prose-table:text-xs prose-td:align-top prose-td:p-2 prose-th:p-2" : "max-w-none"} prose-headings:font-bold prose-strong:font-bold`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
-            </article>
+            {kind === "calendar" ? (
+              <CalendarView markdown={markdown} />
+            ) : (
+              <article className="prose prose-invert prose-sm max-w-none prose-headings:font-bold prose-strong:font-bold">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+              </article>
+            )}
           </div>
         </div>
       )}
@@ -439,24 +443,7 @@ export function CreationStudioSandbox() {
 }
 
 function downloadCalendarCsv(md: string, brandName?: string) {
-  // Extract the first markdown table from the calendar output and export as CSV.
-  const lines = md.split("\n");
-  const tableRows: string[][] = [];
-  let inTable = false;
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
-      const cells = trimmed.slice(1, -1).split("|").map(c => c.trim());
-      // skip separator row like |---|---|
-      if (cells.every(c => /^:?-+:?$/.test(c))) { inTable = true; continue; }
-      tableRows.push(cells);
-      inTable = true;
-    } else if (inTable && trimmed === "") {
-      break;
-    }
-  }
-  if (!tableRows.length) { return; }
-  const csv = tableRows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = calendarToCsv(md);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
