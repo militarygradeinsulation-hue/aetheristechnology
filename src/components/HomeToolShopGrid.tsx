@@ -301,8 +301,7 @@ export function HomeToolShopGrid() {
                 </h2>
 
                 <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto mb-6">
-                  Drop one URL. Aetheris runs the full forensic stack and delivers a 14-chapter
-                  case file with verdicts, dollar leaks, and evidence you can query.
+                  Drop one URL. Aetheris runs the full forensic stack <span className="text-amber">and</span> builds a fully branded content kit — 14-chapter case file, positioning message, hero imagery, per-platform social posts, and a 30-day schedule.
                 </p>
 
                 {/* CTA — case-file evidence tag with perforation + scan sweep */}
