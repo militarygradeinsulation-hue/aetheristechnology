@@ -73,6 +73,14 @@ export default function AIChecklistPage() {
       />
 
       <div className="min-h-screen pt-32 pb-20 px-4">
+        <div className="max-w-5xl mx-auto mb-10 rounded-xl overflow-hidden border border-border">
+          <img
+            src={aiChecklistAsset.url}
+            alt="AI Readiness Checklist — Free Scorecard"
+            className="w-full h-auto object-cover"
+            loading="eager"
+          />
+        </div>
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
           {/* Left: pitch */}
           <div className="space-y-6">
