@@ -42,6 +42,113 @@ async function setStage(id: string, stage: string, state: string, extra: unknown
   await sb.from("forensic_scans").update({ stage_status: prev, updated_at: nowIso() }).eq("id", id);
 }
 
+async function setBrandKitStage(id: string, stage: string, state: string, extra: unknown = null) {
+  const { data } = await sb.from("forensic_scans").select("brand_kit_status").eq("id", id).single();
+  const prev = (data?.brand_kit_status as Record<string, unknown>) || {};
+  prev[stage] = { state, at: nowIso(), extra };
+  await sb.from("forensic_scans").update({ brand_kit_status: prev, updated_at: nowIso() }).eq("id", id);
+}
+
+// Call Lovable AI Gateway for text output. Terminal errors (400/402/etc.) surface as thrown Error.
+async function aiChat(system: string, user: string, opts: { model?: string; max_tokens?: number; jsonMode?: boolean } = {}): Promise<string> {
+  const body: Record<string, unknown> = {
+    model: opts.model || "google/gemini-2.5-flash",
+    messages: [{ role: "system", content: system }, { role: "user", content: user }],
+    max_tokens: opts.max_tokens ?? 1500,
+  };
+  if (opts.jsonMode) body.response_format = { type: "json_object" };
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`AI ${r.status}: ${t.slice(0, 200)}`);
+  }
+  const j = await r.json();
+  return j?.choices?.[0]?.message?.content ?? "";
+}
+
+async function aiImage(prompt: string): Promise<string> {
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-image",
+      messages: [{ role: "user", content: prompt }],
+      modalities: ["image", "text"],
+    }),
+  });
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`Image ${r.status}: ${t.slice(0, 200)}`);
+  }
+  const j = await r.json();
+  return j?.choices?.[0]?.message?.images?.[0]?.image_url?.url
+    || j?.choices?.[0]?.message?.image_url
+    || "";
+}
+
+type SocialPost = { copy: string; hashtags: string[]; best_time: string; char_count: number };
+type SocialPack = Record<"linkedin" | "x" | "instagram" | "facebook" | "tiktok", SocialPost>;
+
+const PLATFORM_CAPS: Record<string, number> = { linkedin: 3000, x: 280, instagram: 2200, facebook: 500, tiktok: 150 };
+
+function clampSocialPack(raw: unknown): SocialPack {
+  const empty: SocialPost = { copy: "", hashtags: [], best_time: "", char_count: 0 };
+  const out: SocialPack = { linkedin: { ...empty }, x: { ...empty }, instagram: { ...empty }, facebook: { ...empty }, tiktok: { ...empty } };
+  const obj = (raw && typeof raw === "object") ? raw as Record<string, unknown> : {};
+  for (const k of Object.keys(out) as Array<keyof SocialPack>) {
+    const v = (obj[k] || {}) as Record<string, unknown>;
+    const copy = typeof v.copy === "string" ? v.copy.trim() : "";
+    const hashtags = Array.isArray(v.hashtags) ? v.hashtags.map((h) => String(h).replace(/^#/, "")).filter(Boolean).slice(0, 30) : [];
+    const best_time = typeof v.best_time === "string" ? v.best_time : "";
+    // Clamp to platform cap
+    const cap = PLATFORM_CAPS[k as string] || 2200;
+    const clipped = copy.length > cap ? copy.slice(0, cap - 1).trimEnd() + "…" : copy;
+    out[k] = { copy: clipped, hashtags, best_time, char_count: clipped.length };
+  }
+  return out;
+}
+
+async function generateBrandKit(id: string, brand: Brand): Promise<Record<string, unknown>> {
+  const brandName = brand.name || brand.sourceURL;
+  const brief = `Company: ${brandName}. Positioning: ${brand.description || "unknown"}. Goal: build brand awareness, drive qualified inbound, and convert warm leads.`;
+  const system = `You are a senior brand designer, copywriter, and content strategist. Match the brand's tone from its palette + positioning. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
+
+  const [messageRes, calendarRes, imageRes, socialRes] = await Promise.allSettled([
+    (async () => { await setBrandKitStage(id, "message", "running"); const md = await aiChat(system, ONE_PAGER_PROMPT(brief), { max_tokens: 1200 }); await setBrandKitStage(id, "message", "done"); return md; })(),
+    (async () => { await setBrandKitStage(id, "calendar", "running"); const md = await aiChat(system, CALENDAR_PROMPT(brief, new Date().toISOString().slice(0, 10)), { max_tokens: 6000 }); await setBrandKitStage(id, "calendar", "done"); return md; })(),
+    (async () => { await setBrandKitStage(id, "imagery", "running"); const img = await aiImage(imagePrompt(brand, `Hero brand image for ${brandName} — represents the core positioning message.`)); await setBrandKitStage(id, "imagery", "done"); return img; })(),
+    (async () => {
+      await setBrandKitStage(id, "social", "running");
+      const sysJson = system + `\n\nReturn ONLY valid JSON, no code fences, no prose.`;
+      const raw = await aiChat(sysJson, `${SOCIAL_POST_RULES}\n\nCompany context: ${brief}`, { max_tokens: 3000, jsonMode: true });
+      let parsed: unknown = null;
+      try { parsed = JSON.parse(raw); } catch {
+        const m = raw.match(/\{[\s\S]*\}/);
+        if (m) { try { parsed = JSON.parse(m[0]); } catch { /* ignore */ } }
+      }
+      const pack = clampSocialPack(parsed);
+      await setBrandKitStage(id, "social", "done");
+      return pack;
+    })(),
+  ]);
+
+  return {
+    brand,
+    message: messageRes.status === "fulfilled" ? messageRes.value : null,
+    message_error: messageRes.status === "rejected" ? String(messageRes.reason).slice(0, 200) : null,
+    calendar_md: calendarRes.status === "fulfilled" ? calendarRes.value : null,
+    calendar_error: calendarRes.status === "rejected" ? String(calendarRes.reason).slice(0, 200) : null,
+    hero_image_url: imageRes.status === "fulfilled" ? imageRes.value : null,
+    hero_image_error: imageRes.status === "rejected" ? String(imageRes.reason).slice(0, 200) : null,
+    social_posts: socialRes.status === "fulfilled" ? socialRes.value : null,
+    social_error: socialRes.status === "rejected" ? String(socialRes.reason).slice(0, 200) : null,
+    generated_at: nowIso(),
+  };
+
 async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs: number, label: string) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
