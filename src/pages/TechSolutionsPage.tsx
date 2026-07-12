@@ -239,7 +239,10 @@ const TechSolutionsPage: React.FC = () => {
             <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
               <Cpu className="w-2 h-2" /> Tech · Store
             </div>
-            <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] mb-4">
+            <h1
+              onClick={handleSecretTap}
+              className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] mb-4 select-none cursor-default"
+            >
               Our systems, <span className="text-amber italic">free to try.</span>
               <br />Or own them for life.
             </h1>
