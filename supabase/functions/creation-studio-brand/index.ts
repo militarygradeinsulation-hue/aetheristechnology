@@ -86,19 +86,22 @@ function brandPromptBlock(brand: Brand) {
 
 async function generateCopy(brand: Brand, brief: string, kind: string): Promise<string> {
   if (!LOVABLE_API_KEY) throw new Error("AI unavailable");
+  const today = new Date().toISOString().slice(0, 10);
   const templates: Record<string, string> = {
     "one-pager": `Produce a one-page marketing PDF outline for: ${brief}\n\nOutput EXACTLY:\n## Headline (max 8 words)\n## Sub-headline (1 line)\n## 3 Value Bullets\n## Proof Line\n## CTA Button Copy\n## Footer Line\n\nUnder 180 words total. Reference brand palette + fonts in a "Design Notes" H2 at the end (2 bullets).`,
     "social-pack": `Produce a branded social pack for: ${brief}\n\nOutput EXACTLY:\n## Instagram Caption (~80 words, brand-voice)\n## LinkedIn Post (~90 words)\n## X Post (≤240 chars)\n## Story Overlay Text (3 lines, 6 words each)\n## Hashtags (5)`,
     "email":      `Produce a branded marketing email for: ${brief}\n\nOutput EXACTLY:\n## Subject Line (2 variants)\n## Preheader\n## Body (~120 words, brand-voice)\n## CTA Button Copy\n## PS Line`,
+    "calendar":   `Produce a **30-day custom marketing calendar** for this brand.\nContext / goals: ${brief}\n\nStart date: ${today}. Produce 30 consecutive daily entries. Mix channels (LinkedIn, Instagram, X, Email, Blog, TikTok/Reel) based on what fits this brand. Include the best posting time for each channel. Every entry must be usable as-is — no placeholders.\n\nOutput EXACTLY this structure — no preamble:\n\n## Strategy Summary\n- Audience: <one line>\n- Voice: <one line>\n- Core themes (3): <comma list>\n- Weekly rhythm: <one line>\n\n## Calendar\n\nA markdown table with columns exactly: | Day | Date | Time | Channel | Theme | Post Copy | Image / Visual Concept | CTA |\n\nRules:\n- 30 rows, one per day, dates in YYYY-MM-DD starting ${today}.\n- "Post Copy" = the finished caption/hook (30–60 words, brand voice, no placeholders).\n- "Image / Visual Concept" = concrete art direction (subject, composition, palette hex references, on-brand style). One sentence.\n- "Time" = specific clock time like "8:30 AM" tuned to that channel's best window.\n- "CTA" = short and specific.\n- No lorem ipsum. No brackets like [Brand]. No "TBD".\n\n## Asset Checklist\n- List 6 hero images/videos to pre-produce this month. Each: one-line art-direction prompt referencing brand palette.`,
   };
   const userTemplate = templates[kind] || templates["one-pager"];
-  const system = `You are a senior brand designer + copywriter. Match the brand's tone from its palette + positioning. Output tight, PDF-style, ~200 words max. Markdown only. No preamble.\n\n${brandPromptBlock(brand)}`;
+  const system = `You are a senior brand designer, copywriter, and content strategist. Match the brand's tone from its palette + positioning. Markdown only. No preamble.\n\n${brandPromptBlock(brand)}`;
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [{ role: "system", content: system }, { role: "user", content: userTemplate }],
+      max_tokens: kind === "calendar" ? 6000 : 1500,
     }),
   });
   if (!r.ok) {

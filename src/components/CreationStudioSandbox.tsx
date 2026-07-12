@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Loader2, Sparkles, Globe, Wand2, Download, RefreshCw, Palette, Type as TypeIcon, Image as ImageIcon, FileText, Printer } from "lucide-react";
+import { Loader2, Sparkles, Globe, Wand2, Download, RefreshCw, Palette, Type as TypeIcon, Image as ImageIcon, FileText, Printer, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,13 +27,14 @@ type Brand = {
   sourceURL: string;
 };
 
-type Kind = "image" | "one-pager" | "social-pack" | "email";
+type Kind = "image" | "one-pager" | "social-pack" | "email" | "calendar";
 
 const KIND_META: Record<Kind, { label: string; hint: string; icon: any }> = {
-  "image":       { label: "Marketing Image",  hint: "e.g. 'Instagram post announcing our Q4 launch'",       icon: ImageIcon },
-  "one-pager":   { label: "One-Pager PDF",    hint: "e.g. 'Investor one-pager for our new pricing tier'",   icon: FileText },
-  "social-pack": { label: "Social Pack",      hint: "e.g. 'Product hunt launch — 3 channels'",              icon: Sparkles },
-  "email":       { label: "Marketing Email",  hint: "e.g. 'Re-engage lapsed trial users this week'",        icon: FileText },
+  "image":       { label: "Marketing Image",  hint: "e.g. 'Instagram post announcing our Q4 launch'",                                   icon: ImageIcon },
+  "one-pager":   { label: "One-Pager PDF",    hint: "e.g. 'Investor one-pager for our new pricing tier'",                               icon: FileText },
+  "social-pack": { label: "Social Pack",      hint: "e.g. 'Product hunt launch — 3 channels'",                                          icon: Sparkles },
+  "email":       { label: "Marketing Email",  hint: "e.g. 'Re-engage lapsed trial users this week'",                                    icon: FileText },
+  "calendar":    { label: "30-Day Calendar",  hint: "Goals + audience, e.g. 'Book 20 demos with mid-market ops leaders in November'",   icon: CalendarDays },
 };
 
 export function CreationStudioSandbox() {
@@ -175,7 +176,7 @@ export function CreationStudioSandbox() {
           <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
             Step 02 · What do you want to make?
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-3">
             {(Object.keys(KIND_META) as Kind[]).map((k) => {
               const Icon = KIND_META[k].icon;
               const active = kind === k;
@@ -230,12 +231,17 @@ export function CreationStudioSandbox() {
       )}
       {markdown && (
         <div className="rounded-sm border border-amber/40 bg-background/60 p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">// generated · {kind.replace("-", "_")}</div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(markdown); toast.success("Copied"); }} className="border-amber/40 text-amber hover:bg-amber/10">
                 Copy
               </Button>
+              {kind === "calendar" && (
+                <Button variant="outline" size="sm" onClick={() => downloadCalendarCsv(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
+                  <Download className="w-3 h-3 mr-1.5" /> CSV
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={() => window.print()} className="border-amber/40 text-amber hover:bg-amber/10">
                 <Printer className="w-3 h-3 mr-1.5" /> Print / PDF
               </Button>
@@ -243,7 +249,7 @@ export function CreationStudioSandbox() {
           </div>
           {/* Preview styled with the extracted palette */}
           <div
-            className="rounded-sm p-5 border"
+            className={`rounded-sm p-5 border ${kind === "calendar" ? "overflow-x-auto" : ""}`}
             style={{
               background: brand?.colors.find(c => /background|surface|base/i.test(c.role))?.hex || "hsl(var(--background))",
               borderColor: brand?.colors[0]?.hex || "hsl(var(--amber))",
@@ -251,7 +257,7 @@ export function CreationStudioSandbox() {
               fontFamily: brand?.fonts[0] ? `"${brand.fonts[0]}", ui-sans-serif, system-ui` : undefined,
             }}
           >
-            <article className="prose prose-invert prose-sm max-w-none prose-headings:font-bold prose-strong:font-bold">
+            <article className={`prose prose-invert prose-sm ${kind === "calendar" ? "max-w-none prose-table:text-xs prose-td:align-top prose-td:p-2 prose-th:p-2" : "max-w-none"} prose-headings:font-bold prose-strong:font-bold`}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
             </article>
           </div>
@@ -259,4 +265,31 @@ export function CreationStudioSandbox() {
       )}
     </div>
   );
+}
+
+function downloadCalendarCsv(md: string, brandName?: string) {
+  // Extract the first markdown table from the calendar output and export as CSV.
+  const lines = md.split("\n");
+  const tableRows: string[][] = [];
+  let inTable = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+      const cells = trimmed.slice(1, -1).split("|").map(c => c.trim());
+      // skip separator row like |---|---|
+      if (cells.every(c => /^:?-+:?$/.test(c))) { inTable = true; continue; }
+      tableRows.push(cells);
+      inTable = true;
+    } else if (inTable && trimmed === "") {
+      break;
+    }
+  }
+  if (!tableRows.length) { return; }
+  const csv = tableRows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(brandName || "brand").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-marketing-calendar.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
