@@ -156,7 +156,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  await optionalAuth(req); // public tool — auth is optional
+  const { userId } = await optionalAuth(req);
+  if (!userId) return json({ error: "Unauthorized" }, 401);
 
   if (!LOVABLE_API_KEY) return json({ error: "Missing LOVABLE_API_KEY" }, 500);
 
