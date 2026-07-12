@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generateAIChecklistPdf } from '@/lib/generateAIChecklistPdf';
 import { toast } from '@/hooks/use-toast';
+import aiChecklistAsset from '@/assets/tools/ai-checklist.jpg.asset.json';
 
 export default function AIChecklistPage() {
   const { trackEvent } = useTrackEvent();
