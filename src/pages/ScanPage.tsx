@@ -59,6 +59,14 @@ const ScanPage = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-20">
+          <div className="max-w-5xl mx-auto px-4 pb-8">
+            <img
+              src={websiteLeakScannerHero.url}
+              alt="Website Leak Scanner - live URL scan, ranked leak list, fix-first order"
+              className="w-full rounded-lg border border-border shadow-lg"
+              loading="eager"
+            />
+          </div>
           <WebsiteScanner onContactClick={() => setIsContactModalOpen(true)} staffUnlock={staffUnlock} />
         </div>
         <Footer />
