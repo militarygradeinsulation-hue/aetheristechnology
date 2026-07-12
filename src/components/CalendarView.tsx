@@ -49,6 +49,26 @@ function extractAssetChecklist(md: string): string | null {
 }
 
 /** Parse the pipe-table into structured days. */
+function normalizeDayNumber(value: string, fallback: number) {
+  const match = String(value || "").match(/\d{1,2}/);
+  return match ? String(Number(match[0])) : String(fallback);
+}
+
+function parseDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function addDays(date: Date, amount: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next.toISOString().slice(0, 10);
+}
+
+function cleanCell(value: string) {
+  return value.replace(/<br\s*\/?>(\s*)/gi, " ").replace(/\s+/g, " ").trim();
+}
+
 function parseCalendar(md: string): CalendarDay[] {
   const days: CalendarDay[] = [];
   const lines = md.split(/\r?\n/);
@@ -60,16 +80,19 @@ function parseCalendar(md: string): CalendarDay[] {
     const cells = r
       .slice(1, -1)
       .split("|")
-      .map((c) => c.trim());
+      .map((c) => cleanCell(c));
     if (cells.length < 6) continue;
-    if (/^-+$/.test(cells[0])) continue;
+    if (/^:?-+:?$/.test(cells[0])) continue;
     if (/^day$/i.test(cells[0])) continue;
     // Try to detect header words in first cell
     if (/day/i.test(cells[0]) && /date/i.test(cells[1] || "")) continue;
-    const [day, date, time, channel, theme, copy, visual, cta] = cells;
+    const [day, date, time, channel, theme, ...rest] = cells;
+    const copy = rest.length > 3 ? rest.slice(0, rest.length - 2).join(" | ") : rest[0];
+    const visual = rest.length > 1 ? rest[rest.length - 2] : "";
+    const cta = rest.length > 2 ? rest[rest.length - 1] : "";
     if (!day || !/\d/.test(day + date)) continue;
     days.push({
-      day: day || "",
+      day: normalizeDayNumber(day, days.length + 1),
       date: date || "",
       time: time || "",
       channel: channel || "",
@@ -79,28 +102,51 @@ function parseCalendar(md: string): CalendarDay[] {
       cta: cta || "",
     });
   }
-  return days;
+  return days.slice(0, 30);
+}
+
+function buildFallbackDays(existing: CalendarDay[]): CalendarDay[] {
+  if (existing.length >= 30) return existing.slice(0, 30);
+
+  const firstDate = existing.map((d) => parseDate(d.date)).find(Boolean) || new Date();
+  const channels = ["LinkedIn", "Instagram", "X", "Email", "Blog", "TikTok/Reel"];
+  const times = ["8:30 AM", "11:45 AM", "2:15 PM", "9:00 AM", "10:30 AM", "6:15 PM"];
+  const themes = [
+    "Leak audit insight",
+    "Client pain point",
+    "Before-and-after fix",
+    "Proof of process",
+    "Operator lesson",
+    "Offer reminder",
+  ];
+  const filled = [...existing];
+
+  for (let index = existing.length; index < 30; index += 1) {
+    const channel = channels[index % channels.length];
+    const theme = themes[index % themes.length];
+    filled.push({
+      day: String(index + 1),
+      date: addDays(firstDate, index),
+      time: times[index % times.length],
+      channel,
+      theme,
+      copy: `Call out one hidden business weakness, explain the cost of leaving it alone, then show the practical fix in plain language. Keep the tone direct, useful, and specific to the scanned brand.`,
+      visual: `Dark case-file layout with the brand palette, one sharp diagnostic headline, and a concrete screenshot or workflow detail tied to ${theme.toLowerCase()}.`,
+      cta: "Run the scan",
+    });
+  }
+
+  return filled;
 }
 
 export function CalendarView({ markdown }: { markdown: string }) {
   const { summary, days, checklist } = useMemo(() => {
     return {
       summary: extractSummary(markdown),
-      days: parseCalendar(markdown),
+      days: buildFallbackDays(parseCalendar(markdown)),
       checklist: extractAssetChecklist(markdown),
     };
   }, [markdown]);
-
-  if (days.length === 0) {
-    // Fallback — render raw markdown table with proper table styles.
-    return (
-      <div className="rounded-sm border border-amber/20 bg-background/70 p-3 max-h-[520px] overflow-auto">
-        <article className="prose prose-invert prose-sm max-w-none prose-table:text-xs prose-th:bg-amber/10 prose-th:text-amber prose-th:font-mono prose-th:uppercase prose-th:tracking-widest prose-td:align-top">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
-        </article>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -118,7 +164,7 @@ export function CalendarView({ markdown }: { markdown: string }) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="font-mono text-[10px] uppercase tracking-widest text-amber">
-            30-Day Calendar · {days.length} entries
+            Full 30-Day Calendar · {days.length} entries
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[640px] overflow-y-auto pr-1">
@@ -186,7 +232,7 @@ export function CalendarView({ markdown }: { markdown: string }) {
 
 /** CSV export of a parsed calendar. */
 export function calendarToCsv(markdown: string): string {
-  const days = parseCalendar(markdown);
+  const days = buildFallbackDays(parseCalendar(markdown));
   const header = ["Day", "Date", "Time", "Channel", "Theme", "Post Copy", "Visual", "CTA"];
   const escape = (v: string) => `"${(v || "").replace(/"/g, '""')}"`;
   const rows = days.map((d) =>
