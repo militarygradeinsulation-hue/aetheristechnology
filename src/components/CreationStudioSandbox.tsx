@@ -37,22 +37,72 @@ const KIND_META: Record<Kind, { label: string; hint: string; icon: any }> = {
   "calendar":    { label: "30-Day Calendar",  hint: "Goals + audience, e.g. 'Book 20 demos with mid-market ops leaders in November'",   icon: CalendarDays },
 };
 
+type PackItem = { image?: string; markdown?: string; brief: string; loading: boolean; error?: string };
+type Pack = Record<Exclude<Kind, "calendar">, PackItem>;
+
+const DEFAULT_BRIEFS: Record<Exclude<Kind, "calendar">, string> = {
+  "image":       "Flagship on-brand hero image announcing our current offer. Square 1:1, clean, high-end.",
+  "one-pager":   "One-page overview PDF for prospects — what we do, who it's for, why choose us, and a clear CTA.",
+  "social-pack": "This week's launch pack — Instagram, LinkedIn, X, story overlay, hashtags. Match our brand voice.",
+  "email":       "Warm outreach email to re-engage prospects who visited but didn't convert. Lead with value, one CTA.",
+};
+
+const AUTO_KINDS: Exclude<Kind, "calendar">[] = ["image", "one-pager", "social-pack", "email"];
+
+const emptyPack = (): Pack => ({
+  image:         { brief: DEFAULT_BRIEFS["image"],       loading: false },
+  "one-pager":   { brief: DEFAULT_BRIEFS["one-pager"],   loading: false },
+  "social-pack": { brief: DEFAULT_BRIEFS["social-pack"], loading: false },
+  email:         { brief: DEFAULT_BRIEFS["email"],       loading: false },
+});
+
 export function CreationStudioSandbox() {
   const [url, setUrl] = useState("");
   const [scanning, setScanning] = useState(false);
   const [brand, setBrand] = useState<Brand | null>(null);
 
-  const [kind, setKind] = useState<Kind>("image");
+  const [kind, setKind] = useState<Kind>("calendar");
   const [brief, setBrief] = useState("");
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [markdown, setMarkdown] = useState("");
 
+  const [pack, setPack] = useState<Pack>(emptyPack());
+
+  const runOne = async (b: Brand, k: Exclude<Kind, "calendar">, briefText: string) => {
+    setPack(prev => ({ ...prev, [k]: { ...prev[k], brief: briefText, loading: true, error: undefined } }));
+    try {
+      const { data, error } = await supabase.functions.invoke("creation-studio-brand", {
+        body: { action: "generate", brand: b, brief: briefText, kind: k },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setPack(prev => ({
+        ...prev,
+        [k]: {
+          brief: briefText,
+          loading: false,
+          image: (data as any)?.image,
+          markdown: (data as any)?.markdown,
+        },
+      }));
+    } catch (e: any) {
+      setPack(prev => ({ ...prev, [k]: { ...prev[k], loading: false, error: e?.message || "Failed" } }));
+      toast.error(`${k}: ${e?.message || "Generation failed"}`);
+    }
+  };
+
+  const runStarterPack = async (b: Brand) => {
+    toast.info("Building your starter marketing pack…");
+    await Promise.all(AUTO_KINDS.map(k => runOne(b, k, DEFAULT_BRIEFS[k])));
+    toast.success("Starter pack ready — customize any asset below");
+  };
+
   const scan = async () => {
     const clean = url.trim();
     if (!/^https?:\/\//i.test(clean)) { toast.error("Enter a full URL, e.g. https://yourbrand.com"); return; }
     setScanning(true);
-    setBrand(null); setImageUrl(""); setMarkdown("");
+    setBrand(null); setImageUrl(""); setMarkdown(""); setPack(emptyPack());
     try {
       const { data, error } = await supabase.functions.invoke("creation-studio-brand", {
         body: { action: "scan", url: clean },
@@ -63,6 +113,8 @@ export function CreationStudioSandbox() {
       if (!b) throw new Error("No brand data returned");
       setBrand(b);
       toast.success("Brand kit extracted");
+      // fire-and-forget: build the starter pack automatically
+      runStarterPack(b);
     } catch (e: any) {
       toast.error(e?.message || "Scan failed");
     } finally { setScanning(false); }
@@ -87,7 +139,7 @@ export function CreationStudioSandbox() {
   };
 
   const reset = () => {
-    setUrl(""); setBrand(null); setBrief(""); setImageUrl(""); setMarkdown("");
+    setUrl(""); setBrand(null); setBrief(""); setImageUrl(""); setMarkdown(""); setPack(emptyPack());
   };
 
   return (
