@@ -101,8 +101,22 @@ const LeakLanderPage: React.FC = () => {
         <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
 
         <div className="w-full">
+          {/* TOP PITCH — money-back guarantee framing */}
+          <section className="mt-2 max-w-4xl mx-auto text-center animate-fade-in">
+            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
+              If I can't save you money,{" "}
+              <span className="text-crimson italic">I don't want to do business with you.</span>
+            </h1>
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+              We find the silent leaks, remove the chaos at the source, and build systems that keep your margin where it belongs.
+            </p>
+            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
+              Named leaks. Dollar figures. No fluff.
+            </p>
+          </section>
+
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-4xl mx-auto flex justify-start mb-1">
+          <div className="max-w-4xl mx-auto flex justify-start mt-5 mb-1">
             <button
               type="button"
               onClick={handleLogoTap}
