@@ -33,6 +33,10 @@ type ToolMeta = {
   howTo: [string, string, string];
   /** What you'll see in the PDF-style report. */
   delivers: string[];
+  /** Optional SEO override title. Defaults to "Try <title> free · Aetheris Chaos Ecosystem". */
+  seoTitle?: string;
+  /** Optional meta keywords for this tool page. */
+  keywords?: string;
 };
 
 const TRY_META: Record<string, ToolMeta> = {
