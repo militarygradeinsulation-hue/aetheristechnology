@@ -138,7 +138,7 @@ const LeakLanderPage: React.FC = () => {
                 // Aetheris Field Note
               </div>
               <h2 className="font-forensic text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                <span className="text-foreground">If I can't save you money, I don't want to do business with you.</span>
+                <span className="text-foreground">If I can't save you <span className="text-crimson">money</span>, I don't want to do <span className="text-crimson">business</span> with you.</span>
                 <span className="text-amber italic"></span>
               </h2>
               <p className="mt-4 text-lg sm:text-xl md:text-2xl text-crimson font-bold tracking-tight">
