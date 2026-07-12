@@ -104,11 +104,11 @@ const LeakLanderPage: React.FC = () => {
           {/* TOP PITCH — money-back guarantee framing */}
           <section className="mt-2 max-w-4xl mx-auto text-center animate-fade-in">
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              If I can't save you money,{" "}
+              If I can't save you money,&nbsp;
               <span className="text-crimson italic">I don't want to do business with you.</span>
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
-              We find the silent leaks, remove the chaos at the source, and build systems that keep your margin where it belongs.
+              {"\n"}
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
               Named leaks. Dollar figures. No fluff.
@@ -139,14 +139,14 @@ const LeakLanderPage: React.FC = () => {
                 // Aetheris Field Note
               </div>
               <h2 className="font-forensic text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                <span className="text-foreground">Sick of AI everywhere and just want something </span>
-                <span className="text-amber italic">simple that actually works?</span>
+                <span className="text-foreground">If I can't save you money, I don't want to do business with you.</span>
+                <span className="text-amber italic"></span>
               </h2>
               <p className="mt-4 text-lg sm:text-xl md:text-2xl text-crimson font-bold tracking-tight">
-                This is us.
+                {"\n"}
               </p>
               <p className="mt-3 text-sm sm:text-base md:text-lg text-foreground/90 font-medium">
-                We make a system that <span className="text-amber font-semibold">YOUR</span> person can follow daily — customized to <span className="text-amber font-semibold">YOUR</span> company — for any department. From social to sales to leadership.
+                {"\n"}
               </p>
               <p className="mt-3 text-sm sm:text-base md:text-lg text-muted-foreground">
                 We're the most <span className="text-amber font-semibold">anti-AI, AI company</span> you'll ever meet.
