@@ -235,6 +235,12 @@ const TechSolutionsPage: React.FC = () => {
               </span>
               We are always updating our tools. Bear with us if there are some that don't work momentarily.
             </div>
+            {isLockedActive && (
+              <div className="mt-3 inline-flex items-center gap-2 text-xs text-crimson font-mono border border-crimson/30 bg-crimson/5 px-3 py-2 rounded-sm">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-crimson" />
+                Daily limit reached — you've tried 3 tools. The rest unlock in ~{unlockHrs}h.
+              </div>
+            )}
           </div>
 
           {/* Pricing tiers */}
