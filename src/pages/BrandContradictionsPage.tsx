@@ -21,7 +21,15 @@ const BrandContradictionsPage = () => {
           <div className="text-center mb-10">
             <span className="text-amber font-bold text-xl tracking-wide uppercase mb-2 block">Executive Clarity Suite</span>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">Brand Contradiction <span className="text-gradient-amber">Finder</span></h1>
-            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Your buyers can feel contradiction before they can explain it. This tool shows you where trust is being weakened in silence.</p>
+          <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Your buyers can feel contradiction before they can explain it. This tool shows you where trust is being weakened in silence.</p>
+          </div>
+          <div className="max-w-5xl mx-auto mb-10">
+            <img
+              src={brandContradictionsHero.url}
+              alt="Brand Contradictions diagnostic - surfaces where a brand's promise and buyer experience don't match"
+              className="w-full rounded-lg border border-border shadow-lg"
+              loading="eager"
+            />
           </div>
           <BrandContradictionFinder adminMode={staffUnlock} />
         </div>
