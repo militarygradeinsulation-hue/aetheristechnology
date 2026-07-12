@@ -55,6 +55,46 @@ const TechSolutionsPage: React.FC = () => {
     setBuyOpen(true);
   };
 
+  // Throttle: after trying 3 different tools, lock the rest for 24h.
+  const LOCK_KEY = "tech_solutions_tries_v1";
+  const LOCK_WINDOW_MS = 24 * 60 * 60 * 1000;
+  type TriesState = { ids: string[]; firstAt: number };
+  const readTries = (): TriesState => {
+    try {
+      const raw = localStorage.getItem(LOCK_KEY);
+      if (!raw) return { ids: [], firstAt: 0 };
+      const p = JSON.parse(raw) as TriesState;
+      if (!p.firstAt || Date.now() - p.firstAt > LOCK_WINDOW_MS) return { ids: [], firstAt: 0 };
+      return { ids: Array.isArray(p.ids) ? p.ids : [], firstAt: p.firstAt };
+    } catch { return { ids: [], firstAt: 0 }; }
+  };
+  const [tries, setTries] = useState<TriesState>(readTries);
+  const [now, setNow] = useState<number>(Date.now());
+  useEffect(() => {
+    const i = setInterval(() => {
+      setNow(Date.now());
+      const fresh = readTries();
+      setTries(prev => (prev.firstAt !== fresh.firstAt || prev.ids.length !== fresh.ids.length ? fresh : prev));
+    }, 60_000);
+    return () => clearInterval(i);
+  }, []);
+  const isLockedActive = tries.ids.length >= 3 && (now - tries.firstAt) < LOCK_WINDOW_MS;
+  const isToolLocked = (id: string) => isLockedActive && !tries.ids.includes(id);
+  const recordTry = useCallback((id: string) => {
+    setTries(prev => {
+      if (prev.ids.includes(id)) return prev;
+      if (prev.ids.length >= 3 && (Date.now() - prev.firstAt) < LOCK_WINDOW_MS) return prev;
+      const next: TriesState = {
+        ids: [...prev.ids, id],
+        firstAt: prev.ids.length === 0 ? Date.now() : prev.firstAt,
+      };
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+  const unlockMs = Math.max(0, tries.firstAt + LOCK_WINDOW_MS - now);
+  const unlockHrs = Math.ceil(unlockMs / (60 * 60 * 1000));
+
   const diagnostics = SHOP_TOOLS.filter(t => t.category === "diagnostics");
   const content = SHOP_TOOLS.filter(t => t.category === "content");
   const reports = SHOP_TOOLS.filter(t => t.category === "reports");
