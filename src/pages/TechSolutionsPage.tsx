@@ -112,10 +112,15 @@ const TechSolutionsPage: React.FC = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {tools.map(t => {
           const info = TOOL_SUMMARIES[t.id];
+          const locked = isToolLocked(t.id);
           return (
             <div
               key={t.id}
-              className="group forensic-tile relative rounded-sm border border-amber/25 hover:border-amber/70 transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.35)]"
+              className={`group forensic-tile relative rounded-sm border transition-all duration-300 overflow-hidden flex flex-col ${
+                locked
+                  ? "border-muted/20 opacity-50 grayscale"
+                  : "border-amber/25 hover:border-amber/70 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.35)]"
+              }`}
             >
               {/* Thumbnail */}
               <ToolThumbnail id={t.id} alt={t.name} />
