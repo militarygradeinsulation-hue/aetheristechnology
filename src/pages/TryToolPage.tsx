@@ -246,6 +246,22 @@ export default function TryToolPage() {
   };
   const printReport = () => window.print();
 
+  const downloadPdf = () => {
+    if (!output || !runAt) return;
+    try {
+      downloadTryToolPdf({
+        toolTitle: meta?.title || "Aetheris Report",
+        subject: `${url}${context ? ` · ${context.slice(0, 120)}` : ""}`,
+        caseId,
+        runAt,
+        output,
+      });
+      toast.success("PDF downloaded");
+    } catch (e: any) {
+      toast.error(e?.message || "PDF export failed");
+    }
+  };
+
   const run = async () => {
     const cleanUrl = url.trim();
     const cleanCtx = context.trim();
