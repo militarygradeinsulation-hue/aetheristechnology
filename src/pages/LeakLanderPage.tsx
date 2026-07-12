@@ -148,8 +148,8 @@ const LeakLanderPage: React.FC = () => {
                 loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                width={1920}
-                height={960}
+                width={1280}
+                height={731}
               />
             </div>
           </section>
