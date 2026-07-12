@@ -7,6 +7,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { ReciprocationDoctrineTool } from "@/components/ReciprocationDoctrineTool";
 import { PublicToolLock } from "@/components/PublicToolLock";
 import { Handshake } from "lucide-react";
+import reciprocationAsset from "@/assets/tools/reciprocation.jpg.asset.json";
 
 const ReciprocationPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
