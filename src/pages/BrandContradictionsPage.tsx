@@ -6,6 +6,7 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
 import { useStaffUnlock } from '@/hooks/useStaffUnlock';
+import brandContradictionsHero from '@/assets/brand-contradictions-hero.png.asset.json';
 
 const BrandContradictionsPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
