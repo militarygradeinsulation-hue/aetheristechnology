@@ -14,14 +14,15 @@ const ReciprocationPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Reciprocation Engine — Cialdini's Rule, Weaponized Ethically | Aetheris"
-        description="Free operator tool. Drop a scenario or URL and get 6 editable reciprocation tactics — Mauss / Regan / Mexico-Ethiopia citations, ethical-use vs manipulator-abuse warnings, and a built-in defense checklist."
+        title="Reciprocation Gift — Free Cold Outreach Report | Aetheris"
+        description="Generate a custom reciprocation report to send cold prospects. Ethical Cialdini-style door-opener with leaks, citations, and next-step CTA."
         path="/reciprocation"
-        keywords="reciprocation, cialdini, influence, sales tactics, gift economy, rejection then retreat"
+        keywords="reciprocation report, cialdini reciprocation, cold outreach gift, door opener report, sales reciprocity"
         breadcrumbs={[
           { name: "Home", path: "/" },
-          { name: "Reciprocation Engine", path: "/reciprocation" },
+          { name: "Reciprocation Gift", path: "/reciprocation" },
         ]}
+        speakable={["h1"]}
       />
       <Background />
       <div className="relative z-10">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead } from '@/components/SEOHead';
 import { CheckCircle2, Download, FileText, Shield, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,11 +59,17 @@ export default function AIChecklistPage() {
 
   return (
     <>
-      <Helmet>
-        <title>AI Implementation Checklist for Operations Managers | Aetheris</title>
-        <meta name="description" content="Free 7-section forensic checklist for ops managers rolling out AI. Pre-flight, use-case triage, data hygiene, pilots, rollout, risk, and ROI measurement." />
-        <link rel="canonical" href="https://aetheris.technology/ai-implementation-checklist" />
-      </Helmet>
+      <SEOHead
+        title="AI Readiness Checklist — Free Scorecard | Aetheris"
+        description="Free 7-section AI readiness checklist for ops managers. Score your business, find rollout gaps, and get a 30-day implementation plan."
+        path="/ai-checklist"
+        keywords="AI readiness checklist, AI implementation checklist, AI adoption scorecard, operations AI audit"
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'AI Readiness Checklist', path: '/ai-checklist' },
+        ]}
+        speakable={['h1']}
+      />
 
       <div className="min-h-screen pt-32 pb-20 px-4">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">

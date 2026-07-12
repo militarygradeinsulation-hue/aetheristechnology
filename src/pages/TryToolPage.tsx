@@ -33,6 +33,10 @@ type ToolMeta = {
   howTo: [string, string, string];
   /** What you'll see in the PDF-style report. */
   delivers: string[];
+  /** Optional SEO override title. Defaults to "Try <title> free · Aetheris Chaos Ecosystem". */
+  seoTitle?: string;
+  /** Optional meta keywords for this tool page. */
+  keywords?: string;
 };
 
 const TRY_META: Record<string, ToolMeta> = {
@@ -71,6 +75,8 @@ const TRY_META: Record<string, ToolMeta> = {
     summary: "Runs every diagnostic layer on one URL — positioning, offer, proof, funnel, SEO, and ops.",
     howTo: ["Paste your website URL", "Run the full sweep", "Get a graded layer report"],
     delivers: ["Executive diagnosis", "Layer grades A–F", "Biggest unlock + 30-day repair"],
+    seoTitle: "Forensic Scan (All) — Full Leak Audit Tool | Aetheris",
+    keywords: "forensic scan all, full leak audit, business diagnostics, revenue leak audit, free business scanner",
   },
   "all-in-one": {
     title: "All-In-One Content", inputLabel: "Topic", inputHint: "e.g. 'AI-powered onboarding'",
@@ -325,9 +331,11 @@ export default function TryToolPage() {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title={`Try ${meta.title} free · Aetheris Chaos Ecosystem`}
-        description={`Sandbox run of the ${meta.title} tool. No signup, nothing saved, each run independent.`}
+        title={meta.seoTitle || `Try ${meta.title} free · Aetheris Chaos Ecosystem`}
+        description={meta.summary}
+        keywords={meta.keywords}
         path={`/try/${toolId}`}
+        speakable={["h1"]}
       />
       <Background />
       <div className="relative z-10">

@@ -14,14 +14,15 @@ const HeadToHeadPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Head-to-Head: URL vs URL — Business Forensics | Aetheris"
-        description="Drop your URL and a rival's. Get a live war-room verdict — dollar-quantified category scores, silent losses, and the exact takeover playbook to win."
+        title="Head-to-Head Report — Competitor Comparison | Aetheris"
+        description="Compare your URL against a rival's in 6 categories. Get a dollar-quantified scorecard, win/loss map, and takeover playbook."
         path="/head-to-head"
-        keywords="competitor analysis, url vs url, head to head, brand comparison, revenue leak audit"
+        keywords="competitor analysis, competitor comparison tool, head-to-head report, url vs url"
         breadcrumbs={[
           { name: "Home", path: "/" },
-          { name: "Head-to-Head", path: "/head-to-head" },
+          { name: "Head-to-Head Report", path: "/head-to-head" },
         ]}
+        speakable={["h1"]}
       />
       <Background />
       <div className="relative z-10">
