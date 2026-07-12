@@ -331,9 +331,11 @@ export default function TryToolPage() {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title={`Try ${meta.title} free · Aetheris Chaos Ecosystem`}
-        description={`Sandbox run of the ${meta.title} tool. No signup, nothing saved, each run independent.`}
+        title={meta.seoTitle || `Try ${meta.title} free · Aetheris Chaos Ecosystem`}
+        description={meta.summary}
+        keywords={meta.keywords}
         path={`/try/${toolId}`}
+        speakable={["h1"]}
       />
       <Background />
       <div className="relative z-10">
