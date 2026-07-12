@@ -110,7 +110,7 @@ const LeakLanderPage: React.FC = () => {
               {"\n"}
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Named leaks. Dollar figures. No fluff.
+              {"\n"}
             </p>
           </section>
 
