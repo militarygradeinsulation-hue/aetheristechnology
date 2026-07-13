@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle, X, Send, Loader2, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
+import { X, Send, Loader2, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
-import { PinnableFloater } from '@/components/ui/PinnableFloater';
-import { getOpenerForPath, pageContextLabel } from '@/lib/nexusOpeners';
+import { getOpenerForPath } from '@/lib/nexusOpeners';
 
 type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
@@ -29,6 +28,7 @@ const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
 const CAPTURE_LEAD_RE = /<capture_lead>\s*(\{[\s\S]*?\})\s*<\/capture_lead>/i;
 const STREAMING_STRIP_RE = /\s*(<suggestions>|<capture_lead>)[\s\S]*$/i;
 const CHECKOUT_LINK_RE = /\[([^\]]+)\]\(checkout:[^)]+\)/g;
+const SALES_LANGUAGE_RE = /\$\s?\d|\b\d[\d,.]*\s?(?:dollars?|usd)\b|\b(?:price|pricing|checkout|purchase|buy|paid product|diagnostic|retainer|all-access|bundle)\b/i;
 const PRICE_LINE_RE = /^.*(?:\$\s?\d|\b\d[\d,.]*\s?(?:dollars?|usd)\b|\b(?:price|pricing|checkout|purchase|buy|paid product|diagnostic|retainer|all-access|bundle)\b).*$/gim;
 
 const scrubSalesLanguage = (text: string) => text
@@ -46,7 +46,7 @@ const parseSuggestions = (text: string): { clean: string; suggestions?: string[]
   try {
     const arr = JSON.parse(m[1]);
     if (Array.isArray(arr) && arr.every((s) => typeof s === 'string')) {
-      return { clean: scrubSalesLanguage(clean.replace(SUGGESTIONS_RE, '').trim()), suggestions: arr.slice(0, 3).filter((s) => !PRICE_LINE_RE.test(s)) };
+      return { clean: scrubSalesLanguage(clean.replace(SUGGESTIONS_RE, '').trim()), suggestions: arr.slice(0, 3).filter((s) => !SALES_LANGUAGE_RE.test(s)) };
     }
   } catch { /* ignore */ }
   return { clean: scrubSalesLanguage(clean.replace(SUGGESTIONS_RE, '').trim()) };

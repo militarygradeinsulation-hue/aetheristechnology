@@ -26,7 +26,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Diagnostic",
       greeting:
-        "You're looking at the diagnostic page. Give me your website and the main issue you're seeing so I can frame the problem before a call.",
+        "You're looking at this page. Give me your website and the main issue you're seeing so I can frame the problem before a call.",
     },
   },
   {
