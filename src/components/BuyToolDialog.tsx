@@ -48,7 +48,7 @@ export function BuyToolDialog({ open, onOpenChange, plan, preselectedToolIds = [
   }, [plan, selected, price.amount]);
 
   const description = plan === "unlimited"
-    ? "Every tool. Every future release. Lifetime access with persistent memory. Replaces $2k/mo in agency retainers — one-time payment, keep it forever. 7-day money back."
+    ? "Every tool. Every future release. Full Team access. Lifetime access with persistent memory. Replaces $2k/mo in agency retainers — one-time payment, keep it forever. 7-day money back."
     : "Own it for life. Unlimited runs. Persistent memory tied to your account. Replaces a $200/mo SaaS subscription — 7-day money back if it doesn't earn its keep.";
 
   const metadata = {
