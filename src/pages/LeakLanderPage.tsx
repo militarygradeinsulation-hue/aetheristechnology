@@ -80,7 +80,7 @@ const LeakLanderPage: React.FC = () => {
           className="relative z-30 block w-full text-amber-50 border-b border-amber/30 transition-colors hover:brightness-110"
           style={{ backgroundColor: 'hsl(36 75% 14%)' }}
         >
-          <div className="max-w-5xl mx-auto px-4 py-1 text-center text-[11px] sm:text-xs font-medium truncate">
+          <div className="max-w-6xl mx-auto px-4 py-1 text-center text-[11px] sm:text-xs font-medium truncate">
             <span className="font-case uppercase tracking-widest text-amber mr-2">Limited</span>
             Connect on LinkedIn — get a <span className="text-amber font-semibold">free premium analysis</span>
             <span className="ml-2 underline underline-offset-2">Connect →</span>
@@ -102,11 +102,11 @@ const LeakLanderPage: React.FC = () => {
 
         <div className="w-full">
           {/* TOP PITCH — money-back guarantee framing */}
-          <section className="mt-2 max-w-4xl mx-auto text-center animate-fade-in">
+          <section className="mt-2 max-w-6xl mx-auto text-center animate-fade-in">
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
               {"\n"}
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
               {"\n"}
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
@@ -115,7 +115,7 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-4xl mx-auto flex justify-start mt-5 mb-1">
+          <div className="max-w-6xl mx-auto flex justify-start mt-5 mb-1">
             <button
               type="button"
               onClick={handleLogoTap}
@@ -132,7 +132,7 @@ const LeakLanderPage: React.FC = () => {
           </div>
 
           {/* Anti-AI positioning — first thing they read */}
-          <section className="mt-4 max-w-4xl mx-auto text-center animate-fade-in">
+          <section className="mt-4 max-w-6xl mx-auto text-center animate-fade-in">
             <div className="relative rounded-lg border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8 shadow-[0_0_40px_-15px_hsl(var(--amber)/0.35)]">
               <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
                 // Aetheris Field Note
@@ -155,7 +155,7 @@ const LeakLanderPage: React.FC = () => {
 
 
           {/* Signature calling card — gentle float + golden shimmer edge */}
-          <section className="mt-5 max-w-4xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
+          <section className="mt-5 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
             <div className="shimmer-gold-border">
               <img
                 src={callingCard.url}
@@ -172,17 +172,17 @@ const LeakLanderPage: React.FC = () => {
 
           {/* WHAT WE SELL — under the signature logo */}
           <section
-            className="mt-6 max-w-4xl mx-auto text-center animate-fade-in"
+            className="mt-6 max-w-6xl mx-auto text-center animate-fade-in"
             aria-label="What Aetheris sells"
           >
             <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8">
               <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
                 // What We Sell
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-medium leading-relaxed max-w-3xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-medium leading-relaxed max-w-5xl mx-auto">
                 We scan your company for its biggest weaknesses using our tools that don't exist anywhere. Next we fix those weaknesses so you don't have to.
               </p>
-              <p className="mt-4 text-base sm:text-lg md:text-xl text-foreground font-bold leading-relaxed max-w-3xl mx-auto">
+              <p className="mt-4 text-base sm:text-lg md:text-xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
                 Tell me what your biggest issue is and let's see if I can fix it.
               </p>
             </div>
@@ -190,7 +190,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
           <section
-            className="mt-4 max-w-4xl mx-auto animate-fade-in"
+            className="mt-4 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "80ms", animationFillMode: "both" }}
             aria-label="Aetheris outcomes and credentials"
           >
@@ -225,7 +225,7 @@ const LeakLanderPage: React.FC = () => {
           {/* HERO — Chaos Theory Forensics */}
 
           <section
-            className="mt-3 max-w-4xl mx-auto text-center animate-fade-in"
+            className="mt-3 max-w-6xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
           >
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -237,16 +237,16 @@ const LeakLanderPage: React.FC = () => {
               Business is <span className="text-amber italic">chaos</span>.<br />
               Chaos always has <span className="text-crimson italic">cause</span>.
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
               <br />
             </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
               Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace every dollar of bleed back to its origin, and remove the cause at the source.
             </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground max-w-2xl mx-auto">
+            <p className="mt-4 text-base sm:text-lg text-foreground max-w-4xl mx-auto">
               Across sales, CRM, follow-up, and lead flow, document client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
             </p>
-            <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-2xl mx-auto">
+            <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-4xl mx-auto">
               If we can't name a leak worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
@@ -314,7 +314,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* CUSTOM BUILD — specific idea or tool */}
           <section
-            className="mt-6 max-w-5xl mx-auto animate-fade-in"
+            className="mt-6 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "280ms", animationFillMode: "both" }}
           >
             <style>{`
@@ -356,16 +356,16 @@ const LeakLanderPage: React.FC = () => {
                   <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/90">200+ apps shipped · Receipts below</span>
                 </div>
 
-                <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight max-w-3xl mx-auto">
+                <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight max-w-5xl mx-auto">
                   Have a specific idea or tool you want built?{" "}
                   <span className="text-amber italic">I can build it.</span>
                 </h2>
 
-                <p className="mt-3 font-forensic text-lg sm:text-xl italic text-crimson/90 max-w-2xl mx-auto">
+                <p className="mt-3 font-forensic text-lg sm:text-xl italic text-crimson/90 max-w-4xl mx-auto">
                   The more crazy or impossible — the better.
                 </p>
 
-                <p className="mt-4 text-sm sm:text-base text-foreground/80 leading-relaxed max-w-2xl mx-auto">
+                <p className="mt-4 text-sm sm:text-base text-foreground/80 leading-relaxed max-w-4xl mx-auto">
                   One-off automations. Internal AI tools. Forensic diagnostics.
                   Scraping pipelines. Private dashboards. Custom operator systems.
                   If it doesn't exist yet, I'll build it from scratch and hand it to you working.
@@ -473,7 +473,7 @@ const LeakLanderPage: React.FC = () => {
 
           {/* Downloads + Deck — combined case-file card */}
           <section
-            className="mt-5 max-w-4xl mx-auto animate-fade-in"
+            className="mt-5 max-w-6xl mx-auto animate-fade-in"
             style={{ animationDelay: "320ms", animationFillMode: "both" }}
           >
             <div className="rounded-lg border border-amber/30 bg-card/80 backdrop-blur-sm shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
