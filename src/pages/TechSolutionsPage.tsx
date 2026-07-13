@@ -261,8 +261,10 @@ const TechSolutionsPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="pt-28 pb-16 px-4 max-w-6xl mx-auto">
+          <EasyModeRecommender />
           {/* Hero */}
           <div className="mb-12 max-w-3xl">
+
             <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
               <Cpu className="w-2 h-2" /> Tech · Store
             </div>
