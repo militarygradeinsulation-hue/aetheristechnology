@@ -156,6 +156,23 @@ const NewPortalPage: React.FC = () => {
   // Remember preference on mount so the toggle sticks.
   useEffect(() => { setPortalStylePref('new'); }, []);
 
+  // Portal engagement — track seconds-online (heartbeat) + Golden Report opens.
+  const [activeTab, setActiveTab] = useState('start');
+  useEffect(() => {
+    if (!authed) return;
+    const stop = startHeartbeat();
+    return () => stop();
+  }, [authed]);
+  // Listen for nudge popup CTAs that ask to jump tabs.
+  useEffect(() => {
+    const jump = (e: Event) => {
+      const t = (e as CustomEvent).detail;
+      if (typeof t === 'string') setActiveTab(t);
+    };
+    window.addEventListener('portal-jump-tab', jump);
+    return () => window.removeEventListener('portal-jump-tab', jump);
+  }, []);
+
   if (!authed) {
     // Login form lives in the classic portal. Bounce to the legacy route to sign in;
     // classic portal detects `next=new` and returns the user to /portal after login.
