@@ -155,9 +155,25 @@ serve(async (req) => {
 - Page title: ${pageContext.title || "unknown"}
 - Section: ${pageContext.section || "General"}
 
-Reference what they're viewing when relevant. If they're on /diagnostic, price it directly. If they're on /tools-shop, offer a checkout link. If they're on /leak-audit, offer to run it on their URL. Do not repeat the page label in every message — just be aware of it.`,
+Reference what they're viewing only when relevant. Never pitch tools or checkout — booking is your only CTA.`,
         }
       : null;
+
+    // If the latest user message contains a URL, do a lightweight live fetch and
+    // inject the summary so Nexus can talk about specific observations.
+    let scanMsg: { role: "system"; content: string } | null = null;
+    try {
+      const lastUser = [...(messages || [])].reverse().find((m: { role?: string }) => m?.role === "user");
+      const url = lastUser && typeof (lastUser as { content?: string }).content === "string"
+        ? extractUrl((lastUser as { content: string }).content)
+        : null;
+      if (url) {
+        const summary = await fetchSiteSummary(url);
+        if (summary) scanMsg = { role: "system", content: summary };
+      }
+    } catch (e) {
+      console.warn("URL scan step failed:", (e as Error).message);
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -170,6 +186,7 @@ Reference what they're viewing when relevant. If they're on /diagnostic, price i
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...(contextMsg ? [contextMsg] : []),
+          ...(scanMsg ? [scanMsg] : []),
           ...messages,
         ],
         stream: true,
