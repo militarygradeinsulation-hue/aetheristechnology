@@ -1,12 +1,13 @@
 import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ChevronDown, Play, Download } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ChevronDown, Play, Download, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
 import callingCard from "@/assets/joseph-toney-calling-card.jpg.asset.json";
+import detectiveModeCard from "@/assets/detective-mode-card.jpg.asset.json";
 import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
 
 
@@ -213,6 +214,44 @@ const LeakLanderPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          {/* FEATURED — Detective Mode */}
+          <section
+            className="mt-5 max-w-4xl mx-auto animate-fade-in"
+            style={{ animationDelay: "100ms", animationFillMode: "both" }}
+            aria-label="Detective Mode — deep single-target forensic sweep"
+          >
+            <div className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-4 sm:p-5 overflow-hidden">
+              <div className="grid md:grid-cols-5 gap-4 md:gap-6 items-center">
+                <div className="md:col-span-3 relative">
+                  <div className="absolute -inset-3 bg-amber/10 blur-2xl rounded-full opacity-40 pointer-events-none" />
+                  <img
+                    src={detectiveModeCard.url}
+                    alt="Detective Mode product card — deep forensic sweep on a single business surface, case file output, evidence-backed findings"
+                    className="relative w-full rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.35)]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <FileSearch className="w-4 h-4 text-amber" />
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Single-surface forensics</span>
+                  </div>
+                  <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight">
+                    Detective Mode
+                  </h3>
+                  <p className="text-sm md:text-base text-foreground/80">
+                    One target URL. One full case file. No fluff. We run the deep sweep, surface the evidence, and hand you the next moves.
+                  </p>
+                  <Button asChild className="bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                    <Link to="/detective">
+                      Open Detective Mode <ArrowRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </section>
 
