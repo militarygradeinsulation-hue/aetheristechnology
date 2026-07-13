@@ -10,6 +10,8 @@ import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SHOP_TOOLS, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight, Trophy, Users } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
+import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
+import { toast } from "sonner";
 
 // Rich per-tool summaries — what it does, who it's for, what you walk away with.
 const TOOL_SUMMARIES: Record<string, { summary: string; bullets: string[] }> = {
@@ -48,6 +50,7 @@ const TechSolutionsPage: React.FC = () => {
   const [buyOpen, setBuyOpen] = useState(false);
   const [plan, setPlan] = useState<ShopPlan>("single");
   const [preselected, setPreselected] = useState<string[]>([]);
+  const [access] = useTechAccess();
 
   const openBuy = (p: ShopPlan, ids: string[] = []) => {
     setPlan(p);
@@ -79,7 +82,12 @@ const TechSolutionsPage: React.FC = () => {
     return () => clearInterval(i);
   }, []);
   const isLockedActive = tries.ids.length >= 3 && (now - tries.firstAt) < LOCK_WINDOW_MS;
-  const isToolLocked = (id: string) => isLockedActive && !tries.ids.includes(id);
+  const hasFullAccess = access.unlockedAll;
+  const isToolLocked = (id: string) => {
+    if (hasFullAccess || isToolUnlockedByAccess(access, id)) return false;
+    return isLockedActive && !tries.ids.includes(id);
+  };
+  const needsEmail = (id: string) => !hasFullAccess && !isToolUnlockedByAccess(access, id) && !access.email;
   const recordTry = useCallback((id: string) => {
     setTries(prev => {
       if (prev.ids.includes(id)) return prev;
@@ -132,6 +140,8 @@ const TechSolutionsPage: React.FC = () => {
         {tools.map(t => {
           const info = TOOL_SUMMARIES[t.id];
           const locked = isToolLocked(t.id);
+          const gated = needsEmail(t.id);
+          const ownedByLicense = !hasFullAccess && isToolUnlockedByAccess(access, t.id);
           return (
             <div
               key={t.id}
@@ -183,15 +193,32 @@ const TechSolutionsPage: React.FC = () => {
                       >
                         <Sparkles className="w-3 h-3 mr-1 opacity-50" /> Back in {unlockHrs}h
                       </Button>
+                    ) : gated ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          toast.error("Enter your email above to unlock 3 free runs.");
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="flex-1 border-amber/30 text-amber/70 hover:bg-amber/5"
+                        title="Enter your email above to unlock free runs"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" /> Email to try
+                      </Button>
                     ) : (
                       <Button
                         asChild
                         variant="outline"
                         size="sm"
-                        className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                        className={`flex-1 ${ownedByLicense ? "border-amber/70 text-amber bg-amber/10 hover:bg-amber/20" : "border-amber/40 text-amber hover:bg-amber/10"}`}
                       >
-                        <Link to={`/try/${t.id}`} onClick={() => recordTry(t.id)}>
-                          <Sparkles className="w-3 h-3 mr-1" /> Try free
+                        <Link
+                          to={`/try/${t.id}`}
+                          onClick={() => { if (!ownedByLicense && !hasFullAccess) recordTry(t.id); }}
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          {ownedByLicense || hasFullAccess ? "Open tool" : "Try free"}
                           <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                         </Link>
                       </Button>
@@ -264,6 +291,11 @@ const TechSolutionsPage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Access bar — email or code required to run tools free */}
+          <TechSolutionsAccessBar />
+
+
 
           {/* Pricing tiers */}
           <section className="mb-14 grid md:grid-cols-3 gap-4">
