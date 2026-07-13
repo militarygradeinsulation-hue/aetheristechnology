@@ -156,9 +156,13 @@ const ResourcesPage = () => {
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Field Manuals
               </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Founder — Joseph Toney, AI Architect MS, BA, IBM AI Certified
+              </p>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground mb-4">
                 Playbooks from the field.
               </h1>
+
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
                 The frameworks behind The Leak Audit™, the patterns we see bleeding revenue across operations, 
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
