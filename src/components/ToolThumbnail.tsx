@@ -44,7 +44,8 @@ import aiChecklistAsset from "@/assets/tools/ai-checklist.jpg.asset.json";
 const aiChecklist = aiChecklistAsset.url;
 import nexusIqAsset from "@/assets/tools/nexus-iq.png.asset.json";
 const nexusIq = nexusIqAsset.url;
-import salesScripts from "@/assets/tools/sales-scripts.jpg";
+import salesScriptsAsset from "@/assets/tools/sales-scripts.jpg.asset.json";
+const salesScripts = salesScriptsAsset.url;
 import followUpPlan from "@/assets/tools/follow-up-plan.jpg";
 import linkedinPlaybook from "@/assets/tools/linkedin-playbook.jpg";
 
