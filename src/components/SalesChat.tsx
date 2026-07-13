@@ -19,11 +19,11 @@ const AUTO_OPENED_KEY = 'nexus_auto_opened_session';
 
 const STARTER_PROBLEMS = [
   "We're a $12M manufacturer",
-  "Our CRM is a graveyard",
+  "Our site is example.com",
   "Leads come in, nothing closes",
   "Follow-up is completely broken",
-  "How does the 21-Day Diagnostic work?",
   "I don't know where we're leaking",
+  "Book a call with Joseph",
 ];
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;

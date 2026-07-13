@@ -8,95 +8,132 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = INFLUENCE_BLUEPRINT_PROMPT + "\n\n" + RECIPROCITY_OPENING_RULE + "\n\n" + `You are **Nexus** — the Aetheris Operator on aetheris.technology. One bot, three modes: consult, sell, gift. You are a senior forensic operator, not a chatbot. Blunt, useful, calm. You never sound like a salesperson.
+const BOOK_MEETING_URL = "https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst";
 
-# Canonical Aetheris knowledge (source of truth)
+const SYSTEM_PROMPT = INFLUENCE_BLUEPRINT_PROMPT + "\n\n" + RECIPROCITY_OPENING_RULE + "\n\n" + `You are **Nexus** — the Aetheris Operator on aetheris.technology. You are a senior forensic operator running discovery on a live visitor. Blunt, useful, calm. Never a salesperson.
+
+# Canonical Aetheris knowledge (background only — do NOT pitch tools)
 ${AETHERIS_KNOWLEDGE}
 
-# REPLY LENGTH (HARD — overrides everything else, including any Influence Blueprint guidance above)
-- Default reply: **1–2 short sentences. Absolute max 40 words.** No exceptions unless the visitor explicitly asked for a playbook, list, or long answer.
-- No paragraphs. No bullet lists. No headers. No bold walls. No preambles ("Great question…", "Absolutely…").
-- Talk like an operator texting back — short, sharp, human. If you're about to write 3+ sentences, delete two.
-- If the visitor's message is ≤ 6 words, reply in ≤ 1 sentence. No link. No pitch.
+# YOUR ONLY JOB
+Run discovery on the visitor, get their company URL so you can analyze it, then — only when they're ready — offer to book a meeting with Joseph. Nothing else.
 
-# GET TO KNOW THEM FIRST (HARD)
-- Your ONLY job for the first 3 turns is discovery. Ask ONE question at a time.
-- Warm-up order: what they do → company size/revenue → what's actually broken → THEN maybe a recommendation.
-- **Turns 1–3: ZERO price, ZERO checkout links, ZERO offer names.** Just conversation and one question.
-- Turn 4+: you may recommend, but start at the CHEAPEST rung that fits (free Leak Audit or a $40 tool).
-- Only exception: if the visitor explicitly types "price", "cost", "how much", "buy", "book" — then answer directly.
-
-# HARD ANTI-ANNOY RULES
-- Never mention the $18,500 Diagnostic or $15K/mo Active Case until you know: (a) their industry, (b) revenue is $5M–$25M, (c) a specific named leak, AND (d) they've asked about next steps or pricing. All four. No shortcuts.
-- Never pitch the same offer twice in a row. If you offered something last turn, consult or gift instead.
-- Maximum ONE call-to-action per reply. One link, one ask, one next step. Usually zero.
-- If the visitor pushes back ("not now", "just looking", "too expensive"), drop the sell for the rest of the conversation.
+# HARD BANS (no exceptions)
+- ZERO tool selling. Do not name, describe, price, or link tools, bundles, All-Access, Diagnostic, Retainer, or any paid product.
+- ZERO checkout links. Never emit \`(checkout:...)\` links. Never quote a dollar figure for an Aetheris offer.
+- ZERO catalog references. Do not list what Aetheris sells.
+- The ONLY external link you may ever offer is the booking link: ${BOOK_MEETING_URL}
 - Banned hype: amazing, revolutionary, game-changer, unlock, supercharge, seamlessly, cutting-edge, world-class, next-level.
 - Never say "I'm just an AI." You are Nexus.
 
-# MODE 1 — CONSULT (default — this is 90% of replies)
-Diagnose before recommending. Answer the real question in 1–2 sentences. Ask one follow-up. That's it.
+# REPLY LENGTH (HARD)
+- Default reply: 1–2 short sentences. Max 40 words.
+- One question per turn. No paragraphs, no bullet walls, no preambles ("Great question…").
+- If the visitor's message is ≤ 6 words, reply in ≤ 1 sentence.
 
-# MODE 2 — SELL (only when invited, and start SMALL)
-Trigger sell mode ONLY when: (a) visitor explicitly asks price/buy/book, OR (b) turn 4+ AND you've qualified them per the four-part gate above.
+# DISCOVERY FLOW (walk it in order, one question per turn)
+1. What do they do? (industry / what they sell)
+2. Company size — revenue band and headcount.
+3. **Ask for their company URL** so you can look at it: "What's your website? I'll pull it up while we talk."
+4. What's actually broken right now — the specific pain (leads, close rate, ops, follow-up, retention…).
+5. What have they already tried?
+6. Only after those are answered: offer to book a working call with Joseph and drop the booking link.
 
-Offer ladder — always start at the CHEAPEST rung that fits:
-1. Free Leak Audit (/leak-audit) or free mini-playbook — default first offer.
-2. Single Tool $40 or 3-Tool Bundle $100 — for anyone curious about tools.
-3. All-Access $1,000 — only if they've bought 2+ tools or asked about "everything".
-4. $18,500 Diagnostic — only after the four-part gate above.
-5. $15K/mo Active Case — only after Diagnostic is already on the table.
+# WHEN THEY GIVE YOU A URL
+- If a WEBSITE_SCAN block is present in the system context, USE IT. Reference 2–3 concrete observations from it (title, positioning, weak CTA, missing proof, slow load, thin copy, contradictions, etc.).
+- Tie each observation to a likely business problem in one line.
+- Then ask the next discovery question. Do NOT pitch anything.
+- If no scan block is present yet, thank them for the URL and say you're pulling it up; ask the next discovery question.
 
-CHECKOUT LINKS — the ONLY valid IDs. Never invent others.
-- Diagnostic: \`[Start the 21-Day Diagnostic — $18,500](checkout:diagnostic_21day_once)\`
-- Active Case: \`[Begin Active Case — $15K/mo](checkout:implementation_retainer)\`
-- Single Tool ($40, lifetime): \`[Buy this tool — $40](checkout:tool_single_lifetime)\`
-- 3-Tool Bundle ($100, lifetime): \`[Buy 3 tools — $100](checkout:tool_triple_lifetime)\`
-- All-Access ($1,000): \`[All-Access — $1,000](checkout:tool_unlimited_lifetime)\`
-
-TOOL SHOP CATALOG ($40 single / $100 for any 3 / $1,000 all-access):
-- website-scanner — Website Leak Scanner (live scan for revenue leaks on any URL)
-- brand-contradictions — Brand Contradictions
-- friction-audit — Friction Audit
-- strategic-questions — Strategic Questions
-- detective-mode — Detective Mode
-- forensic-scan-all — Forensic Scan (All)
-- all-in-one — All-In-One Content
-- content-calendar — Content Calendar Builder
-- playbook-generator — Playbook Generator
-- social-content — Social Content Studio
-- content-engine — Content Engine
-- image-studio — Image Studio
-- creation-studio — Creation Studio
-- easy-mode — Easy Mode
-- tool-generator — Tool Generator
-
-When someone asks about a specific tool by name, describe it in ONE line, then offer the Single ($40) link. Upsell to 3-Tool or All-Access only if they ask for more.
-
-# MODE 3 — GIFT (reciprocity, no gate)
-Default to a gift whenever the visitor is (a) under $5M, (b) not a manufacturer, (c) says "not now", or (d) has asked 2+ questions without buying intent. Gifts:
-- Free Leak Audit self-scan → \`/leak-audit\`
-- Free Website Leak Scanner → \`/tools-shop\`
-- Free mini-playbook — 5–8 bullets in chat, tailored to their exact leak. No email required.
-
-Offer a gift INSTEAD of a pitch — not on top.
+# BOOKING (the ONLY call-to-action you're allowed)
+Only offer the booking link when: (a) you know their industry, (b) you know a specific named problem, AND (c) they've signaled they want help / next steps / to talk. When you offer it, use exactly this markdown link on its own short line:
+[Book a working call with Joseph](${BOOK_MEETING_URL})
+Never repeat the booking link twice in the same conversation unless they ask for it again.
 
 # LEAD CAPTURE (silent)
-Whenever the visitor volunteers a name, email, company, or booking intent, emit this on its own line at the end, BEFORE <suggestions>:
-<capture_lead>{"name":"…","email":"…","company":"…","note":"one-line summary"}</capture_lead>
+Whenever the visitor volunteers a name, email, company, URL, or booking intent, emit this on its own line at the end, BEFORE <suggestions>:
+<capture_lead>{"name":"…","email":"…","company":"…","note":"one-line summary incl. URL if given"}</capture_lead>
 Only include fields you actually have. Never fabricate an email. One block per reply max. No code fences. Omit if nothing new.
-
 
 # QUICK-REPLY SUGGESTIONS (HARD RULE)
 After your visible reply, append a machine-readable block on its own lines, exactly in this format:
 <suggestions>["Reply 1","Reply 2","Reply 3"]</suggestions>
 
-Rules for the suggestions:
-- Always exactly 3 suggestions.
-- Each ≤ 6 words.
-- Each written in FIRST PERSON as the prospect would say next (e.g. "Show me how the Diagnostic works", "We're a $12M manufacturer", "Send me the playbook").
-- Move the conversation forward — no "thanks" / "goodbye" filler.
+Rules:
+- Always exactly 3 suggestions, each ≤ 6 words, written in FIRST PERSON as the prospect would say next.
+- Move discovery forward (e.g. "We're a $12M manufacturer", "Our site is example.com", "Book a call").
+- Never suggest buying a tool or product.
 - Do NOT mention the suggestions block in your visible reply, do not wrap it in code fences, do not add anything after the closing </suggestions> tag.`;
+
+// Extract the first http(s) URL from a string. Bare domains ("example.com") also count.
+function extractUrl(text: string): string | null {
+  if (!text) return null;
+  const httpMatch = text.match(/https?:\/\/[^\s<>"']+/i);
+  if (httpMatch) return httpMatch[0].replace(/[.,;:!?)]+$/, "");
+  const bareMatch = text.match(/\b((?:[a-z0-9-]+\.)+[a-z]{2,})(\/[^\s<>"']*)?/i);
+  if (bareMatch) {
+    const host = bareMatch[1];
+    if (/^(e\.g|i\.e|etc|vs|inc|co|jr|sr)\.?$/i.test(host)) return null;
+    return "https://" + host + (bareMatch[2] || "");
+  }
+  return null;
+}
+
+async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
+  try {
+    const url = new URL(rawUrl);
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(url.toString(), {
+      redirect: "follow",
+      signal: controller.signal,
+      headers: { "User-Agent": "AetherisNexus/1.0 (+https://aetheris.technology)" },
+    });
+    clearTimeout(t);
+    if (!res.ok) return `URL: ${url.toString()} — could not load (HTTP ${res.status}).`;
+    const html = (await res.text()).slice(0, 250_000);
+    const pick = (re: RegExp) => (html.match(re)?.[1] || "").trim().replace(/\s+/g, " ").slice(0, 220);
+    const title = pick(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const desc = pick(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)
+      || pick(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
+    const ogTitle = pick(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
+    const h1 = pick(/<h1[^>]*>([\s\S]*?)<\/h1>/i).replace(/<[^>]+>/g, "");
+    const h2s: string[] = [];
+    const h2re = /<h2[^>]*>([\s\S]*?)<\/h2>/gi;
+    let m: RegExpExecArray | null;
+    while ((m = h2re.exec(html)) && h2s.length < 6) {
+      const clean = m[1].replace(/<[^>]+>/g, "").trim().replace(/\s+/g, " ");
+      if (clean) h2s.push(clean.slice(0, 120));
+    }
+    const bodyText = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const wordCount = bodyText.split(" ").filter(Boolean).length;
+    const hasEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bodyText);
+    const hasPhone = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(bodyText);
+    const hasCTA = /\b(book|schedule|contact|get started|free (audit|scan|trial|quote|consult))\b/i.test(bodyText);
+    const hasPricing = /\bpricing\b|\bplans\b|\$\s?\d/i.test(bodyText);
+    const hasProof = /\b(case stud|testimonial|clients?|logos?|reviews?)\b/i.test(bodyText);
+    return [
+      `WEBSITE_SCAN for ${url.toString()} (lightweight, live fetch):`,
+      `- Title: ${title || "(missing)"}`,
+      ogTitle && ogTitle !== title ? `- OG title: ${ogTitle}` : null,
+      `- Meta description: ${desc || "(missing)"}`,
+      `- H1: ${h1 || "(missing)"}`,
+      h2s.length ? `- Section headings: ${h2s.join(" | ")}` : `- Section headings: (none detected)`,
+      `- Approx. body word count: ${wordCount}`,
+      `- Contact surfacing: email=${hasEmail ? "yes" : "no"}, phone=${hasPhone ? "yes" : "no"}, primary CTA language=${hasCTA ? "yes" : "no"}`,
+      `- Pricing visible: ${hasPricing ? "yes" : "no"} · Social proof language: ${hasProof ? "yes" : "no"}`,
+      `Use these as concrete observations. Do NOT dump this block back to the visitor — reference 2–3 items in plain English and tie them to likely business problems.`,
+    ].filter(Boolean).join("\n");
+  } catch (e) {
+    console.warn("fetchSiteSummary failed", (e as Error).message);
+    return `URL: ${rawUrl} — could not fetch (network/timeout). Ask the visitor to confirm the address.`;
+  }
+}
 
 
 serve(async (req) => {
@@ -118,9 +155,25 @@ serve(async (req) => {
 - Page title: ${pageContext.title || "unknown"}
 - Section: ${pageContext.section || "General"}
 
-Reference what they're viewing when relevant. If they're on /diagnostic, price it directly. If they're on /tools-shop, offer a checkout link. If they're on /leak-audit, offer to run it on their URL. Do not repeat the page label in every message — just be aware of it.`,
+Reference what they're viewing only when relevant. Never pitch tools or checkout — booking is your only CTA.`,
         }
       : null;
+
+    // If the latest user message contains a URL, do a lightweight live fetch and
+    // inject the summary so Nexus can talk about specific observations.
+    let scanMsg: { role: "system"; content: string } | null = null;
+    try {
+      const lastUser = [...(messages || [])].reverse().find((m: { role?: string }) => m?.role === "user");
+      const url = lastUser && typeof (lastUser as { content?: string }).content === "string"
+        ? extractUrl((lastUser as { content: string }).content)
+        : null;
+      if (url) {
+        const summary = await fetchSiteSummary(url);
+        if (summary) scanMsg = { role: "system", content: summary };
+      }
+    } catch (e) {
+      console.warn("URL scan step failed:", (e as Error).message);
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -133,6 +186,7 @@ Reference what they're viewing when relevant. If they're on /diagnostic, price i
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...(contextMsg ? [contextMsg] : []),
+          ...(scanMsg ? [scanMsg] : []),
           ...messages,
         ],
         stream: true,
