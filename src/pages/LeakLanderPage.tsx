@@ -284,31 +284,8 @@ const LeakLanderPage: React.FC = () => {
             </Link>
           </section>
 
-          {/* ENGAGEMENT LADDER — one-line teaser; full ladder + price explainers live on /diagnostic */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "195ms", animationFillMode: "both" }}
-            aria-label="Engagement ladder teaser"
-          >
-            <Link
-              to="/diagnostic"
-              className="group block rounded-sm border border-amber/30 bg-card/60 hover:bg-amber/[0.06] hover:border-amber/60 transition p-3 sm:p-4"
-            >
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat</div>
-                  <div className="mt-1 text-sm sm:text-base text-foreground/85">
-                    <span className="text-amber font-semibold">$2,500</span> Leak Audit →{" "}
-                    <span className="text-amber font-semibold">$18,500</span> 21-Day Diagnostic →{" "}
-                    <span className="text-amber font-semibold">$15,000/mo</span> Active Case
-                  </div>
-                </div>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-amber inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  See why each price <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-            </Link>
-          </section>
+
+
 
           {/* AETHERIS VS OTHERS — visible competitive strip */}
           <section
