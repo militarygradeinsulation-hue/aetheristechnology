@@ -56,6 +56,7 @@ const HeadToHeadPage = lazy(() => import("./pages/HeadToHeadPage"));
 const ReciprocationPage = lazy(() => import("./pages/ReciprocationPage"));
 const GoldenReportPage = lazy(() => import("./pages/GoldenReportPage"));
 const TechSolutionsPage = lazy(() => import("./pages/TechSolutionsPage"));
+const ToolInfoPage = lazy(() => import("./pages/ToolInfoPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const CareersLicensePage = lazy(() => import("./pages/CareersLicensePage"));
@@ -236,8 +237,9 @@ const App = () => (
                       <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
                       <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
                       <Route path="/try/:toolId" element={<TryToolPage />} />
-                      <Route path="/tech-solutions" element={<TechSolutionsPage />} />
-                      <Route path="/tech" element={<Navigate to="/tech-solutions" replace />} />
+                     <Route path="/tech-solutions" element={<TechSolutionsPage />} />
+                     <Route path="/tech-solutions/:toolId" element={<ToolInfoPage />} />
+                     <Route path="/tech" element={<Navigate to="/tech-solutions" replace />} />
 
                       {/* Reps now log into the new portal by default. Old portal preserved for admins only at /portal/legacy. */}
                       <Route path="/portal" element={<NewPortalPage />} />

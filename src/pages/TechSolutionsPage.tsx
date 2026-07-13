@@ -232,14 +232,12 @@ const TechSolutionsPage: React.FC = () => {
                       <ShoppingCart className="w-3 h-3 mr-1" /> Own it
                     </Button>
                   </div>
-                  {t.route && t.route !== `/try/${t.id}` && (
-                    <Link
-                      to={t.route}
-                      className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-amber/70 hover:text-amber transition-colors"
-                    >
-                      → View full page
-                    </Link>
-                  )}
+                  <Link
+                    to={`/tech-solutions/${t.id}`}
+                    className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-amber/70 hover:text-amber transition-colors"
+                  >
+                    → View full page
+                  </Link>
                 </div>
 
               </div>
