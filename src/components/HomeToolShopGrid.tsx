@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Cpu } from "lucide-react";
+import goldenReportHomeAsset from "@/assets/golden-report-home.png.asset.json";
+
 
 /**
  * Homepage CTA for the free Golden Report — rendered as an integrated-circuit
