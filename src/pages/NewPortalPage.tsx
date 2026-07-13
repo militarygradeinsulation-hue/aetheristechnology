@@ -34,6 +34,8 @@ import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
+import { EngagementBoard } from '@/components/portal/EngagementBoard';
+import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
