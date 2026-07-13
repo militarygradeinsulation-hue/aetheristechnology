@@ -436,6 +436,15 @@ const PortalPage: React.FC = () => {
           console.warn('Partner admin auto-login failed:', e);
         }
       }
+
+      // Reps land in the NEW portal by default. Admins previewing a rep code
+      // via ?adminPreview=1 stay on the legacy page.
+      const inAdminPreview =
+        new URLSearchParams(window.location.search).get('adminPreview') === '1';
+      if (data.profile.role !== 'partner' && !inAdminPreview) {
+        navigate('/portal', { replace: true });
+        return;
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed.';
       toast({ title: 'Login failed', description: msg, variant: 'destructive' });
