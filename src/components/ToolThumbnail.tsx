@@ -16,7 +16,8 @@ import forensicScanAllAsset from "@/assets/tools/forensic-scan-all.png.asset.jso
 const forensicScanAll = forensicScanAllAsset.url;
 import allInOneAsset from "@/assets/tools/all-in-one.jpg.asset.json";
 const allInOne = allInOneAsset.url;
-import contentCalendar from "@/assets/tools/content-calendar.jpg";
+import contentCalendarAsset from "@/assets/tools/content-calendar.jpg.asset.json";
+const contentCalendar = contentCalendarAsset.url;
 import playbookGeneratorAsset from "@/assets/tools/playbook-generator.jpg.asset.json";
 const playbookGenerator = playbookGeneratorAsset.url;
 import socialContentAsset from "@/assets/tools/social-content.jpg.asset.json";
