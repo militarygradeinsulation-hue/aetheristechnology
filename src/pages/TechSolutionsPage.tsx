@@ -193,15 +193,32 @@ const TechSolutionsPage: React.FC = () => {
                       >
                         <Sparkles className="w-3 h-3 mr-1 opacity-50" /> Back in {unlockHrs}h
                       </Button>
+                    ) : gated ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          toast.error("Enter your email above to unlock 3 free runs.");
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="flex-1 border-amber/30 text-amber/70 hover:bg-amber/5"
+                        title="Enter your email above to unlock free runs"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" /> Email to try
+                      </Button>
                     ) : (
                       <Button
                         asChild
                         variant="outline"
                         size="sm"
-                        className="flex-1 border-amber/40 text-amber hover:bg-amber/10"
+                        className={`flex-1 ${ownedByLicense ? "border-amber/70 text-amber bg-amber/10 hover:bg-amber/20" : "border-amber/40 text-amber hover:bg-amber/10"}`}
                       >
-                        <Link to={`/try/${t.id}`} onClick={() => recordTry(t.id)}>
-                          <Sparkles className="w-3 h-3 mr-1" /> Try free
+                        <Link
+                          to={`/try/${t.id}`}
+                          onClick={() => { if (!ownedByLicense && !hasFullAccess) recordTry(t.id); }}
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          {ownedByLicense || hasFullAccess ? "Open tool" : "Try free"}
                           <ArrowRight className="w-3 h-3 ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                         </Link>
                       </Button>
