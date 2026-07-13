@@ -43,7 +43,7 @@ export const SHOP_TOOLS: ShopTool[] = [
 export const SHOP_PRICES = {
   single:    { priceId: "tool_single_lifetime",    label: "1 Tool",         amount: 4000,   subtitle: "Lifetime access, memory attached" },
   triple:    { priceId: "tool_triple_lifetime",    label: "3 Tools",        amount: 10000,  subtitle: "Mix & match any 3 tools" },
-  unlimited: { priceId: "tool_unlimited_lifetime", label: "All Access",     amount: 100000, subtitle: "Every tool. Every future release." },
+  unlimited: { priceId: "tool_unlimited_lifetime", label: "All Access",     amount: 100000, subtitle: "Every tool. Every future release. Full Team access." },
 } as const;
 
 export type ShopPlan = keyof typeof SHOP_PRICES;
