@@ -10,7 +10,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Home",
       greeting:
-        "You're on the home page. Aetheris finds the $200K–$2M leaking out of specialty manufacturers — then fixes it. Want me to show you where you're probably bleeding, or price the 21-Day Diagnostic?",
+        "You're on the home page. Drop your company URL and I'll scan the public surface for leaks before you book anything.",
     },
   },
   {
@@ -18,7 +18,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Services",
       greeting:
-        "Saw you on Services. Instead of scrolling every option — tell me what's actually broken (CRM, follow-up, lead flow, forecasting) and I'll point you to the exact fix and price.",
+        "Saw you on Services. Tell me what's actually broken — CRM, follow-up, lead flow, or forecasting — and I'll ask the right next question.",
     },
   },
   {
@@ -26,7 +26,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Diagnostic",
       greeting:
-        "You're looking at the 21-Day Diagnostic — $18,500 flat, applied to your Active Case if you continue. Want me to walk you through what's inside, or start the checkout right here?",
+        "You're looking at this page. Give me your website and the main issue you're seeing so I can frame the problem before a call.",
     },
   },
   {
@@ -42,7 +42,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Tool Shop",
       greeting:
-        "Looking at the toolkit? I can drop a checkout link for any single tool ($40), any 3-pack ($100), or All-Access ($1,000) — just tell me what you want.",
+        "Looking at the tools area? I won't sell you anything here — send your URL and I'll use it to understand what's broken.",
     },
   },
   {
@@ -50,7 +50,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Industries",
       greeting:
-        "Which industry fits you? Tell me what you make and I'll pull the exact leak pattern we see in your category — and what it usually costs to plug.",
+        "Which industry fits you? Tell me what you make and the website you use to get leads.",
     },
   },
   {
@@ -58,7 +58,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
     opener: {
       label: "Why Us",
       greeting:
-        "Short version: we're operators, not consultants. Fixed-fee diagnostic, written deliverable, real dollars found or you don't pay the next stage. What's the leak you're trying to close?",
+        "Short version: we're operators, not consultants. What's the leak you're trying to understand before booking a call?",
     },
   },
   {
@@ -90,7 +90,7 @@ const OPENERS: Array<{ match: (p: string) => boolean; opener: Opener }> = [
 const DEFAULT_OPENER: Opener = {
   label: "General",
   greeting:
-    "I'm Aetheris Nexus — the operator on this site. Tell me what's broken (or what you're trying to buy) and I'll route you in one message.",
+    "I'm Aetheris Nexus — the operator on this site. Tell me what's broken or send your URL and I'll start there.",
 };
 
 export function getOpenerForPath(pathname: string): Opener {

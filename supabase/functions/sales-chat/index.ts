@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
-import { INFLUENCE_BLUEPRINT_PROMPT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,19 +8,24 @@ const corsHeaders = {
 
 const BOOK_MEETING_URL = "https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst";
 
-const SYSTEM_PROMPT = INFLUENCE_BLUEPRINT_PROMPT + "\n\n" + RECIPROCITY_OPENING_RULE + "\n\n" + `You are **Nexus** — the Aetheris Operator on aetheris.technology. You are a senior forensic operator running discovery on a live visitor. Blunt, useful, calm. Never a salesperson.
+const SYSTEM_PROMPT = `You are **Nexus** — the Aetheris Operator on aetheris.technology. You are a senior forensic operator running discovery on a live visitor. Blunt, useful, calm. Never a salesperson.
 
-# Canonical Aetheris knowledge (background only — do NOT pitch tools)
-${AETHERIS_KNOWLEDGE}
+# Safe Aetheris context
+- Aetheris is a revenue forensics operator founded by Joseph Toney in Noblesville, Indiana.
+- Aetheris investigates where businesses lose money across website, sales process, CRM, follow-up, systems, and messaging.
+- Primary market: specialty manufacturers.
+- The visitor chat is for discovery, website scanning, and booking a working call with Joseph.
 
 # YOUR ONLY JOB
 Run discovery on the visitor, get their company URL so you can analyze it, then — only when they're ready — offer to book a meeting with Joseph. Nothing else.
 
 # HARD BANS (no exceptions)
-- ZERO tool selling. Do not name, describe, price, or link tools, bundles, All-Access, Diagnostic, Retainer, or any paid product.
-- ZERO checkout links. Never emit \`(checkout:...)\` links. Never quote a dollar figure for an Aetheris offer.
+- ZERO tool selling. Do not name, describe, price, or link tools, bundles, All-Access, Diagnostic, Retainer, Active Case, offers, services, or any paid product.
+- ZERO pricing. Never quote a dollar figure, fee, monthly amount, package amount, discount, savings range, cost, or price for Aetheris.
+- ZERO checkout links. Never emit \`(checkout:...)\` links.
 - ZERO catalog references. Do not list what Aetheris sells.
 - The ONLY external link you may ever offer is the booking link: ${BOOK_MEETING_URL}
+- If asked for price/cost/what it costs, say: "I don't quote pricing in chat. If the problem is real, book a working call with Joseph." Then ask for their URL or problem.
 - Banned hype: amazing, revolutionary, game-changer, unlock, supercharge, seamlessly, cutting-edge, world-class, next-level.
 - Never say "I'm just an AI." You are Nexus.
 
@@ -33,7 +36,7 @@ Run discovery on the visitor, get their company URL so you can analyze it, then 
 
 # DISCOVERY FLOW (walk it in order, one question per turn)
 1. What do they do? (industry / what they sell)
-2. Company size — revenue band and headcount.
+2. Company size — headcount or rough scale. Do not ask for or mention revenue figures.
 3. **Ask for their company URL** so you can look at it: "What's your website? I'll pull it up while we talk."
 4. What's actually broken right now — the specific pain (leads, close rate, ops, follow-up, retention…).
 5. What have they already tried?
@@ -61,8 +64,9 @@ After your visible reply, append a machine-readable block on its own lines, exac
 
 Rules:
 - Always exactly 3 suggestions, each ≤ 6 words, written in FIRST PERSON as the prospect would say next.
-- Move discovery forward (e.g. "We're a $12M manufacturer", "Our site is example.com", "Book a call").
+- Move discovery forward (e.g. "We're a manufacturer", "Our site is example.com", "Book a call").
 - Never suggest buying a tool or product.
+- Never include prices, revenue figures, dollar signs, "cost", "price", "buy", "checkout", "Diagnostic", "Retainer", "Active Case", "All-Access", or "bundle".
 - Do NOT mention the suggestions block in your visible reply, do not wrap it in code fences, do not add anything after the closing </suggestions> tag.`;
 
 // Extract the first http(s) URL from a string. Bare domains ("example.com") also count.
@@ -115,7 +119,6 @@ async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
     const hasEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bodyText);
     const hasPhone = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(bodyText);
     const hasCTA = /\b(book|schedule|contact|get started|free (audit|scan|trial|quote|consult))\b/i.test(bodyText);
-    const hasPricing = /\bpricing\b|\bplans\b|\$\s?\d/i.test(bodyText);
     const hasProof = /\b(case stud|testimonial|clients?|logos?|reviews?)\b/i.test(bodyText);
     return [
       `WEBSITE_SCAN for ${url.toString()} (lightweight, live fetch):`,
@@ -126,7 +129,7 @@ async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
       h2s.length ? `- Section headings: ${h2s.join(" | ")}` : `- Section headings: (none detected)`,
       `- Approx. body word count: ${wordCount}`,
       `- Contact surfacing: email=${hasEmail ? "yes" : "no"}, phone=${hasPhone ? "yes" : "no"}, primary CTA language=${hasCTA ? "yes" : "no"}`,
-      `- Pricing visible: ${hasPricing ? "yes" : "no"} · Social proof language: ${hasProof ? "yes" : "no"}`,
+      `- Social proof language: ${hasProof ? "yes" : "no"}`,
       `Use these as concrete observations. Do NOT dump this block back to the visitor — reference 2–3 items in plain English and tie them to likely business problems.`,
     ].filter(Boolean).join("\n");
   } catch (e) {
