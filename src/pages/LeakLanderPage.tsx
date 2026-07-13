@@ -287,36 +287,6 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* AETHERIS VS OTHERS — visible competitive strip */}
-          <section
-            className="mt-6 max-w-4xl mx-auto animate-fade-in"
-            style={{ animationDelay: "205ms", animationFillMode: "both" }}
-            aria-label="Aetheris versus agencies, consultants, and software"
-          >
-            <div className="rounded-sm border border-crimson/30 bg-card/70 backdrop-blur-sm overflow-hidden">
-              <div className="px-4 py-2 border-b border-crimson/20 bg-crimson/[0.04]">
-                <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-crimson">Anti-Positioning · Read before comparing bids</div>
-                <div className="font-forensic text-base sm:text-lg font-bold leading-tight mt-0.5">
-                  Not an agency. Not a consultant. Not a software pitch.
-                </div>
-              </div>
-              <div className="grid sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10 text-xs">
-                {[
-                  { h: "Agencies", body: "Sell effort — retainers, activity reports, deliverables that measure motion instead of results.", tone: "muted" },
-                  { h: "Consultants", body: "Sell opinions — frameworks and slide decks that describe your problem back to you.", tone: "muted" },
-                  { h: "Software", body: "Sell tools — one more login, one more subscription your team won't use.", tone: "muted" },
-                  { h: "Aetheris", body: "Sells findings + removal. Named leaks. Dollar figures. Systems that eliminate the cause. Then the engagement ends.", tone: "amber" },
-                ].map((c) => (
-                  <div key={c.h} className={`p-3 ${c.tone === "amber" ? "bg-amber/[0.05]" : ""}`}>
-                    <div className={`font-mono text-[10px] uppercase tracking-widest mb-1 ${c.tone === "amber" ? "text-amber" : "text-foreground/60"}`}>
-                      {c.h}
-                    </div>
-                    <p className={`leading-snug ${c.tone === "amber" ? "text-foreground" : "text-foreground/75"}`}>{c.body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
 
 
 
