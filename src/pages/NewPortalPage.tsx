@@ -34,6 +34,8 @@ import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
+import { EngagementBoard } from '@/components/portal/EngagementBoard';
+import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
@@ -154,6 +156,23 @@ const NewPortalPage: React.FC = () => {
   // Remember preference on mount so the toggle sticks.
   useEffect(() => { setPortalStylePref('new'); }, []);
 
+  // Portal engagement — track seconds-online (heartbeat) + Golden Report opens.
+  const [activeTab, setActiveTab] = useState('start');
+  useEffect(() => {
+    if (!authed) return;
+    const stop = startHeartbeat();
+    return () => stop();
+  }, [authed]);
+  // Listen for nudge popup CTAs that ask to jump tabs.
+  useEffect(() => {
+    const jump = (e: Event) => {
+      const t = (e as CustomEvent).detail;
+      if (typeof t === 'string') setActiveTab(t);
+    };
+    window.addEventListener('portal-jump-tab', jump);
+    return () => window.removeEventListener('portal-jump-tab', jump);
+  }, []);
+
   if (!authed) {
     // Login form lives in the classic portal. Bounce to the legacy route to sign in;
     // classic portal detects `next=new` and returns the user to /portal after login.
@@ -241,8 +260,9 @@ const NewPortalPage: React.FC = () => {
       </header>
 
       {/* Activity + Leaderboard — up top so reps see their standing first */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4 space-y-4">
         <RepLeaderboard myCode={profile!.code} />
+        <EngagementBoard myCode={profile!.code} />
       </section>
 
       {/* Always-on dialer at top of portal */}
@@ -259,7 +279,7 @@ const NewPortalPage: React.FC = () => {
 
       {/* Tabs */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 pb-24">
-        <Tabs defaultValue="start" className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'golden') { logGoldenView(); } }} className="w-full">
 
           {(() => {
             const allTabs: Array<[string, string, any, boolean]> = [
