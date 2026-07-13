@@ -11,6 +11,7 @@ import { SHOP_TOOLS, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog"
 import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight, Trophy, Users } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
+import { EasyModeRecommender } from "@/components/EasyModeRecommender";
 import { toast } from "sonner";
 
 // Rich per-tool summaries — what it does, who it's for, what you walk away with.
@@ -261,8 +262,10 @@ const TechSolutionsPage: React.FC = () => {
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <main className="pt-28 pb-16 px-4 max-w-6xl mx-auto">
+          <EasyModeRecommender />
           {/* Hero */}
           <div className="mb-12 max-w-3xl">
+
             <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
               <Cpu className="w-2 h-2" /> Tech · Store
             </div>

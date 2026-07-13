@@ -255,3 +255,6 @@ verify_jwt = false
 
 [functions.creation-studio-brand]
 verify_jwt = false
+
+[functions.recommend-tools]
+verify_jwt = false
