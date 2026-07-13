@@ -155,9 +155,9 @@ const NewPortalPage: React.FC = () => {
   useEffect(() => { setPortalStylePref('new'); }, []);
 
   if (!authed) {
-    // Login form lives in the classic portal. Bounce there to sign in;
-    // once logged in the toggle in classic PortalPage brings them back.
-    return <Navigate to="/portal?next=new" replace />;
+    // Login form lives in the classic portal. Bounce to the legacy route to sign in;
+    // classic portal detects `next=new` and returns the user to /portal after login.
+    return <Navigate to="/portal/legacy?next=new" replace />;
   }
 
   const isPartner = profile!.role === 'partner';
