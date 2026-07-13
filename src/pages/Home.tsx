@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Search, Grid3x3, Loader2, FileSearch } from 'lucide-react';
+import { ArrowRight, Search, Grid3x3, Loader2 } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
 import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
-import detectiveModeCard from '@/assets/detective-mode-card.jpg.asset.json';
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
