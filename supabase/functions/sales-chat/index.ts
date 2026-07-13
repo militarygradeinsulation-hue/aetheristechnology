@@ -119,7 +119,6 @@ async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
     const hasEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(bodyText);
     const hasPhone = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(bodyText);
     const hasCTA = /\b(book|schedule|contact|get started|free (audit|scan|trial|quote|consult))\b/i.test(bodyText);
-    const hasPricing = /\bpricing\b|\bplans\b|\$\s?\d/i.test(bodyText);
     const hasProof = /\b(case stud|testimonial|clients?|logos?|reviews?)\b/i.test(bodyText);
     return [
       `WEBSITE_SCAN for ${url.toString()} (lightweight, live fetch):`,
@@ -130,7 +129,7 @@ async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
       h2s.length ? `- Section headings: ${h2s.join(" | ")}` : `- Section headings: (none detected)`,
       `- Approx. body word count: ${wordCount}`,
       `- Contact surfacing: email=${hasEmail ? "yes" : "no"}, phone=${hasPhone ? "yes" : "no"}, primary CTA language=${hasCTA ? "yes" : "no"}`,
-      `- Pricing visible: ${hasPricing ? "yes" : "no"} · Social proof language: ${hasProof ? "yes" : "no"}`,
+      `- Social proof language: ${hasProof ? "yes" : "no"}`,
       `Use these as concrete observations. Do NOT dump this block back to the visitor — reference 2–3 items in plain English and tie them to likely business problems.`,
     ].filter(Boolean).join("\n");
   } catch (e) {
