@@ -239,10 +239,13 @@ const App = () => (
                       <Route path="/tech-solutions" element={<TechSolutionsPage />} />
                       <Route path="/tech" element={<Navigate to="/tech-solutions" replace />} />
 
-                      <Route path="/portal" element={<PortalPage />} />
-                      <Route path="/portal/new" element={<NewPortalPage />} />
-                      <Route path="/partner-portal" element={<PortalPage />} />
-                      <Route path="/partner-portal/new" element={<NewPortalPage />} />
+                      {/* Reps now log into the new portal by default. Old portal preserved for admins only at /portal/legacy. */}
+                      <Route path="/portal" element={<NewPortalPage />} />
+                      <Route path="/portal/new" element={<Navigate to="/portal" replace />} />
+                      <Route path="/portal/legacy" element={<PortalPage />} />
+                      <Route path="/partner-portal" element={<NewPortalPage />} />
+                      <Route path="/partner-portal/new" element={<Navigate to="/partner-portal" replace />} />
+                      <Route path="/partner-portal/legacy" element={<PortalPage />} />
                       <Route path="/playbook/linkedin" element={<LinkedInPlaybookPage />} />
                       <Route path="/leak-report/:prospectId" element={<LeakReportPage />} />
                       <Route path="/news" element={<NewsPage />} />
