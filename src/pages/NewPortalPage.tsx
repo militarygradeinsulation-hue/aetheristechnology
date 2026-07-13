@@ -278,7 +278,7 @@ const NewPortalPage: React.FC = () => {
 
       {/* Tabs */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 pb-24">
-        <Tabs defaultValue="start" className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'golden') { logGoldenView(); } }} className="w-full">
 
           {(() => {
             const allTabs: Array<[string, string, any, boolean]> = [
