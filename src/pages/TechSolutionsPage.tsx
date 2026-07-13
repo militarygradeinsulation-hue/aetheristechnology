@@ -140,6 +140,8 @@ const TechSolutionsPage: React.FC = () => {
         {tools.map(t => {
           const info = TOOL_SUMMARIES[t.id];
           const locked = isToolLocked(t.id);
+          const gated = needsEmail(t.id);
+          const ownedByLicense = !hasFullAccess && isToolUnlockedByAccess(access, t.id);
           return (
             <div
               key={t.id}
