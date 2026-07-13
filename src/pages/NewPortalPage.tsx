@@ -33,6 +33,7 @@ import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
+import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
