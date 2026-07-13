@@ -876,13 +876,15 @@ const InfoTile: React.FC<{
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-border/40">
-          <button
-            type="button"
-            onClick={() => onOpenCaseFile(selected)}
+          <a
+            href={BOOK_MEETING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
             className="inline-flex items-center justify-center gap-2 bg-amber hover:bg-amber/90 text-background font-semibold px-4 py-2 rounded-sm transition-colors text-sm"
           >
-            Open the case file <ArrowRight className="w-4 h-4" />
-          </button>
+            Book an appointment <Calendar className="w-4 h-4" />
+          </a>
           <button
             type="button"
             onClick={onClose}
