@@ -139,6 +139,40 @@ const Home = () => {
             </div>
           </section>
 
+          {/* Featured Detective Mode */}
+          <section id="detective-mode" className="px-4 pb-10 scroll-mt-24">
+            <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-4 md:p-6 relative overflow-hidden">
+              <div className="grid md:grid-cols-5 gap-4 md:gap-6 items-center">
+                <div className="md:col-span-3 relative">
+                  <div className="absolute -inset-2 bg-amber/10 blur-2xl rounded-full opacity-40 pointer-events-none" />
+                  <img
+                    src={detectiveModeCard.url}
+                    alt="Detective Mode product card — deep forensic sweep on a single business surface, case file output, evidence-backed findings"
+                    className="relative w-full rounded-sm border border-amber/30 shadow-[0_20px_60px_-20px_hsl(var(--amber)/0.35)]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <FileSearch className="w-4 h-4 text-amber" />
+                    <span className="font-case text-[10px] uppercase tracking-widest text-amber">Single-surface forensics</span>
+                  </div>
+                  <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight">
+                    Detective Mode
+                  </h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    One target URL. One full case file. No fluff. We run the deep sweep, surface the evidence, and hand you the next moves.
+                  </p>
+                  <Link to="/detective" className="inline-block">
+                    <Button className="bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                      Open Detective Mode <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Public sandbox — try every ecosystem tool, nothing saved */}
           <section id="chaos-ecosystem-try" className="px-4 pb-6 scroll-mt-24">
             <div className="max-w-4xl mx-auto text-center mb-6">
