@@ -260,8 +260,9 @@ const NewPortalPage: React.FC = () => {
       </header>
 
       {/* Activity + Leaderboard — up top so reps see their standing first */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4 space-y-4">
         <RepLeaderboard myCode={profile!.code} />
+        <EngagementBoard myCode={profile!.code} />
       </section>
 
       {/* Always-on dialer at top of portal */}
