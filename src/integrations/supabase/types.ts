@@ -4732,6 +4732,42 @@ export type Database = {
         }
         Relationships: []
       }
+      rep_engagement_weekly: {
+        Row: {
+          code: string
+          created_at: string
+          golden_report_uses: number
+          heartbeats: number
+          last_heartbeat_at: string | null
+          rep_name: string | null
+          seconds_online: number
+          updated_at: string
+          week_start: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          golden_report_uses?: number
+          heartbeats?: number
+          last_heartbeat_at?: string | null
+          rep_name?: string | null
+          seconds_online?: number
+          updated_at?: string
+          week_start: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          golden_report_uses?: number
+          heartbeats?: number
+          last_heartbeat_at?: string | null
+          rep_name?: string | null
+          seconds_online?: number
+          updated_at?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       rep_idea_of_day: {
         Row: {
           body: string
