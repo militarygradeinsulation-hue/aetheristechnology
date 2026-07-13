@@ -1,0 +1,28 @@
+// Shared per-tool marketing copy (summary + bullets) reused by TechSolutionsPage
+// and the dedicated ToolInfoPage at /tech-solutions/:toolId.
+export const TOOL_INFO: Record<string, { summary: string; bullets: string[] }> = {
+  "website-scanner":      { summary: "Point it at any URL and get a live forensic sweep of the revenue leaks costing that site money right now.",  bullets: ["Live URL scan", "Ranked leak list", "Fix-first order"] },
+  "brand-contradictions": { summary: "Surfaces every spot where a brand's promise and its actual buyer experience don't match — trust killers, exposed.", bullets: ["Promise vs. reality", "Trust-gap map", "Copy fixes"] },
+  "friction-audit":       { summary: "Walks the buyer journey click-by-click and pins the exact steps where prospects quietly bail on the sale.",     bullets: ["Step-by-step audit", "Drop-off flags", "Priority fixes"] },
+  "strategic-questions":  { summary: "Generates the boardroom-grade questions leadership keeps avoiding — the ones that actually move the P&L.",       bullets: ["Custom to biz", "Boardroom tier", "Instant deck-ready"] },
+  "detective-mode":       { summary: "A deep forensic sweep on a single business surface — one target, full case file, no fluff.",                     bullets: ["Deep single-target", "Case file output", "Evidence-backed"] },
+  "forensic-scan-all":    { summary: "Runs every diagnostic tool at once and stitches the findings into one unified leak report.",                     bullets: ["All diagnostics", "One report", "Save hours"] },
+  "all-in-one":           { summary: "One prompt → blog post, social pack, and email sequence, all voice-locked and ready to publish.",                bullets: ["Blog + social + email", "One prompt", "On-brand"] },
+  "content-calendar":     { summary: "Builds 30 days of aligned, on-brand content in minutes so you never stare at a blank calendar again.",           bullets: ["30-day plan", "Voice-locked", "Auto-scheduled"] },
+  "playbook-generator":   { summary: "Turn a plain-English brief into a custom operating playbook for any function — sales, ops, hiring, anything.",   bullets: ["Any function", "Step-by-step", "Team-ready"] },
+  "social-content":       { summary: "An endless feed of voice-locked social posts that sound like you wrote them — because it learned how you write.", bullets: ["Voice-locked", "Endless supply", "Post-ready"] },
+  "content-engine":       { summary: "Long-form + short-form pipeline in one place. Feed it a topic, get a full content stack out.",                   bullets: ["Long + short form", "One pipeline", "Repurpose built-in"] },
+  "image-studio":         { summary: "On-brand imagery generated and watermarked in seconds — no stock photos, no designer bottleneck.",               bullets: ["On-brand images", "Auto-watermark", "Seconds not days"] },
+  "creation-studio":      { summary: "Mixed-media asset generator with memory — remembers your brand across every image, doc, and post.",              bullets: ["Mixed media", "Brand memory", "One workspace"] },
+  "easy-mode":            { summary: "Paste any output and it rewrites it in plain-English, paste-ready copy your team can actually use.",             bullets: ["Plain English", "Paste-ready", "Any input"] },
+  "tool-generator":       { summary: "Describe a mini-tool in plain English and it builds it — your own custom instrument in minutes.",                bullets: ["Plain-English brief", "Custom tools", "Minutes to build"] },
+  "golden-report":        { summary: "The flagship forensic report that turns a diagnostic into a paid monthly retainer — the deliverable clients pay to keep.", bullets: ["Retainer-closer", "Full case file", "Boardroom-ready"] },
+  "head-to-head":         { summary: "Side-by-side competitor comparison showing exactly where the prospect wins, loses, and can pull ahead.",         bullets: ["Competitor teardown", "Win/lose map", "Move recommendations"] },
+  "resume-forensics":     { summary: "Audits and rewrites a resume to beat ATS filters and land more interviews — hand-off ready deliverable.",        bullets: ["ATS-proof rewrite", "Interview-ready", "Instant PDF"] },
+  "reciprocation":        { summary: "Generates a free, high-value custom report you send cold — opens doors that cold email never will.",             bullets: ["Cold-door opener", "Fully custom", "Reciprocity built-in"] },
+  "ai-checklist":         { summary: "Scores any business on AI readiness in one pass — perfect opener for selling automation and AI services.",       bullets: ["Readiness score", "Gap list", "Sales opener"] },
+  "nexus-iq":             { summary: "Builds the pre-meeting dossier that makes you the smartest person in the room before you even walk in.",         bullets: ["Deep dossier", "Talking points", "Meeting-ready"] },
+  "sales-scripts":        { summary: "Battle-tested cold, warm, and follow-up scripts so you always know exactly what to say on every call.",          bullets: ["Cold + warm + follow-up", "Objection-ready", "Copy-paste"] },
+  "follow-up-plan":       { summary: "Plug-and-play post-meeting email sequences that keep deals alive when prospects go quiet.",                       bullets: ["Post-meeting plays", "Silence-breakers", "Deal savers"] },
+  "linkedin-playbook":    { summary: "The complete LinkedIn system that turns your profile into a lead-generating machine — profile, posts, DMs.",     bullets: ["Full LI system", "Profile + posts + DMs", "Lead engine"] },
+};
