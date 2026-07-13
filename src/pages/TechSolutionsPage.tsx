@@ -82,7 +82,12 @@ const TechSolutionsPage: React.FC = () => {
     return () => clearInterval(i);
   }, []);
   const isLockedActive = tries.ids.length >= 3 && (now - tries.firstAt) < LOCK_WINDOW_MS;
-  const isToolLocked = (id: string) => isLockedActive && !tries.ids.includes(id);
+  const hasFullAccess = access.unlockedAll;
+  const isToolLocked = (id: string) => {
+    if (hasFullAccess || isToolUnlockedByAccess(access, id)) return false;
+    return isLockedActive && !tries.ids.includes(id);
+  };
+  const needsEmail = (id: string) => !hasFullAccess && !isToolUnlockedByAccess(access, id) && !access.email;
   const recordTry = useCallback((id: string) => {
     setTries(prev => {
       if (prev.ids.includes(id)) return prev;
