@@ -13,6 +13,7 @@ import { ChaosMindMap } from '@/components/ChaosMindMap';
 import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
 
 import { supabase } from '@/integrations/supabase/client';
+import { captureToolLead } from '@/lib/toolLeadCapture';
 import { toast } from 'sonner';
 
 
@@ -32,15 +33,12 @@ const Home = () => {
     }
     setUnlocking(true);
     try {
-      try {
-        await supabase.from('tool_leads').insert({
-          email: trimmed,
-          tool_slug: 'ecosystem',
-          tool_title: 'Aetheris Ecosystem',
-          source: 'home_ecosystem_gate',
-          user_agent: navigator.userAgent,
-        });
-      } catch (_) { /* non-fatal */ }
+      await captureToolLead({
+        email: trimmed,
+        tool_slug: 'ecosystem',
+        tool_title: 'Aetheris Ecosystem',
+        source: 'home_ecosystem_gate',
+      });
       sessionStorage.setItem('ecosystem_auth_v1', '1');
       sessionStorage.setItem('ecosystem_code_v1', `EMAIL ${trimmed}`);
       toast.success('Access granted. Loading the toolset…');

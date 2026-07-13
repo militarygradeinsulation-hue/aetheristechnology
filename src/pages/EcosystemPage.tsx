@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { captureToolLead } from '@/lib/toolLeadCapture';
 import { toast } from 'sonner';
 
 const AUTH_KEY = 'ecosystem_auth_v1';
@@ -217,15 +218,12 @@ const EcosystemPage: React.FC = () => {
       // Email path — anyone who drops an email gets in
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
       if (isEmail) {
-        try {
-          await supabase.from('tool_leads').insert({
-            email: trimmed.toLowerCase(),
-            tool_slug: 'ecosystem',
-            tool_title: 'Aetheris Ecosystem',
-            source: 'ecosystem_email_gate',
-            user_agent: navigator.userAgent,
-          });
-        } catch (_) { /* non-fatal */ }
+        await captureToolLead({
+          email: trimmed.toLowerCase(),
+          tool_slug: 'ecosystem',
+          tool_title: 'Aetheris Ecosystem',
+          source: 'ecosystem_email_gate',
+        });
         const label = `EMAIL ${trimmed.toLowerCase()}`;
         sessionStorage.setItem(AUTH_KEY, '1');
         sessionStorage.setItem(CODE_KEY, label);
