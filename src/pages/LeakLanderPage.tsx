@@ -187,24 +187,6 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* WHAT WE SELL — under the signature logo */}
-          <section
-            className="mt-6 max-w-6xl mx-auto text-center animate-fade-in"
-            aria-label="What Aetheris sells"
-          >
-            <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
-                // What We Sell
-              </div>
-              <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-medium leading-relaxed max-w-5xl mx-auto">
-                We scan your company for its biggest weaknesses using our tools that don't exist anywhere. Next we fix those weaknesses so you don't have to.
-              </p>
-              <p className="mt-4 text-base sm:text-lg md:text-xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
-                Tell me what your biggest issue is and let's see if I can fix it.
-              </p>
-            </div>
-          </section>
-
           {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
           <section
             className="mt-4 max-w-6xl mx-auto animate-fade-in"
