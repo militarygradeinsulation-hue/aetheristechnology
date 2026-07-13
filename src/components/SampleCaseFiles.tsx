@@ -323,15 +323,25 @@ function DossierCard({ file }: { file: CaseFile }) {
       </dl>
 
       <div className="px-5 pt-6 text-center">
-        <h4 className="font-forensic text-sm md:text-lg">{file.headline}</h4>
+        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-amber mb-1.5">Outcome we can deliver</div>
+        <div className="font-forensic text-2xl md:text-3xl font-bold text-amber drop-shadow-[0_0_18px_rgba(217,169,58,0.24)]">
+          {file.total}<span className="text-base md:text-lg text-amber/60 tracking-widest"> /YR</span> back to margin
+        </div>
+        <p className="text-xs text-muted-foreground max-w-md mx-auto mt-2 leading-relaxed">
+          Recovered by removing the named leaks surfaced in the full investigation.
+        </p>
       </div>
 
       <div className="px-5 pt-4 text-center">
-        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Estimated Annual Leakage</div>
-        <div className="font-case text-2xl md:text-3xl font-semibold text-amber mt-2 drop-shadow-[0_0_18px_rgba(217,169,58,0.24)]">
-          {file.total}<span className="text-sm text-amber/60 tracking-widest"> /YR</span>
+        <h4 className="font-forensic text-sm md:text-base text-foreground/70">Why the file was opened: {file.headline}</h4>
+      </div>
+
+      <div className="px-5 pt-4 text-center">
+        <div className="font-case text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Leakage identified</div>
+        <div className="font-case text-xl md:text-2xl font-semibold text-amber/70 mt-1">
+          {file.total}<span className="text-sm text-amber/50 tracking-widest"> /YR</span>
         </div>
-        <p className="text-xs text-muted-foreground max-w-md mx-auto mt-3 leading-relaxed">
+        <p className="text-xs text-muted-foreground max-w-md mx-auto mt-2 leading-relaxed">
           Estimate derived from disclosed inputs. Preliminary by definition. Confirmation requires the full investigation.
         </p>
       </div>
