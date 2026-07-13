@@ -56,15 +56,12 @@ export function MindMapEmailGate({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      try {
-        await supabase.from("tool_leads").insert({
-          email: lower,
-          tool_slug: "chaos-mind-map",
-          tool_title: "Chaos Mind Map",
-          source: "home_mindmap_gate",
-          user_agent: navigator.userAgent,
-        });
-      } catch { /* non-fatal */ }
+      await captureToolLead({
+        email: lower,
+        tool_slug: "chaos-mind-map",
+        tool_title: "Chaos Mind Map",
+        source: "home_mindmap_gate",
+      });
       localStorage.setItem(STORAGE_KEY, "1");
       setUnlocked(true);
       toast.success("Unlocked. Explore every leak.");

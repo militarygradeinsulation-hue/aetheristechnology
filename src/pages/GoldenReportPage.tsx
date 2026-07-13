@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
+import { ToolEmailGate } from "@/components/ToolEmailGate";
 import { ScrollText } from "lucide-react";
 
 const GoldenReportPage: React.FC = () => {
@@ -40,7 +41,15 @@ const GoldenReportPage: React.FC = () => {
                 evidence you can search or ask questions of.
               </p>
             </div>
-            <ForensicScanAllPanel />
+            <ToolEmailGate
+              toolSlug="golden-report"
+              toolTitle="Golden Report"
+              source="golden_report_page"
+              headline="Drop your email to run the Golden Report."
+              subhead="One URL, one email. You'll get the full 14-chapter forensic case file — and our team gets pinged the moment a real operator is on the scan."
+            >
+              <ForensicScanAllPanel />
+            </ToolEmailGate>
           </div>
         </div>
         <Footer />

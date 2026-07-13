@@ -217,15 +217,12 @@ const EcosystemPage: React.FC = () => {
       // Email path — anyone who drops an email gets in
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
       if (isEmail) {
-        try {
-          await supabase.from('tool_leads').insert({
-            email: trimmed.toLowerCase(),
-            tool_slug: 'ecosystem',
-            tool_title: 'Aetheris Ecosystem',
-            source: 'ecosystem_email_gate',
-            user_agent: navigator.userAgent,
-          });
-        } catch (_) { /* non-fatal */ }
+        await captureToolLead({
+          email: trimmed.toLowerCase(),
+          tool_slug: 'ecosystem',
+          tool_title: 'Aetheris Ecosystem',
+          source: 'ecosystem_email_gate',
+        });
         const label = `EMAIL ${trimmed.toLowerCase()}`;
         sessionStorage.setItem(AUTH_KEY, '1');
         sessionStorage.setItem(CODE_KEY, label);

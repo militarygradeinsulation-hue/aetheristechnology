@@ -74,16 +74,13 @@ export const TechSolutionsAccessBar: React.FC = () => {
     if (!emailValid) { toast.error("Enter a valid email."); return; }
     setSavingEmail(true);
     const clean = email.trim().toLowerCase();
-    // Log the lead (non-fatal)
-    try {
-      await supabase.from("tool_leads").insert({
-        email: clean,
-        tool_slug: "tech-solutions",
-        tool_title: "Tech Solutions Store",
-        source: "tech_solutions_access_bar",
-        user_agent: navigator.userAgent,
-      });
-    } catch { /* noop */ }
+    // Log the lead + notify admin
+    await captureToolLead({
+      email: clean,
+      tool_slug: "tech-solutions",
+      tool_title: "Tech Solutions Store",
+      source: "tech_solutions_access_bar",
+    });
     setAccess({ ...access, email: clean });
     setSavingEmail(false);
     toast.success("Email saved — 3 free runs per tool unlocked.");
