@@ -370,17 +370,21 @@ const PortalPage: React.FC = () => {
     if (hasValidPortalSession() && !profile) {
       const p = getPortalProfile();
       setProfile(p);
-      // Partner sessions normally land on the Admin Console, but NOT when
-      // we're inside the admin dashboard's "Company Portal, Live Preview"
-      // iframe. Otherwise /portal redirects to /admin, which embeds /portal
-      // again, recursing forever (the stacked "Company Portal" widgets the
-      // user was seeing).
       const inAdminPreviewIframe =
         typeof window !== 'undefined' &&
         (new URLSearchParams(window.location.search).get('adminPreview') === '1' ||
           window.top !== window.self);
       if (p?.role === 'partner' && hasValidAdminToken() && !inAdminPreviewIframe) {
         navigate('/admin', { replace: true });
+        return;
+      }
+      // Reps default to the new portal. Only stay on the legacy page if the
+      // user explicitly toggled the classic style, or is an admin previewing.
+      const wantsNew =
+        new URLSearchParams(window.location.search).get('next') === 'new' ||
+        (() => { try { return localStorage.getItem('aetheris.portalStyle') !== 'classic'; } catch { return true; } })();
+      if (p?.role !== 'partner' && wantsNew && !inAdminPreviewIframe) {
+        navigate('/portal', { replace: true });
       }
     }
   }, [profile, navigate]);
