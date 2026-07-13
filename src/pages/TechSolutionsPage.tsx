@@ -292,6 +292,11 @@ const TechSolutionsPage: React.FC = () => {
             )}
           </div>
 
+          {/* Access bar — email or code required to run tools free */}
+          <TechSolutionsAccessBar />
+
+
+
           {/* Pricing tiers */}
           <section className="mb-14 grid md:grid-cols-3 gap-4">
             <div className="forensic-tile rounded-sm border border-amber/30 p-5">
