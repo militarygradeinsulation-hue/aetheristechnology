@@ -56,6 +56,7 @@ const HeadToHeadPage = lazy(() => import("./pages/HeadToHeadPage"));
 const ReciprocationPage = lazy(() => import("./pages/ReciprocationPage"));
 const GoldenReportPage = lazy(() => import("./pages/GoldenReportPage"));
 const TechSolutionsPage = lazy(() => import("./pages/TechSolutionsPage"));
+const ToolInfoPage = lazy(() => import("./pages/ToolInfoPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
 const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const CareersLicensePage = lazy(() => import("./pages/CareersLicensePage"));
