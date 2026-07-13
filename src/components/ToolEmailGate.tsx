@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { captureToolLead } from "@/lib/toolLeadCapture";
 import { toast } from "sonner";
 import { Loader2, Lock, ScanLine } from "lucide-react";
+import { readAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
 
 interface Props {
   toolSlug: string;
