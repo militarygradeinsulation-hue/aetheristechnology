@@ -295,12 +295,23 @@ export function HomeToolShopGrid() {
                   </span>
                 </div>
 
-                <h2 className="font-forensic text-2xl sm:text-4xl font-extrabold leading-tight mb-3">
+                <h2 className="font-forensic text-2xl sm:text-4xl font-extrabold leading-tight mb-5">
                   Check your{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber to-amber/50">
                     company FREE
                   </span>
                 </h2>
+
+                {/* Golden Report preview image */}
+                <Link to="/golden-report" aria-label="Open the free Golden Report">
+                  <img
+                    src={goldenReportHomeAsset.url}
+                    alt="The Golden Report forensic preview card: leak score, priority fixes, and annual loss estimate"
+                    className="mx-auto mb-6 rounded-md border border-amber/30 shadow-[0_0_40px_-10px_hsl(var(--amber)/0.35)] transition-transform duration-300 hover:scale-[1.02] max-h-[320px] sm:max-h-[380px] w-auto object-contain"
+                    loading="lazy"
+                  />
+                </Link>
+
 
                 <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto mb-6">
                   Drop one URL. Aetheris runs the full forensic stack <span className="text-amber">and</span> builds a fully branded content kit — 14-chapter case file, positioning message, hero imagery, per-platform social posts, and a 30-day schedule.
