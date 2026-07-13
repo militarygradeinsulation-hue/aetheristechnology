@@ -133,21 +133,27 @@ const LeakLanderPage: React.FC = () => {
 
           {/* WHAT WE SELL — top of page */}
           <section
-            className="mt-4 max-w-6xl mx-auto text-center animate-fade-in"
+            className="mt-6 max-w-6xl mx-auto text-center animate-fade-in"
             aria-label="What Aetheris sells"
           >
-            <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
+            <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18">
+              <div className="font-mono text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-amber mb-5">
                 // What We Sell
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-foreground/90 font-medium leading-relaxed max-w-5xl mx-auto">
-                We scan your company for its biggest weaknesses using our tools that don't exist anywhere. Next we fix those weaknesses so you don't have to.
+              <p className="text-lg sm:text-xl md:text-2xl text-foreground font-medium leading-relaxed max-w-5xl mx-auto">
+                We scan your company for its{" "}
+                <span className="text-crimson font-semibold">biggest weaknesses</span>{" "}
+                using our tools that don't exist anywhere. Next we{" "}
+                <span className="text-amber font-semibold">fix those weaknesses</span>{" "}
+                so you don't have to.
               </p>
-              <p className="mt-4 text-base sm:text-lg md:text-xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
-                Tell me what your biggest issue is and let's see if I can fix it.
+              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
+                Tell me what your biggest issue is and{" "}
+                <span className="text-gradient-amber">let's see if I can fix it.</span>
               </p>
             </div>
           </section>
+
 
           {/* Anti-AI positioning */}
           <section className="mt-6 max-w-6xl mx-auto text-center animate-fade-in">
