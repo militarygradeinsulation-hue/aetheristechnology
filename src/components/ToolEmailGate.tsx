@@ -29,10 +29,25 @@ export function ToolEmailGate({ toolSlug, toolTitle, source, headline, subhead, 
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(storageKey) === "1") setUnlocked(true);
-    } catch { /* ignore */ }
-  }, [storageKey]);
+    const check = () => {
+      try {
+        if (localStorage.getItem(storageKey) === "1") { setUnlocked(true); return; }
+      } catch { /* ignore */ }
+      // Auto-unlock when the visitor has staff/rep/all-access via Tech Solutions
+      const a = readAccess();
+      if (a.unlockedAll || isToolUnlockedByAccess(a, toolSlug)) {
+        setUnlocked(true);
+      }
+    };
+    check();
+    const on = () => check();
+    window.addEventListener("tech-access-changed", on);
+    window.addEventListener("storage", on);
+    return () => {
+      window.removeEventListener("tech-access-changed", on);
+      window.removeEventListener("storage", on);
+    };
+  }, [storageKey, toolSlug]);
 
   const unlockAndRemember = () => {
     try { localStorage.setItem(storageKey, "1"); } catch { /* ignore */ }
