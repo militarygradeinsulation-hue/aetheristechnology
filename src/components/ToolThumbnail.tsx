@@ -48,7 +48,8 @@ import salesScriptsAsset from "@/assets/tools/sales-scripts.jpg.asset.json";
 const salesScripts = salesScriptsAsset.url;
 import followUpPlanAsset from "@/assets/tools/follow-up-plan.jpg.asset.json";
 const followUpPlan = followUpPlanAsset.url;
-import linkedinPlaybook from "@/assets/tools/linkedin-playbook.jpg";
+import linkedinPlaybookAsset from "@/assets/tools/linkedin-playbook.jpg.asset.json";
+const linkedinPlaybook = linkedinPlaybookAsset.url;
 
 const IMAGES: Record<string, string> = {
   "website-scanner": websiteScanner,
