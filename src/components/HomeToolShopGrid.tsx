@@ -13,7 +13,7 @@ export function HomeToolShopGrid() {
   const pins = Array.from({ length: 10 });
 
   return (
-    <section className="mt-6 max-w-5xl mx-auto animate-fade-in">
+    <section className="mt-6 max-w-6xl mx-auto animate-fade-in">
       <div className="relative group">
         {/* Ambient board glow */}
         <div className="absolute -inset-4 bg-gradient-to-tr from-amber/15 via-amber/[0.04] to-transparent blur-3xl opacity-70 pointer-events-none" />
