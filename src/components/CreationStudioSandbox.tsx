@@ -418,13 +418,11 @@ export function CreationStudioSandbox() {
               </Button>
             </div>
           </div>
-          {/* Preview styled with the extracted palette */}
+          {/* Preview — readable app defaults, brand accent used only on border */}
           <div
-            className={`rounded-sm p-5 border ${kind === "calendar" ? "overflow-x-auto" : ""}`}
+            className={`rounded-sm p-5 border bg-background/80 text-foreground ${kind === "calendar" ? "overflow-x-auto" : ""}`}
             style={{
-              background: brand?.colors.find(c => /background|surface|base/i.test(c.role))?.hex || "hsl(var(--background))",
               borderColor: brand?.colors[0]?.hex || "hsl(var(--amber))",
-              color: brand?.colors.find(c => /text|foreground|primary_text/i.test(c.role))?.hex || "hsl(var(--foreground))",
               fontFamily: brand?.fonts[0] ? `"${brand.fonts[0]}", ui-sans-serif, system-ui` : undefined,
             }}
           >
