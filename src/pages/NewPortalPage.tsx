@@ -33,6 +33,7 @@ import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
+import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
@@ -239,8 +240,14 @@ const NewPortalPage: React.FC = () => {
         </div>
       </header>
 
+      {/* Activity + Leaderboard — up top so reps see their standing first */}
+      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4">
+        <RepLeaderboard myCode={profile!.code} />
+      </section>
+
       {/* Always-on dialer at top of portal */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 pt-2 pb-4">
+
         <div className="rounded-xl border border-amber-400/25 bg-black/40 backdrop-blur-sm p-4">
           <div className="flex items-center gap-2 mb-3">
             <Phone className="w-4 h-4 text-amber-400" />
