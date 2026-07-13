@@ -50,6 +50,7 @@ const TechSolutionsPage: React.FC = () => {
   const [buyOpen, setBuyOpen] = useState(false);
   const [plan, setPlan] = useState<ShopPlan>("single");
   const [preselected, setPreselected] = useState<string[]>([]);
+  const [access] = useTechAccess();
 
   const openBuy = (p: ShopPlan, ids: string[] = []) => {
     setPlan(p);
