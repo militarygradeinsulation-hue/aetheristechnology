@@ -46,7 +46,8 @@ import nexusIqAsset from "@/assets/tools/nexus-iq.png.asset.json";
 const nexusIq = nexusIqAsset.url;
 import salesScriptsAsset from "@/assets/tools/sales-scripts.jpg.asset.json";
 const salesScripts = salesScriptsAsset.url;
-import followUpPlan from "@/assets/tools/follow-up-plan.jpg";
+import followUpPlanAsset from "@/assets/tools/follow-up-plan.jpg.asset.json";
+const followUpPlan = followUpPlanAsset.url;
 import linkedinPlaybook from "@/assets/tools/linkedin-playbook.jpg";
 
 const IMAGES: Record<string, string> = {
