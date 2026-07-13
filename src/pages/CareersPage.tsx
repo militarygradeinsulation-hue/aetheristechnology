@@ -212,45 +212,6 @@ const CareersPage = () => {
                 </div>
               </div>
 
-              {/* THE MATH */}
-              <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">// the math, plainly</div>
-                <div className="rounded-xl border border-amber/20 bg-background/40 overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-amber/10 text-foreground/80 font-mono text-[11px] uppercase tracking-wider">
-                      <tr>
-                        <th className="text-left p-3">Product referred</th>
-                        <th className="text-right p-3">Price</th>
-                        <th className="text-right p-3 text-emerald-400">You earn (40%)</th>
-                        <th className="text-right p-3 text-foreground/60">Aetheris (60%)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-amber/10">
-                      {[
-                        ['Chaos Ecosystem — Single Tool (lifetime)', 40, 16, 24],
-                        ['Chaos Ecosystem — 3-Tool Bundle (lifetime)', 100, 40, 60],
-                        ['Chaos Ecosystem — All Access (lifetime)', 1000, 400, 600],
-                        ['Signal Pack — One-day forensic snapshot', 2500, 1000, 1500],
-                        ['Revenue Pack — 2-week sales forensics', 5000, 2000, 3000],
-                        ['Operator Suite — 3-week embed', 10000, 4000, 6000],
-                        ['21-Day Revenue Diagnostic (flagship)', 18500, 7400, 11100],
-                        ['Active Case engagement (monthly)', 15000, 6000, 9000],
-                      ].map(([label, price, you, us]) => (
-                        <tr key={label as string} className="hover:bg-amber/5">
-                          <td className="p-3 text-foreground/90">{label}</td>
-                          <td className="p-3 text-right font-mono text-foreground/80">${(price as number).toLocaleString()}</td>
-                          <td className="p-3 text-right font-mono text-emerald-400 font-semibold">${(you as number).toLocaleString()}</td>
-                          <td className="p-3 text-right font-mono text-foreground/60">${(us as number).toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                  <strong className="text-amber">Break-even math:</strong> the $500 license pays for itself at <strong className="text-foreground">$1,250 in tracked sales</strong> — that's 32 single-tool referrals, 2 All-Access referrals, or one Signal Pack. One 21-Day Diagnostic referral pays the license back almost 15 times over. Every dollar after that is yours to keep for the rest of the license year.
-                </p>
-              </div>
-
               {/* HOW IT WORKS — 5 steps */}
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">// how to succeed — 5 steps</div>
