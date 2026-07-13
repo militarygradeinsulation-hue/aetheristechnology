@@ -37,8 +37,20 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => (
         {c.category}
       </span>
     </div>
-    <h3 className="font-forensic text-lg font-bold leading-snug mb-1">{c.title}</h3>
-    <div className="text-amber font-case text-xs uppercase tracking-widest mb-3">{c.headline}</div>
+
+    <div className="mb-3 border-l-4 border-amber pl-3">
+      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Result / Outcome</div>
+      <div className="font-forensic text-xl md:text-2xl font-bold text-amber leading-tight">
+        {c.outcome}
+      </div>
+      {c.headline !== c.outcome && (
+        <div className="text-muted-foreground font-case text-xs uppercase tracking-widest mt-1.5">
+          {c.headline}
+        </div>
+      )}
+    </div>
+
+    <h3 className="font-forensic text-base font-bold leading-snug mb-3">{c.title}</h3>
 
     <dl className="space-y-2 text-sm text-foreground/85 mb-3">
       <div>
@@ -54,6 +66,7 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => (
         <dd>{c.outcome}</dd>
       </div>
     </dl>
+
 
     <div className="mt-auto pt-3 border-t border-border/60 text-xs text-muted-foreground space-y-3">
       <div>
