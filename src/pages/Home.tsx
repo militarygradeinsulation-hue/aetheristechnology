@@ -13,6 +13,7 @@ import { ChaosMindMap } from '@/components/ChaosMindMap';
 import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
 
 import { supabase } from '@/integrations/supabase/client';
+import { captureToolLead } from '@/lib/toolLeadCapture';
 import { toast } from 'sonner';
 
 

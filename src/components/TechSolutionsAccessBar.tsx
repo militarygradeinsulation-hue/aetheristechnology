@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { captureToolLead } from "@/lib/toolLeadCapture";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KeyRound, Mail, Check, Loader2, Unlock, LogOut } from "lucide-react";

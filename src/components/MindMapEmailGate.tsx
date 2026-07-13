@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { captureToolLead } from "@/lib/toolLeadCapture";
 import { toast } from "sonner";
 import { Loader2, Lock } from "lucide-react";
 
