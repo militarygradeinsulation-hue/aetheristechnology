@@ -51,7 +51,7 @@ const TechSolutionsPage: React.FC = () => {
   const [buyOpen, setBuyOpen] = useState(false);
   const [plan, setPlan] = useState<ShopPlan>("single");
   const [preselected, setPreselected] = useState<string[]>([]);
-  const [access] = useTechAccess();
+  const [access, setAccess] = useTechAccess();
 
   const openBuy = (p: ShopPlan, ids: string[] = []) => {
     setPlan(p);
@@ -115,7 +115,8 @@ const TechSolutionsPage: React.FC = () => {
       if (code && code.trim() === "9822") {
         try { localStorage.removeItem(LOCK_KEY); } catch {}
         setTries({ ids: [], firstAt: 0 });
-        window.alert("Unlocked. All tools available again.");
+        setAccess({ ...access, code: "STAFF", plan: "staff", unlockedAll: true, toolIds: [] });
+        window.alert("Staff unlocked. Every tool is free — no email required.");
       } else if (code !== null) {
         window.alert("Invalid code.");
       }
