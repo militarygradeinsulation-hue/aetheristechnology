@@ -72,20 +72,25 @@ const LeakLanderPage: React.FC = () => {
         />
 
 
-        {/* LinkedIn premium offer banner — slim, above navbar */}
-        <a
-          href="https://www.linkedin.com/in/thejosephtoney"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative z-30 block w-full text-amber-50 border-b border-amber/30 transition-colors hover:brightness-110"
-          style={{ backgroundColor: 'hsl(36 75% 14%)' }}
+        {/* Free tools banner — value-first, prominent */}
+        <Link
+          to="/ecosystem"
+          className="relative z-30 block w-full border-b-2 border-amber/60 transition-all hover:brightness-125 group"
+          style={{ background: 'linear-gradient(90deg, hsl(36 75% 14%) 0%, hsl(36 80% 22%) 50%, hsl(36 75% 14%) 100%)' }}
         >
-          <div className="max-w-6xl mx-auto px-4 py-1 text-center text-[11px] sm:text-xs font-medium truncate">
-            <span className="font-case uppercase tracking-widest text-amber mr-2">Limited</span>
-            Connect on LinkedIn — get a <span className="text-amber font-semibold">free premium analysis</span>
-            <span className="ml-2 underline underline-offset-2">Connect →</span>
+          <div className="max-w-6xl mx-auto px-4 py-3 text-center">
+            <div className="font-case uppercase tracking-[0.2em] text-[10px] sm:text-xs text-amber/90 mb-1">
+              // Free · No signup · No pitch
+            </div>
+            <div className="font-forensic text-lg sm:text-2xl md:text-3xl font-bold text-amber leading-tight">
+              Try My Free Tools
+              <span className="ml-3 inline-block text-amber-50 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+            <div className="text-[11px] sm:text-sm text-amber-50/80 mt-1">
+              I'd rather help you first than sell to you. Use the whole toolkit on the house.
+            </div>
           </div>
-        </a>
+        </Link>
 
         <Navbar onContactClick={() => {}} />
 
