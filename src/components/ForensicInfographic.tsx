@@ -31,7 +31,8 @@ export const ForensicInfographic: React.FC<ForensicInfographicProps> = ({
   return (
     <article className="forensic-tile rounded-sm border border-border/60 p-5 md:p-7">
       <div className={`grid gap-6 md:gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] items-center ${reverse ? 'md:[&>*:first-child]:order-2' : ''}`}>
-        <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+        <div className="thumb-frame relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+          <span className="thumb-hairline" />
           <img
             src={image}
             alt={imageAlt}
@@ -40,7 +41,7 @@ export const ForensicInfographic: React.FC<ForensicInfographicProps> = ({
             loading="lazy"
             className="w-full h-auto block aspect-square object-cover"
           />
-          <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">
+          <span className="absolute bottom-2 right-2 z-10 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">
             Aetheris AI Studio
           </span>
         </div>
