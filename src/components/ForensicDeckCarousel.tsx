@@ -75,7 +75,7 @@ export const ForensicDeckCarousel: React.FC = () => {
               loading="lazy"
               draggable={false}
             />
-            <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-background/70 backdrop-blur border border-white/15 text-[10px] font-mono text-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-background/70 backdrop-blur border border-white/15 text-[10px] font-mono text-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity">
               <Maximize2 className="w-3 h-3" /> Expand
             </span>
           </button>
