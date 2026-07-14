@@ -134,7 +134,8 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
+      <TooltipProvider delayDuration={150}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
         {grade && (
           <StatCard
             icon={<Award className="w-3.5 h-3.5" />}
