@@ -91,7 +91,7 @@ export function ToolThumbnail({ id, className = "", alt }: Props) {
         className
       }
     >
-      <div className="absolute inset-0 thumb-frame">
+      <div className="absolute inset-0 thumb-frame !absolute">
         <span className="thumb-hairline" />
         <img
           src={src}
