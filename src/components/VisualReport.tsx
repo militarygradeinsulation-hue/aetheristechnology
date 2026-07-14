@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { DollarSign, TrendingDown, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, Users, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
+
 
 /**
  * Visual enhancers for markdown tool output.
@@ -99,13 +100,28 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 
     if (!topDollar && !pcts.length && !grade && score === null) return null;
 
-    return { topDollar, totalLeak, pcts, grade, score };
+    // Recovery projections: assume ~55% of the identified leak is realistically
+    // recoverable if the fixes ship. Leads recovered = revenue / assumed deal size
+    // (default $2,500 SMB avg). If markdown mentions "$X per lead" or similar,
+    // prefer that.
+    let dealSize = 2500;
+    const perLead = markdown.match(/\$\s?([\d,]+)\s?(?:per|\/)\s?(?:lead|closed lead|deal|customer)/i);
+    if (perLead) {
+      const v = parseInt(perLead[1].replace(/,/g, ""), 10);
+      if (v >= 200 && v <= 25_000) dealSize = v;
+    }
+    const revenueRecovered = Math.round(totalLeak * 0.55);
+    const leadsRecovered = revenueRecovered > 0 ? Math.max(1, Math.round(revenueRecovered / dealSize)) : 0;
+
+    return { topDollar, totalLeak, pcts, grade, score, revenueRecovered, leadsRecovered };
   }, [markdown]);
+
 
 
   if (!signals) return null;
 
-  const { topDollar, totalLeak, pcts, grade, score } = signals;
+  const { topDollar, totalLeak, pcts, grade, score, revenueRecovered, leadsRecovered } = signals;
+
 
   return (
     <div className="mb-5 rounded-sm border border-amber/30 bg-background/60 overflow-hidden">
@@ -117,7 +133,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-amber/10 border-b border-amber/10">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
         {grade && (
           <StatCard
             icon={<Award className="w-3.5 h-3.5" />}
@@ -176,6 +192,40 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
             tone="amber"
           />
         )}
+        {revenueRecovered > 0 && (
+          <StatCard
+            icon={<TrendingUp className="w-3.5 h-3.5" />}
+            label="Revenue Recovered"
+            valueEl={
+              <div>
+                <div className="font-forensic text-2xl font-bold text-emerald-400 leading-none">
+                  {fmtMoney(revenueRecovered)}
+                </div>
+                <div className="font-mono text-[9px] text-emerald-400/70 mt-1 uppercase tracking-wider">
+                  if fixes ship
+                </div>
+              </div>
+            }
+            tone="emerald"
+          />
+        )}
+        {leadsRecovered > 0 && (
+          <StatCard
+            icon={<Users className="w-3.5 h-3.5" />}
+            label="Leads Recovered"
+            valueEl={
+              <div>
+                <div className="font-forensic text-2xl font-bold text-emerald-400 leading-none">
+                  +{leadsRecovered}
+                </div>
+                <div className="font-mono text-[9px] text-emerald-400/70 mt-1 uppercase tracking-wider">
+                  projected / yr
+                </div>
+              </div>
+            }
+            tone="emerald"
+          />
+        )}
         {!grade && score === null && !topDollar && !totalLeak && pcts.length > 0 && (
           <StatCard
             icon={<Percent className="w-3.5 h-3.5" />}
@@ -185,6 +235,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
           />
         )}
       </div>
+
 
       {/* Percentage bar chart */}
       {pcts.length > 0 && (
@@ -222,16 +273,19 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 };
 
 const StatCard: React.FC<{
-  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson";
+  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald";
 }> = ({ icon, label, valueEl, tone }) => (
   <div className="p-4 flex flex-col gap-2">
-    <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${tone === "crimson" ? "text-crimson/80" : "text-amber/80"}`}>
+    <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${
+      tone === "crimson" ? "text-crimson/80" : tone === "emerald" ? "text-emerald-400/80" : "text-amber/80"
+    }`}>
       {icon}
       {label}
     </div>
     {valueEl}
   </div>
 );
+
 
 // ---------- markdown table cell enhancer ----------
 
