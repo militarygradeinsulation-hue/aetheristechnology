@@ -409,11 +409,16 @@ export function CreationStudioSandbox() {
                 Copy
               </Button>
               {kind === "calendar" && (
-                <Button variant="outline" size="sm" onClick={() => downloadCalendarCsv(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
-                  <Download className="w-3 h-3 mr-1.5" /> CSV
-                </Button>
+                <>
+                  <Button variant="outline" size="sm" onClick={() => downloadCalendarCsv(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
+                    <Download className="w-3 h-3 mr-1.5" /> CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadCalendarMarkdown(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
+                    <Download className="w-3 h-3 mr-1.5" /> Markdown
+                  </Button>
+                </>
               )}
-              <Button variant="outline" size="sm" onClick={() => window.print()} className="border-amber/40 text-amber hover:bg-amber/10">
+              <Button variant="outline" size="sm" onClick={() => printFullCalendar(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
                 <Printer className="w-3 h-3 mr-1.5" /> Print / PDF
               </Button>
             </div>
