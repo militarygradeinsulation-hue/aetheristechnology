@@ -209,6 +209,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
               </div>
             }
             tone="emerald"
+            tooltip="Total identified leak × 55% realistic recovery rate if the recommended fixes are implemented. Single-leak and total exposure are capped at SMB-defensible ceilings."
           />
         )}
         {leadsRecovered > 0 && (
@@ -226,6 +227,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
               </div>
             }
             tone="emerald"
+            tooltip="Revenue recovered ÷ assumed deal size. We default to $2,500 per lead unless the scan detects an explicit “$X per lead / deal / customer” figure."
           />
         )}
         {!grade && score === null && !topDollar && !totalLeak && pcts.length > 0 && (
