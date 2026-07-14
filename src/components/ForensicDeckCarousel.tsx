@@ -113,12 +113,13 @@ export const ForensicDeckCarousel: React.FC = () => {
                 type="button"
                 onClick={() => setIdx(i)}
                 aria-label={`Go to slide ${i + 1}`}
-                className={`relative shrink-0 w-20 aspect-[16/9] rounded-md overflow-hidden border transition-all ${
+                className={`thumb-frame relative shrink-0 w-20 aspect-[16/9] rounded-md overflow-hidden border transition-all ${
                   i === idx
                     ? "border-amber ring-2 ring-amber/40"
                     : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
                 }`}
               >
+                <span className="thumb-hairline" />
                 <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" draggable={false} />
               </button>
             ))}
