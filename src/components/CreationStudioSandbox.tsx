@@ -531,3 +531,129 @@ function printFullCalendar(md: string, brandName?: string) {
   w.document.write(html);
   w.document.close();
 }
+
+// ─── Full-report PDF ─────────────────────────────────────────────────────────
+// Builds an Aetheris-styled forensic PDF containing every generated asset:
+//   • Marketing Image (rendered on its own image page)
+//   • One-Pager PDF copy
+//   • Social Pack
+//   • Marketing Email
+//   • 30-Day Content Calendar
+async function downloadFullPackPdf(brand: Brand, pack: Pack) {
+  const brandLabel = brand.name || brand.sourceURL || "Brand";
+  const sections: { key: Kind; label: string; markdown?: string; image?: string }[] = [
+    { key: "one-pager",   label: "One-Pager",              markdown: pack["one-pager"].markdown },
+    { key: "social-pack", label: "Social Pack",            markdown: pack["social-pack"].markdown },
+    { key: "email",       label: "Marketing Email",        markdown: pack["email"].markdown },
+    { key: "calendar",    label: "30-Day Content Calendar",markdown: pack["calendar"].markdown },
+    { key: "image",       label: "Marketing Image",        image:    pack["image"].image },
+  ];
+  const hasAny = sections.some(s => s.markdown || s.image);
+  if (!hasAny) {
+    toast.error("Nothing to export yet — generate the pack first.");
+    return;
+  }
+
+  toast.info("Building your forensic PDF report…");
+
+  // Compose markdown for text sections. Image is added as a real embedded page.
+  const parts: string[] = [];
+  parts.push(`**Brand:** ${brandLabel}`);
+  if (brand.description) parts.push(brand.description);
+  if (brand.sourceURL)   parts.push(`**Source:** ${brand.sourceURL}`);
+  parts.push("");
+
+  for (const s of sections) {
+    if (!s.markdown) continue;
+    parts.push(`## ${s.label}`);
+    parts.push(s.markdown.trim());
+    parts.push("");
+  }
+
+  const caseId = `CS-${Date.now().toString(36).toUpperCase()}`;
+  const doc = generateTryToolPdf({
+    toolTitle: `${brandLabel} · Creation Engine Report`,
+    subject: `Brand-aware marketing pack for ${brandLabel}`,
+    caseId,
+    runAt: new Date(),
+    output: parts.join("\n"),
+    brand: brandLabel,
+  });
+
+  // Append Marketing Image on its own page if we have one.
+  if (pack.image.image) {
+    try {
+      const dataUrl = await toDataUrl(pack.image.image);
+      if (dataUrl) {
+        doc.addPage();
+        // page chrome
+        doc.setFillColor(15, 15, 20);
+        doc.rect(0, 0, 210, 297, "F");
+        doc.setFillColor(217, 158, 46);
+        doc.rect(210 - 24, 0, 24, 2, "F");
+        doc.rect(210 - 2, 0, 2, 24, "F");
+
+        doc.setFont("times", "italic");
+        doc.setFontSize(10);
+        doc.setTextColor(217, 158, 46);
+        doc.text("§ · MARKETING IMAGE", 20, 30);
+        doc.setFont("times", "bold");
+        doc.setFontSize(22);
+        doc.setTextColor(236, 232, 222);
+        doc.text("Marketing Image", 20, 40);
+        doc.setDrawColor(217, 158, 46);
+        doc.line(20, 44, 40, 44);
+
+        // Fit image into content area (max 170mm wide, 210mm tall)
+        const maxW = 170;
+        const maxH = 210;
+        const size = await imgSize(dataUrl);
+        let w = maxW, h = maxW * (size.h / size.w);
+        if (h > maxH) { h = maxH; w = maxH * (size.w / size.h); }
+        const x = (210 - w) / 2;
+        const y = 55;
+        doc.addImage(dataUrl, "PNG", x, y, w, h);
+
+        doc.setFontSize(7);
+        doc.setTextColor(150, 145, 135);
+        doc.text("AETHERIS · BUSINESS FORENSICS", 20, 297 - 9);
+        doc.setTextColor(217, 158, 46);
+        doc.text("Aetheris AI Studio", 210 - 20, 297 - 9, { align: "right" });
+      }
+    } catch (e) {
+      console.warn("[creation-studio] image embed failed:", e);
+    }
+  }
+
+  const safe = brandLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase().slice(0, 40);
+  doc.save(`aetheris-creation-engine-${safe}-${caseId.toLowerCase()}.pdf`);
+  toast.success("Full report PDF downloaded");
+}
+
+function toDataUrl(src: string): Promise<string | null> {
+  // Already a data URL?
+  if (/^data:/i.test(src)) return Promise.resolve(src);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext("2d");
+      if (!ctx) return resolve(null);
+      ctx.drawImage(img, 0, 0);
+      try { resolve(c.toDataURL("image/png")); } catch { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+function imgSize(dataUrl: string): Promise<{ w: number; h: number }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve({ w: 1024, h: 1024 });
+    img.src = dataUrl;
+  });
+}
