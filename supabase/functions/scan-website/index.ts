@@ -26,14 +26,17 @@ function fmt$(n: number): string {
 }
 function computeLeakRange(host: string, score: number): { low: number; high: number } {
   const s = Math.max(0, Math.min(100, score | 0));
+  // Calibrated to realistic SMB conversion leak on a typical service-business
+  // site. Prior ranges (up to $240k–$420k) were not defensible for small
+  // operators and eroded the report's credibility.
   let baseLow: number, baseHigh: number;
-  if (s >= 90) { baseLow = 8000;   baseHigh = 18000; }
-  else if (s >= 80) { baseLow = 22000;  baseHigh = 48000; }
-  else if (s >= 70) { baseLow = 48000;  baseHigh = 95000; }
-  else if (s >= 60) { baseLow = 85000;  baseHigh = 165000; }
-  else if (s >= 50) { baseLow = 130000; baseHigh = 240000; }
-  else if (s >= 40) { baseLow = 180000; baseHigh = 320000; }
-  else { baseLow = 240000; baseHigh = 420000; }
+  if (s >= 90) { baseLow = 1500;  baseHigh = 4000;  }
+  else if (s >= 80) { baseLow = 4000;  baseHigh = 10000; }
+  else if (s >= 70) { baseLow = 9000;  baseHigh = 20000; }
+  else if (s >= 60) { baseLow = 16000; baseHigh = 34000; }
+  else if (s >= 50) { baseLow = 26000; baseHigh = 52000; }
+  else if (s >= 40) { baseLow = 38000; baseHigh = 72000; }
+  else { baseLow = 52000; baseHigh = 95000; }
   const h = hash32(host.toLowerCase());
   const variance = ((h % 1000) / 1000) * 0.24 - 0.12; // -12% .. +12%, fixed per host
   return { low: baseLow * (1 + variance), high: baseHigh * (1 + variance) };

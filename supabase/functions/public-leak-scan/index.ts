@@ -54,10 +54,20 @@ Return STRICT JSON (no prose, no markdown):
 
 CURRENCY RULE: All money values are US Dollars rendered with a $ symbol. Never use €, £, ¥, ₹, EUR, GBP, etc.
 
+LEAK CALIBRATION (defensible SMB ranges — do NOT exceed the ceiling for the site's score):
+- Score 90+: total annual leak $2,000 – $6,000
+- Score 80–89: $5,000 – $12,000
+- Score 70–79: $10,000 – $22,000
+- Score 60–69: $18,000 – $38,000
+- Score 50–59: $28,000 – $58,000
+- Score 40–49: $42,000 – $78,000
+- Score <40: $58,000 – $110,000
+These are conversion-leak estimates for a typical small-business service site, not enterprise numbers. Never inflate. If unsure, pick the LOWER end of the band.
+
 RULES:
 - Be blunt, forensic, operator-voice. No fluff, no "consider", no "you may want to".
 - Each topLeak is a single concrete failure (e.g. "No speed-to-lead automation — inbound leads wait 14+ hours before first touch").
-- estimatedAnnualLeak must be an integer (e.g. 184000), not a string.
+- estimatedAnnualLeak must be an integer within the band above (e.g. 24000), not a string.
 - Scores: where evidence is weak, infer reasonable industry-typical scores rather than refusing. Lower score = bigger leak.`;
 
 async function synthesizeReport(scan: any, url: string, key: string): Promise<any | null> {
@@ -103,7 +113,7 @@ async function synthesizeReport(scan: any, url: string, key: string): Promise<an
 function fallbackReport(url: string): any {
   const host = (() => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } })();
   return {
-    estimatedAnnualLeak: 184000,
+    estimatedAnnualLeak: 32000,
     severity: "ACTIVE",
     executiveSummary: `${host} shows a multi-surface leak pattern. Lead capture, follow-up speed, and reputation signals are the dominant bleed points. An operator review is required to confirm exact dollar loss.`,
     categories: [
@@ -193,7 +203,21 @@ serve(async (req) => {
         topLeaks: Array.isArray(c?.topLeaks) ? c.topLeaks.slice(0, 5).map((x: any) => String(x)) : [],
       };
     });
-    report.estimatedAnnualLeak = Math.max(0, Number(report.estimatedAnnualLeak) || 0);
+    // Clamp AI-estimated leak to a defensible SMB band based on the underlying
+    // website score. Prevents the model from inventing $500k+ leak numbers for
+    // a small-business site that can't credibly be leaking that much.
+    const leakScore = Math.max(0, Math.min(100, Number(full?.score) || 55));
+    const leakCap = (() => {
+      if (leakScore >= 90) return 6000;
+      if (leakScore >= 80) return 12000;
+      if (leakScore >= 70) return 22000;
+      if (leakScore >= 60) return 38000;
+      if (leakScore >= 50) return 58000;
+      if (leakScore >= 40) return 78000;
+      return 110000;
+    })();
+    const rawLeak = Math.max(0, Number(report.estimatedAnnualLeak) || 0);
+    report.estimatedAnnualLeak = Math.min(rawLeak, leakCap);
     report.severity = ["CRITICAL", "ACTIVE", "MINOR"].includes(report.severity) ? report.severity : "ACTIVE";
 
     const teaser = {
