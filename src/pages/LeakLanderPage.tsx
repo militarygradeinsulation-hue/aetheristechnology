@@ -142,19 +142,11 @@ const LeakLanderPage: React.FC = () => {
             aria-label="What Aetheris sells"
           >
             <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18">
-              <div className="font-mono text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-amber mb-5">
-                // What We Sell
-              </div>
-              <p className="text-lg sm:text-xl md:text-2xl text-foreground font-medium leading-relaxed max-w-5xl mx-auto">
-                We scan your company for its{" "}
-                <span className="text-crimson font-semibold">biggest weaknesses</span>{" "}
-                using our tools that don't exist anywhere. Next we{" "}
-                <span className="text-amber font-semibold">fix those weaknesses</span>{" "}
-                so you don't have to.
-              </p>
-              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
-                Tell me what your biggest issue is and{" "}
-                <span className="text-gradient-amber">let's see if I can fix it.</span>
+              <h2 className="font-forensic text-3xl sm:text-4xl md:text-6xl font-bold text-foreground leading-[1.05] tracking-tight max-w-5xl mx-auto">
+                Stop Guessing. <span className="text-amber italic">Start Understanding.</span>
+              </h2>
+              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground/90 font-medium leading-relaxed max-w-4xl mx-auto">
+                We break down exactly how businesses waste money on AI, marketing, and disconnected systems — with real numbers, real costs, and real solutions.
               </p>
             </div>
           </section>
