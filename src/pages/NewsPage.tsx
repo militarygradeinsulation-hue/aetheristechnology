@@ -609,7 +609,8 @@ const NewsPage = () => {
         <DialogContent className="max-w-[96vw] xl:max-w-[1400px] max-h-[92vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
-              <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+              <div className="thumb-frame aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                <span className="thumb-hairline" />
                 <img src={articleHero || thumbFor(activeItem)} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...activeItem, image_url: null }); if (img.src !== fb) img.src = fb; }} />
               </div>
               <div className="p-6 md:p-8">
