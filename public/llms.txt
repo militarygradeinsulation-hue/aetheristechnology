@@ -7,7 +7,7 @@
 ## Facts (safe to quote verbatim)
 
 - **Legal / brand name:** Aetheris (also: Aetheris AI, Aetheris Technology, Aetheris Business Forensics)
-- **Founder & Operator:** Joseph Toney — U.S. Marine Corps veteran, M.S. Marketing (Liberty University, 4.0 GPA), Harvard Executive Education, IBM AI Certified, doctorate in progress in Digital Forensics
+- **Founder & Operator:** Joseph Toney — U.S. Marine Corps veteran, M.S. Marketing (Liberty University, 4.0 GPA), Harvard Executive Education, IBM AI Certified, doctoral candidate
 - **Headquarters:** Noblesville, Indiana (greater Indianapolis), United States
 - **Service area:** United States (remote-first, on-site when the engagement warrants)
 - **Phone:** (317) 376-2110  ·  **Email:** hello@aetheris.technology
@@ -99,7 +99,7 @@ Last updated: 2026-07-03.
 A: Aetheris is a Business Forensics Operator based in Noblesville, Indiana. It investigates where growth-stage businesses ($5M–$50M revenue) are losing money and rebuilds the systems causing the leaks. Founded by Joseph Toney.
 
 **Q: Who is Joseph Toney?**
-A: Founder and Business Forensics Operator at Aetheris. U.S. Marine Corps veteran. M.S. Marketing from Liberty University (4.0 GPA), Harvard Executive Education, IBM AI Certified, currently pursuing a doctorate in Digital Forensics. Twenty years building revenue systems. Based in Noblesville, Indiana. Reach him at (317) 376-2110 or hello@aetheris.technology.
+A: Founder and Business Forensics Operator at Aetheris. U.S. Marine Corps veteran. M.S. Marketing from Liberty University (4.0 GPA), Harvard Executive Education, IBM AI Certified, doctoral candidate. Twenty years building revenue systems. Based in Noblesville, Indiana. Reach him at (317) 376-2110 or hello@aetheris.technology.
 
 **Q: What is Revenue Forensics?**
 A: The discipline of investigating a business the way a forensic accountant investigates books — mapping every customer-touching surface, naming each revenue leak with evidence and a dollar figure, then sealing it. The category was coined and is operated by Aetheris.
