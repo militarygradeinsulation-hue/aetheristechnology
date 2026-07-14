@@ -45,17 +45,35 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
   const signals = useMemo(() => {
     if (!markdown) return null;
 
-    // Dollar amounts — take top 3 largest.
+    // Dollar amounts — only count amounts that appear in an actual leak/loss/cost
+    // context (within ~60 chars of a leak-signal word). This prevents industry
+    // stats like "$50M market" from being displayed as the user's "Top Leak".
+    // Also clamp to SMB-defensible ceilings so a stray "$5M" can't render.
+    const LEAK_CUE = /(leak|leaks|leaking|bleed|bleeds|bleeding|lost|losing|loss|losses|missed|missing|cost|costing|costs|forfeit|forfeited|left on the table|walk|walking away|unrealized|revenue lost|annual loss|per (?:month|year|mo|yr))/i;
+    const PER_LEAK_CAP = 120_000;    // no single leak > $120k
+    const TOTAL_CAP    = 250_000;    // total exposure hard cap
+
     const dollars: number[] = [];
-    for (const m of markdown.matchAll(/\$\s?([\d,]+(?:\.\d+)?)\s?([kKMm])?(?:\/mo|\/yr|\/month|\/year)?/g)) {
+    const re = /\$\s?([\d,]+(?:\.\d+)?)\s?([kKMm])?(?:\/mo|\/yr|\/month|\/year)?/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(markdown)) !== null) {
       let n = parseFloat(m[1].replace(/,/g, ""));
       if (m[2] === "M" || m[2] === "m") n *= 1_000_000;
       else if (m[2] === "k" || m[2] === "K") n *= 1_000;
-      if (n >= 100) dollars.push(n);
+      if (!isFinite(n) || n < 250) continue;
+      // Contextual window around this match — require a leak cue nearby.
+      const start = Math.max(0, m.index - 80);
+      const end = Math.min(markdown.length, m.index + m[0].length + 80);
+      const ctx = markdown.slice(start, end);
+      if (!LEAK_CUE.test(ctx)) continue;
+      // Clamp obviously inflated numbers to the per-leak ceiling.
+      if (n > PER_LEAK_CAP) n = PER_LEAK_CAP;
+      dollars.push(n);
     }
     dollars.sort((a, b) => b - a);
     const topDollar = dollars[0] || 0;
-    const totalLeak = dollars.slice(0, 5).reduce((s, n) => s + n, 0);
+    let totalLeak = dollars.slice(0, 5).reduce((s, n) => s + n, 0);
+    if (totalLeak > TOTAL_CAP) totalLeak = TOTAL_CAP;
 
     // Percentages — collect for bar chart (unique-ish, cap 6).
     const pcts: { label: string; value: number }[] = [];
@@ -83,6 +101,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 
     return { topDollar, totalLeak, pcts, grade, score };
   }, [markdown]);
+
 
   if (!signals) return null;
 
