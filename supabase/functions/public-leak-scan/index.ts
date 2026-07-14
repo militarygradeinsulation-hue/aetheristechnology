@@ -203,7 +203,21 @@ serve(async (req) => {
         topLeaks: Array.isArray(c?.topLeaks) ? c.topLeaks.slice(0, 5).map((x: any) => String(x)) : [],
       };
     });
-    report.estimatedAnnualLeak = Math.max(0, Number(report.estimatedAnnualLeak) || 0);
+    // Clamp AI-estimated leak to a defensible SMB band based on the underlying
+    // website score. Prevents the model from inventing $500k+ leak numbers for
+    // a small-business site that can't credibly be leaking that much.
+    const leakScore = Math.max(0, Math.min(100, Number(full?.score) || 55));
+    const leakCap = (() => {
+      if (leakScore >= 90) return 6000;
+      if (leakScore >= 80) return 12000;
+      if (leakScore >= 70) return 22000;
+      if (leakScore >= 60) return 38000;
+      if (leakScore >= 50) return 58000;
+      if (leakScore >= 40) return 78000;
+      return 110000;
+    })();
+    const rawLeak = Math.max(0, Number(report.estimatedAnnualLeak) || 0);
+    report.estimatedAnnualLeak = Math.min(rawLeak, leakCap);
     report.severity = ["CRITICAL", "ACTIVE", "MINOR"].includes(report.severity) ? report.severity : "ACTIVE";
 
     const teaser = {
