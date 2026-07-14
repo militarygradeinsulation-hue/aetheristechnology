@@ -267,6 +267,7 @@ export function CreationStudioSandbox() {
                 <RefreshCw className="w-3 h-3 mr-1.5" /> Regenerate all
               </Button>
             </div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {AUTO_KINDS.map((k) => {
               const item = pack[k];
