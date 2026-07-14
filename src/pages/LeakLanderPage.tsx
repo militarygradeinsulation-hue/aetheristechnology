@@ -65,10 +65,11 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Revenue Leak Audit for $5M–$50M Businesses | Aetheris — Chaos Theory Forensics"
-          description="Aetheris investigates where US $5M–$50M businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. 30% average recovery on named leaks. Written guarantee. Indianapolis + nationwide."
+          title="Revenue Leak Investigation for Commercial Trade Contractors | Aetheris"
+          description="Aetheris investigates commercial mechanical, electrical, roofing, and specialty trade contractors between $5M and $50M to find where money leaks between the field and the office: bid follow-up, change orders, T&M slippage, service agreements, dispatch drag, and account decay. Free leak audit. Written guarantee. Noblesville, Indiana."
           path="/"
-          keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
+          breadcrumbs={[{ name: 'Home', path: '/' }]}
+          speakable={['h1', 'h2']}
         />
 
 
@@ -83,7 +84,7 @@ const LeakLanderPage: React.FC = () => {
               // Free · No pitch
             </div>
             <div className="font-forensic text-lg sm:text-2xl md:text-3xl font-bold text-amber leading-tight">
-              Try My Free Tools
+              Try My Free Contractor Tools
               <span className="ml-3 inline-block text-amber-50 group-hover:translate-x-1 transition-transform">→</span>
             </div>
             <div className="text-[11px] sm:text-sm text-amber-50/80 mt-1">
@@ -103,24 +104,67 @@ const LeakLanderPage: React.FC = () => {
           }}
         />
 
-        <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
+        <main className="relative flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
 
         <div className="w-full">
-          {/* TOP PITCH — money-back guarantee framing */}
+
+          {/* HERO — Contractor niche */}
           <section className="mt-2 max-w-6xl mx-auto text-center animate-fade-in">
-            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              {"\n"}
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="h-px w-8 bg-amber/50" />
+              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">
+                Commercial Trade Contractors · $5M–$50M
+              </span>
+              <span className="h-px w-8 bg-amber/50" />
+            </div>
+            <h1 className="font-forensic text-4xl sm:text-6xl md:text-7xl font-bold leading-[1.05] tracking-tight">
+              Your backlog is <span className="text-amber italic">full.</span><br />
+              Your margin is <span className="text-crimson italic">not.</span>
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              {"\n"}
+            <p className="mt-5 text-base sm:text-lg md:text-xl text-foreground/90 max-w-4xl mx-auto leading-relaxed">
+              Aetheris investigates <span className="font-semibold text-foreground">commercial trade contractors between $5M and $50M</span> and finds exactly where the money is leaking between the field and the office. Then we remove it at the source.
             </p>
-            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              {"\n"}
+
+            <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+              <Button asChild size="default" className="h-12 px-7 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                <Link to="/leak-audit">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open Your Case File
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="default"
+                onClick={() => setBookingOpen(true)}
+                className="h-12 px-7 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider"
+              >
+                <Calendar className="w-4 h-4 mr-2 text-amber" />
+                Book a Read-Out
+              </Button>
+            </div>
+            <p className="mt-3 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
+              Free · Five minutes · You get a real number
+            </p>
+
+            <p className="mt-6 font-mono text-[10px] sm:text-xs uppercase tracking-[0.28em] text-foreground/60">
+              Mechanical · Electrical · Roofing · Sheet Metal · Plumbing · Fire Protection · Controls
             </p>
           </section>
 
+          {/* QUALIFIER STRIP */}
+          <section className="mt-8 max-w-4xl mx-auto animate-fade-in">
+            <div className="rounded-sm border border-crimson/30 bg-crimson/[0.04] px-5 py-4 text-center">
+              <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                We do not work with residential home services. We do not work with anyone under $5M.
+                We work with <span className="text-amber font-semibold">commercial trade contractors</span>,
+                because that is where we know exactly where the money goes.
+              </p>
+            </div>
+          </section>
+
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-6xl mx-auto flex justify-start mt-5 mb-1">
+          <div className="max-w-6xl mx-auto flex justify-start mt-6 mb-1">
             <button
               type="button"
               onClick={handleLogoTap}
@@ -136,58 +180,166 @@ const LeakLanderPage: React.FC = () => {
             </button>
           </div>
 
-          {/* WHAT WE SELL — top of page */}
-          <section
-            className="mt-6 max-w-6xl mx-auto text-center animate-fade-in"
-            aria-label="What Aetheris sells"
-          >
-            <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18">
-              <div className="font-mono text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] text-amber mb-5">
-                // What We Sell
+          {/* THE PREMISE */}
+          <section className="mt-4 max-w-6xl mx-auto animate-fade-in">
+            <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18 text-center">
+              <div className="font-mono text-xs sm:text-sm uppercase tracking-[0.25em] text-amber mb-4">
+                // The Premise
               </div>
-              <p className="text-lg sm:text-xl md:text-2xl text-foreground font-medium leading-relaxed max-w-5xl mx-auto">
-                We scan your company for its{" "}
-                <span className="text-crimson font-semibold">biggest weaknesses</span>{" "}
-                using our tools that don't exist anywhere. Next we{" "}
-                <span className="text-amber font-semibold">fix those weaknesses</span>{" "}
-                so you don't have to.
-              </p>
-              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground font-bold leading-relaxed max-w-5xl mx-auto">
-                Tell me what your biggest issue is and{" "}
-                <span className="text-gradient-amber">let's see if I can fix it.</span>
-              </p>
-            </div>
-          </section>
-
-
-          {/* Anti-AI positioning */}
-          <section className="mt-6 max-w-6xl mx-auto text-center animate-fade-in">
-            <div className="relative rounded-lg border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8 shadow-[0_0_40px_-15px_hsl(var(--amber)/0.35)]">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
-                // Aetheris Field Note
-              </div>
-              <h2 className="font-forensic text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                <span className="text-foreground">We're the most <span className="text-amber font-semibold">anti-AI, AI company</span> you'll ever meet.</span>
+              <h2 className="font-forensic text-3xl sm:text-4xl md:text-5xl font-bold leading-tight text-foreground">
+                Nothing about this is <span className="text-crimson italic">random.</span>
               </h2>
-              <p className="mt-4 text-lg sm:text-xl md:text-2xl text-crimson font-bold tracking-tight">
-                {"\n"}
-              </p>
-              <p className="mt-3 text-sm sm:text-base md:text-lg text-foreground/90 font-medium">
-                {"\n"}
-              </p>
-              <p className="mt-3 text-sm sm:text-base md:text-lg text-muted-foreground">
-                If I can't save you <span className="text-crimson">money</span>, I don't want to do <span className="text-crimson">business</span> with you.
-              </p>
+              <div className="mt-6 max-w-3xl mx-auto space-y-4 text-base sm:text-lg text-foreground/85 leading-relaxed">
+                <p>
+                  You are busy. Backlog is strong. Crews are out. And somehow the number at the bottom of the P&L does not match the work that went out the door.
+                </p>
+                <p>
+                  Most owners call that bad luck, a bad quarter, or the market. It is none of those. Your business is a system, and it is producing exactly the result it was built to produce. The money is not vanishing. It is <span className="text-crimson font-semibold">leaking</span>, in the same places, on schedule, every month.
+                </p>
+                <p className="font-forensic text-xl sm:text-2xl text-foreground pt-2">
+                  The chaos always has a <span className="text-amber">cause</span>. The cause always leaves <span className="text-amber">evidence</span>.
+                </p>
+                <p className="font-case text-[11px] uppercase tracking-[0.28em] text-amber/80 pt-1">
+                  We find it.
+                </p>
+              </div>
             </div>
           </section>
 
+          {/* THE SIX LEAKS — centerpiece */}
+          <section className="mt-6 max-w-6xl mx-auto animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-amber mb-3">
+                // Case File · Six Leaks
+              </div>
+              <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight max-w-4xl mx-auto">
+                Six places commercial contractors lose money.<br />
+                You are leaking in <span className="text-crimson italic">at least three.</span>
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[
+                {
+                  no: '01',
+                  title: 'The bid follow-up void',
+                  body: 'The estimate goes out. Nobody calls. The GC awards it to whoever stayed in front of them. Your win-rate problem is usually a follow-up problem wearing a pricing costume.',
+                },
+                {
+                  no: '02',
+                  title: 'Change order leakage',
+                  body: 'The field performs the work before the paperwork exists. Your crew delivered the margin. Your invoice never asked for it.',
+                },
+                {
+                  no: '03',
+                  title: 'T&M slippage',
+                  body: 'Tickets written on paper in a truck, reaching billing late, incomplete, or never. Hours worked. Materials installed. Revenue unclaimed.',
+                },
+                {
+                  no: '04',
+                  title: 'The service-to-agreement gap',
+                  body: 'Your techs are standing inside buildings that need maintenance agreements, and they drive away without offering one. The warmest lead in your business leaves in a van every day.',
+                },
+                {
+                  no: '05',
+                  title: 'Dispatch and response drag',
+                  body: 'A call comes in at 6pm Friday. The contractor who answers first wins it. Yours went to voicemail.',
+                },
+                {
+                  no: '06',
+                  title: 'Silent account decay',
+                  body: 'The account that ordered every month now orders every quarter. Nobody was alerted, because nobody is watching. Contractors do not get fired. They get faded.',
+                },
+              ].map((leak) => (
+                <div
+                  key={leak.no}
+                  className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5 hover:border-amber/60 transition-colors"
+                >
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="font-forensic text-3xl font-bold text-amber leading-none">{leak.no}</span>
+                    <span className="font-case text-[9px] uppercase tracking-widest text-crimson/80 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Active</span>
+                  </div>
+                  <h3 className="font-forensic text-lg font-bold text-foreground leading-tight mb-2">
+                    {leak.title}
+                  </h3>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{leak.body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="font-forensic text-lg sm:text-xl text-foreground/90 mb-4">
+                If three of those made you uncomfortable, <span className="text-crimson">your case is worth opening.</span>
+              </p>
+              <Button asChild size="default" className="h-12 px-7 bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider shadow-[0_0_25px_rgba(217,169,58,0.35)]">
+                <Link to="/leak-audit">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open Your Case File
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS — four steps */}
+          <section className="mt-8 max-w-6xl mx-auto animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-amber mb-3">
+                // How It Works
+              </div>
+              <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
+                We work your business like a <span className="text-amber italic">case.</span> Four steps.
+              </h2>
+            </div>
+
+            <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { n: 1, title: 'The scan',        body: 'Twelve questions. Five minutes. You answer from memory, no data pull required.' },
+                { n: 2, title: 'The case file',   body: 'We open a real file, run the analysis, and send you Preliminary Findings: named leaks, with what each one is costing you per year, in dollars.' },
+                { n: 3, title: 'The read-out',    body: 'Fifteen minutes on the phone. We walk you through your own evidence. No pitch, no deck. If your case is not worth investigating, we say so.' },
+                { n: 4, title: 'The investigation', body: 'If you want the full picture, we come to your shop. We ride with a tech, sit with the estimator, and watch a ticket travel from the field to billing. Then we tell you the truth and remove the cause.' },
+              ].map((s) => (
+                <li key={s.n} className="rounded-sm border border-amber/25 bg-card/70 backdrop-blur-sm p-5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber text-background font-bold font-forensic text-lg">
+                      {s.n}
+                    </span>
+                    <h3 className="font-forensic text-lg font-bold text-foreground leading-tight">{s.title}</h3>
+                  </div>
+                  <p className="text-sm text-foreground/80 leading-relaxed">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+
+            <p className="mt-5 text-center font-forensic italic text-base text-foreground/70">
+              Consultants send you a survey. <span className="text-amber not-italic font-semibold">We show up at your shop.</span>
+            </p>
+          </section>
+
+          {/* FINDINGS, NOT ACTIVITY */}
+          <section className="mt-8 max-w-4xl mx-auto animate-fade-in">
+            <div className="rounded-sm border border-amber/30 bg-card/60 backdrop-blur-sm px-6 py-8 text-center">
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-amber mb-3">
+                // What You Actually Get
+              </div>
+              <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight mb-4">
+                Findings, <span className="text-crimson italic">not activity.</span>
+              </h2>
+              <p className="text-base text-foreground/85 leading-relaxed max-w-2xl mx-auto">
+                We are not an agency. We do not sell retainers, hours, ad spend, or logo refreshes. We do not send you a slide deck describing your own problem back to you.
+              </p>
+              <p className="mt-3 text-base text-foreground/85 leading-relaxed max-w-2xl mx-auto">
+                We find what is broken, tell you what it costs, and build the systems that make it stop. Then the engagement ends, because the problem does.
+              </p>
+            </div>
+          </section>
 
           {/* Signature calling card — gentle float + golden shimmer edge */}
-          <section className="mt-5 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
+          <section className="mt-8 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney — Aetheris">
             <div className="shimmer-gold-border">
               <img
                 src={callingCard.url}
-                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
+                alt="Joseph Toney — Aetheris. One operator works your case."
                 className="w-full h-auto animate-float rounded-sm"
                 loading="eager"
                 fetchPriority="high"
@@ -198,69 +350,47 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
-          {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
+          {/* THE ARCHITECT */}
           <section
-            className="mt-4 max-w-6xl mx-auto animate-fade-in"
+            className="mt-6 max-w-4xl mx-auto animate-fade-in"
             style={{ animationDelay: "80ms", animationFillMode: "both" }}
-            aria-label="Aetheris outcomes and credentials"
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-              {[
-                { stat: "30%", label: "AVG. RECOVERY ON NAMED LEAKS\n\n\nFREE FORENSIC SCAN\n\n\nMONEY BACK GUARANTEE IF WE CAN'T HELP", tone: "amber" },,
-                { stat: "10–40×", label: "TYPICAL LEAK / FEE RATIO\nROI ON INVESTMENT INSTANTLY ", tone: "amber" },
-                { stat: "20 yrs", label: "BUILDING REVENUE SYSTEMS\n-FORMER CONSTRUCTION CEO\n-OVER 200 PERSONAL CLIENTS\n\n", tone: "amber" },
-                { stat: "USMC + MS + BA + IBM", label: "MARINE VET · DIGITAL FORENSICS", tone: "crimson" },
-              ].map((it) => (
-                <div
-                  key={it.label}
-                  className={`rounded-sm border ${it.tone === "crimson" ? "border-crimson/40" : "border-amber/30"} bg-card/60 backdrop-blur-sm p-2.5 sm:p-3 text-center`}
-                >
-                  <div className={`font-forensic text-base sm:text-xl font-bold leading-none ${it.tone === "crimson" ? "text-crimson" : "text-amber"}`}>
-                    {it.stat}
-                  </div>
-                  <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/70 leading-tight">
-                    {it.label}
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm px-6 py-8 sm:px-10 sm:py-10">
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-amber mb-3 text-center">
+                // The Architect
+              </div>
+              <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-center mb-4">
+                One operator. <span className="text-amber italic">Yours.</span>
+              </h2>
+              <p className="text-base text-foreground/90 leading-relaxed">
+                <span className="font-semibold text-foreground">Joseph Toney.</span> Marine Corps veteran. Director-level strategy in aerospace. Builder of 30+ production AI and automation systems across specialty manufacturing, commercial construction, and aerospace. MS in Marketing, Liberty University, 4.0. Doctoral candidate. Certified by IBM, Harvard, Google, and HubSpot.
+              </p>
+              <p className="mt-4 text-base text-foreground/85 leading-relaxed">
+                One operator works your case. Not a rotating team, not a junior analyst, not an account manager. Me.
+              </p>
+              <blockquote className="mt-5 border-l-2 border-amber/60 pl-4 font-forensic italic text-base sm:text-lg text-foreground/90">
+                "Business is simply chaos theory. However, I find what causes the 'random' chaos to happen and begin removing it where it begins."
+              </blockquote>
             </div>
           </section>
 
-          {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
-          <HomeToolShopGrid />
+          {/* GOLDEN REPORT — the one tool. */}
+          <div className="mt-8">
+            <HomeToolShopGrid />
+          </div>
 
 
-
-
-          {/* HERO — Chaos Theory Forensics */}
-
+          {/* FINAL PITCH */}
           <section
-            className="mt-3 max-w-6xl mx-auto text-center animate-fade-in"
+            className="mt-8 max-w-4xl mx-auto text-center animate-fade-in"
             style={{ animationDelay: "120ms", animationFillMode: "both" }}
           >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="h-px w-8 bg-amber/50" />
-              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Chaos Theory Forensics · Indianapolis · US-Wide</span>
-              <span className="h-px w-8 bg-amber/50" />
-            </div>
-            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
-              Business is <span className="text-amber italic">chaos</span>.<br />
-              Chaos always has <span className="text-crimson italic">cause</span>.
-            </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              <br />
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace every dollar of bleed back to its origin, and remove the cause at the source.
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground max-w-4xl mx-auto">
-              Across sales, CRM, follow-up, and lead flow, document client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
-            </p>
-            <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-4xl mx-auto">
-              If we can't name a leak worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
-            </p>
-            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Named leaks. Dollar figures. No fluff.
+            <h2 className="font-forensic text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+              The chaos has a cause.<br />
+              <span className="text-amber italic">Let's find it.</span>
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+              Five minutes. A real number. No cost, and no obligation to ever speak to me.
             </p>
           </section>
 
@@ -270,29 +400,29 @@ const LeakLanderPage: React.FC = () => {
             style={{ animationDelay: "180ms", animationFillMode: "both" }}
           >
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full">
-              <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
+              <Button asChild size="default" className="h-12 px-7 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider shadow-[0_0_25px_rgba(217,169,58,0.35)]">
                 <Link to="/leak-audit">
-                  <FileText className="w-4 h-4 mr-2 text-amber" />
-                  Run the 60-second Leak Scan
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open Your Case File
+                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </Button>
               <Button
+                variant="outline"
                 size="default"
                 onClick={() => setBookingOpen(true)}
-                className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
+                className="h-12 px-7 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider"
               >
-                <Calendar className="w-4 h-4 mr-2" />
-                Book the Forensic Call
+                <Calendar className="w-4 h-4 mr-2 text-amber" />
+                Book the Read-Out
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
-            <Link
-              to="/chaos-scan"
-              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber hover:underline underline-offset-4"
-            >
-              Or generate the free Chaos Scan report <ArrowRight className="w-3 h-3" />
-            </Link>
+            <p className="font-case text-[10px] uppercase tracking-[0.28em] text-foreground/60">
+              Aetheris · Chaos Theory Forensics · Real Findings. No Sugar.
+            </p>
           </section>
+
 
 
 
