@@ -270,7 +270,8 @@ const NewsPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {rest.map(it => (
                     <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
-                      <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
+                      <div className="thumb-frame aspect-[16/10] overflow-hidden bg-secondary/30">
+                        <span className="thumb-hairline" />
                         <img src={thumbFor(it)} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...it, image_url: null }); if (img.src !== fb) img.src = fb; }} />
                       </div>
                       <div className="p-4">
