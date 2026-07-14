@@ -613,7 +613,7 @@ export default function TryToolPage() {
                               prose-td:border-t prose-td:border-amber/10 prose-td:px-3 prose-td:py-2 prose-td:text-foreground/85
                               [&_tbody_tr:nth-child(even)]:bg-amber/[0.03]
                               prose-a:text-amber prose-a:no-underline hover:prose-a:underline">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body.trim()}</ReactMarkdown>
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownVisualComponents}>{s.body.trim()}</ReactMarkdown>
                             </article>
                           </div>
                         </section>
