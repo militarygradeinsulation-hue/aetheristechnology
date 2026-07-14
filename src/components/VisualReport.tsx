@@ -120,7 +120,8 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 
   if (!signals) return null;
 
-  const { topDollar, totalLeak, pcts, grade, score } = signals;
+  const { topDollar, totalLeak, pcts, grade, score, revenueRecovered, leadsRecovered } = signals;
+
 
   return (
     <div className="mb-5 rounded-sm border border-amber/30 bg-background/60 overflow-hidden">
