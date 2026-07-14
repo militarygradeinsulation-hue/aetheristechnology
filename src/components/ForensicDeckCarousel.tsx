@@ -64,9 +64,10 @@ export const ForensicDeckCarousel: React.FC = () => {
           <button
             type="button"
             onClick={() => setLightbox(true)}
-            className="block w-full aspect-[16/9] overflow-hidden group"
+            className="thumb-frame block w-full aspect-[16/9] overflow-hidden group"
             aria-label="Expand slide"
           >
+            <span className="thumb-hairline" />
             <img
               src={slides[idx]}
               alt={`Forensic Revenue Recovery. slide ${idx + 1} of ${SLIDE_COUNT}`}
