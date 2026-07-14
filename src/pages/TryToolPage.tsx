@@ -16,6 +16,7 @@ import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
+import { SignalStrip, markdownVisualComponents } from "@/components/VisualReport";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
@@ -560,6 +561,11 @@ export default function TryToolPage() {
                     </div>
                   </div>
 
+                  {/* Visual signal readout — auto-extracted grades, $ leaks, and % signals */}
+                  <div className="p-4 md:p-5 pb-0">
+                    <SignalStrip markdown={output} />
+                  </div>
+
                   {/* Section cards — rotating accent spines + info tiles */}
                   <div className="p-4 md:p-5 space-y-5">
                     {sections.map((s, i) => {
@@ -607,7 +613,7 @@ export default function TryToolPage() {
                               prose-td:border-t prose-td:border-amber/10 prose-td:px-3 prose-td:py-2 prose-td:text-foreground/85
                               [&_tbody_tr:nth-child(even)]:bg-amber/[0.03]
                               prose-a:text-amber prose-a:no-underline hover:prose-a:underline">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body.trim()}</ReactMarkdown>
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownVisualComponents}>{s.body.trim()}</ReactMarkdown>
                             </article>
                           </div>
                         </section>
