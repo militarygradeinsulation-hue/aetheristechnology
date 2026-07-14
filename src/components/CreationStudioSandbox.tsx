@@ -245,17 +245,28 @@ export function CreationStudioSandbox() {
             <label className="block font-mono text-[10px] uppercase tracking-widest text-amber">
               Auto · Your On-Brand Starter Pack
             </label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => runStarterPack(brand)}
-              disabled={AUTO_KINDS.some(k => pack[k].loading)}
-              className="border-amber/40 text-amber hover:bg-amber/10 h-7"
-            >
-              <RefreshCw className="w-3 h-3 mr-1.5" /> Regenerate all
-            </Button>
-          </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => downloadFullPackPdf(brand, pack)}
+                disabled={!AUTO_KINDS.some(k => pack[k].image || pack[k].markdown) || AUTO_KINDS.some(k => pack[k].loading)}
+                className="border-amber/60 text-amber hover:bg-amber/10 h-7"
+              >
+                <FileDown className="w-3 h-3 mr-1.5" /> Download Full Report PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => runStarterPack(brand)}
+                disabled={AUTO_KINDS.some(k => pack[k].loading)}
+                className="border-amber/40 text-amber hover:bg-amber/10 h-7"
+              >
+                <RefreshCw className="w-3 h-3 mr-1.5" /> Regenerate all
+              </Button>
+            </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {AUTO_KINDS.map((k) => {
               const item = pack[k];
