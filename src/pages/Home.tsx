@@ -73,8 +73,8 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
           <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
-            We scan your company for its biggest weaknesses using tools that don't exist anywhere,
-            then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it.
+            Stop Guessing. Start Understanding. We break down exactly how businesses waste money on AI,
+            marketing, and disconnected systems, with real numbers, real costs, and real solutions.
           </h1>
 
           {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
