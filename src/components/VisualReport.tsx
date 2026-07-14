@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { DollarSign, TrendingDown, TrendingUp, Users, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, Users, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Info } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 
 /**
@@ -133,7 +134,8 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
+      <TooltipProvider delayDuration={150}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
         {grade && (
           <StatCard
             icon={<Award className="w-3.5 h-3.5" />}
@@ -207,6 +209,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
               </div>
             }
             tone="emerald"
+            tooltip="Total identified leak × 55% realistic recovery rate if the recommended fixes are implemented. Single-leak and total exposure are capped at SMB-defensible ceilings."
           />
         )}
         {leadsRecovered > 0 && (
@@ -224,6 +227,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
               </div>
             }
             tone="emerald"
+            tooltip="Revenue recovered ÷ assumed deal size. We default to $2,500 per lead unless the scan detects an explicit “$X per lead / deal / customer” figure."
           />
         )}
         {!grade && score === null && !topDollar && !totalLeak && pcts.length > 0 && (
@@ -234,8 +238,8 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
             tone="amber"
           />
         )}
-      </div>
-
+        </div>
+      </TooltipProvider>
 
       {/* Percentage bar chart */}
       {pcts.length > 0 && (
@@ -273,14 +277,30 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 };
 
 const StatCard: React.FC<{
-  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald";
-}> = ({ icon, label, valueEl, tone }) => (
+  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald"; tooltip?: string;
+}> = ({ icon, label, valueEl, tone, tooltip }) => (
   <div className="p-4 flex flex-col gap-2">
     <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${
       tone === "crimson" ? "text-crimson/80" : tone === "emerald" ? "text-emerald-400/80" : "text-amber/80"
     }`}>
       {icon}
-      {label}
+      <span className="truncate">{label}</span>
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center p-0.5 rounded-sm opacity-60 hover:opacity-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber/50"
+              aria-label={`How ${label} is calculated`}
+            >
+              <Info className="w-3 h-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[260px] text-[11px] leading-relaxed bg-popover border border-amber/30 text-popover-foreground">
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
     {valueEl}
   </div>
