@@ -100,8 +100,22 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 
     if (!topDollar && !pcts.length && !grade && score === null) return null;
 
-    return { topDollar, totalLeak, pcts, grade, score };
+    // Recovery projections: assume ~55% of the identified leak is realistically
+    // recoverable if the fixes ship. Leads recovered = revenue / assumed deal size
+    // (default $2,500 SMB avg). If markdown mentions "$X per lead" or similar,
+    // prefer that.
+    let dealSize = 2500;
+    const perLead = markdown.match(/\$\s?([\d,]+)\s?(?:per|\/)\s?(?:lead|closed lead|deal|customer)/i);
+    if (perLead) {
+      const v = parseInt(perLead[1].replace(/,/g, ""), 10);
+      if (v >= 200 && v <= 25_000) dealSize = v;
+    }
+    const revenueRecovered = Math.round(totalLeak * 0.55);
+    const leadsRecovered = revenueRecovered > 0 ? Math.max(1, Math.round(revenueRecovered / dealSize)) : 0;
+
+    return { topDollar, totalLeak, pcts, grade, score, revenueRecovered, leadsRecovered };
   }, [markdown]);
+
 
 
   if (!signals) return null;
