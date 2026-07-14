@@ -409,11 +409,16 @@ export function CreationStudioSandbox() {
                 Copy
               </Button>
               {kind === "calendar" && (
-                <Button variant="outline" size="sm" onClick={() => downloadCalendarCsv(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
-                  <Download className="w-3 h-3 mr-1.5" /> CSV
-                </Button>
+                <>
+                  <Button variant="outline" size="sm" onClick={() => downloadCalendarCsv(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
+                    <Download className="w-3 h-3 mr-1.5" /> CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadCalendarMarkdown(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
+                    <Download className="w-3 h-3 mr-1.5" /> Markdown
+                  </Button>
+                </>
               )}
-              <Button variant="outline" size="sm" onClick={() => window.print()} className="border-amber/40 text-amber hover:bg-amber/10">
+              <Button variant="outline" size="sm" onClick={() => printFullCalendar(markdown, brand?.name)} className="border-amber/40 text-amber hover:bg-amber/10">
                 <Printer className="w-3 h-3 mr-1.5" /> Print / PDF
               </Button>
             </div>
@@ -448,4 +453,56 @@ function downloadCalendarCsv(md: string, brandName?: string) {
   a.download = `${(brandName || "brand").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-marketing-calendar.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function downloadCalendarMarkdown(md: string, brandName?: string) {
+  const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(brandName || "brand").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-30-day-calendar.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function printFullCalendar(md: string, brandName?: string) {
+  const title = `${brandName || "Brand"} — 30-Day Content Calendar`;
+  const csv = calendarToCsv(md);
+  const rows = csv.split("\n").map((line) => {
+    // naive CSV split respecting quoted commas
+    const cells: string[] = [];
+    let cur = "";
+    let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; } else { inQ = !inQ; }
+      } else if (c === "," && !inQ) { cells.push(cur); cur = ""; }
+      else cur += c;
+    }
+    cells.push(cur);
+    return cells;
+  });
+  const [header, ...body] = rows;
+  const esc = (s: string) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+    <style>
+      @page { size: Letter landscape; margin: 0.5in; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: #111; }
+      h1 { font-size: 18px; margin: 0 0 12px; }
+      table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+      th, td { border: 1px solid #999; padding: 6px; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+      th { background: #f3f3f3; text-align: left; }
+      tr { page-break-inside: avoid; }
+    </style></head><body>
+    <h1>${esc(title)}</h1>
+    <table>
+      <thead><tr>${(header || []).map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead>
+      <tbody>${body.filter((r) => r.some((c) => c && c.trim())).map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table>
+    <script>window.onload=()=>{setTimeout(()=>window.print(),200)};</script>
+    </body></html>`;
+  const w = window.open("", "_blank");
+  if (!w) { toast.error("Popup blocked — allow popups to print."); return; }
+  w.document.write(html);
+  w.document.close();
 }

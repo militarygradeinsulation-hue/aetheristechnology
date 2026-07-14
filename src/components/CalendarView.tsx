@@ -167,7 +167,7 @@ export function CalendarView({ markdown }: { markdown: string }) {
             Full 30-Day Calendar · {days.length} entries
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[640px] overflow-y-auto pr-1">
+        <div className="calendar-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[640px] overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:grid-cols-2">
           {days.map((d, i) => (
             <div
               key={i}
