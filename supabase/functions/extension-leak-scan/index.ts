@@ -20,14 +20,16 @@ function hash32(s: string): number {
 function fmt$(n: number): string { return "$" + (Math.round(n / 100) * 100).toLocaleString("en-US"); }
 function computeLeakRange(host: string, score: number) {
   const s = Math.max(0, Math.min(100, score | 0));
+  // Calibrated to realistic SMB annual conversion leak. Prior ranges
+  // (up to $420k) were not defensible for a small operator site.
   let lo: number, hi: number;
-  if (s >= 90) { lo = 8000; hi = 18000; }
-  else if (s >= 80) { lo = 22000; hi = 48000; }
-  else if (s >= 70) { lo = 48000; hi = 95000; }
-  else if (s >= 60) { lo = 85000; hi = 165000; }
-  else if (s >= 50) { lo = 130000; hi = 240000; }
-  else if (s >= 40) { lo = 180000; hi = 320000; }
-  else { lo = 240000; hi = 420000; }
+  if (s >= 90) { lo = 1500;  hi = 4000;  }
+  else if (s >= 80) { lo = 4000;  hi = 10000; }
+  else if (s >= 70) { lo = 9000;  hi = 20000; }
+  else if (s >= 60) { lo = 16000; hi = 34000; }
+  else if (s >= 50) { lo = 26000; hi = 52000; }
+  else if (s >= 40) { lo = 38000; hi = 72000; }
+  else { lo = 52000; hi = 95000; }
   const h = hash32(host.toLowerCase());
   const v = ((h % 1000) / 1000) * 0.24 - 0.12;
   return { low: lo * (1 + v), high: hi * (1 + v) };
