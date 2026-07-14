@@ -236,8 +236,8 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
             tone="amber"
           />
         )}
-      </div>
-
+        </div>
+      </TooltipProvider>
 
       {/* Percentage bar chart */}
       {pcts.length > 0 && (
