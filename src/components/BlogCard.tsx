@@ -33,7 +33,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, caseFileNumber }) => {
       className="block forensic-tile rounded-xl overflow-hidden h-full group"
     >
       {/* Case File Image */}
-      <div className="h-64 bg-[#0c0c0c] overflow-hidden relative flex items-center justify-center">
+      <div className="thumb-frame h-64 bg-[#0c0c0c] overflow-hidden flex items-center justify-center">
+        <span className="thumb-hairline" />
         <img
           src={architectLogo}
           alt="The Architect"
@@ -42,11 +43,11 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, caseFileNumber }) => {
           className="h-48 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
         />
         {/* Case File Badge */}
-        <span className="absolute top-2 left-2 text-[10px] font-bold tracking-widest text-white bg-crimson px-2 py-1 rounded font-mono uppercase">
+        <span className="absolute top-2 left-2 z-10 text-[10px] font-bold tracking-widest text-white bg-crimson px-2 py-1 rounded font-mono uppercase">
           Case File #{caseId}
         </span>
         {/* Watermark */}
-        <span className="absolute bottom-2 right-2 text-[10px] font-semibold text-white/70 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
+        <span className="absolute bottom-2 right-2 z-10 text-[10px] font-semibold text-white/70 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
           Aetheris AI Studio
         </span>
       </div>

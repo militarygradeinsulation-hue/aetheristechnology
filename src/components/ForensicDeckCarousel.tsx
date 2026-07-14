@@ -64,9 +64,10 @@ export const ForensicDeckCarousel: React.FC = () => {
           <button
             type="button"
             onClick={() => setLightbox(true)}
-            className="block w-full aspect-[16/9] overflow-hidden group"
+            className="thumb-frame block w-full aspect-[16/9] overflow-hidden group"
             aria-label="Expand slide"
           >
+            <span className="thumb-hairline" />
             <img
               src={slides[idx]}
               alt={`Forensic Revenue Recovery. slide ${idx + 1} of ${SLIDE_COUNT}`}
@@ -74,7 +75,7 @@ export const ForensicDeckCarousel: React.FC = () => {
               loading="lazy"
               draggable={false}
             />
-            <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-background/70 backdrop-blur border border-white/15 text-[10px] font-mono text-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-background/70 backdrop-blur border border-white/15 text-[10px] font-mono text-foreground/80 opacity-0 group-hover:opacity-100 transition-opacity">
               <Maximize2 className="w-3 h-3" /> Expand
             </span>
           </button>
@@ -112,12 +113,13 @@ export const ForensicDeckCarousel: React.FC = () => {
                 type="button"
                 onClick={() => setIdx(i)}
                 aria-label={`Go to slide ${i + 1}`}
-                className={`relative shrink-0 w-20 aspect-[16/9] rounded-md overflow-hidden border transition-all ${
+                className={`thumb-frame relative shrink-0 w-20 aspect-[16/9] rounded-md overflow-hidden border transition-all ${
                   i === idx
                     ? "border-amber ring-2 ring-amber/40"
                     : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
                 }`}
               >
+                <span className="thumb-hairline" />
                 <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" draggable={false} />
               </button>
             ))}

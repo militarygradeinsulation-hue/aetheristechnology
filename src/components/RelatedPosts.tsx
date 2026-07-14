@@ -38,7 +38,10 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = ({ currentPostId, tags 
           return (
             <Link key={post.id} to={`/blog/${post.slug}`} className="glass rounded-xl overflow-hidden border border-transparent hover:border-amber/40">
               {img && (
-                <img src={img} alt={post.title} className="w-full h-40 object-cover" loading="lazy" decoding="async" />
+                <div className="thumb-frame h-40">
+                  <span className="thumb-hairline" />
+                  <img src={img} alt={post.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                </div>
               )}
               <div className="p-4">
                 <h3 className="font-semibold text-sm leading-tight line-clamp-2">{post.title}</h3>

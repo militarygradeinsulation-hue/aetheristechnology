@@ -91,14 +91,17 @@ export function ToolThumbnail({ id, className = "", alt }: Props) {
         className
       }
     >
-      <img
-        src={src}
-        alt={alt ?? `${id} thumbnail`}
-        loading="lazy"
-        width={1024}
-        height={640}
-        className="absolute inset-0 w-full h-full object-cover grayscale-[0.15] contrast-[1.05] group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-500"
-      />
+      <div className="absolute inset-0 thumb-frame !absolute">
+        <span className="thumb-hairline" />
+        <img
+          src={src}
+          alt={alt ?? `${id} thumbnail`}
+          loading="lazy"
+          width={1024}
+          height={640}
+          className="absolute inset-0 w-full h-full object-cover grayscale-[0.15] contrast-[1.05] group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-500"
+        />
+      </div>
 
       {/* deep vignette + top gradient to sit copy underneath */}
       <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-background/40 pointer-events-none" />

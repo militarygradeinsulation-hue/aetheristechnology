@@ -92,7 +92,10 @@ export const UpcomingEvents: React.FC = () => {
             return (
               <article key={e.id} className="forensic-tile rounded-sm border border-border/60 overflow-hidden flex flex-col">
                 {e.image_url && (
-                  <img src={e.image_url} alt={e.title} className="w-full h-40 object-cover border-b border-border/60" loading="lazy" />
+                  <div className="thumb-frame w-full h-40 border-b border-border/60">
+                    <span className="thumb-hairline" />
+                    <img src={e.image_url} alt={e.title} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
                 )}
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">{e.event_type}</div>

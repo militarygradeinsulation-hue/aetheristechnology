@@ -36,9 +36,10 @@ export const CaseFileCard: React.FC<CaseFileCardProps> = ({
     >
       <span className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       {image && (
-        <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square mb-4">
+        <div className="thumb-frame relative rounded-sm overflow-hidden border border-amber/20 bg-background/40 aspect-square mb-4">
+          <span className="thumb-hairline" />
           <img src={image} alt={imageAlt ?? `Case file #${padded} forensic infographic`} width={512} height={512} loading="lazy" className="w-full h-full object-cover" />
-          <span className="absolute bottom-1.5 right-1.5 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+          <span className="absolute bottom-1.5 right-1.5 z-10 font-case text-[8px] uppercase tracking-widest text-amber/80 bg-background/70 px-1.5 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
         </div>
       )}
       {/* Top bar, case number + status */}

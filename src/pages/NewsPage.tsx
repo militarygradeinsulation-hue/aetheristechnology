@@ -250,9 +250,10 @@ const NewsPage = () => {
               <div className="lg:col-span-2 space-y-6">
                 {top && (
                   <button onClick={() => openItem(top)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/40 hover:border-amber/50 transition">
-                    <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
-                      <img src={thumbFor(top)} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...top, image_url: null }); if (img.src !== fb) img.src = fb; }} />
-                    </div>
+                      <div className="thumb-frame aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                        <span className="thumb-hairline" />
+                        <img src={thumbFor(top)} alt={top.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="eager" referrerPolicy="no-referrer" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...top, image_url: null }); if (img.src !== fb) img.src = fb; }} />
+                      </div>
                     <div className="p-6">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-widest">{top.source_label}</Badge>
@@ -269,7 +270,8 @@ const NewsPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {rest.map(it => (
                     <button key={it.id} onClick={() => openItem(it)} className="group block w-full text-left border border-border rounded-xl overflow-hidden bg-card/30 hover:border-amber/50 transition">
-                      <div className="aspect-[16/10] overflow-hidden bg-secondary/30">
+                      <div className="thumb-frame aspect-[16/10] overflow-hidden bg-secondary/30">
+                        <span className="thumb-hairline" />
                         <img src={thumbFor(it)} alt={it.title} loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...it, image_url: null }); if (img.src !== fb) img.src = fb; }} />
                       </div>
                       <div className="p-4">
@@ -607,7 +609,8 @@ const NewsPage = () => {
         <DialogContent className="max-w-[96vw] xl:max-w-[1400px] max-h-[92vh] overflow-y-auto p-0 bg-card border border-amber/30">
           {activeItem && (
             <article className="relative">
-              <div className="aspect-[2.4/1] overflow-hidden bg-secondary/30">
+              <div className="thumb-frame aspect-[2.4/1] overflow-hidden bg-secondary/30">
+                <span className="thumb-hairline" />
                 <img src={articleHero || thumbFor(activeItem)} alt={activeItem.title} referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { const img = e.currentTarget as HTMLImageElement; const fb = thumbFor({ ...activeItem, image_url: null }); if (img.src !== fb) img.src = fb; }} />
               </div>
               <div className="p-6 md:p-8">
