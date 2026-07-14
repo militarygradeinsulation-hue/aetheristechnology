@@ -133,7 +133,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-amber/10 border-b border-amber/10">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-amber/10 border-b border-amber/10">
         {grade && (
           <StatCard
             icon={<Award className="w-3.5 h-3.5" />}
@@ -192,6 +192,40 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
             tone="amber"
           />
         )}
+        {revenueRecovered > 0 && (
+          <StatCard
+            icon={<TrendingUp className="w-3.5 h-3.5" />}
+            label="Revenue Recovered"
+            valueEl={
+              <div>
+                <div className="font-forensic text-2xl font-bold text-emerald-400 leading-none">
+                  {fmtMoney(revenueRecovered)}
+                </div>
+                <div className="font-mono text-[9px] text-emerald-400/70 mt-1 uppercase tracking-wider">
+                  if fixes ship
+                </div>
+              </div>
+            }
+            tone="emerald"
+          />
+        )}
+        {leadsRecovered > 0 && (
+          <StatCard
+            icon={<Users className="w-3.5 h-3.5" />}
+            label="Leads Recovered"
+            valueEl={
+              <div>
+                <div className="font-forensic text-2xl font-bold text-emerald-400 leading-none">
+                  +{leadsRecovered}
+                </div>
+                <div className="font-mono text-[9px] text-emerald-400/70 mt-1 uppercase tracking-wider">
+                  projected / yr
+                </div>
+              </div>
+            }
+            tone="emerald"
+          />
+        )}
         {!grade && score === null && !topDollar && !totalLeak && pcts.length > 0 && (
           <StatCard
             icon={<Percent className="w-3.5 h-3.5" />}
@@ -201,6 +235,7 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
           />
         )}
       </div>
+
 
       {/* Percentage bar chart */}
       {pcts.length > 0 && (
