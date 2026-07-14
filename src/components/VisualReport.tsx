@@ -277,14 +277,30 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 };
 
 const StatCard: React.FC<{
-  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald";
-}> = ({ icon, label, valueEl, tone }) => (
+  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald"; tooltip?: string;
+}> = ({ icon, label, valueEl, tone, tooltip }) => (
   <div className="p-4 flex flex-col gap-2">
     <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${
       tone === "crimson" ? "text-crimson/80" : tone === "emerald" ? "text-emerald-400/80" : "text-amber/80"
     }`}>
       {icon}
-      {label}
+      <span className="truncate">{label}</span>
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center p-0.5 rounded-sm opacity-60 hover:opacity-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber/50"
+              aria-label={`How ${label} is calculated`}
+            >
+              <Info className="w-3 h-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[260px] text-[11px] leading-relaxed bg-popover border border-amber/30 text-popover-foreground">
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
     {valueEl}
   </div>
