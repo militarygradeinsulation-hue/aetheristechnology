@@ -273,16 +273,19 @@ export const SignalStrip: React.FC<{ markdown: string }> = ({ markdown }) => {
 };
 
 const StatCard: React.FC<{
-  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson";
+  icon: React.ReactNode; label: string; valueEl: React.ReactNode; tone: "amber" | "crimson" | "emerald";
 }> = ({ icon, label, valueEl, tone }) => (
   <div className="p-4 flex flex-col gap-2">
-    <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${tone === "crimson" ? "text-crimson/80" : "text-amber/80"}`}>
+    <div className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.3em] ${
+      tone === "crimson" ? "text-crimson/80" : tone === "emerald" ? "text-emerald-400/80" : "text-amber/80"
+    }`}>
       {icon}
       {label}
     </div>
     {valueEl}
   </div>
 );
+
 
 // ---------- markdown table cell enhancer ----------
 
