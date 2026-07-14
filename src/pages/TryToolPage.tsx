@@ -561,6 +561,11 @@ export default function TryToolPage() {
                     </div>
                   </div>
 
+                  {/* Visual signal readout — auto-extracted grades, $ leaks, and % signals */}
+                  <div className="p-4 md:p-5 pb-0">
+                    <SignalStrip markdown={output} />
+                  </div>
+
                   {/* Section cards — rotating accent spines + info tiles */}
                   <div className="p-4 md:p-5 space-y-5">
                     {sections.map((s, i) => {
