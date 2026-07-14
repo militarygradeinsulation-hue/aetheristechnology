@@ -73,27 +73,20 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
           <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
-            We scan your company for its biggest weaknesses using tools that don't exist anywhere,
-            then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it.
+            Stop Guessing. Start Understanding. We break down exactly how businesses waste money on AI,
+            marketing, and disconnected systems, with real numbers, real costs, and real solutions.
           </h1>
 
           {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
 
 
-          <section className="px-4 py-8 max-w-5xl mx-auto text-center">
-            <p className="font-case text-[11px] uppercase tracking-[0.2em] text-amber mb-3">
-              The Operator's Standard
-            </p>
-            <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground leading-tight">
-              We scan your company for its biggest weaknesses using tools that{" "}
-              <span className="text-crimson">don't exist anywhere.</span>
+          <section className="px-4 pt-10 pb-6 max-w-5xl mx-auto text-center">
+            <h2 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] tracking-tight">
+              Stop Guessing. <span className="text-amber italic">Start Understanding.</span>
             </h2>
             <div className="mt-6 max-w-3xl mx-auto space-y-4 text-base md:text-lg text-muted-foreground">
-              <p>
-                Next we fix those weaknesses so you don't have to.
-              </p>
-              <p className="text-foreground text-lg md:text-xl">
-                Tell us your biggest issue and let's see if we can fix it.
+              <p className="text-foreground/90">
+                We break down exactly how businesses waste money on AI, marketing, and disconnected systems — with real numbers, real costs, and real solutions.
               </p>
             </div>
           </section>
