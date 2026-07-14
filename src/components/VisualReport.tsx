@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { DollarSign, TrendingDown, Percent, Award, AlertTriangle, Gauge } from "lucide-react";
+import { DollarSign, TrendingDown, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
 
 /**
  * Visual enhancers for markdown tool output.
@@ -264,7 +264,79 @@ const VisualCell: React.FC<{ children?: React.ReactNode; isHeader?: boolean }> =
   return <Tag>{children}</Tag>;
 };
 
+// ---------- inline text enhancer (for paragraphs, list items, strong) ----------
+
+const inlineEnhance = (children: React.ReactNode): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (typeof child !== "string") return child;
+    // Split on $ amounts and % values, wrap them in chips
+    const parts = child.split(/(\$\s?[\d,]+(?:\.\d+)?(?:\s?[kKMm])?(?:\/mo|\/yr|\/month|\/year)?|\b\d{1,3}\s?%)/g);
+    return parts.map((p, i) => {
+      if (!p) return null;
+      if (/^\$\s?[\d,]+/.test(p)) {
+        const n = parseDollar(p);
+        const big = n >= 5_000;
+        return (
+          <span key={i} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-sm border font-mono text-[11px] font-semibold align-middle ${
+            big ? "border-crimson/40 bg-crimson/10 text-crimson" : "border-amber/40 bg-amber/10 text-amber"
+          }`}>
+            <DollarSign className="w-2.5 h-2.5" />
+            {p.trim().replace(/^\$\s?/, "")}
+          </span>
+        );
+      }
+      if (/^\d{1,3}\s?%$/.test(p.trim())) {
+        const v = parsePct(p);
+        const color = v >= 66 ? "border-crimson/40 bg-crimson/10 text-crimson"
+                    : v >= 33 ? "border-amber/40 bg-amber/10 text-amber"
+                    : "border-emerald-400/40 bg-emerald-400/10 text-emerald-300";
+        return (
+          <span key={i} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-sm border font-mono text-[11px] font-semibold align-middle ${color}`}>
+            <Percent className="w-2.5 h-2.5" />
+            {v}
+          </span>
+        );
+      }
+      return p;
+    });
+  });
+};
+
+// Visual list item: bullet with icon + auto-highlighted numbers.
+// Detects "positive / negative / action" cues in the first words for icon color.
+const VisualListItem: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const text = React.Children.toArray(children)
+    .map((c) => (typeof c === "string" ? c : ""))
+    .join(" ")
+    .toLowerCase();
+
+  const isPositive = /\b(good|strong|works|wins?|keep|great|solid|clear|✓)\b/.test(text);
+  const isNegative = /\b(leak|risk|weak|missing|broken|fail|drop|loss|bleed|friction|contradict|vague|flat|hidden|unclear|too|no\s+cta|ambigu)\b/.test(text);
+  const isAction = /^\s*(fix|add|change|replace|remove|rewrite|reduce|improve|move|test|deploy|swap|make|create|write|use)\b/.test(text);
+
+  const Icon = isPositive ? CheckCircle2 : isNegative ? XCircle : isAction ? ArrowRight : Target;
+  const tone = isPositive ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/[0.04]"
+             : isNegative ? "text-crimson border-crimson/30 bg-crimson/[0.05]"
+             : isAction  ? "text-amber border-amber/30 bg-amber/[0.05]"
+             : "text-foreground/80 border-amber/15 bg-background/40";
+
+  return (
+    <li className={`list-none relative flex gap-3 items-start p-3 my-1.5 rounded-sm border ${tone}`}>
+      <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+      <div className="flex-1 text-[13px] leading-relaxed text-foreground/90">
+        {inlineEnhance(children)}
+      </div>
+    </li>
+  );
+};
+
 export const markdownVisualComponents = {
   td: (props: any) => <VisualCell>{props.children}</VisualCell>,
   th: (props: any) => <VisualCell isHeader>{props.children}</VisualCell>,
+  li: (props: any) => <VisualListItem>{props.children}</VisualListItem>,
+  ul: (props: any) => <ul className="space-y-1 my-3 pl-0">{props.children}</ul>,
+  ol: (props: any) => <ol className="space-y-1 my-3 pl-0 list-none counter-reset-[step]">{props.children}</ol>,
+  p: (props: any) => <p className="my-3 leading-[1.75] text-foreground/85">{inlineEnhance(props.children)}</p>,
+  strong: (props: any) => <strong className="text-amber font-semibold">{inlineEnhance(props.children)}</strong>,
 };
+
