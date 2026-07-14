@@ -36,7 +36,7 @@ export const OperatorBio: React.FC = () => {
               <span className="text-amber">Chaos Theory Forensics Operator</span>
             </h2>
             <p className="mt-3 text-base text-muted-foreground max-w-2xl mx-auto">
-              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctoral candidate · Based in Noblesville, Indiana
             </p>
           </div>
         </RevealOnScroll>
@@ -84,7 +84,7 @@ export const OperatorBio: React.FC = () => {
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
                   <span className="text-muted-foreground">Research</span>
-                  <span className="text-foreground">Doctorate in Digital Forensics</span>
+                  <span className="text-foreground">Doctoral candidate</span>
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
                   <span className="text-muted-foreground">Location</span>
@@ -100,16 +100,13 @@ export const OperatorBio: React.FC = () => {
 
           <RevealOnScroll delay={0.15}>
             <div className="space-y-6">
-              <p className="font-forensic text-2xl md:text-3xl text-foreground leading-snug">
-                "What started as <span className="text-crimson">survival</span> eventually became{' '}
-                <span className="text-amber">purpose</span>."
-              </p>
               <p className="text-base md:text-lg text-foreground/90 leading-relaxed">
-                I work with growth-minded businesses running $5M to $50M that know they should be further along.
-                Marine Corps veteran. MS Marketing, Liberty University, 4.0 GPA. This year I begin my doctorate
-                in Digital Forensics — formally defining Chaos Theory Forensics as a new field. Based in Noblesville,
-                Indiana.
+                I work with commercial trade contractors running $5M to $50M who know their margin does not
+                match their backlog. Marine Corps veteran. MS Marketing, Liberty University, 4.0 GPA.
+                Doctoral candidate — formally defining Chaos Theory Forensics as a new field. Based in
+                Noblesville, Indiana.
               </p>
+
 
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
