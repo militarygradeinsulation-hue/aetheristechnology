@@ -623,6 +623,7 @@ export default function TryToolPage() {
                   </div>
 
                   <div className="relative flex flex-wrap items-center gap-2 justify-end p-3 border-t border-amber/20 print:hidden">
+                    <SpeakButton text={output} />
                     <Button size="sm" onClick={downloadPdf} className="bg-amber text-background hover:bg-amber/90 font-semibold">
                       <Download className="w-3 h-3 mr-1.5" /> Download PDF
                     </Button>
