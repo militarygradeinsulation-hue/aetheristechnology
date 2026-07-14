@@ -80,7 +80,7 @@ const LeakLanderPage: React.FC = () => {
         >
           <div className="max-w-6xl mx-auto px-4 py-3 text-center">
             <div className="font-case uppercase tracking-[0.2em] text-[10px] sm:text-xs text-amber/90 mb-1">
-              // Free · No signup · No pitch
+              // Free · No pitch
             </div>
             <div className="font-forensic text-lg sm:text-2xl md:text-3xl font-bold text-amber leading-tight">
               Try My Free Tools
