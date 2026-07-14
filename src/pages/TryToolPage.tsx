@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SignalStrip, markdownVisualComponents } from "@/components/VisualReport";
+import { SpeakButton } from "@/components/SpeakButton";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
