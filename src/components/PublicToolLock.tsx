@@ -37,7 +37,7 @@ const Card: React.FC<Pick<Props, "toolLabel" | "blurb">> = ({ toolLabel, blurb }
       <ArrowRight className="w-4 h-4" />
     </Link>
     <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-foreground/50">
-      Free · 14-chapter case file · No signup
+      Free · 14-chapter case file
     </p>
   </div>
 );

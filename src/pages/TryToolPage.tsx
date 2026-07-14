@@ -46,7 +46,7 @@ const TRY_META: Record<string, ToolMeta> = {
   "website-scanner": {
     title: "Website Leak Scanner", inputLabel: "Website URL", inputHint: "https://example.com",
     summary: "Scans any live URL and returns the top revenue leaks costing you deals — with dollar impact and a fix for each.",
-    howTo: ["Paste any public website URL", "Click Run — no signup", "Get a 1-page PDF-style leak audit"],
+    howTo: ["Paste any public website URL", "Click Run", "Get a 1-page PDF-style leak audit"],
     delivers: ["Snapshot diagnosis", "Top 5 revenue leaks (table)", "30-day fix priority"],
   },
   "brand-contradictions": {
