@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { DollarSign, TrendingDown, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, Users, Percent, Award, AlertTriangle, Gauge, CheckCircle2, XCircle, ArrowRight, Target, Wrench } from "lucide-react";
+
 
 /**
  * Visual enhancers for markdown tool output.
