@@ -12,7 +12,7 @@ export const WhyUs: React.FC = () => {
     { tag: 'Operator-led', note: 'No account managers, no juniors' },
     { tag: 'Diagnosis first', note: 'Every leak named in dollars' },
     { tag: 'The Leak Audit™', note: '7-step forensic process' },
-    { tag: 'Behavioral stack', note: 'Psychology + Marine + Digital Forensics' },
+    { tag: 'Behavioral stack', note: 'Psychology + Marine + Doctoral candidate' },
     { tag: 'Sealed case files', note: 'Verifiable, dollar-tied outcomes' },
     { tag: 'No ongoing-billing ransom', note: 'Flat-fee Diagnostic, credited back' },
   ];

@@ -1,60 +1,83 @@
-# Golden Report ↔ Creation Studio: One URL, Two Outputs
+# Staged Site Rewrite — Commercial Trade Contractor Niche
 
-## Goal
-When a user enters a URL in the Golden Report on the home page, it should trigger **both**:
-1. The existing 14-chapter forensic company report (already works).
-2. A new **Branded Creation Kit**: brand message, hero imagery, 30-day content schedule, and per-platform social posts (LinkedIn, X, Instagram, Facebook, TikTok) with correct length + hashtags + tone matched to the company's real brand voice.
+Message compressed to one line, kept across every page:
+> **Your backlog is full. Your margin is not. That is not bad luck, and we can prove it.**
 
-Both run from the same submit — no extra button, no second URL.
+I'll ship this in 5 phases and stop for your approval after each. You can redirect at any checkpoint.
 
-## What the user will see
-On `/golden-report` after submitting a URL:
-- Existing stage progress (site crawl → forensics → synth) — unchanged.
-- **New second progress lane** below it: `Brand Kit → Message → Imagery → Schedule → Social Posts`.
-- When both finish, page shows:
-  - The existing "Download Smart PDF" report button.
-  - A new **Branded Creation Kit** panel with tabs:
-    - **Brand** — extracted colors, fonts, logo, one-line positioning message.
-    - **Imagery** — hero image generated in the brand's style.
-    - **Schedule** — 30-day calendar table (date, channel, theme, post, visual, CTA).
-    - **Posts** — one card per platform showing the post copy, character count vs platform limit, hashtag block, and best-time-to-post note.
-  - "Download Kit" button that bundles the above into a second PDF/zip.
+---
 
-## Implementation
+## Phase 1 — Homepage rewrite (`src/pages/Home.tsx`)
+The five-second test drives everything else.
 
-### 1. Edge function: extend `forensic-scan-all`
-Add a new pipeline stage `brand_kit` that runs after the existing `branding` stage (we already crawl the site there — reuse that output; do not double-scan). It calls the same underlying logic as `creation-studio-brand` `generate` action for each `kind` in parallel:
-- `one-pager` → stores as `report.brand.message`
-- `image` → stores as `report.brand.hero_image_url` (Gemini 2.5 flash image)
-- `calendar` → stores as `report.brand.calendar_md`
-- New `kind: "social-posts"` → returns structured JSON: `{ linkedin: {copy, hashtags[], char_count}, x: {...}, instagram: {...}, facebook: {...}, tiktok: {...} }` with platform-specific length rules baked into the prompt (LinkedIn ≤3000, X ≤280, IG ≤2200 + 30 hashtags, FB ≤500, TikTok ≤150 caption).
+- **Hero**: "Your backlog is full. Your margin is not." + contractor-specific subhead, one CTA → **Open Your Case File** (routes to `/leak-audit`). Trade strip below: Mechanical · Electrical · Roofing · Sheet Metal · Plumbing · Fire Protection · Controls.
+- **Qualifier strip**: $5M–$50M commercial only. No residential. No under $5M.
+- **The Premise** section: "Nothing about this is random."
+- **The Six Leaks** section (centerpiece): case-file cards for bid follow-up void, change order leakage, T&M slippage, service-to-agreement gap, dispatch drag, silent account decay. Each with the exact copy from the doc. Closer: *"If three of those made you uncomfortable, your case is worth opening."*
+- **How It Works**: 4 steps (scan → case file → read-out → investigation).
+- **What You Get**: "Findings, not activity."
+- **The Architect**: Joseph, one operator, the chaos-theory pullquote.
+- **Final CTA**: "The chaos has a cause. Let's find it."
+- **Meta/SEO**: replace title + description with the doc's exact strings, drop the 26-keyword tag, remove any "30% average recovery" claim, change "Doctorate in Digital Forensics" → "Doctoral candidate" everywhere it appears.
 
-Persist on the same `forensic_scans` row under a new `brand_kit` JSONB column and a `brand_kit_status` column mirroring `stage_status`.
+Reuses existing tokens (charcoal + amber, crimson only on leak signals, Fraunces headlines, JetBrains Mono labels). No new colors.
 
-### 2. Shared brand-prompt module
-Extract the `brandPromptBlock` + per-platform templates from `creation-studio-brand` into `supabase/functions/_shared/brand-prompts.ts` so both `forensic-scan-all` and the existing `creation-studio-brand` edge function use the same voice rules. No behavior change to the existing public sandbox.
+---
 
-### 3. Client: `ForensicScanAllPanel.tsx`
-- Add a second `STAGES` array for the brand kit lane.
-- Polling already returns the full row — read `brand_kit_status` and `brand_kit` alongside `report`.
-- Render new `<BrandedCreationKit kit={row.brand_kit} />` component below the existing report actions when `brand_kit_status.all === "done"`.
+## Phase 2 — Leak Audit landing (`/leak-audit`)
+Rewrite the page to match the doc's tool landing:
+- Hero: "Twelve questions. Five minutes. One number you do not currently have."
+- "What you get" strip (4 bullets: real number, named exhibits, case file PDF, optional read-out).
+- "What this is not" strip (no drip, no demo trap).
+- Primary CTA: **Begin the Audit**.
+- Leaves the existing audit engine untouched — just replaces the page shell/copy.
 
-### 4. New component: `src/components/BrandedCreationKit.tsx`
-Tabs (Brand / Imagery / Schedule / Posts) built with existing shadcn `Tabs`. Post cards show live character-count vs platform cap in amber/crimson if over. "Copy" button per post. "Download Kit" hits a new small client-side PDF generator (mirrors `generateForensicGoldenPdf.ts` style).
+---
 
-### 5. Home page CTA copy
-`HomeToolShopGrid` — update the Golden Report card subtitle to: *"One URL. Full company report + fully branded content kit ready to post."*
+## Phase 3 — Services & Pricing page
+New page `/services` (or rewrite existing) with three tiers exactly as specified:
+1. **Free** — Contractor Leak Audit.
+2. **$3,500** — Single-Leak Investigation (5 business days, credited 1:1 toward Diagnostic within 90 days).
+3. **$18,500** — The Contractor Diagnostic (21 days, site visit, ride-along, 3× guarantee in writing, credited 1:1 toward implementation).
+4. **From $15,000/mo, 3-month min** — Implementation (only offered post-Diagnostic).
+
+Prices published on-page. USD only, matching the currency lock.
+
+---
+
+## Phase 4 — About + Why Aetheris
+- **`/about`**: Joseph's story rewritten from the doc — Marine, aerospace, 30+ AI/automation systems, MS Marketing Liberty 4.0, doctoral candidate, IBM/Harvard/Google/HubSpot. "Why commercial trade contractors." One operator works your case.
+- **`/why-us`** (rewrite existing `WhyUsPage`): "What we are not / What we are." Ends on **Real findings. No sugar.**
+
+---
+
+## Phase 5 — SEO niche pages (contractor hub + trade pages)
+New route group under `/contractors`:
+- `/contractors` — niche hub, links all trade + leak pages.
+- `/change-order-leakage`
+- `/bid-follow-up`
+- `/commercial-hvac-contractors`
+- `/commercial-electrical-contractors`
+- `/commercial-roofing-contractors`
+
+Each page reuses the same investigation frame with trade- or leak-specific case file, FAQs, and schema (Service + HowTo + FAQ), so the national firms don't own these SERPs.
+
+---
+
+## Global cleanup (rolls into Phase 1)
+- Remove "Chaos Theory Forensics Operator" as an H1 anywhere it's still the primary headline. Keep it as signature/closer only.
+- Purge "30% average recovery" and any unsubstantiated recovery percentages.
+- Search for "Doctorate in Digital Forensics" and change to "Doctoral candidate" project-wide.
+- Kill the 26-keyword meta tag in `index.html` / `SEOHead` if present.
+
+---
 
 ## Technical notes
-- Model choice: text kinds → `google/gemini-2.5-flash` (fast, cheap, already used by `creation-studio-brand`). Image → `google/gemini-2.5-flash-image`. All via Lovable AI Gateway — no new secrets.
-- Structured output for social posts: use `Output.object` with a small Zod schema (5 platforms × {copy, hashtags, char_count}); include the length rules in the prompt text, not as schema bounds, per the AI SDK constraint rules.
-- DB migration: `ALTER TABLE public.forensic_scans ADD COLUMN brand_kit jsonb, ADD COLUMN brand_kit_status jsonb;` — existing GRANTs cover it.
-- No new tables, no new auth, no new secrets. Runs on the same anonymous scan flow as the current Golden Report.
-- Cost per URL roughly doubles (5 extra text calls + 1 image). Acceptable given this is the hero tool.
+- No backend/schema changes. Copy + component + routing only.
+- Existing design system (tokens, `.thumb-frame`, glass, amber, crimson-for-leaks) is reused — no new palette.
+- Every new route registered in `src/app/AppRouter.tsx` (or the current router file) and added to `sitemap`/`SEOHead` breadcrumbs.
+- I'll typecheck after each phase before handing back to you.
 
-## Out of scope
-- Saving the kit into `admin_library` / `rep_library` — the Golden Report itself doesn't save there today; keeping symmetry. Can be added later as a separate ask.
-- Auto-posting to social networks.
-- Editing the generated posts in-app (v1 is copy-out).
+---
 
-Ready to build on approval.
+**Starting point:** I'll begin with **Phase 1 (homepage)** on approval and stop before Phase 2 so you can review the live preview.

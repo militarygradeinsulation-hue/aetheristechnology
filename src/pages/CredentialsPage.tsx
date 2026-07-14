@@ -19,7 +19,7 @@ const BLOCKS: { label: string; body: string }[] = [
   },
   {
     label: 'Education',
-    body: 'B.A. in Psychology and Communication. M.S. in Business Marketing. Currently pursuing further Doctorate work in Digital Forensics. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
+    body: 'B.A. in Psychology and Communication. M.S. in Business Marketing. Doctoral candidate. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
   },
   {
     label: 'Certifications',
