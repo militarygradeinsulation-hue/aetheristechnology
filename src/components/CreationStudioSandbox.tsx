@@ -82,15 +82,26 @@ export function CreationStudioSandbox() {
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
+      const image = (data as any)?.image as string | undefined;
+      const md = (data as any)?.markdown as string | undefined;
       setPack(prev => ({
         ...prev,
         [k]: {
           brief: briefText,
           loading: false,
-          image: (data as any)?.image,
-          markdown: (data as any)?.markdown,
+          image,
+          markdown: md,
         },
       }));
+      // Persist each asset to My Library so the user never loses work when they
+      // tweak another brief, re-scan, or navigate away.
+      const title = `${b.name || b.sourceURL || "Brand"} · ${KIND_META[k].label} · ${new Date().toLocaleDateString()}`;
+      saveToolRun({
+        tool_type: `creation_studio_${k.replace(/-/g, "_")}`,
+        title,
+        input_data: { url: b.sourceURL, brand: b.name, brief: briefText, kind: k },
+        output_data: { image, markdown: md, brand: b },
+      }).catch(() => { /* toast already handled inside helper */ });
     } catch (e: any) {
       setPack(prev => ({ ...prev, [k]: { ...prev[k], loading: false, error: e?.message || "Failed" } }));
       toast.error(`${k}: ${e?.message || "Generation failed"}`);
