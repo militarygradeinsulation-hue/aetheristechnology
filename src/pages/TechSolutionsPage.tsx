@@ -277,7 +277,7 @@ const TechSolutionsPage: React.FC = () => {
             </h1>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
               Every diagnostic and content system in the Aetheris stack. Same free-run rules
-              as the ecosystem — no signup, nothing saved. Ready to keep one? Buy it right here.
+              as the ecosystem. Ready to keep one? Buy it right here.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 text-xs text-amber/80 font-mono border border-amber/20 bg-amber/5 px-3 py-2 rounded-sm">
               <span className="relative flex h-2 w-2">

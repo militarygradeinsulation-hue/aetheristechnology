@@ -265,7 +265,7 @@ export const HomeFreeTrialArsenal: React.FC = () => {
                   {tool.chip}
                 </span>
                 <span className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-                  Free · No signup
+                  Free
                 </span>
               </div>
 
@@ -312,7 +312,7 @@ export const HomeFreeTrialArsenal: React.FC = () => {
             >
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className={`font-mono text-[9px] uppercase tracking-[0.28em] ${chipColor}`}>{tool.chip}</span>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">Free · No signup</span>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">Free</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className={`shrink-0 w-10 h-10 rounded-sm border ${border} bg-background/60 flex items-center justify-center`}>
