@@ -16,6 +16,7 @@ import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
+import { SignalStrip, markdownVisualComponents } from "@/components/VisualReport";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
