@@ -126,11 +126,14 @@ const RouteFallback = () => (
   <div className="min-h-screen bg-background" aria-hidden="true" />
 );
 
+import { ThumbShimmerOnScroll } from "@/components/ThumbShimmerOnScroll";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <ThumbShimmerOnScroll />
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
