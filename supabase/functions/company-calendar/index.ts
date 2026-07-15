@@ -297,7 +297,7 @@ Rules:
 - If the user says "clear the calendar" / "wipe everything", emit one { "op": "delete_all" }.
 - If the user says "delete Joseph's Friday tasks" or names items, pick matching ids from CURRENT_ENTRIES and emit delete ops for each.
 - Never invent uuids. Only delete ids that appear in CURRENT_ENTRIES.
-- Owner mapping: Joseph->founder, Dean->coo, Braden->chief_sales, otherwise team. Match owner_name to owner_role.
+- Owner mapping: Joseph->founder, Braden->coo, Dean->chief_sales, otherwise team. Match owner_name to owner_role.
 - Money in $ USD only. No fluff. Tactical titles.
 - Return ONLY the JSON, no markdown.`;
 
