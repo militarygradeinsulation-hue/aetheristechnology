@@ -138,6 +138,9 @@ verify_jwt = false
 [functions.personal-engine-token]
 verify_jwt = false
 
+[functions.linkedin-scrape-post]
+verify_jwt = false
+
 [functions.infer-business-context]
 verify_jwt = false
 
