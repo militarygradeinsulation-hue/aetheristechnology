@@ -6,8 +6,10 @@ import {
   List, LayoutGrid, CalendarRange, Lock, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listCompanyCalendar, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
+import { listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 type ViewMode = "list" | "week" | "month";
