@@ -20,6 +20,9 @@ export interface CompanyCalendarAIPlan {
   generated_at?: string;
 }
 
+export type OwnerRole = "founder" | "coo" | "chief_sales" | "team";
+export type TaskStatus = "todo" | "doing" | "done";
+
 export interface CompanyCalendarEntry {
   id: string;
   date: string; // YYYY-MM-DD
@@ -30,10 +33,23 @@ export interface CompanyCalendarEntry {
   ai_plan: CompanyCalendarAIPlan;
   pinned: boolean;
   color: string | null;
+  owner_role: OwnerRole;
+  owner_name: string | null;
+  status: TaskStatus;
+  due_time: string | null; // HH:MM:SS
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const OWNER_META: Record<OwnerRole, { label: string; short: string; badge: string; dot: string; border: string }> = {
+  founder:     { label: "Joseph — Founder / Architect", short: "Joseph", badge: "bg-amber/15 text-amber border-amber/40",         dot: "bg-amber",         border: "border-l-amber" },
+  coo:         { label: "Dean — COO",                   short: "Dean",   badge: "bg-sky-500/15 text-sky-300 border-sky-500/40",   dot: "bg-sky-500",       border: "border-l-sky-500" },
+  chief_sales: { label: "Braden — Chief of Sales",      short: "Braden", badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40", dot: "bg-emerald-500", border: "border-l-emerald-500" },
+  team:        { label: "Whole Team",                   short: "Team",   badge: "bg-muted text-muted-foreground border-border",   dot: "bg-muted-foreground", border: "border-l-muted-foreground" },
+};
+
+export const OWNER_ROLES: OwnerRole[] = ["founder", "coo", "chief_sales", "team"];
 
 function headers(): Record<string, string> {
   const h: Record<string, string> = {};
