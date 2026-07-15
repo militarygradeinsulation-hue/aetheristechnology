@@ -1557,7 +1557,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
             {lead.email && (
               <a
-                href="#" onClick={(e)=>{e.preventDefault();if(lead.email)openRepMail(lead.email);}}
+                href="#" onClick={(e)=>{e.preventDefault();if(lead.email)openLeadEmailWithTouchPrompt(lead, { onLogged: onChanged });}}
                 className="inline-flex items-center gap-1 text-amber hover:underline"
               >
                 <Mail className="w-3 h-3" /> {lead.email}
