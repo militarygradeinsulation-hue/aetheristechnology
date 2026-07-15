@@ -361,6 +361,8 @@ function GrowthTab() {
   const [length, setLength] = useState("brief");
   const [loading, setLoading] = useState(false);
   const [out, setOut] = useState("");
+  const [image, setImage] = useState<string>("");
+  const [imageName, setImageName] = useState<string>("");
 
   const labels: Record<typeof mode, { title: string; sub: string }> = {
     reply: { title: "LinkedIn Reply", sub: "Draft a forensic reply to a post" },
@@ -369,11 +371,27 @@ function GrowthTab() {
     hooks: { title: "Hook Pack",      sub: "5 hook lines from a URL" },
   };
 
+  const onImagePick = (file?: File | null) => {
+    if (!file) return;
+    if (file.size > 9_500_000) { toast.error("Image too large (max ~9MB)"); return; }
+    const reader = new FileReader();
+    reader.onload = () => { setImage(String(reader.result || "")); setImageName(file.name); };
+    reader.onerror = () => toast.error("Could not read image");
+    reader.readAsDataURL(file);
+  };
+
   const run = async () => {
     setLoading(true); setOut("");
     try {
       let res;
-      if (mode === "reply") res = await supabase.functions.invoke("linkedin-post-respond", { body: { post, length, source: "text" } });
+      if (mode === "reply") {
+        const hasImage = image.startsWith("data:image/");
+        res = await supabase.functions.invoke("linkedin-post-respond", {
+          body: hasImage
+            ? { imageDataUrl: image, length, source: "image", post: post || undefined }
+            : { post, length, source: "text" },
+        });
+      }
       else if (mode === "post") res = await supabase.functions.invoke("linkedin-post-from-url", { body: { url, tone: "forensic" } });
       else if (mode === "cold") res = await supabase.functions.invoke("outreach-email-creator", { body: { url, recipientFirstName: name } });
       else res = await supabase.functions.invoke("linkedin-post-from-url", { body: { url, tone: "hooks" } });
