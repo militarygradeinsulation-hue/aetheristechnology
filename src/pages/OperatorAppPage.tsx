@@ -429,6 +429,20 @@ function GrowthTab() {
               <Textarea value={post} onChange={(e) => setPost(e.target.value)} rows={5} placeholder="Paste the LinkedIn post…" className="bg-background/60 border-amber/20 resize-none" />
             </div>
             <div>
+              <Label>Or upload a screenshot</Label>
+              <label className="flex items-center justify-center gap-2 w-full border border-dashed border-amber/30 rounded-sm p-3 cursor-pointer hover:border-amber/60 text-xs font-mono uppercase tracking-wider text-amber/80">
+                <Copy className="w-3.5 h-3.5" />
+                {image ? (imageName || "Screenshot attached") : "Tap to attach image"}
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => onImagePick(e.target.files?.[0])} />
+              </label>
+              {image && (
+                <div className="relative mt-2 rounded-sm border border-amber/20 bg-background/40 p-2">
+                  <button type="button" onClick={() => { setImage(""); setImageName(""); }} className="absolute top-1 right-1 text-[10px] font-mono uppercase text-amber/80 hover:text-amber bg-background/70 border border-amber/30 rounded-sm px-1.5 py-0.5">Remove</button>
+                  <img src={image} alt="Attached" className="max-h-40 mx-auto rounded-sm" />
+                </div>
+              )}
+            </div>
+            <div>
               <Label>Reply length</Label>
               <select value={length} onChange={(e) => setLength(e.target.value)}
                 className="w-full bg-background/60 border border-amber/20 rounded-sm p-2 text-sm font-mono">
