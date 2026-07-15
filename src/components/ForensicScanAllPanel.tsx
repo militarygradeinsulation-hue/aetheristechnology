@@ -69,7 +69,18 @@ export function ForensicScanAllPanel() {
   const [url, setUrl] = useState("");
   const [company, setCompany] = useState("");
   const [scanId, setScanId] = useState<string | null>(() => {
-    try { return sessionStorage.getItem(SCAN_STORAGE_KEY); } catch { return null; }
+    // Prefer ?scan=<id> in the URL so shareable Golden Report links open the
+    // matching case file directly. Fall back to sessionStorage.
+    try {
+      if (typeof window !== "undefined") {
+        const q = new URLSearchParams(window.location.search).get("scan");
+        if (q) {
+          try { sessionStorage.setItem(SCAN_STORAGE_KEY, q); } catch { /* ignore */ }
+          return q;
+        }
+      }
+      return sessionStorage.getItem(SCAN_STORAGE_KEY);
+    } catch { return null; }
   });
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
