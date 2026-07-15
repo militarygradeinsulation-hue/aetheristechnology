@@ -443,15 +443,57 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           </DialogHeader>
           {openDraft && (
             <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Assign-to (primary field) */}
+              <div>
+                <Label className="text-xs flex items-center gap-2">
+                  Assigned to
+                  <span className={`inline-block w-2 h-2 rounded-full ${OWNER_META[openDraft.owner_role].dot}`} />
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  {OWNER_ROLES.map(r => {
+                    const m = OWNER_META[r];
+                    const Icon = ROLE_ICONS[r];
+                    const active = openDraft.owner_role === r;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setOpenDraft({ ...openDraft, owner_role: r, owner_name: m.short })}
+                        className={`px-3 py-2 rounded-md text-xs font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                          active ? m.badge : "border-border text-muted-foreground hover:border-foreground/30"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />{m.short}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <Label className="text-xs">Date</Label>
                   <Input type="date" value={openDraft.date}
                          onChange={e => setOpenDraft({ ...openDraft, date: e.target.value })} />
                 </div>
                 <div>
+                  <Label className="text-xs">Time (optional)</Label>
+                  <Input type="time" value={openDraft.due_time}
+                         onChange={e => setOpenDraft({ ...openDraft, due_time: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Status</Label>
+                  <select value={openDraft.status}
+                          onChange={e => setOpenDraft({ ...openDraft, status: e.target.value as TaskStatus })}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    <option value="todo">◯ To do</option>
+                    <option value="doing">◐ Doing</option>
+                    <option value="done">● Done</option>
+                  </select>
+                </div>
+                <div>
                   <Label className="text-xs flex items-center gap-2">
-                    Category (color)
+                    Category
                     <span className={`inline-block w-3 h-3 rounded ${CATEGORY_META[openDraft.category].swatch}`} />
                   </Label>
                   <select value={openDraft.category}
@@ -460,6 +502,9 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                     {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_META[c].icon} {CATEGORY_META[c].label}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Kind (semantic)</Label>
                   <select value={openDraft.kind}
