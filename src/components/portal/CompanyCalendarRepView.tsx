@@ -61,12 +61,11 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
 
   useEffect(() => {
     void refresh();
-    // Polling fallback (company_calendar removed from Realtime publication to
-    // avoid broadcasting internal calendar events to anon subscribers).
-    const id = setInterval(() => { void refresh(); }, 15000);
+    // Polling fallback — paused while a dialog is open so edits/reads don't get clobbered.
+    const id = setInterval(() => { if (!selectedEntry) void refresh(); }, 15000);
     return () => { clearInterval(id); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, anchor]);
+  }, [view, anchor, selectedEntry]);
 
   const todayStr = isoDate(new Date());
 
