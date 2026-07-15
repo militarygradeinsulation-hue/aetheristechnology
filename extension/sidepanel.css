@@ -107,10 +107,12 @@ body {
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
   flex: 0 0 auto; padding: 11px 12px; background: transparent; color: var(--muted);
-  border: 0; border-bottom: 2px solid transparent; cursor: pointer;
+  border: 0; border-bottom: 2px solid transparent; cursor: grab;
   font: 700 10.5px var(--mono); text-transform: uppercase; letter-spacing: 0.14em;
   position: relative; transition: color .15s;
+  user-select: none;
 }
+.tab:active { cursor: grabbing; }
 .tab:hover { color: var(--fg); }
 .tab.active { color: var(--amber); border-bottom-color: var(--amber); background: rgba(245,158,11,0.05); }
 .tab.active::before {
