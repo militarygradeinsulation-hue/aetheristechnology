@@ -76,12 +76,42 @@
     return bvCode || null;
   }
 
-  function openPanel() {
+  const TONE_OPTIONS = [
+    ["auto", "Auto (brand default)"],
+    ["professional", "Professional"],
+    ["casual", "Casual"],
+    ["confident", "Confident"],
+    ["playful", "Playful"],
+    ["empathetic", "Empathetic"],
+    ["bold", "Bold / punchy"],
+    ["thoughtful", "Thoughtful"],
+  ];
+  const PERSONALITY_OPTIONS = [
+    ["auto", "Auto"],
+    ["friendly", "Friendly"],
+    ["direct", "Direct operator"],
+    ["witty", "Witty"],
+    ["curious", "Curious"],
+    ["supportive", "Supportive"],
+    ["skeptical", "Skeptical"],
+    ["expert", "Quiet expert"],
+  ];
+
+  async function openPanel() {
     removePanel();
+    const { bvTone = "auto", bvPersonality = "auto", bvHumanize = true } =
+      await chrome.storage.local.get(["bvTone", "bvPersonality", "bvHumanize"]);
     panel = document.createElement("div");
     panel.className = "bv-panel";
+    const toneOpts = TONE_OPTIONS.map(([v, l]) => `<option value="${v}" ${v === bvTone ? "selected" : ""}>${l}</option>`).join("");
+    const persOpts = PERSONALITY_OPTIONS.map(([v, l]) => `<option value="${v}" ${v === bvPersonality ? "selected" : ""}>${l}</option>`).join("");
     panel.innerHTML = `
       <h4>Draft in brand voice · ${detectPlatform()}</h4>
+      <div class="bv-grid">
+        <label>Tone<select id="bv-tone">${toneOpts}</select></label>
+        <label>Personality<select id="bv-pers">${persOpts}</select></label>
+      </div>
+      <label class="bv-check"><input type="checkbox" id="bv-human" ${bvHumanize ? "checked" : ""}/> Human texture (tiny natural imperfections)</label>
       <textarea id="bv-intent" placeholder="What do you want to say? (optional)"></textarea>
       <div class="row">
         <button id="bv-go">Draft</button>
@@ -107,6 +137,12 @@
       return;
     }
     const intent = panel.querySelector("#bv-intent").value.trim();
+    const toneSel = panel.querySelector("#bv-tone").value;
+    const persSel = panel.querySelector("#bv-pers").value;
+    const humanize = panel.querySelector("#bv-human").checked;
+    // Persist as defaults
+    chrome.storage.local.set({ bvTone: toneSel, bvPersonality: persSel, bvHumanize: humanize });
+
     const selection = getSelectionText(target).slice(0, 2000);
     const pageCtx = nearestThreadContext(target);
     const btn = panel.querySelector("#bv-go");
@@ -123,6 +159,9 @@
           selection,
           pageContext: pageCtx,
           mode: selection ? "reply" : "post",
+          tone: toneSel === "auto" ? "" : toneSel,
+          personality: persSel === "auto" ? "" : persSel,
+          humanize,
         }),
       });
       const data = await r.json();
