@@ -89,6 +89,10 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
     title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
+    owner_role: e.owner_role || "team",
+    owner_name: e.owner_name || OWNER_META[e.owner_role || "team"].short,
+    status: e.status || "todo",
+    due_time: e.due_time ? e.due_time.slice(0, 5) : "",
   });
 
   const save = async () => {
