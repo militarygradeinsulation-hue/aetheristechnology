@@ -1556,7 +1556,7 @@ export default function LinkedInPostStudio() {
               </SelectContent>
             </Select>
           </div>
-          <div className={respondSourceType === 'reply' ? 'sm:col-span-2' : ''}>
+          <div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Extra Direction (optional)</div>
             <Input
               placeholder={respondSourceType === 'reply' ? 'e.g. Push back hard on their second point.' : 'e.g. Disagree with their framing. Lead with a stat.'}
