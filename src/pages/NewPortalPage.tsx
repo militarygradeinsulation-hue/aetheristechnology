@@ -392,7 +392,10 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <RepCalendarView isAdmin={false} />
+              <div className="space-y-4">
+                <TodaysTouchpoints />
+                <RepCalendarView isAdmin={false} />
+              </div>
             </ToolCard>
           </TabsContent>
 
