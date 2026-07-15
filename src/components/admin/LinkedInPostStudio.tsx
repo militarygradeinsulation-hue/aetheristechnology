@@ -1538,6 +1538,35 @@ export default function LinkedInPostStudio() {
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="flex gap-2 items-center flex-wrap p-2 rounded-md border border-border bg-background/40">
+              <Input
+                type="url"
+                placeholder="LinkedIn URL to fetch (post or comment)"
+                value={fetchUrl}
+                onChange={(e) => setFetchUrl(e.target.value)}
+                className="text-xs flex-1 min-w-[200px] h-8"
+              />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Fill:</span>
+              {([
+                { key: 'original' as const, label: 'Original' },
+                { key: 'their' as const, label: 'Their reply' },
+              ]).map((b) => (
+                <Button
+                  key={b.key}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-[11px]"
+                  onClick={() => scrapeLinkedInUrl(b.key)}
+                  disabled={fetchingUrl !== null || !fetchUrl.trim()}
+                >
+                  {fetchingUrl === b.key
+                    ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    : <LinkIcon className="w-3 h-3 mr-1" />}
+                  {b.label}
+                </Button>
+              ))}
+            </div>
             {([
               { label: 'Original post (optional context)', placeholder: 'Optional: paste the original post you commented on. Helps anchor the thread.', text: replyOriginalPost, setText: setReplyOriginalPost, image: replyOriginalImage, setImage: setReplyOriginalImage, rows: 3 },
               { label: 'Your prior comment', placeholder: "Paste the comment YOU wrote (the one they're replying to).", text: myComment, setText: setMyComment, image: myCommentImage, setImage: setMyCommentImage, rows: 4 },
