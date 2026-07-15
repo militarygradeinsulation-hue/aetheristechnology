@@ -128,9 +128,12 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     if (!openDraft.title.trim()) { toast.error("Title required"); return; }
     setSaving(true);
     try {
-      const { category, ...rest } = openDraft;
+      const { category, due_time, owner_role, owner_name, ...rest } = openDraft;
       const saved = await upsertCompanyEntry({
         ...(rest as Partial<CompanyCalendarEntry>),
+        owner_role,
+        owner_name: owner_name || OWNER_META[owner_role].short,
+        due_time: due_time ? due_time : null,
         color: categoryToColorToken(category),
       });
       setEntries(prev => {
