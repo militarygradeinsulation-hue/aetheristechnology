@@ -1,60 +1,60 @@
-# Golden Report ↔ Creation Studio: One URL, Two Outputs
+# Aetheris Leadership Calendar — 3 Principals, Clear Lanes
 
-## Goal
-When a user enters a URL in the Golden Report on the home page, it should trigger **both**:
-1. The existing 14-chapter forensic company report (already works).
-2. A new **Branded Creation Kit**: brand message, hero imagery, 30-day content schedule, and per-platform social posts (LinkedIn, X, Instagram, Facebook, TikTok) with correct length + hashtags + tone matched to the company's real brand voice.
+Extend the existing Company Calendar into a **leadership-aware** system with three lanes locked to your org chart. Keep it simple: one calendar, color-coded by principal, filter by lane. Add an AI "Playbook Generator" that reads the role definitions and produces a week's worth of tasks for each principal automatically.
 
-Both run from the same submit — no extra button, no second URL.
+## The Three Lanes (locked)
 
-## What the user will see
-On `/golden-report` after submitting a URL:
-- Existing stage progress (site crawl → forensics → synth) — unchanged.
-- **New second progress lane** below it: `Brand Kit → Message → Imagery → Schedule → Social Posts`.
-- When both finish, page shows:
-  - The existing "Download Smart PDF" report button.
-  - A new **Branded Creation Kit** panel with tabs:
-    - **Brand** — extracted colors, fonts, logo, one-line positioning message.
-    - **Imagery** — hero image generated in the brand's style.
-    - **Schedule** — 30-day calendar table (date, channel, theme, post, visual, CTA).
-    - **Posts** — one card per platform showing the post copy, character count vs platform limit, hashtag block, and best-time-to-post note.
-  - "Download Kit" button that bundles the above into a second PDF/zip.
+```text
+FOUNDER (Joseph, "The Architect")   → brand · product · methodology · findings
+COO (Dean)                          → delivery · people · accountability · quality
+CHIEF OF SALES (Braden)             → pipeline · training · tool vetting
+```
 
-## Implementation
+## What gets built
 
-### 1. Edge function: extend `forensic-scan-all`
-Add a new pipeline stage `brand_kit` that runs after the existing `branding` stage (we already crawl the site there — reuse that output; do not double-scan). It calls the same underlying logic as `creation-studio-brand` `generate` action for each `kind` in parallel:
-- `one-pager` → stores as `report.brand.message`
-- `image` → stores as `report.brand.hero_image_url` (Gemini 2.5 flash image)
-- `calendar` → stores as `report.brand.calendar_md`
-- New `kind: "social-posts"` → returns structured JSON: `{ linkedin: {copy, hashtags[], char_count}, x: {...}, instagram: {...}, facebook: {...}, tiktok: {...} }` with platform-specific length rules baked into the prompt (LinkedIn ≤3000, X ≤280, IG ≤2200 + 30 hashtags, FB ≤500, TikTok ≤150 caption).
+### 1. Backend — extend `company_calendar`
 
-Persist on the same `forensic_scans` row under a new `brand_kit` JSONB column and a `brand_kit_status` column mirroring `stage_status`.
+New migration adds two columns (non-breaking):
+- `owner_role text` — `'founder' | 'coo' | 'chief_sales' | 'team'` (default `'team'`)
+- `owner_name text` — display label ("Joseph", "Dean", "Braden", "Team")
+- `status text` — `'todo' | 'doing' | 'done'` (default `'todo'`)
+- `due_time time` — optional time-of-day for the task
 
-### 2. Shared brand-prompt module
-Extract the `brandPromptBlock` + per-platform templates from `creation-studio-brand` into `supabase/functions/_shared/brand-prompts.ts` so both `forensic-scan-all` and the existing `creation-studio-brand` edge function use the same voice rules. No behavior change to the existing public sandbox.
+Index on `owner_role, date`. Grants + RLS unchanged (service-role managed like today).
 
-### 3. Client: `ForensicScanAllPanel.tsx`
-- Add a second `STAGES` array for the brand kit lane.
-- Polling already returns the full row — read `brand_kit_status` and `brand_kit` alongside `report`.
-- Render new `<BrandedCreationKit kit={row.brand_kit} />` component below the existing report actions when `brand_kit_status.all === "done"`.
+New table `leadership_roles` seeded with the 3 principals (name, role, owns, does_not_own, decision_authority) so the AI planner and UI both read from one source of truth. You can edit these later without a code deploy.
 
-### 4. New component: `src/components/BrandedCreationKit.tsx`
-Tabs (Brand / Imagery / Schedule / Posts) built with existing shadcn `Tabs`. Post cards show live character-count vs platform cap in amber/crimson if over. "Copy" button per post. "Download Kit" hits a new small client-side PDF generator (mirrors `generateForensicGoldenPdf.ts` style).
+### 2. Edge function — `company-calendar` extended
 
-### 5. Home page CTA copy
-`HomeToolShopGrid` — update the Golden Report card subtitle to: *"One URL. Full company report + fully branded content kit ready to post."*
+- `list` accepts `owner_role` filter
+- `create`/`update` persist `owner_role`, `owner_name`, `status`, `due_time`
+- New action `ai_playbook`: takes a goal + week start date, calls Lovable AI (gemini-2.5-flash), returns a JSON array of tasks pre-assigned to each principal based on their lane definition from `leadership_roles`. Refuses to cross lanes (e.g. won't hand Sales tasks to the Founder).
+- New action `mark_status`: quick toggle todo→doing→done.
 
-## Technical notes
-- Model choice: text kinds → `google/gemini-2.5-flash` (fast, cheap, already used by `creation-studio-brand`). Image → `google/gemini-2.5-flash-image`. All via Lovable AI Gateway — no new secrets.
-- Structured output for social posts: use `Output.object` with a small Zod schema (5 platforms × {copy, hashtags, char_count}); include the length rules in the prompt text, not as schema bounds, per the AI SDK constraint rules.
-- DB migration: `ALTER TABLE public.forensic_scans ADD COLUMN brand_kit jsonb, ADD COLUMN brand_kit_status jsonb;` — existing GRANTs cover it.
-- No new tables, no new auth, no new secrets. Runs on the same anonymous scan flow as the current Golden Report.
-- Cost per URL roughly doubles (5 extra text calls + 1 image). Acceptable given this is the hero tool.
+### 3. Frontend — `AdminCompanyCalendarPanel`
 
-## Out of scope
-- Saving the kit into `admin_library` / `rep_library` — the Golden Report itself doesn't save there today; keeping symmetry. Can be added later as a separate ask.
-- Auto-posting to social networks.
-- Editing the generated posts in-app (v1 is copy-out).
+Simple, not busy:
+- **Header strip**: 3 principal pills (Joseph amber · Dean blue · Braden emerald · Team muted). Click to filter. "All" resets.
+- **Leadership Structure** collapsible card at top showing each principal's `owns / does not own / decision authority` (pulled from `leadership_roles`, editable inline by admin).
+- **Calendar grid**: existing month view, entries color-bordered by `owner_role`.
+- **Editor dialog**: adds "Assign to" (Joseph/Dean/Braden/Team), "Status", "Time".
+- **"Generate week's playbook" button** (top-right): dialog asks for the week's north-star goal ("Close 3 Diagnostics", "Onboard Dean", etc.), then AI drafts 3–6 tasks per principal for the next 7 days. Preview → accept-all or edit before saving.
 
-Ready to build on approval.
+### 4. Rep-side (`CompanyCalendarRepView`)
+
+Add a small "Leadership" legend row so reps see who owns what that day. No behavior change beyond the color chips.
+
+## Technical details
+
+- Migration file: `supabase/migrations/<ts>_leadership_calendar.sql`
+- New lib: `src/lib/leadershipRoles.ts` (typed CRUD for `leadership_roles`)
+- `src/lib/companyCalendar.ts` gets `OwnerRole` type + `OWNER_META` (name, color, swatch)
+- AI prompt for `ai_playbook` embeds the leadership doctrine from the uploaded infographic verbatim (lanes, decision authority, standing principle: "each person owns their lane fully").
+- No new external secrets — uses existing `LOVABLE_API_KEY`.
+
+## Out of scope for this pass
+- Notifications / email digests
+- Recurring tasks
+- Cross-linking tasks to CRM leads
+
+Say "go" and I'll ship it. If you want to trim (e.g. skip the editable roles table and hardcode the 3 principals for now) tell me and I'll cut that piece.
