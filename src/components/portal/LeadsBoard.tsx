@@ -33,6 +33,7 @@ import { LeakChart } from '@/components/LeakChart';
 
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
+import { openLeadEmailWithTouchPrompt } from '@/lib/leadEmailTouchpoint';
 import { wb } from '@/lib/workbench';
 
 function nextBusinessMorningISO(): string {
