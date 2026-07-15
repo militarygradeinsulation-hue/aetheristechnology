@@ -1514,9 +1514,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           date: string
+          due_time: string | null
           id: string
           kind: string
+          owner_name: string | null
+          owner_role: string
           pinned: boolean
+          status: string
           title: string
           updated_at: string
         }
@@ -1528,9 +1532,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date: string
+          due_time?: string | null
           id?: string
           kind?: string
+          owner_name?: string | null
+          owner_role?: string
           pinned?: boolean
+          status?: string
           title: string
           updated_at?: string
         }
@@ -1542,9 +1550,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date?: string
+          due_time?: string | null
           id?: string
           kind?: string
+          owner_name?: string | null
+          owner_role?: string
           pinned?: boolean
+          status?: string
           title?: string
           updated_at?: string
         }
@@ -3288,6 +3300,48 @@ export type Database = {
           scraper_enabled?: boolean
           scraper_frequency?: string
           scraper_target_per_run?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leadership_roles: {
+        Row: {
+          accent_color: string
+          created_at: string
+          decision_authority: Json
+          display_name: string
+          does_not_own: Json
+          id: string
+          owns: Json
+          role_slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          created_at?: string
+          decision_authority?: Json
+          display_name: string
+          does_not_own?: Json
+          id?: string
+          owns?: Json
+          role_slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          created_at?: string
+          decision_authority?: Json
+          display_name?: string
+          does_not_own?: Json
+          id?: string
+          owns?: Json
+          role_slug?: string
+          sort_order?: number
+          title?: string
           updated_at?: string
         }
         Relationships: []

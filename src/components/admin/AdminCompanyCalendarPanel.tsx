@@ -5,24 +5,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   CalendarDays, Plus, Loader2, Trash2, Pin, PinOff, Save, Sparkles,
-  Paperclip, X, Download, Wand2,
+  Paperclip, X, Wand2, Crown, ShieldCheck, TrendingUp, Users, ChevronDown, CheckCircle2, Circle, CircleDashed,
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
+  aiPlaybook, bulkCreateEntries, markCompanyEntryStatus,
   KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
+  OWNER_META, OWNER_ROLES,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
-  type CompanyCalendarCategory,
+  type CompanyCalendarCategory, type OwnerRole, type TaskStatus, type PlaybookTask,
 } from "@/lib/companyCalendar";
+import { listLeadershipRoles, type LeadershipRole } from "@/lib/leadershipRoles";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
 const CATEGORIES = Object.keys(CATEGORY_META) as CompanyCalendarCategory[];
 const todayISO = () => new Date().toISOString().slice(0, 10);
+const ROLE_ICONS: Record<OwnerRole, React.ComponentType<{ className?: string }>> = {
+  founder: Crown, coo: ShieldCheck, chief_sales: TrendingUp, team: Users,
+};
 
 interface DraftEntry {
   id?: string;
@@ -34,10 +40,15 @@ interface DraftEntry {
   pinned: boolean;
   attachments: CompanyCalendarAttachment[];
   ai_plan?: CompanyCalendarEntry["ai_plan"];
+  owner_role: OwnerRole;
+  owner_name: string;
+  status: TaskStatus;
+  due_time: string;
 }
 
 const emptyDraft = (): DraftEntry => ({
   date: todayISO(), kind: "goal", category: "manual", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
+  owner_role: "team", owner_name: OWNER_META.team.short, status: "todo", due_time: "",
 });
 
 export const AdminCompanyCalendarPanel: React.FC = () => {
@@ -52,32 +63,64 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
 
+  // Leadership + filter state
+  const [roles, setRoles] = useState<LeadershipRole[]>([]);
+  const [filter, setFilter] = useState<OwnerRole | "all">("all");
+  const [showLeadership, setShowLeadership] = useState(true);
+
+  // Playbook generator
+  const [playbookOpen, setPlaybookOpen] = useState(false);
+  const [playbookGoal, setPlaybookGoal] = useState("");
+  const [playbookWeekStart, setPlaybookWeekStart] = useState(todayISO());
+  const [playbookDays, setPlaybookDays] = useState(7);
+  const [playbookTasks, setPlaybookTasks] = useState<PlaybookTask[] | null>(null);
+  const [playbookBusy, setPlaybookBusy] = useState(false);
+
   const refresh = async () => {
     setLoading(true);
     try {
-      const list = await listCompanyCalendar({});
+      const [list, r] = await Promise.all([
+        listCompanyCalendar({}),
+        listLeadershipRoles().catch(() => [] as LeadershipRole[]),
+      ]);
       setEntries(list);
+      setRoles(r);
     } catch (e: any) {
       toast.error("Failed to load calendar", { description: e.message });
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
 
+  const filtered = useMemo(
+    () => filter === "all" ? entries : entries.filter(e => (e.owner_role || "team") === filter),
+    [entries, filter],
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<OwnerRole, number> = { founder: 0, coo: 0, chief_sales: 0, team: 0 };
+    for (const e of entries) c[(e.owner_role || "team") as OwnerRole]++;
+    return c;
+  }, [entries]);
+
   const grouped = useMemo(() => {
     const m = new Map<string, CompanyCalendarEntry[]>();
-    for (const e of entries) {
+    for (const e of filtered) {
       const k = e.date;
       if (!m.has(k)) m.set(k, []);
       m.get(k)!.push(e);
     }
     return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [entries]);
+  }, [filtered]);
 
   const openNew = () => setOpenDraft(emptyDraft());
   const openEdit = (e: CompanyCalendarEntry) => setOpenDraft({
     id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
     title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
+    owner_role: e.owner_role || "team",
+    owner_name: e.owner_name || OWNER_META[e.owner_role || "team"].short,
+    status: e.status || "todo",
+    due_time: e.due_time ? e.due_time.slice(0, 5) : "",
   });
 
   const save = async () => {
@@ -85,9 +128,12 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     if (!openDraft.title.trim()) { toast.error("Title required"); return; }
     setSaving(true);
     try {
-      const { category, ...rest } = openDraft;
+      const { category, due_time, owner_role, owner_name, ...rest } = openDraft;
       const saved = await upsertCompanyEntry({
         ...(rest as Partial<CompanyCalendarEntry>),
+        owner_role,
+        owner_name: owner_name || OWNER_META[owner_role].short,
+        due_time: due_time ? due_time : null,
         color: categoryToColorToken(category),
       });
       setEntries(prev => {
@@ -161,34 +207,164 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     finally { setAiBusy(false); }
   };
 
+  const generatePlaybook = async () => {
+    if (!playbookGoal.trim() || !playbookWeekStart) { toast.error("Goal and week start required"); return; }
+    setPlaybookBusy(true);
+    setPlaybookTasks(null);
+    try {
+      const tasks = await aiPlaybook(playbookGoal, playbookWeekStart, playbookDays);
+      if (!tasks.length) { toast.error("AI returned no tasks. Try a more concrete goal."); return; }
+      setPlaybookTasks(tasks);
+    } catch (e: any) { toast.error("Playbook failed", { description: e.message }); }
+    finally { setPlaybookBusy(false); }
+  };
+
+  const savePlaybook = async () => {
+    if (!playbookTasks) return;
+    setPlaybookBusy(true);
+    try {
+      const rows = playbookTasks.map(t => ({
+        date: t.date,
+        title: t.title.slice(0, 200),
+        body: t.body || "",
+        kind: t.kind || "goal",
+        owner_role: t.owner_role,
+        owner_name: t.owner_name || OWNER_META[t.owner_role].short,
+        due_time: t.due_time || null,
+        color: categoryToColorToken("manual"),
+      }));
+      const saved = await bulkCreateEntries(rows);
+      setEntries(prev => [...prev, ...saved].sort((a, b) => a.date.localeCompare(b.date)));
+      toast.success(`Saved ${saved.length} playbook tasks`);
+      setPlaybookOpen(false);
+      setPlaybookTasks(null);
+      setPlaybookGoal("");
+    } catch (e: any) { toast.error("Save failed", { description: e.message }); }
+    finally { setPlaybookBusy(false); }
+  };
+
+  const toggleStatus = async (entry: CompanyCalendarEntry) => {
+    const next: TaskStatus = entry.status === "todo" ? "doing" : entry.status === "doing" ? "done" : "todo";
+    try {
+      const updated = await markCompanyEntryStatus(entry.id, next);
+      setEntries(prev => prev.map(p => p.id === updated.id ? updated : p));
+    } catch (e: any) { toast.error("Status update failed", { description: e.message }); }
+  };
+
+  const StatusIcon = ({ s }: { s: TaskStatus }) => {
+    if (s === "done") return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+    if (s === "doing") return <CircleDashed className="w-4 h-4 text-amber animate-spin-slow" />;
+    return <Circle className="w-4 h-4 text-muted-foreground" />;
+  };
+
+
   return (
     <div className="space-y-4">
+      {/* Header */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
           <CardTitle className="font-display flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-amber" /> Company Calendar
+            <CalendarDays className="w-5 h-5 text-amber" /> Leadership Calendar
           </CardTitle>
-          <Button onClick={openNew} size="sm">
-            <Plus className="w-4 h-4 mr-1" /> Add entry
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setPlaybookOpen(true)} size="sm" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
+              <Sparkles className="w-4 h-4 mr-1" /> Generate week playbook
+            </Button>
+            <Button onClick={openNew} size="sm">
+              <Plus className="w-4 h-4 mr-1" /> Add task
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            What you put here is shown to <strong>every rep</strong> in their portal under "Company Calendar".
-            Use it for daily goals, vertical focuses, topics to post, sales pushes, and team events.
-            Use the <strong>AI planner</strong> inside any entry to draft tactics/KPIs in seconds.
+            Three principals. Clear lanes. Every task is owned by one person. Use <strong>Generate week playbook</strong> to have AI draft
+            role-appropriate tasks for Joseph, Dean, and Braden based on this week's north-star goal.
           </p>
+
+          {/* Role filter pills */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                filter === "all" ? "bg-foreground/10 border-foreground/40 text-foreground" : "border-border text-muted-foreground hover:border-foreground/30"
+              }`}
+            >
+              All · {entries.length}
+            </button>
+            {OWNER_ROLES.map(r => {
+              const m = OWNER_META[r];
+              const Icon = ROLE_ICONS[r];
+              const active = filter === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setFilter(r)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                    active ? m.badge : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {m.short} · {counts[r]}
+                </button>
+              );
+            })}
+          </div>
         </CardContent>
+      </Card>
+
+      {/* Leadership Structure card */}
+      <Card>
+        <CardHeader className="pb-2">
+          <button onClick={() => setShowLeadership(v => !v)} className="w-full flex items-center justify-between">
+            <CardTitle className="text-sm font-mono uppercase tracking-wider text-amber flex items-center gap-2">
+              <Crown className="w-4 h-4" /> Leadership Structure — Three lanes, no overlap
+            </CardTitle>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showLeadership ? "rotate-180" : ""}`} />
+          </button>
+        </CardHeader>
+        {showLeadership && (
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {roles.map(role => {
+                const m = OWNER_META[role.role_slug];
+                const Icon = ROLE_ICONS[role.role_slug];
+                return (
+                  <div key={role.id} className={`rounded-md border p-3 space-y-2 ${m.badge}`}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <div className="font-display font-semibold">{role.display_name}</div>
+                    </div>
+                    <div className="text-[10px] font-mono uppercase opacity-70">{role.title}</div>
+                    <div>
+                      <div className="text-[10px] font-mono uppercase opacity-70 mt-2 mb-1">Owns</div>
+                      <ul className="text-xs space-y-1 list-disc list-inside">
+                        {role.owns.slice(0, 4).map((o, i) => <li key={i} className="text-foreground/90">{o}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-mono uppercase opacity-70 mt-2 mb-1">Decides</div>
+                      <ul className="text-xs space-y-1 list-disc list-inside">
+                        {role.decision_authority.slice(0, 3).map((o, i) => <li key={i} className="text-foreground/90">{o}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-3 font-mono">
+              Standing principle: each person owns their lane fully. Disagreement fine — inside someone's lane, their call stands.
+            </p>
+          </CardContent>
+        )}
       </Card>
 
       {/* Full visual calendar (month/week/list), same view reps see */}
       <CompanyCalendarRepView />
 
-      {/* Admin list with edit/delete controls */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            All entries, click to edit
+            {filter === "all" ? "All tasks" : `${OWNER_META[filter].short}'s lane`} — click to edit, status dot to advance
           </CardTitle>
         </CardHeader>
       </Card>
@@ -199,7 +375,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         </div>
       ) : grouped.length === 0 ? (
         <div className="glass p-12 rounded-xl text-center">
-          <p className="text-muted-foreground text-sm">No entries yet. Click "Add entry" to plan the team's week.</p>
+          <p className="text-muted-foreground text-sm">No entries. Click "Add task" or "Generate week playbook".</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -213,17 +389,25 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               <CardContent className="space-y-2">
                 {list.map(e => {
                   const meta = entryDisplay(e);
+                  const owner = OWNER_META[(e.owner_role || "team") as OwnerRole];
+                  const OwnerIcon = ROLE_ICONS[(e.owner_role || "team") as OwnerRole];
                   return (
-                    <button
+                    <div
                       key={e.id}
-                      onClick={() => openEdit(e)}
-                      className={`w-full text-left rounded-md border p-3 transition-colors hover:border-primary ${meta.color}`}
+                      className={`w-full rounded-md border border-l-4 p-3 transition-colors hover:border-primary ${meta.color} ${owner.border}`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
+                        <button onClick={() => toggleStatus(e)} className="mt-0.5 flex-shrink-0" title={`Status: ${e.status || "todo"} — click to advance`}>
+                          <StatusIcon s={(e.status || "todo") as TaskStatus} />
+                        </button>
+                        <button onClick={() => openEdit(e)} className="flex-1 min-w-0 text-left">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className={`text-[10px] uppercase flex items-center gap-1 ${owner.badge}`}>
+                              <OwnerIcon className="w-3 h-3" />{owner.short}
+                            </Badge>
                             <span>{meta.icon}</span>
                             <Badge variant="outline" className="text-[10px] uppercase">{meta.label}</Badge>
+                            {e.due_time && <span className="text-[10px] font-mono opacity-70">{e.due_time.slice(0, 5)}</span>}
                             {e.pinned && <Pin className="w-3 h-3" />}
                             {e.attachments?.length > 0 && (
                               <span className="text-[10px] flex items-center gap-0.5 opacity-70">
@@ -231,15 +415,15 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <p className="font-semibold mt-1 text-foreground">{e.title}</p>
+                          <p className={`font-semibold mt-1 ${e.status === "done" ? "line-through opacity-60" : "text-foreground"}`}>{e.title}</p>
                           {e.body && <p className="text-xs text-muted-foreground mt-1 line-clamp-2 whitespace-pre-wrap">{e.body}</p>}
-                        </div>
+                        </button>
                         <button onClick={(ev) => { ev.stopPropagation(); remove(e.id); }}
-                                className="text-muted-foreground hover:text-crimson p-1">
+                                className="text-muted-foreground hover:text-crimson p-1 flex-shrink-0">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </CardContent>
@@ -259,15 +443,57 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           </DialogHeader>
           {openDraft && (
             <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Assign-to (primary field) */}
+              <div>
+                <Label className="text-xs flex items-center gap-2">
+                  Assigned to
+                  <span className={`inline-block w-2 h-2 rounded-full ${OWNER_META[openDraft.owner_role].dot}`} />
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  {OWNER_ROLES.map(r => {
+                    const m = OWNER_META[r];
+                    const Icon = ROLE_ICONS[r];
+                    const active = openDraft.owner_role === r;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setOpenDraft({ ...openDraft, owner_role: r, owner_name: m.short })}
+                        className={`px-3 py-2 rounded-md text-xs font-medium border transition-colors flex items-center justify-center gap-1.5 ${
+                          active ? m.badge : "border-border text-muted-foreground hover:border-foreground/30"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />{m.short}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <Label className="text-xs">Date</Label>
                   <Input type="date" value={openDraft.date}
                          onChange={e => setOpenDraft({ ...openDraft, date: e.target.value })} />
                 </div>
                 <div>
+                  <Label className="text-xs">Time (optional)</Label>
+                  <Input type="time" value={openDraft.due_time}
+                         onChange={e => setOpenDraft({ ...openDraft, due_time: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Status</Label>
+                  <select value={openDraft.status}
+                          onChange={e => setOpenDraft({ ...openDraft, status: e.target.value as TaskStatus })}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    <option value="todo">◯ To do</option>
+                    <option value="doing">◐ Doing</option>
+                    <option value="done">● Done</option>
+                  </select>
+                </div>
+                <div>
                   <Label className="text-xs flex items-center gap-2">
-                    Category (color)
+                    Category
                     <span className={`inline-block w-3 h-3 rounded ${CATEGORY_META[openDraft.category].swatch}`} />
                   </Label>
                   <select value={openDraft.category}
@@ -276,6 +502,9 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                     {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_META[c].icon} {CATEGORY_META[c].label}</option>)}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Kind (semantic)</Label>
                   <select value={openDraft.kind}
@@ -364,6 +593,86 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Playbook generator */}
+      <Dialog open={playbookOpen} onOpenChange={(o) => { if (!o) { setPlaybookOpen(false); setPlaybookTasks(null); } }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber" /> Generate Week Playbook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground">
+              Give me the north-star goal for the week. AI drafts 3–6 tasks per principal, staying inside each lane
+              (Joseph = brand/product · Dean = delivery/people · Braden = sales/training/tools). Nothing saves until you approve.
+            </div>
+            <div>
+              <Label className="text-xs">Week's north-star goal</Label>
+              <Textarea rows={2} value={playbookGoal} onChange={e => setPlaybookGoal(e.target.value)}
+                        placeholder='e.g. "Close 3 Diagnostics and finish Dean&apos;s COO onboarding"' />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Week starts</Label>
+                <Input type="date" value={playbookWeekStart} onChange={e => setPlaybookWeekStart(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Days to plan</Label>
+                <Input type="number" min={1} max={14} value={playbookDays}
+                       onChange={e => setPlaybookDays(Math.max(1, Math.min(14, Number(e.target.value) || 7)))} />
+              </div>
+            </div>
+            <Button onClick={generatePlaybook} disabled={playbookBusy || !playbookGoal.trim()} className="w-full">
+              {playbookBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
+              {playbookTasks ? "Regenerate" : "Generate playbook"}
+            </Button>
+
+            {playbookTasks && (
+              <div className="space-y-3 border-t border-border pt-3">
+                <div className="text-xs font-mono uppercase text-amber">
+                  Preview — {playbookTasks.length} tasks
+                </div>
+                {OWNER_ROLES.filter(r => r !== "team").map(role => {
+                  const m = OWNER_META[role];
+                  const Icon = ROLE_ICONS[role];
+                  const roleTasks = playbookTasks.filter(t => t.owner_role === role);
+                  if (!roleTasks.length) return null;
+                  return (
+                    <div key={role} className={`rounded-md border p-3 ${m.badge}`}>
+                      <div className="flex items-center gap-2 mb-2 font-semibold">
+                        <Icon className="w-4 h-4" /> {m.short} · {roleTasks.length} tasks
+                      </div>
+                      <ul className="space-y-2">
+                        {roleTasks.map((t, i) => (
+                          <li key={i} className="text-xs bg-background/40 rounded p-2 border border-border">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono text-muted-foreground">{t.date}</span>
+                              {t.due_time && <span className="font-mono text-muted-foreground">{t.due_time}</span>}
+                              <Badge variant="outline" className="text-[9px]">{t.kind}</Badge>
+                            </div>
+                            <div className="font-semibold mt-1 text-foreground">{t.title}</div>
+                            {t.body && <div className="text-muted-foreground mt-1 whitespace-pre-wrap">{t.body}</div>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setPlaybookOpen(false); setPlaybookTasks(null); }}>Cancel</Button>
+            {playbookTasks && (
+              <Button onClick={savePlaybook} disabled={playbookBusy}>
+                {playbookBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+                Save all {playbookTasks.length} tasks
+              </Button>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

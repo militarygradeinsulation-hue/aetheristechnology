@@ -20,6 +20,9 @@ export interface CompanyCalendarAIPlan {
   generated_at?: string;
 }
 
+export type OwnerRole = "founder" | "coo" | "chief_sales" | "team";
+export type TaskStatus = "todo" | "doing" | "done";
+
 export interface CompanyCalendarEntry {
   id: string;
   date: string; // YYYY-MM-DD
@@ -30,10 +33,23 @@ export interface CompanyCalendarEntry {
   ai_plan: CompanyCalendarAIPlan;
   pinned: boolean;
   color: string | null;
+  owner_role: OwnerRole;
+  owner_name: string | null;
+  status: TaskStatus;
+  due_time: string | null; // HH:MM:SS
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const OWNER_META: Record<OwnerRole, { label: string; short: string; badge: string; dot: string; border: string }> = {
+  founder:     { label: "Joseph — Founder / Architect", short: "Joseph", badge: "bg-amber/15 text-amber border-amber/40",         dot: "bg-amber",         border: "border-l-amber" },
+  coo:         { label: "Dean — COO",                   short: "Dean",   badge: "bg-sky-500/15 text-sky-300 border-sky-500/40",   dot: "bg-sky-500",       border: "border-l-sky-500" },
+  chief_sales: { label: "Braden — Chief of Sales",      short: "Braden", badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40", dot: "bg-emerald-500", border: "border-l-emerald-500" },
+  team:        { label: "Whole Team",                   short: "Team",   badge: "bg-muted text-muted-foreground border-border",   dot: "bg-muted-foreground", border: "border-l-muted-foreground" },
+};
+
+export const OWNER_ROLES: OwnerRole[] = ["founder", "coo", "chief_sales", "team"];
 
 function headers(): Record<string, string> {
   const h: Record<string, string> = {};
@@ -51,7 +67,7 @@ async function call<T>(payload: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const listCompanyCalendar = (params: { from?: string; to?: string } = {}) =>
+export const listCompanyCalendar = (params: { from?: string; to?: string; owner_role?: OwnerRole } = {}) =>
   call<{ ok: true; entries: CompanyCalendarEntry[] }>({ action: "list", ...params }).then(d => d.entries);
 
 export const upsertCompanyEntry = (entry: Partial<CompanyCalendarEntry>) =>
@@ -60,8 +76,28 @@ export const upsertCompanyEntry = (entry: Partial<CompanyCalendarEntry>) =>
 export const deleteCompanyEntry = (id: string) =>
   call<{ ok: true }>({ action: "delete", id });
 
+export const markCompanyEntryStatus = (id: string, status: TaskStatus) =>
+  call<{ ok: true; entry: CompanyCalendarEntry }>({ action: "mark_status", id, status }).then(d => d.entry);
+
 export const aiPlanCompany = (prompt: string, context = "") =>
   call<{ ok: true; plan: { title?: string; kind?: CompanyCalendarKind; summary?: string; tactics?: string[]; kpis?: string[]; suggested_date?: string | null; raw?: string } }>({ action: "ai_plan", prompt, context }).then(d => d.plan);
+
+export interface PlaybookTask {
+  date: string;
+  owner_role: OwnerRole;
+  owner_name: string;
+  title: string;
+  body: string;
+  kind: CompanyCalendarKind;
+  due_time: string | null;
+}
+
+export const aiPlaybook = (goal: string, week_start: string, days = 7) =>
+  call<{ ok: true; tasks: PlaybookTask[] }>({ action: "ai_playbook", goal, week_start, days }).then(d => d.tasks);
+
+export const bulkCreateEntries = (entries: Array<Partial<CompanyCalendarEntry>>) =>
+  call<{ ok: true; entries: CompanyCalendarEntry[] }>({ action: "bulk_create", entries }).then(d => d.entries);
+
 
 export const KIND_META: Record<CompanyCalendarKind, { label: string; icon: string; color: string }> = {
   goal:     { label: "Goal of the Day", icon: "🎯", color: "bg-amber/15 text-amber border-amber/40" },
