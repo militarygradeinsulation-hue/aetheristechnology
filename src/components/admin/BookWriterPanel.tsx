@@ -237,49 +237,93 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
     }
   };
 
-  const autoWriteAll = async (o: Outline) => {
-    setAutoWriting(true);
-    let chapters = o.chapters;
-    setProgress({ done: 0, total: chapters.length });
-    for (let i = 0; i < chapters.length; i++) {
-      if (chapters[i].body) { setProgress({ done: i + 1, total: chapters.length }); continue; }
-      setOpenChapter(i);
-      chapters = chapters.map((c, ci) => ci === i ? { ...c, generating: true } : c);
-      setOutline({ ...o, chapters });
-      // eslint-disable-next-line no-await-in-loop
-      chapters = await draftChapterInternal(i, chapters);
-      setProgress({ done: i + 1, total: chapters.length });
+  // Poll the library row so progress reflects the server-side worker and
+  // is identical across every admin portal / device viewing the same book.
+  const pollingRef = useRef<number | null>(null);
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      window.clearInterval(pollingRef.current);
+      pollingRef.current = null;
     }
-    setAutoWriting(false);
-    await persistDraft({ ...o, chapters }, 'complete');
-    toast({ title: 'Manuscript complete', description: `${chapters.length} chapters drafted.` });
-  };
+  }, []);
 
-  const generateOutline = async () => {
-    if (entries.length === 0) {
+  const startPolling = useCallback((libId: string) => {
+    stopPolling();
+    const tick = async () => {
+      try {
+        const items = await listAdminLibrary({ toolType: 'book_manuscript', includeData: true, maxPages: 1 });
+        const row = items.find((it) => it.id === libId);
+        if (!row) return;
+        const out = readRecord(row.output_data);
+        if (isOutline(out.outline)) {
+          const cleaned = cleanOutline(out.outline as Outline);
+          setOutline(cleaned);
+          latestOutlineRef.current = cleaned;
+          const done = cleaned.chapters.filter((c) => c.body).length;
+          setProgress({ done, total: cleaned.chapters.length });
+        }
+        const status = String(out.jobStatus || '');
+        if (status === 'complete') {
+          setAutoWriting(false);
+          setLastSavedAt(String(out.updatedAt || row.created_at || ''));
+          setSaveState('saved');
+          stopPolling();
+          toast({ title: 'Book complete', description: 'Every chapter drafted and saved.' });
+        } else if (status === 'error') {
+          setAutoWriting(false);
+          setSaveState('error');
+          stopPolling();
+          toast({ title: 'Book job errored', description: String(out.jobError || 'Unknown'), variant: 'destructive' });
+        } else if (status === 'running') {
+          setAutoWriting(true);
+          setSaveState('saving');
+        }
+      } catch (e) {
+        console.warn('book poll failed', e);
+      }
+    };
+    void tick();
+    pollingRef.current = window.setInterval(tick, 6000) as unknown as number;
+  }, [stopPolling]);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
+  const startAutoWrite = async (opts: { libraryId?: string | null } = {}) => {
+    if (entries.length === 0 && !opts.libraryId) {
       toast({ title: 'No library entries yet', description: 'Save some responses first — the book pulls voice + material from them.', variant: 'destructive' });
       return;
     }
     setBuildingOutline(true);
+    setAutoWriting(true);
     try {
       const data = await invokeBook({
-        action: 'outline',
+        action: 'auto_write',
+        libraryId: opts.libraryId || savedLibraryIdRef.current || undefined,
         bookTitle, audience, styleNotes,
         entries: entries.slice(0, 60),
       });
-      const o = (data as { outline: Outline }).outline;
-      const cleaned = cleanOutline(o);
-      setOutline(cleaned);
-      await persistDraft(cleaned, 'outline');
-      toast({ title: 'Outline drafted — writing now', description: `${o.chapters?.length || 0} chapters queued.` });
-      // Auto-start writing the full book, chapter by chapter.
-      void autoWriteAll(cleaned);
+      const libId = String((data as { libraryId?: string }).libraryId || '');
+      if (!libId) throw new Error('No library id returned');
+      savedLibraryIdRef.current = libId;
+      setSavedLibraryId(libId);
+      const o = (data as { outline?: Outline }).outline;
+      if (o) {
+        const cleaned = cleanOutline(o);
+        setOutline(cleaned);
+        latestOutlineRef.current = cleaned;
+      }
+      toast({ title: 'Writing your book', description: 'The worker runs on the backend — safe to close this tab.' });
+      startPolling(libId);
     } catch (e) {
-      toast({ title: 'Outline failed', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
+      setAutoWriting(false);
+      toast({ title: 'Could not start book job', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     } finally {
       setBuildingOutline(false);
     }
   };
+
+  const generateOutline = () => startAutoWrite();
+  const generateAll = () => startAutoWrite({ libraryId: savedLibraryIdRef.current });
 
   const generateChapter = async (idx: number) => {
     if (!outline) return;
@@ -288,10 +332,7 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
     setOpenChapter(idx);
   };
 
-  const generateAll = async () => {
-    if (!outline) return;
-    await autoWriteAll(outline);
-  };
+
 
 
   const buildManuscript = (): string => outline ? buildManuscriptFromOutline(outline) : '';
