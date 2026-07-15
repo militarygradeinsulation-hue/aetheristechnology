@@ -3,8 +3,16 @@ import { useEffect, useState, useCallback } from 'react';
 const KEY = 'admin.tabsClassic.v1';
 const EVT = 'classictabs:changed';
 
+// Classic flat tab row is now the default for all reps/partners. Users can
+// still opt into category sections via the toggle, which persists their
+// explicit choice ('0') in localStorage.
 const read = (): boolean => {
-  try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+  try {
+    const v = localStorage.getItem(KEY);
+    if (v === '1') return true;
+    if (v === '0') return false;
+    return true; // default ON
+  } catch { return true; }
 };
 
 export function useClassicTabs() {
