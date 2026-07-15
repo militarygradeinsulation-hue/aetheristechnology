@@ -2496,9 +2496,14 @@ const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan 
         <div className="mt-2 flex flex-wrap items-center gap-2 rounded-sm border border-amber/30 bg-background/40 px-2 py-1.5">
           <span className="text-[10px] font-mono uppercase tracking-wider text-amber">To:</span>
           <a
-            href={`mailto:${lead.email}?subject=${encodeURIComponent(`Quick read on ${lead.business_name || 'your operation'}`)}&body=${encodeURIComponent(
-              `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`
-            )}`}
+            href={`mailto:${lead.email}`}
+            onClick={(e) => {
+              e.preventDefault();
+              openLeadEmailWithTouchPrompt(lead, {
+                subject: `Quick read on ${lead.business_name || 'your operation'}`,
+                body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`,
+              });
+            }}
             className="text-xs text-amber hover:underline font-mono break-all"
           >
             {lead.email}
