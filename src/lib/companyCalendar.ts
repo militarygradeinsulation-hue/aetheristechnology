@@ -44,8 +44,8 @@ export interface CompanyCalendarEntry {
 
 export const OWNER_META: Record<OwnerRole, { label: string; short: string; badge: string; dot: string; border: string }> = {
   founder:     { label: "Joseph — Founder / Architect", short: "Joseph", badge: "bg-amber/15 text-amber border-amber/40",         dot: "bg-amber",         border: "border-l-amber" },
-  coo:         { label: "Dean — COO",                   short: "Dean",   badge: "bg-sky-500/15 text-sky-300 border-sky-500/40",   dot: "bg-sky-500",       border: "border-l-sky-500" },
-  chief_sales: { label: "Braden — Chief of Sales",      short: "Braden", badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40", dot: "bg-emerald-500", border: "border-l-emerald-500" },
+  coo:         { label: "Braden — COO",                 short: "Braden", badge: "bg-sky-500/15 text-sky-300 border-sky-500/40",   dot: "bg-sky-500",       border: "border-l-sky-500" },
+  chief_sales: { label: "Dean — Chief of Sales",        short: "Dean",   badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40", dot: "bg-emerald-500", border: "border-l-emerald-500" },
   team:        { label: "Whole Team",                   short: "Team",   badge: "bg-muted text-muted-foreground border-border",   dot: "bg-muted-foreground", border: "border-l-muted-foreground" },
 };
 
