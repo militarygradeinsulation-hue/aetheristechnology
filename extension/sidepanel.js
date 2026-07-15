@@ -1908,55 +1908,79 @@ $("af-apply")?.addEventListener("click", async () => {
     return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  let pollStartedAt = 0;
+  let pollErrCount = 0;
+  const MAX_POLL_MS = 6 * 60_000; // 6 minutes wall clock before we warn
+
   async function pollOnce() {
     if (!currentScanId) return;
-    const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${currentScanId}`, {
-      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
-    });
-    const row = await r.json();
-    if (row?.id) {
-      renderProgress(row.stage_status);
-      statusEl.textContent = `Status: ${row.status}`;
-      if (row.status === "completed") {
-        renderReport(row);
-        openBtn.disabled = false;
-        // ALWAYS save golden reports to the rep's portal + lead history.
-        // Bypasses the auto-sync toggle on purpose — golden reports are
-        // operator deliverables and must never be lost.
-        try {
-          const dedupeKey = `scan:${row.id}`;
-          const seen = (window.__aetherisGoldenSaved = window.__aetherisGoldenSaved || new Set());
-          if (typeof window.aetherisSaveToPortal === "function" && !seen.has(dedupeKey)) {
-            seen.add(dedupeKey);
-            window.aetherisSaveToPortal({
-              tool_type: "extension_golden",
-              title: `Golden report · ${row.company_name || companyInput?.value?.trim() || urlInput?.value?.trim() || "scan"}`,
-              input_data: {
-                url: row.target_url || urlInput?.value || "",
-                company: row.company_name || companyInput?.value || "",
-                scan_id: row.id,
-              },
-              output_data: {
-                scan_id: row.id,
-                report: row.report || null,
-                report_url: `https://aetheris.technology/report/${row.id}/ask`,
-                html: reportEl.innerHTML?.slice(0, 200000) || "",
-              },
-              silent: false,
-              force: true,
-            });
-          }
-        } catch (_) {}
-        if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
-        return;
+    try {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${currentScanId}`, {
+        headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+      });
+      if (!r.ok) throw new Error(`poll ${r.status}`);
+      const row = await r.json();
+      pollErrCount = 0;
+      if (row?.id) {
+        renderProgress(row.stage_status);
+        const elapsed = Math.round((Date.now() - pollStartedAt) / 1000);
+        statusEl.textContent = `Status: ${row.status} · ${elapsed}s`;
+        if (row.status === "completed") {
+          renderReport(row);
+          openBtn.disabled = false;
+          try {
+            const dedupeKey = `scan:${row.id}`;
+            const seen = (window.__aetherisGoldenSaved = window.__aetherisGoldenSaved || new Set());
+            if (typeof window.aetherisSaveToPortal === "function" && !seen.has(dedupeKey)) {
+              seen.add(dedupeKey);
+              window.aetherisSaveToPortal({
+                tool_type: "extension_golden",
+                title: `Golden report · ${row.company_name || companyInput?.value?.trim() || urlInput?.value?.trim() || "scan"}`,
+                input_data: {
+                  url: row.target_url || urlInput?.value || "",
+                  company: row.company_name || companyInput?.value || "",
+                  scan_id: row.id,
+                },
+                output_data: {
+                  scan_id: row.id,
+                  report: row.report || null,
+                  report_url: `https://aetheris.technology/report/${row.id}/ask`,
+                  html: reportEl.innerHTML?.slice(0, 200000) || "",
+                },
+                silent: false,
+                force: true,
+              });
+            }
+          } catch (_) {}
+          if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+          return;
+        }
+        if (row.status === "failed") {
+          statusEl.textContent = `Failed: ${row.error_message || "unknown"}. Try again.`;
+          if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+          return;
+        }
+        // Long-running guard — the scan pipeline caps stages around 55s each but AI
+        // synth can stretch. Keep polling but tell the user we're still working.
+        if (Date.now() - pollStartedAt > MAX_POLL_MS) {
+          statusEl.textContent = `Still processing (${elapsed}s). Large sites can take a few minutes — leaving this open will keep watching.`;
+        }
       }
-      if (row.status === "failed") {
-        statusEl.textContent = `Failed: ${row.error_message || "unknown"}`;
+    } catch (e) {
+      // Never let a transient fetch/JSON error kill the poll loop — that was
+      // the original "timing out" bug: a single hiccup and the panel spun forever.
+      pollErrCount++;
+      const elapsed = Math.round((Date.now() - pollStartedAt) / 1000);
+      statusEl.textContent = `Polling… (${elapsed}s${pollErrCount > 1 ? `, ${pollErrCount} retries` : ""})`;
+      if (pollErrCount > 40) {
+        statusEl.textContent = `Lost connection to scan ${currentScanId.slice(0,8)}. Refresh and re-run.`;
         if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
         return;
       }
     }
-    pollTimer = setTimeout(pollOnce, 3000);
+    // Backoff a touch on repeated failures.
+    const delay = pollErrCount > 3 ? 6000 : 3000;
+    pollTimer = setTimeout(pollOnce, delay);
   }
 
   runBtn?.addEventListener("click", async () => {
