@@ -5,24 +5,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   CalendarDays, Plus, Loader2, Trash2, Pin, PinOff, Save, Sparkles,
-  Paperclip, X, Download, Wand2,
+  Paperclip, X, Wand2, Crown, ShieldCheck, TrendingUp, Users, ChevronDown, CheckCircle2, Circle, CircleDashed,
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
+  aiPlaybook, bulkCreateEntries, markCompanyEntryStatus,
   KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
+  OWNER_META, OWNER_ROLES,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
-  type CompanyCalendarCategory,
+  type CompanyCalendarCategory, type OwnerRole, type TaskStatus, type PlaybookTask,
 } from "@/lib/companyCalendar";
+import { listLeadershipRoles, type LeadershipRole } from "@/lib/leadershipRoles";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyCalendarRepView } from "@/components/portal/CompanyCalendarRepView";
 
 const KINDS: CompanyCalendarKind[] = ["goal", "vertical", "topic", "event", "push", "note"];
 const CATEGORIES = Object.keys(CATEGORY_META) as CompanyCalendarCategory[];
 const todayISO = () => new Date().toISOString().slice(0, 10);
+const ROLE_ICONS: Record<OwnerRole, React.ComponentType<{ className?: string }>> = {
+  founder: Crown, coo: ShieldCheck, chief_sales: TrendingUp, team: Users,
+};
 
 interface DraftEntry {
   id?: string;
@@ -34,10 +40,15 @@ interface DraftEntry {
   pinned: boolean;
   attachments: CompanyCalendarAttachment[];
   ai_plan?: CompanyCalendarEntry["ai_plan"];
+  owner_role: OwnerRole;
+  owner_name: string;
+  status: TaskStatus;
+  due_time: string;
 }
 
 const emptyDraft = (): DraftEntry => ({
   date: todayISO(), kind: "goal", category: "manual", title: "", body: "", pinned: false, attachments: [], ai_plan: {},
+  owner_role: "team", owner_name: OWNER_META.team.short, status: "todo", due_time: "",
 });
 
 export const AdminCompanyCalendarPanel: React.FC = () => {
