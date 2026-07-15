@@ -204,6 +204,14 @@ export const LeadsBoard: React.FC = () => {
     else if (sub === 'mine') refreshMine();
   }, [sub, refreshDrip, refreshPool, refreshMine]);
 
+  // Refresh the "mine" list whenever a rep checks off "Yes, I emailed them"
+  // from the touchpoint prompt — keeps touch_count / last_touched_at fresh.
+  useEffect(() => {
+    const handler = () => { if (sub === 'mine') refreshMine(); };
+    window.addEventListener('lead-touched', handler);
+    return () => window.removeEventListener('lead-touched', handler);
+  }, [sub, refreshMine]);
+
   const handleClaim = async (lead: RepLead, source: 'drip' | 'pool') => {
     try {
       await portalLeads.claim(lead.id);
