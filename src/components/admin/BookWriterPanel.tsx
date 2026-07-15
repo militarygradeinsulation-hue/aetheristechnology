@@ -159,6 +159,14 @@ export const BookWriterPanel: React.FC<{ library: AdminLibraryItem[] }> = ({ lib
         setOpenChapter(restored.chapters.findIndex((c) => !c.body));
         setLastSavedAt(serverUpdated);
         setSaveState('saved');
+        const status = String(out.jobStatus || '');
+        const incomplete = restored.chapters.some((c) => !c.body);
+        if (status === 'running' || (status !== 'complete' && status !== 'error' && incomplete)) {
+          // Resume polling; server worker either still running or crashed —
+          // startPolling+auto_write will re-arm if the heartbeat is stale.
+          setAutoWriting(true);
+          startPolling(latest.id);
+        }
       } catch {
         // Existing library draft is optional; local draft already restored if present.
       }
