@@ -92,6 +92,7 @@ import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import { PortalCursorPicker } from '@/components/portal/PortalCursorPicker';
 import TabColorToggle from '@/components/TabColorToggle';
 import TabSizeSlider from '@/components/TabSizeSlider';
+import ClassicTabsButton from '@/components/ClassicTabsButton';
 import { useTabSize, tabButtonStyle, tabIconSize } from '@/lib/tabSize';
 import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
 import { usePortalCursor } from '@/lib/portalCursor';
@@ -1252,6 +1253,7 @@ const PortalPage: React.FC = () => {
           </Button>
           <TabColorToggle />
           <TabSizeSlider />
+          <ClassicTabsButton />
 
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {effectiveVisible.length} / {availableTabs.length} · {layout === 'widgets' ? 'Widget board · drag headers to reorder · ☆ to pin · 1/4-4/4 to resize' : 'Tab view'}
