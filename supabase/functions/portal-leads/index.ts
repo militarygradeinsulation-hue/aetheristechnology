@@ -519,6 +519,13 @@ serve(async (req) => {
       }
 
       await logActivity(supabase, claims, "lead_claim", { lead_id: id, business: data.business_name });
+      // Seed default 5-touch cadence on the rep's calendar (idempotent)
+      try {
+        await scheduleDefaultClaimCadence({
+          supabase, repCode: claims.code, leadId: id,
+          businessName: data.business_name || "New lead",
+        });
+      } catch (e) { console.warn("default cadence failed:", e); }
       const refilled = await topUpRepDrop(supabase, claims.code);
       return jsonResp({ ok: true, refilled });
     }
