@@ -33,6 +33,7 @@ import { LeakChart } from '@/components/LeakChart';
 
 import { createCalendarEvent } from '@/lib/portalCalendar';
 import { openRepMail } from '@/lib/repMail';
+import { openLeadEmailWithTouchPrompt } from '@/lib/leadEmailTouchpoint';
 import { wb } from '@/lib/workbench';
 
 function nextBusinessMorningISO(): string {
@@ -202,6 +203,14 @@ export const LeadsBoard: React.FC = () => {
     else if (sub === 'pool') refreshPool();
     else if (sub === 'mine') refreshMine();
   }, [sub, refreshDrip, refreshPool, refreshMine]);
+
+  // Refresh the "mine" list whenever a rep checks off "Yes, I emailed them"
+  // from the touchpoint prompt — keeps touch_count / last_touched_at fresh.
+  useEffect(() => {
+    const handler = () => { if (sub === 'mine') refreshMine(); };
+    window.addEventListener('lead-touched', handler);
+    return () => window.removeEventListener('lead-touched', handler);
+  }, [sub, refreshMine]);
 
   const handleClaim = async (lead: RepLead, source: 'drip' | 'pool') => {
     try {
@@ -1500,7 +1509,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                 <>
                   {lead.contact_name && <span> · </span>}
                   <a
-                    href="#" onClick={(e)=>{e.preventDefault();e.stopPropagation();if(lead.email)openRepMail(lead.email);}}
+                    href="#" onClick={(e)=>{e.preventDefault();e.stopPropagation();if(lead.email)openLeadEmailWithTouchPrompt(lead, { onLogged: onChanged });}}
                     className="hover:text-amber hover:underline"
                   >
                     {lead.email}
@@ -1556,7 +1565,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
             {lead.email && (
               <a
-                href="#" onClick={(e)=>{e.preventDefault();if(lead.email)openRepMail(lead.email);}}
+                href="#" onClick={(e)=>{e.preventDefault();if(lead.email)openLeadEmailWithTouchPrompt(lead, { onLogged: onChanged });}}
                 className="inline-flex items-center gap-1 text-amber hover:underline"
               >
                 <Mail className="w-3 h-3" /> {lead.email}
@@ -2421,7 +2430,7 @@ If I'm right, this is bleeding revenue every week it stays open. Worth a 15-minu
                           toast({ title: 'Copy failed', description: 'Clipboard blocked — opening composer instead.', variant: 'destructive' });
                         }
                         if (lead?.email) {
-                          openRepMail(lead.email, { subject, body });
+                          openLeadEmailWithTouchPrompt(lead, { subject, body });
                         }
                       }}
                     >
@@ -2482,7 +2491,7 @@ const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan 
             size="sm"
             variant="outline"
             className="h-8 text-xs"
-            onClick={() => openRepMail(lead.email!, {
+            onClick={() => openLeadEmailWithTouchPrompt(lead, {
               subject: `Quick read on ${lead.business_name || 'your operation'}`,
               body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks. The biggest: ${scan?.gaps?.[0]?.title || '—'}.\n\nWorth a 15-minute look?\n\n—`,
             })}
@@ -2495,9 +2504,14 @@ const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan 
         <div className="mt-2 flex flex-wrap items-center gap-2 rounded-sm border border-amber/30 bg-background/40 px-2 py-1.5">
           <span className="text-[10px] font-mono uppercase tracking-wider text-amber">To:</span>
           <a
-            href={`mailto:${lead.email}?subject=${encodeURIComponent(`Quick read on ${lead.business_name || 'your operation'}`)}&body=${encodeURIComponent(
-              `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`
-            )}`}
+            href={`mailto:${lead.email}`}
+            onClick={(e) => {
+              e.preventDefault();
+              openLeadEmailWithTouchPrompt(lead, {
+                subject: `Quick read on ${lead.business_name || 'your operation'}`,
+                body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`,
+              });
+            }}
             className="text-xs text-amber hover:underline font-mono break-all"
           >
             {lead.email}
