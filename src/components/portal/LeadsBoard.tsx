@@ -2422,7 +2422,7 @@ If I'm right, this is bleeding revenue every week it stays open. Worth a 15-minu
                           toast({ title: 'Copy failed', description: 'Clipboard blocked — opening composer instead.', variant: 'destructive' });
                         }
                         if (lead?.email) {
-                          openRepMail(lead.email, { subject, body });
+                          openLeadEmailWithTouchPrompt(lead, { subject, body });
                         }
                       }}
                     >
