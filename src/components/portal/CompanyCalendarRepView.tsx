@@ -23,7 +23,7 @@ const endOfMonth = (d: Date) => { const x = new Date(d.getFullYear(), d.getMonth
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
-export const CompanyCalendarRepView: React.FC = () => {
+export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) => {
   const [entries, setEntries] = useState<CompanyCalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("month");
