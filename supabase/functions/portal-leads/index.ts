@@ -225,6 +225,48 @@ async function scheduleScanCadence(opts: {
   }
 }
 
+// ---- Default 5-touch cadence on claim (Day 0/1/3/7/14) ----
+// Used when a rep claims a lead without running a scan. Idempotent: skips if
+// any system-generated events already exist for this (rep, lead) pair.
+async function scheduleDefaultClaimCadence(opts: {
+  supabase: any; repCode: string; leadId: string; businessName: string;
+}): Promise<number> {
+  try {
+    const { supabase, repCode, leadId, businessName } = opts;
+    const { count } = await supabase.from("rep_calendar_events")
+      .select("id", { count: "exact", head: true })
+      .eq("rep_code", repCode).eq("lead_id", leadId).eq("created_by", "system");
+    if ((count ?? 0) > 0) return 0;
+
+    const now = new Date();
+    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 14, 0, 0));
+    const steps: Array<{ offset: number; kind: string; label: string; note: string }> = [
+      { offset: 0,  kind: "call",      label: "☎️ Touchpoint 1: Intro call",      note: "First contact. Reference their business, ask 2 discovery questions, book a next step." },
+      { offset: 1,  kind: "task",      label: "✉️ Touchpoint 2: Follow-up email", note: "Short recap + 1 value point + clear CTA. Reply to your last thread if any." },
+      { offset: 3,  kind: "call",      label: "☎️ Touchpoint 3: Value call",      note: "Bring one insight. Ask what changed since last contact. Handle 1 objection." },
+      { offset: 7,  kind: "task",      label: "✉️ Touchpoint 4: Proof email",     note: "Case study, screenshot or short Loom. End with a yes/no CTA." },
+      { offset: 14, kind: "call",      label: "☎️ Touchpoint 5: Final call",      note: "Direct: 'Is this a priority right now, yes or no?' Decision or dead." },
+    ];
+    const rows = steps.map(s => ({
+      rep_code: repCode,
+      lead_id: leadId,
+      kind: s.kind,
+      title: `${s.label} — ${businessName}`,
+      body: s.note,
+      start_at: new Date(anchor.getTime() + s.offset * 86400000).toISOString(),
+      end_at:   new Date(anchor.getTime() + s.offset * 86400000 + 30 * 60000).toISOString(),
+      all_day: false,
+      created_by: "system",
+    }));
+    const { data, error } = await supabase.from("rep_calendar_events").insert(rows).select("id");
+    if (error) { console.error("scheduleDefaultClaimCadence insert error:", error); return 0; }
+    return (data || []).length;
+  } catch (e) {
+    console.error("scheduleDefaultClaimCadence error:", e);
+    return 0;
+  }
+}
+
 const FREE_EMAIL_DOMAINS = new Set([
   "gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com",
   "live.com","msn.com","comcast.net","ymail.com","me.com","mac.com","proton.me",
@@ -477,6 +519,13 @@ serve(async (req) => {
       }
 
       await logActivity(supabase, claims, "lead_claim", { lead_id: id, business: data.business_name });
+      // Seed default 5-touch cadence on the rep's calendar (idempotent)
+      try {
+        await scheduleDefaultClaimCadence({
+          supabase, repCode: claims.code, leadId: id,
+          businessName: data.business_name || "New lead",
+        });
+      } catch (e) { console.warn("default cadence failed:", e); }
       const refilled = await topUpRepDrop(supabase, claims.code);
       return jsonResp({ ok: true, refilled });
     }

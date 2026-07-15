@@ -31,6 +31,7 @@ import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { TodaysTouchpoints } from '@/components/portal/TodaysTouchpoints';
 import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
@@ -391,7 +392,10 @@ const NewPortalPage: React.FC = () => {
               ]}
               defaultOpen
             >
-              <RepCalendarView isAdmin={false} />
+              <div className="space-y-4">
+                <TodaysTouchpoints />
+                <RepCalendarView isAdmin={false} />
+              </div>
             </ToolCard>
           </TabsContent>
 

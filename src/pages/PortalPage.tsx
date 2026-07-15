@@ -49,6 +49,7 @@ import { NewRepBlueprintCard } from '@/components/portal/NewRepBlueprintCard';
 import { MotivationCard } from '@/components/portal/MotivationCard';
 import { CompanyDailyTasksCard } from '@/components/portal/CompanyDailyTasksCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { TodaysTouchpoints } from '@/components/portal/TodaysTouchpoints';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
@@ -780,7 +781,12 @@ const PortalPage: React.FC = () => {
             <div className="rounded-lg border border-border/50 bg-card/30 p-4 sm:p-6">{renderEmbeddedTool(activeTool, () => {}, profile)}</div>
           </div>
         );
-      case 'calendar': return <RepCalendarView isAdmin={false} />;
+      case 'calendar': return (
+        <div className="space-y-4">
+          <TodaysTouchpoints />
+          <RepCalendarView isAdmin={false} />
+        </div>
+      );
       case 'companycal': return isPartner ? <AdminCompanyCalendarPanel /> : <CompanyCalendarRepView />;
       case 'briefing': return <InterviewBriefingPanel />;
       case 'playbook': return <PortalPlaybook />;
