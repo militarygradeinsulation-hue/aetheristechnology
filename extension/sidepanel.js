@@ -2000,6 +2000,8 @@ $("af-apply")?.addEventListener("click", async () => {
       const j = await r.json();
       if (!j?.scan_id) throw new Error(j?.error || "no scan id");
       currentScanId = j.scan_id;
+      pollStartedAt = Date.now();
+      pollErrCount = 0;
       statusEl.textContent = `Started. Scan ${currentScanId.slice(0, 8)}…`;
       pollOnce();
     } catch (e) {
