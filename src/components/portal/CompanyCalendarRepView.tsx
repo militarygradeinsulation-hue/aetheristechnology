@@ -373,8 +373,48 @@ const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalenda
 };
 
 // ---------- Detail dialog ----------
-const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }> = ({ entry, onClose }) => {
+const EntryDialog: React.FC<{
+  entry: CompanyCalendarEntry;
+  isAdmin?: boolean;
+  onClose: () => void;
+  onSaved?: (e: CompanyCalendarEntry) => void;
+  onDeleted?: () => void;
+}> = ({ entry, isAdmin = false, onClose, onSaved, onDeleted }) => {
   const meta = entryDisplay(entry);
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(entry.title || "");
+  const [body, setBody] = useState(entry.body || "");
+  const [date, setDate] = useState(entry.date || "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setTitle(entry.title || ""); setBody(entry.body || ""); setDate(entry.date || "");
+  }, [entry.id]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const saved = await upsertCompanyEntry({ id: entry.id, title, body, date });
+      toast.success("Entry updated");
+      setEditing(false);
+      onSaved?.(saved);
+    } catch (e: any) {
+      toast.error("Save failed", { description: e.message });
+    } finally { setSaving(false); }
+  };
+
+  const remove = async () => {
+    if (!confirm("Delete this calendar entry? This cannot be undone.")) return;
+    setSaving(true);
+    try {
+      await deleteCompanyEntry(entry.id);
+      toast.success("Entry deleted");
+      onDeleted?.();
+    } catch (e: any) {
+      toast.error("Delete failed", { description: e.message });
+    } finally { setSaving(false); }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-background border border-border rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
@@ -384,9 +424,30 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
           {entry.pinned && <Badge variant="outline" className="text-[10px]"><Pin className="w-3 h-3 mr-1" />Pinned</Badge>}
           <span className="text-xs text-muted-foreground ml-auto font-mono">{new Date(entry.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span>
         </div>
-        <h3 className="text-xl font-display font-bold text-foreground">{entry.title}</h3>
-        {entry.body && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{entry.body}</p>}
-        {entry.attachments?.length > 0 && (
+
+        {editing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Title</label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Date</label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Body</label>
+              <Textarea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-xl font-display font-bold text-foreground">{entry.title}</h3>
+            {entry.body && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{entry.body}</p>}
+          </>
+        )}
+
+        {entry.attachments?.length > 0 && !editing && (
           <div className="mt-4 flex flex-wrap gap-2">
             {entry.attachments.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
@@ -396,7 +457,7 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
             ))}
           </div>
         )}
-        {entry.ai_plan && (entry.ai_plan.summary || entry.ai_plan.tactics?.length || entry.ai_plan.kpis?.length) && (
+        {!editing && entry.ai_plan && (entry.ai_plan.summary || entry.ai_plan.tactics?.length || entry.ai_plan.kpis?.length) && (
           <div className="mt-4 p-3 rounded-md border border-amber/30 bg-amber/5">
             <p className="text-[10px] font-mono uppercase text-amber mb-1">Tactical Plan</p>
             {entry.ai_plan.summary && <p className="text-xs text-foreground mb-2">{entry.ai_plan.summary}</p>}
@@ -415,12 +476,28 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
             ) : null}
           </div>
         )}
-        <div className="mt-4 flex justify-end">
+
+        <div className="mt-4 flex justify-end gap-2 flex-wrap">
+          {isAdmin && !editing && (
+            <>
+              <Button variant="destructive" size="sm" onClick={remove} disabled={saving}>Delete</Button>
+              <Button variant="default" size="sm" onClick={() => setEditing(true)}>Edit</Button>
+            </>
+          )}
+          {isAdmin && editing && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</Button>
+              <Button variant="default" size="sm" onClick={save} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+            </>
+          )}
           <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
-          <Lock className="w-3 h-3" /> Read-only, only leadership can edit this entry
-        </p>
+
+        {!isAdmin && (
+          <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
+            <Lock className="w-3 h-3" /> Read-only, only leadership can edit this entry
+          </p>
+        )}
       </div>
     </div>
   );
