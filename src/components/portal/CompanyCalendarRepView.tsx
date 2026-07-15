@@ -166,7 +166,13 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
       )}
 
       {selectedEntry && (
-        <EntryDialog entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
+        <EntryDialog
+          entry={selectedEntry}
+          isAdmin={isAdmin}
+          onClose={() => setSelectedEntry(null)}
+          onSaved={(e) => { setSelectedEntry(e); void refresh(); }}
+          onDeleted={() => { setSelectedEntry(null); void refresh(); }}
+        />
       )}
     </div>
   );
