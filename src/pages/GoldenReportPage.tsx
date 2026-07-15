@@ -10,6 +10,9 @@ import { ScrollText } from "lucide-react";
 
 const GoldenReportPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  // If the URL carries ?scan=<id>, we came from a shared Golden Report link.
+  // Skip the email gate so recipients see their case file immediately.
+  const hasSharedScan = typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("scan");
 
   return (
     <div className="relative min-h-screen">
@@ -41,15 +44,19 @@ const GoldenReportPage: React.FC = () => {
                 evidence you can search or ask questions of.
               </p>
             </div>
-            <ToolEmailGate
-              toolSlug="golden-report"
-              toolTitle="Golden Report"
-              source="golden_report_page"
-              headline="Drop your email to run the Golden Report."
-              subhead="One URL, one email. You'll get the full 14-chapter forensic case file — and our team gets pinged the moment a real operator is on the scan."
-            >
+            {hasSharedScan ? (
               <ForensicScanAllPanel />
-            </ToolEmailGate>
+            ) : (
+              <ToolEmailGate
+                toolSlug="golden-report"
+                toolTitle="Golden Report"
+                source="golden_report_page"
+                headline="Drop your email to run the Golden Report."
+                subhead="One URL, one email. You'll get the full 14-chapter forensic case file — and our team gets pinged the moment a real operator is on the scan."
+              >
+                <ForensicScanAllPanel />
+              </ToolEmailGate>
+            )}
           </div>
         </div>
         <Footer />
