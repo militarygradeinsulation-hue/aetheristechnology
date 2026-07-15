@@ -1486,6 +1486,27 @@ export default function LinkedInPostStudio() {
           )
         ) : respondSourceType === 'text' ? (
           <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                placeholder="Or paste a LinkedIn post URL (linkedin.com/posts/…) and fetch it"
+                value={fetchUrl}
+                onChange={(e) => setFetchUrl(e.target.value)}
+                className="text-sm flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => scrapeLinkedInUrl('text')}
+                disabled={fetchingUrl !== null || !fetchUrl.trim()}
+                className="text-xs"
+              >
+                {fetchingUrl === 'text'
+                  ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Fetching…</>
+                  : <><LinkIcon className="w-3 h-3 mr-1" /> Fetch URL</>}
+              </Button>
+            </div>
             <Textarea
               rows={8}
               placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
