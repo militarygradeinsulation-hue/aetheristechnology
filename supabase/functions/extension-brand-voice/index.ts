@@ -123,19 +123,45 @@ Deno.serve(async (req) => {
       const selection = String(body?.selection || "").slice(0, 2000);
       const pageContext = String(body?.pageContext || "").slice(0, 1500);
       const mode = String(body?.mode || "reply"); // reply | post | comment
+      const toneOverride = String(body?.tone || "").slice(0, 60).trim();
+      const personality = String(body?.personality || "").slice(0, 60).trim();
+      const humanize = body?.humanize !== false; // default on
 
       const memory = await loadMemory(code);
       const kit = (memory as any) || {};
       const brandName = kit.name || lic.brand_url || "the brand";
-      const tone = lic.brand_tone || "professional, direct, human";
+      const brandTone = lic.brand_tone || "professional, direct, human";
       const values = Array.isArray(kit.values) ? kit.values.join(", ") : "";
+
+      const personalityRules: Record<string, string> = {
+        "friendly": "Personality: warm, conversational, first-name energy. Occasional light contraction.",
+        "direct": "Personality: blunt, operator-tier, no filler. State the point in the first sentence.",
+        "witty": "Personality: dry wit, one clever observation, never try-hard.",
+        "curious": "Personality: ask a real question, sound like you're thinking out loud.",
+        "supportive": "Personality: validate the point, add one specific detail, no cheerleading.",
+        "skeptical": "Personality: push back gently, name the unstated assumption.",
+        "expert": "Personality: quiet authority, one precise term, no jargon dump.",
+      };
+      const persLine = personality && personalityRules[personality.toLowerCase()]
+        ? personalityRules[personality.toLowerCase()]
+        : personality ? `Personality: ${personality}.` : "";
+
+      const humanizeLine = humanize
+        ? `HUMAN TEXTURE (mandatory, subtle): write like a real person typing on a phone or laptop. Rules:
+- 1–2 tiny imperfections MAX across the whole reply. Never more.
+- Allowed: a lowercase sentence start, a missing Oxford comma, dropping one apostrophe (dont/its), a mid-sentence "—" that could've been a comma, ending with no period, one very common typo (teh, adn, recieve, alot, its vs it's), or a casual filler ("tbh", "ngl", "kinda", "fwiw") used at most once.
+- Never: multiple typos in one sentence, misspelled proper nouns, broken grammar that hurts readability, "text-speak" (u, r, ur), or anything that looks illiterate.
+- The reader should feel "a person wrote this," not "this has errors." If unsure, leave it clean.`
+        : "";
 
       const system = [
         `You are the ${brandName} voice engine. Write ONLY the ${mode} text — no preface, no quotes, no signature.`,
         `Brand URL: ${lic.brand_url || "unknown"}.`,
-        `Brand tone: ${tone}.`,
+        `Brand tone: ${toneOverride || brandTone}.`,
+        persLine,
         values ? `Brand values: ${values}.` : "",
         platformRules(platform),
+        humanizeLine,
         `Never invent facts about the brand. If unsure, stay generic-but-on-tone.`,
       ].filter(Boolean).join("\n");
 

@@ -48,3 +48,15 @@
   max-height: 220px; overflow: auto;
 }
 .bv-panel .err { color: #e64f4f; font-size: 12px; margin-top: 8px; }
+.bv-panel .bv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.bv-panel .bv-grid label, .bv-panel .bv-check {
+  display: block; font-size: 10px; color: #a09b8f;
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+.bv-panel .bv-grid select {
+  width: 100%; margin-top: 4px; padding: 6px 8px; border-radius: 4px;
+  background: #17181c; color: #f2efe8; border: 1px solid #2a2b30;
+  font: 12px inherit; text-transform: none; letter-spacing: 0;
+}
+.bv-panel .bv-check { margin: 4px 0 8px; display: flex; align-items: center; gap: 6px; }
+.bv-panel .bv-check input { width: auto; }
