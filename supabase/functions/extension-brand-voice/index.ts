@@ -123,9 +123,11 @@ Deno.serve(async (req) => {
       const selection = String(body?.selection || "").slice(0, 2000);
       const pageContext = String(body?.pageContext || "").slice(0, 1500);
       const mode = String(body?.mode || "reply"); // reply | post | comment
-      const toneOverride = String(body?.tone || "").slice(0, 60).trim();
-      const personality = String(body?.personality || "").slice(0, 60).trim();
-      const humanize = body?.humanize !== false; // default on
+      const toneKey = String(body?.tone || "").slice(0, 60).trim().toLowerCase();
+      const styleKey = String(body?.style || "").slice(0, 60).trim().toLowerCase();
+      const personaKey = String(body?.persona || body?.personality || "").slice(0, 60).trim().toLowerCase();
+      const lengthKey = String(body?.length || "").slice(0, 20).trim().toLowerCase();
+      const humanize = body?.humanize !== false;
 
       const memory = await loadMemory(code);
       const kit = (memory as any) || {};
@@ -133,50 +135,113 @@ Deno.serve(async (req) => {
       const brandTone = lic.brand_tone || "professional, direct, human";
       const values = Array.isArray(kit.values) ? kit.values.join(", ") : "";
 
-      const personalityRules: Record<string, string> = {
-        "friendly": "Personality: warm, conversational, first-name energy. Occasional light contraction.",
-        "direct": "Personality: blunt, operator-tier, no filler. State the point in the first sentence.",
-        "witty": "Personality: dry wit, one clever observation, never try-hard.",
-        "curious": "Personality: ask a real question, sound like you're thinking out loud.",
-        "supportive": "Personality: validate the point, add one specific detail, no cheerleading.",
-        "skeptical": "Personality: push back gently, name the unstated assumption.",
-        "expert": "Personality: quiet authority, one precise term, no jargon dump.",
+      // ============ TONE DIRECTIVES ============
+      const TONE: Record<string, string> = {
+        "blunt-operator": "TONE: Blunt operator. Direct, no filler, no throat-clearing. State the point in the first sentence.",
+        "forensic-cold": "TONE: Forensic / cold. Clinical, case-file cadence. Diagnose, don't opine.",
+        "aggressive-callout": "TONE: Aggressive call-out. Name the leak or the lazy pattern directly. No hedging.",
+        "mentor-calm": "TONE: Calm mentor. Patient, teaching cadence. One clear lesson.",
+        "contrarian": "TONE: Contrarian. Flip the conventional take. Argue the opposite of the obvious answer.",
+        "storyteller": "TONE: Storyteller. First-person mini field story with a specific detail.",
+        "dry-witty": "TONE: Dry, restrained wit. One clever observation, never try-hard.",
+        "empathetic-peer": "TONE: Empathetic peer, founder-to-founder. Warm, real, no cheerleading.",
+        "data-driven": "TONE: Data-driven. Lead with a stat or number. Prove with math, not adjectives.",
+        "professional": "TONE: Professional, polished, corporate-safe. Clean grammar, measured.",
+        "casual": "TONE: Casual, conversational. Light contractions, relaxed rhythm.",
+        "confident": "TONE: Confident, assertive, self-assured. No hedging language.",
+        "playful": "TONE: Playful, cheeky, light. One small joke, still on-topic.",
       };
-      const persLine = personality && personalityRules[personality.toLowerCase()]
-        ? personalityRules[personality.toLowerCase()]
-        : personality ? `Personality: ${personality}.` : "";
+
+      // ============ STYLE / STRUCTURE ============
+      const STYLE: Record<string, string> = {
+        "reaction": "STRUCTURE: Natural reaction. Read what is actually there, react to the real point, no template.",
+        "hook-list-close": "STRUCTURE: Hook line → short numbered list (3 items max) → sharp one-line close.",
+        "micro-story": "STRUCTURE: Micro-story with one specific dollar figure or metric.",
+        "case-file": "STRUCTURE: Case-file format. Subject / Findings / Verdict. Terse.",
+        "one-paragraph": "STRUCTURE: One dense paragraph, no line breaks.",
+        "stat-led": "STRUCTURE: Open with a stat. Three supporting points. Close with implication.",
+        "verdict-first": "STRUCTURE: Verdict first sentence. Then the proof. Then the consequence.",
+        "question-frame": "STRUCTURE: Question frame → answer → twist that reframes the question.",
+        "before-after": "STRUCTURE: Before / After / What changed. Concrete on both sides.",
+        "problem-solution": "STRUCTURE: Name the problem in one line, then 2-3 concrete moves the reader could test this week.",
+        "agree-extend": "STRUCTURE: Agree with the post, then extend it with ONE sharper detail or angle they missed.",
+        "polite-pushback": "STRUCTURE: Polite pushback. Name the unstated assumption. Offer the counter-frame.",
+      };
+
+      // ============ PERSONA DIRECTIVES (style transfer, never name them) ============
+      const PERSONA: Record<string, string> = {
+        "alex-hormozi": "PERSONA (style transfer only, never name him): blunt, declarative, arithmetic over adjectives. Reframe the stated problem as a more uncomfortable upstream one. Flat, slightly tired closer.",
+        "machiavellian": "PERSONA: strategic, power-aware, calculating. Frame moves in terms of leverage and unstated incentives.",
+        "elon-musk": "PERSONA (style transfer only): terse, first-principles, dry tech bravado. Short lines. Occasional 'obviously'.",
+        "ryan-reynolds": "PERSONA (style transfer only): self-aware deadpan, charming wit, one gentle self-deprecating aside. Never cheesy.",
+        "robin-williams": "PERSONA (style transfer only): rapid-fire, warm, associative. One quick riff, then land the point.",
+        "clint-eastwood": "PERSONA (style transfer only): spare, weathered, quiet menace. Short sentences. Never raises voice.",
+        "hemingway": "PERSONA: short, declarative, iceberg restraint. Concrete nouns. No adjectives you can cut.",
+        "aaron-sorkin": "PERSONA (style transfer only): walk-and-talk cadence, rhythmic sparring, one rhetorical rebound.",
+        "anthony-bourdain": "PERSONA (style transfer only): gritty, observational, unfiltered. Moral weight under practical advice. Direct 'you' address.",
+        "churchill": "PERSONA: gravitas, cadenced resolve, tricolon rhythm. One line of iron.",
+        "denzel": "PERSONA (style transfer only): measured, magnetic, moral weight. Slow, sure sentences.",
+        "steve-jobs": "PERSONA (style transfer only): reductive, reverent, reality-distortion conviction. 'It's really simple.'",
+        "tony-soprano": "PERSONA (style transfer only): blunt, North-Jersey menace, family-first logic. Never talks down.",
+        "don-draper": "PERSONA (style transfer only): mid-century pitch cadence, controlled gravity. One clean image, one clean line.",
+        "bill-burr": "PERSONA (style transfer only): frustrated everyman, rant-into-clarity. Ends with something true nobody wants to say.",
+        "naval-ravikant": "PERSONA (style transfer only): aphoristic, leverage-aware, calm tech-philosopher. One-line truths, stacked.",
+        "david-goggins": "PERSONA (style transfer only): confrontational, accountability-forward, no soft-landing. Never theatrical.",
+        "jocko-willink": "PERSONA (style transfer only): disciplined, ownership-first, command voice. Calm authority. 'Good.'",
+        "mr-rogers": "PERSONA (style transfer only): gentle, deliberate, radically kind clarity. Never saccharine.",
+        "samuel-jackson": "PERSONA (style transfer only): emphatic, rhythmic, righteous indignation. Controlled, not shouted.",
+        "mark-twain": "PERSONA: wry, plain-spoken, folksy demolition of nonsense. One quiet dagger of a line.",
+        "robert-greene": "PERSONA: 48 Laws power-strategist. Historical parable + cold law. Every observation ends on a rule.",
+        "robert-cialdini": "PERSONA: behavioral scientist. Frame the move in terms of reciprocity, commitment, social proof, authority, liking, or scarcity — name only the mechanism, not the book.",
+        "aetheris-strategist": "PERSONA: fused Greene + Cialdini + Godin operator voice. Cold law, behavioral principle, and remarkable-idea framing in one calm sentence. Never quote them.",
+      };
+
+      // ============ LENGTH ============
+      const LENGTH: Record<string, string> = {
+        "one-liner": "LENGTH: One sentence. Under 20 words.",
+        "short": "LENGTH: 2–3 short sentences.",
+        "medium": "LENGTH: One tight paragraph, roughly 40–80 words.",
+        "long": "LENGTH: 2–3 paragraphs, roughly 120–220 words.",
+      };
+
+      const toneLine = TONE[toneKey] || (toneKey ? `TONE: ${toneKey}.` : "");
+      const styleLine = STYLE[styleKey] || (styleKey ? `STRUCTURE: ${styleKey}.` : "");
+      const personaLine = PERSONA[personaKey] || "";
+      const lengthLine = LENGTH[lengthKey] || "";
 
       const humanizeLine = humanize
-        ? `HUMAN TEXTURE (mandatory, subtle): write like a real person typing on a phone or laptop. Rules:
+        ? `HUMAN TEXTURE (mandatory, subtle): write like a real person typing on a phone. Rules:
 - 1–2 tiny imperfections MAX across the whole reply. Never more.
-- Allowed: a lowercase sentence start, a missing Oxford comma, dropping one apostrophe (dont/its), a mid-sentence "—" that could've been a comma, ending with no period, one very common typo (teh, adn, recieve, alot, its vs it's), or a casual filler ("tbh", "ngl", "kinda", "fwiw") used at most once.
-- Never: multiple typos in one sentence, misspelled proper nouns, broken grammar that hurts readability, "text-speak" (u, r, ur), or anything that looks illiterate.
+- Allowed: a lowercase sentence start, a missing Oxford comma, dropping one apostrophe (dont/its), ending with no period, one very common typo (teh, adn, recieve, alot, its vs it's), or a casual filler ("tbh", "ngl", "kinda", "fwiw") used at most once.
+- Never: multiple typos in one sentence, misspelled proper nouns, broken grammar that hurts readability, text-speak (u, r, ur).
 - The reader should feel "a person wrote this," not "this has errors." If unsure, leave it clean.`
         : "";
 
       const problemSolverLine = `PROBLEM-SOLVER MODE (conditional):
-- First, silently scan the thread/context for a concrete problem, blocker, mistake, or "how do I…" question the author is wrestling with.
-- If a real problem exists: give 1–3 specific things to TEST or TRY. Each item should be a concrete action (a tactic, tool, script, metric, phrasing, or check) — not a platitude. Keep it tight: one short sentence per item, no numbered lists longer than 3, prose or a compact "Try: A. … B. … C. …" line is fine.
-- If NO clear problem exists (e.g. it's a hot take, a win post, a meme, a philosophical musing): do NOT invent one. Stay on-tone and react naturally. Never force advice.
-- Never say "here are some tips" or "hope this helps." Just give the moves.
-- Answers must be things a real operator could test this week. No theory dumps, no framework names without substance.`;
+- Silently scan the thread for a concrete problem, blocker, mistake, or "how do I…" question.
+- If a real problem exists: give 1–3 specific things to TEST or TRY (a tactic, tool, script, metric, phrasing, or check). Prose or a compact "Try: A. … B. … C. …" line — no numbered lists longer than 3.
+- If NO clear problem exists (hot take, win post, meme, philosophical musing): do NOT invent one. React naturally, on-tone.
+- Never say "here are some tips" or "hope this helps." Just give the moves.`;
 
       const system = [
-        `You are the ${brandName} voice engine. Write ONLY the ${mode} text — no preface, no quotes, no signature.`,
+        `You are the ${brandName} voice engine. Write ONLY the ${mode} text — no preface, no quotes, no signature, no labels.`,
         `Brand URL: ${lic.brand_url || "unknown"}.`,
-        `Brand tone: ${toneOverride || brandTone}.`,
-        persLine,
+        `Brand default tone: ${brandTone}.`,
         values ? `Brand values: ${values}.` : "",
         platformRules(platform),
+        toneLine,
+        styleLine,
+        personaLine,
+        lengthLine,
         problemSolverLine,
         humanizeLine,
-        `Never invent facts about the brand. If unsure, stay generic-but-on-tone.`,
-      ].filter(Boolean).join("\n");
+        `Never invent facts about the brand. Never name any persona. Never use em dashes (—); use periods or commas.`,
+      ].filter(Boolean).join("\n\n");
 
       const user = [
-        selection ? `Thread / context the user is replying to:\n"""${selection}"""` : "",
-        pageContext ? `Page context: ${pageContext}` : "",
-        intent ? `What the user wants to say: ${intent}` : "Write something on-brand that fits the context.",
+        selection ? `Thread / post the user is replying to:\n"""${selection}"""` : "",
+        pageContext ? `Surrounding page context: ${pageContext}` : "",
+        intent ? `User direction: ${intent}` : "Write something on-brand that fits the context.",
       ].filter(Boolean).join("\n\n");
 
       const draft = await callAI(system, user);
