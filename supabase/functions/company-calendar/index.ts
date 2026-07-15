@@ -280,7 +280,7 @@ Return ONLY the JSON object. No prose.`;
       const priorMessages: Array<{ role: string; content: string; ts?: string }> = Array.isArray((kvRow?.value as any)?.messages) ? (kvRow!.value as any).messages : [];
 
       const today = new Date().toISOString().slice(0, 10);
-      const sys = `You are the operations chief-of-staff for the Aetheris leadership calendar. The calendar is ONLY for three principals: Joseph (founder), Dean (coo), Braden (chief_sales). Today is ${today}.
+      const sys = `You are the operations chief-of-staff for the Aetheris leadership calendar. The calendar is ONLY for three principals: Joseph (founder), Braden (coo), Dean (chief_sales). Today is ${today}.
 
 You receive a natural-language instruction from Joseph and MUST return ONLY a JSON object of this shape:
 {
