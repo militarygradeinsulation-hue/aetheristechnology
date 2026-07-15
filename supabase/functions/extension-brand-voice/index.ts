@@ -154,6 +154,13 @@ Deno.serve(async (req) => {
 - The reader should feel "a person wrote this," not "this has errors." If unsure, leave it clean.`
         : "";
 
+      const problemSolverLine = `PROBLEM-SOLVER MODE (conditional):
+- First, silently scan the thread/context for a concrete problem, blocker, mistake, or "how do I…" question the author is wrestling with.
+- If a real problem exists: give 1–3 specific things to TEST or TRY. Each item should be a concrete action (a tactic, tool, script, metric, phrasing, or check) — not a platitude. Keep it tight: one short sentence per item, no numbered lists longer than 3, prose or a compact "Try: A. … B. … C. …" line is fine.
+- If NO clear problem exists (e.g. it's a hot take, a win post, a meme, a philosophical musing): do NOT invent one. Stay on-tone and react naturally. Never force advice.
+- Never say "here are some tips" or "hope this helps." Just give the moves.
+- Answers must be things a real operator could test this week. No theory dumps, no framework names without substance.`;
+
       const system = [
         `You are the ${brandName} voice engine. Write ONLY the ${mode} text — no preface, no quotes, no signature.`,
         `Brand URL: ${lic.brand_url || "unknown"}.`,
@@ -161,6 +168,7 @@ Deno.serve(async (req) => {
         persLine,
         values ? `Brand values: ${values}.` : "",
         platformRules(platform),
+        problemSolverLine,
         humanizeLine,
         `Never invent facts about the brand. If unsure, stay generic-but-on-tone.`,
       ].filter(Boolean).join("\n");
