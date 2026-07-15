@@ -595,6 +595,86 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Playbook generator */}
+      <Dialog open={playbookOpen} onOpenChange={(o) => { if (!o) { setPlaybookOpen(false); setPlaybookTasks(null); } }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber" /> Generate Week Playbook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-md border border-amber/30 bg-amber/5 p-3 text-xs text-muted-foreground">
+              Give me the north-star goal for the week. AI drafts 3–6 tasks per principal, staying inside each lane
+              (Joseph = brand/product · Dean = delivery/people · Braden = sales/training/tools). Nothing saves until you approve.
+            </div>
+            <div>
+              <Label className="text-xs">Week's north-star goal</Label>
+              <Textarea rows={2} value={playbookGoal} onChange={e => setPlaybookGoal(e.target.value)}
+                        placeholder='e.g. "Close 3 Diagnostics and finish Dean&apos;s COO onboarding"' />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Week starts</Label>
+                <Input type="date" value={playbookWeekStart} onChange={e => setPlaybookWeekStart(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Days to plan</Label>
+                <Input type="number" min={1} max={14} value={playbookDays}
+                       onChange={e => setPlaybookDays(Math.max(1, Math.min(14, Number(e.target.value) || 7)))} />
+              </div>
+            </div>
+            <Button onClick={generatePlaybook} disabled={playbookBusy || !playbookGoal.trim()} className="w-full">
+              {playbookBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
+              {playbookTasks ? "Regenerate" : "Generate playbook"}
+            </Button>
+
+            {playbookTasks && (
+              <div className="space-y-3 border-t border-border pt-3">
+                <div className="text-xs font-mono uppercase text-amber">
+                  Preview — {playbookTasks.length} tasks
+                </div>
+                {OWNER_ROLES.filter(r => r !== "team").map(role => {
+                  const m = OWNER_META[role];
+                  const Icon = ROLE_ICONS[role];
+                  const roleTasks = playbookTasks.filter(t => t.owner_role === role);
+                  if (!roleTasks.length) return null;
+                  return (
+                    <div key={role} className={`rounded-md border p-3 ${m.badge}`}>
+                      <div className="flex items-center gap-2 mb-2 font-semibold">
+                        <Icon className="w-4 h-4" /> {m.short} · {roleTasks.length} tasks
+                      </div>
+                      <ul className="space-y-2">
+                        {roleTasks.map((t, i) => (
+                          <li key={i} className="text-xs bg-background/40 rounded p-2 border border-border">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono text-muted-foreground">{t.date}</span>
+                              {t.due_time && <span className="font-mono text-muted-foreground">{t.due_time}</span>}
+                              <Badge variant="outline" className="text-[9px]">{t.kind}</Badge>
+                            </div>
+                            <div className="font-semibold mt-1 text-foreground">{t.title}</div>
+                            {t.body && <div className="text-muted-foreground mt-1 whitespace-pre-wrap">{t.body}</div>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setPlaybookOpen(false); setPlaybookTasks(null); }}>Cancel</Button>
+            {playbookTasks && (
+              <Button onClick={savePlaybook} disabled={playbookBusy}>
+                {playbookBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+                Save all {playbookTasks.length} tasks
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
