@@ -141,6 +141,7 @@ const App = () => (
             {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/engine" element={<PersonalEnginePage />} />
             <Route
               path="/admin"
               element={
