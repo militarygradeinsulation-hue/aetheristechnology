@@ -366,6 +366,54 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* AI Chat Box — bulk add/remove via natural language, saved to backend */}
+      <Card className="border-amber/30">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm font-mono uppercase tracking-wider text-amber flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" /> Calendar Chat — tell it what to add or remove
+          </CardTitle>
+          {chatMessages.length > 0 && (
+            <Button onClick={wipeChat} size="sm" variant="ghost" className="text-muted-foreground hover:text-crimson">
+              <Eraser className="w-3.5 h-3.5 mr-1" /> Clear history
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="max-h-72 overflow-y-auto space-y-2 rounded-md bg-background/40 border border-border p-3 text-sm">
+            {chatMessages.length === 0 ? (
+              <p className="text-xs text-muted-foreground font-mono">
+                Try: "Add a founder task tomorrow at 9am: review Q3 roadmap" · "Clear Braden's Friday" · "Wipe the calendar" · "Give Dean 3 ops tasks this week"
+              </p>
+            ) : chatMessages.map((m, i) => (
+              <div key={i} className={`rounded-md px-3 py-2 whitespace-pre-wrap ${m.role === "user" ? "bg-amber/10 border border-amber/30 text-foreground" : "bg-muted/40 border border-border text-foreground/90"}`}>
+                <div className="text-[10px] font-mono uppercase opacity-60 mb-1">{m.role === "user" ? "You" : "Chief of Staff"}</div>
+                {m.content}
+              </div>
+            ))}
+            {chatBusy && (
+              <div className="rounded-md px-3 py-2 bg-muted/40 border border-border text-muted-foreground text-xs flex items-center gap-2">
+                <Loader2 className="w-3 h-3 animate-spin" /> Thinking…
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <div className="flex gap-2">
+            <Textarea
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void sendChat(); } }}
+              placeholder="Tell it what to change… (Cmd/Ctrl+Enter to send)"
+              rows={2}
+              className="resize-none"
+              disabled={chatBusy}
+            />
+            <Button onClick={sendChat} disabled={chatBusy || !chatInput.trim()} className="self-end">
+              {chatBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Leadership Structure card */}
       <Card>
         <CardHeader className="pb-2">
