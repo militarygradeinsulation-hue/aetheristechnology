@@ -207,6 +207,57 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     finally { setAiBusy(false); }
   };
 
+  const generatePlaybook = async () => {
+    if (!playbookGoal.trim() || !playbookWeekStart) { toast.error("Goal and week start required"); return; }
+    setPlaybookBusy(true);
+    setPlaybookTasks(null);
+    try {
+      const tasks = await aiPlaybook(playbookGoal, playbookWeekStart, playbookDays);
+      if (!tasks.length) { toast.error("AI returned no tasks. Try a more concrete goal."); return; }
+      setPlaybookTasks(tasks);
+    } catch (e: any) { toast.error("Playbook failed", { description: e.message }); }
+    finally { setPlaybookBusy(false); }
+  };
+
+  const savePlaybook = async () => {
+    if (!playbookTasks) return;
+    setPlaybookBusy(true);
+    try {
+      const rows = playbookTasks.map(t => ({
+        date: t.date,
+        title: t.title.slice(0, 200),
+        body: t.body || "",
+        kind: t.kind || "goal",
+        owner_role: t.owner_role,
+        owner_name: t.owner_name || OWNER_META[t.owner_role].short,
+        due_time: t.due_time || null,
+        color: categoryToColorToken("manual"),
+      }));
+      const saved = await bulkCreateEntries(rows);
+      setEntries(prev => [...prev, ...saved].sort((a, b) => a.date.localeCompare(b.date)));
+      toast.success(`Saved ${saved.length} playbook tasks`);
+      setPlaybookOpen(false);
+      setPlaybookTasks(null);
+      setPlaybookGoal("");
+    } catch (e: any) { toast.error("Save failed", { description: e.message }); }
+    finally { setPlaybookBusy(false); }
+  };
+
+  const toggleStatus = async (entry: CompanyCalendarEntry) => {
+    const next: TaskStatus = entry.status === "todo" ? "doing" : entry.status === "doing" ? "done" : "todo";
+    try {
+      const updated = await markCompanyEntryStatus(entry.id, next);
+      setEntries(prev => prev.map(p => p.id === updated.id ? updated : p));
+    } catch (e: any) { toast.error("Status update failed", { description: e.message }); }
+  };
+
+  const StatusIcon = ({ s }: { s: TaskStatus }) => {
+    if (s === "done") return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+    if (s === "doing") return <CircleDashed className="w-4 h-4 text-amber animate-spin-slow" />;
+    return <Circle className="w-4 h-4 text-muted-foreground" />;
+  };
+
+
   return (
     <div className="space-y-4">
       <Card>
