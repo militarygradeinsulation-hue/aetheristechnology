@@ -34,12 +34,29 @@ Deno.serve(async (req) => {
       });
     }
     const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const { key } = await req.json().catch(() => ({}));
-    if (typeof key !== "string" || key.length < 20) {
-      return new Response(JSON.stringify({ error: "invalid" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const body = await req.json().catch(() => ({}));
+    const action = String(body?.action || "mint");
+
+    // Admins (with a valid x-admin-token) can retrieve the personal key to build the URL.
+    if (action === "reveal") {
+      const adminToken = req.headers.get("x-admin-token") || "";
+      const dot = adminToken.indexOf(".");
+      if (dot < 0) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const exp = Number(adminToken.slice(0, dot));
+      const sigHex = adminToken.slice(dot + 1);
+      if (!Number.isFinite(exp) || exp < Date.now()) return new Response(JSON.stringify({ error: "expired" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const enc = new TextEncoder();
+      const k = await crypto.subtle.importKey("raw", enc.encode(SERVICE), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      const sig = await crypto.subtle.sign("HMAC", k, enc.encode(`${ADMIN_PIN}.${exp}`));
+      const expectedHex = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      if (expectedHex !== sigHex) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ ok: true, key: PERSONAL_ENGINE_KEY }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const { key } = body;
+    if (typeof key !== "string" || key.length < 20) {
     // constant-time compare
     const a = new TextEncoder().encode(key);
     const b = new TextEncoder().encode(PERSONAL_ENGINE_KEY);
