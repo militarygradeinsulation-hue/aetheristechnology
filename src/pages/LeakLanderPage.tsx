@@ -161,22 +161,10 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Anti-AI positioning */}
+          {/* Aetheris positioning */}
           <section className="mt-6 max-w-6xl mx-auto text-center animate-fade-in">
             <div className="relative rounded-lg border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8 shadow-[0_0_40px_-15px_hsl(var(--amber)/0.35)]">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-amber/80 mb-3">
-                // Aetheris Field Note
-              </div>
-              <h2 className="font-forensic text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                <span className="text-foreground">We're the most <span className="text-amber font-semibold">anti-AI, AI company</span> you'll ever meet.</span>
-              </h2>
-              <p className="mt-4 text-lg sm:text-xl md:text-2xl text-crimson font-bold tracking-tight">
-                {"\n"}
-              </p>
-              <p className="mt-3 text-sm sm:text-base md:text-lg text-foreground/90 font-medium">
-                {"\n"}
-              </p>
-              <p className="mt-3 text-sm sm:text-base md:text-lg text-muted-foreground">
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                 If I can't save you <span className="text-crimson">money</span>, I don't want to do <span className="text-crimson">business</span> with you.
               </p>
             </div>
