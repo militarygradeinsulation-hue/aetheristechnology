@@ -63,26 +63,54 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
 
+  // Leadership + filter state
+  const [roles, setRoles] = useState<LeadershipRole[]>([]);
+  const [filter, setFilter] = useState<OwnerRole | "all">("all");
+  const [showLeadership, setShowLeadership] = useState(true);
+
+  // Playbook generator
+  const [playbookOpen, setPlaybookOpen] = useState(false);
+  const [playbookGoal, setPlaybookGoal] = useState("");
+  const [playbookWeekStart, setPlaybookWeekStart] = useState(todayISO());
+  const [playbookDays, setPlaybookDays] = useState(7);
+  const [playbookTasks, setPlaybookTasks] = useState<PlaybookTask[] | null>(null);
+  const [playbookBusy, setPlaybookBusy] = useState(false);
+
   const refresh = async () => {
     setLoading(true);
     try {
-      const list = await listCompanyCalendar({});
+      const [list, r] = await Promise.all([
+        listCompanyCalendar({}),
+        listLeadershipRoles().catch(() => [] as LeadershipRole[]),
+      ]);
       setEntries(list);
+      setRoles(r);
     } catch (e: any) {
       toast.error("Failed to load calendar", { description: e.message });
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
 
+  const filtered = useMemo(
+    () => filter === "all" ? entries : entries.filter(e => (e.owner_role || "team") === filter),
+    [entries, filter],
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<OwnerRole, number> = { founder: 0, coo: 0, chief_sales: 0, team: 0 };
+    for (const e of entries) c[(e.owner_role || "team") as OwnerRole]++;
+    return c;
+  }, [entries]);
+
   const grouped = useMemo(() => {
     const m = new Map<string, CompanyCalendarEntry[]>();
-    for (const e of entries) {
+    for (const e of filtered) {
       const k = e.date;
       if (!m.has(k)) m.set(k, []);
       m.get(k)!.push(e);
     }
     return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [entries]);
+  }, [filtered]);
 
   const openNew = () => setOpenDraft(emptyDraft());
   const openEdit = (e: CompanyCalendarEntry) => setOpenDraft({
