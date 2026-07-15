@@ -49,6 +49,5 @@ export async function openLeadEmailWithTouchPrompt(
       label: 'Yes — mark emailed',
       onClick: () => { void logEmailTouch(lead, opts.onLogged); },
     },
-    cancel: { label: 'Not yet', onClick: () => { /* dismiss */ } },
   });
 }
