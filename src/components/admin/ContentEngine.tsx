@@ -13,12 +13,55 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine, Mail, Hash, TrendingUp, Target, Building2,
+  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
+
+const MobileEngineLinkButton: React.FC = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState<string | null>(null);
+  const reveal = async () => {
+    setLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin token missing — re-enter PIN');
+      const { data, error } = await supabase.functions.invoke('personal-engine-token', {
+        body: { action: 'reveal' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (!data?.key) throw new Error(data?.error || 'No key returned');
+      const link = `${window.location.origin}/engine?k=${encodeURIComponent(data.key)}`;
+      setUrl(link);
+      try { await navigator.clipboard.writeText(link); toast({ title: 'Mobile link copied', description: 'Bookmark it on your phone.' }); } catch { /* ignore */ }
+    } catch (e) {
+      toast({ title: 'Reveal failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <Button size="sm" variant="outline" onClick={reveal} disabled={loading} className="text-xs">
+        {loading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Smartphone className="w-3 h-3 mr-1" />}
+        Mobile Link
+      </Button>
+      {url && (
+        <button
+          onClick={() => { navigator.clipboard.writeText(url); toast({ title: 'Copied' }); }}
+          className="text-[10px] font-mono text-amber truncate max-w-[220px] underline"
+          title={url}
+        >
+          {url.replace(/^https?:\/\//, '')}
+        </button>
+      )}
+    </div>
+  );
+};
 
 type Strategy = {
   id: string;
@@ -387,6 +430,7 @@ export const ContentEngine: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <MobileEngineLinkButton />
           {saveIndicator && (
             <div className={`text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5 ${
               saveIndicator === 'saved' ? 'text-emerald-500' : saveIndicator === 'saving' ? 'text-amber' : 'text-crimson'
