@@ -384,18 +384,24 @@ function GrowthTab() {
   const run = async () => {
     setLoading(true); setOut("");
     try {
+      const adminToken = getAdminToken();
+      if (!adminToken) {
+        throw new Error("Not signed in. Open your personal engine link (/engine?k=…) first to unlock.");
+      }
+      const headers = { "x-admin-token": adminToken } as Record<string, string>;
       let res;
       if (mode === "reply") {
         const hasImage = image.startsWith("data:image/");
         res = await supabase.functions.invoke("linkedin-post-respond", {
+          headers,
           body: hasImage
             ? { imageDataUrl: image, length, source: "image", post: post || undefined }
             : { post, length, source: "text" },
         });
       }
-      else if (mode === "post") res = await supabase.functions.invoke("linkedin-post-from-url", { body: { url, tone: "forensic" } });
-      else if (mode === "cold") res = await supabase.functions.invoke("outreach-email-creator", { body: { url, recipientFirstName: name } });
-      else res = await supabase.functions.invoke("linkedin-post-from-url", { body: { url, tone: "hooks" } });
+      else if (mode === "post") res = await supabase.functions.invoke("linkedin-post-from-url", { headers, body: { url, tone: "forensic" } });
+      else if (mode === "cold") res = await supabase.functions.invoke("outreach-email-creator", { headers, body: { url, recipientFirstName: name } });
+      else res = await supabase.functions.invoke("linkedin-post-from-url", { headers, body: { url, tone: "hooks" } });
       if (res.error) throw res.error;
       setOut(res.data?.reply || res.data?.post || res.data?.text || res.data?.email || JSON.stringify(res.data, null, 2));
     } catch (e: any) { toast.error(e?.message || "Failed"); }
