@@ -194,7 +194,9 @@ const NewPortalPage: React.FC = () => {
 
   const switchToClassic = () => {
     setPortalStylePref('classic');
-    navigate('/portal', { replace: true });
+    // Route directly to the legacy portal — /portal is bound to NewPortalPage,
+    // which would re-flip the pref back to 'new' on mount and trap the rep here.
+    navigate('/portal/legacy', { replace: true });
   };
 
   return (
