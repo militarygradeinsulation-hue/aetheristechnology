@@ -308,19 +308,156 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+          <CardTitle className="font-display flex items-center gap-2">
+            <CalendarDays className="w-5 h-5 text-amber" /> Leadership Calendar
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button onClick={() => setPlaybookOpen(true)} size="sm" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
+              <Sparkles className="w-4 h-4 mr-1" /> Generate week playbook
+            </Button>
+            <Button onClick={openNew} size="sm">
+              <Plus className="w-4 h-4 mr-1" /> Add task
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Three principals. Clear lanes. Every task is owned by one person. Use <strong>Generate week playbook</strong> to have AI draft
+            role-appropriate tasks for Joseph, Dean, and Braden based on this week's north-star goal.
+          </p>
+
+          {/* Role filter pills */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                filter === "all" ? "bg-foreground/10 border-foreground/40 text-foreground" : "border-border text-muted-foreground hover:border-foreground/30"
+              }`}
+            >
+              All · {entries.length}
+            </button>
+            {OWNER_ROLES.map(r => {
+              const m = OWNER_META[r];
+              const Icon = ROLE_ICONS[r];
+              const active = filter === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setFilter(r)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                    active ? m.badge : "border-border text-muted-foreground hover:border-foreground/30"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {m.short} · {counts[r]}
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Leadership Structure card */}
+      <Card>
+        <CardHeader className="pb-2">
+          <button onClick={() => setShowLeadership(v => !v)} className="w-full flex items-center justify-between">
+            <CardTitle className="text-sm font-mono uppercase tracking-wider text-amber flex items-center gap-2">
+              <Crown className="w-4 h-4" /> Leadership Structure — Three lanes, no overlap
+            </CardTitle>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showLeadership ? "rotate-180" : ""}`} />
+          </button>
+        </CardHeader>
+        {showLeadership && (
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {roles.map(role => {
+                const m = OWNER_META[role.role_slug];
+                const Icon = ROLE_ICONS[role.role_slug];
+                return (
+                  <div key={role.id} className={`rounded-md border p-3 space-y-2 ${m.badge}`}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      <div className="font-display font-semibold">{role.display_name}</div>
+                    </div>
+                    <div className="text-[10px] font-mono uppercase opacity-70">{role.title}</div>
+                    <div>
+                      <div className="text-[10px] font-mono uppercase opacity-70 mt-2 mb-1">Owns</div>
+                      <ul className="text-xs space-y-1 list-disc list-inside">
+                        {role.owns.slice(0, 4).map((o, i) => <li key={i} className="text-foreground/90">{o}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-mono uppercase opacity-70 mt-2 mb-1">Decides</div>
+                      <ul className="text-xs space-y-1 list-disc list-inside">
+                        {role.decision_authority.slice(0, 3).map((o, i) => <li key={i} className="text-foreground/90">{o}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-3 font-mono">
+              Standing principle: each person owns their lane fully. Disagreement fine — inside someone's lane, their call stands.
+            </p>
+          </CardContent>
+        )}
+      </Card>
+
+      {/* Full visual calendar (month/week/list), same view reps see */}
+      <CompanyCalendarRepView />
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            {filter === "all" ? "All tasks" : `${OWNER_META[filter].short}'s lane`} — click to edit, status dot to advance
+          </CardTitle>
+        </CardHeader>
+      </Card>
+
+      {loading ? (
+        <div className="glass p-12 rounded-xl text-center">
+          <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
+        </div>
+      ) : grouped.length === 0 ? (
+        <div className="glass p-12 rounded-xl text-center">
+          <p className="text-muted-foreground text-sm">No entries. Click "Add task" or "Generate week playbook".</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {grouped.map(([date, list]) => (
+            <Card key={date}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-mono text-amber">
+                  {new Date(date + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
                 {list.map(e => {
                   const meta = entryDisplay(e);
+                  const owner = OWNER_META[(e.owner_role || "team") as OwnerRole];
+                  const OwnerIcon = ROLE_ICONS[(e.owner_role || "team") as OwnerRole];
                   return (
-                    <button
+                    <div
                       key={e.id}
-                      onClick={() => openEdit(e)}
-                      className={`w-full text-left rounded-md border p-3 transition-colors hover:border-primary ${meta.color}`}
+                      className={`w-full rounded-md border border-l-4 p-3 transition-colors hover:border-primary ${meta.color} ${owner.border}`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
+                        <button onClick={() => toggleStatus(e)} className="mt-0.5 flex-shrink-0" title={`Status: ${e.status || "todo"} — click to advance`}>
+                          <StatusIcon s={(e.status || "todo") as TaskStatus} />
+                        </button>
+                        <button onClick={() => openEdit(e)} className="flex-1 min-w-0 text-left">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className={`text-[10px] uppercase flex items-center gap-1 ${owner.badge}`}>
+                              <OwnerIcon className="w-3 h-3" />{owner.short}
+                            </Badge>
                             <span>{meta.icon}</span>
                             <Badge variant="outline" className="text-[10px] uppercase">{meta.label}</Badge>
+                            {e.due_time && <span className="text-[10px] font-mono opacity-70">{e.due_time.slice(0, 5)}</span>}
                             {e.pinned && <Pin className="w-3 h-3" />}
                             {e.attachments?.length > 0 && (
                               <span className="text-[10px] flex items-center gap-0.5 opacity-70">
@@ -328,15 +465,15 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <p className="font-semibold mt-1 text-foreground">{e.title}</p>
+                          <p className={`font-semibold mt-1 ${e.status === "done" ? "line-through opacity-60" : "text-foreground"}`}>{e.title}</p>
                           {e.body && <p className="text-xs text-muted-foreground mt-1 line-clamp-2 whitespace-pre-wrap">{e.body}</p>}
-                        </div>
+                        </button>
                         <button onClick={(ev) => { ev.stopPropagation(); remove(e.id); }}
-                                className="text-muted-foreground hover:text-crimson p-1">
+                                className="text-muted-foreground hover:text-crimson p-1 flex-shrink-0">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </CardContent>
