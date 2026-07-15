@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -80,6 +81,9 @@ const AetherisCoderPage = () => {
   );
 
   const currentPhase = VIBE_PHASES[charter.phase] ?? VIBE_PHASES[0];
+
+  const [openPhase, setOpenPhase] = useState(`phase-${charter.phase}`);
+  useEffect(() => setOpenPhase(`phase-${charter.phase}`), [charter.phase]);
 
   return (
     <div className="relative min-h-screen">
@@ -320,7 +324,7 @@ const AetherisCoderPage = () => {
                 <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground">The Six Phases</h2>
               </div>
             </RevealOnScroll>
-            <Accordion type="single" collapsible defaultValue={`phase-${charter.phase}`} className="glass rounded-lg border border-border px-2">
+            <Accordion type="single" collapsible value={openPhase} onValueChange={setOpenPhase} className="glass rounded-lg border border-border px-2">
               {VIBE_PHASES.map((p) => (
                 <AccordionItem key={p.id} value={`phase-${p.id}`} className="border-border">
                   <AccordionTrigger className="px-3">
@@ -353,11 +357,11 @@ const AetherisCoderPage = () => {
                     security floor, and the launch phase for you.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="/leak-audit">
+                    <Link to="/leak-audit">
                       <Button size="lg" className="bg-amber hover:bg-amber/90 text-background font-semibold">
                         Run the Free Leak Audit™ <ArrowRight className="ml-2 w-5 h-5" />
                       </Button>
-                    </a>
+                    </Link>
                     <a href="tel:+13173762110">
                       <Button size="lg" variant="outline" className="glass-hover border-border">
                         <Phone className="mr-2 w-5 h-5" /> (317) 376-2110
