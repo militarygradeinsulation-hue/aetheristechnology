@@ -10,6 +10,9 @@ import { ScrollText } from "lucide-react";
 
 const GoldenReportPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  // If the URL carries ?scan=<id>, we came from a shared Golden Report link.
+  // Skip the email gate so recipients see their case file immediately.
+  const hasSharedScan = typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("scan");
 
   return (
     <div className="relative min-h-screen">
