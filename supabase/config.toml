@@ -39,6 +39,9 @@ verify_jwt = false
 [functions.sales-chat]
 verify_jwt = false
 
+[functions.aetheris-coder-chat]
+verify_jwt = false
+
 [functions.payments-webhook]
 verify_jwt = false
 
