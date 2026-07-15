@@ -1541,21 +1541,21 @@ export default function LinkedInPostStudio() {
 
 
         <div className="grid sm:grid-cols-2 gap-3">
-          {respondSourceType !== 'reply' && (
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Response Format</div>
-              <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'micro' | 'brief' | 'medium' | 'long' | 'full')}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="micro">Micro Reply (40-70 words)</SelectItem>
-                  <SelectItem value="brief">Short Comment (90-140 words)</SelectItem>
-                  <SelectItem value="medium">Medium Comment (150-210 words)</SelectItem>
-                  <SelectItem value="long">Long Comment (220-300 words)</SelectItem>
-                  <SelectItem value="full">Standalone Repost (180-260 words)</SelectItem>
-                </SelectContent>
-              </Select>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+              {respondSourceType === 'reply' ? 'Reply Length' : 'Response Format'}
             </div>
-          )}
+            <Select value={respondMode} onValueChange={(v) => setRespondMode(v as 'micro' | 'brief' | 'medium' | 'long' | 'full')}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="micro">{respondSourceType === 'reply' ? 'One-liner (40-70 words / ~250-450 chars)' : 'Micro Reply (40-70 words)'}</SelectItem>
+                <SelectItem value="brief">{respondSourceType === 'reply' ? 'Short (90-140 words / ~550-900 chars)' : 'Short Comment (90-140 words)'}</SelectItem>
+                <SelectItem value="medium">{respondSourceType === 'reply' ? 'Medium (150-210 words / ~950-1350 chars)' : 'Medium Comment (150-210 words)'}</SelectItem>
+                <SelectItem value="long">{respondSourceType === 'reply' ? 'Long (220-300 words / ~1400-1900 chars)' : 'Long Comment (220-300 words)'}</SelectItem>
+                {respondSourceType !== 'reply' && <SelectItem value="full">Standalone Repost (180-260 words)</SelectItem>}
+              </SelectContent>
+            </Select>
+          </div>
           <div className={respondSourceType === 'reply' ? 'sm:col-span-2' : ''}>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">Extra Direction (optional)</div>
             <Input
