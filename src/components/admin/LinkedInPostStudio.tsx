@@ -872,6 +872,38 @@ export default function LinkedInPostStudio() {
   const [theirReplyImage, setTheirReplyImage] = useState<string | null>(null);
   const [replyOriginalImage, setReplyOriginalImage] = useState<string | null>(null);
 
+  // Fetch-from-URL (LinkedIn) state
+  const [fetchUrl, setFetchUrl] = useState('');
+  const [fetchingUrl, setFetchingUrl] = useState<null | 'text' | 'original' | 'their'>(null);
+
+  const scrapeLinkedInUrl = async (target: 'text' | 'original' | 'their') => {
+    const url = fetchUrl.trim();
+    if (!url) { toast({ title: 'Paste a LinkedIn URL first', variant: 'destructive' }); return; }
+    setFetchingUrl(target);
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('linkedin-scrape-post', {
+        body: { url },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const text: string = data?.text || '';
+      if (!text) throw new Error('No post text returned');
+      const author: string = data?.author || '';
+      const body = author ? `${author}:\n\n${text}` : text;
+      if (target === 'text') setRespondText(body);
+      else if (target === 'original') setReplyOriginalPost(body);
+      else if (target === 'their') setTheirReply(body);
+      toast({ title: 'Post fetched', description: author ? `Author: ${author}` : 'Text loaded' });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Fetch failed';
+      toast({ title: 'Could not read that URL', description: msg + ' — try pasting the text or uploading a screenshot.', variant: 'destructive' });
+    } finally {
+      setFetchingUrl(null);
+    }
+  };
+
   const readImageToDataUrl = (file: File | null | undefined, setter: (v: string | null) => void) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast({ title: 'Please upload an image', variant: 'destructive' }); return; }
