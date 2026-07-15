@@ -44,15 +44,19 @@ const GoldenReportPage: React.FC = () => {
                 evidence you can search or ask questions of.
               </p>
             </div>
-            <ToolEmailGate
-              toolSlug="golden-report"
-              toolTitle="Golden Report"
-              source="golden_report_page"
-              headline="Drop your email to run the Golden Report."
-              subhead="One URL, one email. You'll get the full 14-chapter forensic case file — and our team gets pinged the moment a real operator is on the scan."
-            >
+            {hasSharedScan ? (
               <ForensicScanAllPanel />
-            </ToolEmailGate>
+            ) : (
+              <ToolEmailGate
+                toolSlug="golden-report"
+                toolTitle="Golden Report"
+                source="golden_report_page"
+                headline="Drop your email to run the Golden Report."
+                subhead="One URL, one email. You'll get the full 14-chapter forensic case file — and our team gets pinged the moment a real operator is on the scan."
+              >
+                <ForensicScanAllPanel />
+              </ToolEmailGate>
+            )}
           </div>
         </div>
         <Footer />
