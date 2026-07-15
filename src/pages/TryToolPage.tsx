@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { findTool } from "@/lib/tool-shop-catalog";
 import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
+import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
+
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SignalStrip, markdownVisualComponents } from "@/components/VisualReport";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -395,8 +397,11 @@ export default function TryToolPage() {
               </div>
             </div>
 
-            {toolId === "creation-studio" ? (
+            {toolId === "golden-report" ? (
+              <ForensicScanAllPanel />
+            ) : toolId === "creation-studio" ? (
               <CreationStudioSandbox />
+
             ) : toolId === "resume-forensics" ? (
               <>
                 <label className="block font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
