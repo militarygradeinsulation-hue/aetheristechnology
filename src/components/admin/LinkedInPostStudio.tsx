@@ -1167,7 +1167,7 @@ export default function LinkedInPostStudio() {
             myCommentImageDataUrl: myCommentImage,
             theirReplyImageDataUrl: theirReplyImage,
             originalPostImageDataUrl: replyOriginalImage,
-            mode: 'brief',
+            mode: respondMode === 'full' ? 'brief' : respondMode,
             extraContext: extraWithFreshness,
             personaActive: activePersonas.length > 0,
             personaKeys: activePersonas,
