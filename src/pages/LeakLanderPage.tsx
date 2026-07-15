@@ -142,11 +142,20 @@ const LeakLanderPage: React.FC = () => {
             aria-label="What Aetheris sells"
           >
             <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18">
+              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.24em] text-amber/80 mb-3">
+                // Aetheris Technology · Founder Pitch
+              </div>
               <h2 className="font-forensic text-3xl sm:text-4xl md:text-6xl font-bold text-foreground leading-[1.05] tracking-tight max-w-5xl mx-auto">
-                Stop Guessing. <span className="text-amber italic">Start Understanding.</span>
+                Helping Founders Turn <span className="text-crimson italic">Wasted Marketing Dollars</span> Into the <span className="text-amber italic">Right Leads</span> and More Sales.
               </h2>
               <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground/90 font-medium leading-relaxed max-w-4xl mx-auto">
-                We break down exactly how businesses waste money on AI, marketing, and disconnected systems — with real numbers, real costs, and real solutions.
+                One honest question for every founder:
+              </p>
+              <p className="mt-3 font-forensic text-xl sm:text-2xl md:text-3xl text-amber leading-snug max-w-4xl mx-auto italic">
+                "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales?"
+              </p>
+              <p className="mt-6 text-base sm:text-lg md:text-xl text-foreground/85 max-w-4xl mx-auto">
+                If that hits, you're in the right place. We solve the problem you already feel: <span className="text-crimson font-semibold">marketing dollars that don't create enough good leads or sales</span> — and we turn them into the right leads and revenue.
               </p>
             </div>
           </section>
@@ -243,16 +252,16 @@ const LeakLanderPage: React.FC = () => {
               <br />
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span>. We investigate established businesses, trace every dollar of bleed back to its origin, and remove the cause at the source.
+              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span> on your revenue engine. Every leak in your funnel is <span className="text-crimson font-semibold">wasted marketing money</span> — dollars you already spent that never turned into the right leads or sales.
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground max-w-4xl mx-auto">
-              Across sales, CRM, follow-up, and lead flow, document client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
+              We trace those wasted dollars back to their origin across ads, site, CRM, follow-up, and sales handoff — then we stop the bleed and reroute the spend into revenue. Documented client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
             </p>
             <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-4xl mx-auto">
-              If we can't name a leak worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
+              If we can't name wasted marketing dollars worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Named leaks. Dollar figures. No fluff.
+              Wasted dollars. Named leaks. Right leads. More sales.
             </p>
           </section>
 
