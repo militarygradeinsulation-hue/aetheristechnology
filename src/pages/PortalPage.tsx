@@ -49,6 +49,7 @@ import { NewRepBlueprintCard } from '@/components/portal/NewRepBlueprintCard';
 import { MotivationCard } from '@/components/portal/MotivationCard';
 import { CompanyDailyTasksCard } from '@/components/portal/CompanyDailyTasksCard';
 import { RepCalendarView } from '@/components/portal/RepCalendarView';
+import { TodaysTouchpoints } from '@/components/portal/TodaysTouchpoints';
 import { Sprint90View } from '@/components/portal/Sprint90View';
 import { CalendarDays, Rocket } from 'lucide-react';
 import { PartnerTimePanel } from '@/components/portal/PartnerTimePanel';
