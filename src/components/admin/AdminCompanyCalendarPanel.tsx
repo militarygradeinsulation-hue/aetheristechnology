@@ -460,8 +460,8 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
         )}
       </Card>
 
-      {/* Full visual calendar (month/week/list), same view reps see */}
-      <CompanyCalendarRepView />
+      {/* Full visual calendar (month/week/list), same view reps see — admin can edit inline */}
+      <CompanyCalendarRepView isAdmin />
 
       <Card>
         <CardHeader className="pb-2">
