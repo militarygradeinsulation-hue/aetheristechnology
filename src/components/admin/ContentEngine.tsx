@@ -387,6 +387,7 @@ export const ContentEngine: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <MobileEngineLinkButton />
           {saveIndicator && (
             <div className={`text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5 ${
               saveIndicator === 'saved' ? 'text-emerald-500' : saveIndicator === 'saving' ? 'text-amber' : 'text-crimson'
