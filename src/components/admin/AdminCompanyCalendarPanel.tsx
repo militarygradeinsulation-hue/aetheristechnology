@@ -10,14 +10,17 @@ import { toast } from "sonner";
 import {
   CalendarDays, Plus, Loader2, Trash2, Pin, PinOff, Save, Sparkles,
   Paperclip, X, Wand2, Crown, ShieldCheck, TrendingUp, Users, ChevronDown, CheckCircle2, Circle, CircleDashed,
+  MessageSquare, Send, Eraser,
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
   aiPlaybook, bulkCreateEntries, markCompanyEntryStatus,
   KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
   OWNER_META, OWNER_ROLES,
+  getCalendarChat, clearCalendarChat, aiCalendarChat, deleteAllCompanyEntries,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
   type CompanyCalendarCategory, type OwnerRole, type TaskStatus, type PlaybookTask,
+  type CalendarChatMessage,
 } from "@/lib/companyCalendar";
 import { listLeadershipRoles, type LeadershipRole } from "@/lib/leadershipRoles";
 import { supabase } from "@/integrations/supabase/client";
