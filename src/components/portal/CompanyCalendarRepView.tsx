@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
-import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -29,6 +28,7 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
   const [view, setView] = useState<ViewMode>("month");
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
+  const dialogOpenRef = useRef(false);
 
   const range = useMemo(() => {
     if (view === "week") {
@@ -46,26 +46,36 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
     return { from, to };
   }, [view, anchor]);
 
-  const refresh = async () => {
-    setLoading(true);
+  const rangeFrom = useMemo(() => isoDate(range.from), [range.from]);
+  const rangeTo = useMemo(() => isoDate(range.to), [range.to]);
+
+  const refresh = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const list = await listCompanyCalendar({
-        from: isoDate(range.from),
-        to: isoDate(range.to),
+        from: rangeFrom,
+        to: rangeTo,
       });
       setEntries(list);
+      setSelectedEntry(current => {
+        if (!current) return null;
+        return list.find(e => e.id === current.id) || current;
+      });
     } catch (e: any) {
       toast.error("Couldn't load company calendar", { description: e.message });
-    } finally { setLoading(false); }
-  };
+    } finally { if (showLoading) setLoading(false); }
+  }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
-    void refresh();
-    // Polling fallback — paused while a dialog is open so edits/reads don't get clobbered.
-    const id = setInterval(() => { if (!selectedEntry) void refresh(); }, 15000);
+    dialogOpenRef.current = !!selectedEntry;
+  }, [selectedEntry]);
+
+  useEffect(() => {
+    void refresh(true);
+    // Polling fallback — paused while a dialog is open so reads don't clobber the popup.
+    const id = setInterval(() => { if (!dialogOpenRef.current) void refresh(false); }, 15000);
     return () => { clearInterval(id); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, anchor, selectedEntry]);
+  }, [refresh]);
 
   const todayStr = isoDate(new Date());
 
@@ -114,7 +124,7 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
                   <LayoutGrid className="w-3 h-3 mr-1" /> Month
                 </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+              <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={loading}>
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
               </Button>
             </div>
@@ -170,8 +180,8 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
           entry={selectedEntry}
           isAdmin={isAdmin}
           onClose={() => setSelectedEntry(null)}
-          onSaved={(e) => { setSelectedEntry(e); void refresh(); }}
-          onDeleted={() => { setSelectedEntry(null); void refresh(); }}
+          onSaved={(e) => { setSelectedEntry(e); void refresh(false); }}
+          onDeleted={() => { setSelectedEntry(null); void refresh(true); }}
         />
       )}
     </div>
