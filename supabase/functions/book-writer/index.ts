@@ -190,8 +190,6 @@ async function runBookJob(params: {
       const c = outline.chapters[i];
       if (c.body && c.body.trim().length > 200) continue;
 
-      await heartbeat(sb, outline, ...([libraryId] as never)).catch(() => {});
-      // ^ noop guard; call real one below
       await heartbeat(sb, libraryId, outline, { jobStage: `chapter-${c.number}-drafting` });
 
       const user = `${source}
