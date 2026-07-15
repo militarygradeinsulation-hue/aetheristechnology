@@ -49,6 +49,7 @@ const DeliverablePage = lazy(() => import("./pages/DeliverablePage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PersonalEnginePage = lazy(() => import("./pages/PersonalEnginePage"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
 const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
 const ScanPage = lazy(() => import("./pages/ScanPage"));
