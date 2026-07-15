@@ -242,6 +242,140 @@ Return ONLY the JSON object. No prose.`;
       return json({ ok: true });
     }
 
+    if (action === "delete_all") {
+      const { error } = await supabase.from("company_calendar").delete().not("id", "is", null);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
+    // ============== CHAT HISTORY (admin_kv) ==============
+    const CHAT_KEY = "leadership_calendar_chat";
+    if (action === "get_chat") {
+      const { data } = await supabase.from("admin_kv").select("value").eq("key", CHAT_KEY).maybeSingle();
+      const messages = Array.isArray((data?.value as any)?.messages) ? (data!.value as any).messages : [];
+      return json({ ok: true, messages });
+    }
+    if (action === "clear_chat") {
+      await supabase.from("admin_kv").upsert({ key: CHAT_KEY, value: { messages: [] }, updated_at: new Date().toISOString() });
+      return json({ ok: true, messages: [] });
+    }
+
+    // ============== AI CHAT: natural-language bulk add/remove ==============
+    if (action === "ai_chat") {
+      const LOVABLE = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE) return json({ error: "AI not configured" }, 500);
+      const message = String(body.message || "").trim().slice(0, 4000);
+      if (!message) return json({ error: "Missing message" }, 400);
+
+      // Load current entries so the model can decide what to delete
+      const { data: currentRows } = await supabase
+        .from("company_calendar")
+        .select("id,date,title,owner_role,owner_name,kind,status,due_time")
+        .order("date", { ascending: true })
+        .limit(500);
+      const current = currentRows || [];
+
+      // Load prior chat
+      const { data: kvRow } = await supabase.from("admin_kv").select("value").eq("key", CHAT_KEY).maybeSingle();
+      const priorMessages: Array<{ role: string; content: string; ts?: string }> = Array.isArray((kvRow?.value as any)?.messages) ? (kvRow!.value as any).messages : [];
+
+      const today = new Date().toISOString().slice(0, 10);
+      const sys = `You are the operations chief-of-staff for the Aetheris leadership calendar. The calendar is ONLY for three principals: Joseph (founder), Dean (coo), Braden (chief_sales). Today is ${today}.
+
+You receive a natural-language instruction from Joseph and MUST return ONLY a JSON object of this shape:
+{
+  "reply": "short 1-3 sentence confirmation, blunt operator tone",
+  "operations": [
+    { "op": "add",    "date": "YYYY-MM-DD", "title": "...", "body": "optional", "owner_role": "founder"|"coo"|"chief_sales"|"team", "owner_name": "Joseph"|"Dean"|"Braden"|"Team", "kind": "goal"|"vertical"|"topic"|"event"|"push"|"note", "due_time": "HH:MM" or null },
+    { "op": "delete", "id": "uuid-from-current-entries" },
+    { "op": "delete_all" }
+  ]
+}
+
+Rules:
+- Resolve relative dates ("tomorrow", "next Monday") using today = ${today}.
+- If the user says "clear the calendar" / "wipe everything", emit one { "op": "delete_all" }.
+- If the user says "delete Joseph's Friday tasks" or names items, pick matching ids from CURRENT_ENTRIES and emit delete ops for each.
+- Never invent uuids. Only delete ids that appear in CURRENT_ENTRIES.
+- Owner mapping: Joseph->founder, Dean->coo, Braden->chief_sales, otherwise team. Match owner_name to owner_role.
+- Money in $ USD only. No fluff. Tactical titles.
+- Return ONLY the JSON, no markdown.`;
+
+      const historyForModel = priorMessages.slice(-10).map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content }));
+
+      const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: sys },
+            { role: "user", content: `CURRENT_ENTRIES:\n${JSON.stringify(current)}` },
+            ...historyForModel,
+            { role: "user", content: message },
+          ],
+          response_format: { type: "json_object" },
+        }),
+      });
+      if (!r.ok) return json({ error: `AI ${r.status}: ${await r.text()}` }, 500);
+      const j = await r.json();
+      const txt = j?.choices?.[0]?.message?.content || "{}";
+      let parsed: any = {};
+      try { parsed = JSON.parse(txt); } catch { parsed = {}; }
+      const ops: any[] = Array.isArray(parsed.operations) ? parsed.operations : [];
+
+      const added: any[] = [];
+      const deletedIds: string[] = [];
+      let deletedAll = false;
+
+      for (const op of ops) {
+        try {
+          if (op.op === "delete_all") {
+            const { error } = await supabase.from("company_calendar").delete().not("id", "is", null);
+            if (!error) deletedAll = true;
+          } else if (op.op === "delete" && op.id) {
+            const { error } = await supabase.from("company_calendar").delete().eq("id", String(op.id));
+            if (!error) deletedIds.push(String(op.id));
+          } else if (op.op === "add" && op.date && op.title) {
+            const row = {
+              date: String(op.date).slice(0, 10),
+              kind: KINDS.has(String(op.kind)) ? String(op.kind) : "goal",
+              title: String(op.title).slice(0, 200),
+              body: String(op.body || "").slice(0, 10000),
+              attachments: [],
+              ai_plan: {},
+              pinned: false,
+              color: null,
+              owner_role: OWNER_ROLES.has(String(op.owner_role)) ? String(op.owner_role) : "team",
+              owner_name: op.owner_name ? String(op.owner_name).slice(0, 60) : null,
+              status: "todo",
+              due_time: op.due_time ? String(op.due_time).slice(0, 8) : null,
+              created_by: isAdmin ? "admin:chat" : `partner:${portalClaims?.code || ""}:chat`,
+            };
+            const { data: ins } = await supabase.from("company_calendar").insert(row).select().maybeSingle();
+            if (ins) added.push(ins);
+          }
+        } catch (_e) { /* skip bad op */ }
+      }
+
+      const reply = String(parsed.reply || "Done.").slice(0, 800);
+      const summaryBits: string[] = [];
+      if (deletedAll) summaryBits.push("cleared all entries");
+      if (added.length) summaryBits.push(`added ${added.length}`);
+      if (deletedIds.length && !deletedAll) summaryBits.push(`deleted ${deletedIds.length}`);
+      const finalReply = summaryBits.length ? `${reply}\n\n[${summaryBits.join(" · ")}]` : reply;
+
+      const nowIso = new Date().toISOString();
+      const nextMessages = [
+        ...priorMessages,
+        { role: "user", content: message, ts: nowIso },
+        { role: "assistant", content: finalReply, ts: nowIso },
+      ].slice(-100);
+      await supabase.from("admin_kv").upsert({ key: CHAT_KEY, value: { messages: nextMessages }, updated_at: nowIso });
+
+      return json({ ok: true, reply: finalReply, added, deletedIds, deletedAll, messages: nextMessages });
+    }
+
     // Admin-only: edit leadership role
     if (action === "update_role") {
       if (!isAdmin) return json({ error: "Admin only" }, 403);

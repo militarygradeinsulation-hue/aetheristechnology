@@ -10,14 +10,17 @@ import { toast } from "sonner";
 import {
   CalendarDays, Plus, Loader2, Trash2, Pin, PinOff, Save, Sparkles,
   Paperclip, X, Wand2, Crown, ShieldCheck, TrendingUp, Users, ChevronDown, CheckCircle2, Circle, CircleDashed,
+  MessageSquare, Send, Eraser,
 } from "lucide-react";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, aiPlanCompany,
   aiPlaybook, bulkCreateEntries, markCompanyEntryStatus,
   KIND_META, COMPANY_CAL_BUCKET, CATEGORY_META, categoryOf, entryDisplay, categoryToColorToken,
   OWNER_META, OWNER_ROLES,
+  getCalendarChat, clearCalendarChat, aiCalendarChat, deleteAllCompanyEntries,
   type CompanyCalendarEntry, type CompanyCalendarKind, type CompanyCalendarAttachment,
   type CompanyCalendarCategory, type OwnerRole, type TaskStatus, type PlaybookTask,
+  type CalendarChatMessage,
 } from "@/lib/companyCalendar";
 import { listLeadershipRoles, type LeadershipRole } from "@/lib/leadershipRoles";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,20 +79,68 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
   const [playbookTasks, setPlaybookTasks] = useState<PlaybookTask[] | null>(null);
   const [playbookBusy, setPlaybookBusy] = useState(false);
 
+  // Chat box
+  const [chatMessages, setChatMessages] = useState<CalendarChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   const refresh = async () => {
     setLoading(true);
     try {
-      const [list, r] = await Promise.all([
+      const [list, r, msgs] = await Promise.all([
         listCompanyCalendar({}),
         listLeadershipRoles().catch(() => [] as LeadershipRole[]),
+        getCalendarChat().catch(() => [] as CalendarChatMessage[]),
       ]);
       setEntries(list);
       setRoles(r);
+      setChatMessages(msgs);
     } catch (e: any) {
       toast.error("Failed to load calendar", { description: e.message });
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+
+  const sendChat = async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatBusy) return;
+    setChatBusy(true);
+    setChatMessages(prev => [...prev, { role: "user", content: msg, ts: new Date().toISOString() }]);
+    setChatInput("");
+    try {
+      const res = await aiCalendarChat(msg);
+      setChatMessages(res.messages);
+      // Refresh calendar entries after mutations
+      const list = await listCompanyCalendar({});
+      setEntries(list);
+      const bits: string[] = [];
+      if (res.deletedAll) bits.push("cleared calendar");
+      if (res.added.length) bits.push(`+${res.added.length} added`);
+      if (res.deletedIds.length && !res.deletedAll) bits.push(`-${res.deletedIds.length} removed`);
+      if (bits.length) toast.success(bits.join(" · "));
+    } catch (e: any) {
+      toast.error("Chat failed", { description: e.message });
+      setChatMessages(prev => prev.slice(0, -1));
+    } finally { setChatBusy(false); }
+  };
+
+  const wipeChat = async () => {
+    if (!confirm("Clear chat history? (Calendar entries stay)")) return;
+    try { const msgs = await clearCalendarChat(); setChatMessages(msgs); }
+    catch (e: any) { toast.error("Failed", { description: e.message }); }
+  };
+
+  const wipeCalendar = async () => {
+    if (!confirm("Delete ALL calendar entries? This cannot be undone.")) return;
+    try {
+      await deleteAllCompanyEntries();
+      setEntries([]);
+      toast.success("Calendar cleared");
+    } catch (e: any) { toast.error("Failed", { description: e.message }); }
+  };
+
 
   const filtered = useMemo(
     () => filter === "all" ? entries : entries.filter(e => (e.owner_role || "team") === filter),
@@ -273,12 +324,15 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
             <Button onClick={openNew} size="sm">
               <Plus className="w-4 h-4 mr-1" /> Add task
             </Button>
+            <Button onClick={wipeCalendar} size="sm" variant="outline" className="border-crimson/40 text-crimson hover:bg-crimson/10">
+              <Trash2 className="w-4 h-4 mr-1" /> Clear all
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Three principals. Clear lanes. Every task is owned by one person. Use <strong>Generate week playbook</strong> to have AI draft
-            role-appropriate tasks for Joseph, Dean, and Braden based on this week's north-star goal.
+            Shared workspace for <strong>Joseph, Dean, and Braden</strong>. Three principals, clear lanes, one owner per task. Use the chat box below to
+            add or remove tasks in bulk — it runs on your Cloud AI credits, not editor credits.
           </p>
 
           {/* Role filter pills */}
@@ -308,6 +362,54 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
                 </button>
               );
             })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Chat Box — bulk add/remove via natural language, saved to backend */}
+      <Card className="border-amber/30">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm font-mono uppercase tracking-wider text-amber flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" /> Calendar Chat — tell it what to add or remove
+          </CardTitle>
+          {chatMessages.length > 0 && (
+            <Button onClick={wipeChat} size="sm" variant="ghost" className="text-muted-foreground hover:text-crimson">
+              <Eraser className="w-3.5 h-3.5 mr-1" /> Clear history
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="max-h-72 overflow-y-auto space-y-2 rounded-md bg-background/40 border border-border p-3 text-sm">
+            {chatMessages.length === 0 ? (
+              <p className="text-xs text-muted-foreground font-mono">
+                Try: "Add a founder task tomorrow at 9am: review Q3 roadmap" · "Clear Braden's Friday" · "Wipe the calendar" · "Give Dean 3 ops tasks this week"
+              </p>
+            ) : chatMessages.map((m, i) => (
+              <div key={i} className={`rounded-md px-3 py-2 whitespace-pre-wrap ${m.role === "user" ? "bg-amber/10 border border-amber/30 text-foreground" : "bg-muted/40 border border-border text-foreground/90"}`}>
+                <div className="text-[10px] font-mono uppercase opacity-60 mb-1">{m.role === "user" ? "You" : "Chief of Staff"}</div>
+                {m.content}
+              </div>
+            ))}
+            {chatBusy && (
+              <div className="rounded-md px-3 py-2 bg-muted/40 border border-border text-muted-foreground text-xs flex items-center gap-2">
+                <Loader2 className="w-3 h-3 animate-spin" /> Thinking…
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          <div className="flex gap-2">
+            <Textarea
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void sendChat(); } }}
+              placeholder="Tell it what to change… (Cmd/Ctrl+Enter to send)"
+              rows={2}
+              className="resize-none"
+              disabled={chatBusy}
+            />
+            <Button onClick={sendChat} disabled={chatBusy || !chatInput.trim()} className="self-end">
+              {chatBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
           </div>
         </CardContent>
       </Card>
