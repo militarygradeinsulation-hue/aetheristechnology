@@ -872,6 +872,38 @@ export default function LinkedInPostStudio() {
   const [theirReplyImage, setTheirReplyImage] = useState<string | null>(null);
   const [replyOriginalImage, setReplyOriginalImage] = useState<string | null>(null);
 
+  // Fetch-from-URL (LinkedIn) state
+  const [fetchUrl, setFetchUrl] = useState('');
+  const [fetchingUrl, setFetchingUrl] = useState<null | 'text' | 'original' | 'their'>(null);
+
+  const scrapeLinkedInUrl = async (target: 'text' | 'original' | 'their') => {
+    const url = fetchUrl.trim();
+    if (!url) { toast({ title: 'Paste a LinkedIn URL first', variant: 'destructive' }); return; }
+    setFetchingUrl(target);
+    try {
+      const adminToken = getAdminToken();
+      const { data, error } = await supabase.functions.invoke('linkedin-scrape-post', {
+        body: { url },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const text: string = data?.text || '';
+      if (!text) throw new Error('No post text returned');
+      const author: string = data?.author || '';
+      const body = author ? `${author}:\n\n${text}` : text;
+      if (target === 'text') setRespondText(body);
+      else if (target === 'original') setReplyOriginalPost(body);
+      else if (target === 'their') setTheirReply(body);
+      toast({ title: 'Post fetched', description: author ? `Author: ${author}` : 'Text loaded' });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Fetch failed';
+      toast({ title: 'Could not read that URL', description: msg + ' — try pasting the text or uploading a screenshot.', variant: 'destructive' });
+    } finally {
+      setFetchingUrl(null);
+    }
+  };
+
   const readImageToDataUrl = (file: File | null | undefined, setter: (v: string | null) => void) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast({ title: 'Please upload an image', variant: 'destructive' }); return; }
@@ -1454,6 +1486,27 @@ export default function LinkedInPostStudio() {
           )
         ) : respondSourceType === 'text' ? (
           <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                placeholder="Or paste a LinkedIn post URL (linkedin.com/posts/…) and fetch it"
+                value={fetchUrl}
+                onChange={(e) => setFetchUrl(e.target.value)}
+                className="text-sm flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => scrapeLinkedInUrl('text')}
+                disabled={fetchingUrl !== null || !fetchUrl.trim()}
+                className="text-xs"
+              >
+                {fetchingUrl === 'text'
+                  ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Fetching…</>
+                  : <><LinkIcon className="w-3 h-3 mr-1" /> Fetch URL</>}
+              </Button>
+            </div>
             <Textarea
               rows={8}
               placeholder="Paste the full LinkedIn post text here. Include author claim and any examples they used."
@@ -1485,6 +1538,35 @@ export default function LinkedInPostStudio() {
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="flex gap-2 items-center flex-wrap p-2 rounded-md border border-border bg-background/40">
+              <Input
+                type="url"
+                placeholder="LinkedIn URL to fetch (post or comment)"
+                value={fetchUrl}
+                onChange={(e) => setFetchUrl(e.target.value)}
+                className="text-xs flex-1 min-w-[200px] h-8"
+              />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Fill:</span>
+              {([
+                { key: 'original' as const, label: 'Original' },
+                { key: 'their' as const, label: 'Their reply' },
+              ]).map((b) => (
+                <Button
+                  key={b.key}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-[11px]"
+                  onClick={() => scrapeLinkedInUrl(b.key)}
+                  disabled={fetchingUrl !== null || !fetchUrl.trim()}
+                >
+                  {fetchingUrl === b.key
+                    ? <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    : <LinkIcon className="w-3 h-3 mr-1" />}
+                  {b.label}
+                </Button>
+              ))}
+            </div>
             {([
               { label: 'Original post (optional context)', placeholder: 'Optional: paste the original post you commented on. Helps anchor the thread.', text: replyOriginalPost, setText: setReplyOriginalPost, image: replyOriginalImage, setImage: setReplyOriginalImage, rows: 3 },
               { label: 'Your prior comment', placeholder: "Paste the comment YOU wrote (the one they're replying to).", text: myComment, setText: setMyComment, image: myCommentImage, setImage: setMyCommentImage, rows: 4 },
