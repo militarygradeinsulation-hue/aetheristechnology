@@ -324,12 +324,15 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
             <Button onClick={openNew} size="sm">
               <Plus className="w-4 h-4 mr-1" /> Add task
             </Button>
+            <Button onClick={wipeCalendar} size="sm" variant="outline" className="border-crimson/40 text-crimson hover:bg-crimson/10">
+              <Trash2 className="w-4 h-4 mr-1" /> Clear all
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Three principals. Clear lanes. Every task is owned by one person. Use <strong>Generate week playbook</strong> to have AI draft
-            role-appropriate tasks for Joseph, Dean, and Braden based on this week's north-star goal.
+            Shared workspace for <strong>Joseph, Dean, and Braden</strong>. Three principals, clear lanes, one owner per task. Use the chat box below to
+            add or remove tasks in bulk — it runs on your Cloud AI credits, not editor credits.
           </p>
 
           {/* Role filter pills */}
