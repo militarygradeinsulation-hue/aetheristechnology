@@ -42,15 +42,66 @@ async function snapToSelector(selector) {
 }
 
 // ---------------- Tabs ----------------
-document.querySelectorAll(".tab").forEach((btn) => {
+function bindTabClick(btn) {
   btn.addEventListener("click", () => {
+    if (btn.dataset.dragging === "1") return; // ignore click after drag
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
     state.tab = btn.dataset.tab;
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === `tab-${state.tab}`));
     if (state.tab === "case") (typeof resetCaseView === "function" ? resetCaseView() : renderCaseList());
     if (state.tab === "fix") renderFix();
   });
-});
+}
+document.querySelectorAll(".tab").forEach(bindTabClick);
+
+// Drag-to-reorder tabs (order persists per-user in chrome.storage.local).
+(function initTabDnD() {
+  const nav = document.getElementById("tabs-nav");
+  if (!nav) return;
+  let dragged = null;
+
+  function persistOrder() {
+    const order = Array.from(nav.querySelectorAll(".tab")).map((t) => t.dataset.tab);
+    try { chrome.storage.local.set({ aetherisTabOrder: order }); } catch (_) {}
+  }
+
+  nav.addEventListener("dragstart", (e) => {
+    const t = e.target.closest(".tab");
+    if (!t) return;
+    dragged = t;
+    t.dataset.dragging = "1";
+    t.style.opacity = "0.4";
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", t.dataset.tab); } catch (_) {}
+  });
+  nav.addEventListener("dragend", (e) => {
+    const t = e.target.closest(".tab");
+    if (t) { t.style.opacity = ""; setTimeout(() => { delete t.dataset.dragging; }, 60); }
+    dragged = null;
+    persistOrder();
+  });
+  nav.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    if (!dragged) return;
+    const over = e.target.closest(".tab");
+    if (!over || over === dragged) return;
+    const rect = over.getBoundingClientRect();
+    const after = (e.clientX - rect.left) > rect.width / 2;
+    nav.insertBefore(dragged, after ? over.nextSibling : over);
+  });
+
+  // Restore saved order.
+  try {
+    chrome.storage.local.get("aetherisTabOrder", ({ aetherisTabOrder }) => {
+      if (!Array.isArray(aetherisTabOrder)) return;
+      aetherisTabOrder.forEach((name) => {
+        const el = nav.querySelector(`.tab[data-tab="${name}"]`);
+        if (el) nav.appendChild(el);
+      });
+    });
+  } catch (_) {}
+})();
+
 // Growth sub-tabs
 document.querySelectorAll(".gt").forEach((btn) => {
   btn.addEventListener("click", () => {
