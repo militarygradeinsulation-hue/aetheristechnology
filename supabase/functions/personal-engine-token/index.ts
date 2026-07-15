@@ -57,14 +57,17 @@ Deno.serve(async (req) => {
 
     const { key } = body;
     if (typeof key !== "string" || key.length < 20) {
+      return new Response(JSON.stringify({ error: "invalid" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     // constant-time compare
     const a = new TextEncoder().encode(key);
     const b = new TextEncoder().encode(PERSONAL_ENGINE_KEY);
-    let ok = a.length === b.length;
     const len = Math.max(a.length, b.length);
     let diff = a.length ^ b.length;
     for (let i = 0; i < len; i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
-    ok = ok && diff === 0;
+    const ok = diff === 0;
     if (!ok) {
       return new Response(JSON.stringify({ error: "invalid" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
