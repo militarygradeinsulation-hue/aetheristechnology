@@ -260,56 +260,6 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-          <CardTitle className="font-display flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-amber" /> Company Calendar
-          </CardTitle>
-          <Button onClick={openNew} size="sm">
-            <Plus className="w-4 h-4 mr-1" /> Add entry
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            What you put here is shown to <strong>every rep</strong> in their portal under "Company Calendar".
-            Use it for daily goals, vertical focuses, topics to post, sales pushes, and team events.
-            Use the <strong>AI planner</strong> inside any entry to draft tactics/KPIs in seconds.
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Full visual calendar (month/week/list), same view reps see */}
-      <CompanyCalendarRepView />
-
-      {/* Admin list with edit/delete controls */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-            All entries, click to edit
-          </CardTitle>
-        </CardHeader>
-      </Card>
-
-      {loading ? (
-        <div className="glass p-12 rounded-xl text-center">
-          <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
-        </div>
-      ) : grouped.length === 0 ? (
-        <div className="glass p-12 rounded-xl text-center">
-          <p className="text-muted-foreground text-sm">No entries yet. Click "Add entry" to plan the team's week.</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {grouped.map(([date, list]) => (
-            <Card key={date}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-mono text-amber">
-                  {new Date(date + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-  return (
-    <div className="space-y-4">
       {/* Header */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
