@@ -79,20 +79,68 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
   const [playbookTasks, setPlaybookTasks] = useState<PlaybookTask[] | null>(null);
   const [playbookBusy, setPlaybookBusy] = useState(false);
 
+  // Chat box
+  const [chatMessages, setChatMessages] = useState<CalendarChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   const refresh = async () => {
     setLoading(true);
     try {
-      const [list, r] = await Promise.all([
+      const [list, r, msgs] = await Promise.all([
         listCompanyCalendar({}),
         listLeadershipRoles().catch(() => [] as LeadershipRole[]),
+        getCalendarChat().catch(() => [] as CalendarChatMessage[]),
       ]);
       setEntries(list);
       setRoles(r);
+      setChatMessages(msgs);
     } catch (e: any) {
       toast.error("Failed to load calendar", { description: e.message });
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+
+  const sendChat = async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatBusy) return;
+    setChatBusy(true);
+    setChatMessages(prev => [...prev, { role: "user", content: msg, ts: new Date().toISOString() }]);
+    setChatInput("");
+    try {
+      const res = await aiCalendarChat(msg);
+      setChatMessages(res.messages);
+      // Refresh calendar entries after mutations
+      const list = await listCompanyCalendar({});
+      setEntries(list);
+      const bits: string[] = [];
+      if (res.deletedAll) bits.push("cleared calendar");
+      if (res.added.length) bits.push(`+${res.added.length} added`);
+      if (res.deletedIds.length && !res.deletedAll) bits.push(`-${res.deletedIds.length} removed`);
+      if (bits.length) toast.success(bits.join(" · "));
+    } catch (e: any) {
+      toast.error("Chat failed", { description: e.message });
+      setChatMessages(prev => prev.slice(0, -1));
+    } finally { setChatBusy(false); }
+  };
+
+  const wipeChat = async () => {
+    if (!confirm("Clear chat history? (Calendar entries stay)")) return;
+    try { const msgs = await clearCalendarChat(); setChatMessages(msgs); }
+    catch (e: any) { toast.error("Failed", { description: e.message }); }
+  };
+
+  const wipeCalendar = async () => {
+    if (!confirm("Delete ALL calendar entries? This cannot be undone.")) return;
+    try {
+      await deleteAllCompanyEntries();
+      setEntries([]);
+      toast.success("Calendar cleared");
+    } catch (e: any) { toast.error("Failed", { description: e.message }); }
+  };
+
 
   const filtered = useMemo(
     () => filter === "all" ? entries : entries.filter(e => (e.owner_role || "team") === filter),
