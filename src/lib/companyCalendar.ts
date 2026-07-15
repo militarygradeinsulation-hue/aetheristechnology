@@ -98,6 +98,20 @@ export const aiPlaybook = (goal: string, week_start: string, days = 7) =>
 export const bulkCreateEntries = (entries: Array<Partial<CompanyCalendarEntry>>) =>
   call<{ ok: true; entries: CompanyCalendarEntry[] }>({ action: "bulk_create", entries }).then(d => d.entries);
 
+export interface CalendarChatMessage { role: "user" | "assistant"; content: string; ts?: string }
+
+export const getCalendarChat = () =>
+  call<{ ok: true; messages: CalendarChatMessage[] }>({ action: "get_chat" }).then(d => d.messages);
+
+export const clearCalendarChat = () =>
+  call<{ ok: true; messages: CalendarChatMessage[] }>({ action: "clear_chat" }).then(d => d.messages);
+
+export const aiCalendarChat = (message: string) =>
+  call<{ ok: true; reply: string; added: CompanyCalendarEntry[]; deletedIds: string[]; deletedAll: boolean; messages: CalendarChatMessage[] }>({ action: "ai_chat", message });
+
+export const deleteAllCompanyEntries = () =>
+  call<{ ok: true }>({ action: "delete_all" });
+
 
 export const KIND_META: Record<CompanyCalendarKind, { label: string; icon: string; color: string }> = {
   goal:     { label: "Goal of the Day", icon: "🎯", color: "bg-amber/15 text-amber border-amber/40" },
