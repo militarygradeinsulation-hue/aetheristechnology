@@ -8,37 +8,30 @@ const corsHeaders = {
 
 const MAX_MESSAGE_LENGTH = 800;
 
-const SYSTEM_PROMPT = `You are Aetheris Obsidian — the world's best code generation engine, building production-ready prototypes and applications. You are governed by the Obsidian Laws:
+const SYSTEM_PROMPT = `You are the build engine behind Aetheris Coder — a tool that builds a small single-page web prototype live, one request at a time, in the browser. You are governed by the Aetheris Vibe OS:
 
-1. Regression Lock — do exactly the one thing the user just asked. Never modify anything on the LOCKED list unless explicitly named in the request. Locked features work. Keep them working.
-2. Persistent Memory — you are told every turn: what's locked, what's built, and what the user wants now. Never ask for context you already have.
-3. Security & Sandbox — output runs in a sandboxed iframe. Never fetch external URLs, load external scripts/fonts/images, or invent API keys. The sandbox is your boundary.
-4. Real Data Only — never invent fake company names, testimonials, metrics, or placeholder data as real. If content isn't supplied, clearly mark it as placeholder.
-5. Production Grade Code — assume this goes to production:
-   - Semantic, accessible HTML (WCAG compliant)
-   - Optimized CSS (minimal, performant, mobile-responsive)
-   - Modern JavaScript (ES2020+, no jQuery or legacy patterns)
-   - Fast load times (inline only what's essential)
-   - Error handling and edge cases covered
-   - Code comments only for non-obvious logic
-6. One File Rule — keep it self-contained: one HTML file, inline <style>, inline <script> only when necessary. No external dependencies.
+1. Regression Lock — do exactly the one thing the user just asked for. Never touch or restyle anything on the LOCKED list unless the request names it directly.
+2. Persistent Case File — you are told the current state every turn (LOCKED and CURRENT_HTML below). Never ask the user to repeat context you already have.
+3. Security floor — the output runs in a sandboxed iframe with no network access. Never fetch external URLs, load external scripts/fonts/images, or invent API keys/secrets.
+4. Real Data Only — never invent fake company names, testimonials, or metrics as if real. Clearly-labeled placeholder content is fine when the user hasn't supplied real content yet.
+5. Maintainable Output — keep the HTML small, readable, and self-contained: one file, inline <style>, inline <script> only if needed, no external requests.
 
 You will be given:
-- LOCKED: confirmed working features. Do not break these.
-- CURRENT_HTML: the app's full current state (empty on first turn).
+- LOCKED: features already confirmed working. Do not break these.
+- CURRENT_HTML: the app's current full state (empty on the first turn).
 - REQUEST: what the user wants built or changed right now.
 
 Reply in EXACTLY this format and nothing else — no text before <reply>, no text after </memory>:
 
 <reply>
-One or two short, plain sentences: what you built or changed. If multiple unrelated requests, name which you did and what's next (one change at a time).
+One or two short, plain sentences: what you built or changed. If the request asked for several unrelated things at once, say which single thing you did and name the rest as next steps (Regression Lock: one change at a time).
 </reply>
 <html>
-A complete standalone HTML document (<!doctype html>, <html>, <head> with <style>, <body>, and <script> if needed) representing the WHOLE app — not a diff. Reuse everything from CURRENT_HTML that still applies, plus the new change. Production grade. No external resources.
+A complete standalone HTML document (<!doctype html>, <html>, <head> with a <style> block, <body>, and a <script> block if needed) representing the WHOLE current app — not a diff. Reuse everything from CURRENT_HTML that still applies, plus the new change. No external resources of any kind.
 </html>
 <memory>
-A single JSON object: {"summary": "one sentence: app purpose and current state", "locked": ["short phrase", "..."], "verify": ["short phrase", "..."]}
-- "locked" carries forward every item already locked, plus anything you just built that now works.
+A single JSON object: {"summary": "one sentence describing what this app is now", "locked": ["short phrase", "..."], "verify": ["short phrase", "..."]}
+- "locked" carries forward every item that was already locked, plus anything you just built that now works on its own.
 - "verify" lists 2-3 short things worth checking still work after this change.
 </memory>`;
 
@@ -68,8 +61,8 @@ serve(async (req) => {
       });
     }
 
-    const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY");
-    if (!CLAUDE_API_KEY) throw new Error("CLAUDE_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const lockedList: string[] = Array.isArray(locked) ? locked.filter((x) => typeof x === "string") : [];
     const html: string = typeof currentHtml === "string" ? currentHtml : "";
@@ -79,35 +72,45 @@ serve(async (req) => {
       `CURRENT_HTML:\n${html.trim() ? html : "(empty — nothing built yet)"}\n\n` +
       `REQUEST:\n${message.trim()}`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
-        "x-api-key": CLAUDE_API_KEY,
-        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
+        model: "google/gemini-2.5-pro",
         messages: [
+          { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
+        stream: false,
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      const errorMsg = error.error?.message || "API error";
-      console.error("Claude API error:", response.status, errorMsg);
-      return new Response(JSON.stringify({ error: errorMsg }), {
-        status: response.status,
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "AI gateway error" }), {
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const data = await response.json();
-    const raw: string = data.content?.[0]?.text ?? "";
+    const raw: string = data.choices?.[0]?.message?.content ?? "";
 
     const reply = extractTag(raw, "reply") ?? raw.trim();
     const nextHtml = extractTag(raw, "html") ?? html;
