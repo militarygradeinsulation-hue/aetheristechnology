@@ -36,6 +36,7 @@ import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 import { EngagementBoard } from '@/components/portal/EngagementBoard';
+import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
