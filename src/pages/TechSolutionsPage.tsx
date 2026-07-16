@@ -370,6 +370,45 @@ const TechSolutionsPage: React.FC = () => {
 
           <Section title="Featured Systems" tools={featured} icon={Trophy} />
 
+          {hasFullAccess ? (
+            <>
+              <Section title="Diagnostics" tools={diagnostics} icon={Cpu} />
+              <Section title="Reports & Deliverables" tools={reports} icon={Trophy} />
+              <Section title="Sales Enablement" tools={sales} icon={Users} />
+              <Section title="Content Systems" tools={content} icon={Sparkles} />
+            </>
+          ) : (
+            <section className="mb-16 forensic-tile rounded-sm border border-amber/30 bg-background/40 p-6 md:p-8 text-center">
+              <div className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-amber mb-3">
+                <KeyRound className="w-3 h-3" /> Locked · code required
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold mb-2">
+                The rest of the stack is <span className="text-amber italic">code-gated.</span>
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                Every other diagnostic, report, and content system unlocks with a client
+                or company code. Enter yours in the access bar above — or contact us to get one.
+              </p>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  className="bg-amber text-background hover:bg-amber/90 font-semibold"
+                >
+                  <KeyRound className="w-3.5 h-3.5 mr-1.5" /> Enter access code
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setContactOpen(true)}
+                  className="border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  Request a code
+                </Button>
+              </div>
+            </section>
+          )}
+
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
             <p className="text-sm text-muted-foreground">
               Same rules as the Try surface: sandbox runs are free, nothing is saved,
