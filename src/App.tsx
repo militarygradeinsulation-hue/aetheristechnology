@@ -40,6 +40,7 @@ const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
+const AetherisCoderPage = lazy(() => import("./pages/AetherisCoderPage"));
 const SalesScriptsPage = lazy(() => import("./pages/SalesScriptsPage"));
 const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
 const FollowUpPlanPage = lazy(() => import("./pages/FollowUpPlanPage"));
@@ -124,6 +125,7 @@ const App = () => (
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
                       <Route path="/deliverable/:token" element={<DeliverablePage />} />
                       <Route path="/content-generator" element={<ContentGeneratorPage />} />
+                      <Route path="/aetheris-coder" element={<AetherisCoderPage />} />
                       <Route path="/sales-scripts" element={<SalesScriptsPage />} />
                       <Route path="/content-calendar" element={<ContentCalendarPage />} />
                       <Route path="/follow-up-plan" element={<FollowUpPlanPage />} />
