@@ -160,7 +160,7 @@ const ResourcesPage = () => {
                 Founder — Joseph Toney, AI Architect MS, BA, IBM AI Certified
               </p>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground mb-4">
-                Playbooks from the field.
+                Free Business Guides.
               </h1>
 
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">

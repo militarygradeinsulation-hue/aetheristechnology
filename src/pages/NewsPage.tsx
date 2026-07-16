@@ -388,7 +388,7 @@ const NewsPage = () => {
 
                 {/* Newsletter / Field Notes */}
                 <div className="border border-amber/30 rounded-xl bg-gradient-to-br from-card/40 to-amber/5 p-5">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">Field Notes</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">Blog</div>
                   <div className="font-display text-lg font-semibold text-foreground leading-tight">Get the weekly leak report</div>
                   <p className="text-sm text-muted-foreground mt-2">One operator dispatch a week. Real teardowns, no fluff. Unsubscribe anytime.</p>
                   <Link to="/leak-audit" className="mt-3 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
@@ -566,7 +566,7 @@ const NewsPage = () => {
                 </div>
 
                 <div className="border border-border rounded-xl bg-card/30 p-7 flex flex-col">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Field notes</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Blog</div>
                   <div className="font-display text-xl font-semibold text-foreground leading-tight">Get one operator dispatch a week</div>
                   <p className="text-sm text-muted-foreground mt-2">Real teardowns, real leak math, no engagement bait. Sent only when there's something worth sending.</p>
                   <ul className="mt-4 space-y-1.5">

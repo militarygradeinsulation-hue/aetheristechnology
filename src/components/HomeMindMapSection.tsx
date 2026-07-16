@@ -117,7 +117,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
       connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
     { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/industries"),
       connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
-    { id: "field",    label: "Field Notes",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog"),
+    { id: "field",    label: "Blog",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog"),
       connections: ["Weekly operator dispatches", "Real leaks, real fixes", "No fluff"] },
     { id: "playbooks",label: "Playbooks",         sublabel: "Sealed IP",  icon: BookOpen,   onClick: () => navigate("/resources"),
       connections: ["Named-leak playbooks", "Repeatable fix stacks", "Reserved for operators"] },
