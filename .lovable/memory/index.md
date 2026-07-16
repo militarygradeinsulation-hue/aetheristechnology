@@ -12,6 +12,7 @@
 - Generated Images: must include "Aetheris AI Studio" watermark bottom-right.
 - Commission split (locked, rep program intact but not promoted publicly): tiered model in `src/lib/repProducts.ts` / `payments-webhook`.
 - FORBIDDEN: Social proof popups, testimonials carousels, purchase popups, 'Magic Robot' analogies, "AI Systems Architect" title, generic AI-guru gradients, 10-industry keyword stacks above the fold, public pilot pricing on the site.
+- **Aetheris Coder is a protected feature.** Never touch `src/pages/AetherisCoderPage.tsx`, `supabase/functions/aetheris-coder-chat/`, its route, or `LOVABLE_API_KEY` during unrelated edits or rollbacks. See [Aetheris Coder — Protected](mem://features/aetheris-coder).
 
 ## Memories
 - [Design System](mem://style/design-system) — HSL color tokens, typography stack, gradients, motion utilities
@@ -28,3 +29,4 @@
 - [Rep & Partner Portal](mem://features/rep-partner-portal) — Code-only portal (intact, not promoted publicly)
 - [Rep Time Clock](mem://features/rep-timeclock) — Clock-in/out per rep
 - [Team Training](mem://features/team-training) — Admin trainings + AI Q&A
+- [Aetheris Coder — Protected](mem://features/aetheris-coder) — Vibe-coding tool at /aetheris-coder. Frozen — never modified by unrelated edits or rollbacks.
