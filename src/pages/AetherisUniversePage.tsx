@@ -227,6 +227,25 @@ const AetherisUniversePage: React.FC = () => {
   const inViewRef = useRef(true);
   const visibleRef = useRef(true);
 
+  // Physics parameters (live-tunable, ref = no re-render on slider drag)
+  const [paramsUI, setParamsUI] = useState<PhysicsParams>(DEFAULT_PARAMS);
+  const paramsRef = useRef<PhysicsParams>(DEFAULT_PARAMS);
+  paramsRef.current = paramsUI;
+  const [showControls, setShowControls] = useState(false);
+
+  // Spark container + audio context
+  const sparkLayerRef = useRef<HTMLDivElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const lastBlipRef = useRef(0);
+
+  // Drag-throw state
+  const dragNodeRef = useRef<{
+    i: number; pointerId: number;
+    lastX: number; lastY: number; lastT: number;
+    vx: number; vy: number; vz: number;
+    moved: number;
+  } | null>(null);
+
   const tools: PlacedTool[] = useMemo(() => {
     return SHOP_TOOLS.map((t, i) => {
       const angle = seeded(i, 1) * Math.PI * 2;
@@ -245,7 +264,6 @@ const AetherisUniversePage: React.FC = () => {
   if (physicsRef.current.length !== tools.length) {
     physicsRef.current = tools.map((t, i) => ({
       x: t.x, y: t.y, z: t.z,
-      // seeded initial drift, ~40..110 px/s per axis, signed
       vx: (seeded(i, 21) - 0.5) * 160,
       vy: (seeded(i, 22) - 0.5) * 110,
       vz: (seeded(i, 23) - 0.5) * 160,
@@ -257,6 +275,54 @@ const AetherisUniversePage: React.FC = () => {
   }, []);
   const unregisterAnimator = React.useCallback((id: string) => {
     nodesRef.current.delete(id);
+  }, []);
+
+  // ----- Audio: short click blip on collision (throttled) -----
+  const playImpact = React.useCallback((impactSpeed: number) => {
+    const P = paramsRef.current;
+    if (!P.soundOn) return;
+    const now = performance.now();
+    if (now - lastBlipRef.current < 35) return;
+    lastBlipRef.current = now;
+    try {
+      const AC = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+      if (!audioCtxRef.current) audioCtxRef.current = new AC();
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      const strength = Math.min(1, impactSpeed / 500);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.value = 240 + Math.random() * 260 + strength * 200;
+      const vol = Math.max(0.02, Math.min(0.22, strength * 0.22)) * P.soundVolume;
+      g.gain.setValueAtTime(0, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
+      o.connect(g).connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.15);
+    } catch { /* audio unavailable */ }
+  }, []);
+
+  // ----- Spark VFX: append a short-lived DOM element at world position -----
+  const spawnSpark = React.useCallback((x: number, y: number, z: number, impactSpeed: number, color: string) => {
+    const layer = sparkLayerRef.current;
+    if (!layer) return;
+    const strength = Math.min(1, impactSpeed / 500);
+    const size = 24 + strength * 60;
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:absolute;left:50%;top:50%;
+      width:${size}px;height:${size}px;margin-left:${-size / 2}px;margin-top:${-size / 2}px;
+      transform:translate3d(${x}px, ${y}px, ${z}px);
+      border-radius:9999px;pointer-events:none;
+      background:radial-gradient(circle, ${color} 0%, ${color}80 30%, rgba(255,255,255,0) 70%);
+      mix-blend-mode:screen;
+      animation:aetherSpark 520ms ease-out forwards;
+      will-change:transform,opacity;
+    `;
+    layer.appendChild(el);
+    setTimeout(() => { el.remove(); }, 560);
   }, []);
 
   // Pause work when page hidden or scene off-screen
