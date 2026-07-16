@@ -27,80 +27,68 @@ const CategoryPill: React.FC<{
   </button>
 );
 
-const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => (
-  <div className="forensic-tile rounded-sm border border-amber/25 p-4 flex flex-col h-full hover:border-amber/60 transition-colors group">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="font-case text-[9px] uppercase tracking-widest text-crimson">
-        Case №{String(c.id).padStart(3, '0')}
-      </span>
-      <span className="font-case text-[9px] uppercase tracking-widest text-amber/70 truncate">
-        {c.category}
-      </span>
-    </div>
-
-    <div className="mb-3 border-l-4 border-amber pl-3">
-      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Result / Outcome</div>
-      <div className="font-forensic text-xl md:text-2xl font-bold text-amber leading-tight">
-        {c.outcome}
+const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
+  const [showMore, setShowMore] = useState(false);
+  return (
+    <div className="forensic-tile rounded-sm border border-amber/25 p-4 flex flex-col h-full hover:border-amber/60 transition-colors">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="font-case text-[9px] uppercase tracking-widest text-crimson">
+          Case №{String(c.id).padStart(3, '0')}
+        </span>
+        <span className="font-case text-[9px] uppercase tracking-widest text-amber/70 truncate">
+          {c.category}
+        </span>
       </div>
-      {c.headline !== c.outcome && (
-        <div className="text-muted-foreground font-case text-xs uppercase tracking-widest mt-1.5">
-          {c.headline}
+
+      <div className="mb-3 border-l-4 border-amber pl-3">
+        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Result</div>
+        <div className="font-forensic text-xl md:text-2xl font-bold text-amber leading-tight">
+          {c.outcome}
+        </div>
+      </div>
+
+      <h3 className="font-forensic text-base font-bold leading-snug mb-2">{c.title}</h3>
+
+      <p className="text-sm text-foreground/80 leading-snug mb-3">
+        <span className="text-crimson font-semibold">Problem:</span> {c.problem}
+      </p>
+
+      {showMore && (
+        <div className="text-sm text-foreground/80 space-y-2 mb-3">
+          <p><span className="text-amber font-semibold">Fix:</span> {c.solution}</p>
+          <p className="italic text-foreground/70 text-xs">Mirrors Aetheris: {c.mirrors}</p>
+          {CASE_DELIVERY[c.id] && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {CASE_DELIVERY[c.id].tools.map((t) => (
+                <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
+
+      <div className="mt-auto pt-3 border-t border-border/60 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setShowMore(v => !v)}
+          className="font-case text-[10px] uppercase tracking-widest text-amber/90 hover:text-amber"
+        >
+          {showMore ? 'Less' : 'More detail'}
+        </button>
+        <a
+          href={c.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-case text-[10px] uppercase tracking-widest text-muted-foreground hover:text-amber transition-colors"
+        >
+          {c.source} <ExternalLink className="w-3 h-3" />
+        </a>
+      </div>
     </div>
-
-    <h3 className="font-forensic text-base font-bold leading-snug mb-3">{c.title}</h3>
-
-    <dl className="space-y-2 text-sm text-foreground/85 mb-3">
-      <div>
-        <dt className="font-case text-[9px] uppercase tracking-widest text-crimson">Problem</dt>
-        <dd>{c.problem}</dd>
-      </div>
-      <div>
-        <dt className="font-case text-[9px] uppercase tracking-widest text-amber">Solution</dt>
-        <dd>{c.solution}</dd>
-      </div>
-      <div>
-        <dt className="font-case text-[9px] uppercase tracking-widest text-amber">Outcome</dt>
-        <dd>{c.outcome}</dd>
-      </div>
-    </dl>
-
-
-    <div className="mt-auto pt-3 border-t border-border/60 text-xs text-muted-foreground space-y-3">
-      <div>
-        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Why it mirrors Aetheris</div>
-        <div className="italic text-foreground/75">{c.mirrors}</div>
-      </div>
-      {CASE_DELIVERY[c.id] && (
-        <div className="rounded-sm border border-amber/20 bg-amber/5 p-2.5">
-          <div className="flex items-center gap-1.5 font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">
-            <Wrench className="w-3 h-3" /> How Aetheris delivers this
-          </div>
-          <div className="text-foreground/85 text-[12px] leading-relaxed mb-1.5">
-            {CASE_DELIVERY[c.id].experience}
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {CASE_DELIVERY[c.id].tools.map((t) => (
-              <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      <a
-        href={c.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 font-case text-[10px] uppercase tracking-widest text-amber hover:text-crimson transition-colors"
-      >
-        Source: {c.source} <ExternalLink className="w-3 h-3" />
-      </a>
-    </div>
-  </div>
-);
+  );
+};
 
 export const RealCaseStudiesSection: React.FC = () => {
   const [active, setActive] = useState<RealCaseCategory | 'all'>('all');
@@ -132,7 +120,8 @@ export const RealCaseStudiesSection: React.FC = () => {
     });
   }, [active, query]);
 
-  const visible = expanded ? filtered : filtered.slice(0, 9);
+  const INITIAL = 6;
+  const visible = expanded ? filtered : filtered.slice(0, INITIAL);
 
   return (
     <section className="py-16 px-4 scroll-mt-24" id="real-case-files">
@@ -141,15 +130,13 @@ export const RealCaseStudiesSection: React.FC = () => {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-case uppercase tracking-widest mb-5">
             <FileText className="w-4 h-4" />
-            50 Sourced Case Files
+            50 Real Cases
           </div>
           <h2 className="font-forensic text-3xl md:text-5xl font-bold mb-4 leading-tight">
-            Every case, verified. Every source, linked.
+            Real problems. Real fixes. Real numbers.
           </h2>
-          <p className="text-foreground/80 max-w-3xl mx-auto text-lg">
-            Fifty published case studies — from Salesforce and Shell to mid-market SaaS and family
-            manufacturers — that mirror the leak-audit methodology. Real problem. Real fix. Real
-            metric. Click the source on any card to read the original.
+          <p className="text-foreground/80 max-w-2xl mx-auto text-base md:text-lg">
+            Each card: what broke, the result. Tap <span className="text-amber">More detail</span> for the fix, or the source to read the original.
           </p>
         </div>
 
@@ -197,7 +184,7 @@ export const RealCaseStudiesSection: React.FC = () => {
               ))}
             </div>
 
-            {filtered.length > 9 && (
+            {filtered.length > INITIAL && (
               <div className="text-center mt-8">
                 <Button
                   variant="outline"
@@ -205,8 +192,8 @@ export const RealCaseStudiesSection: React.FC = () => {
                   className="border-amber/40 text-amber hover:bg-amber/10 font-case uppercase tracking-widest text-xs"
                 >
                   {expanded
-                    ? `Collapse — showing all ${filtered.length}`
-                    : `Open the rest — ${filtered.length - 9} more case files`}
+                    ? `Show fewer`
+                    : `Show all ${filtered.length} cases`}
                 </Button>
               </div>
             )}
