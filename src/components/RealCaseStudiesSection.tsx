@@ -120,7 +120,8 @@ export const RealCaseStudiesSection: React.FC = () => {
     });
   }, [active, query]);
 
-  const visible = expanded ? filtered : filtered.slice(0, 9);
+  const INITIAL = 6;
+  const visible = expanded ? filtered : filtered.slice(0, INITIAL);
 
   return (
     <section className="py-16 px-4 scroll-mt-24" id="real-case-files">
@@ -129,15 +130,13 @@ export const RealCaseStudiesSection: React.FC = () => {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber/10 border border-amber/30 text-amber text-sm font-case uppercase tracking-widest mb-5">
             <FileText className="w-4 h-4" />
-            50 Sourced Case Files
+            50 Real Cases
           </div>
           <h2 className="font-forensic text-3xl md:text-5xl font-bold mb-4 leading-tight">
-            Every case, verified. Every source, linked.
+            Real problems. Real fixes. Real numbers.
           </h2>
-          <p className="text-foreground/80 max-w-3xl mx-auto text-lg">
-            Fifty published case studies — from Salesforce and Shell to mid-market SaaS and family
-            manufacturers — that mirror the leak-audit methodology. Real problem. Real fix. Real
-            metric. Click the source on any card to read the original.
+          <p className="text-foreground/80 max-w-2xl mx-auto text-base md:text-lg">
+            Each card: what broke, the result. Tap <span className="text-amber">More detail</span> for the fix, or the source to read the original.
           </p>
         </div>
 
