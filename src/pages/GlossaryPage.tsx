@@ -25,7 +25,7 @@ const TERMS: Term[] = [
   { slug: 'competitor-teardown', term: 'Competitor Teardown', definition: 'Pointing the Live DOM Scanner at a rival URL to surface their Revenue Score and named leaks. One of the five structural moats.' },
   { slug: 'industry-leak-report', term: 'Industry Leak Report', definition: 'Aetheris\'s annual proprietary research aggregating anonymized scan data by industry. The citation magnet for the category.' },
   { slug: 'leak-audit', term: 'The Leak Audit™', definition: 'The free seven-step forensic self-scan at /leak-audit any owner can run unaided. The on-ramp to the operator-led framework.' },
-  { slug: 'forensic-diagnostic', term: 'Forensic Diagnostic', definition: 'The operator-led entry engagement starting at $2,500 flat, applied 1:1 toward the 21-Day Revenue Diagnostic.' },
+  { slug: 'forensic-diagnostic', term: 'Forensic Diagnostic', definition: 'The operator-led entry engagement starting at $18,500 flat, applied 1:1 toward the 21-Day Revenue Diagnostic.' },
   { slug: 'revenue-diagnostic', term: '21-Day Revenue Diagnostic', definition: 'The flagship engagement. $18,500 flat. 21 days. Live scan, Revenue Score, complete Leak Register, prioritized fix path, written Case File, 60-minute readout.' },
   { slug: 'leak-categories', term: 'Leak Categories', definition: 'The seven forensic categories every leak falls into: Lead Capture, Tracking, Trust, Follow-Up, Performance, Messaging, Systems.' },
   { slug: 'severity', term: 'Severity (1-5)', definition: 'A per-leak rating calculated from impact × frequency × evidence confidence. Severity 5 is critical (named, frequent, certain). Severity 1 is observable but low-impact.' },

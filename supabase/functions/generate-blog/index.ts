@@ -114,7 +114,7 @@ const TOPICS = [
       "We ran forensic diagnostics on 50 businesses last year. Here are the 5 leaks that showed up in every single one.",
       "The anatomy of a $200K revenue leak: how one missing follow-up sequence cost a B2B company more than their entire marketing budget",
       "Why your P&L looks healthy but your cash flow is dying — the operational forensics behind margin compression",
-      "The Forensic Diagnostic vs. a strategy session: what you actually get for $2,500 and why it pays for itself in the first finding",
+      "The Forensic Diagnostic vs. a strategy session: what you actually get for $18,500+ and why it pays for itself in the first finding",
       "Most businesses have 3-7 active revenue leaks running right now. Here's how to find yours in 48 hours without hiring a consultant.",
     ],
   },

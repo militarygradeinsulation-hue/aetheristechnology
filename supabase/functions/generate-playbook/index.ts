@@ -190,7 +190,7 @@ function renderBackCover(doc: any, pageW: number, pageH: number, margin: number)
   doc.setFont("helvetica", "normal");
   doc.setTextColor(200, 195, 185);
   const ctaLines = doc.splitTextToSize(
-    "This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $2,500, applied toward engagement.",
+    "This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $18,500+, applied toward engagement.",
     contentW - 20
   );
   doc.text(ctaLines, pageW / 2, 108, { align: "center" });

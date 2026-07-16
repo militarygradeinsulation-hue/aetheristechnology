@@ -528,8 +528,8 @@ const NewsPage = () => {
                   <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber/10 blur-3xl" />
                   <div className="font-mono text-[10px] uppercase tracking-widest text-amber relative">Operator-led</div>
                   <div className="font-display text-2xl font-semibold text-foreground mt-2 relative leading-tight">Forensic Diagnostic</div>
-                  <div className="font-display text-4xl font-bold text-amber mt-2 relative">$2,500 <span className="text-sm font-mono text-muted-foreground tracking-widest uppercase">flat</span></div>
-                  <p className="text-sm text-muted-foreground mt-3 relative">A live, operator-led teardown of your funnel, ops, and stack. Full $2,500 applies toward any engagement.</p>
+                  <div className="font-display text-4xl font-bold text-amber mt-2 relative">$18,500+ <span className="text-sm font-mono text-muted-foreground tracking-widest uppercase">flat</span></div>
+                  <p className="text-sm text-muted-foreground mt-3 relative">A live, operator-led teardown of your funnel, ops, and stack. Full $18,500+ applies toward any engagement.</p>
                   <ul className="mt-4 space-y-1.5 relative">
                     {["7-step Leak Audit™ on your real data", "Ranked leak report with $/month estimates", "Remediation plan you can run yourself"].map(b => (
                       <li key={b} className="flex items-start gap-2 text-xs text-foreground/80"><span className="text-amber font-mono mt-0.5">▸</span>{b}</li>
