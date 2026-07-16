@@ -345,8 +345,8 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* THE LEAK ECOSYSTEM — always unlocked, no email gate */}
-          <HomeMindMapSection onBookAudit={() => setBookingOpen(true)} />
+          {/* THE LEAK ECOSYSTEM moved to industry pages */}
+
 
           {/* Golden Report CTA now lives above; no duplicate here. */}
 
