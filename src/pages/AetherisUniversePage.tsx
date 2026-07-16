@@ -592,7 +592,7 @@ const AetherisUniversePage: React.FC = () => {
         }
       `}</style>
       <SEOHead
-        title="AetherisUniverse — Every Forensic Tool, Floating in 3D"
+        title="Aetheris Universe — Every Forensic Tool, Floating in 3D"
         description="A living 3D map of every Aetheris tool and technology. Fly through the universe, open any tool, try it live."
         path="/aetheris-universe"
       />
