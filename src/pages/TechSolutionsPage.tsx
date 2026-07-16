@@ -128,6 +128,11 @@ const TechSolutionsPage: React.FC = () => {
   const featured = FEATURED_IDS
     .map(id => SHOP_TOOLS.find(t => t.id === id))
     .filter((t): t is (typeof SHOP_TOOLS)[number] => Boolean(t));
+  const isFeatured = (id: string) => FEATURED_IDS.includes(id);
+  const diagnostics = SHOP_TOOLS.filter(t => t.category === "diagnostics" && !isFeatured(t.id));
+  const content = SHOP_TOOLS.filter(t => t.category === "content" && !isFeatured(t.id));
+  const reports = SHOP_TOOLS.filter(t => t.category === "reports" && !isFeatured(t.id));
+  const sales = SHOP_TOOLS.filter(t => t.category === "sales" && !isFeatured(t.id));
 
   const Section = ({ title, tools, icon: Icon }: { title: string; tools: typeof SHOP_TOOLS; icon: any }) => (
     <section className="mb-16">
