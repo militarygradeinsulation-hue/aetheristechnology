@@ -263,9 +263,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { label: 'Why am I getting leads but not closing them?', href: '/why-am-i-not-closing-leads' },
     ],
     faqs: [
-      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30-40% of their leaks unaided. The operator-led Forensic Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
+      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30-40% of their leaks unaided. The 21-Day Revenue Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
       { q: 'What is the single most common leak in $5M-$25M businesses?', a: 'Slow follow-up. Across our scans, the median first-touch lag from form submission to first human reply is over 18 hours. Industry data is unambiguous that this destroys conversion.' },
-      { q: 'How long does the scan take?', a: 'The free scan is 30 seconds. The full operator-led Forensic Diagnostic is 21 days and ends with a written Case File and 60-minute readout.' },
+      { q: 'How long does the scan take?', a: 'The free scan is 30 seconds. The 21-Day Revenue Diagnostic runs 21 days and ends with a written Case File and 60-minute readout.' },
       { q: 'What tools do I need to run this myself?', a: 'A browser, your CRM access, your ad platform access, and a willingness to look at the actual numbers instead of the dashboard summary.' },
       { q: 'What if I find a leak I cannot fix?', a: 'Most leaks have a $39-$300 one-time fix in the tool marketplace. The leaks that require coordination across multiple surfaces are the reason the Active Case engagement exists.' },
     ],
