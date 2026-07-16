@@ -5,7 +5,7 @@ import { Clock, Play, Square, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { portalTimeclock, formatDuration, type TimeEntry } from "@/lib/portalTimeclock";
 
-export const RepClockWidget: React.FC = () => {
+export const RepClockWidget: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const [open, setOpen] = useState<TimeEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -34,6 +34,46 @@ export const RepClockWidget: React.FC = () => {
     }
     tickRef.current = window.setInterval(() => setTick((t) => t + 1), 1000);
     return () => { if (tickRef.current) window.clearInterval(tickRef.current); };
+  }, [open]);
+
+  // Auto clock-out after 5 minutes of screen inactivity, and BACKDATE the
+  // clock-out to the actual last-activity timestamp so the recorded time
+  // reflects real work, not when the sweep ran.
+  useEffect(() => {
+    if (!open) return;
+    const IDLE_MS = 5 * 60 * 1000;
+    const KEY = "rep.lastActivityAt";
+    const bump = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch {} };
+    bump();
+
+    const events = ["mousemove", "keydown", "click", "touchstart", "scroll", "visibilitychange", "focus"];
+    events.forEach(e => window.addEventListener(e, bump, { passive: true }));
+
+    const checkIdle = async () => {
+      let last = 0;
+      try { last = Number(localStorage.getItem(KEY) || "0"); } catch {}
+      if (!last || Date.now() - last < IDLE_MS) return;
+      try {
+        // End the session at the moment we last saw activity, not now.
+        const endIso = new Date(last).toISOString();
+        const { entry } = await portalTimeclock.clockOut(
+          "Auto clock-out (inactive ≥5m)",
+          endIso,
+        );
+        setOpen(null);
+        toast({
+          title: "Auto clocked out",
+          description: `Closed at last activity ${new Date(last).toLocaleTimeString()}. Session: ${formatDuration(entry.duration_seconds)}`,
+        });
+      } catch (e) { console.error("auto clock-out failed", e); }
+    };
+    // Check every 30s.
+    checkIdle();
+    const id = window.setInterval(checkIdle, 30_000);
+    return () => {
+      events.forEach(e => window.removeEventListener(e, bump));
+      window.clearInterval(id);
+    };
   }, [open]);
 
   const elapsed = open
@@ -68,6 +108,43 @@ export const RepClockWidget: React.FC = () => {
       setActing(false);
     }
   };
+
+  if (compact) {
+    if (loading) {
+      return (
+        <Button size="sm" variant="outline" disabled className="gap-1.5">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Clock
+        </Button>
+      );
+    }
+    if (open) {
+      return (
+        <Button
+          onClick={handleOut}
+          disabled={acting}
+          size="sm"
+          variant="destructive"
+          className="gap-1.5 font-mono"
+          data-tick={tick}
+          title={`On the clock since ${new Date(open.clock_in_at).toLocaleTimeString()}`}
+        >
+          {acting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />}
+          {formatDuration(elapsed)}
+        </Button>
+      );
+    }
+    return (
+      <Button
+        onClick={handleIn}
+        disabled={acting}
+        size="sm"
+        className="gap-1.5 bg-amber hover:bg-amber/90 text-background font-bold"
+      >
+        {acting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+        Clock In
+      </Button>
+    );
+  }
 
   return (
     <Card>

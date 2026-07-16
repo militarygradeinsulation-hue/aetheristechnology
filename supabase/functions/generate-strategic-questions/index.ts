@@ -6,6 +6,31 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function fallbackQuestions(industry: string, mainProduct: string, goal: string) {
+  const categories = ["leadership", "sales", "marketing", "operations", "hiringAndPeople", "pricingAndOffer", "customerJourney", "growthAndExpansion"];
+  const make = (category: string, i: number) => ({
+    question: `Where is ${industry} leaking money in ${category.replace(/([A-Z])/g, " $1").toLowerCase()} before ${mainProduct} ever gets a fair shot?`,
+    whyItMatters: "This isolates the system failure instead of blaming lead quality, effort, or market conditions.",
+    ...(i < 10 ? { category, urgency: i < 3 ? "critical" : i < 6 ? "high" : "medium" } : {}),
+  });
+  return {
+    _fallback: true,
+    _fallbackReason: "AI strategic question generation timed out, so a safe operator question map was returned instead.",
+    companySnapshot: `${industry} is trying to reach ${goal}. The core risk is disconnected sales, marketing, and operations signals hiding the real leak pattern.`,
+    top10CriticalQuestions: Array.from({ length: 10 }, (_, i) => make(categories[i % categories.length], i)),
+    categories: Object.fromEntries(categories.map((c) => [c, Array.from({ length: 4 }, (_, i) => make(c, i + 10))])),
+    questionsYouProbablyArentAsking: [
+      { question: "Which handoff looks successful in the tool but fails in the real buyer journey?", whyItMatters: "Silent handoff failures create false confidence." },
+      { question: "What follow-up step depends on memory instead of a system?", whyItMatters: "Memory-based operations do not scale." },
+      { question: "Which metric improves while cash still leaks?", whyItMatters: "Vanity metrics can hide margin loss." },
+      { question: "Where do prospects stall without anyone owning the stall?", whyItMatters: "Unowned stalls become accepted leakage." },
+      { question: "What would break first if volume doubled next month?", whyItMatters: "Capacity leaks show up before growth does." },
+    ],
+    leadershipTeamDiscussion: Array.from({ length: 5 }, (_, i) => ({ question: `What leak would we fix first if we had to recover cash in ${i + 1} week(s)?`, context: "Forces prioritization by business impact." })),
+    workshopPrompts: Array.from({ length: 5 }, (_, i) => ({ prompt: `Map the ${i + 1} highest-risk buyer handoffs and mark who owns each one.`, format: "Whiteboard", timeEstimate: "20 minutes" })),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -78,8 +103,10 @@ RULES:
 - Never ask weak questions like "Are you happy with...?" or "Do you have...?"
 - Focus on exposing root causes, not symptoms`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiRes = await Promise.race([
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: AbortSignal.timeout(15_000),
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
@@ -91,13 +118,17 @@ RULES:
           { role: "user", content: prompt },
         ],
       }),
-    });
+      }),
+      new Promise<Response>((_, reject) => setTimeout(() => reject(new Error("AI request timed out")), 15_500)),
+    ]);
 
     if (!aiRes.ok) {
       const status = aiRes.status;
       if (status === 429) return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error("AI request failed");
+      return new Response(JSON.stringify(fallbackQuestions(industry, mainProduct, goal)), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiData = await aiRes.json();
@@ -112,6 +143,11 @@ RULES:
   } catch (error) {
     console.error("generate-strategic-questions error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate questions";
+    if (/abort|timeout|timed out|context canceled|AI request failed/i.test(message)) {
+      return new Response(JSON.stringify(fallbackQuestions("general business", "core offer", "predictable growth")), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -83,18 +83,18 @@ export const CommissionStructurePanel: React.FC = () => {
         <span className="text-xs text-amber font-mono hidden group-open:inline">Collapse ▴</span>
       </summary>
       <div className="space-y-6 p-4 pt-2">
-      <FlagshipCommissionPanel />
+      <FlagshipCommissionPanel audience="admin" />
 
       {/* Tiered rules */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-display">
-            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure — Tiered 3-Way Split
+            <DollarSign className="w-5 h-5 text-amber" /> Commission Structure, Tiered 3-Way Split
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Every closed sale tied to the rep's 6-digit code splits three ways. The percentage depends on the product's price tier — entry-level products pay reps a higher % to drive volume; high-ticket deals pay reps fewer points but far more dollars per close. Applies to one-time and recurring invoices.
+            Every closed sale tied to the rep's 6-digit code splits three ways. The percentage depends on the product's price tier, entry-level products pay reps a higher % to drive volume; high-ticket deals pay reps fewer points but far more dollars per close. Applies to one-time and recurring invoices.
           </p>
 
           <div className="grid md:grid-cols-3 gap-3">
@@ -126,8 +126,8 @@ export const CommissionStructurePanel: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {t === 1 && 'Entry-level $29–$59. Built for volume + fast wins.'}
-                    {t === 2 && 'Mid-level $79–$349. Bread-and-butter consultative sales.'}
+                    {t === 1 && 'Entry-level $29-$59. Built for volume + fast wins.'}
+                    {t === 2 && 'Mid-level $79-$349. Bread-and-butter consultative sales.'}
                     {t === 3 && 'High-ticket $599+. Fewer points, big dollars per close.'}
                   </p>
                 </div>
@@ -164,29 +164,47 @@ export const CommissionStructurePanel: React.FC = () => {
                   const partnerCut = partnerCentsForProduct(p);
                   const companyCut = companyCentsForProduct(p);
                   return (
-                    <TableRow key={p.name} className={p.highlight ? 'bg-amber/5' : undefined}>
-                      <TableCell className={p.highlight ? 'font-semibold text-foreground' : 'text-foreground'}>
-                        {p.name}
-                        {p.recurring && (
-                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                            <Repeat className="w-3 h-3" /> recurring
-                          </span>
+                    <TableRow key={p.name} className={p.highlight ? 'bg-amber/5 align-top' : 'align-top'}>
+                      <TableCell className={p.highlight ? 'font-semibold text-foreground max-w-md' : 'text-foreground max-w-md'}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {p.name}
+                          {p.flagship && (
+                            <Badge variant="outline" className="border-amber/60 text-amber font-mono text-[9px]">FLAGSHIP</Badge>
+                          )}
+                          {p.bundle && (
+                            <Badge variant="outline" className="border-amber/60 text-amber font-mono text-[9px]">BUNDLE</Badge>
+                          )}
+                          {p.recurring && (
+                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                              <Repeat className="w-3 h-3" /> recurring
+                            </span>
+                          )}
+                        </div>
+                        {p.description && (
+                          <p className="text-xs text-muted-foreground font-normal mt-1 leading-snug">{p.description}</p>
+                        )}
+                        {p.forWho && (
+                          <p className="text-[11px] text-amber/80 font-mono mt-1 leading-snug">
+                            <span className="uppercase tracking-wider mr-1">For:</span>{p.forWho}
+                          </p>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="font-mono text-[10px]">T{p.tier}</Badge>
+                        <Badge variant="outline" className="font-mono text-[10px]">
+                          {p.flagship ? 'FIXED' : `T${p.tier}`}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
                         {fmtUsd(p.priceCents)}{p.recurring ? '/mo' : ''}
                       </TableCell>
                       <TableCell className="text-right text-foreground">
-                        {fmtUsd(companyCut)} <span className="text-xs text-muted-foreground">({Math.round(r.company * 100)}%)</span>
+                        {fmtUsd(companyCut)} <span className="text-xs text-muted-foreground">({p.flagship ? 'fixed' : `${Math.round(r.company * 100)}%`})</span>
                       </TableCell>
                       <TableCell className={`text-right font-semibold ${p.highlight ? 'text-amber' : 'text-foreground'}`}>
-                        {fmtUsd(repCut)} <span className="text-xs text-muted-foreground">({Math.round(r.rep * 100)}%)</span>
+                        {fmtUsd(repCut)} <span className="text-xs text-muted-foreground">({p.flagship ? 'fixed' : `${Math.round(r.rep * 100)}%`})</span>
                       </TableCell>
                       <TableCell className="text-right font-semibold text-amber">
-                        {fmtUsd(partnerCut)} <span className="text-xs text-muted-foreground">({Math.round(r.partner * 100)}%)</span>
+                        {fmtUsd(partnerCut)} <span className="text-xs text-muted-foreground">({p.flagship ? 'fixed' : `${Math.round(r.partner * 100)}%`})</span>
                       </TableCell>
                     </TableRow>
                   );
@@ -209,7 +227,7 @@ export const CommissionStructurePanel: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Set how many of each product the rep closes this month. Each product uses its own tier rate. Recurring retainers project over your retention window.
+            Set how many of each product the rep closes this month. Each product uses its own tier rate. Recurring active cases project over your retention window.
           </p>
 
           <div className="grid sm:grid-cols-2 gap-3">
@@ -225,15 +243,26 @@ export const CommissionStructurePanel: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground">
                         {p.name}
                         {p.recurring && <span className="ml-1 text-xs text-muted-foreground">/mo</span>}
-                        <Badge variant="outline" className="ml-2 font-mono text-[10px]">T{p.tier}</Badge>
+                        <Badge variant="outline" className="ml-2 font-mono text-[10px]">
+                          {p.flagship ? 'FIXED' : `T${p.tier}`}
+                        </Badge>
+                        {p.bundle && <Badge variant="outline" className="ml-1 border-amber/60 text-amber font-mono text-[9px]">BUNDLE</Badge>}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {fmtUsd(p.priceCents)} → rep {fmtUsd(repCentsForProduct(p))} · partner {fmtUsd(partnerCentsForProduct(p))}
                       </p>
+                      {p.description && (
+                        <p className="text-[11px] text-muted-foreground/80 mt-1 leading-snug line-clamp-2">{p.description}</p>
+                      )}
+                      {p.forWho && (
+                        <p className="text-[10px] text-amber/70 font-mono mt-0.5 leading-snug line-clamp-1">
+                          <span className="uppercase">For:</span> {p.forWho}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="mt-2 flex items-center gap-2">
@@ -246,7 +275,7 @@ export const CommissionStructurePanel: React.FC = () => {
                           R: {fmtUsd(repLine)}{p.recurring ? '/mo' : ''}<br />
                           P: {fmtUsd(partnerLine)}{p.recurring ? '/mo' : ''}
                         </>
-                      ) : '—'}
+                      ) : ', '}
                     </span>
                   </div>
                 </div>

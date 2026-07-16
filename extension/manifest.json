@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Aetheris Operator — Forensic Cockpit",
+  "version": "0.9.13",
+  "description": "Chaos Theory Forensics operator: scans any page for revenue leaks, drafts LinkedIn replies in the forensic voice, and pushes fixes back to WordPress without an API key.",
+  "permissions": ["activeTab", "storage", "scripting", "tabs", "sidePanel", "webNavigation", "cookies", "alarms"],
+  "optional_permissions": ["debugger"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://*.hubspot.com/*",
+    "https://*.hubapi.com/*",
+    "https://*.linkedin.com/*",
+    "https://ihdjpxhcaiaixmqxyqoe.supabase.co/*"
+  ],
+  "action": {
+    "default_title": "Aetheris Operator",
+    "default_icon": "icon.png"
+  },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://*.linkedin.com/*"],
+      "js": ["linkedinAutoReply.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "48": "icon.png", "128": "icon.png" }
+}

@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const code = String(body?.code || "").trim();
     if (!/^\d{4,12}$/.test(code)) {
-      return new Response(JSON.stringify({ error: "Invalid code format" }), {
-        status: 400,
+      return new Response(JSON.stringify({ ok: false, error: "Invalid code format" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -29,18 +29,52 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // ---- Brute-force protection: per-IP rate limit via admin_kv ----------
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const rlKey = `ratelimit:rep-portal-login:${ip}`;
+    const WINDOW_MS = 5 * 60 * 1000;
+    const MAX_FAILS = 10;
+    const nowMs = Date.now();
+    const { data: rlRow } = await sb
+      .from("admin_kv")
+      .select("value")
+      .eq("key", rlKey)
+      .maybeSingle();
+    const rlVal = (rlRow?.value as { count?: number; first?: number } | undefined) || { count: 0, first: nowMs };
+    if (nowMs - (rlVal.first || 0) > WINDOW_MS) {
+      rlVal.count = 0;
+      rlVal.first = nowMs;
+    }
+    if ((rlVal.count || 0) >= MAX_FAILS) {
+      return new Response(JSON.stringify({ ok: false, error: "Too many attempts. Try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data, error } = await sb.from("rep_codes")
-      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active")
+      .select("code, rep_name, rep_email, commission_rate, total_sales_cents, total_commission_cents, role, is_active, certification_id, certification_image_url, certification_issued_at, certification_valid_until")
       .eq("code", code)
       .eq("is_active", true)
       .maybeSingle();
 
     if (error || !data) {
-      return new Response(JSON.stringify({ error: "Invalid or inactive code" }), {
-        status: 401,
+      await sb.from("admin_kv").upsert({
+        key: rlKey,
+        value: { count: (rlVal.count || 0) + 1, first: rlVal.first || nowMs },
+        updated_at: new Date().toISOString(),
+      });
+      return new Response(JSON.stringify({ ok: false, error: "Invalid or inactive code" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Success — clear the rate-limit counter for this IP.
+    await sb.from("admin_kv").delete().eq("key", rlKey);
 
     const role: "rep" | "partner" = data.role === "partner" ? "partner" : "rep";
     const { token, exp } = await signPortalToken(data.code, role, SERVICE_KEY);
@@ -58,6 +92,10 @@ Deno.serve(async (req) => {
           total_sales_cents: data.total_sales_cents,
           total_commission_cents: data.total_commission_cents,
           role,
+          certification_id: data.certification_id,
+          certification_image_url: data.certification_image_url,
+          certification_issued_at: data.certification_issued_at,
+          certification_valid_until: data.certification_valid_until,
         },
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },

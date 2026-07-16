@@ -19,11 +19,11 @@ const BLOCKS: { label: string; body: string }[] = [
   },
   {
     label: 'Education',
-    body: 'B.A. in Psychology and Communication. M.S. in Business Marketing. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
+    body: 'B.A. in Psychology and Communication. M.S. in Business Marketing. Currently pursuing further Doctorate work in Digital Forensics. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
   },
   {
     label: 'Certifications',
-    body: 'Vibe Coding — Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis) — Google. AI for Business — Harvard edX AI for Business Systems. AI Engineer — IBM AI Engineering. HubSpot Certification — HubSpot. Biomedical & Health Science Researchers — CITI Program (Credential ID 76234047). Google Analytics Individual Qualification — Google Operations Center. Marketing & Analytics — Google Digital Academy (Skillshop).',
+    body: 'Vibe Coding, Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis), Google. AI for Business, Harvard edX AI for Business Systems. AI Engineer, IBM AI Engineering. HubSpot Certification, HubSpot. Biomedical & Health Science Researchers, CITI Program (Credential ID 76234047). Google Analytics Individual Qualification, Google Operations Center. Marketing & Analytics, Google Digital Academy (Skillshop).',
   },
   {
     label: 'Company',
@@ -40,7 +40,7 @@ const CredentialsPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Credentials — Joseph Toney, Aetheris Operator"
+        title="Credentials, Joseph Toney, Aetheris Operator"
         description="20 years building revenue systems for manufacturers. Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm."
         path="/credentials"
         keywords="Joseph Toney, Aetheris operator, manufacturing revenue consultant, Indianapolis"
@@ -56,7 +56,7 @@ const CredentialsPage: React.FC = () => {
                 Credentials · Aetheris
               </div>
               <h1 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                Joseph Toney — Operator.
+                Joseph Toney, Operator.
               </h1>
               <p className="text-lg text-muted-foreground mt-4">
                 Background, certifications, prior operator roles, and the business-continuity plan procurement teams ask for.
@@ -80,7 +80,7 @@ const CredentialsPage: React.FC = () => {
 
             <div className="space-y-6">
               {BLOCKS.map((b) => (
-                <section key={b.label} className="premium-tile rounded-sm border border-border/60 p-6 md:p-7">
+                <section key={b.label} className="forensic-tile rounded-sm border border-border/60 p-6 md:p-7">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">{b.label}</div>
                   <p className="text-foreground/85 leading-relaxed">{b.body}</p>
                 </section>

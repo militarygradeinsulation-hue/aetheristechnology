@@ -127,7 +127,7 @@ const AppDashboard = () => {
                   <div className="text-sm font-semibold">Changes pushed to HubSpot · last 24h</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {changes24h.total === 0
-                      ? "No changes yet — ask the Co-Pilot to update something."
+                      ? "No changes yet, ask the Co-Pilot to update something."
                       : `${changes24h.verified} verified${changes24h.partial ? ` · ${changes24h.partial} partial` : ""}${changes24h.undone ? ` · ${changes24h.undone} undone` : ""}`}
                   </div>
                 </div>

@@ -36,7 +36,7 @@ Structure (in this exact order):
 3. CASE FILE block (markdown blockquote) with mono-style labels:
    > CASE ID: <slug-businessName-YYYYMMDD>
    > STATUS: ACTIVE
-   > OPERATOR: Aetheris Business Forensics
+   > OPERATOR: Aetheris Chaos Theory Forensics
    > SCOPE: <one line scope>
 4. ## EXECUTIVE SUMMARY — 4–6 sentences for the CEO. Lead with the diagnosis, not the agreement.
 5. ## THE INVENTORY — what we examined / inputs in play (bullets or table).
@@ -226,9 +226,9 @@ export const SYSTEM_SPECS: Record<string, SystemSpec> = {
     userPrompt: (i) => `${JSON.stringify(i)}\n\nDeliver: (1) Shared funnel definitions (MQL/SAL/SQL/Opp), (2) Lead scoring model, (3) SLA between marketing and sales, (4) Weekly sync agenda, (5) Shared dashboard spec, (6) 60-day implementation roadmap.`,
   },
 
-  // ───────────── Recurring (monthly retainers) ─────────────
-  sales_coaching_retainer_monthly: {
-    priceId: "sales_coaching_retainer_monthly",
+  // ───────────── Recurring (active cases) ─────────────
+  "sales_coaching_active case_monthly": {
+    priceId: "sales_coaching_active case_monthly",
     toolType: "sales_coaching_kickoff",
     title: "Sales Coaching Kickoff",
     intake: I([

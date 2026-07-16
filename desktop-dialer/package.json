@@ -1,0 +1,19 @@
+{
+  "name": "aetheris-dialer",
+  "version": "1.0.0",
+  "description": "Aetheris Desktop Dialer — Electron wrapper for PopTox that keeps you signed in and accepts one-click calls from the Aetheris portal.",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "package:mac": "electron-packager . AetherisDialer --platform=darwin --arch=arm64 --out=release --overwrite --icon=icon.icns",
+    "package:mac-intel": "electron-packager . AetherisDialer --platform=darwin --arch=x64 --out=release --overwrite --icon=icon.icns",
+    "package:win": "electron-packager . AetherisDialer --platform=win32 --arch=x64 --out=release --overwrite --icon=icon.ico",
+    "package:linux": "electron-packager . AetherisDialer --platform=linux --arch=x64 --out=release --overwrite"
+  },
+  "author": "Aetheris Technology",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-packager": "^17.1.2"
+  }
+}

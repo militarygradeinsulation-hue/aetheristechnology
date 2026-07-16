@@ -2,27 +2,48 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { computeWebsiteScore } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM = `You are a B2B sales forensics analyst. Given scraped website content for a prospect, return STRICT JSON:
+const SYSTEM = `You are a B2B sales forensics analyst. CURRENCY RULE (NON-NEGOTIABLE): every monetary figure must be in US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, EUR, GBP, CAD, AUD. Given scraped website content for a prospect, return STRICT JSON. DO NOT return a numeric "score" — the score is computed in code from the "signals" object you fill from observable evidence. Schema:
 {
-  "score": 0-100 (how strong a fit they are for an AI consulting / forensic ops engagement; weight: business size, signs of friction, industry leverage, contact-ability),
-  "score_reason": short 1-line justification,
-  "weak_points": [3-5 short bullets — observable problems, gaps, friction, missing automation, slow processes, outdated tech],
-  "talking_points": [3-5 short bullets — what a sales rep should LEAD with on the first call to grab attention],
-  "icebreaker": "1-2 sentence opener the rep can paste into an email or use on a cold call",
+  "signals": {
+    "has_phone": boolean, "has_email": boolean, "has_contact_form": boolean, "has_calendar_link": boolean,
+    "cta_strength": 0-5, "lead_magnet_present": boolean, "value_prop_clarity": 0-5,
+    "content_depth": 0-5, "has_case_studies": boolean,
+    "has_title_tag": boolean, "has_meta_description": boolean, "has_schema": boolean,
+    "uses_responsive": boolean, "fast_first_paint": boolean,
+    "brand_consistency": 0-5,
+    "industry_fit": "high" | "medium" | "low" | "unknown",
+    "revenue_band": "<500k" | "500k-2M" | "2M-10M" | "10M+" | "unknown"
+  },
+  "score_reason": "one-line justification grounded in what you saw",
+  "weak_points": [3-5 bullets — observable problems, gaps, missing automation, slow processes],
+  "talking_points": [3-5 bullets — what to lead with on first call],
+  "icebreaker": "1-2 sentence opener",
   "decision_makers": [{"role":"...", "why":"..."}],
   "industry_refined": "best-fit industry label",
   "estimated_revenue_band": "<$1M | $1-5M | $5-25M | $25M+",
-  "confidence": "low|medium|high"
+  "confidence": "low|medium|high",
+  "outreach": {
+    "recommended_channel": "call | email | linkedin | text",
+    "channel_confidence": "low|medium|high",
+    "why_this_channel": "2-3 sentences grounded in OBSERVABLE evidence",
+    "secondary_channel": "call | email | linkedin | text",
+    "best_time_to_reach": "...",
+    "persona_read": "...",
+    "tone_to_use": "...",
+    "do_not_do": ["1-3 anti-patterns"],
+    "first_touch_script": "3-5 sentence opener"
+  }
 }
-Be blunt and specific. No fluff. If the site is empty or low-info, say so in score_reason and lower confidence.`;
+If the scraped content is < 500 chars or you cannot fill the signals from evidence, set confidence to "low" and leave signals fields as their best-guess defaults — the code will refuse to score it. Be blunt and specific. No fluff.`;
 
-async function firecrawl(url: string, key: string): Promise<string> {
+async function firecrawl(url: string, key: string): Promise<{ md: string; err?: string }> {
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
       method: "POST",
@@ -31,10 +52,41 @@ async function firecrawl(url: string, key: string): Promise<string> {
     });
     const j = await r.json().catch(() => ({}));
     const md = j?.data?.markdown || j?.markdown || "";
-    return String(md).slice(0, 15000);
-  } catch {
-    return "";
+    if (!r.ok) return { md: "", err: `firecrawl ${r.status}: ${(j?.error || "").toString().slice(0, 200)}` };
+    return { md: String(md).slice(0, 15000) };
+  } catch (e) {
+    return { md: "", err: `firecrawl exception: ${e instanceof Error ? e.message : String(e)}` };
   }
+}
+
+async function firecrawlSearch(query: string, key: string): Promise<{ md: string; url?: string; err?: string }> {
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ query, limit: 3, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { md: "", err: `firecrawl search ${r.status}` };
+    const results = j?.data?.web || j?.data || [];
+    const arr = Array.isArray(results) ? results : [];
+    const top = arr[0] || {};
+    const md = top?.markdown || top?.description || "";
+    return { md: String(md).slice(0, 15000), url: top?.url };
+  } catch (e) {
+    return { md: "", err: `firecrawl search exception: ${e instanceof Error ? e.message : String(e)}` };
+  }
+}
+
+function deriveUrlFromEmail(email?: string | null): string | null {
+  if (!email) return null;
+  const m = String(email).match(/@([^\s>]+)/);
+  if (!m) return null;
+  const domain = m[1].toLowerCase();
+  // skip free mail providers
+  if (/^(gmail|yahoo|hotmail|outlook|aol|icloud|live|msn|comcast|protonmail|me)\./.test(domain + ".")) return null;
+  if (["gmail.com","yahoo.com","hotmail.com","outlook.com","aol.com","icloud.com","live.com","msn.com","comcast.net","protonmail.com","me.com"].includes(domain)) return null;
+  return `https://${domain}`;
 }
 
 async function aiAnalyze(payload: Record<string, unknown>, content: string, key: string) {
@@ -83,23 +135,62 @@ serve(async (req) => {
     for (const lead of leads || []) {
       try {
         let content = "";
-        if (lead.website && FIRECRAWL) {
+        let scrapedUrl: string | null = null;
+        const scrapeNotes: string[] = [];
+
+        // 1) Try direct website if present
+        const candidates: string[] = [];
+        if (lead.website) {
           const url = lead.website.startsWith("http") ? lead.website : `https://${lead.website}`;
-          content = await firecrawl(url, FIRECRAWL);
+          candidates.push(url);
         }
-        const enriched = await aiAnalyze(lead, content, LOVABLE);
-        const newScore = Number(enriched?.score);
+        // 2) Derive from email domain
+        const fromEmail = deriveUrlFromEmail(lead.email);
+        if (fromEmail && !candidates.includes(fromEmail)) candidates.push(fromEmail);
+
+        if (FIRECRAWL) {
+          for (const url of candidates) {
+            const r = await firecrawl(url, FIRECRAWL);
+            if (r.md && r.md.length > 200) { content = r.md; scrapedUrl = url; break; }
+            if (r.err) scrapeNotes.push(`${url} → ${r.err}`);
+          }
+          // 3) Fallback: search the business name
+          if (!content && lead.business_name) {
+            const q = [lead.business_name, lead.location, lead.industry].filter(Boolean).join(" ");
+            const s = await firecrawlSearch(q, FIRECRAWL);
+            if (s.md) { content = s.md; scrapedUrl = s.url || null; scrapeNotes.push(`fallback: search '${q}' → ${s.url || "no url"}`); }
+            else if (s.err) scrapeNotes.push(`search err: ${s.err}`);
+          }
+        } else {
+          scrapeNotes.push("FIRECRAWL_API_KEY not configured");
+        }
+
+        const enriched = (await aiAnalyze(lead, content, LOVABLE)) as Record<string, unknown>;
+        // Strip any score the AI tried to send — score is computed in code.
+        delete enriched.score;
+        const breakdown = computeWebsiteScore(enriched.signals as any, [], content.length);
+        enriched.score_breakdown = breakdown.parts;
+        if (breakdown.reason) enriched.score_reason_code = breakdown.reason;
+        enriched.scrape_source_url = scrapedUrl;
+        enriched.scrape_notes = scrapeNotes;
+        enriched.scraped_chars = content.length;
+
         const patch: Record<string, unknown> = {
           enrichment: enriched,
           enriched_at: new Date().toISOString(),
+          score_stage: "audit",
         };
-        if (Number.isFinite(newScore)) patch.score = Math.max(0, Math.min(100, Math.round(newScore)));
-        if (enriched?.industry_refined && !lead.industry) patch.industry = String(enriched.industry_refined).slice(0, 100);
+        // Only overwrite the existing score when we have real evidence to score on.
+        if (breakdown.total != null) patch.score = breakdown.total;
+        const indRefined = enriched.industry_refined;
+        if (indRefined && !lead.industry) patch.industry = String(indRefined).slice(0, 100);
+        if (scrapedUrl && !lead.website) patch.website = scrapedUrl;
 
         const { error: uErr } = await admin.from("rep_leads").update(patch).eq("id", lead.id);
         if (uErr) throw uErr;
-        results.push({ id: lead.id, ok: true, score: Number.isFinite(newScore) ? newScore : undefined });
+        results.push({ id: lead.id, ok: true, score: breakdown.total ?? undefined });
       } catch (e) {
+        console.error("enrich error for", lead.id, e);
         results.push({ id: lead.id, ok: false, error: e instanceof Error ? e.message : String(e) });
       }
     }

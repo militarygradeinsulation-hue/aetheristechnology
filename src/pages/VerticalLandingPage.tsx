@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { ArrowRight, Sparkles, Target, Shield, Cpu, Megaphone } from 'lucide-react';
 import { Background } from '@/components/Background';
@@ -9,8 +9,9 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, howToSchema, serviceSchema, speakableSchema } from '@/lib/schemas';
 import { VERTICAL_BY_SLUG, type VerticalUseCase } from '@/config/verticals';
+import LeakMindMap, { type MindMapNodeData } from '@/components/LeakMindMap';
 
-const CATEGORY_ICONS: Record<VerticalUseCase['category'], React.ComponentType<{ className?: string }>> = {
+const CATEGORY_ICONS: Record<VerticalUseCase['category'], typeof Target> = {
   'Strategy': Target,
   'Governance': Shield,
   'Technology': Cpu,
@@ -26,6 +27,18 @@ const VerticalLandingPage: React.FC = () => {
   if (!vertical) return <Navigate to="/industries" replace />;
 
   const path = `/${vertical.slug}`;
+
+  const mindMapNodes: MindMapNodeData[] = useMemo(
+    () =>
+      vertical.useCases.map((uc, i) => ({
+        id: `${uc.category}-${i}`,
+        label: uc.title,
+        sublabel: uc.category,
+        icon: CATEGORY_ICONS[uc.category],
+        connections: [uc.description],
+      })),
+    [vertical.useCases],
+  );
 
   const jsonLd = combineSchemas(
     serviceSchema(
@@ -99,7 +112,7 @@ const VerticalLandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* TL;DR — Speakable */}
+        {/* TL;DR, Speakable */}
         <section className="py-12 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="glass rounded-2xl p-8 border border-amber/20">
@@ -113,36 +126,31 @@ const VerticalLandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* USE CASES */}
+        {/* USE CASES — Mind map */}
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
               How Aetheris AI deploys in {vertical.industry}
             </h2>
-            <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
               Four pillars. Mapped to the workflows actually bleeding revenue and time.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {vertical.useCases.map((uc) => {
-                const Icon = CATEGORY_ICONS[uc.category];
-                return (
-                  <div key={uc.title} className="glass rounded-2xl p-6 border border-border/50 hover:border-amber/40 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-amber/10 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-6 h-6 text-amber" />
-                      </div>
-                      <div>
-                        <div className="text-xs uppercase tracking-wider text-amber font-semibold mb-1">{uc.category}</div>
-                        <h3 className="text-xl font-bold mb-2">{uc.title}</h3>
-                        <p className="text-muted-foreground">{uc.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <LeakMindMap
+              hub={{
+                eyebrow: vertical.industry,
+                title: <>Deployment<br/>Map</>,
+                subtitle: 'Four pillars',
+              }}
+              nodes={mindMapNodes}
+              accent="amber"
+              heightClass="h-[620px] md:h-[720px] lg:h-[780px]"
+            />
+            <p className="text-center text-[11px] font-mono uppercase tracking-widest text-foreground/50 mt-2">
+              Tap any circle to expand its details.
+            </p>
           </div>
         </section>
+
 
         {/* STATS / ROI */}
         <section className="py-16 px-4">
@@ -169,7 +177,7 @@ const VerticalLandingPage: React.FC = () => {
         <section className="py-16 px-4">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-display mb-3 text-center">
-              How AI transforms {vertical.industry.toLowerCase()} — 5 steps
+              How AI transforms {vertical.industry.toLowerCase()}, 5 steps
             </h2>
             <p className="text-muted-foreground text-center mb-10">
               The deployment sequence. No fluff. No "consider thinking about." Run this.

@@ -7,7 +7,9 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
-import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw } from 'lucide-react';
+import { Loader2, Database, Download, Zap, Settings, Play, RefreshCw, Ban } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { SeasonalityWidget } from './SeasonalityWidget';
 
 interface DripSettings {
   id: string;
@@ -20,6 +22,7 @@ interface DripSettings {
   scraper_frequency: string;
   scraper_target_per_run: number;
   hold_hours: number;
+  blocked_keywords: string[];
 }
 
 interface PoolStats {
@@ -42,33 +45,44 @@ export const LeadPipelinePanel: React.FC = () => {
   const [importProgress, setImportProgress] = useState<string | null>(null);
   const [importCursor, setImportCursor] = useState<string | null>(null);
   const [scrapeIndustry, setScrapeIndustry] = useState('professional services');
+  const [blockedText, setBlockedText] = useState('');
+  const [purging, setPurging] = useState(false);
 
   const refreshStats = useCallback(async () => {
     try {
-      const [tot, un, dr, cl, wo, dd] = await Promise.all([
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).is('assigned_to_code', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).is('claimed_by_code', null).not('assigned_to_code', 'is', null),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).not('claimed_by_code', 'is', null).not('status', 'in', '(won,lost,dead)'),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['won']),
-        supabase.from('rep_leads').select('id', { count: 'exact', head: true }).in('status', ['lost', 'dead']),
-      ]);
-      setStats({
-        total: tot.count ?? 0,
-        unassigned: un.count ?? 0,
-        dripped: dr.count ?? 0,
-        claimed: cl.count ?? 0,
-        worked: wo.count ?? 0,
-        dead: dd.count ?? 0,
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'lead_pool_stats' },
+        headers: { 'x-admin-token': token },
       });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (data?.stats) setStats(data.stats as PoolStats);
     } catch (e) {
       console.error('stats error', e);
+      toast({ title: 'Refresh failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     }
-  }, []);
+  }, [toast]);
 
   const refreshSettings = useCallback(async () => {
-    const { data } = await supabase.from('lead_drip_settings').select('*').maybeSingle();
-    if (data) setSettings(data as DripSettings);
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: { action: 'get_drip_settings' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const s = data?.settings as DripSettings | null;
+      if (s) {
+        setSettings(s);
+        setBlockedText((s.blocked_keywords || []).join('\n'));
+      }
+    } catch (e) {
+      console.error('settings load error', e);
+    }
   }, []);
 
   useEffect(() => {
@@ -80,17 +94,31 @@ export const LeadPipelinePanel: React.FC = () => {
     if (!settings) return;
     setLoading(true);
     try {
-      const { error } = await supabase.from('lead_drip_settings').update({
-        daily_per_rep: settings.daily_per_rep,
-        enabled: settings.enabled,
-        require_email: settings.require_email,
-        indianapolis_only: settings.indianapolis_only,
-        scraper_enabled: settings.scraper_enabled,
-        scraper_target_per_run: settings.scraper_target_per_run,
-        hold_hours: settings.hold_hours,
-        updated_at: new Date().toISOString(),
-      }).eq('id', settings.id);
-      if (error) throw error;
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired, log in again.');
+      const parsedBlocked = blockedText
+        .split(/[\n,]/)
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
+      const { data, error } = await supabase.functions.invoke('admin-data', {
+        body: {
+          action: 'update_drip_settings',
+          id: settings.id,
+          patch: {
+            daily_per_rep: settings.daily_per_rep,
+            enabled: settings.enabled,
+            require_email: settings.require_email,
+            indianapolis_only: settings.indianapolis_only,
+            scraper_enabled: settings.scraper_enabled,
+            scraper_target_per_run: settings.scraper_target_per_run,
+            hold_hours: settings.hold_hours,
+            blocked_keywords: parsedBlocked,
+          },
+        },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
       toast({ title: 'Drip settings saved' });
     } catch (e) {
       toast({ title: 'Save failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -110,7 +138,7 @@ export const LeadPipelinePanel: React.FC = () => {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
       setImportCursor(data.nextCursor);
-      setImportProgress(`Inserted ${data.inserted} · Skipped ${data.skipped} · Scanned ${data.scanned}${data.hasMore ? ' (more available — click again)' : ' (done)'}`);
+      setImportProgress(`Inserted ${data.inserted} · Skipped ${data.skipped} · Scanned ${data.scanned}${data.hasMore ? ' (more available, click again)' : ' (done)'}`);
       toast({ title: `Imported ${data.inserted} leads`, description: `Scanned ${data.scanned}, skipped ${data.skipped}` });
       refreshStats();
     } catch (e) {
@@ -150,6 +178,31 @@ export const LeadPipelinePanel: React.FC = () => {
     } finally { setDripping(false); }
   };
 
+  const runPurge = async (dryRun: boolean) => {
+    const token = getAdminToken();
+    if (!token) return toast({ title: 'Admin session expired', variant: 'destructive' });
+    setPurging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-purge-blocked-leads', {
+        body: { dryRun },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (dryRun) {
+        toast({
+          title: `Preview: ${data.matched} leads match the blocklist`,
+          description: data.matched > 0 ? `e.g. ${(data.samples || []).slice(0, 3).map((s: any) => s.business_name).filter(Boolean).join(', ')}` : 'Nothing to purge.',
+        });
+      } else {
+        toast({ title: `Deleted ${data.deleted} blocked leads` });
+        refreshStats();
+      }
+    } catch (e) {
+      toast({ title: 'Purge failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setPurging(false); }
+  };
+
   return (
     <div className="space-y-4">
       {/* Stats */}
@@ -165,7 +218,7 @@ export const LeadPipelinePanel: React.FC = () => {
           <Card key={s.label}>
             <CardContent className="p-3">
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{s.label}</p>
-              <p className={`text-2xl font-display ${s.color}`}>{s.value?.toLocaleString() ?? '—'}</p>
+              <p className={`text-2xl font-display ${s.color}`}>{s.value?.toLocaleString() ?? ', '}</p>
             </CardContent>
           </Card>
         ))}
@@ -179,7 +232,7 @@ export const LeadPipelinePanel: React.FC = () => {
               <Database className="w-5 h-5 text-amber" /> Import HubSpot Contacts
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Pulls eligible contacts from your HubSpot mirror into the rep lead pool. Runs in 5,000-row batches — click again to continue. Idempotent on contact ID.
+              Pulls eligible contacts from your HubSpot mirror into the rep lead pool. Runs in 5,000-row batches, click again to continue. Idempotent on contact ID.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -208,7 +261,23 @@ export const LeadPipelinePanel: React.FC = () => {
           <CardContent className="space-y-3">
             <div>
               <Label className="text-xs">Industry focus</Label>
-              <Input value={scrapeIndustry} onChange={e => setScrapeIndustry(e.target.value)} placeholder="e.g. healthcare, manufacturing" />
+              <div className="flex flex-wrap gap-1.5 mt-1 mb-2">
+                {['Medspas','Auto Mechanics','Dental','Roofing','HVAC','Law Firm','Real Estate','Chiropractor','Insurance','Accounting','SaaS','Restaurant'].map(label => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setScrapeIndustry(label.toLowerCase())}
+                    className={`px-2 py-0.5 rounded-full text-[11px] border transition ${
+                      scrapeIndustry.toLowerCase() === label.toLowerCase()
+                        ? 'border-amber bg-amber text-background'
+                        : 'border-border/60 bg-card/40 text-muted-foreground hover:border-amber/50 hover:text-amber'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <Input value={scrapeIndustry} onChange={e => setScrapeIndustry(e.target.value)} placeholder="e.g. medspa, auto mechanic, healthcare" />
             </div>
             <Button onClick={runScraper} disabled={scraping} className="bg-amber text-background hover:bg-amber/90 w-full">
               {scraping ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping…</> : <><Play className="w-4 h-4 mr-1" /> Run Now</>}
@@ -216,6 +285,9 @@ export const LeadPipelinePanel: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Seasonal industry intelligence — click any card to load it as a scrape target */}
+      <SeasonalityWidget onPickIndustry={(ind) => setScrapeIndustry(ind.label.split(' /')[0].toLowerCase())} />
 
       {/* Drip settings */}
       {settings && (
@@ -258,6 +330,37 @@ export const LeadPipelinePanel: React.FC = () => {
                   <Switch checked={settings[opt.key]} onCheckedChange={v => setSettings({ ...settings, [opt.key]: v })} />
                 </div>
               ))}
+            </div>
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Ban className="w-4 h-4 text-red-400" />
+                <Label className="text-sm font-semibold">Blocked keywords (schools, etc.)</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                One per line (or comma-separated). Any lead whose name, industry, website, location, contact, email, or fit-reason contains one of these will be hidden from the rep pool and skipped by the scrapers. Case-insensitive substring match.
+              </p>
+              <Textarea
+                value={blockedText}
+                onChange={e => setBlockedText(e.target.value)}
+                rows={5}
+                className="font-mono text-xs"
+                placeholder="school&#10;university&#10;college&#10;k-12&#10;academy"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => runPurge(true)} disabled={purging}>
+                  {purging ? <Loader2 className="w-3 h-3 animate-spin" /> : <Ban className="w-3 h-3 mr-1" />}
+                  Preview matches
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                  onClick={() => { if (confirm('Permanently delete all leads matching the blocklist?')) runPurge(false); }}
+                  disabled={purging}
+                >
+                  Purge matching leads
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={saveSettings} disabled={loading} className="bg-amber text-background hover:bg-amber/90">

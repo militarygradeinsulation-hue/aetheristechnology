@@ -1,66 +1,139 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2 } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords } from 'lucide-react';
+const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
+const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
-import { SocialContentGenerator } from '@/components/SocialContentGenerator';
-import { SalesScriptGenerator } from '@/components/SalesScriptGenerator';
-import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
-import { FollowUpPlanGenerator } from '@/components/FollowUpPlanGenerator';
-import { StrategicQuestionEngine } from '@/components/StrategicQuestionEngine';
-import { BrandContradictionFinder } from '@/components/BrandContradictionFinder';
-import { FrictionVocabularyAudit } from '@/components/FrictionVocabularyAudit';
-import { PlaybookCreator } from '@/components/PlaybookCreator';
-import { AllInOneGenerator } from '@/components/AllInOneGenerator';
-import { AdminLibrary } from '@/components/AdminLibrary';
-import { ContentCalendar, type ViewMode } from '@/components/admin/ContentCalendar';
-import { ContentEngine } from '@/components/admin/ContentEngine';
-import { AdminCrm } from '@/components/crm/AdminCrm';
-import { CampaignControlCenter } from '@/components/admin/CampaignControlCenter';
-import { SEOOptimizer } from '@/components/admin/SEOOptimizer';
+import { type ViewMode } from '@/components/admin/ContentCalendar';
 import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
-import { AdminAssistant } from '@/components/admin/AdminAssistant';
-import { CommissionStructurePanel } from '@/components/admin/CommissionStructurePanel';
-import { LeadPipelinePanel } from '@/components/admin/LeadPipelinePanel';
-import { AdminLeadBrowser } from '@/components/admin/AdminLeadBrowser';
-import { AdminCareersTest } from '@/components/admin/AdminCareersTest';
-import { AdminCareersPanel } from '@/components/admin/AdminCareersPanel';
-import { RepActivityPanel } from '@/components/admin/RepActivityPanel';
-import { ForecastSettingsPanel } from '@/components/admin/ForecastSettingsPanel';
-import { CompanyPortalPreview } from '@/components/admin/CompanyPortalPreview';
-import ManageRepsPanel from '@/components/admin/ManageRepsPanel';
-import { RepPlaybookPanel } from '@/components/admin/RepPlaybookPanel';
-import { AdminTrainingPanel } from '@/components/admin/AdminTrainingPanel';
-import { AdminOnboardingStudio } from '@/components/admin/AdminOnboardingStudio';
-import { AdminRepCalendarPanel } from '@/components/admin/AdminRepCalendarPanel';
-import SalesCrmPanel from '@/components/admin/SalesCrmPanel';
-
-import TeamMessageBoard from '@/components/team/TeamMessageBoard';
-import AdminNewsPanel from '@/components/admin/AdminNewsPanel';
-import { AdminForensicsSystemsPanel } from '@/components/admin/AdminForensicsSystemsPanel';
-import SharedWorkspace from '@/components/admin/SharedWorkspace';
+import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
+import ChipControlBar from '@/components/admin/ChipControlBar';
 import NotificationBell from '@/components/admin/NotificationBell';
+import { EasyModeWrapper } from '@/components/EasyModeBar';
 import CustomViewSelector from '@/components/admin/CustomViewSelector';
-import { AdminImageStudio } from '@/components/admin/AdminImageStudio';
-import { AdminDocumentsPanel } from '@/components/admin/AdminDocumentsPanel';
-import { AdminCompanyCalendarPanel } from '@/components/admin/AdminCompanyCalendarPanel';
-import { AdminMailboxesPanel } from '@/components/admin/AdminMailboxesPanel';
+import TabColorToggle from '@/components/TabColorToggle';
+import TabSizeSlider from '@/components/TabSizeSlider';
+import ClassicTabsButton from '@/components/ClassicTabsButton';
+import { useClassicTabs } from '@/lib/classicTabs';
+import { useTabSize, tabButtonStyle, tabIconSize, tabTileStyle, tabTileBodyStyle } from '@/lib/tabSize';
+import { useTabColorMode, getTabColorClasses } from '@/lib/portalTabColors';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-type ToolKey = 'allinone' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook';
+// Heavy panels — lazy-loaded so the initial admin bundle stays small and the
+// post-login navigation to /admin feels instant. Only the active tab's code
+// is fetched/parsed; other tabs load on demand when clicked.
+const SocialContentGenerator = lazy(() => import('@/components/SocialContentGenerator').then(m => ({ default: m.SocialContentGenerator })));
+const SalesScriptGenerator = lazy(() => import('@/components/SalesScriptGenerator').then(m => ({ default: m.SalesScriptGenerator })));
+const ContentCalendarGenerator = lazy(() => import('@/components/ContentCalendarGenerator').then(m => ({ default: m.ContentCalendarGenerator })));
+const PostFromSourceGenerator = lazy(() => import('@/components/PostFromSourceGenerator').then(m => ({ default: m.PostFromSourceGenerator })));
+const FollowUpPlanGenerator = lazy(() => import('@/components/FollowUpPlanGenerator').then(m => ({ default: m.FollowUpPlanGenerator })));
+const StrategicQuestionEngine = lazy(() => import('@/components/StrategicQuestionEngine').then(m => ({ default: m.StrategicQuestionEngine })));
+const BrandContradictionFinder = lazy(() => import('@/components/BrandContradictionFinder').then(m => ({ default: m.BrandContradictionFinder })));
+const FrictionVocabularyAudit = lazy(() => import('@/components/FrictionVocabularyAudit').then(m => ({ default: m.FrictionVocabularyAudit })));
+const PlaybookCreator = lazy(() => import('@/components/PlaybookCreator').then(m => ({ default: m.PlaybookCreator })));
+const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').then(m => ({ default: m.AllInOneGenerator })));
+const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
+const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
+const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
+const AuthorityPromptStudio = lazy(() => import('@/components/admin/AuthorityPromptStudio'));
+const ServicesPricing = lazy(() => import('@/components/ServicesPricing').then(m => ({ default: m.ServicesPricing })));
+const AdminCrm = lazy(() => import('@/components/crm/AdminCrm').then(m => ({ default: m.AdminCrm })));
+const CampaignControlCenter = lazy(() => import('@/components/admin/CampaignControlCenter').then(m => ({ default: m.CampaignControlCenter })));
+const SEOOptimizer = lazy(() => import('@/components/admin/SEOOptimizer').then(m => ({ default: m.SEOOptimizer })));
+const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').then(m => ({ default: m.AdminAssistant })));
+const AdminLiveTrafficBar = lazy(() => import('@/components/admin/AdminLiveTrafficBar').then(m => ({ default: m.AdminLiveTrafficBar })));
+const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
+const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
+const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
+const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
+const AdminCareersTest = lazy(() => import('@/components/admin/AdminCareersTest').then(m => ({ default: m.AdminCareersTest })));
+const AdminCareersPanel = lazy(() => import('@/components/admin/AdminCareersPanel').then(m => ({ default: m.AdminCareersPanel })));
+const AdminHiresOnboardingPanel = lazy(() => import('@/components/admin/AdminHiresOnboardingPanel'));
+const RepActivityPanel = lazy(() => import('@/components/admin/RepActivityPanel').then(m => ({ default: m.RepActivityPanel })));
+const ForecastSettingsPanel = lazy(() => import('@/components/admin/ForecastSettingsPanel').then(m => ({ default: m.ForecastSettingsPanel })));
+const CompanyPortalPreview = lazy(() => import('@/components/admin/CompanyPortalPreview').then(m => ({ default: m.CompanyPortalPreview })));
+const AdminRepLeadsView = lazy(() => import('@/components/admin/AdminRepLeadsView').then(m => ({ default: m.AdminRepLeadsView })));
+const ManageRepsPanel = lazy(() => import('@/components/admin/ManageRepsPanel'));
+const AdminLeadActionsPanel = lazy(() => import('@/components/admin/AdminLeadActionsPanel'));
+const RepPlaybookPanel = lazy(() => import('@/components/admin/RepPlaybookPanel').then(m => ({ default: m.RepPlaybookPanel })));
+const AdminTrainingPanel = lazy(() => import('@/components/admin/AdminTrainingPanel').then(m => ({ default: m.AdminTrainingPanel })));
+const AdminOnboardingStudio = lazy(() => import('@/components/admin/AdminOnboardingStudio').then(m => ({ default: m.AdminOnboardingStudio })));
+const AdminRepCalendarPanel = lazy(() => import('@/components/admin/AdminRepCalendarPanel').then(m => ({ default: m.AdminRepCalendarPanel })));
+const SalesCrmPanel = lazy(() => import('@/components/admin/SalesCrmPanel'));
+const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard'));
+const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
+const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
+const AdminChaosScanTool = lazy(() => import('@/components/admin/ChaosScanTool'));
+const AdminHeadToHeadTool = lazy(() => import('@/components/admin/HeadToHeadTool'));
+const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
+const InterviewsPanel = lazy(() => import('@/components/admin/InterviewsPanel').then(m => ({ default: m.InterviewsPanel })));
+const InterviewBriefingPanel = lazy(() => import('@/components/portal/InterviewBriefingPanel').then(m => ({ default: m.InterviewBriefingPanel })));
+const AdminImageStudio = lazy(() => import('@/components/admin/AdminImageStudio').then(m => ({ default: m.AdminImageStudio })));
+const AdminDocumentsPanel = lazy(() => import('@/components/admin/AdminDocumentsPanel').then(m => ({ default: m.AdminDocumentsPanel })));
+const AdminCompanyCalendarPanel = lazy(() => import('@/components/admin/AdminCompanyCalendarPanel').then(m => ({ default: m.AdminCompanyCalendarPanel })));
+const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompanyTaskAudit').then(m => ({ default: m.AdminCompanyTaskAudit })));
+const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
+const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
+const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
+const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
+const SocialSchedulerPanel = lazy(() => import('@/components/admin/SocialSchedulerPanel').then(m => ({ default: m.SocialSchedulerPanel })));
+const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel').then(m => ({ default: m.HubSpotBlogPanel })));
+const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
+const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
+const AiWritingDetectorCard = lazy(() => import('@/components/admin/AiWritingDetectorCard').then(m => ({ default: m.AiWritingDetectorCard })));
+const ScamCheckCard = lazy(() => import('@/components/admin/ScamCheckCard').then(m => ({ default: m.ScamCheckCard })));
+const DetectiveModeStandalone = lazy(() => import('@/components/DetectiveModeStandalone').then(m => ({ default: m.DetectiveModeStandalone })));
+const BriefingsPanel = lazy(() => import('@/components/admin/BriefingsPanel').then(m => ({ default: m.BriefingsPanel })));
+const AdminPodcastStudio = lazy(() => import('@/components/admin/AdminPodcastStudio').then(m => ({ default: m.AdminPodcastStudio })));
+const EasyModeTool = lazy(() => import('@/components/EasyModeTool').then(m => ({ default: m.EasyModeTool })));
+const IdeaRoom = lazy(() => import('@/components/portal/IdeaRoom').then(m => ({ default: m.IdeaRoom })));
+
+const PanelFallback = () => (
+  <div className="flex items-center justify-center py-12 text-muted-foreground">
+    <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading…
+  </div>
+);
+
+type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
+type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
-const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean }[] = [
-  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true },
-  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone },
-  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone },
-  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar },
-  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail },
-  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain },
-  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle },
-  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText },
-  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4–5k word strategic playbook PDF saved to your library.', icon: BookOpen },
+// Category color tokens — uses theme tokens, not raw colors
+const CATEGORY_STYLE: Record<ToolCategory, { label: string; ring: string; bg: string; iconBg: string; iconColor: string; chipBg: string; chipText: string }> = {
+  core:         { label: 'Core',         ring: 'border-amber/50 hover:border-amber',                bg: 'bg-amber/5',         iconBg: 'bg-amber/15 group-hover:bg-amber/25',         iconColor: 'text-amber',         chipBg: 'bg-amber/15',         chipText: 'text-amber' },
+  content:      { label: 'Content',      ring: 'border-sky-500/40 hover:border-sky-400',            bg: 'bg-sky-500/5',       iconBg: 'bg-sky-500/15 group-hover:bg-sky-500/25',     iconColor: 'text-sky-400',       chipBg: 'bg-sky-500/15',       chipText: 'text-sky-400' },
+  sales:        { label: 'Sales',        ring: 'border-emerald-500/40 hover:border-emerald-400',    bg: 'bg-emerald-500/5',   iconBg: 'bg-emerald-500/15 group-hover:bg-emerald-500/25', iconColor: 'text-emerald-400', chipBg: 'bg-emerald-500/15', chipText: 'text-emerald-400' },
+  forensics:    { label: 'Forensics',    ring: 'border-crimson/40 hover:border-crimson',            bg: 'bg-crimson/5',       iconBg: 'bg-crimson/15 group-hover:bg-crimson/25',     iconColor: 'text-crimson',       chipBg: 'bg-crimson/15',       chipText: 'text-crimson' },
+  integrations: { label: 'Integrations', ring: 'border-violet-500/40 hover:border-violet-400',      bg: 'bg-violet-500/5',    iconBg: 'bg-violet-500/15 group-hover:bg-violet-500/25', iconColor: 'text-violet-400', chipBg: 'bg-violet-500/15', chipText: 'text-violet-400' },
+  hr:           { label: 'People',       ring: 'border-orange-500/40 hover:border-orange-400',      bg: 'bg-orange-500/5',    iconBg: 'bg-orange-500/15 group-hover:bg-orange-500/25', iconColor: 'text-orange-400', chipBg: 'bg-orange-500/15', chipText: 'text-orange-400' },
+};
+
+const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: React.ElementType; featured?: boolean; category: ToolCategory }[] = [
+  { key: 'golden', label: 'Golden Report — One URL, Full Forensic Case File', description: 'Drop in one URL. Aetheris runs the full stack — site crawl, brand contradictions, friction, SEO, pipeline signals — then synthesizes a 14-chapter Golden Report in the forensic case-file style. Verdicts, dollar leaks, evidence, and a Smart PDF you can ask questions of.', icon: ScrollText, featured: true, category: 'forensics' },
+  { key: 'reciprocation', label: 'Reciprocation Doctrine Engine', description: "Convert Cialdini's Rule of Reciprocation into 6 editable operator tactics — each with Mauss / Regan / Mexico-Ethiopia citations, ethical-use vs manipulator-abuse warnings, and a built-in reader defense checklist. Instant Markdown/JSON download.", icon: Handshake, featured: true, category: 'sales' },
+  { key: 'chaosscan', label: 'Chaos Scan', description: 'Scan any URL and render the business as an interactive chaos-theory mind map. Symptoms, operator anchors, cross-connections, and the single source of chaos — with a "close the source" toggle to visualize the fix.', icon: ScanSearch, featured: true, category: 'forensics' },
+  { key: 'headtohead', label: 'Head-to-Head: URL vs URL', description: 'Drop your URL and a rival\'s. Get a scored, evidence-cited verdict on who\'s winning positioning, offer, proof, brand, CTAs, SEO, trust, and differentiation — plus silent monthly losses and an ordered action plan.', icon: Swords, featured: true, category: 'forensics' },
+  { key: 'allinone', label: 'All-In-One: Run Every Tool', description: 'Drop in a website URL and run every tool at once. Each result auto-saves to your library.', icon: Sparkles, featured: true, category: 'core' },
+  { key: 'scanner', label: 'Website Scanner', description: 'Scan any website for SEO gaps, weak CTAs, messaging issues, and revenue leaks.', icon: Search, category: 'forensics' },
+  { key: 'social', label: 'Social Content Generator', description: 'LinkedIn, Facebook, and ad hooks scraped from any URL.', icon: Megaphone, category: 'content' },
+  { key: 'sales', label: 'Sales Script Generator', description: 'Call scripts, objection handlers, follow-up templates.', icon: Phone, category: 'sales' },
+  { key: 'calendar', label: '30-Day Content Calendar', description: '30 days of platform-specific posts with hooks and timing.', icon: Calendar, category: 'content' },
+  { key: 'followup', label: 'Follow-Up System Plan', description: '14-day multi-channel cadence with templates.', icon: Mail, category: 'sales' },
+  { key: 'questions', label: 'Strategic Question Engine', description: 'Critical questions across 8 business categories.', icon: Brain, category: 'sales' },
+  { key: 'brand', label: 'Brand Contradiction Finder', description: 'Find gaps between brand promise and execution.', icon: AlertTriangle, category: 'forensics' },
+  { key: 'friction', label: 'Friction Vocabulary Audit', description: 'Flag weak copy, suggest stronger replacements.', icon: ScanText, category: 'forensics' },
+  { key: 'ai_detect', label: 'AI Writing Detector', description: 'Compare up to 5 writing samples (text or screenshots) for AI authorship, same-author analysis, and forensic clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'scam_check', label: 'Scam / Legit Forensics', description: 'Investigate any website + business for scam signals. Pulls live RDAP domain age, redirect chain, SSL, and page copy, then returns a forensic verdict with cited clues.', icon: ScanSearch, category: 'forensics' },
+  { key: 'detective', label: 'Detective Mode', description: 'Drop a website + business. Auto-runs scan, RDAP, scrape, enrichment. Walks the detective monologue, picks the best angle, writes the opener.', icon: FileSearch, category: 'forensics' },
+  { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4-5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
+  { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
+  { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
+  { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
+  { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
+  { key: 'podcast', label: 'Podcast Studio', description: 'Generate short-form podcast episodes in your ElevenLabs voice with auto-generated cover art. Topic ideas, paste/upload source, rewrite, save.', icon: Mic, featured: true, category: 'content' },
 ];
 
 interface ContactSubmission {
@@ -120,7 +193,7 @@ function RepPerformancePanel() {
             {repCodes.map(r => (
               <tr key={r.id} className="border-b border-border/50">
                 <td className="py-2 pr-4 font-mono text-amber">{r.code}</td>
-                <td className="py-2 pr-4 text-foreground">{r.rep_name || '—'}</td>
+                <td className="py-2 pr-4 text-foreground">{r.rep_name || ', '}</td>
                 <td className="py-2 pr-4 text-muted-foreground">{(r.commission_rate * 100).toFixed(0)}%</td>
                 <td className="py-2 pr-4 text-foreground font-medium">{fmt(r.total_sales_cents)}</td>
                 <td className="py-2 pr-4 text-amber font-medium">{fmt(r.total_commission_cents)}</td>
@@ -138,27 +211,51 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const { mode: tabColorMode } = useTabColorMode();
+  const { scale: tabScale } = useTabSize();
+  const { classic: classicTabs } = useClassicTabs();
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'imagestudio' | 'documents' | 'careers' | 'mailboxes'>('workspace');
+  const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads'>(() => {
+    try {
+      const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+      if (saved) return saved as any;
+    } catch {}
+    return 'workspace';
+  });
+  const setActiveTab: typeof setActiveTabState = ((value: any) => {
+    setActiveTabState(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      try { localStorage.setItem(ACTIVE_TAB_KEY, String(next)); } catch {}
+      return next;
+    });
+  }) as any;
   const ALL_TAB_DEFS: { key: string; label: string; icon: React.ElementType }[] = [
     { key: 'insights', label: 'AI Insights', icon: Brain },
-    { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
-    { key: 'careers', label: 'Careers', icon: Briefcase },
     { key: 'events', label: 'Campaign', icon: Megaphone },
+    { key: 'careers', label: 'Careers', icon: Briefcase },
+    { key: 'hires', label: 'Hires & Onboarding', icon: UserPlus },
+    { key: 'catalog', label: 'Catalog & Pricing', icon: ShoppingCart },
     { key: 'commissions', label: 'Commissions', icon: BarChart },
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
+    { key: 'liveevents', label: 'Live Events & Webinars', icon: CalendarDays },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
     { key: 'documents', label: 'Documents', icon: FileBox },
-    { key: 'systems', label: 'Forensics', icon: FlaskConical },
+    { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
-    { key: 'imagestudio', label: 'Image Studio', icon: ImageIcon },
+    { key: 'systems', label: 'Forensics', icon: FlaskConical },
+    
+    { key: 'mediastudio', label: 'Media Studio', icon: ImageIcon },
+    { key: 'briefings', label: 'Briefings', icon: BookMarked },
+    { key: 'hiring', label: 'Hiring', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
     { key: 'library', label: 'Library', icon: Library },
-    { key: 'onboarding', label: 'New-Rep Onboarding', icon: GraduationCap },
+    { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
+    { key: 'onboarding', label: 'Aetheris Academy', icon: GraduationCap },
     { key: 'news', label: 'News', icon: Newspaper },
     { key: 'outlook', label: 'Outlook Sync', icon: Send },
     { key: 'overview', label: 'Overview', icon: BarChart3 },
@@ -170,14 +267,23 @@ const AdminDashboard: React.FC = () => {
     { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'training', label: 'Training', icon: GraduationCap },
     { key: 'workspace', label: 'Workspace', icon: Handshake },
+    { key: 'ideas', label: 'Idea Room', icon: Lightbulb },
+    { key: 'toolleads', label: 'Tool Leads', icon: Wrench },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const merged = [...parsed];
+          for (const k of ALWAYS_INCLUDE_NEW) {
+            if (!merged.includes(k) && ALL_TAB_DEFS.some(t => t.key === k)) merged.push(k);
+          }
+          return merged;
+        }
       }
     } catch {}
     return ALL_TAB_DEFS.map(t => t.key);
@@ -209,6 +315,60 @@ const AdminDashboard: React.FC = () => {
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [tabSearch, setTabSearch] = useState('');
   const [tabSearchOpen, setTabSearchOpen] = useState(false);
+  const TABS_COLLAPSED_KEY = 'admin.tabsCollapsed.v1';
+  const [tabsCollapsed, setTabsCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem(TABS_COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const toggleTabsCollapsed = useCallback(() => {
+    setTabsCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem(TABS_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* noop */ }
+      return next;
+    });
+  }, []);
+
+  const EXPANDED_CATS_KEY = 'admin.expandedTabCats.v1';
+  const COLLAPSED_CATS_KEY = 'admin.collapsedTabCats.v1';
+  const [expandedCats, setExpandedCats] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(EXPANDED_CATS_KEY);
+      if (raw) return new Set(JSON.parse(raw));
+    } catch { /* noop */ }
+    return new Set<string>();
+  });
+  const [collapsedCats, setCollapsedCats] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSED_CATS_KEY);
+      if (raw) return new Set(JSON.parse(raw));
+    } catch { /* noop */ }
+    return new Set<string>();
+  });
+  const toggleCategory = useCallback((name: string, currentlyOpen: boolean) => {
+    if (currentlyOpen) {
+      setExpandedCats(prev => {
+        const next = new Set(prev); next.delete(name);
+        try { localStorage.setItem(EXPANDED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+      setCollapsedCats(prev => {
+        const next = new Set(prev); next.add(name);
+        try { localStorage.setItem(COLLAPSED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+    } else {
+      setCollapsedCats(prev => {
+        const next = new Set(prev); next.delete(name);
+        try { localStorage.setItem(COLLAPSED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+      setExpandedCats(prev => {
+        const next = new Set(prev); next.add(name);
+        try { localStorage.setItem(EXPANDED_CATS_KEY, JSON.stringify([...next])); } catch { /* noop */ }
+        return next;
+      });
+    }
+  }, []);
+
   const tabSearchResults = tabSearch.trim()
     ? ALL_TAB_DEFS.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
     : [];
@@ -405,24 +565,67 @@ const AdminDashboard: React.FC = () => {
   const renderTabBody = (key: string): React.ReactNode => {
     switch (key) {
       case 'workspace': return <SharedWorkspace me="admin" onUnreadChange={setUnreadNotifs} />;
-      case 'imagestudio': return <AdminImageStudio />;
+      case 'hiring': return (
+        <Tabs defaultValue="interviews" className="w-full">
+          <TabsList>
+            <TabsTrigger value="interviews"><CalendarClock className="w-4 h-4 mr-1.5" />Interviews</TabsTrigger>
+            <TabsTrigger value="briefing"><BookOpen className="w-4 h-4 mr-1.5" />Interview Briefing</TabsTrigger>
+          </TabsList>
+          <TabsContent value="interviews" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewsPanel me="admin" /></Suspense></TabsContent>
+          <TabsContent value="briefing" className="mt-4"><Suspense fallback={<PanelFallback />}><InterviewBriefingPanel /></Suspense></TabsContent>
+        </Tabs>
+      );
+      case 'briefings': return <BriefingsPanel />;
+      case 'mediastudio': return (
+        <Tabs defaultValue="video" className="w-full">
+          <TabsList>
+            <TabsTrigger value="video"><Film className="w-4 h-4 mr-1.5" />Video Studio</TabsTrigger>
+            <TabsTrigger value="image"><ImageIcon className="w-4 h-4 mr-1.5" />Image Studio</TabsTrigger>
+          </TabsList>
+          <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
+          <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
+        </Tabs>
+      );
       case 'documents': return <AdminDocumentsPanel />;
+      case 'easymode': return <EasyModeTool />;
+      case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
+      
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
-      case 'engine': return <ContentEngine />;
+      case 'engine': return (
+        <Tabs defaultValue="engine" className="w-full">
+          <TabsList>
+            <TabsTrigger value="engine"><Zap className="w-4 h-4 mr-1.5" />Content Engine</TabsTrigger>
+            <TabsTrigger value="authority"><Sparkles className="w-4 h-4 mr-1.5" />AI Authority Prompts</TabsTrigger>
+          </TabsList>
+          <TabsContent value="engine" className="mt-4"><Suspense fallback={<PanelFallback />}><ContentEngine /></Suspense></TabsContent>
+          <TabsContent value="authority" className="mt-4">
+            <Suspense fallback={<PanelFallback />}><AuthorityPromptStudio /></Suspense>
+          </TabsContent>
+        </Tabs>
+      );
       case 'crm': return <AdminCrm />;
+      
       case 'commissions': return <CommissionStructurePanel />;
+      case 'catalog': return <ServicesPricing />;
+      case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
       case 'portal': return <CompanyPortalPreview />;
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
       case 'onboarding': return <AdminOnboardingStudio />;
       case 'calendars': return <AdminRepCalendarPanel />;
-      case 'companycal': return <AdminCompanyCalendarPanel />;
+      case 'companycal': return (
+        <div className="space-y-6">
+          <AdminCompanyCalendarPanel />
+          <AdminCompanyTaskAudit />
+        </div>
+      );
       case 'sales': return <SalesCrmPanel />;
       case 'team': return <TeamMessageBoard isAdmin authorName="Admin" />;
       case 'news': return <AdminNewsPanel />;
       case 'careers': return <AdminCareersPanel />;
+      case 'hires': return <AdminHiresOnboardingPanel />;
       case 'mailboxes': return <AdminMailboxesPanel />;
       case 'seo': return <SEOOptimizer />;
       case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
@@ -431,12 +634,14 @@ const AdminDashboard: React.FC = () => {
       case 'insights': return <InsightsBody recommendations={recommendations} loadingInsights={loadingInsights} fetchInsights={fetchInsights} />;
       case 'tools': return <ToolsBody activeTool={activeTool} setActiveTool={setActiveTool} />;
       case 'outlook': return <OutlookBody syncingOutlook={syncingOutlook} syncResults={syncResults} postingSchedule={postingSchedule} handleOutlookSync={handleOutlookSync} />;
+      case 'toolleads': return <Suspense fallback={<PanelFallback />}><ToolLeadsPanel /></Suspense>;
       default: return null;
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
+      <ChipControlBar />
       <header className="border-b border-border px-4 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -497,6 +702,29 @@ const AdminDashboard: React.FC = () => {
                 <Database className="w-4 h-4 mr-1 text-primary" /> HubSpot Hub
               </Button>
             </Link>
+            <Link to="/extension">
+              <Button variant="outline" size="sm" title="Download the Aetheris Chrome extension">
+                <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> Extension
+              </Button>
+            </Link>
+            <Link to="/mobile-app">
+              <Button variant="outline" size="sm" title="Download the Aetheris mobile app">
+                <ArrowDownToLine className="w-4 h-4 mr-1 text-amber" /> App
+              </Button>
+            </Link>
+            <Link to="/test-portal">
+              <Button variant="outline" size="sm" title="Open the demo portal (sandbox clone of the rep portal)" className="border-amber-500/50 text-amber-300 hover:bg-amber-500/10">
+                <FlaskConical className="w-4 h-4 mr-1 text-amber" /> Demo Portal
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.dispatchEvent(new Event('workbench:toggle'))}
+              title="Open Workbench"
+            >
+              <Wrench className="w-4 h-4 mr-1 text-amber" /> Workbench
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </Button>
@@ -507,7 +735,20 @@ const AdminDashboard: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+        <OperatorIdentityBar />
+        <Suspense fallback={null}><AdminLiveTrafficBar /></Suspense>
+        <Link to="/aetheris-ai" className="block w-full rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:border-amber-500 transition p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em] text-amber-400 font-mono">Premium AI · New</div>
+              <div className="text-lg font-semibold text-zinc-100 mt-1">Open Aetheris Nexus</div>
+              <div className="text-sm text-zinc-400">ChatGPT-class operator with web search, company scans, image gen, and document analysis.</div>
+            </div>
+            <div className="text-amber-400 text-2xl">→</div>
+          </div>
+        </Link>
+
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <CustomViewSelector
@@ -519,6 +760,9 @@ const AdminDashboard: React.FC = () => {
             widgetSizes={widgetSizes}
             onWidgetSizeChange={setWidgetSize}
           />
+          <TabColorToggle />
+          <TabSizeSlider />
+          <ClassicTabsButton />
           <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
             {visibleTabs.length} / {ALL_TAB_DEFS.length} · {layout === 'widgets' ? 'Widget board' : 'Tab view'}
           </span>
@@ -526,32 +770,152 @@ const AdminDashboard: React.FC = () => {
 
         {layout === 'tabs' ? (
           <>
-            <div className="flex gap-1.5 mb-8 flex-wrap">
-              {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
-                const active = activeTab === tab;
-                return (
-                  <Button
-                    key={tab}
-                    id={`admin-tab-btn-${tab}`}
-                    variant={active ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      setActiveTab(tab as typeof activeTab);
-                      ensureTabData(tab);
-                      if (tab !== 'tools') setActiveTool(null);
-                    }}
-                    className={`h-8 ${active ? 'bg-amber text-background hover:bg-amber/90 border-amber' : 'border-border hover:border-amber/50 hover:text-amber'}`}
-                  >
-                    <Icon className="w-3.5 h-3.5 mr-1.5" />
-                    <span className="text-xs font-medium">{label}</span>
-                  </Button>
-                );
-              })}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={toggleTabsCollapsed}
+                className="text-xs text-muted-foreground hover:text-amber gap-1.5"
+                title={tabsCollapsed ? 'Show tabs bar' : 'Hide tabs bar for more screen space'}
+              >
+                {tabsCollapsed
+                  ? <><Maximize2 className="w-3.5 h-3.5" /> Show tabs</>
+                  : <><Minimize2 className="w-3.5 h-3.5" /> Hide tabs</>}
+              </Button>
+              {tabsCollapsed && (
+                <span className="text-xs font-mono uppercase tracking-wide text-amber/80 truncate">
+                  {ALL_TAB_DEFS.find(t => t.key === activeTab)?.label || activeTab}
+                </span>
+              )}
             </div>
 
-            {renderTabBody(activeTab)}
+            {!tabsCollapsed && classicTabs && (
+              <div className="flex flex-wrap gap-1.5 mb-8" style={tabTileBodyStyle(tabScale)}>
+                {ALL_TAB_DEFS
+                  .filter(t => visibleTabs.includes(t.key))
+                  .map(({ key: tab, label, icon: Icon }) => {
+                    const active = activeTab === tab;
+                    return (
+                      <Button
+                        key={tab}
+                        id={`admin-tab-btn-${tab}`}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(tab as typeof activeTab);
+                          ensureTabData(tab);
+                          if (tab !== 'tools') setActiveTool(null);
+                        }}
+                        variant={active ? 'default' : 'ghost'}
+                        size="sm"
+                        style={tabButtonStyle(tabScale)}
+                        className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
+                      >
+                        <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                        <span>{label}</span>
+                      </Button>
+                    );
+                  })}
+              </div>
+            )}
+
+            {!tabsCollapsed && !classicTabs && (() => {
+              const CATEGORIES: { name: string; keys: string[] }[] = [
+                { name: 'Overview', keys: ['overview', 'insights', 'events'] },
+                { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
+                { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
+                { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
+                { name: 'Ops', keys: ['calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
+                { name: 'Forensics & Tools', keys: ['systems', 'easymode', 'briefings', 'tools'] },
+                { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
+              ];
+              const visibleSet = new Set(visibleTabs);
+              const categorized = new Set(CATEGORIES.flatMap(c => c.keys));
+              const uncategorized = ALL_TAB_DEFS
+                .filter(t => visibleSet.has(t.key) && !categorized.has(t.key))
+                .map(t => t.key);
+              const groups = [
+                ...CATEGORIES.map(c => ({ name: c.name, keys: c.keys.filter(k => visibleSet.has(k)) })),
+                ...(uncategorized.length ? [{ name: 'Other', keys: uncategorized }] : []),
+              ].filter(g => g.keys.length > 0);
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-8">
+                  {groups.map(group => {
+                    const containsActive = group.keys.includes(activeTab);
+                    const isOpen = collapsedCats.has(group.name)
+                      ? false
+                      : (expandedCats.has(group.name) || containsActive);
+                    return (
+                      <section
+                        key={group.name}
+                        className={`rounded-lg border bg-card/30 backdrop-blur-sm transition-colors ${
+                          containsActive ? 'border-amber/40' : 'border-border/40 hover:border-border/70'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleCategory(group.name, isOpen)}
+                          className="w-full flex items-center gap-2 text-left"
+                          style={tabTileStyle(tabScale)}
+                          aria-expanded={isOpen}
+                        >
+                          <ChevronDown
+                            style={{ width: tabIconSize(tabScale) * 0.9, height: tabIconSize(tabScale) * 0.9 }}
+                            className={`text-muted-foreground transition-transform ${isOpen ? '' : '-rotate-90'}`}
+                          />
+                          <span className="uppercase tracking-[0.2em] font-mono text-amber/80" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
+                            {group.name}
+                          </span>
+                          <span className="h-px flex-1 bg-border/40" aria-hidden />
+                          <span className="font-mono text-muted-foreground" style={{ fontSize: `${(10 * tabScale).toFixed(2)}px` }}>
+                            {group.keys.length}
+                          </span>
+                          {containsActive && (
+                            <span className="font-mono uppercase tracking-wider text-amber/90" style={{ fontSize: `${(9 * tabScale).toFixed(2)}px` }}>●</span>
+                          )}
+                        </button>
+                        {isOpen && (
+                          <div className="flex flex-wrap pt-0.5" style={tabTileBodyStyle(tabScale)}>
+                            {group.keys
+                              .map(k => ALL_TAB_DEFS.find(t => t.key === k))
+                              .filter((t): t is { key: string; label: string; icon: React.ElementType } => !!t)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map(({ key: tab, label, icon: Icon }) => {
+                                const active = activeTab === tab;
+                                return (
+                                  <Button
+                                    key={tab}
+                                    id={`admin-tab-btn-${tab}`}
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveTab(tab as typeof activeTab);
+                                      ensureTabData(tab);
+                                      if (tab !== 'tools') setActiveTool(null);
+                                    }}
+                                    variant={active ? 'default' : 'ghost'}
+                                    size="sm"
+                                    style={tabButtonStyle(tabScale)}
+                                    className={`gap-1.5 whitespace-nowrap font-medium h-8 px-2.5 ${getTabColorClasses(tab, active, tabColorMode)}`}
+                                  >
+                                    <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} />
+                                    <span>{label}</span>
+                                  </Button>
+                                );
+                              })}
+                          </div>
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            <EasyModeWrapper tabKey={activeTab}><Suspense fallback={<PanelFallback />}>{renderTabBody(activeTab)}</Suspense></EasyModeWrapper>
           </>
         ) : (
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {ALL_TAB_DEFS.filter(t => visibleTabs.includes(t.key)).map(({ key: tab, label, icon: Icon }) => {
               const size = widgetSizes[tab] || 2;
@@ -565,10 +929,10 @@ const AdminDashboard: React.FC = () => {
                   key={tab}
                   className={`${colSpan} glass rounded-xl border border-border overflow-hidden flex flex-col`}
                 >
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-secondary/30">
+                  <div className="flex items-center justify-between gap-2 border-b border-border bg-secondary/30" style={tabTileStyle(tabScale)}>
                     <div className="flex items-center gap-2 min-w-0">
-                      <Icon className="w-4 h-4 text-amber shrink-0" />
-                      <span className="font-display font-bold text-sm text-foreground truncate">{label}</span>
+                      <Icon style={{ width: tabIconSize(tabScale), height: tabIconSize(tabScale) }} className="text-amber shrink-0" />
+                      <span className="font-display font-bold text-foreground truncate" style={{ fontSize: `${(14 * tabScale).toFixed(2)}px` }}>{label}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       {([1, 2, 3, 4] as const).map(s => (
@@ -597,7 +961,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-3 max-h-[600px] overflow-y-auto">
-                    {renderTabBody(tab)}
+                    <Suspense fallback={<PanelFallback />}>{renderTabBody(tab)}</Suspense>
                   </div>
                 </div>
               );
@@ -605,7 +969,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-      <AdminAssistant />
+      <Suspense fallback={null}><AdminAssistant /></Suspense>
     </div>
   );
 };
@@ -671,6 +1035,7 @@ const OverviewBody: React.FC<{
       </div>
     )}
     <ManageRepsPanel scope="admin" />
+    <AdminLeadActionsPanel />
     <RepPerformancePanel />
     <LeadPipelinePanel />
     <AdminLeadBrowser />
@@ -685,6 +1050,7 @@ const SubmissionsBody: React.FC<{
   deleteSubmission: (id: string) => void;
 }> = ({ submissions, toggleRead, deleteSubmission }) => (
   <div className="space-y-6">
+    <AdminRepLeadsView />
     <AdminLeadBrowser />
     <div className="space-y-4">
       <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
@@ -807,40 +1173,123 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         <div className="flex items-center gap-2 mb-2">
           <Wrench className="w-6 h-6 text-amber" />
           <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
-          <span className="text-xs text-muted-foreground ml-2">Full access — no paywall</span>
+          <span className="text-xs text-muted-foreground ml-2">Full access, no paywall</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {(Object.keys(CATEGORY_STYLE) as ToolCategory[]).map((cat) => {
+            const s = CATEGORY_STYLE[cat];
+            const count = ADMIN_TOOLS.filter(t => t.category === cat).length;
+            return (
+              <span key={cat} className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-sm border ${s.chipBg} ${s.chipText} border-current/30`}>
+                {s.label} <span className="opacity-60 ml-1">{count}</span>
+              </span>
+            );
+          })}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ADMIN_TOOLS.map(tool => (
-            <button key={tool.key} onClick={() => setActiveTool(tool.key)}
-              className={`glass p-6 rounded-xl text-left border transition-colors group ${
-                tool.featured ? 'border-amber/60 hover:border-amber bg-amber/5 sm:col-span-2 lg:col-span-3' : 'border-border hover:border-amber/40'
-              }`}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${tool.featured ? 'bg-amber/20 group-hover:bg-amber/30' : 'bg-amber/10 group-hover:bg-amber/20'}`}>
-                  <tool.icon className="w-5 h-5 text-amber" />
+          {ADMIN_TOOLS.map(tool => {
+            const s = CATEGORY_STYLE[tool.category];
+            return (
+              <button key={tool.key} onClick={() => setActiveTool(tool.key)}
+                className={`glass p-6 rounded-xl text-left border transition-colors group ${s.ring} ${s.bg} ${
+                  tool.featured ? 'sm:col-span-2 lg:col-span-3' : ''
+                }`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${s.iconBg}`}>
+                    <tool.icon className={`w-5 h-5 ${s.iconColor}`} />
+                  </div>
+                  <h3 className="font-bold text-foreground font-display text-base flex-1">{tool.label}</h3>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-sm ${s.chipBg} ${s.chipText}`}>
+                    {s.label}
+                  </span>
+                  {tool.featured && (<span className="text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
                 </div>
-                <h3 className="font-bold text-foreground font-display text-base">{tool.label}</h3>
-                {tool.featured && (<span className="ml-auto text-[10px] font-bold uppercase text-background bg-amber px-2 py-0.5 rounded">New</span>)}
-              </div>
-              <p className="text-sm text-muted-foreground">{tool.description}</p>
-            </button>
-          ))}
+                <p className="text-sm text-muted-foreground">{tool.description}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        <div id="tool-history" className="pt-8 mt-4 border-t border-border scroll-mt-24">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-amber" />
+            <h2 className="text-xl font-bold text-foreground font-display">Tool History</h2>
+            <span className="text-xs text-muted-foreground ml-2">Every saved run, view, download as PDF, or delete</span>
+          </div>
+          <AdminLibrary />
         </div>
       </>
     ) : (
       <>
-        <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
-        </Button>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <Button variant="ghost" size="sm" onClick={() => setActiveTool(null)}>
+            <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tools
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setActiveTool(null);
+              setTimeout(() => {
+                document.getElementById('tool-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 50);
+            }}
+          >
+            <Clock className="w-4 h-4 mr-1" /> Tool History
+          </Button>
+        </div>
+        {activeTool === 'golden' && (
+          <Suspense fallback={<PanelFallback />}>
+            <ForensicScanAllPanel />
+          </Suspense>
+        )}
+        {activeTool === 'reciprocation' && (
+          <Suspense fallback={<PanelFallback />}>
+            <ReciprocationDoctrineTool />
+          </Suspense>
+        )}
+        {activeTool === 'chaosscan' && (
+          <Suspense fallback={<PanelFallback />}>
+            <AdminChaosScanTool />
+          </Suspense>
+        )}
+        {activeTool === 'headtohead' && (
+          <Suspense fallback={<PanelFallback />}>
+            <AdminHeadToHeadTool />
+          </Suspense>
+        )}
         {activeTool === 'allinone' && <AllInOneGenerator />}
+        {activeTool === 'scanner' && <WebsiteScanner onContactClick={() => {}} hideHeader staffUnlock />}
         {activeTool === 'social' && <SocialContentGenerator adminMode />}
         {activeTool === 'sales' && <SalesScriptGenerator adminMode />}
-        {activeTool === 'calendar' && <ContentCalendarGenerator adminMode />}
+        {activeTool === 'calendar' && (
+          <div className="space-y-12">
+            <ContentCalendarGenerator adminMode />
+            <PostFromSourceGenerator adminMode />
+          </div>
+        )}
         {activeTool === 'followup' && <FollowUpPlanGenerator adminMode />}
         {activeTool === 'questions' && <StrategicQuestionEngine adminMode />}
         {activeTool === 'brand' && <BrandContradictionFinder adminMode />}
         {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
         {activeTool === 'playbook' && <PlaybookCreator />}
+        {activeTool === 'social_scheduler' && <SocialSchedulerPanel />}
+        {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
+        {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
+        {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
+        {activeTool === 'ai_detect' && <AiWritingDetectorCard />}
+        {activeTool === 'scam_check' && <ScamCheckCard />}
+        {activeTool === 'detective' && <DetectiveModeStandalone />}
+        {activeTool === 'podcast' && <AdminPodcastStudio />}
+
+        <div className="pt-8 mt-4 border-t border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-amber" />
+            <h3 className="text-lg font-bold text-foreground font-display">Recent Runs</h3>
+            <span className="text-xs text-muted-foreground ml-2">All saved tool runs, filter by type</span>
+          </div>
+          <AdminLibrary />
+        </div>
       </>
     )}
   </div>

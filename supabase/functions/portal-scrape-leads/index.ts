@@ -4,10 +4,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
+import { computeScrapeScore } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface ScoredLead {
@@ -18,7 +20,9 @@ interface ScoredLead {
   website?: string;
   industry?: string;
   location?: string;
-  score: number;
+  // score is computed in code from observable signals — NOT returned by the AI.
+  score?: number;
+  score_breakdown?: Array<{ key: string; label: string; weight: number; earned: number }>;
   why_fit: string;
 }
 
@@ -52,7 +56,7 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
       messages: [
         {
           role: "system",
-          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. We DON'T sell to: enterprises, freelancers, very small (<10 employees), or non-business entities. Score 0-100 based on ICP fit.`,
+          content: `You are a B2B prospecting analyst for Aetheris Technology — a Chaos Theory Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, legacy shops, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. HARD EXCLUSIONS: never return enterprises or companies with estimated annual revenue over $100M, publicly traded Fortune 1000 companies, large national chains (>500 employees), freelancers/solopreneurs, very small shops (<10 employees), or non-business entities (gov, schools, churches, non-profits). If you cannot confidently rule out >$100M revenue based on the search context, skip the lead. Score 0-100 based on ICP fit.`,
         },
         {
           role: "user",
@@ -60,14 +64,14 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
 
 CRITICAL: For every lead you MUST identify the company's official website URL (their primary domain — e.g. "acmeco.com", not a LinkedIn/Facebook/directory page). If the search result is a profile (LinkedIn, ZoomInfo, Yelp, BBB, etc.), infer the company they work at and return that company's real homepage URL. Never leave website blank — if you truly cannot determine it, skip the lead entirely. Prefer https:// root domains over deep links.
 
-For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), score (0-100), why_fit (one sentence). Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
+For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), why_fit (one sentence that cites a SIZE signal — employee count, revenue, multi-location — AND a PAIN signal — manual process, missing automation, hiring strain, scaling pressure — whenever the source supports it). DO NOT return a score; the score is computed in code from observable signals. Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
         },
       ],
       tools: [{
         type: "function",
         function: {
           name: "return_leads",
-          description: "Return scored prospect leads",
+          description: "Return ICP-matching prospect leads (score is computed in code, do not include it).",
           parameters: {
             type: "object",
             properties: {
@@ -83,10 +87,9 @@ For each lead return: business_name, website (REQUIRED), industry, location, con
                     contact_name: { type: "string" },
                     email: { type: "string" },
                     phone: { type: "string" },
-                    score: { type: "number" },
                     why_fit: { type: "string" },
                   },
-                  required: ["business_name", "website", "score", "why_fit"],
+                  required: ["business_name", "website", "why_fit"],
                 },
               },
             },
@@ -147,36 +150,74 @@ serve(async (req) => {
 
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
+    // Enrich each lead by scraping its site for real contact info (person email
+    // first, info@/contact@ fallback, plus phone + likely contact name).
+    const enrich = async (l: ScoredLead): Promise<ScoredLead> => {
+      if (!l.website) return l;
+      const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+      if (hasPerson && l.phone) return l;
+      try {
+        const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+        return {
+          ...l,
+          email: l.email || found.email,
+          phone: l.phone || found.phone,
+          contact_name: l.contact_name || found.contact_name,
+        };
+      } catch { return l; }
+    };
+    const enriched: ScoredLead[] = [];
+    const CONC = 4;
+    for (let i = 0; i < leads.length; i += CONC) {
+      const chunk = await Promise.all(leads.slice(i, i + CONC).map(enrich));
+      enriched.push(...chunk);
+    }
+
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
     let inserted = 0;
-    if (leads.length > 0) {
+    if (enriched.length > 0) {
       const now = new Date();
       const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const rows = leads.map((l) => ({
-        business_name: l.business_name?.slice(0, 200) || null,
-        contact_name: l.contact_name?.slice(0, 200) || null,
-        email: l.email?.toLowerCase().slice(0, 200) || null,
-        phone: l.phone?.slice(0, 50) || null,
-        website: l.website?.slice(0, 500) || null,
-        industry: l.industry?.slice(0, 100) || industry || null,
-        location: l.location?.slice(0, 200) || location,
-        score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
-        why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: `rep_scrape:${claims.code}`,
-        external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
-        status: "new",
-        ...(assignToMe ? {
-          assigned_to_code: claims.code,
-          assigned_at: now.toISOString(),
-          assignment_expires_at: expires.toISOString(),
-        } : {}),
-      })).filter((r) => r.business_name && r.website);
+      const rows = enriched.map((l) => {
+        const breakdown = computeScrapeScore(l, location);
+        l.score = breakdown.total;
+        l.score_breakdown = breakdown.parts;
+        return {
+          business_name: l.business_name?.slice(0, 200) || null,
+          contact_name: l.contact_name?.slice(0, 200) || null,
+          email: l.email?.toLowerCase().slice(0, 200) || null,
+          phone: l.phone?.slice(0, 50) || null,
+          website: l.website?.slice(0, 500) || null,
+          industry: l.industry?.slice(0, 100) || industry || null,
+          location: l.location?.slice(0, 200) || location,
+          score: breakdown.total,
+          why_fit: l.why_fit?.slice(0, 1000) || null,
+          enrichment: { scrape_score_breakdown: breakdown.parts, scrape_score_total: breakdown.total },
+          source: `rep_scrape:${claims.code}`,
+          external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
+          status: "new",
+          score_stage: "triage",
+          ...(assignToMe ? {
+            assigned_to_code: claims.code,
+            assigned_at: now.toISOString(),
+            assignment_expires_at: expires.toISOString(),
+          } : {}),
+        };
+      }).filter((r) => r.business_name && r.website);
 
-      const { data, error } = await supabase.from("rep_leads")
-        .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
-        .select("id");
-      if (error) throw error;
-      inserted = data?.length || 0;
+      // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
+      const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
+      let fresh = rows;
+      if (extIds.length > 0) {
+        const { data: existing } = await supabase.from("rep_leads").select("external_id").in("external_id", extIds);
+        const have = new Set((existing || []).map((r: any) => r.external_id));
+        fresh = rows.filter(r => !r.external_id || !have.has(r.external_id));
+      }
+      if (fresh.length > 0) {
+        const { data, error } = await supabase.from("rep_leads").insert(fresh).select("id");
+        if (error) throw error;
+        inserted = data?.length || 0;
+      }
 
       try {
         const { data: rep } = await supabase.from("rep_codes").select("rep_name").eq("code", claims.code).maybeSingle();
@@ -189,7 +230,7 @@ serve(async (req) => {
       } catch (e) { console.error("activity log failed:", e); }
     }
 
-    return new Response(JSON.stringify({ ok: true, inserted, leads, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, inserted, leads: enriched, assigned_to_me: assignToMe }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("portal-scrape-leads error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

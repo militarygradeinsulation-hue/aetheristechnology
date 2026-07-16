@@ -1,340 +1,458 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight, Check, X, Database, Globe, MessagesSquare, FileSearch,
-  CalendarRange, Mic2, ListChecks, ShieldAlert, Search, ChevronDown,
-} from 'lucide-react';
+import { ArrowRight, Check, X, Calendar } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
+import { PackageTiers } from '@/components/PackageTiers';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 
 const INCLUDES = [
-  '12-month CRM snapshot pulled from HubSpot, Salesforce, or CSV export',
   'Lead-to-contact, deal-stage progression, and touch-frequency analysis',
-  'Full Operator Tool Suite (9 live tools) run against your business — see below',
-  'Written report (15–30 pages): leak map + prioritized fixes + ROI projections',
+  'Full Operator Tool Suite (9 live instruments) run against your business',
+  'Written report (15-30 pages): leak map + prioritized fixes + ROI projections',
   'Source-data appendix — every CSV, query, and tool export used',
   '60-minute readout with you and up to two of your team',
   'Fixed-fee implementation quote if you choose to proceed',
 ];
 
-interface ToolItem {
-  icon: React.ComponentType<{ className?: string }>;
-  name: string;
-  finds: string;
-  inputs: string[];
-  process: string[];
-  deliverables: string[];
-  exampleLeak: string;
-}
-
-const TOOL_BUNDLE: ToolItem[] = [
-  {
-    icon: Globe,
-    name: 'Website + Digital Footprint Scan',
-    finds: 'AI-readiness, SEO/GEO gaps, schema, page-speed leaks visible to buyers.',
-    inputs: ['Public domain + up to 25 priority URLs', 'Google Business Profile + LinkedIn company page', 'Top 5 competitor domains for benchmark'],
-    process: ['Crawl pages for schema, meta, alt text, Core Web Vitals', 'Score AI-readability (how LLMs parse and quote your site)', 'Compare local/GEO presence vs. competitors'],
-    deliverables: ['Page-by-page scorecard with red/amber/green flags', 'Prioritized fix list with effort vs. revenue impact', 'GEO + schema patch recommendations'],
-    exampleLeak: '$240K/yr in inbound leads lost because product pages had no schema and were invisible to ChatGPT and Perplexity searches.',
-  },
-  {
-    icon: Database,
-    name: 'CRM Hygiene Audit',
-    finds: 'Duplicate contacts, stalled deals, broken stage definitions, ghost pipeline.',
-    inputs: ['12-month CSV export from HubSpot, Salesforce, or any CRM', 'Pipeline + deal stage definitions', 'Sales rep activity log if available'],
-    process: ['De-duplicate contacts and companies', 'Flag deals stalled >30/60/90 days at each stage', 'Audit stage definitions against actual rep behavior'],
-    deliverables: ['Cleaned contact + deal database returned to you', 'Stalled-deal report by rep, stage, and dollar value', 'Rewritten stage exit criteria'],
-    exampleLeak: '$1.1M in pipeline marked "Proposal Sent" that had no follow-up activity in 60+ days — quietly dying in the CRM.',
-  },
-  {
-    icon: ShieldAlert,
-    name: 'Brand Contradiction Finder',
-    finds: 'Where your homepage, sales deck, and proposal say three different things.',
-    inputs: ['Homepage + about page copy', 'Latest sales deck (PDF or Google Slides)', 'Sample proposal or SOW from last 90 days'],
-    process: ['Extract positioning claims, value props, and proof points from each asset', 'Map contradictions in language, pricing posture, and ICP', 'Score buyer-confusion risk on each touchpoint'],
-    deliverables: ['Contradiction matrix (asset × claim × conflict)', 'Single-source-of-truth message rewrite', 'Sales-deck red-line for the highest-leverage 3 slides'],
-    exampleLeak: 'Homepage said "enterprise-grade." Deck said "made for SMB." Proposal quoted enterprise pricing. Buyers walked.',
-  },
-  {
-    icon: MessagesSquare,
-    name: 'Friction Vocabulary Audit',
-    finds: 'Words on your site that quietly cost you the deal.',
-    inputs: ['Top 10 site pages by traffic', 'Last 20 lost-deal reasons from CRM', 'Last 10 sales call transcripts (optional)'],
-    process: ['Flag jargon, hedging language, and fear-words', 'Cross-reference site copy against actual buyer objections', 'Score each page for clarity, specificity, and momentum'],
-    deliverables: ['Word-by-word red-line of priority pages', 'Replacement vocabulary tied to buyer language', 'CTA copy rewrites with predicted lift'],
-    exampleLeak: 'The word "solutions" appeared 47 times on the homepage. Buyers couldn\'t tell what was actually being sold.',
-  },
-  {
-    icon: FileSearch,
-    name: 'Strategic Question Engine',
-    finds: 'The 12 questions a CFO will ask that your team can\'t answer yet.',
-    inputs: ['Your industry + business model', 'Last 3 board or investor decks', 'Current revenue, COGS, and pipeline snapshot'],
-    process: ['Generate the 12 questions a sharp CFO/board member will ask', 'Stress-test your existing answers against operator benchmarks', 'Identify the data you don\'t yet track'],
-    deliverables: ['12-question briefing doc with model answers', 'Gap list of metrics you should be tracking but aren\'t', 'KPI dashboard spec for your finance team'],
-    exampleLeak: 'CEO couldn\'t answer "what\'s your CAC by channel?" in a board meeting. Lost a $2M follow-on raise.',
-  },
-  {
-    icon: ListChecks,
-    name: '20-Question Business Diagnostic',
-    finds: 'Operator-graded scorecard across ops, sales, marketing, and revenue.',
-    inputs: ['60–90 minutes from the founder/CEO', '15 minutes each from sales lead + ops lead', 'Last 90 days of revenue + pipeline data'],
-    process: ['Structured interview across 4 functional pillars', 'Operator scoring against industry benchmarks', 'Triangulation of leadership answers vs. actual data'],
-    deliverables: ['Pillar-by-pillar scorecard (0–100 per area)', 'Top 5 leverage points ranked by ROI', 'Quick-win list executable inside 30 days'],
-    exampleLeak: 'Marketing scored 82/100 for activity, 19/100 for attribution. They were spending $40K/mo with no idea what worked.',
-  },
-  {
-    icon: Mic2,
-    name: 'Sales Script + Follow-Up Generator',
-    finds: 'Custom outbound + post-quote sequences mapped to your stalled deals.',
-    inputs: ['ICP definition + top 3 buyer personas', 'Top 5 stalled-deal reasons from CRM', 'Existing email + call templates if any'],
-    process: ['Pattern-match stalled deals to objection clusters', 'Write outbound + follow-up sequences per persona', 'Build talk-tracks for the 3 most common objections'],
-    deliverables: ['7-touch outbound cadence (email + LinkedIn + call)', '5-touch post-quote follow-up sequence', 'Objection-handling cheat sheet for the sales team'],
-    exampleLeak: 'Reps stopped following up after touch 2. The data says 80% of closed deals took 5–9 touches. We rebuilt the cadence.',
-  },
-  {
-    icon: CalendarRange,
-    name: '90-Day Content Calendar',
-    finds: 'Pillar-mapped LinkedIn + email cadence built from leak themes.',
-    inputs: ['Findings from the diagnostic (auto-fed)', 'Founder/CEO voice samples (3–5 posts or articles)', 'Top 3 customer-success stories'],
-    process: ['Cluster diagnostic findings into 4–6 content pillars', 'Map a 90-day publishing rhythm across LinkedIn + email', 'Draft the first 2 weeks of posts in your voice'],
-    deliverables: ['90-day editorial calendar (CSV + Notion)', '14 ready-to-post drafts in founder voice', 'Pillar guide for the in-house writer or agency'],
-    exampleLeak: 'Founder posted twice a quarter, randomly. We turned the diagnostic into 90 days of content that pre-sold the next engagement.',
-  },
-  {
-    icon: Search,
-    name: 'AI Visibility Scorecard',
-    finds: 'How ChatGPT, Perplexity, and Google AI describe you vs. competitors.',
-    inputs: ['Company name + 3 product/service names', 'Top 5 competitors', '10 buyer-intent prompts you want to win'],
-    process: ['Query ChatGPT, Perplexity, Claude, and Google AI Overviews live', 'Score visibility, accuracy, and sentiment per prompt', 'Identify the source pages each AI is pulling from'],
-    deliverables: ['Side-by-side AI visibility report (you vs. competitors)', 'Prompt-by-prompt remediation list', 'GEO content brief for the 5 highest-value prompts'],
-    exampleLeak: 'ChatGPT recommended a competitor 9 out of 10 times for their core service category. We knew exactly which 3 pages to fix.',
-  },
-];
-
 const NOT_INCLUDED = [
   'Brand strategy, product pricing, or shop-floor operations',
-  'Percentage-of-savings billing or ongoing retainer requirement',
+  'Percentage-of-savings billing or ongoing engagement requirement',
   'Vendor reseller commissions on tools we recommend',
+];
+
+const COST_ROWS: [string, string, string][] = [
+  ['CRM audit + cleanup (HubSpot/Salesforce)', '$15K - $40K', 'Included'],
+  ['Sales process + pipeline diagnostic', '$20K - $50K', 'Included'],
+  ['Website + SEO/GEO + AI-visibility audit', '$8K - $25K', 'Included'],
+  ['Brand/messaging contradiction audit', '$10K - $20K', 'Included'],
+  ['Sales script + 7-touch follow-up build', '$6K - $15K', 'Included'],
+  ['90-day content calendar + first 14 drafts', '$8K - $20K', 'Included'],
+  ['Operator-graded scorecard + readout', '$10K - $30K', 'Included'],
+  ['Written report w/ ROI + roadmap', '$5K - $15K', 'Included'],
+  ['Source-data appendix (CSVs + queries)', 'Rare', 'Included'],
 ];
 
 const DiagnosticPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
-  const [openTool, setOpenTool] = useState<string | null>(null);
+
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen text-foreground overflow-x-hidden">
       <SEOHead
-        title="The 21-Day Revenue Diagnostic — $18,500 | Aetheris"
-        description="Fixed-fee 21-day diagnostic for specialty manufacturers $5M–$25M. Map where CRM, sales follow-up, and lead flow are losing money."
+        title="The Leak Audit™ — $18,500 21-Day Revenue Diagnostic | Aetheris"
+        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. $18,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
-        keywords="revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
-        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Diagnostic', path: '/diagnostic' }]}
+        keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
+        breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
       />
       <Background />
+
+      {/* subtle ambient wash — matches home */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 opacity-[0.06] mix-blend-overlay z-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20% 30%, hsl(var(--amber)) 0%, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--crimson, 0 60% 45%)) 0%, transparent 45%)",
+        }}
+      />
+
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
-        <main className="px-4 pt-28 pb-16">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                Specialty manufacturers · $5M–$25M
-              </div>
-              <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
-                The 21-Day Revenue Diagnostic.
-              </h1>
-              <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We map where your CRM, sales follow-up, and lead flow are losing you money. You get a written report with prioritized fixes, ROI projections, and an implementation roadmap.
-              </p>
-            </div>
 
-            <section className="premium-tile rounded-sm border border-crimson/40 p-6 mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-crimson mb-3">
-                Why we're not another AI company
+        <main className="px-4 pt-24 pb-12">
+          <div className="max-w-4xl mx-auto">
+            {/* HERO — matches home Chaos Theory Forensics rhythm */}
+            <section className="text-center animate-fade-in">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className="h-px w-8 bg-amber/50" />
+                <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">
+                  Case File · Specialty Manufacturers · $5M–$25M
+                </span>
+                <span className="h-px w-8 bg-amber/50" />
               </div>
-              <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-4 leading-tight">
-                Every other AI shop sells you tools. We use ours <span className="text-crimson">on you</span>.
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="premium-tile rounded-sm border border-border/60 p-4">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Them</div>
-                  <ul className="space-y-1.5 text-sm text-foreground/65">
-                    <li>• Sell you a chatbot, dashboard, or "AI platform" license</li>
-                    <li>• Hand you software and walk away</li>
-                    <li>• Charge per seat, per token, per month, forever</li>
-                    <li>• Pitch "AI transformation" with no operator on the floor</li>
-                    <li>• Generic playbooks from a junior consultant + GPT wrapper</li>
-                    <li>• You do the work of finding what's broken</li>
-                  </ul>
-                </div>
-                <div className="premium-tile rounded-sm border border-amber/40 p-4">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Aetheris</div>
-                  <ul className="space-y-1.5 text-sm text-foreground/90">
-                    <li>• A human operator runs 9 forensic tools <strong>against your business</strong></li>
-                    <li>• You get a written leak map — not a software login</li>
-                    <li>• One fixed fee. $18,500. No retainer to read the report</li>
-                    <li>• 20+ years operating real P&Ls before the AI was bolted on</li>
-                    <li>• Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
-                    <li>• We tell you exactly where the money is leaking and what to fix first</li>
-                  </ul>
+              <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+                The <span className="text-amber italic">Leak Audit</span>™.<br />
+                Find the <span className="text-crimson italic">bleed</span>. Price the fix.
+              </h1>
+              <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-2xl mx-auto">
+                We map where your CRM, sales follow-up, and lead flow are losing money. Written report with prioritized fixes, ROI projections, and an implementation roadmap.
+              </p>
+              <p className="mt-3 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
+                $18,500 flat · One operator · Nothing ongoing
+              </p>
+
+              {/* video */}
+              <div className="mt-6 max-w-3xl mx-auto">
+                <div className="shimmer-gold-border rounded-sm">
+                  <div className="relative w-full rounded-sm overflow-hidden" style={{ paddingTop: '56.25%' }}>
+                    <iframe
+                      src="https://player.vimeo.com/video/1191299864?badge=0&autopause=0&player_id=0&app_id=58479"
+                      loading="lazy"
+                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                      allowFullScreen
+                      title="The Leak Audit"
+                      className="absolute inset-0 w-full h-full"
+                    />
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground italic mt-4 text-center">
-                AI is the microscope. The operator is the one holding it. That's the difference.
+            </section>
+
+            {/* THE PRICE — Filter-style crimson tile */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '120ms', animationFillMode: 'both' }}
+            >
+              <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)] text-center">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Fixed fee · Applied toward any engagement</div>
+                <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground leading-none">
+                  $18,500
+                </div>
+                <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-xl mx-auto">
+                  Operator-led. No percentage-of-savings. No retainer. If the number sounds "expensive," the leak is bigger than you think — and you aren't our client.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mt-5">
+                  <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
+                    <Button size="default" className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book a 15-min call
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </a>
+                  <Link to="/methodology">
+                    <Button size="default" variant="outline" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
+                      Read the methodology first
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </section>
+            {/* ENGAGEMENT LADDER — three tiers with per-price explainers */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '140ms', animationFillMode: 'both' }}
+              aria-label="Aetheris engagement ladder"
+            >
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <span className="h-px w-8 bg-amber/50" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber/90">Engagement Ladder · USD Flat · Why each price</span>
+                <span className="h-px w-8 bg-amber/50" />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-3">
+                {[
+                  {
+                    tier: '01',
+                    name: 'Leak Audit',
+                    price: '$18,500',
+                    sub: 'Named leaks + dollar exposure',
+                    note: 'Fastest way in.',
+                    why: 'Why $18,500',
+                    whyBody:
+                      'One operator, 8–12 focused hours across your CRM export, site, funnels, and follow-up. You get a written leak map with dollar figures — enough to prove the bleed is real without committing to a full engagement. Priced as a rounding error against a leak that typically costs 10–40× the fee every year unfixed.',
+                    scope: ['8–12 operator hours', '5–10 named leaks, $-tagged', 'Written report + 30-min readout', '100% credited to Tier 02 or 03'],
+                  },
+                  {
+                    tier: '02',
+                    name: '21-Day Revenue Diagnostic',
+                    price: '$18,500',
+                    sub: 'Full forensic dig',
+                    note: 'Credited 1:1 to Active Case.',
+                    featured: true,
+                    why: 'Why $18,500',
+                    whyBody:
+                      'Three weeks of operator time running all 9 forensic instruments against live data — CRM, pipeline, site, brand, follow-up, content, AI-readiness. Replaces $82K–$215K worth of separate audits. Every dollar credits 1:1 toward the Active Case, so it costs nothing if you continue.',
+                    scope: ['21 days · 1 operator', 'All 9 instruments run live', '15–30 page report + roadmap', 'Fully credited to Tier 03'],
+                    toolsLabel: 'Tools & access you keep',
+                    tools: [
+                      'Website Leak Scanner — unlimited re-runs',
+                      'CRM Bleed Analyzer (HubSpot / Pipedrive / Sheets export)',
+                      'Pipeline Stall Autopsy dashboard',
+                      'Follow-Up Gap Timeline (per-lead SLA breach map)',
+                      'Brand & Positioning Audit report',
+                      'AI-Readiness Scorecard + remediation checklist',
+                      'Content & SEO Decay tracker (Semrush-powered)',
+                      'Competitor Delta Report (top 3 tracked)',
+                      '90-day Rep Portal seats (up to 3 users)',
+                      'Forensic Playbook Library (SOPs, scripts, email frames)',
+                      'Priority Slack channel with the operator for 21 days',
+                      'Recorded weekly readouts + editable Notion workspace',
+                    ],
+                  },
+                  {
+                    tier: '03',
+                    name: 'Active Case',
+                    price: '$15,000/mo',
+                    sub: 'Operator-led implementation',
+                    note: '3-month minimum · Diagnostic clients.',
+                    why: 'Why $15,000/mo',
+                    whyBody:
+                      'Operator-led removal of the leaks named in the Diagnostic — not a retainer, not seat-based software, not activity theatre. Fee is a fraction of a mid-level ops hire ($180K+ fully-loaded) and typically pays for itself in month one from a single recovered deal or plugged CRM bleed.',
+                    scope: ['~40 hrs/mo senior operator', '3-month minimum, no auto-renew', 'Weekly readout + fix log', 'Ends when the leak ends'],
+                    toolsLabel: 'What you get every month',
+                    tools: [
+                      'Everything in the Diagnostic — kept live & re-run monthly',
+                      'Dedicated senior operator (~40 hrs/mo hands-on)',
+                      'CRM rebuild & pipeline hygiene execution (not just advice)',
+                      'Follow-up sequences written, installed, and monitored',
+                      'AI agents deployed into your stack (intake, triage, follow-up)',
+                      'Sales enablement: scripts, objection frames, call reviews',
+                      'Weekly leak-closure report with $ recovered / $ still bleeding',
+                      'Unlimited Rep Portal seats + monthly team training module',
+                      'Smart Subscription: monthly AI-personalized playbook drop',
+                      'Direct Slack + 24h response SLA with the operator',
+                      'Quarterly Business Forensics review with owner + partner',
+                      'Cancel any month after the 3-month floor — no auto-renew',
+                    ],
+                  },
+                ].map((t) => (
+                  <div
+                    key={t.tier}
+                    className={`relative rounded-sm border p-5 flex flex-col ${
+                      t.featured
+                        ? 'border-amber/70 bg-amber/[0.06] shadow-[0_0_30px_-15px_hsl(var(--amber)/0.6)]'
+                        : 'border-amber/25 bg-card/60'
+                    }`}
+                  >
+                    {t.featured && (
+                      <span className="absolute -top-2 right-3 font-mono text-[9px] uppercase tracking-[0.28em] bg-amber text-background px-1.5 py-0.5 rounded-sm">
+                        Most named
+                      </span>
+                    )}
+                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80">Tier {t.tier}</div>
+                    <div className="mt-1 font-forensic text-lg font-bold leading-tight">{t.name}</div>
+                    <div className="mt-1 font-forensic text-3xl font-bold text-amber leading-none">{t.price}</div>
+                    <div className="mt-2 text-xs text-foreground/80">{t.sub}</div>
+                    <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-foreground/60">{t.note}</div>
+
+                    <div className="mt-4 pt-4 border-t border-amber/15">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber mb-1.5">{t.why}</div>
+                      <p className="text-xs text-foreground/80 leading-relaxed">{t.whyBody}</p>
+                    </div>
+
+                    <ul className="mt-3 space-y-1 text-[11px] text-foreground/75">
+                      {t.scope.map((s) => (
+                        <li key={s} className="flex gap-1.5">
+                          <Check className="w-3 h-3 text-amber shrink-0 mt-0.5" />
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {'tools' in t && Array.isArray((t as any).tools) && (
+                      <div className="mt-4 pt-3 border-t border-amber/15">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber mb-2">
+                          {(t as any).toolsLabel ?? 'Included tools & access'}
+                        </div>
+                        <ul className="space-y-1 text-[11px] text-foreground/80 leading-snug">
+                          {((t as any).tools as string[]).map((item) => (
+                            <li key={item} className="flex gap-1.5">
+                              <span className="text-amber/80 font-mono text-[10px] mt-0.5">▸</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-4 text-center text-[11px] text-foreground/60 italic">
+                If we can't name a leak worth more than our fee, you pay nothing. Written guarantee.
               </p>
             </section>
 
-            <div className="premium-tile rounded-sm border border-amber/40 p-8 mb-10 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fixed fee</div>
-              <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground">$18,500</div>
-              <p className="text-sm text-muted-foreground mt-2">21 calendar days. No retainer required. No percentage-of-savings.</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                    Book a 15-min call <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </a>
-                <Link to="/methodology">
-                  <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber">
-                    Read the methodology first
-                  </Button>
-                </Link>
+            {/* THEM vs AETHERIS */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '160ms', animationFillMode: 'both' }}
+            >
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2 text-center">
+                Why we're not another AI company
               </div>
-              <p className="text-xs text-muted-foreground mt-4">
-                Methodology document goes to every prospect before pricing.
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight text-center mb-5">
+                Every other AI shop sells you tools.<br />We use ours <span className="text-crimson italic">on you</span>.
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-sm border border-crimson/40 bg-card/60 backdrop-blur-sm p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-3">Them</div>
+                  <ul className="space-y-2 text-sm text-foreground/80 leading-relaxed">
+                    <li>— Sell a chatbot, dashboard, or "AI platform" license</li>
+                    <li>— Hand you software and walk away</li>
+                    <li>— Charge per seat, per token, per month, forever</li>
+                    <li>— Pitch "AI transformation" with no operator on the floor</li>
+                    <li>— Generic playbooks from a junior + GPT wrapper</li>
+                    <li>— You do the work of finding what's broken</li>
+                  </ul>
+                </div>
+                <div className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">Aetheris</div>
+                  <ul className="space-y-2 text-sm text-foreground/90 leading-relaxed">
+                    <li>— A human operator runs 9 forensic instruments <strong className="text-amber">against your business</strong></li>
+                    <li>— You get a written leak map, not a software login</li>
+                    <li>— One fixed fee. $18,500. Nothing else owed to read the report</li>
+                    <li>— 20+ years operating real P&Ls before the AI was bolted on</li>
+                    <li>— Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
+                    <li>— We tell you exactly where the money is leaking and what to fix first</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-foreground/60 italic text-center">
+                AI is the microscope. The operator holds it. That's the difference.
               </p>
-            </div>
+            </section>
 
-            <div className="grid md:grid-cols-2 gap-4 mb-10">
-              <section className="premium-tile rounded-sm border border-border/60 p-6">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">What you get</div>
-                <ul className="space-y-2.5">
+            {/* THE OBJECTION + MATH TABLE */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '200ms', animationFillMode: 'both' }}
+            >
+              <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-5 sm:p-6 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">The objection we hear every time</div>
+                <blockquote className="font-forensic text-2xl md:text-3xl font-bold text-crimson leading-tight">
+                  "That's just too expensive."
+                </blockquote>
+                <p className="mt-1 text-xs text-foreground/60 italic">Said by every CFO who hasn't done the math. Here's the math.</p>
+
+                <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground mt-5 mb-4 leading-snug">
+                  $18,500 buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
+                </h3>
+
+                <div className="overflow-x-auto rounded-sm border border-amber/20 bg-background/40">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-amber/30 bg-background/40">
+                        <th className="text-left font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground py-2 pl-3 pr-2">Line item</th>
+                        <th className="text-left font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground py-2 px-2">Alternative</th>
+                        <th className="text-left font-mono text-[10px] uppercase tracking-[0.2em] text-amber py-2 px-2">Aetheris</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-foreground/85">
+                      {COST_ROWS.map(([item, alt, us]) => (
+                        <tr key={item} className="border-b border-border/30">
+                          <td className="py-2 pl-3 pr-2">{item}</td>
+                          <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">{alt}</td>
+                          <td className="py-2 px-2 text-amber font-semibold whitespace-nowrap">{us}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t-2 border-amber/50 bg-amber/[0.03]">
+                        <td className="py-2.5 pl-3 pr-2 font-bold text-foreground">TOTAL</td>
+                        <td className="py-2.5 px-2 font-bold text-muted-foreground whitespace-nowrap">$82K – $215K</td>
+                        <td className="py-2.5 px-2 font-bold text-amber whitespace-nowrap">$18,500 flat</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mt-5">
+                  {[
+                    ['Fast', 'vs. 90-120 days'],
+                    ['1 operator', '20+ yrs · not a GPT wrapper'],
+                    ['$0 ongoing', 'Read, walk, or open a case'],
+                  ].map(([h, s]) => (
+                    <div key={h} className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-3 text-center">
+                      <div className="font-forensic text-base sm:text-lg font-bold text-amber leading-tight">{h}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">{s}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="mt-5 text-sm text-foreground/85 leading-relaxed text-center">
+                  Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot.{' '}
+                  <span className="text-amber font-semibold">$18,500 to find it is a rounding error.</span> One recovered deal usually pays 100×.
+                </p>
+              </div>
+            </section>
+
+            {/* WHAT YOU GET / WHAT IT ISN'T — mirror home's two-column */}
+            <section
+              className="mt-8 grid md:grid-cols-2 gap-4 animate-fade-in"
+              style={{ animationDelay: '240ms', animationFillMode: 'both' }}
+            >
+              <div className="rounded-sm border border-amber/40 bg-card/60 backdrop-blur-sm p-5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">What you get</div>
+                <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
                   {INCLUDES.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/85">
+                    <li key={i} className="flex gap-2">
                       <Check className="w-4 h-4 text-amber shrink-0 mt-0.5" />
                       <span>{i}</span>
                     </li>
                   ))}
                 </ul>
-              </section>
-              <section className="premium-tile rounded-sm border border-border/60 p-6">
-                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">What it isn't</div>
-                <ul className="space-y-2.5">
+              </div>
+              <div className="rounded-sm border border-crimson/40 bg-card/60 backdrop-blur-sm p-5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-3">What it isn't</div>
+                <ul className="space-y-2 text-sm text-foreground/85 leading-relaxed">
                   {NOT_INCLUDED.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-foreground/70">
-                      <X className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <li key={i} className="flex gap-2">
+                      <X className="w-4 h-4 text-crimson shrink-0 mt-0.5" />
                       <span>{i}</span>
                     </li>
                   ))}
                 </ul>
-              </section>
-            </div>
-
-            <section className="premium-tile rounded-sm border border-amber/40 p-6 mb-10">
-              <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                  Automatically included · $18,500 package
-                </div>
-                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                  No add-on fee · No upsell
-                </div>
               </div>
-              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">
-                The full Operator Tool Suite ships with every Diagnostic.
+            </section>
+
+            {/* CRM-agnostic — thin factual tile like home footer sections */}
+            <section
+              className="mt-8 animate-fade-in"
+              style={{ animationDelay: '260ms', animationFillMode: 'both' }}
+            >
+              <div className="rounded-sm border border-amber/30 bg-card/70 backdrop-blur-sm p-5">
+                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">CRM-agnostic</div>
+                <h2 className="font-forensic text-lg md:text-xl font-bold leading-tight">Runs on a CSV export.</h2>
+                <p className="mt-2 text-sm text-foreground/75 leading-relaxed">
+                  No HubSpot or Salesforce required. We work from a CSV export of contacts, deals, and activity. Running it live in your CRM is a paid upsell, not a prerequisite.
+                </p>
+              </div>
+            </section>
+
+            {/* CLOSING CTA — echoes home rhythm */}
+            <section
+              className="mt-10 text-center animate-fade-in"
+              style={{ animationDelay: '300ms', animationFillMode: 'both' }}
+            >
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className="h-px w-8 bg-amber/50" />
+                <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Open a case</span>
+                <span className="h-px w-8 bg-amber/50" />
+              </div>
+              <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-[1.05] tracking-tight">
+                Real findings. <span className="text-amber italic">No sugar.</span>
               </h2>
-              <p className="text-sm text-foreground/75 mb-5">
-                When you buy the $18,500 package, your operator automatically runs all nine live diagnostic tools against your business — the same instruments our reps use in the field. Every finding feeds the final leak map. No tier upgrades, no à la carte pricing, no "tool access" SKUs. It's all in.
+              <p className="mt-3 text-sm text-foreground/70 max-w-xl mx-auto">
+                Fifteen minutes on the phone. We tell you whether a Leak Audit is even the right instrument for your business. If it isn't, we say so.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {TOOL_BUNDLE.map((t) => {
-                  const Icon = t.icon;
-                  const isOpen = openTool === t.name;
-                  return (
-                    <div
-                      key={t.name}
-                      className={`premium-tile rounded-sm transition-colors ${
-                        isOpen ? 'border-amber/60 md:col-span-2 lg:col-span-3' : 'border-border/60 hover:border-amber/40'
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setOpenTool(isOpen ? null : t.name)}
-                        aria-expanded={isOpen}
-                        className="w-full text-left p-3.5"
-                      >
-                        <div className="flex items-start gap-2.5 mb-1.5">
-                          <div className="w-7 h-7 rounded-sm bg-amber/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-4 h-4 text-amber" />
-                          </div>
-                          <div className="flex-1 font-bold text-foreground text-sm leading-tight">{t.name}</div>
-                          <ChevronDown className={`w-4 h-4 text-amber shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                        </div>
-                        <p className="text-xs text-foreground/65 leading-snug pl-9">
-                          <span className="font-case text-[9px] uppercase tracking-widest text-amber">Finds → </span>
-                          {t.finds}
-                        </p>
-                      </button>
-                      {isOpen && (
-                        <div className="px-3.5 pb-4 pt-1 border-t border-border/40 mt-1 space-y-3">
-                          <div className="grid md:grid-cols-3 gap-3 pt-3">
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">Inputs we need</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.inputs.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">How the operator runs it</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.process.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
-                            <div>
-                              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1.5">What you get back</div>
-                              <ul className="space-y-1 text-xs text-foreground/75">
-                                {t.deliverables.map((x) => <li key={x}>• {x}</li>)}
-                              </ul>
-                            </div>
-                          </div>
-                          <div className="rounded-sm border border-crimson/30 bg-crimson/5 p-3">
-                            <div className="font-case text-[9px] uppercase tracking-widest text-crimson mb-1">Real leak we caught</div>
-                            <p className="text-xs text-foreground/85 italic">{t.exampleLeak}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
+                  <Button size="default" className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Request an Investigation
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </a>
+                <Link to="/business-diagnostic">
+                  <Button size="default" variant="outline" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
+                    Free 60-sec pre-scan
+                  </Button>
+                </Link>
               </div>
-              <p className="text-xs text-muted-foreground italic mt-4">
-                Tool outputs land in the source-data appendix. Your team keeps the raw exports after the engagement.
-              </p>
-            </section>
-
-            <section className="premium-tile rounded-sm border border-border/60 p-6 mb-10">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">CRM-agnostic</div>
-              <h2 className="font-forensic text-xl font-bold text-foreground mb-2">Runs on a CSV export.</h2>
-              <p className="text-sm text-foreground/80">
-                You don't need to be on HubSpot or Salesforce. We work from a CSV export of contacts, deals, and activity. If you want us to run it live in your CRM, that's a paid upsell — not a prerequisite.
-              </p>
-            </section>
-
-            <section className="premium-tile rounded-sm border border-amber/30 p-6 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">After the diagnostic</div>
-              <h2 className="font-forensic text-2xl font-bold text-foreground mb-2">Implementation Retainer — $15K/month.</h2>
-              <p className="text-sm text-foreground/80 mb-4">
-                3-month minimum. Available only to Diagnostic clients. We execute the prioritized fixes ourselves.
-              </p>
-              <Link to="/implementation" className="text-amber font-semibold hover:underline">
-                See implementation details →
-              </Link>
             </section>
           </div>
+
+          <div className="mt-12">
+            <PackageTiers onRequest={() => setContactOpen(true)} />
+          </div>
         </main>
+
         <Footer />
       </div>
+
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );

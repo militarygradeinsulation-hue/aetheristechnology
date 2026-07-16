@@ -31,12 +31,32 @@ serve(async (req) => {
     const { action } = body;
 
     if (action === "dashboard") {
-      const [subRes, evtRes] = await Promise.all([
-        supabase.from("contact_submissions").select("*").order("created_at", { ascending: false }),
-        supabase.from("site_events").select("*").order("created_at", { ascending: false }).limit(1000),
-      ]);
+      // Hard-cap both queries — site_events grows fast and an unbounded
+      // SELECT was hitting Postgres statement_timeout (57014) and bubbling
+      // up to the client as a 500 / blank screen.
+      // Run independently so a slow site_events query can't fail the whole response.
+      const subRes = await supabase
+        .from("contact_submissions")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200)
+        .then((r) => r, (e) => ({ data: [], error: e }));
+
+      let events: any[] = [];
+      try {
+        const evtRes = await supabase
+          .from("site_events")
+          .select("id,event_type,session_id,user_agent,created_at")
+          .order("created_at", { ascending: false })
+          .limit(200);
+        if (evtRes.error) console.error("dashboard events error:", evtRes.error);
+        events = evtRes.data || [];
+      } catch (e) {
+        console.error("dashboard events exception:", e);
+      }
+      if ((subRes as any).error) console.error("dashboard submissions error:", (subRes as any).error);
       return new Response(
-        JSON.stringify({ submissions: subRes.data || [], events: evtRes.data || [] }),
+        JSON.stringify({ submissions: (subRes as any).data || [], events }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -105,23 +125,25 @@ serve(async (req) => {
       let q = supabase
         .from("rep_leads")
         .select(
-          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at",
+          "id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,source,claimed_by_code,assigned_to_code,assignment_expires_at,enrichment,enriched_at,created_at,notes,low_hanging_fruit,admin_holding",
         )
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(200);
 
-      if (filter === "pool") q = q.is("claimed_by_code", null).is("assigned_to_code", null);
+      if (filter === "pool") q = q.is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false);
       if (filter === "assigned") q = q.is("claimed_by_code", null).not("assigned_to_code", "is", null);
       if (filter === "claimed") q = q.not("claimed_by_code", "is", null);
+      if (filter === "holding") q = q.eq("admin_holding", true);
+
       if (search.trim()) {
-        const s = search.trim();
-        q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
+        const s = search.trim().replace(/[,()*\\%:\r\n]/g, " ").trim();
+        if (s) q = q.or(`business_name.ilike.%${s}%,website.ilike.%${s}%,industry.ilike.%${s}%`);
       }
       if (minScore !== null) q = q.gte("score", minScore);
 
       const nowIso = new Date().toISOString();
-      const [leadsR, repsR, dripR] = await Promise.all([
+      const [leadsR, repsR, dripR, claimedR] = await Promise.all([
         q,
         supabase.from("rep_codes").select("code,rep_name,is_active,role").order("rep_name"),
         supabase
@@ -131,6 +153,11 @@ serve(async (req) => {
           .not("assigned_to_code", "is", null)
           .gt("assignment_expires_at", nowIso)
           .limit(5000),
+        supabase
+          .from("rep_leads")
+          .select("claimed_by_code")
+          .not("claimed_by_code", "is", null)
+          .limit(10000),
       ]);
 
       if (leadsR.error) throw leadsR.error;
@@ -138,16 +165,191 @@ serve(async (req) => {
       (dripR.data || []).forEach((r: any) => {
         if (r.assigned_to_code) dripCounts[r.assigned_to_code] = (dripCounts[r.assigned_to_code] || 0) + 1;
       });
+      const claimedCounts: Record<string, number> = {};
+      (claimedR.data || []).forEach((r: any) => {
+        if (r.claimed_by_code) claimedCounts[r.claimed_by_code] = (claimedCounts[r.claimed_by_code] || 0) + 1;
+      });
+      const totalCounts: Record<string, number> = {};
+      for (const code of new Set([...Object.keys(dripCounts), ...Object.keys(claimedCounts)])) {
+        totalCounts[code] = (dripCounts[code] || 0) + (claimedCounts[code] || 0);
+      }
 
       return new Response(
         JSON.stringify({
           leads: leadsR.data || [],
           reps: repsR.data || [],
           dripCounts,
+          claimedCounts,
+          totalCounts,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    if (action === "lead_pool_stats") {
+      const [tot, un, dr, cl, wo, dd] = await Promise.all([
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .is("claimed_by_code", null).is("assigned_to_code", null),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .is("claimed_by_code", null).not("assigned_to_code", "is", null),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true })
+          .not("claimed_by_code", "is", null).not("status", "in", "(won,lost,dead)"),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }).in("status", ["won"]),
+        supabase.from("rep_leads").select("id", { count: "exact", head: true }).in("status", ["lost", "dead"]),
+      ]);
+      return new Response(JSON.stringify({
+        ok: true,
+        stats: {
+          total: tot.count ?? 0,
+          unassigned: un.count ?? 0,
+          dripped: dr.count ?? 0,
+          claimed: cl.count ?? 0,
+          worked: wo.count ?? 0,
+          dead: dd.count ?? 0,
+        },
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "lead_pool_recent") {
+      const limit = Math.min(Math.max(Number(body.limit) || 50, 1), 200);
+      const { data, error } = await supabase
+        .from("rep_leads")
+        .select("id,business_name,industry,location,website,score,why_fit,source,status,claimed_by_code,created_at")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, leads: data || [] }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "delete_lead") {
+      const id = String(body.id || "");
+      if (!id) {
+        return new Response(JSON.stringify({ error: "Missing id" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error } = await supabase.from("rep_leads").delete().eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "get_drip_settings") {
+      const { data, error } = await supabase.from("lead_drip_settings").select("*").maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, settings: data || null }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "update_drip_settings") {
+      const patch = (body.patch || {}) as Record<string, unknown>;
+      const allowed = [
+        "daily_per_rep", "enabled", "require_email", "indianapolis_only",
+        "scraper_enabled", "scraper_target_per_run", "hold_hours", "blocked_keywords",
+      ];
+      const clean: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      for (const k of allowed) if (k in patch) clean[k] = (patch as any)[k];
+      const id = String(body.id || "");
+      if (!id) return new Response(JSON.stringify({ error: "Missing id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const { error } = await supabase.from("lead_drip_settings").update(clean).eq("id", id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "careers_payments") {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("id,email,amount_cents,currency,status,environment,occurred_at,stripe_session_id,metadata")
+        .eq("metadata->>purpose", "careers_test_fee")
+        .order("occurred_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      const rows = data || [];
+      const paid = rows.filter((r: any) => r.status === "paid");
+      const total_cents = paid.reduce((s: number, r: any) => s + (r.amount_cents || 0), 0);
+      const emails = Array.from(new Set(paid.map((r: any) => (r.email || "").toLowerCase()).filter(Boolean)));
+      const attempts_by_email: Record<string, any> = {};
+      if (emails.length) {
+        const { data: at } = await supabase
+          .from("careers_attempts")
+          .select("id,candidate_email,candidate_name,status,score_pct,share_code,submitted_at")
+          .in("candidate_email", emails);
+        for (const a of at || []) {
+          const k = (a.candidate_email || "").toLowerCase();
+          if (!attempts_by_email[k]) attempts_by_email[k] = a;
+        }
+      }
+      // Look up delivery status of the careers-test-access email for these recipients.
+      const email_send_status: Record<string, { status: string; error: string | null; sent_at: string | null }> = {};
+      if (emails.length) {
+        const { data: logs } = await supabase
+          .from("email_send_log")
+          .select("recipient_email,status,error_message,created_at")
+          .eq("template_name", "careers-test-access")
+          .in("recipient_email", emails)
+          .order("created_at", { ascending: false })
+          .limit(2000);
+        for (const l of logs || []) {
+          const k = (l.recipient_email || "").toLowerCase();
+          if (!email_send_status[k]) {
+            email_send_status[k] = { status: l.status, error: l.error_message, sent_at: l.created_at };
+          }
+        }
+      }
+      const siteUrlPub = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
+      return new Response(JSON.stringify({
+        payments: rows,
+        summary: { count: paid.length, total_cents, unique_emails: emails.length },
+        attempts_by_email,
+        email_send_status,
+        test_link_base: `${siteUrlPub}/careers/test?session_id=`,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "send_careers_test_link") {
+      const email = String(body.email || "").trim().toLowerCase();
+      const sessionId = String(body.stripe_session_id || "").trim();
+      if (!email || !sessionId) {
+        return new Response(JSON.stringify({ error: "email and stripe_session_id required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
+      const testUrl = `${siteUrl}/careers/test?session_id=${sessionId}`;
+      const { data: sendData, error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "careers-test-access",
+          recipientEmail: email,
+          idempotencyKey: `careers-test-resend-${sessionId}-${Date.now()}`,
+          templateData: { testUrl },
+        },
+      });
+      if (sendErr) throw sendErr;
+      // Poll email_send_log briefly for confirmation
+      let confirmation: any = null;
+      for (let i = 0; i < 5; i++) {
+        const { data: log } = await supabase
+          .from("email_send_log")
+          .select("status,error_message,created_at,message_id")
+          .eq("template_name", "careers-test-access")
+          .eq("recipient_email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (log) { confirmation = log; if (log.status === 'sent' || log.status === 'suppressed' || log.status === 'failed') break; }
+        await new Promise(r => setTimeout(r, 400));
+      }
+      return new Response(JSON.stringify({ ok: true, testUrl, send: sendData || null, log: confirmation }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
+
+
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },

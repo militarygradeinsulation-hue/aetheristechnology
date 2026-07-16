@@ -32,7 +32,7 @@ const FrictionAuditPage = () => {
   );
 
   const faqs = [
-    { question: 'What is a friction vocabulary audit?', answer: 'An AI-powered scan that identifies the exact words and phrases on your website that are weakening conversions — like hedge words, weak verbs, and corporate jargon — and replaces them with stronger alternatives.' },
+    { question: 'What is a friction vocabulary audit?', answer: 'An AI-powered scan that identifies the exact words and phrases on your website that are weakening conversions, like hedge words, weak verbs, and corporate jargon, and replaces them with stronger alternatives.' },
     { question: 'Why does word choice affect conversions?', answer: 'Hedge words ("might", "could", "try"), passive verbs, and jargon create cognitive friction and erode trust. High-converting copy is direct, specific, and benefits-led.' },
     { question: 'Is the friction audit free?', answer: 'Yes. The basic vocabulary audit is free with no login required.' },
     { question: 'What kind of phrases get flagged?', answer: 'Weak verbs (try, attempt, help), hedge words (might, could, possibly), corporate jargon (synergy, leverage), passive constructions, and vague benefits.' },
@@ -73,7 +73,7 @@ const FrictionAuditPage = () => {
             </div>
             <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
               The Friction Vocabulary Audit is a free AI scan that flags every weak verb, hedge word,
-              and jargon phrase on your site — and gives you a stronger, conversion-tested replacement
+              and jargon phrase on your site, and gives you a stronger, conversion-tested replacement
               for each one.
             </p>
           </div>

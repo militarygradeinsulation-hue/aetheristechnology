@@ -25,7 +25,7 @@ const QUESTIONS = [
     id: 'automation',
     question: 'How much of your workflow is automated?',
     options: [
-      { label: 'Almost nothing — mostly manual', value: 'none', score: 0 },
+      { label: 'Almost nothing, mostly manual', value: 'none', score: 0 },
       { label: 'A few email automations', value: 'minimal', score: 1 },
       { label: 'Key processes are automated', value: 'partial', score: 2 },
       { label: 'End-to-end automation across departments', value: 'full', score: 3 },
@@ -58,7 +58,7 @@ const QUESTIONS = [
       { label: "I know we're losing money somewhere", value: 'certain', score: 0 },
       { label: "Probably leaking but can't pinpoint it", value: 'likely', score: 1 },
       { label: "We've identified some gaps", value: 'aware', score: 2 },
-      { label: 'Systems are tight — minimal leakage', value: 'confident', score: 3 },
+      { label: 'Systems are tight, minimal leakage', value: 'confident', score: 3 },
     ],
   },
 ];
@@ -74,7 +74,7 @@ const getScoreBreakdown = (score: number) => {
     icon: AlertTriangle,
     headline: 'Your Business Is Running Blind',
     description: 'You have significant operational gaps that are almost certainly costing you revenue. A diagnostic would likely uncover 30-50% efficiency gains.',
-    cta: 'You need a full Operational Diagnostic — this is exactly what we fix.',
+    cta: 'You need a full Operational Diagnostic, this is exactly what we fix.',
   };
   if (pct <= 50) return {
     level: 'Needs Work',
@@ -90,7 +90,7 @@ const getScoreBreakdown = (score: number) => {
     color: 'text-blue-400',
     bgColor: 'bg-blue-400/10 border-blue-400/20',
     icon: BarChart3,
-    headline: 'Solid Foundation — Time to Scale',
+    headline: 'Solid Foundation, Time to Scale',
     description: "Your operations are functional but there's significant room for AI-powered optimization. You're leaving growth on the table.",
     cta: 'A Growth Engine engagement would take your systems from good to exceptional.',
   };
@@ -156,7 +156,7 @@ export const AIReadinessAssessment: React.FC = () => {
       });
       trackEvent('assessment_completed', { score: total, email: email.trim() });
     } catch {
-      // Non-blocking — still show results
+      // Non-blocking, still show results
     }
     setSubmitted(true);
     setStep(QUESTIONS.length + 1);

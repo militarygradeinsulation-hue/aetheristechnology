@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, Calendar } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import aetherisLogo from '@/assets/aetheris-new-logo.png';
+import { BOOK_MEETING_URL } from '@/lib/links';
+
+
 
 interface NavbarProps {
   onContactClick: () => void;
 }
+
+type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean; blood?: boolean };
 
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { trackEvent } = useTrackEvent();
   const navigate = useNavigate();
+  const location = useLocation();
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -24,8 +29,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     if (tapCountRef.current >= 3) {
       e.preventDefault();
       tapCountRef.current = 0;
-      // Land on the staff entry chooser. It clears any stored token and
-      // forces an explicit code entry — no silent re-auth.
       navigate('/staff');
       return;
     }
@@ -35,125 +38,144 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems: { label: string; href: string; special?: boolean; tone?: 'red' | 'yellow' }[] = [
-    { label: 'Home', href: '/', special: true },
-    { label: 'The Leak Audit', href: '/diagnostic', tone: 'red' },
+  const navItems: NavItem[] = [
+    { label: 'Home', href: '/home', blood: true },
+    { label: 'Tech Solutions', href: '/tech-solutions', accent: true },
+    { label: 'Case Studies', href: '/case-studies' },
     { label: 'Industries', href: '/industries' },
-    { label: 'Methodology', href: '/methodology' },
-    { label: 'About', href: '/about' },
     { label: 'Field Notes', href: '/blog' },
     { label: 'Playbooks', href: '/resources' },
     { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers', tone: 'yellow' },
+    { label: 'Careers', href: '/careers', accent: true },
   ];
 
-  const showStickyCTA = true;
+  const showStickyCTA = !location.pathname.startsWith('/careers');
   const expanded = isHovered || isMobileMenuOpen;
+
+  const isActive = (href: string) =>
+    href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass py-4' : 'bg-transparent py-6'
+        isScrolled
+          ? 'glass py-3 border-b border-amber/15'
+          : 'bg-transparent py-5'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center space-x-3" onClick={handleLogoTap}>
-            <img 
-              src={aetherisLogo} 
-              alt="Aetheris Business Forensics" 
-              className="w-20 h-20 object-contain select-none transition-transform duration-300 ease-out hover:scale-125"
-              draggable={false}
-            />
-          </Link>
-
-          <div className="hidden md:flex items-center gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`premium-pill-btn whitespace-nowrap ${
-                  item.tone === 'red'
-                    ? '!text-crimson'
-                    : item.tone === 'yellow'
-                    ? '!text-yellow-400'
-                    : item.special
-                    ? '!text-amber'
-                    : ''
-                }`}
-                onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
-          <div className="ml-auto hidden md:block" />
-
+        <div className="flex items-center gap-3 lg:gap-10">
           <button
-            className="md:hidden ml-auto text-foreground"
+            className="lg:hidden text-foreground p-2 -ml-2 order-first"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
+
+
+
+          {/* Desktop nav, quiet text rail */}
+          <div className="hidden lg:flex items-center gap-7 flex-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              if (item.kind === 'case') {
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
+                    className="group flex items-center gap-2 pl-2.5 border-l-2 border-amber/70 hover:border-amber transition-colors"
+                  >
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber/80 group-hover:text-amber transition-colors">
+                      Case ·
+                    </span>
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber font-semibold">
+                      Leak Audit
+                    </span>
+                  </Link>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar' })}
+                  className={`relative whitespace-nowrap font-edge uppercase text-[15px] tracking-[0.14em] transition-colors duration-200 after:content-[''] after:absolute after:left-0 after:-bottom-1.5 after:h-[1.5px] after:transition-transform after:duration-300 after:origin-right hover:after:origin-left ${
+                    item.blood
+                      ? `text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold after:bg-[hsl(0_75%_32%)] after:w-full ${active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'}`
+                      : active
+                      ? 'text-amber after:bg-amber after:w-full after:scale-x-100'
+                      : item.accent
+                      ? 'text-amber/90 hover:text-amber font-semibold after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                      : 'text-foreground/90 hover:text-amber after:bg-amber after:w-full after:scale-x-0 hover:after:scale-x-100'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <Link to="/home" className="flex items-center shrink-0 ml-auto" onClick={handleLogoTap} aria-label="Aetheris home">
+            <img src="/aetheris-logo.png" alt="Aetheris" className="h-12 w-auto object-contain rounded-full" />
+          </Link>
+
+          {/* CTA removed per operator request */}
+
         </div>
 
+        {/* Mobile sheet, same hierarchy: quiet links + one amber CTA */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 glass rounded-lg p-4 space-y-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`block transition-colors ${
-                  item.tone === 'red'
-                    ? 'text-crimson hover:text-crimson/80 font-semibold'
-                    : item.tone === 'yellow'
-                    ? 'text-yellow-400 hover:text-yellow-300 font-semibold'
-                    : item.special
-                    ? 'text-amber hover:text-amber/80 font-semibold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link to="/contact" onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: 'nav_contact', location: 'navbar_mobile' }); }}>
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Contact Us
-              </Button>
-            </Link>
+          <div className="lg:hidden mt-4 glass border border-amber/15 rounded-lg p-5 space-y-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              if (item.kind === 'case') {
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
+                    className="flex items-center gap-2 py-2.5 pl-3 border-l-2 border-amber/70"
+                  >
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber/80">Case ·</span>
+                    <span className="font-case text-[10px] uppercase tracking-[0.22em] text-amber font-semibold">Leak Audit</span>
+                  </Link>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => { setIsMobileMenuOpen(false); trackEvent('click', { label: `nav_${item.label.toLowerCase()}`, location: 'navbar_mobile' }); }}
+                  className={`block py-2.5 font-edge uppercase text-base tracking-[0.14em] transition-colors ${
+                    item.blood
+                      ? 'text-[hsl(0_75%_32%)] hover:text-[hsl(0_85%_45%)] font-bold'
+                      : active
+                      ? 'text-amber font-semibold'
+                      : item.accent
+                      ? 'text-amber/90 hover:text-amber font-semibold'
+                      : 'text-foreground/80 hover:text-amber font-medium'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+            {/* Mobile CTA removed per operator request */}
           </div>
         )}
       </div>
 
-      {showStickyCTA && (
-        <div
-          className={`bg-amber overflow-hidden transition-all duration-300 ${
-            expanded ? 'max-h-12 py-1.5 opacity-100' : 'max-h-0 py-0 opacity-0 pointer-events-none'
-          } px-4 text-center`}
-        >
-          <a
-            href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-foreground text-sm font-bold hover:underline inline-flex items-center gap-1"
-            onClick={() => trackEvent('click', { label: 'sticky_cta_book_call', location: 'navbar_sticky' })}
-          >
-            Book a 15-min call with the Operator →
-          </a>
-        </div>
-      )}
+      {/* Sticky CTA removed per operator request */}
+
     </nav>
   );
 };

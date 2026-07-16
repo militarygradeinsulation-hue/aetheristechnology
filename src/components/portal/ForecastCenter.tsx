@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -34,7 +35,7 @@ const ALL_SECTIONS: { key: SectionKey; label: string }[] = [
 const STORAGE_KEY = "aetheris_forecast_user_sections_v1";
 
 const formatAge = (h: number | null): string => {
-  if (h == null) return "—";
+  if (h == null) return ", ";
   if (h < 1) return `${Math.round(h * 60)}m ago`;
   if (h < 24) return `${Math.round(h)}h ago`;
   return `${Math.round(h / 24)}d ago`;
@@ -100,7 +101,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         description: looks401 && authMode === "admin"
           ? "Your admin session may have expired. Sign out and re-enter your PIN at /admin/login."
           : looks401
-            ? "Session expired — please sign in again."
+            ? "Session expired, please sign in again."
             : msg,
         variant: "destructive",
       });
@@ -279,11 +280,17 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
         {/* TIP OF THE DAY */}
         {visible.tip && briefing.tip?.headline && (
           <section className="rounded-lg border border-amber/30 bg-amber/5 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Lightbulb className="w-4 h-4 text-amber" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
-                Tip of the Day{briefing.tip.tag ? ` · ${briefing.tip.tag}` : ""}
-              </p>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-amber" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
+                  Tip of the Day{briefing.tip.tag ? ` · ${briefing.tip.tag}` : ""}
+                </p>
+              </div>
+              <ReadAloudButton
+                text={`Tip of the day. ${briefing.tip.headline}. ${briefing.tip.body || ''}`}
+                variant="ghost"
+              />
             </div>
             <h3 className="font-display text-lg font-semibold text-foreground">{briefing.tip.headline}</h3>
             <p className="text-sm text-muted-foreground mt-2">{briefing.tip.body}</p>
@@ -295,7 +302,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
           <section>
             <div className="flex items-center gap-2 mb-3">
               <GraduationCap className="w-4 h-4 text-amber" />
-              <h3 className="font-display font-semibold">Operator Education — Read Today</h3>
+              <h3 className="font-display font-semibold">Operator Education, Read Today</h3>
               <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{briefing.education!.length}</Badge>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -362,7 +369,7 @@ export const ForecastCenter: React.FC<Props> = ({ isPartner, authMode = "portal"
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4 text-amber" />
-              <h3 className="font-display font-semibold">Target Companies — Hunt Today</h3>
+              <h3 className="font-display font-semibold">Target Companies, Hunt Today</h3>
               <Badge variant="outline" className="text-[10px] border-amber/30 text-amber">{briefing.companies.length}</Badge>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">

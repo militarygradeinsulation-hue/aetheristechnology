@@ -90,7 +90,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
       { name: "mqlDef", label: "How is an MQL defined today (if at all)?", type: "textarea", required: true },
       { name: "handoffPain", label: "What breaks at the marketing→sales handoff?", type: "textarea", required: true },
     ])},
-  { priceId: "sales_coaching_retainer_monthly", title: "Sales Coaching Kickoff", tier: "Recurring",
+  { priceId: "sales_coaching_active case_monthly", title: "Sales Coaching Kickoff", tier: "Recurring",
     intake: I([
       { name: "reps", label: "Reps in the program (names + tenure)", type: "textarea", required: true },
       { name: "focusAreas", label: "Top focus areas", type: "textarea", required: true },
@@ -106,7 +106,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     intake: I([
       { name: "dataSources", label: "Customer data sources you can share (emails, Slack, support tickets, reviews...)", type: "textarea", required: true },
       { name: "currentPositioning", label: "Current positioning / messaging in one paragraph", type: "textarea", required: true },
-      { name: "competitors", label: "Top 2–3 competitors", type: "text" },
+      { name: "competitors", label: "Top 2-3 competitors", type: "text" },
     ])},
   { priceId: "revenue_leak_detector_once", title: "The Revenue Leak Detector", tier: "1M IQ · Core",
     intake: I([
@@ -119,7 +119,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     intake: I([
       { name: "currentCopy", label: "Paste current homepage hero / primary messaging", type: "textarea", required: true },
       { name: "buyerEmotions", label: "What you THINK your buyer feels before buying", type: "textarea", required: true },
-      { name: "competitorCopy", label: "1–2 competitor headlines for contrast", type: "textarea" },
+      { name: "competitorCopy", label: "1-2 competitor headlines for contrast", type: "textarea" },
     ])},
   { priceId: "opportunity_radar_once", title: "The Opportunity Radar", tier: "1M IQ · Core",
     intake: I([
@@ -233,7 +233,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     ])},
   { priceId: "account_growth_accelerator_monthly", title: "Account Growth Accelerator", tier: "1M IQ · Strategic",
     intake: I([
-      { name: "keyAccounts", label: "Top 10–20 key accounts (names + spend)", type: "textarea", required: true },
+      { name: "keyAccounts", label: "Top 10-20 key accounts (names + spend)", type: "textarea", required: true },
       { name: "expansionLevers", label: "Expansion levers in your model (seats, modules, departments)", type: "textarea", required: true },
     ])},
   { priceId: "operational_excellence_once", title: "Operational Excellence Auditor", tier: "1M IQ · Strategic",
@@ -252,7 +252,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
   { priceId: "disruption_predictor_once", title: "Disruption Predictor", tier: "1M IQ · Strategic",
     intake: I([
       { name: "industry", label: "Industry + sub-segment", type: "text", required: true },
-      { name: "currentModel", label: "Your current business model in 2–3 sentences", type: "textarea", required: true },
+      { name: "currentModel", label: "Your current business model in 2-3 sentences", type: "textarea", required: true },
       { name: "watchlist", label: "Players / tech you already watch", type: "textarea" },
     ])},
   { priceId: "org_structure_optimizer_once", title: "Org Structure Optimizer", tier: "1M IQ · Strategic",
@@ -263,7 +263,7 @@ export const FORENSICS_SYSTEMS: ForensicsSystem[] = [
     ])},
 ];
 
-// Public checkout is disabled for these priceIds — they render a red "Coming Soon"
+// Public checkout is disabled for these priceIds, they render a red "Coming Soon"
 // badge on /services and cannot be added to the Mix & Match bundle. Admins can
 // still run them free-of-charge from the Admin → Forensics Systems panel.
 // To re-enable sales, remove the priceId from this set.
@@ -272,7 +272,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   // Monthly variants surfaced in ServicesPricing but not in this catalog
   "crm_health_check_monthly",
   "lead_flow_mapper_monthly",
-  // 1M IQ Innovations — net-new categories, public checkout disabled
+  // 1M IQ Innovations, net-new categories, public checkout disabled
   "obsession_engine_once", "obsession_engine_monthly",
   "revenue_leak_detector_once", "revenue_leak_detector_monthly",
   "messaging_psychologist_once", "messaging_psychologist_monthly",
@@ -283,7 +283,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "unfair_advantage_detector_once",
   "ltv_maximizer_once",
   "pmf_predictor_once",
-  // More 1M IQ Innovations (#11–#20, distinct from prior set)
+  // More 1M IQ Innovations (#11-#20, distinct from prior set)
   "conversation_intelligence_monthly",
   "deal_momentum_predictor_monthly",
   "competitive_stealing_blueprint_monthly",
@@ -291,7 +291,7 @@ export const COMING_SOON_PRICE_IDS: ReadonlySet<string> = new Set<string>([
   "product_usage_optimization_monthly",
   "customer_research_automation_monthly",
   "sales_team_cloning_monthly",
-  // 1M IQ Innovations #31–#40 (skipped #34, #37 — overlap with Customer Research Automation)
+  // 1M IQ Innovations #31-#40 (skipped #34, #37, overlap with Customer Research Automation)
   "hiring_predictor_monthly",
   "customer_health_score_monthly",
   "territory_intelligence_once",

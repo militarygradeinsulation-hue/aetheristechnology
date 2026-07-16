@@ -6,12 +6,19 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
-import { generatePreviewPdf, type FullReport } from '@/lib/generateScanReport';
+import { generatePreviewPdf, generateFullReport, type FullReport } from '@/lib/generateScanReport';
+import { LeakChart } from '@/components/LeakChart';
 import { useAuth } from '@/contexts/AuthContext';
 import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { hasValidAdminToken } from '@/lib/adminAuth';
+import { suggestToolsForGap } from '@/lib/repToolTips';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { Wrench } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChaosScanReport } from '@/components/ChaosScanReport';
+import { scanResultToChaos } from '@/lib/toolChaosAdapters';
 
 interface Gap {
   category: string;
@@ -74,9 +81,23 @@ const ScoreGauge = ({ score, grade }: { score: number; grade?: string }) => {
   );
 };
 
-const GapCard = ({ gap, index, onFixClick, isLocked }: { gap: Gap; index: number; onFixClick: () => void; isLocked?: boolean }) => {
+const TOOL_HREF: Record<string, string> = {
+  'all-in-one': '#',
+  'leak-audit': '/leak-audit',
+  'scan': '/scan',
+  'business-diagnostic': '/business-diagnostic',
+  'sales-scripts': '/sales-scripts',
+  'follow-up-plan': '/follow-up-plan',
+  'strategic-questions': '/strategic-questions',
+  'brand-contradictions': '/brand-contradictions',
+  'friction-audit': '/friction-audit',
+  'business-post-analyst': 'https://businesspostanalyst.lovable.app/',
+};
+
+const GapCard = ({ gap, index, onFixClick, isLocked, showRepSuggestions }: { gap: Gap; index: number; onFixClick: () => void; isLocked?: boolean; showRepSuggestions?: boolean }) => {
   const config = severityConfig[gap.severity];
   const Icon = config.icon;
+  const suggestions = showRepSuggestions && !isLocked ? suggestToolsForGap(gap) : [];
 
   return (
     <motion.div
@@ -104,11 +125,37 @@ const GapCard = ({ gap, index, onFixClick, isLocked }: { gap: Gap; index: number
           <h4 className="font-semibold text-foreground mt-1">{gap.title}</h4>
           <p className="text-sm text-muted-foreground mt-1">{gap.description}</p>
           {gap.annualCost && (
-            <div className="mt-2 flex flex-wrap gap-3 text-xs">
+            <div className="mt-2 flex flex-col gap-1 text-xs">
               <span className="text-destructive font-bold flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> Est. Leak: {gap.annualCost}
+                <DollarSign className="w-3 h-3" /> Est. Lead Loss: {gap.annualCost} / yr
               </span>
-              {gap.projectedROI && <span className="text-primary font-medium">ROI: {gap.projectedROI}</span>}
+              {gap.projectedROI && (
+                <span className="text-primary/80 text-[11px]">Potential ROI once fixed: {gap.projectedROI}</span>
+              )}
+            </div>
+          )}
+          {suggestions.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-amber/20">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-1.5 flex items-center gap-1">
+                <Wrench className="w-3 h-3" /> Rep tools for this gap
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((s, i) => {
+                  const href = TOOL_HREF[s.key] || '#';
+                  const external = href.startsWith('http');
+                  const inner = (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-amber/40 bg-amber/10 hover:bg-amber/20 px-2 py-1 text-[11px] text-foreground transition-colors" title={s.why}>
+                      <Wrench className="w-3 h-3 text-amber" /> {s.name}
+                    </span>
+                  );
+                  return external ? (
+                    <a key={i} href={href} target="_blank" rel="noopener noreferrer">{inner}</a>
+                  ) : (
+                    <Link key={i} to={href}>{inner}</Link>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5 italic">{suggestions[0].why}</p>
             </div>
           )}
         </div>
@@ -153,16 +200,34 @@ const ScanProgressBar = ({ phase }: { phase: number }) => {
   );
 };
 
+const parseCost = (raw: string): number => {
+  if (!raw) return 0;
+  const s = raw.toLowerCase().replace(/,/g, '');
+  // Match the FIRST number in the string (handles ranges like "$50k-$120k")
+  const m = s.match(/(\d+(?:\.\d+)?)\s*([kmb])?/);
+  if (!m) return 0;
+  let n = parseFloat(m[1]);
+  const suffix = m[2];
+  if (suffix === 'k') n *= 1_000;
+  else if (suffix === 'm') n *= 1_000_000;
+  else if (suffix === 'b') n *= 1_000_000_000;
+  return n;
+};
+
+// Realistic per-gap cap for SMB website leaks
+const PER_GAP_CAP = 500_000;
+const TOTAL_CAP = 2_500_000;
+
 const RevenueBanner = ({ gaps }: { gaps: Gap[] }) => {
   const costs = gaps
     .map(g => g.annualCost)
     .filter(Boolean)
-    .map(c => parseInt(c!.replace(/[^0-9]/g, ''), 10))
-    .filter(n => !isNaN(n));
+    .map(c => Math.min(parseCost(c!), PER_GAP_CAP))
+    .filter(n => n > 0);
   if (costs.length === 0) return null;
-  const total = costs.reduce((a, b) => a + b, 0);
-  const low = Math.round(total * 0.8);
-  const high = Math.round(total * 1.3);
+  const total = Math.min(costs.reduce((a, b) => a + b, 0), TOTAL_CAP);
+  const low = Math.round(total * 0.7);
+  const high = Math.round(total * 1.2);
   const fmt = (n: number) => '$' + n.toLocaleString();
 
   return (
@@ -172,7 +237,7 @@ const RevenueBanner = ({ gaps }: { gaps: Gap[] }) => {
       className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center mb-6"
     >
       <p className="text-sm text-destructive font-medium mb-1">Estimated Annual Revenue Leaks</p>
-      <p className="text-2xl font-bold text-destructive">{fmt(low)} – {fmt(high)}</p>
+      <p className="text-2xl font-bold text-destructive">{fmt(low)} - {fmt(high)}</p>
     </motion.div>
   );
 };
@@ -200,6 +265,9 @@ const tierCards = [
 
 export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock = false }: { onContactClick: () => void; hideHeader?: boolean; staffUnlock?: boolean }) => {
   const [url, setUrl] = useState('');
+  useActiveLeadAutofill('website-scanner', (lead) => {
+    if (lead.website) setUrl(lead.website);
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [scanPhase, setScanPhase] = useState(0);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -258,7 +326,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
       if (isPortalSession() || hasValidAdminToken()) {
         saveToolRun({
           tool_type: 'website_scan',
-          title: `${url.trim()} — Website scan — ${new Date().toLocaleDateString()}`,
+          title: `${url.trim()}, Website scan, ${new Date().toLocaleDateString()}`,
           input_data: { url: url.trim() },
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -276,8 +344,13 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
 
   const handleDownloadPreview = () => {
     if (!result) return;
-    generatePreviewPdf(result);
-    trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    if (isUnlocked) {
+      generateFullReport(result);
+      trackEvent('scan_full_downloaded', { url: url.trim(), score: result.score });
+    } else {
+      generatePreviewPdf(result);
+      trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    }
   };
 
   const handleFixClick = (isVisible: boolean) => {
@@ -308,7 +381,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               Scan Your Website for <span className="text-primary">Hidden Gaps</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities — in under 30 seconds.
+              Enter your URL and our AI will analyze your site for SEO issues, weak CTAs, messaging gaps, and missed conversion opportunities, in under 30 seconds.
             </p>
           </div>
         )}
@@ -381,14 +454,21 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Score */}
+              {/* Chaos-theory mind map of every gap + its dollar leak */}
+              <ChaosScanReport
+                data={scanResultToChaos(url.trim(), result.companyName, result.gaps)}
+                className="mb-6"
+              />
+
+              {/* LOST LEADS + LEAK GRAPH */}
+              <LeakChart gaps={result.gaps} className="mb-6" />
+
+              {/* Then the health score (context, not the headline) */}
               <div className="text-center mb-6">
                 <p className="text-sm text-muted-foreground mb-2">Your Digital Health Score</p>
                 <ScoreGauge score={result.score} grade={result.grade} />
               </div>
 
-              {/* Revenue Leak Banner */}
-              <RevenueBanner gaps={result.gaps} />
 
               {/* Visible gaps */}
               <div className="space-y-3">
@@ -399,6 +479,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                     index={i}
                     onFixClick={() => handleFixClick(i < VISIBLE_GAPS)}
                     isLocked={!isUnlocked && i >= VISIBLE_GAPS}
+                    showRepSuggestions={staffUnlock}
                   />
                 ))}
               </div>
@@ -410,7 +491,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <FileDown className="w-3.5 h-3.5" />
-                  Download Preview PDF
+                  {isUnlocked ? 'Download Full Report PDF' : 'Download Preview PDF'}
                 </button>
               </div>
 
@@ -477,7 +558,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                     </div>
 
                     <p className="text-xs italic text-muted-foreground text-center max-w-sm">
-                      "I didn't ask for your business. This is free. I find problems. I show the math. If you want them fixed — that's when I go to work."
+                      "I didn't ask for your business. This is free. I find problems. I show the math. If you want them fixed, that's when I go to work."
                     </p>
                   </div>
                 </div>

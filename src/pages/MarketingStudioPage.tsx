@@ -7,7 +7,7 @@ const MarketingStudioPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEOHead
-        title="Hook AI — Free Post Creator | Aetheris AI"
+        title="Hook AI, Free Post Creator | Aetheris AI"
         description="Create scroll-stopping marketing posts with Hook AI. Free tool, no login required. Built by Aetheris AI."
         path="/marketing-studio"
       />
@@ -19,7 +19,7 @@ const MarketingStudioPage = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Aetheris AI
         </Link>
-        <span className="text-muted-foreground/50">|</span>
+        <span className="text-muted-foreground">|</span>
         <span className="text-sm font-semibold text-foreground">Hook AI</span>
         <span className="ml-auto text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-medium">Free Tool</span>
       </div>

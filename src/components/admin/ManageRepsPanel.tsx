@@ -15,6 +15,7 @@ import {
   sendRepTestEmail,
   type RepCodeRow,
 } from "@/lib/repCodes";
+import { revokeRepAccess } from "@/lib/hireTeams";
 
 const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) => {
   const { toast } = useToast();
@@ -145,9 +146,14 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
   };
 
   const onDelete = async (id: string, name: string) => {
-    if (!confirm(`Remove ${name}? This deletes their code, notes, library, and settings.`)) return;
-    try { await deleteRepCode(id); toast({ title: "Removed" }); await load(); }
-    catch (e) { toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" }); }
+    const row = rows.find(r => r.id === id);
+    if (!row) return;
+    if (!confirm(`Remove ${name}?\n\nThis instantly revokes their portal LOGIN and deletes their code, mailbox, notes, library, and settings. Cannot be undone.`)) return;
+    try {
+      const res = await revokeRepAccess(row.code);
+      toast({ title: "Removed", description: res.auth_deleted ? "Login deleted. They cannot sign in." : "Rep deleted. No auth user was found." });
+      await load();
+    } catch (e) { toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" }); }
   };
 
   return (
@@ -183,13 +189,13 @@ const ManageRepsPanel: React.FC<{ scope: "admin" | "partner" }> = ({ scope }) =>
         <div className="rounded-md border border-border/60 p-3 bg-muted/20">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Add a rep</div>
           <div className="text-[11px] text-muted-foreground mb-2">
-            Just enter a name — we'll auto-generate a 6-digit rep ID and an <span className="font-mono">@aetheris.technology</span> email. You can override either field if you want.
+            Just enter a name, we'll auto-generate a 6-digit rep ID and an <span className="font-mono">@aetheris.technology</span> email. You can override either field if you want.
           </div>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-2">
             <Input placeholder="Code (auto)" value={draft.code} onChange={e => setDraft(s => ({ ...s, code: e.target.value.replace(/\D/g, "").slice(0, 12) }))} />
             <Input placeholder="Full name (required)" value={draft.rep_name} onChange={e => setDraft(s => ({ ...s, rep_name: e.target.value }))} className="md:col-span-2" />
             <Input placeholder="Email (auto)" value={draft.rep_email} onChange={e => setDraft(s => ({ ...s, rep_email: e.target.value }))} />
-            <Input placeholder="Rate (tiered — ignored)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} title="Commission rate is now tier-based (T1 30% / T2 25% / T3 20%) and resolved per sale. This field is kept for legacy data only." />
+            <Input placeholder="Rate (tiered, ignored)" value={draft.commission_rate} onChange={e => setDraft(s => ({ ...s, commission_rate: e.target.value }))} title="Commission rate is now tier-based (T1 30% / T2 25% / T3 20%) and resolved per sale. This field is kept for legacy data only." />
             <div className="flex gap-2">
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={draft.role} onChange={e => setDraft(s => ({ ...s, role: e.target.value as "rep" | "partner" }))}>
                 <option value="rep">rep</option>

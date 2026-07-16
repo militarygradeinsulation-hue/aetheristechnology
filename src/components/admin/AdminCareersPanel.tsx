@@ -1,18 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { openRepMail } from '@/lib/repMail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import {
   Loader2, RefreshCw, Briefcase, Eye, MousePointerClick, Users, FileText,
   CheckCircle2, XCircle, Mail, Phone, ExternalLink, Search, Sparkles, PhoneCall,
-  ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote
+  ArrowDownAZ, ArrowUpAZ, CalendarCheck, Clock, Ban, StickyNote, Send,
+  Star, CalendarPlus, Share2, Copy, Trash2, ChevronDown, ChevronRight, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { AdminCareersTest } from './AdminCareersTest';
+import { AdminCareersPayments } from './AdminCareersPayments';
+import { upsertCompanyEntry } from '@/lib/companyCalendar';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 interface Attempt {
   id: string;
@@ -53,8 +59,18 @@ interface Application {
   ai_summary?: string | null;
   ai_strengths?: string[] | null;
   ai_concerns?: string[] | null;
+  ai_section_scores?: Record<string, { rating: number; reason: string }> | null;
   ai_analyzed_at?: string | null;
 }
+
+const SECTION_LABELS: [string, string][] = [
+  ['b2b_sales_experience',     'B2B Sales Experience'],
+  ['closing_track_record',     'Closing Track Record'],
+  ['communication_confidence', 'Communication & Confidence'],
+  ['hustle_ownership',         'Hustle & Ownership'],
+  ['domain_fit',               'Domain Fit'],
+  ['resilience_tenure',        'Resilience & Tenure'],
+];
 
 interface Analytics {
   total_views: number;
@@ -76,7 +92,109 @@ export const AdminCareersPanel: React.FC = () => {
   const [minFitScore, setMinFitScore] = useState<string>('');
   const [contactFilter, setContactFilter] = useState<'any' | 'not' | 'yes'>('any');
   const [fitSort, setFitSort] = useState<'none' | 'desc' | 'asc'>('none');
-  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no'>('all');
+  const [stageFilter, setStageFilter] = useState<'all' | 'new' | 'interview' | 'wait' | 'no' | 'archived'>('all');
+  const [ageFilter, setAgeFilter] = useState<'all' | '7' | '30' | '90' | 'over30' | 'over90'>('all');
+  const [minimized, setMinimized] = useState<boolean>(() => {
+    try { return localStorage.getItem('aetheris_careers_minimized') !== '0'; } catch { return true; }
+  });
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleMinimized = () => {
+    setMinimized(m => {
+      const next = !m;
+      try { localStorage.setItem('aetheris_careers_minimized', next ? '1' : '0'); } catch {}
+      if (next) setExpandedIds(new Set());
+      return next;
+    });
+  };
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  };
+  const [bulkBusy, setBulkBusy] = useState<string | null>(null);
+  const [detailAttempt, setDetailAttempt] = useState<Attempt | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('aetheris_saved_candidates') || '[]')); }
+    catch { return new Set(); }
+  });
+  const persistSaved = (s: Set<string>) => {
+    setSavedIds(new Set(s));
+    localStorage.setItem('aetheris_saved_candidates', JSON.stringify(Array.from(s)));
+  };
+  const toggleSaved = (id: string) => {
+    const next = new Set(savedIds);
+    if (next.has(id)) { next.delete(id); toast({ title: 'Removed from saved' }); }
+    else { next.add(id); toast({ title: 'Saved candidate ★' }); }
+    persistSaved(next);
+  };
+  const [calDate, setCalDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [calTime, setCalTime] = useState<string>('10:00');
+  const [calBusy, setCalBusy] = useState(false);
+  const [shareNote, setShareNote] = useState<string>('');
+
+  const matchingApp = useMemo(
+    () => detailAttempt
+      ? applications.find(app =>
+          app.candidate_email.toLowerCase() === detailAttempt.candidate_email.toLowerCase()
+          || (detailAttempt.share_code && app.share_code === detailAttempt.share_code)
+        ) || null
+      : null,
+    [detailAttempt, applications]
+  );
+
+  const moveToCalendar = async () => {
+    if (!detailAttempt) return;
+    setCalBusy(true);
+    try {
+      const who = detailAttempt.candidate_name || detailAttempt.candidate_email;
+      const body = [
+        `Candidate: ${who}`,
+        `Email: ${detailAttempt.candidate_email}`,
+        detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+        detailAttempt.score_pct != null ? `Test score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+        `Interview time: ${calTime}`,
+        detailAttempt.notes_to_admin ? `Notes from candidate: ${detailAttempt.notes_to_admin}` : '',
+      ].filter(Boolean).join('\n');
+      await upsertCompanyEntry({
+        date: calDate,
+        kind: 'event',
+        title: `Interview ${calTime}, ${who}`,
+        body,
+        pinned: true,
+        color: 'cat:interview',
+      });
+      toast({ title: 'Added to Company Calendar', description: `${calDate} at ${calTime}` });
+    } catch (e) {
+      toast({ title: 'Failed to add to calendar', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setCalBusy(false); }
+  };
+
+  const buildShareText = () => {
+    if (!detailAttempt) return '';
+    const lines = [
+      `Candidate: ${detailAttempt.candidate_name || ', '}`,
+      `Email: ${detailAttempt.candidate_email}`,
+      detailAttempt.candidate_phone ? `Phone: ${detailAttempt.candidate_phone}` : '',
+      detailAttempt.score_pct != null ? `Score: ${detailAttempt.score_pct}% (${detailAttempt.correct_count}/${detailAttempt.total_count})` : '',
+      detailAttempt.notes_to_admin ? `Candidate note: "${detailAttempt.notes_to_admin}"` : '',
+      matchingApp?.ai_summary ? `AI summary: ${matchingApp.ai_summary}` : '',
+      matchingApp?.ai_fit_score != null ? `AI fit score: ${matchingApp.ai_fit_score}/60` : '',
+      shareNote ? `\nNotes:\n${shareNote}` : '',
+    ].filter(Boolean);
+    return lines.join('\n');
+  };
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      toast({ title: 'Copied to clipboard' });
+    } catch {
+      toast({ title: 'Copy failed', variant: 'destructive' });
+    }
+  };
+
+  const emailShare = () => {
+    const subject = `Candidate: ${detailAttempt?.candidate_name || detailAttempt?.candidate_email || ''}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildShareText())}`;
+  };
 
   const load = async () => {
     setLoading(true);
@@ -99,31 +217,68 @@ export const AdminCareersPanel: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : '—';
+  const fmt = (s: string | null | undefined) => s ? new Date(s).toLocaleString() : ', ';
   const q = filter.trim().toLowerCase();
   const minTest = minTestScore === '' ? null : Number(minTestScore);
   const minFit = minFitScore === '' ? null : Number(minFitScore);
   const matchesText = (name: string | null, email: string, code: string | null) =>
     !q || (name || '').toLowerCase().includes(q) || email.toLowerCase().includes(q) || (code || '').toLowerCase().includes(q);
+
+  const now = Date.now();
+  const ageDays = (iso: string | null | undefined) => iso ? (now - new Date(iso).getTime()) / 86400000 : 0;
+  const matchesAge = (iso: string | null | undefined) => {
+    if (ageFilter === 'all') return true;
+    const d = ageDays(iso);
+    if (ageFilter === '7') return d <= 7;
+    if (ageFilter === '30') return d <= 30;
+    if (ageFilter === '90') return d <= 90;
+    if (ageFilter === 'over30') return d > 30;
+    if (ageFilter === 'over90') return d > 90;
+    return true;
+  };
+
   const filteredAttempts = attempts.filter(a =>
     matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-    (minTest == null || (a.score_pct ?? -1) >= minTest)
+    (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+    matchesAge(a.submitted_at || a.started_at)
   );
   const passedAttempts = filteredAttempts.filter(a => a.status === 'passed');
+
+  // Count attempts per candidate (keyed by lowercased email).
+  const attemptCountByEmail = React.useMemo(() => {
+    const m: Record<string, number> = {};
+    attempts.forEach(at => {
+      const k = (at.candidate_email || '').toLowerCase().trim();
+      if (!k) return;
+      m[k] = (m[k] || 0) + 1;
+    });
+    return m;
+  }, [attempts]);
+  const countFor = (email: string | null | undefined) =>
+    attemptCountByEmail[(email || '').toLowerCase().trim()] || 0;
   const filteredApps = applications
-    .filter(a =>
-      matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
-      (minTest == null || (a.score_pct ?? -1) >= minTest) &&
-      (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
-      (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
-      (stageFilter === 'all' || (a.stage || 'new') === stageFilter)
-    )
+    .filter(a => {
+      const stage = a.stage || 'new';
+      // By default hide archived unless user is looking at "all" with age > filter or explicitly at "archived"
+      if (stageFilter === 'all' && stage === 'archived') return false;
+      return (
+        matchesText(a.candidate_name, a.candidate_email, a.share_code) &&
+        (minTest == null || (a.score_pct ?? -1) >= minTest) &&
+        (minFit == null || (a.ai_fit_score ?? -1) >= minFit) &&
+        (contactFilter === 'any' || (contactFilter === 'yes' ? !!a.contacted : !a.contacted)) &&
+        (stageFilter === 'all' || stage === stageFilter) &&
+        matchesAge(a.created_at)
+      );
+    })
     .sort((a, b) => {
       if (fitSort === 'none') return 0;
       const av = a.ai_fit_score ?? -1;
       const bv = b.ai_fit_score ?? -1;
       return fitSort === 'desc' ? bv - av : av - bv;
     });
+
+  const archivedCount = applications.filter(a => (a.stage || 'new') === 'archived').length;
+
 
   const openResume = async (shareCode: string) => {
     const popup = window.open('', '_blank');
@@ -182,9 +337,10 @@ export const AdminCareersPanel: React.FC = () => {
         ai_summary: d.summary,
         ai_strengths: d.strengths,
         ai_concerns: d.concerns,
+        ai_section_scores: d.section_scores || a.ai_section_scores || null,
         ai_analyzed_at: new Date().toISOString(),
       } : a));
-      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/100` });
+      if (!opts?.silent) toast({ title: `Fit score: ${d.fit_score}/60` });
       return d.fit_score as number;
     } catch (e) {
       if (!opts?.silent) toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -199,7 +355,7 @@ export const AdminCareersPanel: React.FC = () => {
   const analyzeAllPassed = async (onlyMissing = true) => {
     const targets = applications.filter(a => a.resume_path && (!onlyMissing || a.ai_fit_score == null));
     if (!targets.length) {
-      toast({ title: onlyMissing ? 'All passed candidates already analyzed' : 'No passed candidates with resumes' });
+      toast({ title: onlyMissing ? 'All applicants with resumes are already analyzed' : 'No applicants with resumes' });
       return;
     }
     setBulkAnalyze({ done: 0, total: targets.length, current: null, recent: [] });
@@ -257,7 +413,7 @@ export const AdminCareersPanel: React.FC = () => {
   };
 
   const [stageSavingId, setStageSavingId] = useState<string | null>(null);
-  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no') => {
+  const setStage = async (shareCode: string, stage: 'new' | 'interview' | 'wait' | 'no' | 'archived') => {
     setStageSavingId(shareCode);
     const prev = applications;
     setApplications(p => p.map(a => a.share_code === shareCode ? { ...a, stage } : a));
@@ -281,6 +437,152 @@ export const AdminCareersPanel: React.FC = () => {
     }, 700);
   };
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const deleteApplication = async (a: Application) => {
+    const ok = window.confirm(`Delete applicant "${a.candidate_name}" (${a.share_code})? This removes their application and attempts. This cannot be undone.`);
+    if (!ok) return;
+    setDeletingId(a.share_code);
+    const prev = applications;
+    setApplications(p => p.filter(x => x.share_code !== a.share_code));
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin session expired');
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'admin_delete_application', share_code: a.share_code },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      // also drop matching attempts from local list
+      setAttempts(prevA => prevA.filter(at => at.share_code !== a.share_code));
+      toast({ title: 'Applicant deleted' });
+    } catch (e) {
+      setApplications(prev);
+      toast({ title: 'Delete failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setDeletingId(null); }
+  };
+
+  // Bulk archive / delete helpers
+  const bulkArchive = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to archive' }); return; }
+    if (!window.confirm(`Archive ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? They'll be hidden from the default view but not deleted.`)) return;
+    setBulkBusy('archive');
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try { await updateApp(t.share_code, { stage: 'archived' }); ok++; } catch { fail++; }
+    }
+    setApplications(prev => prev.map(a => targets.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+    setBulkBusy(null);
+    toast({ title: `Archived ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  const bulkDeleteApps = async (targets: Application[], label: string) => {
+    if (!targets.length) { toast({ title: 'Nothing to delete' }); return; }
+    if (!window.confirm(`PERMANENTLY DELETE ${targets.length} applicant${targets.length === 1 ? '' : 's'} (${label})? This removes applications AND attempts. Cannot be undone.`)) return;
+    setBulkBusy('delete');
+    const token = getAdminToken();
+    let ok = 0, fail = 0;
+    for (const t of targets) {
+      try {
+        const { error } = await supabase.functions.invoke('careers-test', {
+          body: { action: 'admin_delete_application', share_code: t.share_code },
+          headers: { 'x-admin-token': token || '' },
+        });
+        if (error) throw error;
+        ok++;
+      } catch { fail++; }
+    }
+    const codes = new Set(targets.map(t => t.share_code));
+    setApplications(prev => prev.filter(a => !codes.has(a.share_code)));
+    setAttempts(prev => prev.filter(a => !codes.has(a.share_code || '')));
+    setBulkBusy(null);
+    toast({ title: `Deleted ${ok}`, description: fail ? `${fail} failed` : undefined });
+  };
+
+  // Auto-archive rejected applicants older than 30 days on load (one-time per session, opt-in via localStorage flag)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('aetheris_careers_autoarchive') !== '1') return;
+    } catch { return; }
+    if (!applications.length) return;
+    const stale = applications.filter(a => (a.stage || 'new') === 'no' && ageDays(a.created_at) > 30);
+    if (!stale.length) return;
+    (async () => {
+      for (const t of stale) {
+        try { await updateApp(t.share_code, { stage: 'archived' }); } catch {}
+      }
+      setApplications(prev => prev.map(a => stale.find(t => t.share_code === a.share_code) ? { ...a, stage: 'archived' } : a));
+      toast({ title: `Auto-archived ${stale.length} old rejected applicant${stale.length === 1 ? '' : 's'}` });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applications.length]);
+
+  const autoArchiveEnabled = (() => {
+    try { return localStorage.getItem('aetheris_careers_autoarchive') === '1'; } catch { return false; }
+  })();
+  const toggleAutoArchive = () => {
+    try {
+      const next = !autoArchiveEnabled;
+      localStorage.setItem('aetheris_careers_autoarchive', next ? '1' : '0');
+      toast({ title: next ? 'Auto-archive ON, rejected > 30 days will archive' : 'Auto-archive OFF' });
+      window.location.reload();
+    } catch {}
+  };
+
+
+
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const sendToWorkspace = async (a: Application, opts: { schedule: boolean }) => {
+    setSendingId(a.share_code);
+    try {
+      let scheduledAt: string | null = null;
+      let meetingLink: string | null = null;
+      if (opts.schedule) {
+        const when = window.prompt(`Schedule interview with ${a.candidate_name}\nEnter date/time (e.g. "2026-05-20 14:30"):`, '');
+        if (!when) { setSendingId(null); return; }
+        const dt = new Date(when);
+        if (isNaN(+dt)) { toast({ title: 'Invalid date', variant: 'destructive' }); setSendingId(null); return; }
+        scheduledAt = dt.toISOString();
+        meetingLink = window.prompt('Meeting link (optional):', '') || null;
+      }
+      const { data: ins, error } = await supabase.from('shared_interviews').insert({
+        candidate_name: a.candidate_name,
+        candidate_email: a.candidate_email,
+        candidate_phone: a.candidate_phone,
+        share_code: a.share_code,
+        resume_path: a.resume_path,
+        resume_filename: a.resume_filename,
+        ai_fit_score: a.ai_fit_score,
+        ai_summary: a.ai_summary,
+        ai_strengths: a.ai_strengths as any,
+        ai_concerns: a.ai_concerns as any,
+        notes: a.admin_notes || a.notes,
+        scheduled_at: scheduledAt,
+        meeting_link: meetingLink,
+        status: scheduledAt ? 'scheduled' : 'pending',
+        source: 'careers',
+        created_by: 'admin',
+      }).select('id').single();
+      if (error) throw error;
+      if (scheduledAt) {
+        const { data: t } = await supabase.from('shared_tasks').insert({
+          title: `Interview: ${a.candidate_name}`,
+          description: [meetingLink ? `Link: ${meetingLink}` : null, a.candidate_email, a.admin_notes || a.notes].filter(Boolean).join('\n'),
+          owner: 'admin', assignee: 'admin',
+          priority: 'high', bucket: 'today', due_at: scheduledAt,
+        }).select('id').single();
+        if (t?.id) await supabase.from('shared_interviews').update({ task_id: (t as any).id }).eq('id', (ins as any).id);
+      }
+      try { await updateApp(a.share_code, { stage: 'interview' }); } catch {}
+      setApplications(prev => prev.map(x => x.share_code === a.share_code ? { ...x, stage: 'interview' } : x));
+      toast({ title: 'Sent to Shared Workspace', description: scheduledAt ? 'Interview scheduled and added to calendar.' : 'Open the Workspace → Interviews tab to schedule.' });
+    } catch (e) {
+      toast({ title: 'Send failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   const applyPreset = (preset: 'top' | 'passedNew' | 'pending' | 'rejected' | 'reset') => {
     setTab('apps');
     setStageFilter('all');
@@ -288,7 +590,7 @@ export const AdminCareersPanel: React.FC = () => {
     setMinTestScore('');
     setMinFitScore('');
     setFitSort('none');
-    if (preset === 'top') { setMinFitScore('80'); setFitSort('desc'); }
+    if (preset === 'top') { setMinFitScore('25'); setFitSort('desc'); }
     else if (preset === 'passedNew') { setMinTestScore('70'); setStageFilter('new'); setContactFilter('not'); }
     else if (preset === 'pending') { setStageFilter('new'); setFitSort('desc'); }
     else if (preset === 'rejected') { setStageFilter('no'); }
@@ -306,7 +608,11 @@ export const AdminCareersPanel: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Paid Applications — proof of who paid and how much */}
+      <AdminCareersPayments />
+
       {/* Analytics */}
+
       <Card>
         <CardHeader>
           <CardTitle className="font-display flex items-center gap-2">
@@ -372,11 +678,15 @@ export const AdminCareersPanel: React.FC = () => {
             <CardTitle className="font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-amber" /> Candidates & Applications
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search name, email, code…" className="pl-7 h-8 w-64" />
               </div>
+              <Button size="sm" variant="outline" onClick={toggleMinimized} title={minimized ? 'Expand all cards' : 'Collapse all cards'}>
+                {minimized ? <ChevronRight className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
+                {minimized ? 'Expand' : 'Collapse'}
+              </Button>
               <Button size="sm" variant="outline" onClick={load} disabled={loading}>
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
               </Button>
@@ -397,7 +707,7 @@ export const AdminCareersPanel: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
             <span className="font-mono uppercase text-muted-foreground">Quick:</span>
             {([
-              { k: 'top', label: '🔥 Top fit (80+)' },
+              { k: 'top', label: '🔥 Top fit (25+/60)' },
               { k: 'passedNew', label: '✅ Passed · uncontacted' },
               { k: 'pending', label: '🕒 Pending review' },
               { k: 'rejected', label: '🚫 Rejected' },
@@ -410,7 +720,7 @@ export const AdminCareersPanel: React.FC = () => {
               onClick={() => analyzeAllPassed(true)} disabled={!!bulkAnalyze}>
               {bulkAnalyze
                 ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing {bulkAnalyze.done}/{bulkAnalyze.total}</>
-                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all passed resumes</>}
+                : <><Sparkles className="w-3 h-3 mr-1" />Analyze all applicant resumes</>}
             </Button>
             {applications.some(a => a.ai_fit_score != null) && !bulkAnalyze && (
               <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground"
@@ -452,8 +762,8 @@ export const AdminCareersPanel: React.FC = () => {
             {tab === 'apps' && (
               <>
                 <label className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Min fit</span>
-                  <Input type="number" min={0} max={100} value={minFitScore}
+                  <span className="text-muted-foreground">Min fit /60</span>
+                  <Input type="number" min={0} max={60} value={minFitScore}
                     onChange={e => setMinFitScore(e.target.value)}
                     placeholder="0" className="h-7 w-16" />
                 </label>
@@ -470,13 +780,13 @@ export const AdminCareersPanel: React.FC = () => {
                     <ArrowUpAZ className="w-3 h-3 mr-1" /> Worst
                   </Button>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="text-muted-foreground">Stage:</span>
-                  {(['all', 'new', 'interview', 'wait', 'no'] as const).map(v => (
+                  {(['all', 'new', 'interview', 'wait', 'no', 'archived'] as const).map(v => (
                     <Button key={v} size="sm" variant={stageFilter === v ? 'default' : 'outline'}
                       onClick={() => setStageFilter(v)}
                       className={`h-7 capitalize ${stageFilter === v ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
-                      {v}
+                      {v}{v === 'archived' && archivedCount > 0 ? ` (${archivedCount})` : ''}
                     </Button>
                   ))}
                 </div>
@@ -489,21 +799,101 @@ export const AdminCareersPanel: React.FC = () => {
                 ))}
               </>
             )}
-            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none') && (
+            {(minTestScore || minFitScore || contactFilter !== 'any' || stageFilter !== 'all' || fitSort !== 'none' || ageFilter !== 'all') && (
               <Button size="sm" variant="ghost" className="h-7 text-muted-foreground"
-                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); }}>
+                onClick={() => { setMinTestScore(''); setMinFitScore(''); setContactFilter('any'); setStageFilter('all'); setFitSort('none'); setAgeFilter('all'); }}>
                 Clear
               </Button>
             )}
           </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+            <span className="font-mono uppercase text-muted-foreground">Age:</span>
+            {([
+              { k: 'all', label: 'All time' },
+              { k: '7', label: '≤ 7 days' },
+              { k: '30', label: '≤ 30 days' },
+              { k: '90', label: '≤ 90 days' },
+              { k: 'over30', label: '> 30 days' },
+              { k: 'over90', label: '> 90 days' },
+            ] as const).map(v => (
+              <Button key={v.k} size="sm" variant={ageFilter === v.k ? 'default' : 'outline'}
+                onClick={() => setAgeFilter(v.k)}
+                className={`h-7 ${ageFilter === v.k ? 'bg-amber text-background hover:bg-amber/90' : ''}`}>
+                {v.label}
+              </Button>
+            ))}
+          </div>
+          {tab === 'apps' && (
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+              <span className="font-mono uppercase text-muted-foreground">Cleanup:</span>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') === 'no'), 'all rejected')}>
+                {bulkBusy === 'archive' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Archive className="w-3 h-3 mr-1" />}
+                Archive rejected
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-amber/40 text-amber hover:bg-amber/10"
+                disabled={!!bulkBusy}
+                onClick={() => bulkArchive(applications.filter(a => (a.stage || 'new') !== 'archived' && (a.stage || 'new') !== 'interview' && ageDays(a.created_at) > 90), 'older than 90 days, not in interview')}>
+                <Archive className="w-3 h-3 mr-1" /> Archive &gt; 90 days
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 border-destructive/40 text-destructive hover:bg-destructive/10"
+                disabled={!!bulkBusy || archivedCount === 0}
+                onClick={() => bulkDeleteApps(applications.filter(a => (a.stage || 'new') === 'archived'), 'all archived')}>
+                {bulkBusy === 'delete' ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                Delete all archived ({archivedCount})
+              </Button>
+              <Button size="sm" variant="ghost" className={`h-7 ${autoArchiveEnabled ? 'text-amber' : 'text-muted-foreground'}`}
+                onClick={toggleAutoArchive}
+                title="When ON, rejected applicants older than 30 days are auto-archived on load">
+                <ArchiveRestore className="w-3 h-3 mr-1" />
+                Auto-archive rejected &gt; 30d: {autoArchiveEnabled ? 'ON' : 'OFF'}
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {loading ? <div className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div> : (
             <div className="space-y-2">
               {tab === 'apps' ? (
                 filteredApps.length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No applications submitted yet.</p> :
-                filteredApps.map(a => (
+                filteredApps.map(a => {
+                  const isCollapsed = minimized && !expandedIds.has(a.id);
+                  if (isCollapsed) {
+                    const stage = a.stage || 'new';
+                    return (
+                      <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 hover:border-amber/50 hover:bg-secondary/30 transition-colors">
+                        <button type="button" onClick={() => toggleExpanded(a.id)} className="w-full text-left px-3 py-2 flex items-center gap-2 flex-wrap">
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                          <span className="font-display font-semibold text-foreground truncate">{a.candidate_name || a.candidate_email}</span>
+                          <Badge variant="outline" className="font-mono text-[10px] h-5">{a.share_code}</Badge>
+                          {a.score_pct != null && <Badge className="h-5 text-[10px] bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
+                          {a.ai_fit_score != null && (
+                            <Badge className={`h-5 text-[10px] border ${a.ai_fit_score >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 30 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              Fit {a.ai_fit_score}/60
+                            </Badge>
+                          )}
+                          {stage !== 'new' && (
+                            <Badge className={`h-5 text-[10px] capitalize border ${
+                              stage === 'interview' ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+                              stage === 'wait' ? 'bg-amber/20 text-amber border-amber/40' :
+                              stage === 'no' ? 'bg-destructive/20 text-destructive border-destructive/40' :
+                              stage === 'archived' ? 'bg-muted text-muted-foreground border-border' :
+                              'bg-muted'
+                            }`}>{stage}</Badge>
+                          )}
+                          {a.contacted && <Badge className="h-5 text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/40">Contacted</Badge>}
+                          <span className="ml-auto text-[10px] text-muted-foreground font-mono">{Math.floor(ageDays(a.created_at))}d ago</span>
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
                   <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                    <button type="button" onClick={() => toggleExpanded(a.id)}
+                      className="text-[10px] font-mono uppercase text-muted-foreground hover:text-amber flex items-center gap-1 mb-2">
+                      <ChevronDown className="w-3 h-3" /> Collapse
+                    </button>
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <div className="flex items-center gap-2">
@@ -511,8 +901,8 @@ export const AdminCareersPanel: React.FC = () => {
                           <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>
                           {a.score_pct != null && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">{a.score_pct}%</Badge>}
                           {a.ai_fit_score != null && (
-                            <Badge className={`border ${a.ai_fit_score >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 60 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
-                              <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/100
+                            <Badge className={`border ${a.ai_fit_score >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' : a.ai_fit_score >= 30 ? 'bg-amber/20 text-amber border-amber/40' : 'bg-destructive/20 text-destructive border-destructive/40'}`}>
+                              <Sparkles className="w-3 h-3 mr-1" />Fit {a.ai_fit_score}/60
                             </Badge>
                           )}
                           {analyzingSet.has(a.share_code) && (
@@ -520,6 +910,19 @@ export const AdminCareersPanel: React.FC = () => {
                               <Loader2 className="w-3 h-3 mr-1 animate-spin" />Analyzing…
                             </Badge>
                           )}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 0 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : n >= 2 ? 'border-blue-400/50 text-blue-300' : 'text-muted-foreground'}`}
+                                title={`${n} test attempt${n === 1 ? '' : 's'} from this email`}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                {n} attempt{n === 1 ? '' : 's'}
+                              </Badge>
+                            ) : null;
+                          })()}
                           {a.reviewed && <Badge variant="outline" className="text-xs">Reviewed</Badge>}
                           {a.resume_recreated_at && <Badge variant="outline" className="text-xs">Readable resume</Badge>}
                           {a.contacted && (
@@ -537,15 +940,36 @@ export const AdminCareersPanel: React.FC = () => {
                           )}
                         </div>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
+                          <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(a.candidate_email);}} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
                           {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
                           <span>Applied {fmt(a.created_at)}</span>
                         </div>
                         {a.notes && <p className="text-sm text-foreground mt-2 whitespace-pre-wrap bg-background/40 p-2 rounded">{a.notes}</p>}
                         {a.resume_extract_error && <p className="text-xs text-destructive mt-2">Resume extraction note: {a.resume_extract_error}</p>}
                         {a.ai_summary && (
-                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-1">
+                          <div className="mt-2 rounded border border-amber/30 bg-amber/5 p-2 space-y-2">
                             <p className="text-xs whitespace-pre-wrap">{a.ai_summary}</p>
+                            {a.ai_section_scores && Object.keys(a.ai_section_scores).length > 0 && (
+                              <div>
+                                <div className="text-[10px] font-mono uppercase text-amber mt-1 mb-1">Section ratings (1-10), sum = fit score / 60</div>
+                                <div className="grid sm:grid-cols-2 gap-1">
+                                  {SECTION_LABELS.map(([key, label]) => {
+                                    const s = a.ai_section_scores?.[key];
+                                    if (!s) return null;
+                                    const tone = s.rating >= 8 ? 'text-green-400' : s.rating >= 5 ? 'text-amber' : 'text-destructive';
+                                    return (
+                                      <div key={key} className="flex items-start gap-2 bg-background/40 rounded px-2 py-1">
+                                        <span className={`font-mono font-bold text-xs ${tone} shrink-0 w-10`}>{s.rating}/10</span>
+                                        <div className="min-w-0">
+                                          <div className="text-[11px] font-bold text-foreground leading-tight">{label}</div>
+                                          {s.reason && <div className="text-[10px] text-muted-foreground leading-snug">{s.reason}</div>}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                             {!!a.ai_strengths?.length && (
                               <div>
                                 <div className="text-[10px] font-mono uppercase text-green-400 mt-1">Strengths</div>
@@ -567,18 +991,43 @@ export const AdminCareersPanel: React.FC = () => {
                             <FileText className="w-3 h-3 mr-1" /> Resume <ExternalLink className="w-3 h-3 ml-1" />
                           </Button>
                         )}
-                        {a.resume_path && (
-                          <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
-                            {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                            {a.ai_analyzed_at ? 'Re-analyze' : 'Analyze AI'}
-                          </Button>
-                        )}
+                        <Button size="sm" onClick={() => analyzeResume(a.share_code)} disabled={analyzingId === a.share_code} className="bg-amber text-background hover:bg-amber/90">
+                          {analyzingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                          {a.ai_analyzed_at ? 'Re-analyze' : a.resume_path ? 'Analyze AI' : 'Analyze (no resume)'}
+                        </Button>
+                        <Button size="sm"
+                          onClick={() => setStage(a.share_code, 'no')}
+                          disabled={stageSavingId === a.share_code || (a.stage === 'no')}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-60">
+                          {stageSavingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Ban className="w-3 h-3 mr-1" />}
+                          {a.stage === 'no' ? 'Rejected' : 'Reject'}
+                        </Button>
                         <Button size="sm" variant={a.contacted ? 'outline' : 'default'}
                           onClick={() => toggleContacted(a.share_code, !a.contacted)}
                           disabled={contactingId === a.share_code}
                           className={a.contacted ? '' : 'bg-blue-500 text-white hover:bg-blue-500/90'}>
                           {contactingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <PhoneCall className="w-3 h-3 mr-1" />}
                           {a.contacted ? 'Mark not contacted' : 'Mark contacted'}
+                        </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => sendToWorkspace(a, { schedule: false })}
+                          disabled={sendingId === a.share_code}
+                          className="border-amber/40 text-amber hover:bg-amber/10">
+                          {sendingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                          Send to Workspace
+                        </Button>
+                        <Button size="sm"
+                          onClick={() => sendToWorkspace(a, { schedule: true })}
+                          disabled={sendingId === a.share_code}
+                          className="bg-amber text-background hover:bg-amber/90">
+                          <CalendarCheck className="w-3 h-3 mr-1" /> Schedule interview
+                        </Button>
+                        <Button size="sm" variant="outline"
+                          onClick={() => deleteApplication(a)}
+                          disabled={deletingId === a.share_code}
+                          className="border-destructive/40 text-destructive hover:bg-destructive/10">
+                          {deletingId === a.share_code ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Trash2 className="w-3 h-3 mr-1" />}
+                          Delete
                         </Button>
                       </div>
                     </div>
@@ -588,6 +1037,7 @@ export const AdminCareersPanel: React.FC = () => {
                         { k: 'interview', label: 'Move to interview', icon: CalendarCheck, cls: 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30' },
                         { k: 'wait', label: 'Wait', icon: Clock, cls: 'bg-amber/20 text-amber border-amber/40 hover:bg-amber/30' },
                         { k: 'no', label: 'No', icon: Ban, cls: 'bg-destructive/20 text-destructive border-destructive/40 hover:bg-destructive/30' },
+                        { k: 'archived', label: 'Archive', icon: Archive, cls: 'bg-muted text-muted-foreground border-border hover:bg-muted/70' },
                       ] as const).map(s => {
                         const Icon = s.icon;
                         const active = (a.stage || 'new') === s.k;
@@ -617,15 +1067,22 @@ export const AdminCareersPanel: React.FC = () => {
                       />
                     </div>
                   </div>
-                ))
+                  );
+                })
               ) : (
                 (tab === 'passed' ? passedAttempts : filteredAttempts).length === 0 ? <p className="text-muted-foreground text-sm text-center py-6">No attempts yet.</p> :
                 (tab === 'passed' ? passedAttempts : filteredAttempts).map(a => (
-                  <div key={a.id} className="rounded-lg border border-border/50 bg-secondary/20 p-3">
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setDetailAttempt(a)}
+                    className={`w-full text-left rounded-lg border border-border/50 bg-secondary/20 ${minimized ? 'px-3 py-2' : 'p-3'} hover:border-amber/60 hover:bg-secondary/30 transition-colors`}
+                  >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-display font-bold text-foreground">{a.candidate_name || '—'}</span>
+                          {savedIds.has(a.id) && <Star className="w-3.5 h-3.5 text-amber fill-amber" />}
+                          <span className="font-display font-bold text-foreground underline-offset-2 hover:underline">{a.candidate_name || ', '}</span>
                           <StatusBadge s={a.status} />
                           {a.score_pct != null && (
                             <Badge variant="outline" className="font-mono">
@@ -634,17 +1091,45 @@ export const AdminCareersPanel: React.FC = () => {
                             </Badge>
                           )}
                           {a.share_code && <Badge variant="outline" className="font-mono text-xs">{a.share_code}</Badge>}
+                          {(() => {
+                            const n = countFor(a.candidate_email);
+                            return n > 1 ? (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs flex items-center gap-1 ${n >= 3 ? 'border-amber/60 text-amber' : 'border-blue-400/50 text-blue-300'}`}
+                                title={`${n} test attempts from this email`}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                {n} attempts
+                              </Badge>
+                            ) : null;
+                          })()}
                         </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
-                          <a href={`mailto:${a.candidate_email}`} className="flex items-center gap-1 hover:text-amber"><Mail className="w-3 h-3" /> {a.candidate_email}</a>
-                          {a.candidate_phone && <a href={`tel:${a.candidate_phone}`} className="flex items-center gap-1 hover:text-amber"><Phone className="w-3 h-3" /> {a.candidate_phone}</a>}
-                          <span>Started {fmt(a.started_at)}</span>
-                          {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
-                        </div>
-                        {a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {!minimized && (
+                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+                            <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {a.candidate_email}</span>
+                            {a.candidate_phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {a.candidate_phone}</span>}
+                            <span>Started {fmt(a.started_at)}</span>
+                            {a.submitted_at && <span>· Submitted {fmt(a.submitted_at)}</span>}
+                          </div>
+                        )}
+                        {!minimized && a.notes_to_admin && <p className="text-xs text-foreground/80 mt-2 italic">"{a.notes_to_admin}"</p>}
+                        {minimized && (
+                          <span className="text-[10px] text-muted-foreground font-mono ml-auto">{Math.floor(ageDays(a.submitted_at || a.started_at))}d ago</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        <Button
+                          type="button" size="sm" variant="ghost"
+                          className={`h-8 ${savedIds.has(a.id) ? 'text-amber' : 'text-muted-foreground hover:text-amber'}`}
+                          onClick={(e) => { e.stopPropagation(); toggleSaved(a.id); }}
+                          title={savedIds.has(a.id) ? 'Remove from saved' : 'Save candidate'}
+                        >
+                          <Star className={`w-4 h-4 ${savedIds.has(a.id) ? 'fill-amber' : ''}`} />
+                        </Button>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -653,6 +1138,203 @@ export const AdminCareersPanel: React.FC = () => {
       </Card>
 
       <AdminCareersTest />
+
+
+      <Dialog open={!!detailAttempt} onOpenChange={(o) => { if (!o) { setDetailAttempt(null); setShareNote(''); } }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span>{detailAttempt?.candidate_name || detailAttempt?.candidate_email || 'Candidate'}</span>
+              {detailAttempt && <StatusBadge s={detailAttempt.status} />}
+              {detailAttempt?.score_pct != null && (
+                <Badge variant="outline" className="font-mono">
+                  {detailAttempt.score_pct}% ({detailAttempt.correct_count}/{detailAttempt.total_count})
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {detailAttempt && (
+            <div className="space-y-3 text-sm">
+              {/* CONTACT, sky */}
+              <div className="rounded-lg border-l-4 border-sky-500 bg-sky-500/5 p-3">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-sky-400 mb-2">Contact</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Email</div>
+                    <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(detailAttempt.candidate_email);}} className="text-sky-300 hover:underline flex items-center gap-1">
+                      <Mail className="w-3 h-3" /> {detailAttempt.candidate_email}
+                    </a>
+                  </div>
+                  {detailAttempt.candidate_phone && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Phone</div>
+                      <a href={`tel:${detailAttempt.candidate_phone}`} className="text-sky-300 hover:underline flex items-center gap-1">
+                        <Phone className="w-3 h-3" /> {detailAttempt.candidate_phone}
+                      </a>
+                    </div>
+                  )}
+                  {detailAttempt.share_code && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Share code</div>
+                      <div className="font-mono">{detailAttempt.share_code}</div>
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide">Started</div>
+                    <div>{fmt(detailAttempt.started_at)}</div>
+                  </div>
+                  {detailAttempt.submitted_at && (
+                    <div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Submitted</div>
+                      <div>{fmt(detailAttempt.submitted_at)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* CANDIDATE NOTES, amber */}
+              {detailAttempt.notes_to_admin && (
+                <div className="rounded-lg border-l-4 border-amber bg-amber/10 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-amber">Notes from candidate</div>
+                    <ReadAloudButton text={`Notes from candidate. ${detailAttempt.notes_to_admin}`} variant="ghost" />
+                  </div>
+                  <p className="italic text-foreground/90">"{detailAttempt.notes_to_admin}"</p>
+                </div>
+              )}
+
+              {matchingApp ? (
+                <>
+                  {/* AI SUMMARY, purple */}
+                  {matchingApp.ai_summary && (
+                    <div className="rounded-lg border-l-4 border-purple-500 bg-purple-500/5 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-purple-300 flex items-center gap-1">
+                          <FileText className="w-3 h-3" /> AI Summary
+                        </div>
+                        <ReadAloudButton text={`AI summary. ${matchingApp.ai_summary}`} variant="ghost" />
+                      </div>
+                      <p className="text-foreground/90">{matchingApp.ai_summary}</p>
+                    </div>
+                  )}
+
+                  {/* AI FIT SCORE, emerald */}
+                  {matchingApp.ai_fit_score != null && (
+                    <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-500/5 p-3">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300 mb-1">AI Fit Score</div>
+                      <Badge variant="outline" className="font-mono border-emerald-500/50 text-emerald-300">{matchingApp.ai_fit_score}/60</Badge>
+                    </div>
+                  )}
+
+                  {/* STRENGTHS, green */}
+                  {matchingApp.ai_strengths && matchingApp.ai_strengths.length > 0 && (
+                    <div className="rounded-lg border-l-4 border-green-500 bg-green-500/5 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-green-300">Strengths</div>
+                        <ReadAloudButton text={`Strengths. ${matchingApp.ai_strengths.join('. ')}`} variant="ghost" />
+                      </div>
+                      <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
+                        {matchingApp.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* CONCERNS, crimson */}
+                  {matchingApp.ai_concerns && matchingApp.ai_concerns.length > 0 && (
+                    <div className="rounded-lg border-l-4 border-crimson bg-crimson/10 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-crimson">Concerns</div>
+                        <ReadAloudButton text={`Concerns. ${matchingApp.ai_concerns.join('. ')}`} variant="ghost" />
+                      </div>
+                      <ul className="list-disc list-inside text-foreground/90 space-y-0.5">
+                        {matchingApp.ai_concerns.map((s, i) => <li key={i}>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* CANDIDATE APP NOTES, indigo */}
+                  {matchingApp.notes && (
+                    <div className="rounded-lg border-l-4 border-indigo-500 bg-indigo-500/5 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-indigo-300">Candidate Application Notes</div>
+                        <ReadAloudButton text={`Candidate application notes. ${matchingApp.notes}`} variant="ghost" />
+                      </div>
+                      <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.notes}</p>
+                    </div>
+                  )}
+
+                  {/* ADMIN NOTES, slate */}
+                  {matchingApp.admin_notes && (
+                    <div className="rounded-lg border-l-4 border-slate-400 bg-slate-400/10 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-slate-300">Admin Notes</div>
+                        <ReadAloudButton text={`Admin notes. ${matchingApp.admin_notes}`} variant="ghost" />
+                      </div>
+                      <p className="text-foreground/90 whitespace-pre-wrap">{matchingApp.admin_notes}</p>
+                    </div>
+                  )}
+
+                  {matchingApp.resume_filename && (
+                    <div className="text-xs text-muted-foreground">Resume: {matchingApp.resume_filename}</div>
+                  )}
+                </>
+              ) : (
+                <div className="border-t border-border/50 pt-3 text-xs text-muted-foreground italic">
+                  No application submitted yet for this candidate.
+                </div>
+              )}
+
+              {/* ===== Quick actions ===== */}
+              <div className="border-t border-border/50 pt-4 space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="text-xs font-mono uppercase tracking-wide text-amber">Actions</div>
+                  <Button
+                    type="button" size="sm"
+                    variant={detailAttempt && savedIds.has(detailAttempt.id) ? 'default' : 'outline'}
+                    className={detailAttempt && savedIds.has(detailAttempt.id) ? 'bg-amber text-background hover:bg-amber/90' : ''}
+                    onClick={() => detailAttempt && toggleSaved(detailAttempt.id)}
+                  >
+                    <Star className={`w-3.5 h-3.5 mr-1 ${detailAttempt && savedIds.has(detailAttempt.id) ? 'fill-background' : ''}`} />
+                    {detailAttempt && savedIds.has(detailAttempt.id) ? 'Saved' : 'Save'}
+                  </Button>
+                </div>
+
+                {/* Move to calendar */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><CalendarPlus className="w-3.5 h-3.5 text-amber" /> Move to Company Calendar</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Input type="date" value={calDate} onChange={e => setCalDate(e.target.value)} className="h-8 w-auto" />
+                    <Input type="time" value={calTime} onChange={e => setCalTime(e.target.value)} className="h-8 w-auto" />
+                    <Button size="sm" onClick={moveToCalendar} disabled={calBusy} className="bg-amber text-background hover:bg-amber/90">
+                      {calBusy ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CalendarPlus className="w-3.5 h-3.5 mr-1" />}
+                      Add interview
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Share with notes */}
+                <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-2">
+                  <div className="text-xs font-semibold flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-amber" /> Share with notes</div>
+                  <Textarea
+                    value={shareNote}
+                    onChange={e => setShareNote(e.target.value)}
+                    placeholder="Add context for whoever you're sharing this candidate with…"
+                    className="min-h-[70px] text-sm bg-background/40"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={copyShare}>
+                      <Copy className="w-3.5 h-3.5 mr-1" /> Copy summary + notes
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={emailShare}>
+                      <Send className="w-3.5 h-3.5 mr-1" /> Email…
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

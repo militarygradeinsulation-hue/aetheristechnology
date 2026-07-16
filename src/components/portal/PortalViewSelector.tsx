@@ -174,7 +174,7 @@ export const PortalViewSelector: React.FC<Props> = ({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">
-              {editingName ? `Edit View — ${editingName}` : "Create New View"}
+              {editingName ? `Edit View, ${editingName}` : "Create New View"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">

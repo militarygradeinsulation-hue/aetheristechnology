@@ -31,7 +31,7 @@ function buildPdf(modules: OnboardingModule[]): Blob {
   doc.setTextColor(180, 180, 180);
   doc.text(`${modules.length} modules · narrated by Brian`, pageW / 2, pageH / 2 + 24, { align: "center" });
   doc.setFontSize(9);
-  doc.text("Confidential — Aetheris Technology", pageW / 2, pageH - margin, { align: "center" });
+  doc.text("Confidential, Aetheris Technology", pageW / 2, pageH - margin, { align: "center" });
 
   // Modules
   modules.forEach((m, mi) => {
@@ -95,16 +95,16 @@ export async function buildOnboardingPackage(modules: OnboardingModule[]): Promi
   // README
   zip.file(
     "README.txt",
-    `Aetheris Technology — New Rep Onboarding Package
+    `Aetheris Technology, New Rep Onboarding Package
 Generated: ${new Date().toLocaleString()}
 
 Contents:
-  • Aetheris-Onboarding-Guide.pdf  — printable guide with all transcripts
-  • audio/                          — narrated MP3s, one folder per module
+  • Aetheris-Onboarding-Guide.pdf , printable guide with all transcripts
+  • audio/                         , narrated MP3s, one folder per module
 
 How to use:
   1. Read the PDF cover-to-cover (about 30 minutes).
-  2. Listen to each module's MP3s in order — they are numbered.
+  2. Listen to each module's MP3s in order, they are numbered.
   3. Log in to your Rep Portal and complete the in-app trainings.
 
 Questions? Ask the AI Sales Coach or your admin.

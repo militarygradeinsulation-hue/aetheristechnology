@@ -5,6 +5,9 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generateDiagnosticPdf } from '@/lib/generateDiagnosticPdf';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, XCircle, TrendingUp, Megaphone, ShoppingCart, Palette, Settings, Rocket, Download } from 'lucide-react';
 
 // --- DATA ---
@@ -40,18 +43,18 @@ const sections: Section[] = [
         { label: 'Local Business', score: -1 }, { label: 'Other', score: -1 },
       ]},
       { id: 2, text: 'Company size', options: [
-        { label: 'Just me', score: -1 }, { label: '2–10 employees', score: -1 },
-        { label: '11–50 employees', score: -1 }, { label: '51–200 employees', score: -1 },
+        { label: 'Just me', score: -1 }, { label: '2-10 employees', score: -1 },
+        { label: '11-50 employees', score: -1 }, { label: '51-200 employees', score: -1 },
         { label: '200+', score: -1 },
       ]},
       { id: 3, text: 'Years in business', options: [
-        { label: '0–1', score: -1 }, { label: '1–3', score: -1 },
-        { label: '3–7', score: -1 }, { label: '7–15', score: -1 },
+        { label: '0-1', score: -1 }, { label: '1-3', score: -1 },
+        { label: '3-7', score: -1 }, { label: '7-15', score: -1 },
         { label: '15+', score: -1 },
       ]},
       { id: 4, text: 'Monthly revenue range', options: [
-        { label: 'Under $10k', score: -1 }, { label: '$10k–$50k', score: -1 },
-        { label: '$50k–$250k', score: -1 }, { label: '$250k–$1M', score: -1 },
+        { label: 'Under $10k', score: -1 }, { label: '$10k-$50k', score: -1 },
+        { label: '$50k-$250k', score: -1 }, { label: '$250k-$1M', score: -1 },
         { label: '$1M+', score: -1 },
       ]},
     ],
@@ -169,23 +172,23 @@ const categoryMap: Record<string, { label: string; icon: React.ReactNode; questi
 
 const categoryNarratives: Record<string, string[]> = {
   marketing: [
-    "Your lead generation is inconsistent — you're relying on methods that don't scale.",
+    "Your lead generation is inconsistent, you're relying on methods that don't scale.",
     "Content posting is sporadic, which means you're invisible to potential customers most of the time.",
     "You lack visibility into which marketing efforts actually drive revenue.",
   ],
   conversion: [
-    "Your website doesn't make it clear what visitors should do next — they're bouncing.",
+    "Your website doesn't make it clear what visitors should do next, they're bouncing.",
     "Slow response times to inquiries mean warm leads are going cold before you reach them.",
     "Without a structured follow-up system, potential customers are slipping through the cracks.",
   ],
   brand: [
     "Your brand messaging doesn't clearly differentiate you from competitors.",
-    "Generic visuals are undermining trust — prospects can't see real proof of your work.",
+    "Generic visuals are undermining trust, prospects can't see real proof of your work.",
     "People can't instantly understand what you do, which kills first impressions.",
   ],
   systems: [
     "Without a CRM, leads are getting lost and follow-ups are inconsistent.",
-    "You have no visibility into your sales pipeline — growth is a guessing game.",
+    "You have no visibility into your sales pipeline, growth is a guessing game.",
     "Manual processes are creating bottlenecks that cost you time and revenue.",
   ],
   growth: [
@@ -290,6 +293,16 @@ export const BusinessDiagnostic: React.FC = () => {
       weakestCategories: weakest,
     });
 
+    // Also save to the operator library so logged-in admins/reps can find it later.
+    if (getPortalToken() || getAdminToken()) {
+      saveToolRun({
+        tool_type: 'business_diagnostic',
+        title: `Business Diagnostic. ${company || name || email}`,
+        input_data: { name, email, company, answers },
+        output_data: { totalScore, maxScore: 80, catScores, weakestCategories: weakest, scores },
+      });
+    }
+
     setPdfDownloaded(true);
     setSubmitting(false);
   };
@@ -367,7 +380,7 @@ export const BusinessDiagnostic: React.FC = () => {
             })}
           </ul>
           <p className="text-sm text-muted-foreground italic">
-            This typically results in 20%–40% of potential leads being lost.
+            This typically results in 20%-40% of potential leads being lost.
           </p>
         </div>
 
@@ -378,11 +391,11 @@ export const BusinessDiagnostic: React.FC = () => {
               <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />
               <h3 className="text-xl font-semibold text-foreground">Your Action Plan Has Been Downloaded!</h3>
               <p className="text-muted-foreground text-sm">
-                Check your downloads folder for your personalized PDF. Want expert help implementing it?
+                Check your downloads folder for your personalized PDF. Ready to book the Findings Read-Out? 15 minutes, no pitch, we walk you through your own case file.
               </p>
               <a href="/contact">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 mt-2">
-                  Book a Free Strategy Call <ArrowRight className="w-4 h-4 ml-1" />
+                  Book the Findings Read-Out <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </a>
             </div>
@@ -426,16 +439,34 @@ export const BusinessDiagnostic: React.FC = () => {
           )}
         </div>
 
-        {/* Recommendation */}
+        {/* Evidence Kit unlock — appears after PDF download per spec Part 5 */}
+        {pdfDownloaded && (
+          <div className="rounded-2xl border border-amber/30 bg-amber/5 p-6 space-y-4">
+            <div className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
+              Your case file unlocks the evidence kit
+            </div>
+            <h3 className="text-xl font-semibold text-foreground">7 investigation tools, now open to you</h3>
+            <p className="text-muted-foreground text-sm">
+              Friction Audit · Brand Contradictions · Follow-Up Plan · Sales Scripts · Question Engine · Content Calendar · Gap Scanner. Run any of them against your business, now that we have your case open.
+            </p>
+            <a href="/ecosystem">
+              <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
+                Open the Evidence Kit <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </a>
+          </div>
+        )}
+
+        {/* Recommendation — points to the paid rungs of the Reciprocity Engine */}
         {!pdfDownloaded && (
           <div className="rounded-2xl border border-border bg-card p-6 text-center space-y-4">
             <h3 className="text-xl font-semibold text-foreground">👉 Recommendation: {tier.rec}</h3>
             <p className="text-muted-foreground text-sm">
-              Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a roadmap to fix it.
+              Ready to trace your worst leak to origin? The Single-Leak Investigation is $18,500, delivered in 5 business days, and every dollar is credited toward the Chaos Diagnostic within 90 days.
             </p>
-            <a href="/contact">
+            <a href="/catalog">
               <Button size="lg" variant="outline">
-                Learn More <ArrowRight className="w-4 h-4 ml-1" />
+                Trace One Leak <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </a>
           </div>

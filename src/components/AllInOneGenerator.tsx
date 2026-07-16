@@ -19,6 +19,8 @@ import {
   Library as LibraryIcon,
   Globe,
   Stethoscope,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -57,6 +59,8 @@ export const AllInOneGenerator: React.FC = () => {
   const [inferring, setInferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [states, setStates] = useState<Record<string, RunState>>({});
+  const [outputs, setOutputs] = useState<Record<string, { label: string; title: string; data: any }>>({});
+
 
   const inferFromUrl = async (urlOverride?: string): Promise<typeof form | null> => {
     const targetUrl = (urlOverride ?? form.url).trim();
@@ -96,7 +100,7 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Globe,
       fn: 'scan-website',
       body: () => ({ url: f.url.trim() }),
-      titleFor: () => `${f.businessName || f.url} — Website Scan`,
+      titleFor: () => `${f.businessName || f.url}, Website Scan`,
     },
     {
       key: 'diagnose',
@@ -119,7 +123,7 @@ export const AllInOneGenerator: React.FC = () => {
           f.goals && `Goals: ${f.goals}`,
         ].filter(Boolean).join('\n'),
       }),
-      titleFor: () => `${f.businessName || f.url} — What's Wrong Diagnostic`,
+      titleFor: () => `${f.businessName || f.url}, What's Wrong Diagnostic`,
     },
     {
       key: 'social',
@@ -128,7 +132,7 @@ export const AllInOneGenerator: React.FC = () => {
       icon: Megaphone,
       fn: 'generate-social-content',
       body: () => ({ url: f.url.trim() }),
-      titleFor: (d) => `${d?.businessName || f.businessName || f.url} — Social Pack`,
+      titleFor: (d) => `${d?.businessName || f.businessName || f.url}, Social Pack`,
     },
     {
       key: 'calendar',
@@ -138,10 +142,10 @@ export const AllInOneGenerator: React.FC = () => {
       fn: 'generate-content-calendar',
       body: () => ({
         industry: f.industry || f.businessName || 'general business',
-        goals: f.goals || 'grow brand awareness and inbound leads',
+        goals: f.goals || 'surface revenue leaks and book Diagnostic calls',
         platforms: 'LinkedIn, Facebook, Instagram',
       }),
-      titleFor: () => `${f.industry || f.businessName || f.url} — 30-Day Calendar`,
+      titleFor: () => `${f.industry || f.businessName || f.url}, 30-Day Calendar`,
     },
     {
       key: 'sales',
@@ -156,7 +160,7 @@ export const AllInOneGenerator: React.FC = () => {
         objections: '',
       }),
       skipReason: () => (!f.industry && !f.product && !f.businessName ? 'Add an industry or product to generate sales scripts.' : null),
-      titleFor: () => `${f.industry || f.businessName} — Sales Scripts`,
+      titleFor: () => `${f.industry || f.businessName}, Sales Scripts`,
     },
     {
       key: 'followup',
@@ -169,7 +173,7 @@ export const AllInOneGenerator: React.FC = () => {
         salesCycleLength: '14-30 days',
         currentTools: 'Email + phone + LinkedIn',
       }),
-      titleFor: () => `${f.industry || f.businessName} — Follow-Up Plan`,
+      titleFor: () => `${f.industry || f.businessName}, Follow-Up Plan`,
     },
     {
       key: 'brand',
@@ -183,7 +187,7 @@ export const AllInOneGenerator: React.FC = () => {
         idealCustomer: f.targetCustomer || 'mid-market decision makers',
         desiredPerception: ['Premium', 'Trusted', 'Expert'],
       }),
-      titleFor: () => `${f.businessName || f.url} — Brand Contradictions`,
+      titleFor: () => `${f.businessName || f.url}, Brand Contradictions`,
     },
     {
       key: 'friction',
@@ -197,7 +201,7 @@ export const AllInOneGenerator: React.FC = () => {
         industry: f.industry || f.businessName || 'general business',
         targetCustomer: f.targetCustomer || 'mid-market decision makers',
       }),
-      titleFor: () => `${f.businessName || f.url} — Friction Audit`,
+      titleFor: () => `${f.businessName || f.url}, Friction Audit`,
     },
     {
       key: 'questions',
@@ -217,42 +221,54 @@ export const AllInOneGenerator: React.FC = () => {
         goal: f.goals || 'Predictable inbound pipeline',
       }),
       skipReason: () => (!f.industry && !f.businessName ? 'Add an industry or business name to generate strategic questions.' : null),
-      titleFor: () => `${f.industry || f.businessName} — Strategic Questions`,
+      titleFor: () => `${f.industry || f.businessName}, Strategic Questions`,
     },
   ];
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 3) => {
+  const invokeWithRetry = async (fn: string, body: Record<string, unknown>, maxAttempts = 4) => {
     let lastErr: any = null;
+    const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
+    const headers: Record<string, string> = {};
+
+    // Most tools in this batch are public edge functions. Sending admin/portal
+    // headers to those functions triggers browser CORS preflight failures before
+    // the request ever reaches the backend. Only send the admin token to the one
+    // generator that explicitly requires it.
+    if (fn === 'generate-social-content' && adminToken) headers['x-admin-token'] = adminToken;
+
+    const invokeOpts: any = Object.keys(headers).length ? { body, headers } : { body };
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const { data, error } = await supabase.functions.invoke(fn, { body });
+        const { data, error } = await supabase.functions.invoke(fn, invokeOpts);
         if (error) {
-          // Try to read response body for a real error message
           const ctx: any = (error as any).context;
           let detail = error.message || '';
+          let status = ctx?.status;
           if (ctx && typeof ctx.json === 'function') {
             try { const j = await ctx.json(); detail = j?.error || detail; } catch { /* ignore */ }
           }
-          // Retry transient errors (429 rate-limit, 5xx)
-          const isTransient = /rate.?limit|429|timeout|503|502|504|non-2xx/i.test(detail) || ctx?.status === 429 || (ctx?.status >= 500 && ctx?.status < 600);
+          const isTransient =
+            status === 429 || (status >= 500 && status < 600) ||
+            /rate.?limit|429|timeout|503|502|504|non-2xx|fetch|network|context canceled/i.test(detail);
           if (isTransient && attempt < maxAttempts) {
-            await sleep(1500 * attempt + Math.random() * 1000);
+            await sleep(2000 * attempt + Math.random() * 1500);
             continue;
           }
-          throw new Error(detail || 'Edge function error');
+          throw new Error(detail || `Edge function ${fn} error`);
         }
         if (!data) throw new Error('No data returned');
+        if ((data as any)?.error) throw new Error(String((data as any).error));
         return data;
       } catch (e: any) {
         lastErr = e;
         const msg = String(e?.message || '');
-        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx/i.test(msg)) {
-          await sleep(1500 * attempt + Math.random() * 1000);
+        if (attempt < maxAttempts && /rate.?limit|429|timeout|fetch|network|non-2xx|context canceled|abort/i.test(msg)) {
+          await sleep(2000 * attempt + Math.random() * 1500);
           continue;
         }
-        throw e;
+        if (attempt === maxAttempts) throw e;
       }
     }
     throw lastErr || new Error('Failed after retries');
@@ -264,13 +280,14 @@ export const AllInOneGenerator: React.FC = () => {
     const started = Date.now();
     try {
       const data = await invokeWithRetry(job.fn, job.body());
-      // Save to the right library (rep_library for portal sessions, admin_library for admins)
+      const title = `${job.titleFor(data)}, ${new Date().toLocaleDateString()}`;
       await saveToolRun({
         tool_type: job.toolType,
-        title: `${job.titleFor(data)} — ${new Date().toLocaleDateString()}`,
+        title,
         input_data: { source: 'all-in-one', ...form, ...job.body() },
         output_data: data,
       });
+      setOutputs((prev) => ({ ...prev, [job.key]: { label: job.label, title, data } }));
       return { status: 'success', durationMs: Date.now() - started };
     } catch (err: any) {
       console.error(`[all-in-one] ${job.key} failed:`, err);
@@ -278,23 +295,23 @@ export const AllInOneGenerator: React.FC = () => {
     }
   };
 
+
   const handleRun = async () => {
     if (!form.url.trim()) {
       toast({ title: 'Website URL required', description: 'Enter the website to analyze.', variant: 'destructive' });
       return;
     }
 
-    // Auto-infer business profile if user hasn't filled details
     let workingForm = form;
     const needsInference = !form.businessName && !form.industry && !form.product && !form.targetCustomer;
     if (needsInference) {
       const inferred = await inferFromUrl(form.url);
       if (inferred) workingForm = inferred;
-      // continue even if inference fails — tools will fall back to URL-only
     }
 
     setRunning(true);
     setProgress(0);
+    setOutputs({});
     const allJobs = jobs(workingForm);
     const initial: Record<string, RunState> = {};
     allJobs.forEach((j) => (initial[j.key] = { status: 'running' }));
@@ -306,11 +323,15 @@ export const AllInOneGenerator: React.FC = () => {
     let skipped = 0;
     const total = allJobs.length;
 
-    // Run all tools fully in parallel — retry logic handles transient 429s.
-    // Tiny stagger (50ms each) avoids a thundering-herd against the AI gateway.
-    await Promise.all(
-      allJobs.map(async (job, idx) => {
-        await sleep(idx * 50);
+    // Concurrency pool of 3 — running 9 long AI calls in parallel reliably hits
+    // gateway rate limits and times out the whole batch. 3-at-a-time keeps every
+    // tool inside its budget while still finishing in ~60-90s.
+    const POOL_SIZE = 3;
+    const queue = [...allJobs];
+    const workers = Array.from({ length: Math.min(POOL_SIZE, queue.length) }, async () => {
+      while (queue.length) {
+        const job = queue.shift();
+        if (!job) break;
         const result = await runOne(job);
         completed++;
         if (result.status === 'success') succeeded++;
@@ -318,8 +339,9 @@ export const AllInOneGenerator: React.FC = () => {
         else if (result.status === 'skipped') skipped++;
         setProgress(Math.round((completed / total) * 100));
         setStates((prev) => ({ ...prev, [job.key]: result }));
-      }),
-    );
+      }
+    });
+    await Promise.all(workers);
 
     setRunning(false);
     setProgress(100);
@@ -329,10 +351,86 @@ export const AllInOneGenerator: React.FC = () => {
     });
   };
 
+
   const reset = () => {
     setStates({});
+    setOutputs({});
     setProgress(0);
   };
+
+  const renderValue = (val: any, depth = 0): string => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    if (Array.isArray(val)) {
+      return val.map((v) => {
+        if (v && typeof v === 'object') return renderValue(v, depth + 1);
+        return `- ${String(v)}`;
+      }).join('\n');
+    }
+    if (typeof val === 'object') {
+      return Object.entries(val)
+        .map(([k, v]) => {
+          const label = k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+          const inner = renderValue(v, depth + 1);
+          if (!inner) return '';
+          if (inner.includes('\n') || inner.length > 80) {
+            return `${'#'.repeat(Math.min(depth + 3, 6))} ${label}\n\n${inner}`;
+          }
+          return `**${label}:** ${inner}`;
+        })
+        .filter(Boolean)
+        .join('\n\n');
+    }
+    return String(val);
+  };
+
+  const buildReportMarkdown = () => {
+    const lines: string[] = [];
+    lines.push(`# Forensic Tools Report`);
+    lines.push(`**Website:** ${form.url}`);
+    if (form.businessName) lines.push(`**Business:** ${form.businessName}`);
+    if (form.industry) lines.push(`**Industry:** ${form.industry}`);
+    lines.push(`**Generated:** ${new Date().toLocaleString()}`);
+    lines.push('\n---\n');
+    jobs().forEach((job) => {
+      const out = outputs[job.key];
+      const state = states[job.key];
+      lines.push(`## ${job.label}`);
+      if (!out) {
+        lines.push(`_${state?.status === 'error' ? 'Failed: ' + (state.message || 'unknown error') : state?.status === 'skipped' ? 'Skipped: ' + (state.message || '') : 'No output'}_`);
+      } else {
+        lines.push(renderValue(out.data));
+      }
+      lines.push('\n---\n');
+    });
+    return lines.join('\n');
+  };
+
+  const downloadReport = () => {
+    const md = buildReportMarkdown();
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Forensic Tools Report</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:860px;margin:40px auto;padding:0 24px;color:#1a1a1a;line-height:1.6;}
+  h1{font-size:2rem;border-bottom:3px solid #d97706;padding-bottom:.5rem;}
+  h2{color:#92400e;margin-top:2.5rem;border-bottom:1px solid #e5e5e5;padding-bottom:.25rem;}
+  h3{color:#1a1a1a;margin-top:1.5rem;}
+  hr{border:none;border-top:1px solid #ddd;margin:2rem 0;}
+  pre,code{background:#f5f5f5;padding:2px 6px;border-radius:4px;font-size:.9rem;}
+  pre{padding:12px;overflow:auto;}
+</style></head><body><pre style="white-space:pre-wrap;font-family:inherit;background:transparent;padding:0;">${md.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]!))}</pre></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (form.businessName || form.url || 'report').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    a.download = `forensic-report-${safeName}-${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
 
   const successCount = Object.values(states).filter((s) => s.status === 'success').length;
   const errorCount = Object.values(states).filter((s) => s.status === 'error').length;
@@ -445,10 +543,11 @@ export const AllInOneGenerator: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground mt-3">
-          Just paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span> — we'll read your
-          site, infer your business profile, then run all 9 tools fully in parallel (~30–60 seconds). If a tool gets
-          rate-limited it auto-retries up to 3 times. Each result saves to your library independently.
+          Paste your URL and hit <span className="text-amber font-semibold">Run Every Tool</span>. We read your site,
+          infer your business profile, then run all 9 tools 3-at-a-time (~60-90 seconds) so the AI gateway doesn't
+          rate-limit the batch. Each tool auto-retries up to 4 times on transient failures and saves independently.
         </p>
+
       </div>
 
       {(running || Object.keys(states).length > 0) && (
@@ -516,15 +615,57 @@ export const AllInOneGenerator: React.FC = () => {
           </div>
 
           {!running && successCount > 0 && (
-            <div className="mt-5 p-4 rounded-lg bg-amber/5 border border-amber/30 flex items-start gap-3">
-              <LibraryIcon className="w-5 h-5 text-amber flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">All results are in your Library</p>
-                <p className="text-xs text-muted-foreground">
-                  Switch to the <span className="text-amber font-semibold">My Library</span> tab to view, download as
-                  PDF, or copy any result.
-                </p>
+            <div className="mt-5 space-y-4">
+              <div className="p-4 rounded-lg bg-amber/5 border border-amber/30 flex flex-wrap items-center gap-3">
+                <FileText className="w-5 h-5 text-amber flex-shrink-0" />
+                <div className="flex-1 min-w-[200px]">
+                  <p className="text-sm font-bold text-foreground">Full Report Ready</p>
+                  <p className="text-xs text-muted-foreground">
+                    View every tool's output below or download the consolidated report.
+                  </p>
+                </div>
+                <Button
+                  onClick={downloadReport}
+                  className="bg-amber hover:bg-amber/90 text-background font-bold"
+                  size="sm"
+                >
+                  <Download className="w-4 h-4 mr-2" /> Download Report
+                </Button>
               </div>
+
+              <div className="rounded-xl border border-border bg-background/40 p-5 space-y-6 max-h-[600px] overflow-y-auto">
+                <div className="pb-3 border-b border-border">
+                  <h3 className="text-xl font-bold font-display text-foreground">Forensic Tools Report</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {form.url} · {new Date().toLocaleString()}
+                  </p>
+                </div>
+                {jobs().map((job) => {
+                  const out = outputs[job.key];
+                  const state = states[job.key];
+                  if (!out && state?.status !== 'error' && state?.status !== 'skipped') return null;
+                  return (
+                    <section key={job.key} className="space-y-2">
+                      <h4 className="text-base font-bold text-amber flex items-center gap-2">
+                        <job.icon className="w-4 h-4" /> {job.label}
+                      </h4>
+                      {out ? (
+                        <pre className="whitespace-pre-wrap text-xs text-foreground/90 leading-relaxed font-mono bg-card/40 p-3 rounded border border-border/50">
+{renderValue(out.data)}
+                        </pre>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          {state?.status === 'error' ? `Failed: ${state.message}` : `Skipped: ${state?.message || ''}`}
+                        </p>
+                      )}
+                    </section>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Individual results are also saved to <span className="text-amber font-semibold">My Library</span> for later access.
+              </p>
             </div>
           )}
         </div>

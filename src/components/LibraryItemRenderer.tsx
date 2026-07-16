@@ -4,10 +4,12 @@ import {
   Copy, Check, Linkedin, Facebook, Megaphone, Phone, Mail, Calendar,
   MessageCircle, AlertTriangle, Search, Globe, TrendingDown, TrendingUp,
   Stethoscope, Sparkles, Target, Users, DollarSign, Briefcase, Lightbulb,
-  ChevronRight, Zap,
+  ChevronRight, Zap, BookOpen, Download, Eye, HelpCircle, Gavel, Fingerprint,
+  ArrowRight, FileSearch, Send,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
+import { generateFullReport } from '@/lib/generateScanReport';
 
 const copyText = (text: string, setCopiedId: (id: string | null) => void, id: string) => {
   navigator.clipboard.writeText(text);
@@ -140,11 +142,11 @@ const SocialContentView = ({ data, copiedId, setCopiedId }: any) => {
                     {c.lesson && <p className="text-xs text-muted-foreground mt-1"><span className="text-amber font-bold">Lesson:</span> {c.lesson}</p>}
                     {Array.isArray(c.carouselSlides) && c.carouselSlides.length > 0 && (
                       <details className="mt-2">
-                        <summary className="text-xs text-primary cursor-pointer">Carousel — {c.carouselSlides.length} slides</summary>
+                        <summary className="text-xs text-primary cursor-pointer">Carousel, {c.carouselSlides.length} slides</summary>
                         <div className="mt-2 space-y-1 pl-2 border-l border-border">
                           {c.carouselSlides.map((sl: any, idx: number) => (
                             <div key={idx} className="text-xs">
-                              <p className="font-bold text-foreground">Slide {sl.slideNumber} — {sl.headline}</p>
+                              <p className="font-bold text-foreground">Slide {sl.slideNumber}, {sl.headline}</p>
                               {sl.body && <p className="text-muted-foreground">{sl.body}</p>}
                             </div>
                           ))}
@@ -372,7 +374,7 @@ const FollowUpPlanView = ({ data, copiedId, setCopiedId }: any) => {
           {days.map((s: any, i: number) => {
             const dayNum = s.day || s.dayNumber || i + 1;
             const body = s.template || s.message || s.body || s.script || '';
-            const text = `Day ${dayNum} — ${s.channel || ''} (${s.timing || ''})\n${s.action ? `Action: ${s.action}\n` : ''}${s.subject ? `Subject: ${s.subject}\n` : ''}${body}\n${s.tips ? `\nTips: ${s.tips}` : ''}`;
+            const text = `Day ${dayNum}, ${s.channel || ''} (${s.timing || ''})\n${s.action ? `Action: ${s.action}\n` : ''}${s.subject ? `Subject: ${s.subject}\n` : ''}${body}\n${s.tips ? `\nTips: ${s.tips}` : ''}`;
             return (
               <div key={i} className="relative glass rounded-lg p-4 border border-border">
                 <CopyBtn text={text} id={`fu-${i}`} copiedId={copiedId} setCopiedId={setCopiedId} />
@@ -847,6 +849,11 @@ const WebsiteScanView = ({ data, copiedId, setCopiedId }: any) => {
         )}
         {grade && <p className="text-2xl font-bold text-amber mb-3">Grade: {grade}</p>}
         {data.executiveSummary && <p className="text-sm text-muted-foreground max-w-2xl mx-auto">{data.executiveSummary}</p>}
+        <div className="mt-4">
+          <Button size="sm" variant="outline" onClick={() => generateFullReport(data)} className="gap-2">
+            <Download className="w-3.5 h-3.5" /> Download Full PDF (matches this view)
+          </Button>
+        </div>
       </div>
 
       {/* Gaps */}
@@ -1080,15 +1087,38 @@ const WhatsWrongView = ({ data, copiedId, setCopiedId }: any) => {
 // ────────────────────────────────────────────────────────────────────────────
 const PlaybookView = ({ data, fileUrl }: any) => (
   <div className="text-center py-8">
-    <div className="glass rounded-xl p-8 border border-border">
-      <p className="text-sm text-muted-foreground mb-4">{data.description || data.subtitle || 'Custom playbook generated'}</p>
-      {fileUrl ? (
-        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-          <Button className="bg-amber hover:bg-amber/90 text-background font-bold">Download PDF</Button>
-        </a>
-      ) : (
-        <p className="text-xs text-muted-foreground">PDF still generating or unavailable.</p>
+    <div className="glass rounded-xl p-8 border border-border space-y-4">
+      <BookOpen className="w-10 h-10 text-amber mx-auto" />
+      <h4 className="text-lg font-bold text-foreground font-display">{data.title || 'Strategic Playbook'}</h4>
+      <p className="text-sm text-muted-foreground">{data.description || data.subtitle || 'Custom playbook generated'}</p>
+      {data.pillar && (
+        <span className="inline-block text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">{data.pillar}</span>
       )}
+      {Array.isArray(data.tags) && data.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 justify-center">
+          {data.tags.map((t: string) => (
+            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">{t}</span>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2 justify-center pt-2">
+        {fileUrl ? (
+          <>
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Button className="bg-amber hover:bg-amber/90 text-background font-bold gap-2">
+                <BookOpen className="w-4 h-4" /> View PDF
+              </Button>
+            </a>
+            <a href={fileUrl} download>
+              <Button variant="outline" className="gap-2">
+                <Download className="w-4 h-4" /> Download PDF
+              </Button>
+            </a>
+          </>
+        ) : (
+          <p className="text-xs text-muted-foreground">PDF still generating or unavailable.</p>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -1096,14 +1126,189 @@ const PlaybookView = ({ data, fileUrl }: any) => (
 // ────────────────────────────────────────────────────────────────────────────
 // SWITCH
 // ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+// DETECTIVE CASE FILE
+// ────────────────────────────────────────────────────────────────────────────
+const DetectiveCaseView: React.FC<{ data: any; input?: any; copiedId: string | null; setCopiedId: (id: string | null) => void }> = ({ data, input, copiedId, setCopiedId }) => {
+  const channel = input?.channel || data?.channel || 'email';
+  const monologue: Array<{ type: string; text: string }> = Array.isArray(data?.monologue) ? data.monologue : [];
+  const angle = data?.best_angle || null;
+  const chain: Array<{ step?: number; from?: string; to?: string; evidence?: string }> = Array.isArray(data?.deduction_chain) ? data.deduction_chain : [];
+  const reserve: string[] = Array.isArray(data?.deeper_forensics) ? data.deeper_forensics : [];
+  const message = data?.message || null;
+
+  const beatIcon = (t: string) => {
+    if (t === 'question') return <HelpCircle className="w-3.5 h-3.5 text-amber" />;
+    if (t === 'observation') return <Eye className="w-3.5 h-3.5 text-sky-400" />;
+    if (t === 'conclusion') return <Gavel className="w-3.5 h-3.5 text-emerald-400" />;
+    return <Lightbulb className="w-3.5 h-3.5 text-amber/70" />;
+  };
+
+  const messageText = message?.body
+    ? (channel === 'email' && message.subject ? `Subject: ${message.subject}\n\n${message.body}` : String(message.body))
+    : '';
+
+  return (
+    <div className="space-y-5">
+      {/* Case header strip */}
+      <div className="flex items-center gap-2 flex-wrap text-[10px] font-mono uppercase tracking-[0.2em] text-amber/80 border-b border-amber/20 pb-2">
+        <Fingerprint className="w-3.5 h-3.5 text-amber" />
+        <span>Aetheris · case file</span>
+        <span className="text-muted-foreground">·</span>
+        <span className="text-muted-foreground normal-case tracking-normal">Channel:</span>
+        <span className="text-amber">{channel}</span>
+      </div>
+
+      {/* Verdict */}
+      {angle && (
+        <div className="rounded-lg border-2 border-amber/40 bg-gradient-to-br from-amber/10 to-transparent p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Gavel className="w-4 h-4 text-amber" />
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber">Verdict · best angle</p>
+          </div>
+          {angle.title && <p className="text-base font-display font-bold text-foreground">{angle.title}</p>}
+          {angle.leak_or_gap && (
+            <p className="text-sm text-foreground">
+              <span className="text-amber font-bold">Leak:</span> {angle.leak_or_gap}
+              {angle.estimated_cost && <span className="text-red-400 font-semibold"> · ~{angle.estimated_cost}/yr</span>}
+            </p>
+          )}
+          {angle.why_this_one && (
+            <p className="text-xs text-muted-foreground italic leading-snug">{angle.why_this_one}</p>
+          )}
+        </div>
+      )}
+
+      {/* Deduction A → B */}
+      {chain.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <FileSearch className="w-4 h-4 text-amber" />
+            <h4 className="text-sm font-display font-bold text-foreground">Deduction chain</h4>
+            <span className="text-[10px] font-mono uppercase text-muted-foreground">A → B</span>
+          </div>
+          <ol className="space-y-2">
+            {chain.map((s, i) => (
+              <li key={i} className="rounded-md border border-border bg-card/40 p-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-[10px] font-mono text-amber bg-amber/10 border border-amber/30 rounded px-1.5 py-0.5 mt-0.5">
+                    {String(s.step ?? i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap text-sm text-foreground">
+                      <span>{s.from}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-amber flex-shrink-0" />
+                      <span className="font-semibold">{s.to}</span>
+                    </div>
+                    {s.evidence && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        <span className="text-amber font-bold">Evidence:</span> {s.evidence}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Monologue */}
+      {monologue.length > 0 && (
+        <details className="rounded-md border border-border bg-card/30 p-3">
+          <summary className="cursor-pointer text-sm font-display font-bold text-foreground flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 text-amber" />
+            Detective monologue
+            <span className="text-[10px] font-mono uppercase text-muted-foreground">({monologue.length} beats)</span>
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {monologue.map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs">
+                <span className="mt-0.5">{beatIcon(b.type)}</span>
+                <div className="flex-1">
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground mr-2">{b.type}</span>
+                  <span className="text-foreground/90">{b.text}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {/* Reserve */}
+      {reserve.length > 0 && (
+        <div className="rounded-md border border-border bg-card/30 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-4 h-4 text-amber" />
+            <h4 className="text-sm font-display font-bold text-foreground">Hold in reserve</h4>
+          </div>
+          <ul className="space-y-1 list-disc pl-5">
+            {reserve.map((b, i) => (
+              <li key={i} className="text-xs text-muted-foreground">{b}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* The message */}
+      {message?.body && (
+        <div className="relative rounded-lg border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-transparent p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Send className="w-4 h-4 text-primary" />
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary">The message · {channel}</p>
+            <Button
+              variant="ghost" size="sm"
+              className="ml-auto h-7 w-7 p-0"
+              onClick={() => copyText(messageText, setCopiedId, 'det-msg')}
+            >
+              {copiedId === 'det-msg' ? <Check className="w-3.5 h-3.5 text-amber" /> : <Copy className="w-3.5 h-3.5" />}
+            </Button>
+          </div>
+          {channel === 'email' && message.subject && (
+            <p className="text-sm">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mr-2">Subject</span>
+              <span className="font-semibold text-foreground">{message.subject}</span>
+            </p>
+          )}
+          <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed bg-background/40 rounded p-3 border border-border/60">
+{message.body}
+          </pre>
+          {message.why_it_lands && (
+            <p className="text-[11px] text-muted-foreground italic border-t border-border/40 pt-2">
+              <span className="text-amber font-bold not-italic">Why it lands:</span> {message.why_it_lands}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const data = item.output_data as any;
+  const data = (item.output_data || {}) as any;
   const props = { data, copiedId, setCopiedId };
 
-  if (!data || typeof data !== 'object') {
-    return <p className="text-sm text-muted-foreground">No content to display.</p>;
+  const isEmpty = !data || typeof data !== 'object' || Object.keys(data).length === 0;
+  if (isEmpty) {
+    return (
+      <div className="glass rounded-lg p-6 border border-amber/30 space-y-3">
+        <div>
+          <p className="text-sm text-foreground font-bold mb-1">No saved content for this entry.</p>
+          <p className="text-xs text-muted-foreground">
+            The record exists but its output payload is empty — the original generation didn't persist (usually a provider timeout or a rate limit). You can safely delete this entry and re-run the tool.
+          </p>
+        </div>
+        <div className="border-t border-border pt-3">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-amber mb-1">Try the Golden Report instead</p>
+          <p className="text-xs text-muted-foreground">
+            One URL → full forensic case file (14 chapters, verdicts, dollar leaks, Smart PDF). Tools → <span className="text-foreground font-semibold">Golden Report</span>.
+          </p>
+        </div>
+      </div>
+    );
   }
+
 
   switch (item.tool_type) {
     case 'social_content': return <SocialContentView {...props} />;
@@ -1116,6 +1321,229 @@ export const LibraryItemRenderer: React.FC<{ item: AdminLibraryItem }> = ({ item
     case 'website_scan': return <WebsiteScanView {...props} />;
     case 'whats_wrong': return <WhatsWrongView {...props} />;
     case 'playbook': return <PlaybookView data={data} fileUrl={item.file_url} />;
+    case 'reciprocation_tactics': {
+      const tactics: any[] = Array.isArray(data?.tactics) ? data.tactics : [];
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber border-b border-amber/20 pb-2">
+            <span>Reciprocation Tactics · Mauss / Regan / Mexico-Ethiopia</span>
+          </div>
+          {data?.scenario_summary && (
+            <p className="text-sm text-foreground/85 italic border-l-2 border-amber/50 pl-3">{String(data.scenario_summary)}</p>
+          )}
+          {tactics.map((t: any, i: number) => (
+            <div key={t?.id || i} className="border border-border rounded-md bg-muted/10 p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="font-serif font-semibold text-sm text-foreground">
+                  <span className="font-mono text-[10px] text-amber mr-2">T{String(i + 1).padStart(2, '0')}</span>
+                  {t?.concept || 'Tactic'}
+                </div>
+                <div className="flex gap-1">
+                  {(Array.isArray(t?.citation_keys) ? t.citation_keys : []).map((k: string) => (
+                    <span key={k} className="text-[9px] font-mono uppercase tracking-widest bg-amber/10 border border-amber/30 text-amber px-1.5 py-0.5 rounded-sm">{k}</span>
+                  ))}
+                </div>
+              </div>
+              {t?.tactic && <p className="text-sm text-foreground/90 whitespace-pre-wrap">{t.tactic}</p>}
+              {t?.script_line && (
+                <div className="text-xs font-mono bg-background/40 border border-border rounded p-2 text-foreground/90">"{t.script_line}"</div>
+              )}
+              <div className="grid md:grid-cols-2 gap-2">
+                {t?.ethical_use && (
+                  <div className="border border-emerald-500/30 bg-emerald-500/5 rounded p-2">
+                    <div className="text-[10px] font-mono uppercase text-emerald-400 mb-1">Ethical use</div>
+                    <div className="text-xs text-foreground/85 whitespace-pre-wrap">{t.ethical_use}</div>
+                  </div>
+                )}
+                {t?.manipulator_abuse && (
+                  <div className="border border-crimson/40 bg-crimson/5 rounded p-2">
+                    <div className="text-[10px] font-mono uppercase text-crimson mb-1">Manipulator abuse</div>
+                    <div className="text-xs text-foreground/85 whitespace-pre-wrap">{t.manipulator_abuse}</div>
+                  </div>
+                )}
+              </div>
+              {t?.defense_signal && (
+                <div className="border-l-2 border-amber/60 pl-3 py-1 bg-amber/5 rounded-r text-xs">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber mr-1">Defense signal:</span>
+                  {t.defense_signal}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    case 'detective_case': return <DetectiveCaseView data={data} input={(item as any).input_data} copiedId={copiedId} setCopiedId={setCopiedId} />;
+    case 'lead_deep_scan': {
+      const person = data?.person || {};
+      const fc = data?.firecrawl || {};
+      const emails: any[] = Array.isArray(person.emails) ? person.emails : [];
+      const phones: any[] = Array.isArray(person.phones) ? person.phones : [];
+      return (
+        <div className="space-y-5">
+          <div className="flex items-center gap-2 flex-wrap text-[10px] font-mono uppercase tracking-[0.2em] text-amber/80 border-b border-amber/20 pb-2">
+            <Search className="w-3.5 h-3.5 text-amber" />
+            <span>Lead deep scan · RocketReach + Firecrawl</span>
+          </div>
+          {(person.name || person.current_title || person.current_employer) && (
+            <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 space-y-1">
+              {person.name && <p className="text-base font-display font-bold text-foreground">{person.name}</p>}
+              {(person.current_title || person.current_employer) && (
+                <p className="text-sm text-muted-foreground">
+                  {[person.current_title, person.current_employer].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              {person.location && <p className="text-xs text-muted-foreground">{person.location}</p>}
+              {person.linkedin_url && (
+                <a href={person.linkedin_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-amber underline">
+                  <Linkedin className="w-3 h-3" /> LinkedIn profile
+                </a>
+              )}
+            </div>
+          )}
+          {(emails.length > 0 || phones.length > 0) && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {emails.length > 0 && (
+                <div className="rounded-md border border-border bg-card/40 p-3">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Mail className="w-3 h-3" /> Emails</p>
+                  <ul className="space-y-1 text-xs">
+                    {emails.map((e: any, i: number) => (
+                      <li key={i} className="text-foreground break-all">
+                        {e.email || e.address || String(e)}
+                        {e.type && <span className="text-muted-foreground ml-1">· {e.type}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {phones.length > 0 && (
+                <div className="rounded-md border border-border bg-card/40 p-3">
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Phone className="w-3 h-3" /> Phones</p>
+                  <ul className="space-y-1 text-xs">
+                    {phones.map((p: any, i: number) => (
+                      <li key={i} className="text-foreground">{p.number || String(p)}{p.type && <span className="text-muted-foreground ml-1">· {p.type}</span>}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {fc?.summary && (
+            <div className="rounded-md border border-border bg-card/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2 flex items-center gap-1.5"><Globe className="w-3 h-3" /> Website intel</p>
+              <p className="text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed">{fc.summary}</p>
+            </div>
+          )}
+          {Array.isArray(fc?.signals) && fc.signals.length > 0 && (
+            <div className="rounded-md border border-border bg-card/30 p-3">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-2">Signals</p>
+              <ul className="list-disc pl-5 space-y-0.5 text-xs text-muted-foreground">
+                {fc.signals.map((s: any, i: number) => <li key={i}>{typeof s === 'string' ? s : (s.text || JSON.stringify(s))}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+    case 'video': return (
+      <div className="space-y-3">
+        {item.file_url ? (
+          <video src={item.file_url} controls className="w-full max-h-[70vh] rounded-lg bg-black" />
+        ) : (
+          <p className="text-sm text-muted-foreground">Video file missing.</p>
+        )}
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {data.aspect && <span>Aspect: {String(data.aspect)}</span>}
+          {data.ext && <span>Format: .{String(data.ext)}</span>}
+          {data.size_mb != null && <span>Size: {String(data.size_mb)} MB</span>}
+          {Array.isArray(data.scenes) && <span>Scenes: {data.scenes.length}</span>}
+        </div>
+        {item.file_url && (
+          <a href={item.file_url} download target="_blank" rel="noopener noreferrer" className="text-amber text-sm underline">
+            Download original
+          </a>
+        )}
+      </div>
+    );
+    case 'day_post': return (
+      <div className="space-y-4">
+        {data.format && (
+          <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber bg-amber/10 border border-amber/30 rounded px-2 py-0.5">
+            {String(data.format).replace(/_/g, ' ')}
+          </span>
+        )}
+        {data.hook && (
+          <p className="text-lg font-display font-bold text-foreground border-l-2 border-amber pl-3">{data.hook}</p>
+        )}
+        {data.body && (
+          <div className="prose prose-invert max-w-none text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-foreground bg-transparent p-0 m-0 border-0 text-sm leading-relaxed">{data.body}</pre>
+          </div>
+        )}
+        {data.cta && (
+          <div className="rounded-lg bg-amber/10 border border-amber/30 p-3 text-sm text-foreground">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-amber block mb-1">CTA</span>
+            {data.cta}
+          </div>
+        )}
+        {Array.isArray(data.hashtags) && data.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {data.hashtags.map((h: string, i: number) => (
+              <span key={i} className="text-[11px] font-mono text-amber/80">#{String(h).replace(/^#/, '')}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+    case 'linkedin_post': return (
+      <div className="space-y-3">
+        {data.scheduledFor && (
+          <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber bg-amber/10 border border-amber/30 rounded px-2 py-0.5">
+            Scheduled {new Date(`${data.scheduledFor}T12:00:00`).toLocaleDateString()}
+          </span>
+        )}
+        <pre className="whitespace-pre-wrap font-sans text-sm text-foreground/90 leading-relaxed bg-transparent p-0 m-0 border-0">
+          {String(data.body || '')}
+        </pre>
+      </div>
+    );
+    case 'linkedin_response':
+    case 'linkedin_reply':
+    case 'linkedin_comment': {
+      const body = String(data.body || data.text || data.reply || data.content || '');
+      const sourceUrl = data.sourceUrl || data.source_url || data.url;
+      const sourcePost = data.sourcePost || data.source_post || data.original;
+      return (
+        <div className="space-y-4">
+          {sourceUrl && (
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-[10px] font-mono uppercase tracking-widest text-amber underline">
+              Source post ↗
+            </a>
+          )}
+          {sourcePost && (
+            <div className="rounded-lg bg-muted/20 border border-border p-3">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">Original</p>
+              <p className="text-xs text-muted-foreground whitespace-pre-wrap">{String(sourcePost)}</p>
+            </div>
+          )}
+          <div className="relative">
+            {body && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-0 right-0 h-7 w-7 p-0"
+                onClick={() => copyText(body, setCopiedId, 'linkedin-resp')}
+              >
+                {copiedId === 'linkedin-resp' ? <Check className="w-3.5 h-3.5 text-amber" /> : <Copy className="w-3.5 h-3.5" />}
+              </Button>
+            )}
+            <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed bg-transparent p-0 m-0 border-0 pr-10">
+              {body || '(empty reply)'}
+            </pre>
+          </div>
+        </div>
+      );
+    }
     default:
       return (
         <pre className="bg-muted/30 rounded-lg p-4 text-xs text-foreground whitespace-pre-wrap font-mono overflow-x-auto max-h-[60vh]">

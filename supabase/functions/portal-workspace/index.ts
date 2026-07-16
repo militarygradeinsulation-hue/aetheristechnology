@@ -4,10 +4,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
+import { sanitizePostgrestLike } from "../_shared/sanitize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const MAX_LIBRARY = 500;
@@ -84,7 +85,8 @@ serve(async (req) => {
 
     // ============ NOTES ============
     if (action === "notes_list") {
-      const q = clean(body.q, 200);
+      const raw = clean(body.q, 200);
+      const q = raw ? sanitizePostgrestLike(raw) : null;
       let query = supabase.from("rep_notes")
         .select("id, title, body, pinned, tags, attachments, created_at, updated_at")
         .eq("code", claims.code)
@@ -146,8 +148,15 @@ serve(async (req) => {
       const q = clean(body.q, 200);
       const toolType = clean(body.tool_type, 64);
       const leadId = clean(body.lead_id, 64);
+      // Default to lightweight payload (no input_data / output_data) so the
+      // history view loads fast even when reps have hundreds of saved runs.
+      // Callers that need full rows pass { full: true } or use library_get.
+      const full = body.full === true;
+      const cols = full
+        ? "id, tool_type, title, input_data, output_data, file_url, lead_id, created_at"
+        : "id, tool_type, title, file_url, lead_id, created_at";
       let query = supabase.from("rep_library")
-        .select("id, tool_type, title, input_data, output_data, file_url, lead_id, created_at")
+        .select(cols)
         .eq("code", claims.code)
         .order("created_at", { ascending: false })
         .limit(MAX_LIBRARY);
@@ -156,7 +165,24 @@ serve(async (req) => {
       if (q) query = query.ilike("title", `%${q}%`);
       const { data, error } = await query;
       if (error) throw error;
-      return jsonResp({ ok: true, items: data || [] });
+      const items = (data || []).map((r: any) => ({
+        input_data: {},
+        output_data: {},
+        ...r,
+      }));
+      return jsonResp({ ok: true, items });
+    }
+
+    if (action === "library_get") {
+      const id = clean(body.id, 64);
+      if (!id) return jsonResp({ error: "Missing id" }, 400);
+      const { data, error } = await supabase.from("rep_library")
+        .select("id, tool_type, title, input_data, output_data, file_url, lead_id, created_at")
+        .eq("id", id).eq("code", claims.code)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return jsonResp({ error: "Not found" }, 404);
+      return jsonResp({ ok: true, item: data });
     }
 
     if (action === "library_save") {
@@ -186,7 +212,8 @@ serve(async (req) => {
 
     // ============ UNIFIED SEARCH ============
     if (action === "search") {
-      const q = clean(body.q, 200);
+      const raw = clean(body.q, 200);
+      const q = raw ? sanitizePostgrestLike(raw) : null;
       if (!q) return jsonResp({ ok: true, notes: [], items: [] });
       const [notesRes, libRes] = await Promise.all([
         supabase.from("rep_notes")

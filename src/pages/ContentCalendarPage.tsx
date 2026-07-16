@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { ContentCalendarGenerator } from '@/components/ContentCalendarGenerator';
+import { PostFromSourceGenerator } from '@/components/PostFromSourceGenerator';
 
 const ContentCalendarPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -12,7 +13,7 @@ const ContentCalendarPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Content Calendar — 30 Days of Posts | Aetheris"
+        title="AI Content Calendar, 30 Days of Posts | Aetheris"
         description="Generate a 30-day content calendar with daily topics, hooks, captions, and post times. First 7 days free, full calendar $29."
         path="/content-calendar"
       />
@@ -25,9 +26,10 @@ const ContentCalendarPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">
               30 Days of Content <span className="text-gradient-amber">Done For You</span>
             </h1>
-            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Daily post ideas, hooks, topics, and best times — generated for your industry in minutes.</p>
+            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">Daily post ideas, hooks, topics, and best times, generated for your industry in minutes.</p>
           </div>
           <ContentCalendarGenerator />
+          <PostFromSourceGenerator />
         </div>
         <Footer />
       </div>

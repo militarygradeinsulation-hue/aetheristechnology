@@ -6,14 +6,33 @@ import pdfParse from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 import JSZip from "npm:jszip@3.10.1";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest, type PortalClaims } from "../_shared/portal-token.ts";
+import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
+
+// Verify a Stripe Checkout session was actually paid for the careers test fee.
+// Returns the verified payer email when ok.
+async function verifyCareersPayment(sessionId: string, environment: StripeEnv): Promise<{ ok: boolean; email: string | null; error?: string }> {
+  if (!sessionId || !/^cs_[a-zA-Z0-9_]+$/.test(sessionId)) {
+    return { ok: false, email: null, error: "Invalid payment session" };
+  }
+  try {
+    const stripe = createStripeClient(environment);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== "paid") return { ok: false, email: null, error: "Payment not completed" };
+    if (session.metadata?.purpose !== "careers_test_fee") return { ok: false, email: null, error: "Payment is not for the careers test" };
+    const email = session.customer_details?.email || session.customer_email || null;
+    return { ok: true, email: email ? String(email).toLowerCase() : null };
+  } catch (e) {
+    return { ok: false, email: null, error: e instanceof Error ? e.message : "Could not verify payment" };
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Reps/partners with elevated access to careers admin data.
-const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Bradon Roberts
+const CAREERS_ALLOWED_PORTAL_CODES = new Set(["963169"]); // Braden Roberts
 
 async function authorize(req: Request, secret: string): Promise<{ ok: boolean; isAdmin: boolean; claims: PortalClaims | null }> {
   if (await verifyAdminToken(getAdminTokenFromRequest(req), secret)) return { ok: true, isAdmin: true, claims: null };
@@ -314,15 +333,35 @@ async function analyzeApplicationFit(admin: any, app: any, apiKey: string) {
     ? { resumeText: app.resume_text, resumeHtml: app.resume_html, method: app.resume_extract_method || "stored", extractError: app.resume_extract_error || null }
     : await recreateResumeForApplication(admin, app, apiKey);
 
-  const sys = `You are the hiring operator for Aetheris Technology, a Business Forensics consulting firm in Indianapolis.
-We sell the Forensic Diagnostic ($2,500 flat applied toward engagement). Reps work on a 70/15/15 commission split.
+  const sys = `You are the hiring operator for Aetheris Technology, a Chaos Theory Forensics consulting firm in Indianapolis.
+We sell the 21-Day Revenue Diagnostic ($18,500 flat, credited 1:1 toward the Implementation Retainer). Reps work on a 70/15/15 commission split.
 Tone is blunt, operator, non-corporate. We hire CLOSERS — confident communicators with B2B sales instincts, comfort with discovery calls and CFO-level conversations, hustle, ownership, and resilience.
-Penalize: pure marketing/agency fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
+Penalize: pure marketing/operator fluff, no measurable outcomes, no B2B sales experience, job-hopping under 6 months.
 Reward: closed-deal numbers, quota attainment, consultative selling, finance/ops/SaaS background, entrepreneurship, prior commission roles.
+
+You MUST rate the candidate 1-10 on each of these six sections (1 = total miss, 5 = average, 10 = exceptional). Be strict — most candidates land 3-6.
+
+SECTIONS:
+1. b2b_sales_experience      — Direct B2B sales role time, deal complexity, sales cycle exposure.
+2. closing_track_record      — Quota attainment, closed-deal numbers, commission history, win rate.
+3. communication_confidence  — Discovery skills, CFO-level conversation comfort, written clarity.
+4. hustle_ownership          — Self-direction, entrepreneurial moves, side businesses, outbound grit.
+5. domain_fit                — Finance / ops / SaaS / consulting / forensics-adjacent background.
+6. resilience_tenure         — Tenure stability (no <6 mo hops), bouncing back from misses, longevity.
+
+The overall fit_score is the SUM of the six section ratings (range 6-60). Do NOT scale to 100. Do not invent the total — sum it.
 
 Output STRICT JSON only — no markdown, no code fences:
 {
-  "fit_score": <integer 0-100>,
+  "section_scores": {
+    "b2b_sales_experience":     { "rating": <1-10>, "reason": "<one sentence>" },
+    "closing_track_record":     { "rating": <1-10>, "reason": "<one sentence>" },
+    "communication_confidence": { "rating": <1-10>, "reason": "<one sentence>" },
+    "hustle_ownership":         { "rating": <1-10>, "reason": "<one sentence>" },
+    "domain_fit":               { "rating": <1-10>, "reason": "<one sentence>" },
+    "resilience_tenure":        { "rating": <1-10>, "reason": "<one sentence>" }
+  },
+  "fit_score": <integer 6-60, must equal sum of all six ratings>,
   "summary": "<2-3 sentence verdict on whether to hire as a sales rep>",
   "strengths": ["<bullet>", "<bullet>", "..."],
   "concerns": ["<bullet>", "<bullet>", "..."],
@@ -356,7 +395,27 @@ ${recreated.resumeText.slice(0, 18000)}`;
   let txt = j.choices?.[0]?.message?.content || "{}";
   txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   const parsed = JSON.parse(txt);
-  const fitScore = Math.max(0, Math.min(100, Math.round(Number(parsed.fit_score) || 0)));
+
+  // Normalize section scores and recompute fit_score = sum (always trustworthy).
+  const SECTION_KEYS = [
+    "b2b_sales_experience",
+    "closing_track_record",
+    "communication_confidence",
+    "hustle_ownership",
+    "domain_fit",
+    "resilience_tenure",
+  ];
+  const rawSections = (parsed.section_scores && typeof parsed.section_scores === "object") ? parsed.section_scores : {};
+  const sectionScores: Record<string, { rating: number; reason: string }> = {};
+  let total = 0;
+  for (const key of SECTION_KEYS) {
+    const entry = rawSections[key] || {};
+    const rating = Math.max(1, Math.min(10, Math.round(Number(entry.rating) || 0) || 1));
+    const reason = String(entry.reason || "").slice(0, 400);
+    sectionScores[key] = { rating, reason };
+    total += rating;
+  }
+  const fitScore = Math.max(6, Math.min(60, total));
   const strengths = Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 8) : [];
   const concerns = Array.isArray(parsed.concerns) ? parsed.concerns.slice(0, 8) : [];
   const summary = String(parsed.summary || "").slice(0, 2000) +
@@ -364,13 +423,14 @@ ${recreated.resumeText.slice(0, 18000)}`;
 
   await admin.from("careers_applications").update({
     ai_fit_score: fitScore,
+    ai_section_scores: sectionScores,
     ai_summary: summary,
     ai_strengths: strengths,
     ai_concerns: concerns,
     ai_analyzed_at: new Date().toISOString(),
   }).eq("share_code", app.share_code);
 
-  return { fit_score: fitScore, summary, strengths, concerns, ...recreated };
+  return { fit_score: fitScore, section_scores: sectionScores, summary, strengths, concerns, ...recreated };
 }
 
 function json(body: unknown, status = 200) {
@@ -407,6 +467,22 @@ serve(async (req) => {
       const phone = String(body.phone || "").trim() || null;
       if (!email || !name) return json({ error: "Name and email required" }, 400);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
+
+      // ---- REQUIRED: paid Stripe checkout session for the careers test fee ----
+      const paymentSessionId = String(body.payment_session_id || "").trim();
+      const rawEnv = String(body.environment || "sandbox");
+      const env: StripeEnv = rawEnv === "live" ? "live" : "sandbox";
+      if (!paymentSessionId) {
+        return json({ error: "Payment required. Please complete the $40 access fee to take the test." }, 402);
+      }
+      const pay = await verifyCareersPayment(paymentSessionId, env);
+      if (!pay.ok) {
+        return json({ error: pay.error || "Payment could not be verified." }, 402);
+      }
+      // Tie the payment to the candidate email — no sharing a paid session across accounts.
+      if (pay.email && pay.email !== email) {
+        return json({ error: `This payment was made by ${pay.email}. Use the same email to take the test.` }, 403);
+      }
 
       // Only count *submitted* attempts toward the daily limit so abandoned/lost
       // sessions and quick mis-clicks don't lock candidates out.
@@ -592,7 +668,7 @@ serve(async (req) => {
         .order("started_at", { ascending: false }).limit(500);
 
       const { data: applications } = await admin.from("careers_applications")
-        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,resume_extract_method,resume_extract_error,resume_recreated_at,notes,admin_notes,stage,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_analyzed_at")
+        .select("id,share_code,candidate_name,candidate_email,candidate_phone,resume_path,resume_filename,resume_extract_method,resume_extract_error,resume_recreated_at,notes,admin_notes,stage,score_pct,reviewed,reviewed_at,contacted,contacted_at,created_at,ai_fit_score,ai_summary,ai_strengths,ai_concerns,ai_section_scores,ai_analyzed_at")
         .order("created_at", { ascending: false }).limit(500);
 
       // Page analytics for /careers and /careers/test
@@ -657,6 +733,19 @@ serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ---------- ADMIN: delete application (and its attempts) ----------
+    if (action === "admin_delete_application") {
+      const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+      const code = String(body.share_code || "").trim().toUpperCase();
+      if (!code) return json({ error: "Missing share_code" }, 400);
+      // Best-effort: delete attempts tied to this share_code, then the application
+      try { await admin.from("careers_attempts").delete().eq("share_code", code); } catch {}
+      const { error } = await admin.from("careers_applications").delete().eq("share_code", code);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
     // ---------- ADMIN: update attempt (admin notes) ----------
     if (action === "admin_update_attempt") {
       const ok = await isAuthorizedAdminOrAllowedPortal(req, SERVICE);
@@ -712,7 +801,7 @@ serve(async (req) => {
       if (!app) return json({ error: "Application not found" }, 404);
       try {
         const result = await analyzeApplicationFit(admin, app, LOVABLE_API_KEY);
-        return json({ ok: true, fit_score: result.fit_score, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
+        return json({ ok: true, fit_score: result.fit_score, section_scores: result.section_scores, summary: result.summary, strengths: result.strengths, concerns: result.concerns });
       } catch (err) {
         const message = err instanceof Error ? err.message : "AI analysis failed";
         if (message.includes("rate limited")) return json({ error: message }, 429);

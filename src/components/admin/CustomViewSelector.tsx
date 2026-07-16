@@ -77,7 +77,7 @@ export const CustomViewSelector: React.FC<Props> = ({
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); }, [views]);
   useEffect(() => { localStorage.setItem(ACTIVE_KEY, active); }, [active]);
 
-  // Hydrate from cloud — but never overwrite changes the user already made this session.
+  // Hydrate from cloud, but never overwrite changes the user already made this session.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -202,7 +202,7 @@ export const CustomViewSelector: React.FC<Props> = ({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <Cloud className={`w-3 h-3 ${syncing ? "text-amber animate-pulse" : "text-muted-foreground/60"}`} aria-label={syncing ? "Syncing views…" : "Views synced"} />
+      <Cloud className={`w-3 h-3 ${syncing ? "text-amber animate-pulse" : "text-muted-foreground"}`} aria-label={syncing ? "Syncing views…" : "Views synced"} />
 
       <Select value={active} onValueChange={applyView}>
         <SelectTrigger className="w-[200px] h-9">
@@ -252,7 +252,7 @@ export const CustomViewSelector: React.FC<Props> = ({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">
-              {editingName ? `Edit View — ${editingName}` : "Create New View"}
+              {editingName ? `Edit View, ${editingName}` : "Create New View"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">

@@ -1,45 +1,67 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, ShoppingCart, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { X, Send, Loader2, Phone, Mail, Linkedin, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { getOpenerForPath } from '@/lib/nexusOpeners';
 
 type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[] };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sales-chat`;
 
-const INITIAL_MESSAGE: Msg = {
-  role: 'assistant',
-  content: "Hey — I'm the Aetheris Sales Advisor. I help business owners figure out exactly what's broken in their digital presence and what to do about it.\n\nWhat's going on in your business? What's the biggest headache right now?",
-};
+// Auto-open delay for the Nexus proactive greeting.
+const AUTO_OPEN_MS = 10_000;
+// Session flag key — set once per browser session so we don't re-pop on every route change.
+const AUTO_OPENED_KEY = 'nexus_auto_opened_session';
 
 const STARTER_PROBLEMS = [
-  "My website isn't generating leads",
-  "I'm losing bids and don't know why",
-  "My CRM is a graveyard",
-  "Marketing spend, no ROI",
-  "My follow-up is broken",
-  "I don't know what's actually broken",
+  "Our site is example.com",
+  "We're a manufacturer",
+  "Leads come in, nothing closes",
+  "Follow-up is completely broken",
+  "I don't know where we're leaking",
+  "Book a call with Joseph",
 ];
 
 const SUGGESTIONS_RE = /<suggestions>\s*(\[[\s\S]*?\])\s*<\/suggestions>\s*$/i;
-const STREAMING_STRIP_RE = /\s*<suggestions>[\s\S]*$/i;
+const CAPTURE_LEAD_RE = /<capture_lead>\s*(\{[\s\S]*?\})\s*<\/capture_lead>/i;
+const STREAMING_STRIP_RE = /\s*(<suggestions>|<capture_lead>)[\s\S]*$/i;
+const CHECKOUT_LINK_RE = /\[([^\]]+)\]\(checkout:[^)]+\)/g;
+const SALES_LANGUAGE_RE = /\$\s?\d|\b\d[\d,.]*\s?(?:dollars?|usd)\b|\b(?:price|pricing|checkout|purchase|buy|paid product|diagnostic|retainer|all-access|bundle)\b/i;
+const PRICE_LINE_RE = /^.*(?:\$\s?\d|\b\d[\d,.]*\s?(?:dollars?|usd)\b|\b(?:price|pricing|checkout|purchase|buy|paid product|diagnostic|retainer|all-access|bundle)\b).*$/gim;
 
-const stripSuggestionsForDisplay = (text: string) => text.replace(STREAMING_STRIP_RE, '').trim();
+const scrubSalesLanguage = (text: string) => text
+  .replace(CHECKOUT_LINK_RE, '$1')
+  .replace(PRICE_LINE_RE, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
+
+const stripSuggestionsForDisplay = (text: string) => scrubSalesLanguage(text.replace(STREAMING_STRIP_RE, '').trim());
 
 const parseSuggestions = (text: string): { clean: string; suggestions?: string[] } => {
-  const m = text.match(SUGGESTIONS_RE);
-  if (!m) return { clean: text };
+  let clean = text.replace(CAPTURE_LEAD_RE, '').trim();
+  const m = clean.match(SUGGESTIONS_RE);
+  if (!m) return { clean };
   try {
     const arr = JSON.parse(m[1]);
     if (Array.isArray(arr) && arr.every((s) => typeof s === 'string')) {
-      return { clean: text.replace(SUGGESTIONS_RE, '').trim(), suggestions: arr.slice(0, 3) };
+      return { clean: scrubSalesLanguage(clean.replace(SUGGESTIONS_RE, '').trim()), suggestions: arr.slice(0, 3).filter((s) => !SALES_LANGUAGE_RE.test(s)) };
     }
-  } catch {
-    // ignore
-  }
-  return { clean: text.replace(SUGGESTIONS_RE, '').trim() };
+  } catch { /* ignore */ }
+  return { clean: scrubSalesLanguage(clean.replace(SUGGESTIONS_RE, '').trim()) };
+};
+
+const parseCaptureLead = (text: string): { name?: string; email?: string; company?: string; note?: string } | null => {
+  const m = text.match(CAPTURE_LEAD_RE);
+  if (!m) return null;
+  try {
+    const obj = JSON.parse(m[1]);
+    if (obj && typeof obj === 'object' && typeof obj.email === 'string' && /.+@.+\..+/.test(obj.email)) {
+      return obj;
+    }
+  } catch { /* ignore */ }
+  return null;
 };
 
 const CONTACT_LINKS = [
@@ -50,19 +72,47 @@ const CONTACT_LINKS = [
 ];
 
 export const SalesChat: React.FC = () => {
+  const { pathname } = useLocation();
+  const opener = useMemo(() => getOpenerForPath(pathname), [pathname]);
+  const initialMessage = useMemo<Msg>(
+    () => ({ role: 'assistant', content: opener.greeting }),
+    [opener.greeting],
+  );
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<Msg[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [showPulse, setShowPulse] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { trackEvent } = useTrackEvent();
+
+  // If the visitor hasn't sent anything yet, keep the intro line in sync with the page.
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [initialMessage];
+      }
+      return prev;
+    });
+  }, [initialMessage]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Aggressive auto-open: once per browser session, ~10s after landing.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem(AUTO_OPENED_KEY) === '1') return;
+    const t = setTimeout(() => {
+      setIsOpen(true);
+      sessionStorage.setItem(AUTO_OPENED_KEY, '1');
+      trackEvent('nexus_auto_open', { path: pathname, section: opener.label });
+    }, AUTO_OPEN_MS);
+    return () => clearTimeout(t);
+  }, [pathname, opener.label, trackEvent]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,7 +136,14 @@ export const SalesChat: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: allMessages }),
+        body: JSON.stringify({
+          messages: allMessages,
+          pageContext: {
+            pathname,
+            title: typeof document !== 'undefined' ? document.title : '',
+            section: opener.label,
+          },
+        }),
       });
 
       if (!resp.ok || !resp.body) throw new Error('Failed to start stream');
@@ -140,13 +197,27 @@ export const SalesChat: React.FC = () => {
         if (last?.role !== 'assistant') return prev;
         return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: clean, suggestions } : m));
       });
+
+      // Silent lead capture → HubSpot + contact_submissions.
+      const lead = parseCaptureLead(assistantSoFar);
+      if (lead?.email) {
+        trackEvent('nexus_lead_captured', { has_name: !!lead.name, has_company: !!lead.company });
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nexus-capture-lead`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ ...lead, pathname }),
+        }).catch((err) => console.warn('nexus-capture-lead failed', err));
+      }
     } catch (e) {
       console.error(e);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, something went wrong. Try again or call us at (317) 376-2110.' }]);
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages]);
+  }, [isLoading, messages, pathname, opener.label]);
 
   const sendMessage = useCallback(() => {
     runChat(input.trim());
@@ -157,62 +228,8 @@ export const SalesChat: React.FC = () => {
     runChat(text);
   }, [runChat, trackEvent]);
 
-  const handleCheckoutClick = (priceId: string) => {
-    setCheckoutPriceId(priceId);
-  };
-
-  if (checkoutPriceId) {
-    return (
-      <div className="fixed inset-0 z-[9998] bg-background/95 backdrop-blur-sm flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-bold text-foreground">Complete Your Purchase</h2>
-          <button onClick={() => setCheckoutPriceId(null)} className="text-muted-foreground hover:text-foreground">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-2xl mx-auto">
-            <StripeEmbeddedCheckout
-              priceId={checkoutPriceId}
-              returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const renderContent = (content: string) => {
-    const parts = content.split(/\[([^\]]+)\]\(checkout:([^)]+)\)/g);
-    if (parts.length === 1) {
-      return <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2"><ReactMarkdown>{content}</ReactMarkdown></div>;
-    }
-
-    const elements: React.ReactNode[] = [];
-    for (let i = 0; i < parts.length; i += 3) {
-      if (parts[i]) {
-        elements.push(
-          <div key={`md-${i}`} className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2">
-            <ReactMarkdown>{parts[i]}</ReactMarkdown>
-          </div>
-        );
-      }
-      if (i + 1 < parts.length && i + 2 < parts.length) {
-        const label = parts[i + 1];
-        const priceId = parts[i + 2];
-        elements.push(
-          <button
-            key={`btn-${i}`}
-            onClick={() => handleCheckoutClick(priceId)}
-            className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold transition-colors my-2"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            {label}
-          </button>
-        );
-      }
-    }
-    return <>{elements}</>;
+    return <div className="prose prose-sm prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2"><ReactMarkdown>{scrubSalesLanguage(content)}</ReactMarkdown></div>;
   };
 
   const lastAssistantIdx = (() => {
@@ -226,29 +243,37 @@ export const SalesChat: React.FC = () => {
     <>
       {/* Single floating button */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 ${
-            showPulse ? 'animate-pulse' : ''
-          }`}
-          aria-label="Chat with us"
-        >
-          {showPulse && (
-            <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
-          )}
-          <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
-        </button>
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={() => setIsOpen(true)}
+            className={`w-16 h-16 rounded-full bg-background border-2 border-amber/60 shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative overflow-hidden ${
+              showPulse ? 'animate-pulse' : ''
+            }`}
+            aria-label="Open Aetheris Nexus"
+          >
+            {showPulse && (
+              <span className="absolute inset-0 rounded-full bg-amber/30 animate-ping" />
+            )}
+            <img
+              src="/aetheris-logo.png"
+              alt="Aetheris"
+              className="w-12 h-12 object-contain relative z-10 pointer-events-none"
+              draggable={false}
+            />
+          </button>
+        </div>
       )}
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[560px] max-h-[calc(100vh-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed bottom-6 right-6 z-50">
+        <div className="w-[380px] max-w-[calc(100vw-48px)] h-[560px] max-h-[calc(100vh-48px)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
           {/* Header */}
           <div className="px-4 py-3 border-b border-border bg-card">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="font-bold text-foreground text-sm">Aetheris Sales Advisor</h3>
-                <p className="text-[10px] text-muted-foreground">Ask me anything or reach out directly</p>
+                <h3 className="font-bold text-foreground text-sm">Aetheris Nexus</h3>
+                <p className="text-[10px] text-muted-foreground">AI operator · viewing {opener.label}</p>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
@@ -363,6 +388,7 @@ export const SalesChat: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
         </div>
       )}
 

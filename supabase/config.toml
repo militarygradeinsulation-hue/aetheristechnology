@@ -1,5 +1,11 @@
 project_id = "ihdjpxhcaiaixmqxyqoe"
 
+[functions.tool-shop]
+verify_jwt = false
+
+[functions.detective-prep]
+verify_jwt = false
+
 [functions.voice-chat]
 verify_jwt = false
 
@@ -7,6 +13,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.scan-website]
+verify_jwt = false
+
+[functions.rep-code-scan]
 verify_jwt = false
 
 [functions.retrofit-blogs]
@@ -39,10 +48,13 @@ verify_jwt = false
 [functions.sales-chat]
 verify_jwt = false
 
-[functions.aetheris-coder-chat]
+[functions.nexus-capture-lead]
 verify_jwt = false
 
 [functions.payments-webhook]
+verify_jwt = false
+
+[functions.head-to-head]
 verify_jwt = false
 
 [functions.get-stripe-price]
@@ -123,6 +135,12 @@ verify_jwt = false
 [functions.admin-pin-login]
 verify_jwt = false
 
+[functions.personal-engine-token]
+verify_jwt = false
+
+[functions.linkedin-scrape-post]
+verify_jwt = false
+
 [functions.infer-business-context]
 verify_jwt = false
 
@@ -168,4 +186,81 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.portal-mailbox]
+verify_jwt = false
+
+[functions.creation-studio]
+verify_jwt = false
+
+[functions.outlook-oauth-start]
+verify_jwt = false
+
+[functions.outlook-oauth-callback]
+verify_jwt = false
+
+[functions.outlook-status]
+verify_jwt = false
+
+[functions.easy-mode]
+verify_jwt = false
+
+[functions.revoke-rep-access]
+verify_jwt = false
+
+[functions.extension-leak-scan]
+verify_jwt = false
+
+[functions.extension-operator-chat]
+verify_jwt = false
+
+[functions.extension-leak-scan-ai]
+verify_jwt = false
+
+[functions.extension-brand-voice]
+verify_jwt = false
+
+
+
+
+
+[functions.forensic-scan-all]
+verify_jwt = false
+
+[functions.forensic-report-chat]
+verify_jwt = false
+
+[functions.verify-careers-test-payment]
+verify_jwt = false
+
+[functions.aetheris-nexus-chat]
+verify_jwt = false
+
+[functions.aetheris-nexus-image]
+verify_jwt = false
+
+[functions.aetheris-nexus-prompt-ideas]
+verify_jwt = false
+
+
+[functions.admin-live-traffic]
+verify_jwt = false
+
+
+[functions.reciprocation-tactics]
+verify_jwt = false
+
+[functions.book-writer]
+verify_jwt = false
+
+[functions.try-tool-sandbox]
+verify_jwt = false
+
+
+
+[functions.verify-careers-license]
+verify_jwt = false
+
+[functions.creation-studio-brand]
+verify_jwt = false
+
+[functions.recommend-tools]
 verify_jwt = false

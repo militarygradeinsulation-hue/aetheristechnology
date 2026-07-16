@@ -9,6 +9,8 @@ import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 import { Badge } from '@/components/ui/badge';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Running forensic scan...', target: 18 },
@@ -141,8 +143,10 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
     }, 3000);
 
     try {
+      const adminToken = (typeof window !== 'undefined') ? localStorage.getItem('aetheris_admin_token') : null;
       const { data, error } = await supabase.functions.invoke('generate-social-content', {
         body: { url: url.trim() },
+        headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       clearInterval(interval);
       if (error || !data) throw new Error(error?.message || 'Failed to generate');
@@ -152,7 +156,7 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
       if (adminMode) {
         saveToAdminLibrary({
           tool_type: 'social_content',
-          title: `${data.businessName || url.trim()} — ${new Date().toLocaleDateString()}`,
+          title: `${data.businessName || url.trim()}, ${new Date().toLocaleDateString()}`,
           input_data: { url: url.trim() },
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -173,7 +177,7 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
   };
 
   const sections = [
-    { key: 'case_file', dataKey: 'caseFiles', title: 'The Case File', desc: 'Flagship forensic case studies — find the leak, show the math, tease the fix' },
+    { key: 'case_file', dataKey: 'caseFiles', title: 'The Case File', desc: 'Flagship forensic case studies, find the leak, show the math, tease the fix' },
     { key: 'leak_of_week', dataKey: 'leakOfTheWeek', title: 'Leak of the Week', desc: 'Name one specific leak pattern. Define it. Show the signs.' },
     { key: 'diagnostic', dataKey: 'deadSimpleDiagnostics', title: 'Dead Simple Diagnostic', desc: 'One 60-second test. Shareable. Saveable.' },
     { key: 'operators_journal', dataKey: 'operatorsJournal', title: "Operator's Journal", desc: 'Field notes. Unpolished. Personal. No CTA.' },
@@ -195,16 +199,30 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
 
     const imagePrompt = post.finding || post.leakName || post.question || post.entry || post.claim || 'business operations forensic analysis';
 
+    const postText = (() => {
+      switch (sectionKey) {
+        case 'case_file': return `${post.finding}\n\n${post.evidence}\n\n${post.math}\n\n${post.fixTease}\n\n${post.lesson}`;
+        case 'leak_of_week': return `${post.leakName}\n\n${post.definition}\n\n${(post.signs || []).join('\n')}\n\n${post.spotIt}`;
+        case 'diagnostic': return `${post.testName}\n\n${post.test}\n\n${post.threshold}\n\n${post.whatItMeans}`;
+        case 'operators_journal': return post.body || '';
+        case 'contrarian': return `${post.claim}\n\n${post.evidence}\n\n${post.counter}\n\n${post.position}`;
+        default: return '';
+      }
+    })();
+
     return (
       <div key={id} className="space-y-2">
         {card}
         {adminMode && visible && (
-          <PostImageGenerator
-            prompt={imagePrompt}
-            postIndex={index}
-            compact
-            onImageGenerated={() => {}}
-          />
+          <>
+            <PostImageGenerator
+              prompt={imagePrompt}
+              postIndex={index}
+              compact
+              onImageGenerated={() => {}}
+            />
+            <ScheduleSocialButton content={postText} source={`social_content:${sectionKey}`} className="w-full" />
+          </>
         )}
       </div>
     );
@@ -219,7 +237,7 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             <Globe className="w-6 h-6 text-amber" />
             <h2 className="text-2xl font-bold text-foreground font-display">Enter Your Website</h2>
           </div>
-          <p className="text-muted-foreground mb-6">We'll scan your site and generate a Forensic Content Pack — 7 posts across five formats, each built to find a leak, name a leak, or fix a leak.</p>
+          <p className="text-muted-foreground mb-6">We'll scan your site and generate a Forensic Content Pack, 7 posts across five formats, each built to find a leak, name a leak, or fix a leak.</p>
           <div className="flex gap-3">
             <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourbusiness.com" className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleGenerate()} />
             <Button onClick={handleGenerate} className="bg-amber hover:bg-amber/90 text-background font-bold px-8">Run Forensic Scan</Button>
@@ -243,8 +261,15 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             <h2 className="text-3xl font-bold text-foreground font-display mb-2">
               Forensic Content Pack: <span className="text-amber">{result.businessName || 'Your Business'}</span>
             </h2>
-            <p className="text-muted-foreground">7 forensic posts + weekly rotation — five formats, each finds a leak, names a leak, or fixes a leak</p>
+            <p className="text-muted-foreground">7 forensic posts + weekly rotation, five formats, each finds a leak, names a leak, or fixes a leak</p>
           </div>
+
+          <QuickDownloadBar
+            toolType="social_content"
+            title={`Forensic Content Pack${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
+
 
           {/* Format Sections */}
           {sections.map(({ key, dataKey, title, desc }) => {
@@ -292,7 +317,7 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             <div className="glass rounded-xl p-8 border-2 border-amber/40 text-center">
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Forensic Pack</h3>
-              <p className="text-muted-foreground mb-4">Get all 7 forensic posts — Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes — plus the weekly rotation.</p>
+              <p className="text-muted-foreground mb-4">Get all 7 forensic posts, Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes, plus the weekly rotation.</p>
               <p className="text-3xl font-bold text-amber mb-4">$29</p>
               <Button onClick={() => setShowCheckout(true)} className="bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">
                 Unlock Now

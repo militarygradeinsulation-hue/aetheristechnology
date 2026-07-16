@@ -15,7 +15,7 @@ const BlogPage = () => {
         title="AI & Business Strategy Blog | Aetheris AI"
         description="Insights on AI automation, operational efficiency, CRM, and digital marketing failures. Updated daily with actionable intelligence."
         path="/blog"
-        type="blog"
+        type="website"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Blog",

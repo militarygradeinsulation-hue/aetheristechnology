@@ -1,81 +1,50 @@
 import React from 'react';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Users, Brain, Mail, BarChart3 } from 'lucide-react';
+import pitchQuartet from '@/assets/editorial/pitch-quartet.jpg';
+
+const PILLARS = [
+  { label: 'Lead Generation', note: 'Pipeline fills itself' },
+  { label: 'Intelligent CRM', note: 'Nothing gets dropped' },
+  { label: '24/7 Engine', note: 'Outreach while you sleep' },
+  { label: 'You Focus', note: 'We run the systems' },
+];
 
 export const ThePitch: React.FC = () => {
-  const services = [
-    {
-      icon: Users,
-      title: 'Lead Generation',
-      description: 'We build systems that find and qualify prospects automatically — so your pipeline stays full without you chasing.',
-      tags: ['AUTO-PROSPECTING', 'LEAD SCORING', 'ROUTING'],
-    },
-    {
-      icon: Brain,
-      title: 'Intelligent CRM',
-      description: 'Every interaction tracked, every preference remembered. Your team never drops a lead or forgets a follow-up again.',
-      tags: ['FULL CONTEXT', 'CLIENT HISTORY', 'SMART FOLLOW-UPS'],
-    },
-    {
-      icon: Mail,
-      title: '24/7 Marketing Engine',
-      description: 'Automated outreach that runs while you sleep — email, content, campaigns — all working around the clock.',
-      tags: ['CONTINUOUS OUTREACH', 'AUTOMATED CAMPAIGNS', '24/7 ENGAGEMENT'],
-    },
-    {
-      icon: BarChart3,
-      title: 'You Focus on Your Business',
-      description: 'We handle the systems, the automation, and the infrastructure. You do what you do best — and collect the revenue.',
-      tags: ['CORE FOCUS', 'FULL AUTOMATION', 'SCALE REVENUE'],
-    },
-  ];
-
   return (
     <section className="relative py-24 px-4 bg-gradient-to-b from-background to-secondary/20">
       <div className="max-w-5xl mx-auto">
         <RevealOnScroll>
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-foreground font-display">
               What We <span className="text-amber glow-text">Actually Do</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              We step into your business, find the gaps bleeding revenue, and build the systems to fix them.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Step in. Find the bleed. Build the system that closes it.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {services.map((service, index) => (
-            <RevealOnScroll key={service.title} delay={0.1 + index * 0.1}>
-              <div className="glass glass-hover p-8 rounded-xl h-full">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <service.icon className="w-6 h-6 text-amber" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-foreground mb-2 font-display">{service.title}</h3>
-                    <p className="text-muted-foreground mb-4">{service.description}</p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {service.tags.map(tag => (
-                        <span key={tag} className="px-3 py-1 rounded-full glass border border-amber/20 text-amber">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+        <RevealOnScroll>
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center mb-10">
+            <div className="relative rounded-sm overflow-hidden border border-amber/20 bg-background/40">
+              <img src={pitchQuartet} alt="Four editorial panels: lead magnet, CRM drawer, 24/7 clock with envelopes, operator at desk" width={1024} height={1024} loading="lazy" className="w-full h-auto" />
+              <span className="absolute bottom-2 right-2 font-case text-[9px] uppercase tracking-widest text-amber/80 bg-background/70 px-2 py-0.5 rounded-sm border border-amber/20">Aetheris AI Studio</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {PILLARS.map((p) => (
+                <div key={p.label} className="forensic-tile rounded-sm border border-amber/20 p-4">
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">{p.label}</div>
+                  <div className="text-sm text-foreground/85 leading-snug">{p.note}</div>
                 </div>
-              </div>
-            </RevealOnScroll>
-          ))}
-        </div>
+              ))}
+            </div>
+          </div>
+        </RevealOnScroll>
 
-        <RevealOnScroll delay={0.6}>
-          <div className="mt-12 text-center glass p-8 rounded-xl border-2 border-amber/30">
+        <RevealOnScroll delay={0.2}>
+          <div className="text-center glass p-8 rounded-xl border-2 border-amber/30">
             <p className="text-2xl font-bold text-foreground mb-4 font-display">
               That's what a Co-CEO does for your business.
-            </p>
-            <p className="text-lg text-muted-foreground mb-6">
-              We find the gaps. We build the systems. You run your business.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a href="tel:+13173762110">

@@ -6,8 +6,11 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+import { getPortalToken } from '@/lib/portalAuth';
+import { getAdminToken } from '@/lib/adminAuth';
 
-// Consolidated to 4 high-signal categories — keeps the "no fluff" promise
+// Consolidated to 4 high-signal categories, keeps the "no fluff" promise
 const ISSUE_CATEGORIES = [
   {
     id: 'brand-digital',
@@ -30,7 +33,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'Spending on ads with no measurable ROI',
       'No idea where leads actually come from',
-      'Leads go cold — follow-up is too slow or inconsistent',
+      'Leads go cold, follow-up is too slow or inconsistent',
       'No repeatable sales process',
       'Losing deals to cheaper competitors',
     ],
@@ -43,7 +46,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'CRM is a mess or does not exist',
       'Team is doing busywork instead of revenue work',
-      'Everything is manual — no automation',
+      'Everything is manual, no automation',
       'Data lives in spreadsheets and sticky notes',
       'Cannot track what is actually working',
     ],
@@ -56,7 +59,7 @@ const ISSUE_CATEGORIES = [
     issues: [
       'Revenue is stuck and we cannot break through',
       'Leadership is the bottleneck',
-      'Tried everything — nothing moves the needle',
+      'Tried everything, nothing moves the needle',
       'Do not know which problem to solve first',
       'Need a real strategy, not more tactics',
     ],
@@ -108,6 +111,15 @@ export const WhatsWrongDiagnostic: React.FC = () => {
       setRecommendation(data);
       setStep('results');
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      // Only persist for authenticated operators (admin or rep portal).
+      if (getPortalToken() || getAdminToken()) {
+        saveToolRun({
+          tool_type: 'whats_wrong',
+          title: `What's Wrong. ${selectedIssues.slice(0, 3).join(', ').slice(0, 80) || 'diagnosis'}`,
+          input_data: { issues: selectedIssues, notes },
+          output_data: data,
+        });
+      }
     } catch {
       toast({ title: 'Analysis failed', description: 'Please try again.', variant: 'destructive' });
       setStep('notes');
@@ -175,7 +187,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
             Where is your business <span className="text-amber italic">leaking</span>?
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Pick the symptom. We&apos;ll name the leak, quantify the bleed, and prescribe the exact fix — in under 60 seconds.
+            Pick the symptom. We&apos;ll name the leak, quantify the bleed, and prescribe the exact fix, in under 60 seconds.
           </p>
         </div>
 
@@ -212,7 +224,7 @@ export const WhatsWrongDiagnostic: React.FC = () => {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-baseline gap-2">
-                              <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                              <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                                 CAT {String(idx + 1).padStart(2, '0')}
                               </span>
                             </div>

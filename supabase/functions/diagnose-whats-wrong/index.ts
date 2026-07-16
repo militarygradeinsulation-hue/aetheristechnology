@@ -46,7 +46,7 @@ OUR SERVICE CATALOG:
 7. Follow-Up Plan — $49 (14-day multi-channel sales cadence)
 8. Website Evaluation — $500 (detailed human tear-down + strategy call)
 9. Strategic Discovery Audit — $500 (website + social + CRM — complete picture, normally $1,200+)
-10. 14-Day Diagnostic — $2,500 (embedded operational audit finding every revenue leak)
+10. 21-Day Revenue Diagnostic — $18,500 flat, credited toward the $15,000/mo Implementation Retainer
 11. Full Buildout — $5,000-$25,000 (complete digital infrastructure rebuild)
 
 Return a JSON object with this exact structure:
@@ -72,7 +72,7 @@ RULES:
 - Revenue leak estimate should be realistic based on common business sizes
 - The recommendation must make logical sense given their issues
 - Always push toward the package that solves the ROOT problem, not just symptoms
-- If issues span multiple areas, recommend the Strategic Discovery Audit or 14-Day Diagnostic`;
+- If issues span multiple areas, recommend the 21-Day Revenue Diagnostic`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

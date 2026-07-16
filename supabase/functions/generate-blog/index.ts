@@ -1,12 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-token",
 };
+
 
 // ═══════════════════════════════════════════════════════════════════
 // HASHTAG POOLS — B2B FORENSICS & GROWTH
@@ -50,7 +52,7 @@ const TOPICS = [
     angles: [
       "Salesforce just laid off 10% of their workforce while their CRM adoption rate sits at 26% — the tool isn't the problem, the implementation is the leak",
       "HubSpot's free CRM is the most expensive software you'll ever use — here's the hidden revenue drain nobody talks about",
-      "McKinsey charges $500K for a strategy deck. We charge $2,500 for a Forensic Diagnostic that finds the actual leaks. Here's why the results are the same.",
+      "McKinsey charges $500K for a strategy deck. We charge $18,500 for a 21-Day Revenue Diagnostic that finds the actual leaks. Here's why the results are the same.",
       "Stripe just raised prices and nobody noticed because they buried it in 'platform fees' — this is exactly how your vendors are bleeding you dry",
       "Shopify's 'build your empire' marketing created a generation of businesses with beautiful storefronts and zero operational infrastructure",
       "Monday.com and Asana are in a feature war while their users can't answer one question: is this tool making us money or costing us money?",
@@ -112,7 +114,7 @@ const TOPICS = [
       "We ran forensic diagnostics on 50 businesses last year. Here are the 5 leaks that showed up in every single one.",
       "The anatomy of a $200K revenue leak: how one missing follow-up sequence cost a B2B company more than their entire marketing budget",
       "Why your P&L looks healthy but your cash flow is dying — the operational forensics behind margin compression",
-      "The Forensic Diagnostic vs. a strategy session: what you actually get for $2,500 and why it pays for itself in the first finding",
+      "The Forensic Diagnostic vs. a strategy session: what you actually get for $18,500+ and why it pays for itself in the first finding",
       "Most businesses have 3-7 active revenue leaks running right now. Here's how to find yours in 48 hours without hiring a consultant.",
     ],
   },
@@ -124,7 +126,7 @@ const TOPICS = [
 
 const AETHERIS_FRAMEWORKS = [
   "The Leak Audit™ — A 7-step forensic methodology that systematically identifies every point where revenue, margin, or operational capacity is being lost. From pipeline analysis to vendor stack audits, each step exposes a specific category of business hemorrhage.",
-  "The Forensic Diagnostic ($2,500) — A 14-day deep-dive into your business operations that produces a prioritized map of every revenue leak, operational bottleneck, and margin drain. The fee is applied toward any engagement, making the diagnosis free when you fix the problem.",
+  "The 21-Day Revenue Diagnostic ($18,500 flat) — A 14-day deep-dive into your business operations that produces a prioritized map of every revenue leak, operational bottleneck, and margin drain. The fee is applied toward any engagement, making the diagnosis free when you fix the problem.",
   "The Revenue Autopsy Framework™ — Post-mortem analysis of lost deals, churned clients, and missed targets to identify the systemic operational failures that caused each loss. Not what went wrong — why the system allowed it to happen.",
   "The Operational X-Ray™ — A rapid diagnostic that maps the gap between what your business claims to do and what it actually does, exposing the process failures, data gaps, and human bottlenecks that create revenue leakage.",
 ];
@@ -170,7 +172,7 @@ const STRATEGIC_INTELLIGENCE = `
 - Average consulting engagement: $150K-$500K with no measurable outcome guarantee
 - 70% of change management initiatives fail to achieve their goals (McKinsey)
 - Companies that measure consulting ROI within 90 days see 4x better outcomes
-- The Forensic Diagnostic at $2,500 with fee applied toward engagement converts at 72%
+- The 21-Day Revenue Diagnostic at $18,500 with fee applied toward engagement converts at 72%
 `;
 
 function pickNicheTags(pool: string): string[] {
@@ -195,6 +197,14 @@ serve(async (req) => {
 
     if (!LOVABLE_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Missing required environment variables");
+    }
+
+    // Require admin token. Internal cron callers should pass it via header.
+    const adminOk = await verifyAdminToken(getAdminTokenFromRequest(req), SUPABASE_SERVICE_ROLE_KEY);
+    if (!adminOk) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -245,13 +255,13 @@ serve(async (req) => {
 COMPANY CONTEXT (apply the blueprint above through this lens)
 ═══════════════════════════════════════════════════════════════════
 
-You are a senior content strategist for Aetheris — a Business Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the Forensic Diagnostic ($2,500, applied toward engagement). Headquartered in Indianapolis, Indiana.
+You are a senior content strategist for Aetheris — a Chaos Theory Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer). Headquartered in Indianapolis, Indiana.
 
 ## TONE & VOICE — THIS IS NON-NEGOTIABLE
 
 Write like you're telling a CEO the uncomfortable truth over whiskey. Raw. Blunt. No corporate speak. Short sentences that hit hard.
 
-You are a Business Forensics Operator — not a consultant, not an advisor, not a thought leader. You find where businesses are bleeding and you stop the bleeding. Every sentence should feel like a diagnosis, not a suggestion.
+You are a Chaos Theory Forensics Operator — not a consultant, not an advisor, not a thought leader. You find where businesses are bleeding and you stop the bleeding. Every sentence should feel like a diagnosis, not a suggestion.
 
 Use aggressive, forensic language — "revenue hemorrhage", "operational autopsy", "pipeline leakage", "margin drain", "process failure", "systemic breakdown." Make every paragraph feel like an evidence exhibit. If a reader can skim past it without flinching, rewrite it.
 
@@ -303,7 +313,7 @@ ${brandedFramework}
 - Make each step specific to B2B operations — not generic advice.
 
 ### 6. THE AETHERIS APPROACH (Conversion Layer)
-- Position the Forensic Diagnostic ($2,500) and The Leak Audit as the logical next step.
+- Position the 21-Day Revenue Diagnostic ($18,500 flat) and The Leak Audit as the logical next step.
 - Frame it through the branded framework introduced earlier.
 - Aetheris provides: 14-day deep-dive diagnostic, prioritized leak map, operational system design, AI-powered automation implementation, and ongoing measurement.
 
@@ -316,7 +326,7 @@ ${brandedFramework}
 
 **Your business is leaking. You just can't see it from the inside. Let's find it.**
 
-📧 [joseph@aetheris.technology](mailto:joseph@aetheris.technology)
+📧 [aetheris.technology@outlook.com](mailto:aetheris.technology@outlook.com)
 📞 (317) 376-2110
 🔗 [Connect with Joseph Toney on LinkedIn](https://www.linkedin.com/in/aisystemsarchitect)
 🌐 [aetheris.technology](https://aetheris.technology)
@@ -327,6 +337,7 @@ ${brandedFramework}
 - Lead with the forensic frame. First 3 lines match Case File DNA — a finding, not an intro.
 - H2s as dossier section markers: "THE INVENTORY", "THE AUTOPSY", "THE MATH", "THE FIX", "THE PATTERN"
 - Numbers stay in digits, currency stays explicit, time frames stay specific. "$1.4M/year" not "millions."
+- CURRENCY RULE (NON-NEGOTIABLE): every dollar amount is US Dollars (USD), formatted like $1,200 or $1.4M. Never use €, £, ¥, ₹, EUR, GBP, JPY, CAD, AUD, or any other currency or symbol.
 - Break every 3-4 sentences. Air on the page is part of the brand.
 - Every blog ends with a single clean CTA — the 14-Point Leak Audit, no alternatives, no "also consider."
 - No generic intro paragraphs. No "In today's rapidly evolving business landscape…" Start in the middle.
@@ -402,11 +413,12 @@ IMPORTANT: The entire response must be parseable by JSON.parse(). Do not include
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.5-pro",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
+          max_tokens: 16000,
           response_format: { type: "json_object" },
         }),
       }

@@ -261,7 +261,7 @@ export const ForecastSettingsPanel: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mb-2">Industry Presets — One-Click Add</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mb-2">Industry Presets, One-Click Add</p>
               <div className="flex flex-wrap gap-2">
                 {settings.industry_presets.map((p) => (
                   <Button key={p.id} variant="outline" size="sm" onClick={() => applyPreset(p)}
@@ -381,7 +381,7 @@ export const ForecastSettingsPanel: React.FC = () => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="font-display flex items-center gap-2">
-              <Eye className="w-4 h-4 text-amber" /> Live Preview — What Reps See
+              <Eye className="w-4 h-4 text-amber" /> Live Preview, What Reps See
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -19,9 +19,75 @@ serve(async (req) => {
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, SERVICE);
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "assign");
-    const ids: string[] = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
-    const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign"]);
-    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) return new Response(JSON.stringify({ error: "Missing id(s)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const ids: string[] = Array.isArray(body.ids)
+      ? body.ids.filter((x: unknown) => typeof x === "string" && x.length > 0)
+      : (body.id && typeof body.id === "string" ? [body.id] : []);
+    const NO_ID_ACTIONS = new Set(["refresh_rep", "auto_assign", "create_leads"]);
+    console.log("[admin-assign-lead] action=", action, "ids=", ids.length, "rows=", Array.isArray(body.rows) ? body.rows.length : 0);
+    if (ids.length === 0 && !NO_ID_ACTIONS.has(action)) {
+      console.warn("[admin-assign-lead] Missing id(s) for action:", action, "body keys:", Object.keys(body));
+      return new Response(JSON.stringify({ error: `Missing id(s) for action "${action}"` }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
+
+    // ---------- CREATE LEADS: manual admin entry / bulk paste, optionally drop to pool or to a specific rep ----------
+    if (action === "create_leads") {
+      const rows: any[] = Array.isArray(body.rows) ? body.rows : [];
+      if (rows.length === 0) return new Response(JSON.stringify({ error: "No rows provided" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      const destination = String(body.destination || "pool"); // "pool" | "rep" | "holding"
+      const assignCode = destination === "rep" ? String(body.assign_to_code || "").trim() : "";
+      const holdHours = Math.max(1, Math.min(720, Number(body.hold_hours) || 72));
+      const sharedLHF = body.low_hanging_fruit === true;
+      const sharedNotes = typeof body.notes === "string" ? body.notes.trim() : "";
+
+      if (destination === "rep") {
+        if (!assignCode) return new Response(JSON.stringify({ error: "Pick a rep for the daily drop" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        const { data: rep } = await admin.from("rep_codes").select("code,is_active").eq("code", assignCode).maybeSingle();
+        if (!rep || !rep.is_active) return new Response(JSON.stringify({ error: "Rep code not found or inactive" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const nowIso = new Date().toISOString();
+      const expires = destination === "rep" ? new Date(Date.now() + holdHours * 3600 * 1000).toISOString() : null;
+      const isHolding = destination === "holding";
+
+      const cleaned = rows.map((r: any) => {
+        const business = String(r.business_name || r.company || r.name || "").trim();
+        if (!business) return null;
+        const lhf = r.low_hanging_fruit === true || sharedLHF;
+        const rowNotes = [sharedNotes, typeof r.notes === "string" ? r.notes.trim() : ""].filter(Boolean).join("\n").trim() || null;
+        let score = r.score != null && r.score !== "" ? Number(r.score) : null;
+        if (score != null && (!Number.isFinite(score) || score < 0)) score = null;
+        if (score != null) score = Math.min(100, Math.max(0, Math.round(score)));
+        return {
+          business_name: business,
+          contact_name: r.contact_name ? String(r.contact_name).trim() : null,
+          email: r.email ? String(r.email).trim().toLowerCase() : null,
+          phone: r.phone ? String(r.phone).trim() : null,
+          website: r.website ? String(r.website).trim() : null,
+          industry: r.industry ? String(r.industry).trim() : null,
+          location: r.location ? String(r.location).trim() : null,
+          notes: rowNotes,
+          score,
+          low_hanging_fruit: lhf,
+          source: "admin_manual",
+          status: "new",
+          admin_holding: isHolding,
+          assigned_to_code: destination === "rep" ? assignCode : null,
+          assigned_at: destination === "rep" ? nowIso : null,
+          assignment_expires_at: expires,
+        };
+      }).filter(Boolean);
+
+      }).filter(Boolean);
+
+      if (cleaned.length === 0) return new Response(JSON.stringify({ error: "No valid rows (business name required)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      const { data: inserted, error } = await admin.from("rep_leads").insert(cleaned).select("id");
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, inserted: inserted?.length || 0, destination, assign_to_code: assignCode || null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     if (action === "assign") {
       const code = String(body.code || "").trim();
@@ -32,13 +98,37 @@ serve(async (req) => {
       if (!rep || !rep.is_active) return new Response(JSON.stringify({ error: "Rep code not found or inactive" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
       const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
+      const expires = new Date(Date.now() + holdHours * 3600 * 1000).toISOString();
       const { error } = await admin.from("rep_leads").update({
         assigned_to_code: code,
         assigned_at: new Date().toISOString(),
         assignment_expires_at: expires,
+        admin_holding: false,
       }).in("id", ids).is("claimed_by_code", null);
       if (error) throw error;
       return new Response(JSON.stringify({ ok: true, assigned: ids.length, code, expires }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE FROM HOLDING → POOL (admin distributes their personal stash) ----------
+    if (action === "move_to_pool") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: false,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // ---------- MOVE TO HOLDING (admin pulls a pool lead back into personal stash) ----------
+    if (action === "move_to_holding") {
+      const { error } = await admin.from("rep_leads").update({
+        admin_holding: true,
+        assigned_to_code: null, assigned_at: null, assignment_expires_at: null,
+      }).in("id", ids).is("claimed_by_code", null);
+      if (error) throw error;
+      return new Response(JSON.stringify({ ok: true, moved: ids.length }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     }
 
     if (action === "unassign") {
@@ -90,7 +180,8 @@ serve(async (req) => {
       }
 
       let q = admin.from("rep_leads").select("id")
-        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
+
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(need);
@@ -151,7 +242,8 @@ serve(async (req) => {
       }
 
       let q = admin.from("rep_leads").select("id,industry,score")
-        .is("claimed_by_code", null).is("assigned_to_code", null)
+        .is("claimed_by_code", null).is("assigned_to_code", null).eq("admin_holding", false)
+
         .order("score", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .limit(totalNeed);

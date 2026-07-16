@@ -7,14 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
+import { DetectiveMode } from '@/components/portal/DetectiveMode';
 import {
   Loader2, RefreshCw, Search, Trash2, Send, ScanLine, ExternalLink,
-  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap,
+  Sparkles, AlertTriangle, MessageSquare, UserPlus, X, Shuffle, Zap, Plus, Flame, Upload, Archive, ArrowRightLeft,
+
 } from 'lucide-react';
 
 interface Lead {
@@ -36,23 +40,47 @@ interface Lead {
   enrichment: any;
   enriched_at: string | null;
   created_at: string;
+  notes: string | null;
+  low_hanging_fruit?: boolean | null;
+  admin_holding?: boolean | null;
+
 }
+
+interface ManualLeadRow {
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  website: string;
+  industry: string;
+  location: string;
+  score: string;
+  notes: string;
+}
+
+const EMPTY_ROW: ManualLeadRow = {
+  business_name: '', contact_name: '', email: '', phone: '',
+  website: '', industry: '', location: '', score: '', notes: '',
+};
 
 interface Rep { code: string; rep_name: string | null; is_active: boolean; role: string | null; }
 
 const STATUS_FILTERS = [
   { value: 'pool', label: 'Unassigned pool' },
+  { value: 'holding', label: 'My holdings' },
   { value: 'assigned', label: 'Dripped (held for rep)' },
   { value: 'claimed', label: 'Claimed / working' },
   { value: 'all', label: 'All leads' },
 ];
+
 
 export const AdminLeadBrowser: React.FC = () => {
   const { toast } = useToast();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'pool' | 'assigned' | 'claimed' | 'all'>('pool');
+  const [filter, setFilter] = useState<'pool' | 'holding' | 'assigned' | 'claimed' | 'all'>('pool');
+
   const [search, setSearch] = useState('');
   const [minScore, setMinScore] = useState<number | ''>('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -69,12 +97,31 @@ export const AdminLeadBrowser: React.FC = () => {
   const [autoBusy, setAutoBusy] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState<string | null>(null);
   const [dripCounts, setDripCounts] = useState<Record<string, number>>({});
+  const [claimedCounts, setClaimedCounts] = useState<Record<string, number>>({});
+  const [totalCounts, setTotalCounts] = useState<Record<string, number>>({});
+  const [confirmPush, setConfirmPush] = useState<null | { codes: string[]; perRep: number }>(null);
+  const [resultDialog, setResultDialog] = useState<null | { title: string; assigned: number; perRep: Record<string, number>; message?: string }>(null);
+  // Add Leads dialog
+  const [addOpen, setAddOpen] = useState(false);
+  const [addBusy, setAddBusy] = useState(false);
+  const [addRows, setAddRows] = useState<ManualLeadRow[]>([{ ...EMPTY_ROW }]);
+  const [addCsv, setAddCsv] = useState('');
+  const [addTab, setAddTab] = useState<'manual' | 'csv' | 'excel'>('manual');
+  const [addExcelRows, setAddExcelRows] = useState<ManualLeadRow[]>([]);
+  const [addExcelFileName, setAddExcelFileName] = useState<string>('');
+  const [addExcelParsing, setAddExcelParsing] = useState(false);
+  const [addDest, setAddDest] = useState<'pool' | 'rep' | 'holding'>('holding');
+
+  const [addRepCode, setAddRepCode] = useState('');
+  const [addHoldHours, setAddHoldHours] = useState(72);
+  const [addLHF, setAddLHF] = useState(false);
+  const [addNotes, setAddNotes] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const token = getAdminToken();
-      if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+      if (!token) throw new Error('Admin session expired, log in again at /admin/login');
       const { data, error } = await supabase.functions.invoke('admin-data', {
         body: {
           action: 'leads_browser',
@@ -89,6 +136,8 @@ export const AdminLeadBrowser: React.FC = () => {
       setLeads((data?.leads || []) as Lead[]);
       setReps(((data?.reps || []) as Rep[]).filter(r => r.is_active));
       setDripCounts((data?.dripCounts || {}) as Record<string, number>);
+      setClaimedCounts((data?.claimedCounts || {}) as Record<string, number>);
+      setTotalCounts((data?.totalCounts || {}) as Record<string, number>);
       setSelected(new Set());
     } catch (e) {
       toast({ title: 'Failed to load leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -99,6 +148,14 @@ export const AdminLeadBrowser: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // Keep the open detail dialog in sync with refreshed leads (e.g. after a scan completes)
+  useEffect(() => {
+    if (!detail) return;
+    const fresh = leads.find(l => l.id === detail.id);
+    if (fresh && fresh !== detail) setDetail(fresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leads]);
+
   const toggle = (id: string) => {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
@@ -106,7 +163,7 @@ export const AdminLeadBrowser: React.FC = () => {
 
   const callAdmin = async (path: string, body: Record<string, unknown>) => {
     const token = getAdminToken();
-    if (!token) throw new Error('Admin session expired — log in again at /admin/login');
+    if (!token) throw new Error('Admin session expired, log in again at /admin/login');
     const { data, error } = await supabase.functions.invoke(path, { body, headers: { 'x-admin-token': token } });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
@@ -158,6 +215,21 @@ export const AdminLeadBrowser: React.FC = () => {
     } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
   };
 
+  const moveToPool = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_pool', ids });
+      toast({ title: `Released ${ids.length} from holding to the pool` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+  const moveToHolding = async (ids: string[]) => {
+    try {
+      await callAdmin('admin-assign-lead', { action: 'move_to_holding', ids });
+      toast({ title: `Pulled ${ids.length} into your holding area` }); load();
+    } catch (e) { toast({ title: 'Failed', description: e instanceof Error ? e.message : '', variant: 'destructive' }); }
+  };
+
+
   const remove = async (ids: string[]) => {
     if (!confirm(`Delete ${ids.length} lead${ids.length > 1 ? 's' : ''}?`)) return;
     try {
@@ -182,27 +254,113 @@ export const AdminLeadBrowser: React.FC = () => {
     } finally { setRefreshBusy(null); }
   };
 
-  const autoAssign = async () => {
-    const codes = Array.from(autoCodes);
+  const autoAssign = async (codesArg?: string[], perRepArg?: number) => {
+    const codes = codesArg ?? Array.from(autoCodes);
+    const perRep = perRepArg ?? autoPerRep;
     if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
     setAutoBusy(true);
     try {
       const res = await callAdmin('admin-assign-lead', {
-        action: 'auto_assign', codes, per_rep: autoPerRep, hold_hours: holdHours,
+        action: 'auto_assign', codes, per_rep: perRep, hold_hours: holdHours,
         industry: autoIndustry || undefined,
         min_score: typeof autoMinScore === 'number' ? autoMinScore : undefined,
         respect_current: true,
       });
-      const breakdown = Object.entries(res.per_rep || {}).map(([c, n]) => `${reps.find(r => r.code === c)?.rep_name || c}: ${n}`).join(', ');
-      toast({ title: `Auto-assigned ${res.assigned} leads`, description: breakdown || res.message });
+      setResultDialog({
+        title: res.assigned > 0 ? `✓ Assigned ${res.assigned} leads` : 'No new leads assigned',
+        assigned: res.assigned || 0,
+        perRep: (res.per_rep || {}) as Record<string, number>,
+        message: res.message,
+      });
       load();
     } catch (e) {
       toast({ title: 'Auto-assign failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAutoBusy(false); }
   };
 
+  const requestPush = (codes: string[], perRep: number) => {
+    if (codes.length === 0) return toast({ title: 'Pick at least one rep', variant: 'destructive' });
+    setConfirmPush({ codes, perRep });
+  };
+
   const selectedIds = useMemo(() => Array.from(selected), [selected]);
-  const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : '—';
+  const repName = (code: string | null) => code ? (reps.find(r => r.code === code)?.rep_name || code) : ', ';
+
+  // ---- Add Leads helpers ----
+  const parseAddCsv = (text: string): ManualLeadRow[] => {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return [];
+    const splitRow = (line: string) => {
+      const out: string[] = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQ) {
+          if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+          else if (ch === '"') inQ = false;
+          else cur += ch;
+        } else {
+          if (ch === ',' || ch === '\t') { out.push(cur); cur = ''; }
+          else if (ch === '"') inQ = true;
+          else cur += ch;
+        }
+      }
+      out.push(cur); return out.map(s => s.trim());
+    };
+    const headers = splitRow(lines[0]).map(h => h.toLowerCase().replace(/\s+/g, '_'));
+    const hasHeader = headers.some(h => ['business_name','business','company','name','email','website','phone'].includes(h));
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+    const map = (cols: string[]): ManualLeadRow => {
+      if (hasHeader) {
+        const o: any = { ...EMPTY_ROW };
+        headers.forEach((h, i) => {
+          const v = cols[i] || '';
+          if (h === 'business_name' || h === 'business' || h === 'company' || h === 'name') o.business_name = v;
+          else if (h in EMPTY_ROW) o[h] = v;
+        });
+        return o;
+      }
+      // positional: business, contact, email, phone, website, industry, location, score, notes
+      return {
+        business_name: cols[0] || '', contact_name: cols[1] || '', email: cols[2] || '',
+        phone: cols[3] || '', website: cols[4] || '', industry: cols[5] || '',
+        location: cols[6] || '', score: cols[7] || '', notes: cols[8] || '',
+      };
+    };
+    return dataLines.map(l => map(splitRow(l))).filter(r => r.business_name);
+  };
+
+  const submitAddLeads = async () => {
+    const rows = addTab === 'csv'
+      ? parseAddCsv(addCsv)
+      : addTab === 'excel'
+        ? addExcelRows.filter(r => r.business_name.trim())
+        : addRows.filter(r => r.business_name.trim());
+    if (rows.length === 0) return toast({ title: 'Add at least one lead (business name required)', variant: 'destructive' });
+    if (addDest === 'rep' && !addRepCode) return toast({ title: 'Pick a rep for the daily drop', variant: 'destructive' });
+    setAddBusy(true);
+    try {
+      const res = await callAdmin('admin-assign-lead', {
+        action: 'create_leads',
+        rows,
+        destination: addDest,
+        assign_to_code: addDest === 'rep' ? addRepCode : undefined,
+        hold_hours: addHoldHours,
+        low_hanging_fruit: addLHF,
+        notes: addNotes,
+      });
+      toast({
+        title: `Added ${res.inserted} lead${res.inserted === 1 ? '' : 's'}`,
+        description: addDest === 'rep' ? `Dropped to ${repName(addRepCode)} for ${addHoldHours}h` : 'Dropped to unassigned pool',
+      });
+      setAddOpen(false);
+      setAddRows([{ ...EMPTY_ROW }]);
+      setAddCsv(''); setAddLHF(false); setAddNotes('');
+      setAddExcelRows([]); setAddExcelFileName('');
+      load();
+    } catch (e) {
+      toast({ title: 'Failed to add leads', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setAddBusy(false); }
+  };
 
   return (
     <Card>
@@ -238,6 +396,9 @@ export const AdminLeadBrowser: React.FC = () => {
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           </Button>
+          <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => setAddOpen(true)}>
+            <Plus className="w-4 h-4 mr-1" /> Add leads
+          </Button>
         </div>
 
         {/* Auto-assign panel */}
@@ -252,11 +413,59 @@ export const AdminLeadBrowser: React.FC = () => {
           </button>
           {autoOpen && (
             <div className="p-3 space-y-3 border-t border-border/40">
-              <div className="grid sm:grid-cols-4 gap-2">
-                <div>
-                  <Label className="text-[10px]">Per-rep target</Label>
-                  <Input type="number" min={1} max={200} value={autoPerRep} onChange={e => setAutoPerRep(Number(e.target.value) || 10)} className="h-8" />
+              {/* Quick count control */}
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Label className="text-[11px] font-mono uppercase tracking-wider text-amber">Leads per rep</Label>
+                  <div className="flex items-center gap-1">
+                    {[5, 10, 25, 50, 100].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setAutoPerRep(n)}
+                        className={`px-2 py-1 rounded text-xs font-mono border transition-colors ${
+                          autoPerRep === n ? 'border-amber bg-amber text-background' : 'border-border/50 hover:border-amber/60'
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={Math.min(autoPerRep, 100)}
+                    onChange={e => setAutoPerRep(Number(e.target.value))}
+                    className="flex-1 accent-amber"
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={autoPerRep}
+                    onChange={e => setAutoPerRep(Number(e.target.value) || 1)}
+                    className="h-8 w-20"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    className="bg-amber text-background hover:bg-amber/90"
+                    disabled={autoBusy || reps.length === 0}
+                    onClick={() => requestPush(reps.map(r => r.code), autoPerRep)}
+                  >
+                    {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+                    Push {autoPerRep} to ALL {reps.length} reps
+                  </Button>
+                  <span className="text-[11px] text-muted-foreground">
+                    Tops each rep up to {autoPerRep}. Already-met reps skipped.
+                  </span>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="text-[10px]">Hold hrs</Label>
                   <Input type="number" min={1} max={720} value={holdHours} onChange={e => setHoldHours(Number(e.target.value) || 72)} className="h-8" />
@@ -275,7 +484,9 @@ export const AdminLeadBrowser: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {reps.map(r => {
                     const active = autoCodes.has(r.code);
-                    const cur = dripCounts[r.code] || 0;
+                    const drip = dripCounts[r.code] || 0;
+                    const claimed = claimedCounts[r.code] || 0;
+                    const total = totalCounts[r.code] || (drip + claimed);
                     return (
                       <button
                         key={r.code}
@@ -284,9 +495,13 @@ export const AdminLeadBrowser: React.FC = () => {
                         className={`px-2.5 py-1.5 rounded border text-xs flex items-center gap-2 transition-colors ${
                           active ? 'border-amber bg-amber/15 text-amber' : 'border-border/50 text-muted-foreground hover:border-amber/40'
                         }`}
+                        title={`Drip ${drip} • Claimed ${claimed} • Total ${total}`}
                       >
                         <span className="font-semibold">{r.rep_name || r.code}</span>
-                        <span className="font-mono text-[10px] opacity-70">{cur}/{autoPerRep}</span>
+                        <span className="font-mono text-[10px] opacity-80">
+                          <span className="text-amber">{drip}</span>/<span>{claimed}</span>
+                          <span className="opacity-60"> · {total} total</span>
+                        </span>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); refreshRep(r.code, autoPerRep); }}
@@ -304,7 +519,7 @@ export const AdminLeadBrowser: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={autoAssign} disabled={autoBusy || autoCodes.size === 0}>
+                <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => requestPush(Array.from(autoCodes), autoPerRep)} disabled={autoBusy || autoCodes.size === 0}>
                   {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
                   Auto-assign to {autoCodes.size || 0} rep{autoCodes.size === 1 ? '' : 's'}
                 </Button>
@@ -345,6 +560,16 @@ export const AdminLeadBrowser: React.FC = () => {
             </div>
             <Button size="sm" variant="outline" onClick={() => unassign(selectedIds)}>Unassign</Button>
             <Button size="sm" variant="outline" onClick={() => release(selectedIds)}>Release</Button>
+            {filter === 'holding' ? (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToPool(selectedIds)}>
+                <Shuffle className="w-3 h-3 mr-1" /> Push to pool
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => moveToHolding(selectedIds)}>
+                <Archive className="w-3 h-3 mr-1" /> Hold for me
+              </Button>
+            )}
+
             <Button size="sm" variant="outline" className="text-red-400" onClick={() => remove(selectedIds)}>
               <Trash2 className="w-3 h-3 mr-1" /> Delete
             </Button>
@@ -371,24 +596,27 @@ export const AdminLeadBrowser: React.FC = () => {
                 <Checkbox checked={selected.has(l.id)} onCheckedChange={() => toggle(l.id)} />
                 <button onClick={() => setDetail(l)} className="text-left min-w-0">
                   <div className="font-semibold text-foreground truncate flex items-center gap-1">
-                    {l.business_name || '—'}
+                    {l.business_name || ', '}
                     {l.enriched_at && <Sparkles className="w-3 h-3 text-amber shrink-0" />}
+                    {l.low_hanging_fruit && <Flame className="w-3 h-3 text-red-400 shrink-0" />}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || '—'}
+                    {[l.industry, l.location].filter(Boolean).join(' · ') || l.website || l.email || ', '}
                   </div>
                 </button>
                 <span className={`font-mono text-sm ${(l.score ?? 0) >= 70 ? 'text-green-400' : (l.score ?? 0) >= 40 ? 'text-amber' : 'text-muted-foreground'}`}>
-                  {l.score ?? '—'}
+                  {l.score ?? ', '}
                 </span>
                 <span>
                   <Badge variant="outline" className="text-[10px] font-mono uppercase">{l.status}</Badge>
                 </span>
                 <span className="text-xs truncate">
                   {l.claimed_by_code ? <span className="text-blue-400">✓ {repName(l.claimed_by_code)}</span>
+                    : l.admin_holding ? <span className="text-amber font-mono uppercase tracking-wider text-[10px]">held</span>
                     : l.assigned_to_code ? <span className="text-amber">→ {repName(l.assigned_to_code)}</span>
                     : <span className="text-muted-foreground">pool</span>}
                 </span>
+
                 <div className="flex items-center justify-end gap-1">
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => scan([l.id])} disabled={busy[l.id] === 'scan'} title="Scan with AI">
                     {busy[l.id] === 'scan' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ScanLine className="w-3 h-3" />}
@@ -399,6 +627,16 @@ export const AdminLeadBrowser: React.FC = () => {
                       {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {l.admin_holding ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber" onClick={() => moveToPool([l.id])} title="Push to unassigned pool">
+                      <Shuffle className="w-3 h-3" />
+                    </Button>
+                  ) : !l.claimed_by_code && !l.assigned_to_code ? (
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-amber/80" onClick={() => moveToHolding([l.id])} title="Hold for me">
+                      <Archive className="w-3 h-3" />
+                    </Button>
+                  ) : null}
+
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-red-400" onClick={() => remove([l.id])} title="Delete">
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -410,7 +648,7 @@ export const AdminLeadBrowser: React.FC = () => {
       </CardContent>
 
       {/* Detail dialog */}
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o && detail && busy[detail.id] === 'scan') return; if (!o) setDetail(null); }}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           {detail && (
             <>
@@ -435,10 +673,19 @@ export const AdminLeadBrowser: React.FC = () => {
 
                 {!detail.enrichment ? (
                   <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                    <p className="text-muted-foreground mb-2">No AI scan yet.</p>
-                    <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => { scan([detail.id]); setDetail(null); }}>
-                      <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
-                    </Button>
+                    {busy[detail.id] === 'scan' ? (
+                      <div className="flex items-center justify-center gap-2 text-amber">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Scanning lead… hang tight, this can take a minute.</span>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground mb-2">No AI scan yet.</p>
+                        <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={() => scan([detail.id])}>
+                          <ScanLine className="w-3 h-3 mr-1" /> Run AI scan
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -473,8 +720,55 @@ export const AdminLeadBrowser: React.FC = () => {
                       <div className="text-xs">
                         <div className="font-display mb-1">Likely decision makers</div>
                         {detail.enrichment.decision_makers.map((d: any, i: number) => (
-                          <div key={i}>· <strong>{d.role}</strong> — {d.why}</div>
+                          <div key={i}>· <strong>{d.role}</strong>, {d.why}</div>
                         ))}
+                      </div>
+                    )}
+                    {detail.enrichment.outreach && (
+                      <div className="p-3 rounded-lg bg-amber/5 border border-amber/30 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="font-display text-amber uppercase tracking-wider">
+                            Recommended outreach: {String(detail.enrichment.outreach.recommended_channel || '—').toUpperCase()}
+                          </div>
+                          {detail.enrichment.outreach.channel_confidence && (
+                            <span className="text-[10px] font-mono uppercase text-muted-foreground">
+                              {detail.enrichment.outreach.channel_confidence} confidence
+                            </span>
+                          )}
+                        </div>
+                        {detail.enrichment.outreach.why_this_channel && (
+                          <div className="text-muted-foreground">{detail.enrichment.outreach.why_this_channel}</div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          {detail.enrichment.outreach.secondary_channel && (
+                            <div><span className="text-muted-foreground">Backup:</span> {detail.enrichment.outreach.secondary_channel}</div>
+                          )}
+                          {detail.enrichment.outreach.best_time_to_reach && (
+                            <div><span className="text-muted-foreground">Best time:</span> {detail.enrichment.outreach.best_time_to_reach}</div>
+                          )}
+                          {detail.enrichment.outreach.tone_to_use && (
+                            <div className="col-span-2"><span className="text-muted-foreground">Tone:</span> {detail.enrichment.outreach.tone_to_use}</div>
+                          )}
+                        </div>
+                        {detail.enrichment.outreach.persona_read && (
+                          <div className="pt-2 border-t border-amber/20">
+                            <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Persona read</div>
+                            <div>{detail.enrichment.outreach.persona_read}</div>
+                          </div>
+                        )}
+                        {Array.isArray(detail.enrichment.outreach.do_not_do) && detail.enrichment.outreach.do_not_do.length > 0 && (
+                          <div>
+                            <div className="text-[10px] font-mono uppercase text-muted-foreground mb-1">Do NOT</div>
+                            <ul className="list-disc list-inside space-y-0.5">
+                              {detail.enrichment.outreach.do_not_do.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                        {detail.enrichment.outreach.first_touch_script && (
+                          <div className="p-2 rounded bg-background/60 border border-border/40 italic">
+                            {detail.enrichment.outreach.first_touch_script}
+                          </div>
+                        )}
                       </div>
                     )}
                     <div className="flex gap-3 text-[10px] font-mono uppercase text-muted-foreground pt-2 border-t border-border/30">
@@ -484,6 +778,18 @@ export const AdminLeadBrowser: React.FC = () => {
                     </div>
                   </>
                 )}
+                {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+                <div className="pt-3 border-t border-border/30">
+                  <DetectiveMode
+                    auth="admin"
+                    lead={detail as any}
+                    scan={detail.enrichment?.scan || null}
+                    rr={detail.enrichment?.rocketreach || null}
+                    fc={detail.enrichment?.firecrawl || null}
+                    enrichment={detail.enrichment}
+                  />
+                </div>
+
 
                 {/* Assign */}
                 <div className="pt-3 border-t border-border/30 flex flex-wrap items-end gap-2">
@@ -499,8 +805,9 @@ export const AdminLeadBrowser: React.FC = () => {
                   <Button className="bg-amber text-background hover:bg-amber/90" onClick={() => { assign([detail.id], bulkRep); setDetail(null); }}>
                     <UserPlus className="w-4 h-4 mr-1" /> Send to rep
                   </Button>
-                  <Button variant="outline" onClick={() => { scan([detail.id]); }}>
-                    <ScanLine className="w-4 h-4 mr-1" /> Re-scan
+                  <Button variant="outline" onClick={() => scan([detail.id])} disabled={busy[detail.id] === 'scan'}>
+                    {busy[detail.id] === 'scan' ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ScanLine className="w-4 h-4 mr-1" />}
+                    {busy[detail.id] === 'scan' ? 'Scanning…' : 'Re-scan'}
                   </Button>
                 </div>
               </div>
@@ -508,6 +815,409 @@ export const AdminLeadBrowser: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirm push dialog */}
+      <Dialog open={!!confirmPush} onOpenChange={(o) => !o && setConfirmPush(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber" /> Confirm push
+            </DialogTitle>
+            <DialogDescription>
+              Top up <span className="text-amber font-mono">{confirmPush?.codes.length}</span> rep{confirmPush?.codes.length === 1 ? '' : 's'} to <span className="text-amber font-mono">{confirmPush?.perRep}</span> active drip leads each. Reps already at target are skipped.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-60 overflow-auto rounded border border-border/40 p-2 space-y-1">
+            {(confirmPush?.codes || []).map(code => {
+              const r = reps.find(x => x.code === code);
+              const drip = dripCounts[code] || 0;
+              const claimed = claimedCounts[code] || 0;
+              const total = totalCounts[code] || 0;
+              const need = Math.max(0, (confirmPush?.perRep || 0) - drip);
+              return (
+                <div key={code} className="flex items-center justify-between text-xs">
+                  <span className="font-semibold">{r?.rep_name || code}</span>
+                  <span className="font-mono text-muted-foreground">
+                    drip {drip} · claimed {claimed} · total {total}
+                    {need > 0 && <span className="text-amber"> → +{need}</span>}
+                    {need === 0 && <span className="text-green-400"> ✓ full</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setConfirmPush(null)}>Cancel</Button>
+            <Button
+              size="sm"
+              className="bg-amber text-background hover:bg-amber/90"
+              disabled={autoBusy}
+              onClick={async () => {
+                const c = confirmPush;
+                setConfirmPush(null);
+                if (c) await autoAssign(c.codes, c.perRep);
+              }}
+            >
+              {autoBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Zap className="w-3 h-3 mr-1" />}
+              Push now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Result dialog */}
+      <Dialog open={!!resultDialog} onOpenChange={(o) => !o && setResultDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">{resultDialog?.title}</DialogTitle>
+            {resultDialog?.message && <DialogDescription>{resultDialog.message}</DialogDescription>}
+          </DialogHeader>
+          <div className="max-h-72 overflow-auto rounded border border-border/40 p-2 space-y-1">
+            {Object.entries(resultDialog?.perRep || {}).map(([code, n]) => {
+              const r = reps.find(x => x.code === code);
+              const total = totalCounts[code] || 0;
+              return (
+                <div key={code} className="flex items-center justify-between text-xs">
+                  <span className="font-semibold">{r?.rep_name || code}</span>
+                  <span className="font-mono">
+                    <span className={n > 0 ? 'text-amber' : 'text-muted-foreground'}>+{n} new</span>
+                    <span className="text-muted-foreground"> · {total} total</span>
+                  </span>
+                </div>
+              );
+            })}
+            {Object.keys(resultDialog?.perRep || {}).length === 0 && (
+              <div className="text-xs text-muted-foreground">No per-rep breakdown returned.</div>
+            )}
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button size="sm" onClick={() => setResultDialog(null)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Leads dialog */}
+      <Dialog open={addOpen} onOpenChange={(o) => !addBusy && setAddOpen(o)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Upload className="w-5 h-5 text-amber" /> Add leads
+            </DialogTitle>
+            <DialogDescription>
+              Drop new leads straight into the unassigned pool, or push them as a daily drop to a specific rep. Mark them as low-hanging fruit and add shared notes so reps know how to play them.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Destination */}
+          <div className="rounded-lg border border-border/50 bg-secondary/20 p-3 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setAddDest('holding')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'holding' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Archive className="w-4 h-4 text-amber" /> Hold for me</div>
+                <div className="text-xs text-muted-foreground">Private stash. Reps can't see these — distribute them later from "My holdings".</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddDest('pool')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'pool' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Shuffle className="w-4 h-4 text-amber" /> Drop to pool</div>
+                <div className="text-xs text-muted-foreground">Any rep can claim. Auto-assign/refresh can pull from it later.</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddDest('rep')}
+                className={`flex-1 min-w-[180px] text-left px-3 py-2 rounded border transition-colors ${
+                  addDest === 'rep' ? 'border-amber bg-amber/10' : 'border-border/50 hover:border-amber/40'
+                }`}
+              >
+                <div className="font-display text-sm flex items-center gap-2"><Send className="w-4 h-4 text-amber" /> Daily drop to rep</div>
+                <div className="text-xs text-muted-foreground">Held exclusively for one rep until the hold expires.</div>
+              </button>
+            </div>
+
+            {addDest === 'rep' && (
+              <div className="grid sm:grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px]">Rep</Label>
+                  <Select value={addRepCode} onValueChange={setAddRepCode}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Pick rep" /></SelectTrigger>
+                    <SelectContent>
+                      {reps.map(r => <SelectItem key={r.code} value={r.code}>{r.rep_name || r.code} {r.role === 'partner' ? '(P)' : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[10px]">Hold hours</Label>
+                  <Input type="number" min={1} max={720} value={addHoldHours} onChange={e => setAddHoldHours(Number(e.target.value) || 72)} className="h-9" />
+                </div>
+              </div>
+            )}
+            <div className="grid sm:grid-cols-[auto_1fr] gap-2 items-start">
+              <label className="flex items-center gap-2 px-3 py-2 rounded border border-border/50 cursor-pointer hover:border-amber/60">
+                <Checkbox checked={addLHF} onCheckedChange={(v) => setAddLHF(!!v)} />
+                <Flame className="w-4 h-4 text-red-400" />
+                <span className="text-sm font-mono uppercase tracking-wider">Low-hanging fruit</span>
+              </label>
+              <div>
+                <Label className="text-[10px]">Shared notes (applied to every lead in this batch)</Label>
+                <Textarea
+                  value={addNotes}
+                  onChange={e => setAddNotes(e.target.value)}
+                  placeholder="e.g. Referred by Joe at Acme — already warm. Mention the leak audit."
+                  rows={2}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Lead entry */}
+          <Tabs value={addTab} onValueChange={(v) => setAddTab(v as any)}>
+            <TabsList>
+              <TabsTrigger value="manual">Manual entry</TabsTrigger>
+              <TabsTrigger value="csv">Paste CSV</TabsTrigger>
+              <TabsTrigger value="excel">Upload Excel</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="manual" className="space-y-3">
+              {addRows.map((row, idx) => (
+                <div key={idx} className="rounded border border-border/40 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase text-muted-foreground">Lead {idx + 1}</span>
+                    {addRows.length > 1 && (
+                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setAddRows(rs => rs.filter((_, i) => i !== idx))}>
+                        <X className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px]">Business name *</Label>
+                      <Input value={row.business_name} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, business_name: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Contact name</Label>
+                      <Input value={row.contact_name} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, contact_name: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Email</Label>
+                      <Input value={row.email} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, email: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Phone</Label>
+                      <Input value={row.phone} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, phone: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Website</Label>
+                      <Input value={row.website} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, website: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Industry</Label>
+                      <Input value={row.industry} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, industry: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Location</Label>
+                      <Input value={row.location} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, location: e.target.value } : r))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Score (0-100)</Label>
+                      <Input type="number" min={0} max={100} value={row.score} onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, score: e.target.value } : r))} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px]">Per-lead notes</Label>
+                    <Textarea
+                      rows={2}
+                      value={row.notes}
+                      onChange={e => setAddRows(rs => rs.map((r, i) => i === idx ? { ...r, notes: e.target.value } : r))}
+                      placeholder="Specific intel for this lead only"
+                    />
+                  </div>
+                </div>
+              ))}
+              <Button size="sm" variant="outline" onClick={() => setAddRows(rs => [...rs, { ...EMPTY_ROW }])}>
+                <Plus className="w-3 h-3 mr-1" /> Add another lead
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="csv" className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Paste rows from a spreadsheet. First row can be headers (<code className="font-mono">business_name, contact_name, email, phone, website, industry, location, score, notes</code>) or just data in that order. One lead per line.
+              </p>
+              <Textarea
+                rows={10}
+                className="font-mono text-xs"
+                value={addCsv}
+                onChange={e => setAddCsv(e.target.value)}
+                placeholder={`business_name,contact_name,email,phone,website,industry,location,score,notes\nAcme Roofing,Joe Smith,joe@acme.com,317-555-1212,acme.com,Roofing,"Indianapolis, IN",75,Met at trade show`}
+              />
+              {addCsv.trim() && (
+                <div className="text-xs text-amber font-mono">
+                  Detected {parseAddCsv(addCsv).length} valid lead{parseAddCsv(addCsv).length === 1 ? '' : 's'}.
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="excel" className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Upload any <code className="font-mono">.xlsx</code>, <code className="font-mono">.xls</code>, or <code className="font-mono">.csv</code>. Columns are auto-detected — works with headers like <span className="text-foreground">Company, Business, Contact, Email, Phone, Website, Industry, City, Notes, Pain, Leak</span> and variants. Header row is auto-located, all sheets are scanned, and unmapped columns are merged into notes.
+              </p>
+
+              <label className="flex items-center gap-3 px-4 py-6 rounded border-2 border-dashed border-border/60 hover:border-amber/60 cursor-pointer">
+                <Upload className="w-5 h-5 text-amber" />
+                <div className="flex-1">
+                  <div className="text-sm font-mono uppercase tracking-wider">
+                    {addExcelFileName || 'Click to choose Excel / CSV file'}
+                  </div>
+                  {addExcelRows.length > 0 && (
+                    <div className="text-xs text-amber font-mono mt-1">
+                      Parsed {addExcelRows.length} valid lead{addExcelRows.length === 1 ? '' : 's'} (rows with a business name).
+                    </div>
+                  )}
+                  {addExcelParsing && <div className="text-xs text-muted-foreground mt-1">Parsing…</div>}
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setAddExcelParsing(true);
+                    setAddExcelFileName(file.name);
+                    try {
+                      const XLSX = await import('xlsx');
+                      const buf = await file.arrayBuffer();
+                      const wb = XLSX.read(buf, { type: 'array' });
+                      // Try every sheet, pick the one with the most usable rows
+                      let best: ManualLeadRow[] = [];
+                      let bestSheet = '';
+                      const norm = (k: string) => String(k).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+                      // Column-name pattern matchers (substring on normalized header)
+                      const matchers: Array<{ field: keyof ManualLeadRow; patterns: string[] }> = [
+                        { field: 'business_name', patterns: ['business','company','organization','org_name','account','firm','employer','name'] },
+                        { field: 'contact_name',  patterns: ['contact','owner','decision','dm','poc','rep_name','person','first_name','last_name','full_name'] },
+                        { field: 'email',         patterns: ['email','e_mail','mail'] },
+                        { field: 'phone',         patterns: ['phone','tel','mobile','cell'] },
+                        { field: 'website',       patterns: ['website','url','site','domain','homepage','web'] },
+                        { field: 'industry',      patterns: ['industry','vertical','sector','category','svc','service','trade'] },
+                        { field: 'location',      patterns: ['location','city','state','address','region','geo','area','loc'] },
+                        { field: 'score',         patterns: ['score','rating','fit','priority','grade'] },
+                        { field: 'notes',         patterns: ['note','comment','pain','pitch','description','summary','detail','reason','leak','opportunity'] },
+                      ];
+                      const mapHeader = (h: string): keyof ManualLeadRow | null => {
+                        const nk = norm(h);
+                        if (!nk) return null;
+                        // exact first
+                        for (const m of matchers) if (m.patterns.some(p => nk === p)) return m.field;
+                        // substring
+                        for (const m of matchers) if (m.patterns.some(p => nk.includes(p))) return m.field;
+                        return null;
+                      };
+                      for (const sheetName of wb.SheetNames) {
+                        const ws = wb.Sheets[sheetName];
+                        if (!ws) continue;
+                        // Read as matrix to auto-detect header row
+                        const matrix: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false, blankrows: false });
+                        if (!matrix.length) continue;
+                        // Find header row: first row in first 15 where at least 2 cells map to known fields
+                        let headerIdx = 0;
+                        let headers: string[] = [];
+                        for (let i = 0; i < Math.min(matrix.length, 15); i++) {
+                          const row = matrix[i].map((c: any) => String(c ?? '').trim());
+                          const mapped = row.filter(c => c && mapHeader(c)).length;
+                          if (mapped >= 2) { headerIdx = i; headers = row; break; }
+                        }
+                        if (!headers.length) headers = matrix[0].map((c: any) => String(c ?? '').trim());
+                        const fieldMap: (keyof ManualLeadRow | null)[] = headers.map(h => mapHeader(h));
+                        // Fallback: if no business_name column detected, use the first text column
+                        if (!fieldMap.includes('business_name')) {
+                          const firstTextCol = headers.findIndex((_, i) => matrix.slice(headerIdx + 1, headerIdx + 6).some(r => String(r[i] ?? '').trim().length > 1));
+                          if (firstTextCol >= 0) fieldMap[firstTextCol] = 'business_name';
+                        }
+                        const rows: ManualLeadRow[] = [];
+                        for (let r = headerIdx + 1; r < matrix.length; r++) {
+                          const cells = matrix[r];
+                          if (!cells || cells.every((c: any) => !String(c ?? '').trim())) continue;
+                          const row: any = { ...EMPTY_ROW };
+                          const extras: string[] = [];
+                          cells.forEach((cell: any, idx: number) => {
+                            const val = String(cell ?? '').trim();
+                            if (!val) return;
+                            const target = fieldMap[idx];
+                            if (target) {
+                              row[target] = row[target] ? `${row[target]} ${val}`.trim() : val;
+                            } else if (headers[idx]) {
+                              extras.push(`${headers[idx]}: ${val}`);
+                            }
+                          });
+                          if (extras.length) row.notes = [row.notes, extras.join(' | ')].filter(Boolean).join(' | ');
+                          if (row.score) {
+                            const n = Number(String(row.score).replace(/[^0-9.\-]/g, ''));
+                            row.score = Number.isFinite(n) ? String(Math.min(100, Math.max(0, n <= 5 ? Math.round(n * 20) : Math.round(n)))) : '';
+                          }
+                          if (row.business_name) rows.push(row as ManualLeadRow);
+                        }
+                        if (rows.length > best.length) { best = rows; bestSheet = sheetName; }
+                      }
+                      setAddExcelRows(best);
+                      if (best.length === 0) {
+                        toast({ title: 'No leads found', description: 'Could not detect a business/company column in any sheet. Try renaming a column to "business_name" or "company".', variant: 'destructive' });
+                      } else {
+                        toast({ title: `Parsed ${best.length} leads`, description: bestSheet ? `From sheet "${bestSheet}". Columns were auto-mapped.` : 'Columns were auto-mapped.' });
+                      }
+
+                    } catch (err) {
+                      toast({ title: 'Failed to parse file', description: err instanceof Error ? err.message : '', variant: 'destructive' });
+                      setAddExcelRows([]);
+                    } finally {
+                      setAddExcelParsing(false);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </label>
+              {addExcelRows.length > 0 && (
+                <div className="rounded border border-border/40 max-h-48 overflow-auto">
+                  <table className="w-full text-xs font-mono">
+                    <thead className="bg-muted/30 sticky top-0">
+                      <tr><th className="text-left px-2 py-1">Business</th><th className="text-left px-2 py-1">Email</th><th className="text-left px-2 py-1">Phone</th><th className="text-left px-2 py-1">Score</th></tr>
+                    </thead>
+                    <tbody>
+                      {addExcelRows.slice(0, 50).map((r, i) => (
+                        <tr key={i} className="border-t border-border/30">
+                          <td className="px-2 py-1">{r.business_name}</td>
+                          <td className="px-2 py-1 text-muted-foreground">{r.email}</td>
+                          <td className="px-2 py-1 text-muted-foreground">{r.phone}</td>
+                          <td className="px-2 py-1 text-amber">{r.score}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {addExcelRows.length > 50 && <div className="px-2 py-1 text-[10px] text-muted-foreground">…and {addExcelRows.length - 50} more</div>}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)} disabled={addBusy}>Cancel</Button>
+            <Button className="bg-amber text-background hover:bg-amber/90" onClick={submitAddLeads} disabled={addBusy}>
+              {addBusy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+              {addDest === 'rep' ? 'Drop to rep' : addDest === 'holding' ? 'Hold for me' : 'Drop to pool'}
+
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
+
   );
 };

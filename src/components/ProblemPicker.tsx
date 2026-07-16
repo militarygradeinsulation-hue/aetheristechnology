@@ -1,0 +1,233 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  ChevronDown,
+  Droplets,
+  MessageSquareWarning,
+  PhoneOff,
+  PenLine,
+  UserSearch,
+  HandCoins,
+  Anchor,
+  Boxes,
+  BatteryLow,
+} from 'lucide-react';
+import { RevealOnScroll } from '@/components/RevealOnScroll';
+import { problemGroups } from '@/lib/problemGroups';
+
+// Each problem → icon, humanized "you feel it" line, the fix in one sentence,
+// and a piece of Joseph's story explaining why the tool exists at all.
+const groupMeta = [
+  {
+    icon: Droplets,
+    felt: "You keep asking yourself, 'where is it all going?'",
+    fix: 'Three tools below put a name and a number on the leak.',
+    backstory:
+      "I went 18 months knowing money was bleeding out of my construction company and couldn't name where. I built the Diagnostic so no other owner has to guess that long.",
+  },
+  {
+    icon: MessageSquareWarning,
+    felt: 'You sound expensive on the call and cheap on the website.',
+    fix: 'These two read your brand the way a prospect actually does.',
+    backstory:
+      "I watched a $25M aerospace client lose a seven-figure deal because the website undercut everything the sales team said. That call is why this exists.",
+  },
+  {
+    icon: PhoneOff,
+    felt: "Good leads keep going dark and nobody on your team can tell you why.",
+    fix: 'Give your reps the words and the cadence that close the gap.',
+    backstory:
+      "I once found 142 quoted leads in a CRM that nobody followed up on. $1.4M sitting in a pipeline that everyone assumed was dead. Built the cadence so it never happens again.",
+  },
+  {
+    icon: PenLine,
+    felt: "It's 11pm on a Sunday and you still haven't posted anything this week.",
+    fix: 'Stop staring at the blank page. These do the heavy lift.',
+    backstory:
+      "I missed three months of posting while my kids were in surgery. The content generator is what I built when I came back, so I never had to choose between visibility and showing up at the hospital again.",
+  },
+  {
+    icon: UserSearch,
+    felt: "The last bad hire cost you $40K and three months of sideways energy.",
+    fix: 'Run the resume through the case file before you sign the offer.',
+    backstory:
+      "I hired a 'senior operator' off a polished resume who set the company back a quarter. Resume Forensics is the tool I wish I'd run that Tuesday morning.",
+  },
+  {
+    icon: HandCoins,
+    felt: "You've paid six figures to consultants and you're still asking the same questions.",
+    fix: 'Stop paying for decks. Get an operator-led ledger with dollar amounts on every leak.',
+    backstory:
+      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $18,500 21-Day Revenue Diagnostic is the opposite of that experience. Flat fee, written ledger, credit toward the work.",
+  },
+  {
+    icon: Anchor,
+    felt: "You wanted a business. You built a job that pays worse and never clocks out.",
+    fix: 'Name every decision still routed through you, then hand the work off Monday.',
+    backstory:
+      "Marine Corps taught me to lead from the front. Running my own shop taught me that 'front' becomes a cage when every decision routes back to you. These tools are how I cut the cord.",
+  },
+  {
+    icon: Boxes,
+    felt: "You're paying for tools nobody opens and reports that take a person, not a system.",
+    fix: 'Audit what you actually use. Kill the rest. Make the stack do the work.',
+    backstory:
+      "I was paying $3,200/mo across 11 SaaS subscriptions. Six of them hadn't been opened in 90 days. That audit was the first leak I ever closed in my own business.",
+  },
+  {
+    icon: BatteryLow,
+    felt: "The work isn't the problem anymore. The carrying it is.",
+    fix: 'Hand the audit to an operator. Get the weekend back.',
+    backstory:
+      "I spent a winter freezing inside half-built houses with two kids in surgery and a company I couldn't put down. Nobody should have to carry it alone. That's the only reason Aetheris exists.",
+  },
+];
+
+
+export const ProblemPicker: React.FC = () => {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const total = problemGroups.length;
+  const openGroup = openIdx !== null ? problemGroups[openIdx] : null;
+  const openMeta = openIdx !== null ? groupMeta[openIdx] : null;
+
+  return (
+    <section className="px-4 py-10">
+      <div className="max-w-[1400px] mx-auto">
+        <RevealOnScroll>
+          <div className="text-center mb-6 max-w-4xl mx-auto">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+              Start here · I've been where you are
+            </div>
+            <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground leading-[1.1]">
+              Pick your <span className="text-crimson italic">problem</span>.
+              <span className="text-amber"> Meet the tool that fixes it.</span>
+            </h2>
+            <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-2">
+              {String(total).padStart(2, '0')} owner pressure points · Tap a tile
+            </p>
+          </div>
+        </RevealOnScroll>
+
+        <div className="rounded-sm border-2 border-amber/40 bg-card/95 p-3 md:p-5 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.7)]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-3">
+            {problemGroups.map((group, idx) => {
+              const meta = groupMeta[idx];
+              const Icon = meta?.icon ?? Droplets;
+              const isOpen = openIdx === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setOpenIdx(isOpen ? null : idx)}
+                  aria-expanded={isOpen}
+                  className={`text-left rounded-md bg-background/80 border-2 p-3 md:p-4 transition-all flex flex-col gap-2 min-h-[120px] ${
+                    isOpen
+                      ? 'border-amber shadow-[0_0_24px_-4px_hsl(var(--amber-glow)/0.55)] bg-background'
+                      : 'border-border/60 hover:border-amber/60 hover:bg-background/95'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                        isOpen ? 'bg-amber/25 ring-1 ring-amber/60' : 'bg-amber/10'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 text-amber" />
+                    </div>
+                    <div className="font-case text-[9px] uppercase tracking-widest text-amber/80">
+                      Case {String(idx + 1).padStart(2, '0')}
+                    </div>
+                  </div>
+                  <div className="font-forensic font-bold text-foreground text-sm md:text-base leading-snug">
+                    "{group.problem}"
+                  </div>
+                  <p className="text-[11px] md:text-xs text-foreground/85 leading-snug italic line-clamp-2 mt-auto">
+                    {meta?.felt ?? group.symptom}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {openGroup && (
+            <div className="mt-4 rounded-md border border-amber/40 bg-background/95 p-4 md:p-5 animate-fade-in">
+              <div className="flex items-baseline justify-between gap-3 mb-3 pb-3 border-b border-amber/20">
+                <div>
+                  <div className="font-case text-[9px] uppercase tracking-widest text-amber">
+                    Case {String((openIdx ?? 0) + 1).padStart(2, '0')} · Open file
+                  </div>
+                  <div className="font-forensic text-lg md:text-xl font-bold text-foreground leading-tight">
+                    "{openGroup.problem}"
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpenIdx(null)}
+                  className="font-case text-[9px] uppercase tracking-widest text-muted-foreground hover:text-amber"
+                >
+                  Close ✕
+                </button>
+              </div>
+
+              {openGroup.image && (
+                <div className="mb-3 rounded-sm overflow-hidden border border-amber/30 bg-background">
+                  <img
+                    src={openGroup.image}
+                    alt={`Editorial illustration: ${openGroup.problem}`}
+                    className="w-full h-auto block"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {openMeta?.backstory && (
+                <div className="mb-3 rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-3 py-2">
+                  <p className="text-[13px] text-foreground/85 leading-relaxed italic">
+                    "{openMeta.backstory}"
+                  </p>
+                </div>
+              )}
+
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                The fix
+              </div>
+              <p className="text-sm text-foreground/85 mb-3">{openMeta?.fix}</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {openGroup.tools.map((tool) => (
+                  <Link
+                    key={tool.title}
+                    to={tool.path}
+                    className="group/tool rounded-md border border-amber/25 bg-background/40 p-3 hover:border-amber/60 hover:bg-amber/5 transition-all flex flex-col"
+                  >
+                    <p className="text-[13px] text-foreground/90 leading-snug mb-2">
+                      {tool.solves}
+                    </p>
+                    <div className="mt-auto pt-2 border-t border-amber/15 flex items-center justify-between gap-2">
+                      <span className="font-forensic text-sm font-bold text-foreground leading-tight">
+                        {tool.title}
+                      </span>
+                      <span className="text-amber text-xs font-semibold inline-flex items-center gap-1 whitespace-nowrap">
+                        Run it free <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="text-center mt-4">
+          <Link
+            to="/catalog"
+            className="text-sm text-amber hover:underline inline-flex items-center gap-1.5 font-semibold"
+          >
+            See every tool in the catalog <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};

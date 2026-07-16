@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search } from 'lucide-react';
+import { Loader2, RefreshCw, Copy, Download, Trash2, FileText, Eye, X, ExternalLink, Search, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+
 import { toast } from '@/hooks/use-toast';
-import { listAdminLibrary, deleteFromAdminLibrary, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
+import { listAdminLibrary, deleteFromAdminLibrary, getAdminLibraryItem, formatLibraryItemAsText, downloadText, type AdminLibraryItem } from '@/lib/adminLibrary';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { LibraryItemRenderer } from './LibraryItemRenderer';
+import { EasyReadButton } from './EasyReadButton';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -16,6 +18,14 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions',
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
+  video: 'Video',
+  linkedin_response: 'LinkedIn Reply',
+  linkedin_reply: 'LinkedIn Reply',
+  linkedin_comment: 'LinkedIn Comment',
+  linkedin_post: 'LinkedIn Post',
+  day_post: 'Daily Post',
+  website_scan: 'Website Scan',
+  whats_wrong: "What's Wrong",
 };
 
 export const AdminLibrary: React.FC = () => {
@@ -24,6 +34,11 @@ export const AdminLibrary: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [viewItem, setViewItem] = useState<AdminLibraryItem | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+  const COMPACT_LIMIT = 5;
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,24 +54,57 @@ export const AdminLibrary: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  const hydrate = async (item: AdminLibraryItem): Promise<AdminLibraryItem> => {
+    const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+    if (!needs) return item;
+    try {
+      const full = await getAdminLibraryItem(item.id);
+      if (!full) {
+        toast({ title: 'Could not load full content', description: 'The record was not found.', variant: 'destructive' });
+        return item;
+      }
+      return full;
+    } catch (e: any) {
+      toast({ title: 'Failed to load content', description: e?.message || 'Network error', variant: 'destructive' });
+      return item;
+    }
+  };
+
+  const handleView = async (item: AdminLibraryItem) => {
+    // Open modal immediately so the user sees feedback while we hydrate.
+    setViewItem(item);
+    const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+    if (!needs) return;
+    setViewLoading(true);
+    try {
+      const full = await hydrate(item);
+      setViewItem(full);
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
   const handleCopy = async (item: AdminLibraryItem) => {
-    await navigator.clipboard.writeText(formatLibraryItemAsText(item));
+    const full = await hydrate(item);
+    await navigator.clipboard.writeText(formatLibraryItemAsText(full));
     toast({ title: 'Copied to clipboard' });
   };
 
-  const handleDownloadPdf = (item: AdminLibraryItem) => {
+  const handleDownloadPdf = async (item: AdminLibraryItem) => {
     try {
-      downloadLibraryItemAsPdf(item);
+      const full = await hydrate(item);
+      downloadLibraryItemAsPdf(full);
       toast({ title: 'PDF downloaded' });
     } catch (e: any) {
       toast({ title: 'Download failed', description: e.message, variant: 'destructive' });
     }
   };
 
-  const handleDownloadText = (item: AdminLibraryItem) => {
-    const safeTitle = item.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
-    const ext = item.tool_type === 'playbook' ? 'md' : 'txt';
-    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(item));
+  const handleDownloadText = async (item: AdminLibraryItem) => {
+    const full = await hydrate(item);
+    const safeTitle = full.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
+    const ext = full.tool_type === 'playbook' ? 'md' : 'txt';
+    downloadText(`${safeTitle}.${ext}`, formatLibraryItemAsText(full));
   };
 
   const handleDelete = async (item: AdminLibraryItem) => {
@@ -78,72 +126,94 @@ export const AdminLibrary: React.FC = () => {
 
   const types = Array.from(new Set(items.map(i => i.tool_type)));
 
+  const visible = showAll ? filtered : filtered.slice(0, COMPACT_LIMIT);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <FileText className="w-6 h-6 text-amber" />
-          <h2 className="text-2xl font-bold text-foreground font-display">My Library</h2>
-          <span className="text-xs text-muted-foreground ml-2">{items.length} saved</span>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
-        </Button>
-      </div>
-
-      <div className="flex gap-2 flex-wrap items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search by title..." className="pl-9" />
-        </div>
         <button
-          onClick={() => setTypeFilter('')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${!typeFilter ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
-        >All</button>
-        {types.map(t => (
-          <button
-            key={t}
-            onClick={() => setTypeFilter(t)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
-          >{TOOL_LABELS[t] || t}</button>
-        ))}
+          type="button"
+          onClick={() => setCollapsed(c => !c)}
+          className="flex items-center gap-2 group"
+          aria-expanded={!collapsed}
+        >
+          <FileText className="w-5 h-5 text-amber" />
+          <h2 className="text-lg font-bold text-foreground font-display group-hover:text-amber transition-colors">My Library</h2>
+          <span className="text-xs text-muted-foreground">{items.length} saved</span>
+          {collapsed ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 text-muted-foreground" />}
+        </button>
+        {!collapsed && (
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1 ${loading ? 'animate-spin' : ''}`} /> Refresh
+          </Button>
+        )}
       </div>
 
-      {loading ? (
-        <div className="glass p-12 rounded-xl text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="glass p-12 rounded-xl text-center text-muted-foreground">
-          {items.length === 0 ? 'Nothing saved yet. Generate something in My Tools and it will appear here.' : 'No items match this filter.'}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map(item => (
-            <div key={item.id} className="glass rounded-lg p-4 border border-border flex items-start gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-[10px] font-bold uppercase text-amber bg-amber/10 px-2 py-0.5 rounded">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
-                  {item.file_url && <span className="text-[10px] font-bold uppercase text-primary bg-primary/10 px-2 py-0.5 rounded">PDF</span>}
-                  <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString()}</span>
-                </div>
-                <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-4 h-4" /></Button>
-                {item.file_url && (
-                  <a href={item.file_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon" title="Open PDF"><ExternalLink className="w-4 h-4" /></Button>
-                  </a>
-                )}
-                <Button variant="ghost" size="icon" title="Delete" onClick={() => handleDelete(item)}><Trash2 className="w-4 h-4 text-red-400" /></Button>
-              </div>
+      {!collapsed && (
+        <>
+          <div className="flex gap-2 flex-wrap items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Search by title..." className="pl-9 h-8 text-sm" />
             </div>
-          ))}
-        </div>
+            <button
+              onClick={() => setTypeFilter('')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${!typeFilter ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
+            >All</button>
+            {types.map(t => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
+              >{TOOL_LABELS[t] || t}</button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="glass p-6 rounded-xl text-center">
+              <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="glass p-6 rounded-xl text-center text-sm text-muted-foreground">
+              {items.length === 0 ? 'Nothing saved yet. Generate something in My Tools and it will appear here.' : 'No items match this filter.'}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                {visible.map(item => (
+                  <div key={item.id} className="glass rounded-md px-3 py-2 border border-border/60 flex items-center gap-3 group hover:border-amber/40 transition-colors">
+                    <div className="flex-1 min-w-0 cursor-pointer flex items-center gap-2 flex-wrap" onClick={() => handleView(item)}>
+                      <span className="text-[9px] font-bold uppercase text-amber bg-amber/10 px-1.5 py-0.5 rounded flex-shrink-0">{TOOL_LABELS[item.tool_type] || item.tool_type}</span>
+                      {item.file_url && <span className="text-[9px] font-bold uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">PDF</span>}
+                      <p className="text-xs font-semibold text-foreground truncate group-hover:text-amber transition-colors flex-1 min-w-0">{item.title}</p>
+                      <span className="text-[10px] text-muted-foreground flex-shrink-0 hidden sm:inline">{new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="View" onClick={() => handleView(item)}><Eye className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Copy" onClick={() => handleCopy(item)}><Copy className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Download PDF" onClick={() => handleDownloadPdf(item)}><Download className="w-3.5 h-3.5" /></Button>
+                      {item.file_url && (
+                        <a href={item.file_url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Open PDF"><ExternalLink className="w-3.5 h-3.5" /></Button>
+                        </a>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => handleDelete(item)}><Trash2 className="w-3.5 h-3.5 text-red-400" /></Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {filtered.length > COMPACT_LIMIT && (
+                <div className="text-center pt-1">
+                  <Button variant="ghost" size="sm" onClick={() => setShowAll(s => !s)} className="text-xs text-muted-foreground hover:text-amber">
+                    {showAll ? `Show less` : `Show all ${filtered.length}`}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
+
 
       {viewItem && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
@@ -165,9 +235,17 @@ export const AdminLibrary: React.FC = () => {
                   <Button variant="outline" size="sm"><ExternalLink className="w-4 h-4 mr-1" /> Open PDF</Button>
                 </a>
               )}
+              <EasyReadButton source={formatLibraryItemAsText(viewItem)} toolLabel={TOOL_LABELS[viewItem.tool_type] || viewItem.tool_type} />
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem} />
+              )}
             </div>
           </div>
         </div>

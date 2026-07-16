@@ -95,7 +95,7 @@ export const TrainingPanel: React.FC<Props> = () => {
       const { attempt } = await repTraining.submit(active.id, payload);
       setResult(attempt);
       toast({
-        title: attempt.passed ? `Passed: ${attempt.score}%` : `Score: ${attempt.score}% — keep going`,
+        title: attempt.passed ? `Passed: ${attempt.score}%` : `Score: ${attempt.score}%, keep going`,
       });
       refresh();
     } catch (e) {
@@ -310,7 +310,7 @@ export const TrainingPanel: React.FC<Props> = () => {
               <CardHeader>
                 <CardTitle className="font-display flex items-center gap-2">
                   {result.passed ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <XCircle className="w-5 h-5 text-crimson" />}
-                  {result.passed ? "Passed" : "Try Again"} — {result.score}%
+                  {result.passed ? "Passed" : "Try Again"}, {result.score}%
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -332,7 +332,7 @@ export const TrainingPanel: React.FC<Props> = () => {
                 })}
                 <Button variant="outline" onClick={() => { setResult(null); setAnswers({}); setPlayWelcome(false); }}>Retake</Button>
 
-                {/* Welcome to Aetheris unlock — only after passing */}
+                {/* Welcome to Aetheris unlock, only after passing */}
                 {result.passed && welcome && (
                   <div className="mt-4 rounded-lg border border-amber/40 bg-gradient-to-br from-amber/10 to-amber/5 p-4 space-y-3">
                     <div className="flex items-start gap-3">
@@ -340,7 +340,7 @@ export const TrainingPanel: React.FC<Props> = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-display text-base text-foreground">You're in. Watch this next.</p>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          <strong className="text-amber">Welcome to Aetheris</strong> — {welcome.slides_json?.length || 5} narrated slides ({Math.round(welcome.total_duration_sec || 0)}s) walking you through who we are, what we sell, and how you get paid.
+                          <strong className="text-amber">Welcome to Aetheris</strong>, {welcome.slides_json?.length || 5} narrated slides ({Math.round(welcome.total_duration_sec || 0)}s) walking you through who we are, what we sell, and how you get paid.
                         </p>
                       </div>
                     </div>

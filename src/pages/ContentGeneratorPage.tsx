@@ -13,7 +13,7 @@ const ContentGeneratorPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Forensic Content Pack | Aetheris AI"
-        description="Scan your website. Get 7 forensic LinkedIn posts — Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes. Built on the five-format Business Forensics architecture."
+        description="Scan your website. Get 7 forensic LinkedIn posts, Case Files, Leak of the Week, Diagnostics, Field Notes, and Contrarian takes. Built on the five-format Chaos Theory Forensics architecture."
         path="/content-generator"
       />
       <Background />
@@ -21,7 +21,7 @@ const ContentGeneratorPage = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <div className="pt-32 pb-16 px-4">
           <div className="text-center mb-10">
-            <span className="text-amber font-bold text-xl tracking-wide uppercase mb-2 block">Business Forensics</span>
+            <span className="text-amber font-bold text-xl tracking-wide uppercase mb-2 block">Chaos Theory Forensics</span>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground font-display mb-3">
               Forensic Content <span className="text-gradient-amber">Pack</span>
             </h1>

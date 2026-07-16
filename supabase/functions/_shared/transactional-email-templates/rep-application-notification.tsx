@@ -44,7 +44,7 @@ export const template = {
   component: RepApplicationEmail,
   subject: (data: Record<string, any>) => `New Rep Application: ${data.name || 'Unknown'}`,
   displayName: 'Rep application notification',
-  to: 'joseph@aetheris.technology',
+  to: 'aetheris.technology@outlook.com',
   previewData: { name: 'John Doe', email: 'john@example.com', phone: '(555) 987-6543', linkedin_url: 'https://linkedin.com/in/johndoe', experience: '5 years in B2B sales, SaaS background.' },
 } satisfies TemplateEntry
 

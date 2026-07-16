@@ -46,14 +46,50 @@ serve(async (req) => {
       if (!isAdmin) return json(401, { error: "Unauthorized" });
     }
 
+    // Map a blog_posts row into the NewsPost shape so the portal/admin
+    // feed surfaces the existing Aetheris content engine output.
+    const mapBlog = (b: any) => ({
+      id: `blog:${b.id}`,
+      title: b.title,
+      slug: b.slug,
+      summary: b.excerpt || b.meta_description || null,
+      body: b.content || "",
+      cover_image_url: b.featured_image || null,
+      category: (b.tags && b.tags[0]) || "Aetheris Blog",
+      tags: b.tags || [],
+      author_name: b.author || "Aetheris AI Team",
+      published: !!b.is_published,
+      published_at: b.published_at,
+      view_count: 0,
+      created_at: b.created_at,
+      updated_at: b.updated_at,
+      _source: "blog" as const,
+    });
+
     if (action === "list") {
       const includeDrafts = !!body.include_drafts && isAdmin;
       const limit = Math.min(Number(body.limit) || 50, 200);
+
       let q = supabase.from("news_posts").select("*").order("published_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(limit);
       if (!includeDrafts) q = q.eq("published", true);
-      const { data, error } = await q;
-      if (error) throw error;
-      return json(200, { posts: data || [] });
+      const { data: news, error: newsErr } = await q;
+      if (newsErr) throw newsErr;
+
+      let blogQ = supabase.from("blog_posts")
+        .select("id,title,slug,excerpt,content,featured_image,author,published_at,created_at,updated_at,is_published,tags,meta_description")
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (!includeDrafts) blogQ = blogQ.eq("is_published", true);
+      const { data: blogs, error: blogErr } = await blogQ;
+      if (blogErr) throw blogErr;
+
+      const merged = [...(news || []), ...((blogs || []).map(mapBlog))]
+        .sort((a: any, b: any) =>
+          (b.published_at || b.created_at || "").localeCompare(a.published_at || a.created_at || ""))
+        .slice(0, limit);
+
+      return json(200, { posts: merged });
     }
 
     if (action === "admin_list") {
@@ -73,6 +109,7 @@ serve(async (req) => {
     if (action === "get") {
       const slug = String(body.slug || "");
       if (!slug) return json(400, { error: "slug required" });
+      // Try news_posts first, then fall back to blog_posts.
       const { data, error } = await supabase
         .from("news_posts")
         .select("*")
@@ -80,8 +117,17 @@ serve(async (req) => {
         .eq("published", true)
         .maybeSingle();
       if (error) throw error;
-      if (!data) return json(404, { error: "Not found" });
-      return json(200, { post: data });
+      if (data) return json(200, { post: data });
+
+      const { data: blog, error: blogErr } = await supabase
+        .from("blog_posts")
+        .select("id,title,slug,excerpt,content,featured_image,author,published_at,created_at,updated_at,is_published,tags,meta_description")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .maybeSingle();
+      if (blogErr) throw blogErr;
+      if (!blog) return json(404, { error: "Not found" });
+      return json(200, { post: mapBlog(blog) });
     }
 
     if (action === "increment_view") {

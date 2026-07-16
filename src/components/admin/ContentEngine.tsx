@@ -13,7 +13,55 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
+  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone,
 } from 'lucide-react';
+import { PostImageGenerator } from './PostImageGenerator';
+import LinkedInPostStudio from './LinkedInPostStudio';
+import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
+import { saveToAdminLibrary } from '@/lib/adminLibrary';
+
+const MobileEngineLinkButton: React.FC = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState<string | null>(null);
+  const reveal = async () => {
+    setLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error('Admin token missing — re-enter PIN');
+      const { data, error } = await supabase.functions.invoke('personal-engine-token', {
+        body: { action: 'reveal' },
+        headers: { 'x-admin-token': token },
+      });
+      if (error) throw error;
+      if (!data?.key) throw new Error(data?.error || 'No key returned');
+      const link = `${window.location.origin}/engine?k=${encodeURIComponent(data.key)}`;
+      setUrl(link);
+      try { await navigator.clipboard.writeText(link); toast({ title: 'Mobile link copied', description: 'Bookmark it on your phone.' }); } catch { /* ignore */ }
+    } catch (e) {
+      toast({ title: 'Reveal failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <Button size="sm" variant="outline" onClick={reveal} disabled={loading} className="text-xs">
+        {loading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Smartphone className="w-3 h-3 mr-1" />}
+        Mobile Link
+      </Button>
+      {url && (
+        <button
+          onClick={() => { navigator.clipboard.writeText(url); toast({ title: 'Copied' }); }}
+          className="text-[10px] font-mono text-amber truncate max-w-[220px] underline"
+          title={url}
+        >
+          {url.replace(/^https?:\/\//, '')}
+        </button>
+      )}
+    </div>
+  );
+};
 
 type Strategy = {
   id: string;
@@ -81,6 +129,76 @@ const STATUS_INFO: Record<string, { label: string; cls: string }> = {
   posted:   { label: 'Posted',   cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
 };
 
+const PREMADE_TITLE_GROUPS: Record<string, string[]> = {
+  'Leak Audit': [
+    'The 5 silent leaks bleeding 6-figures from your ops',
+    'Why your "best" rep is actually your biggest leak',
+    'The follow-up gap that costs $40k/month (and nobody tracks it)',
+    'Stop calling it a pipeline problem, it\'s a process leak',
+    'The ghosted-proposal autopsy: where the deal actually died',
+    'Three questions that expose a leaking sales process in 10 minutes',
+    'The retention leak hiding in your onboarding (and how to seal it)',
+    'Quote-to-cash: where most B2B operators lose 8-12% margin',
+    'The 7 leaks every $5M-$50M business has (and refuses to look at)',
+    'Why "more leads" is the wrong fix 70% of the time',
+    'The Leak Audit™ explained in 90 seconds',
+    'What a leak actually looks like on a P&L (it doesn\'t say "leak")',
+  ],
+  'Forensic Diagnostic': [
+    'How a $7M shop found $1.2M in 14 days without hiring',
+    'What I found inside a $30M company\'s revenue ops in 90 minutes',
+    'The Leak Audit framework I run on every engagement',
+    'Why I charge $2,500 flat to look, and why it\'s the cheapest thing you\'ll buy this year',
+    'Inside a real diagnostic: 4 leaks, $480k recovered, no new tools',
+    'The case for a forensic diagnostic before any tech stack rebuild',
+    'Diagnostic vs. consulting call: why one finds money and the other wastes time',
+    'The 3 numbers I ask for before I\'ll take a diagnostic engagement',
+  ],
+  'Operator POV': [
+    'Owner-operators: the 4 reports your finance lead should be running',
+    'The 3 metrics every operator should run weekly (most don\'t)',
+    'How to stop your ops team from being a glorified inbox',
+    'Why discounting is a symptom, not a strategy',
+    'Operator > consultant: what the difference looks like in the field',
+    'The CEO dashboard I rebuild on every engagement (and why)',
+    'When to fire your "rockstar", the operator\'s checklist',
+    'Stop measuring activity. Start measuring leaks.',
+  ],
+  'AI / Tech': [
+    'AI won\'t fix a broken process, it\'ll just speed up the bleed',
+    'Why "we tried automation" usually means "we bought software"',
+    'Your CRM is lying to you. Here\'s how to prove it.',
+    'The 3-question test before you let AI touch your sales pipeline',
+    'Why most "AI consultants" are just SaaS resellers in a hoodie',
+    'Triple-AI architecture: how I stack models so one keeps the others honest',
+    'The cheapest AI win in any business: dead-lead resurrection',
+    'When AI replaces a hire vs. when it replaces a process',
+  ],
+  'Sales & Pipeline': [
+    'The follow-up SLA that doubled close rate at a $12M services firm',
+    'Stuck-deal triage: the 4 questions that move (or kill) a deal in 1 call',
+    'Why "warm leads" go cold in 72 hours, and the fix takes 20 minutes',
+    'The proposal template I rewrote that closed an extra $310k in Q2',
+    'Discovery calls are leaking deals. Here\'s the script that plugs it.',
+    'Why your CRM stages are lying about your pipeline value',
+  ],
+  'Indianapolis / Local': [
+    'Indianapolis owner-operators: the 3 leaks I see in every shop on Mass Ave',
+    'Why Indy\'s mid-market is leaving $500k+/yr on the table (and not noticing)',
+    'A Forensic Diagnostic for an Indianapolis manufacturer: what we found',
+    'Indianapolis vs. Chicago: why Indy operators get squeezed harder on margin',
+  ],
+  'Trust & Positioning': [
+    'I don\'t do active cases until I find the leak. Here\'s why.',
+    'What a "Chaos Theory Forensics Operator" actually does (it\'s not consulting)',
+    'Why I refuse to pitch, and what I do instead',
+    'The 3 kinds of clients I turn away (and why you should too)',
+    'How to vet anyone selling you "AI for your business" in 4 questions',
+  ],
+};
+
+const PREMADE_TITLES: string[] = Object.values(PREMADE_TITLE_GROUPS).flat();
+
 function pad(n: number) { return String(n).padStart(2, '0'); }
 function ymd(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function dayShort(d: Date) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
@@ -109,7 +227,7 @@ async function callThumb(action: string, payload: Record<string, unknown> = {}) 
 
 export const ContentEngine: React.FC = () => {
   const { toast } = useToast();
-  const [view, setView] = useState<'calendar' | 'generator' | 'strategy'>('calendar');
+  const [view, setView] = useState<'calendar' | 'generator' | 'studio' | 'email' | 'strategy'>('calendar');
   const [strategy, setStrategy] = useState<Strategy | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,17 +264,50 @@ export const ContentEngine: React.FC = () => {
     return () => clearTimeout(t);
   }, [strategy, loading]);
 
-  async function handleGenerate(numPosts: number) {
+  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) {
     if (generating) return;
     setGenerating(true);
     setGenerationStatus('Planning slots and writing scripts in parallel...');
     try {
-      const res = await call('plan_and_generate', { numPosts });
+      const res = await call('plan_and_generate', { numPosts, ...(opts || {}) });
       const newPosts = (res.posts || []) as Post[];
       setPosts((prev) => [...prev, ...newPosts].sort((a, b) => (a.scheduled_date + a.scheduled_time).localeCompare(b.scheduled_date + b.scheduled_time)));
-      setGenerationStatus(`✓ Generated ${res.generated} posts${res.failures ? ` (${res.failures} failed)` : ''}`);
+
+      // Snapshot each new post into the cross-tool Admin Library so it's always retrievable.
+      let librarySaved = 0;
+      await Promise.all(newPosts.map(async (p) => {
+        try {
+          const title = (p.hook || p.topic_angle || `${FORMAT_INFO[p.format]?.name || p.format} post`).slice(0, 120);
+          await saveToAdminLibrary({
+            tool_type: 'content_engine_post',
+            title,
+            input_data: {
+              format: p.format,
+              topic_angle: p.topic_angle,
+              target_emotion: p.target_emotion,
+              scheduled_date: p.scheduled_date,
+              scheduled_time: p.scheduled_time,
+              source_post_id: p.id,
+            },
+            output_data: {
+              hook: p.hook,
+              script: p.script,
+              caption: p.caption,
+              hashtags: p.hashtags,
+              format: p.format,
+              status: p.status,
+            },
+            created_at: new Date(`${p.scheduled_date}T${p.scheduled_time || '12:00'}:00`).toISOString(),
+          });
+          librarySaved++;
+        } catch (err) {
+          console.warn('Library snapshot failed for post', p.id, err);
+        }
+      }));
+
+      setGenerationStatus(`✓ Generated ${res.generated} posts${res.failures ? ` (${res.failures} failed)` : ''}${librarySaved ? ` · Saved ${librarySaved} to Library` : ''}`);
       setView('calendar');
-      toast({ title: 'Content generated', description: `${res.generated} posts ready in the calendar.` });
+      toast({ title: 'Content generated', description: `${res.generated} posts ready in the calendar${librarySaved ? ` and saved to the Library.` : '.'}` });
       setTimeout(() => setGenerationStatus(''), 4000);
     } catch (e) {
       const msg = (e as Error).message;
@@ -193,6 +344,19 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  async function handleClearCalendar() {
+    const previous = posts;
+    setPosts([]);
+    setSelectedPost(null);
+    try {
+      await call('clear_posts');
+      toast({ title: 'Calendar cleared', description: 'All saved Content Engine posts were removed.' });
+    } catch (e) {
+      setPosts(previous);
+      toast({ title: 'Clear failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
   async function handleDuplicate(id: string) {
     try {
       const res = await call('duplicate_post', { id });
@@ -204,7 +368,7 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
-  // Headshots library — loaded once
+  // Headshots library, loaded once
   const [headshots, setHeadshots] = useState<Headshot[]>([]);
   useEffect(() => {
     callThumb('list_headshots').then((d) => setHeadshots(d.headshots || [])).catch(() => {});
@@ -266,6 +430,7 @@ export const ContentEngine: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <MobileEngineLinkButton />
           {saveIndicator && (
             <div className={`text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5 ${
               saveIndicator === 'saved' ? 'text-emerald-500' : saveIndicator === 'saving' ? 'text-amber' : 'text-crimson'
@@ -278,6 +443,8 @@ export const ContentEngine: React.FC = () => {
             {([
               { id: 'calendar', label: 'Calendar', Icon: Calendar },
               { id: 'generator', label: 'Generator', Icon: Sparkles },
+              { id: 'studio', label: 'Post Studio', Icon: PenLine },
+              { id: 'email', label: 'Email', Icon: Mail },
               { id: 'strategy', label: 'Strategy', Icon: Settings },
             ] as const).map((t) => (
               <button
@@ -314,12 +481,21 @@ export const ContentEngine: React.FC = () => {
           onGenerate={handleGenerate}
           generating={generating}
           onExport={exportTSV}
+          onClear={handleClearCalendar}
           strategy={strategy}
         />
       )}
 
       {view === 'generator' && (
         <GeneratorView strategy={strategy} onGenerate={handleGenerate} generating={generating} postsCount={posts.length} />
+      )}
+
+      {view === 'studio' && (
+        <LinkedInPostStudio />
+      )}
+
+      {view === 'email' && (
+        <OutreachEmailCreator authMode="admin" token={getAdminToken()} />
       )}
 
       {view === 'strategy' && (
@@ -344,10 +520,10 @@ export const ContentEngine: React.FC = () => {
 
 // ----------------- Calendar View -----------------
 
-function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, strategy }: {
+function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
-  onSelectPost: (p: Post) => void; onGenerate: (n: number) => void; generating: boolean;
-  onExport: () => void; strategy: Strategy;
+  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void; generating: boolean;
+  onExport: () => void; onClear: () => void; strategy: Strategy;
 }) {
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   const firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
@@ -382,9 +558,14 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
         </div>
         <div className="flex gap-2">
           {posts.length > 0 && (
-            <Button variant="outline" size="sm" onClick={onExport}>
-              <Download className="w-3.5 h-3.5 mr-1.5" /> Export
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={onExport}>
+                <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+              </Button>
+              <Button variant="outline" size="sm" onClick={onClear} className="border-crimson/40 text-crimson hover:bg-crimson/10">
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Clear Calendar
+              </Button>
+            </>
           )}
           <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90">
             {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
@@ -477,15 +658,172 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
 // ----------------- Generator View -----------------
 
 function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
-  strategy: Strategy; onGenerate: (n: number) => void; generating: boolean; postsCount: number;
+  strategy: Strategy;
+  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void;
+  generating: boolean;
+  postsCount: number;
 }) {
   const [batchSize, setBatchSize] = useState(12);
+  const [userPrompt, setUserPrompt] = useState('');
+  const [topicInput, setTopicInput] = useState('');
+  const [topicSeeds, setTopicSeeds] = useState<string[]>([]);
+  const [blogs, setBlogs] = useState<{ id: string; title: string }[]>([]);
+  const [playbooks, setPlaybooks] = useState<{ id: string; title: string }[]>([]);
+  const [blogIds, setBlogIds] = useState<string[]>([]);
+  const [playbookIds, setPlaybookIds] = useState<string[]>([]);
+  const [titleCategory, setTitleCategory] = useState<string>('All');
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: b }, { data: p }] = await Promise.all([
+        supabase.from('blog_posts').select('id, title').eq('is_published', true).order('published_at', { ascending: false }).limit(80),
+        supabase.from('playbooks').select('id, title').order('created_at', { ascending: false }).limit(80),
+      ]);
+      setBlogs(b || []);
+      setPlaybooks(p || []);
+    })();
+  }, []);
+
+  const toggle = (id: string, set: (v: string[]) => void, current: string[]) => {
+    set(current.includes(id) ? current.filter(x => x !== id) : [...current, id]);
+  };
+
+  const addTopic = () => {
+    const t = topicInput.trim();
+    if (!t) return;
+    if (topicSeeds.includes(t)) { setTopicInput(''); return; }
+    setTopicSeeds([...topicSeeds, t]);
+    setTopicInput('');
+  };
+
+  const fire = () => onGenerate(batchSize, {
+    userPrompt: userPrompt.trim() || undefined,
+    blogIds: blogIds.length ? blogIds : undefined,
+    playbookIds: playbookIds.length ? playbookIds : undefined,
+    topicSeeds: topicSeeds.length ? topicSeeds : undefined,
+  });
+
+  const hasDirection = !!(userPrompt.trim() || topicSeeds.length || blogIds.length || playbookIds.length);
+
   return (
     <div className="max-w-3xl space-y-5">
       <div>
         <h2 className="font-display text-3xl font-bold mb-1">Content Generator</h2>
-        <p className="text-muted-foreground text-sm">Each batch creates posts respecting your format mix and posting schedule.</p>
+        <p className="text-muted-foreground text-sm">
+          Tell the engine what you want, mix in blogs/playbooks/topics, or just hit generate to use your strategy defaults.
+        </p>
       </div>
+
+      <Card className="p-5 glass border-border space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Your Prompt</div>
+            {userPrompt && (
+              <button onClick={() => setUserPrompt('')} className="text-[10px] text-muted-foreground hover:text-crimson uppercase tracking-wider">Clear</button>
+            )}
+          </div>
+          <Textarea
+            rows={4}
+            placeholder="e.g. Focus this batch on stuck deals + slow follow-up. Hammer the dollar figures. Use the new $7M shop story as a recurring example."
+            value={userPrompt}
+            onChange={(e) => setUserPrompt(e.target.value)}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1.5">Free-text direction. Highest priority, every post in the batch will obey this.</p>
+        </div>
+
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">Topic Seeds</div>
+          <div className="flex gap-2 mb-2">
+            <Input
+              value={topicInput}
+              onChange={(e) => setTopicInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTopic(); } }}
+              placeholder="e.g. ghosted proposals over 30 days"
+            />
+            <Button type="button" variant="outline" onClick={addTopic}>Add</Button>
+          </div>
+          {topicSeeds.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {topicSeeds.map((t) => (
+                <button key={t} onClick={() => setTopicSeeds(topicSeeds.filter(x => x !== t))}
+                  className="text-[11px] bg-amber/10 text-amber border border-amber/30 rounded-full px-2.5 py-1 hover:bg-amber/20">
+                  {t} <span className="ml-1 opacity-60">×</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Premade Title Ideas</div>
+            <span className="text-[10px] text-muted-foreground">Click to add as a topic seed</span>
+          </div>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {['All', ...Object.keys(PREMADE_TITLE_GROUPS)].map((cat) => {
+              const on = titleCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setTitleCategory(cat)}
+                  className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition ${
+                    on ? 'bg-amber text-background border-amber font-bold' : 'bg-background/40 border-border text-muted-foreground hover:text-amber hover:border-amber/50'
+                  }`}
+                >{cat}</button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto p-2 border border-border/40 rounded-md bg-background/30">
+            {(titleCategory === 'All' ? PREMADE_TITLES : PREMADE_TITLE_GROUPS[titleCategory] || []).map((t) => {
+              const on = topicSeeds.includes(t);
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTopicSeeds(on ? topicSeeds.filter(x => x !== t) : [...topicSeeds, t])}
+                  className={`text-[11px] rounded-full px-2.5 py-1 border transition text-left ${
+                    on
+                      ? 'bg-amber/15 border-amber text-amber'
+                      : 'bg-background/40 border-border text-foreground/80 hover:border-amber/50 hover:text-amber'
+                  }`}
+                >{t}</button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+              Blogs <span className="text-amber">({blogIds.length})</span>
+            </div>
+            <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-background/40">
+              {blogs.length === 0 && <div className="p-3 text-xs text-muted-foreground">No published blogs.</div>}
+              {blogs.map(b => (
+                <label key={b.id} className="flex items-start gap-2 p-2 hover:bg-card/40 cursor-pointer text-xs border-b border-border/50 last:border-0">
+                  <input type="checkbox" checked={blogIds.includes(b.id)} onChange={() => toggle(b.id, setBlogIds, blogIds)} className="mt-0.5" />
+                  <span className="text-foreground/90 line-clamp-2">{b.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+              Playbooks <span className="text-amber">({playbookIds.length})</span>
+            </div>
+            <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-background/40">
+              {playbooks.length === 0 && <div className="p-3 text-xs text-muted-foreground">No playbooks.</div>}
+              {playbooks.map(p => (
+                <label key={p.id} className="flex items-start gap-2 p-2 hover:bg-card/40 cursor-pointer text-xs border-b border-border/50 last:border-0">
+                  <input type="checkbox" checked={playbookIds.includes(p.id)} onChange={() => toggle(p.id, setPlaybookIds, playbookIds)} className="mt-0.5" />
+                  <span className="text-foreground/90 line-clamp-2">{p.title}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <Card className="p-5 glass border-border">
         <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-3">Current Strategy</div>
@@ -520,6 +858,8 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
         </div>
       </Card>
 
+      <HashtagGeneratorCard strategy={strategy} topicHint={userPrompt || topicSeeds.join('; ')} />
+
       <Card className="p-5 glass border-border">
         <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-3">Batch Size</div>
         <div className="flex items-center gap-4 mb-4">
@@ -527,12 +867,12 @@ function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
           <div className="font-display text-2xl font-bold text-amber w-12 text-right">{batchSize}</div>
         </div>
         <Button
-          onClick={() => onGenerate(batchSize)}
+          onClick={fire}
           disabled={generating}
           className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
         >
           {generating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-          Generate {batchSize} Posts
+          Generate {batchSize} Posts {hasDirection ? 'with your direction' : ''}
         </Button>
       </Card>
     </div>
@@ -547,6 +887,132 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// ----------------- Hashtag Generator -----------------
+type HashtagItem = { tag: string; reason: string; category: 'trending' | 'niche' | 'industry'; popularity: 'high' | 'medium' | 'low' };
+
+function HashtagGeneratorCard({ strategy, topicHint }: { strategy: Strategy; topicHint: string }) {
+  const { toast } = useToast();
+  const [industry, setIndustry] = useState<string>('');
+  const [topic, setTopic] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<HashtagItem[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => { setTopic(topicHint.slice(0, 300)); }, [topicHint]);
+
+  const run = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-hashtags', {
+        body: {
+          niche: strategy.niche,
+          industry: industry || strategy.target_buyer,
+          topic,
+          platform: 'LinkedIn',
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setTags((data as any)?.hashtags || []);
+    } catch (e) {
+      toast({ title: 'Hashtag generation failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyOne = async (t: string) => {
+    await navigator.clipboard.writeText(t);
+    setCopied(t);
+    setTimeout(() => setCopied(null), 1200);
+  };
+
+  const copyAll = async () => {
+    if (!tags.length) return;
+    await navigator.clipboard.writeText(tags.map(t => t.tag).join(' '));
+    toast({ title: 'Copied all 5 hashtags' });
+  };
+
+  const popDot = (p: HashtagItem['popularity']) =>
+    p === 'high' ? 'bg-emerald-500' : p === 'medium' ? 'bg-amber' : 'bg-muted-foreground';
+
+  const catIcon = (c: HashtagItem['category']) =>
+    c === 'trending' ? <TrendingUp className="w-3 h-3" /> : c === 'industry' ? <Building2 className="w-3 h-3" /> : <Target className="w-3 h-3" />;
+
+  return (
+    <Card className="p-5 glass border-border">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-amber to-orange-500 flex items-center justify-center">
+            <Hash className="w-4 h-4 text-background" strokeWidth={2.5} />
+          </div>
+          <div>
+            <div className="text-sm font-bold font-display leading-none">Hashtag Engine</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Trends · Niche · Industry</div>
+          </div>
+        </div>
+        {tags.length > 0 && (
+          <button onClick={copyAll} className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-amber flex items-center gap-1">
+            <Copy className="w-3 h-3" /> Copy all
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 mb-3">
+        <Input
+          placeholder={`Industry (defaults to "${strategy.target_buyer || 'target buyer'}")`}
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+        />
+        <Input
+          placeholder="Optional: topic / post angle (auto-filled from your prompt)"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
+      </div>
+
+      <Button onClick={run} disabled={loading} className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 mb-3">
+        {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+        Generate 5 Hashtags
+      </Button>
+
+      {tags.length === 0 && !loading && (
+        <div className="text-[11px] text-muted-foreground text-center py-3 border border-dashed border-border rounded-md">
+          Mix of 1 trending · 2 niche · 2 industry tags, ranked by popularity.
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div className="space-y-1.5">
+          {tags.map((h) => (
+            <button
+              key={h.tag}
+              onClick={() => copyOne(h.tag)}
+              className="w-full text-left flex items-start gap-2 p-2 rounded-md border border-border/60 bg-background/40 hover:border-amber/60 transition group"
+            >
+              <span className={`mt-1.5 w-1.5 h-1.5 rounded-full ${popDot(h.popularity)}`} title={`Popularity: ${h.popularity}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-amber font-bold truncate">{h.tag}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center gap-0.5">
+                    {catIcon(h.category)} {h.category}
+                  </span>
+                </div>
+                <div className="text-[11px] text-muted-foreground line-clamp-1">{h.reason}</div>
+              </div>
+              <span className="text-muted-foreground group-hover:text-amber transition">
+                {copied === h.tag ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+
 
 // ----------------- Strategy View -----------------
 
@@ -644,16 +1110,53 @@ function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrate
         <div className={`text-xs mb-3 ${totalMix === 100 ? 'text-emerald-500' : 'text-amber'}`}>
           Total: {totalMix}% {totalMix === 100 ? '✓' : '(should equal 100)'}
         </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            if (!keys.length) return;
+            const even = Math.floor(100 / keys.length / 5) * 5;
+            const next: Record<string, number> = {};
+            keys.forEach((k, i) => { next[k] = i === 0 ? 100 - even * (keys.length - 1) : even; });
+            update('format_mix', next);
+          }}>Even split</Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => {
+            const keys = Object.keys(strategy.format_mix);
+            const total = totalMix || 1;
+            const next: Record<string, number> = {};
+            let running = 0;
+            keys.forEach((k, i) => {
+              if (i === keys.length - 1) next[k] = 100 - running;
+              else { const v = Math.round((strategy.format_mix[k] / total) * 100 / 5) * 5; next[k] = v; running += v; }
+            });
+            update('format_mix', next);
+          }}>Normalize to 100%</Button>
+        </div>
         {Object.entries(strategy.format_mix).map(([k, pct]) => {
           const fmt = FORMAT_INFO[k];
           if (!fmt) return null;
+          const bump = (delta: number) => updateMix(k, Math.max(0, Math.min(100, pct + delta)));
           return (
             <div key={k} className="mb-4">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className={`font-bold ${fmt.text}`}>{fmt.name}</span>
-                <span className="text-muted-foreground">{pct}%</span>
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <span className={`font-bold text-xs ${fmt.text}`}>{fmt.name}</span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(-5)}>−</Button>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={pct}
+                    onChange={(e) => updateMix(k, Math.max(0, Math.min(100, parseInt(e.target.value || '0', 10))))}
+                    className="h-7 w-16 text-center text-xs"
+                  />
+                  <Button type="button" size="sm" variant="outline" className="h-7 w-7 p-0" onClick={() => bump(5)}>+</Button>
+                  <span className="text-[10px] text-muted-foreground w-6">%</span>
+                </div>
               </div>
-              <Slider min={0} max={100} step={5} value={[pct]} onValueChange={(v) => updateMix(k, v[0])} />
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full ${fmt.bar} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+              </div>
               <p className="text-xs text-muted-foreground mt-1.5">{fmt.description}</p>
             </div>
           );
@@ -661,7 +1164,7 @@ function StrategyView({ strategy, setStrategy }: { strategy: Strategy; setStrate
       </Section>
 
       <Section title="Voice">
-        <Field label="Voice Reference (paste your writing samples — the more specific, the better the mimicry)">
+        <Field label="Voice Reference (paste your writing samples, the more specific, the better the mimicry)">
           <Textarea rows={6} value={strategy.voice_reference} onChange={(e) => update('voice_reference', e.target.value)} />
         </Field>
       </Section>
@@ -788,7 +1291,12 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
         </div>
 
         <div className="p-6 space-y-5">
-          <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
+          <UnifiedImageStudio
+            post={post}
+            headshots={headshots}
+            onUpdate={onUpdate}
+            onGenerateThumbnail={onGenerateThumbnail}
+          />
           <Field label="Topic Angle">
             {editing
               ? <Textarea rows={2} value={draft.topic_angle} onChange={(e) => setDraft({ ...draft, topic_angle: e.target.value })} />
@@ -918,7 +1426,7 @@ function ThumbnailBlock({ post, headshots, onGenerate }: {
             <div className="text-center">
               <Loader2 className="w-8 h-8 animate-spin text-amber mx-auto mb-2" />
               <div className="text-xs text-muted-foreground">Generating with OpenAI gpt-image-1...</div>
-              <div className="text-[10px] text-muted-foreground mt-1">~10–20 seconds</div>
+              <div className="text-[10px] text-muted-foreground mt-1">~10-20 seconds</div>
             </div>
           ) : hasThumb ? (
             <img src={post.thumbnail_url!} alt="Post thumbnail" className="w-full h-full object-cover" />
@@ -953,10 +1461,70 @@ function ThumbnailBlock({ post, headshots, onGenerate }: {
         </div>
         {post.thumbnail_status === 'error' && (
           <div className="px-3 py-2 text-[11px] text-crimson border-t border-crimson/30 bg-crimson/5">
-            Last attempt failed — check edge function logs.
+            Last attempt failed, check edge function logs.
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function UnifiedImageStudio({ post, headshots, onUpdate, onGenerateThumbnail }: {
+  post: Post;
+  headshots: Headshot[];
+  onUpdate: (id: string, updates: Partial<Post>) => void;
+  onGenerateThumbnail: (id: string, headshotId?: string) => Promise<void>;
+}) {
+  const [mode, setMode] = useState<'ai' | 'headshot'>('ai');
+  const hasThumb = !!post.thumbnail_url;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+        <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Post Image</div>
+        <div className="inline-flex rounded-md border border-border overflow-hidden text-[10px] font-bold uppercase tracking-wider">
+          <button
+            type="button"
+            onClick={() => setMode('ai')}
+            className={`px-3 py-1.5 transition-colors ${mode === 'ai' ? 'bg-amber text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+          >
+            AI Image
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('headshot')}
+            className={`px-3 py-1.5 transition-colors border-l border-border ${mode === 'headshot' ? 'bg-amber text-background' : 'bg-background text-muted-foreground hover:text-foreground'}`}
+          >
+            Use My Headshot
+          </button>
+        </div>
+      </div>
+
+      {hasThumb && (
+        <div className="mb-2 flex justify-end">
+          <a href={post.thumbnail_url!} target="_blank" rel="noreferrer" className="text-[10px] text-cyan-400 hover:underline flex items-center gap-1">
+            <Download className="w-3 h-3" /> Download current image
+          </a>
+        </div>
+      )}
+
+      {mode === 'ai' ? (
+        <PostImageGenerator
+          key={`ai-${post.id}`}
+          prompt={`${post.hook}\n\n${post.caption?.slice(0, 400) || ''}`}
+          editablePrompt
+          existingImageUrl={post.thumbnail_url || ''}
+          onImageGenerated={(url) => onUpdate(post.id, { thumbnail_url: url, thumbnail_status: 'ready' })}
+        />
+      ) : (
+        <ThumbnailBlock post={post} headshots={headshots} onGenerate={onGenerateThumbnail} />
+      )}
+
+      <p className="text-[11px] text-muted-foreground mt-2">
+        {mode === 'ai'
+          ? 'Free prompt, generate any image you want with AI.'
+          : 'Generates a branded thumbnail from one of your reference photos.'}
+      </p>
     </div>
   );
 }

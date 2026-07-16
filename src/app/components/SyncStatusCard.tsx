@@ -29,7 +29,7 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
     return () => clearInterval(t);
   }, []);
 
-  // Live counts of mirrored data — confirms the sync is actually writing rows
+  // Live counts of mirrored data, confirms the sync is actually writing rows
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -79,7 +79,7 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
         description:
           mode === "initial"
             ? "Pulling 18 months of contacts, deals, and owners. This runs in the background and may take several minutes."
-            : "Running in the background — safe to close this tab.",
+            : "Running in the background, safe to close this tab.",
       });
       setTimeout(onRefresh, 1500);
     } catch (err: any) {
@@ -164,14 +164,14 @@ export const SyncStatusCard = ({ account, onRefresh }: SyncStatusCardProps) => {
         </div>
       )}
 
-      {/* Reconnect hint when companies haven't been pulled — likely missing scope */}
+      {/* Reconnect hint when companies haven't been pulled, likely missing scope */}
       {counts && counts.companies === 0 && !neverSynced && status === "success" && (
         <div className="mt-3 text-xs text-muted-foreground bg-muted/30 border border-border rounded-md p-2">
           No companies mirrored. If you recently expanded permissions, disconnect and reconnect HubSpot to grant the new scopes (companies, lists).
         </div>
       )}
 
-      {/* Diagnostic counts — confirms data is actually flowing */}
+      {/* Diagnostic counts, confirms data is actually flowing */}
       {counts && (
         <div className="mt-4 pt-4 border-t border-border grid grid-cols-4 gap-3 text-center">
           <div>

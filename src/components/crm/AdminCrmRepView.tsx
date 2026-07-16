@@ -82,7 +82,7 @@ export const AdminCrmRepView: React.FC = () => {
 
   if (loading) return <div className="glass p-12 rounded-xl flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-amber" /></div>;
 
-  const repName = (code: string | null) => !code ? "—" : (reps.find(r => r.code === code)?.rep_name || code);
+  const repName = (code: string | null) => !code ? ", " : (reps.find(r => r.code === code)?.rep_name || code);
 
   return (
     <div className="space-y-6">
@@ -131,7 +131,7 @@ export const AdminCrmRepView: React.FC = () => {
       {/* Funnel + Leaks for selected */}
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="glass">
-          <CardHeader><CardTitle className="text-base">Conversion funnel — {selected === "__all__" ? "all reps" : selected === "__unassigned__" ? "unassigned" : repName(selected)}</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Conversion funnel, {selected === "__all__" ? "all reps" : selected === "__unassigned__" ? "unassigned" : repName(selected)}</CardTitle></CardHeader>
           <CardContent>
             <FunnelStage label="Talked to" count={funnel.talked} max={funnel.talked} icon={<Phone className="w-3 h-3" />} />
             <FunnelStage label="Qualified" count={funnel.qualified} max={funnel.talked} icon={<CheckCircle className="w-3 h-3" />} />
@@ -192,7 +192,7 @@ export const AdminCrmRepView: React.FC = () => {
                     <td className="py-2 text-xs">{repName(d.owner_code)}</td>
                     <td className="py-2"><Badge variant="outline">{d.stage}</Badge></td>
                     <td className="py-2 font-mono">{fmt$(d.value_cents)}</td>
-                    <td className="py-2 text-xs text-muted-foreground">{d.proposal_sent_at ? new Date(d.proposal_sent_at).toLocaleDateString() : "—"}</td>
+                    <td className="py-2 text-xs text-muted-foreground">{d.proposal_sent_at ? new Date(d.proposal_sent_at).toLocaleDateString() : ", "}</td>
                     <td className="py-2 text-xs">
                       {d.won_at ? <span className="text-emerald-400">Won</span> :
                        d.lost_at ? <span className="text-destructive">Lost{d.lost_reason ? ` · ${d.lost_reason}` : ""}</span> :

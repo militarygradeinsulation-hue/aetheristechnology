@@ -1,0 +1,2 @@
+ALTER TABLE public.rep_leads ADD COLUMN IF NOT EXISTS score_stage text NOT NULL DEFAULT 'triage';
+ALTER TABLE public.rep_code_scan_leads ADD COLUMN IF NOT EXISTS score_stage text NOT NULL DEFAULT 'audit';

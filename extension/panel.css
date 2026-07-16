@@ -1,0 +1,206 @@
+#aetheris-panel {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #14171c;
+  color: #f3efe7;
+  border: 1px solid #3a2f1a;
+  border-radius: 6px;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+#aetheris-panel header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #2a2419;
+  background: #0f1115;
+  border-radius: 6px 6px 0 0;
+}
+#aetheris-panel header .ae-title {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #f5a524;
+}
+#aetheris-panel header button {
+  background: transparent; border: none; color: #888; cursor: pointer; font-size: 16px;
+}
+#aetheris-panel .ae-body { padding: 12px; }
+#aetheris-panel .ae-btn {
+  background: #f5a524; color: #14171c; border: none; border-radius: 4px;
+  padding: 8px 12px; font-weight: 600; cursor: pointer; width: 100%;
+  font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+#aetheris-panel .ae-btn:disabled { opacity: 0.5; cursor: wait; }
+#aetheris-panel .ae-btn.ghost {
+  background: transparent; color: #f5a524; border: 1px solid #3a2f1a; width: auto; padding: 4px 8px; font-size: 11px;
+}
+#aetheris-panel .ae-source {
+  background: #0f1115; border: 1px solid #2a2419; border-radius: 4px;
+  padding: 8px; margin-top: 10px; font-size: 12px; color: #b9b3a6;
+  max-height: 120px; overflow-y: auto; white-space: pre-wrap;
+}
+#aetheris-panel .ae-variant {
+  background: #0f1115; border: 1px solid #2a2419; border-radius: 4px;
+  padding: 10px; margin-top: 10px;
+}
+#aetheris-panel .ae-variant .ae-label {
+  font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: #f5a524; margin-bottom: 6px;
+}
+#aetheris-panel .ae-variant .ae-text { color: #f3efe7; line-height: 1.45; }
+#aetheris-panel .ae-variant .ae-actions { display: flex; gap: 6px; margin-top: 8px; }
+#aetheris-panel .ae-error { color: #ff6b6b; margin-top: 10px; font-size: 12px; }
+#aetheris-panel .ae-hint { color: #888; margin-top: 8px; font-size: 11px; }
+
+#aetheris-panel .ae-tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2419;
+  background: #0f1115;
+}
+#aetheris-panel .ae-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 10px 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+#aetheris-panel .ae-tab.active {
+  color: #f5a524;
+  border-bottom-color: #f5a524;
+}
+#aetheris-panel .ae-label-input {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #888;
+  margin: 8px 0 4px;
+}
+#aetheris-panel .ae-input {
+  width: 100%;
+  background: #0f1115;
+  border: 1px solid #2a2419;
+  border-radius: 4px;
+  padding: 8px;
+  color: #f3efe7;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+#aetheris-panel .ae-input:focus {
+  outline: none;
+  border-color: #f5a524;
+}
+#aetheris-panel select.ae-input {
+  cursor: pointer;
+}
+
+/* ===== Aetheris Operator v0.2 additions ===== */
+#aetheris-panel { width: 380px; max-height: 85vh; }
+
+#aetheris-panel .ae-sub-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+#aetheris-panel .ae-sub-tab {
+  flex: 1; background: #0f1115; color: #888; border: 1px solid #2a2419;
+  padding: 6px 8px; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  font-family: ui-monospace, monospace; cursor: pointer; border-radius: 3px;
+}
+#aetheris-panel .ae-sub-tab.active { color: #f5a524; border-color: #f5a524; }
+
+#aetheris-panel .ae-url-line {
+  font-family: ui-monospace, monospace; font-size: 10px; color: #888;
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Scan card */
+#aetheris-panel .ae-scan-card {
+  margin-top: 12px; background: #0f1115; border: 1px solid #2a2419; border-radius: 4px; padding: 12px;
+}
+#aetheris-panel .ae-scan-top { display: flex; align-items: center; gap: 12px; }
+#aetheris-panel .ae-score { font-family: ui-serif, "Fraunces", Georgia, serif; font-size: 38px; font-weight: 700; color: #f5a524; line-height: 1; }
+#aetheris-panel .ae-score span { font-size: 14px; color: #888; font-weight: 400; }
+#aetheris-panel .ae-scan-meta { flex: 1; }
+#aetheris-panel .ae-scan-host { font-family: ui-monospace, monospace; font-size: 11px; color: #b9b3a6; word-break: break-all; }
+#aetheris-panel .ae-scan-grade { font-family: ui-monospace, monospace; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: .12em; margin-top: 2px; }
+#aetheris-panel .ae-leak-banner {
+  margin-top: 10px; padding: 8px 10px; background: rgba(217, 79, 63, .08);
+  border-left: 3px solid #d94f3f; color: #f3efe7; font-size: 12px;
+}
+#aetheris-panel .ae-leak-banner strong { color: #d94f3f; font-weight: 700; }
+#aetheris-panel .ae-scan-summary { margin-top: 10px; color: #b9b3a6; font-size: 12px; line-height: 1.5; }
+#aetheris-panel .ae-section-label {
+  margin-top: 14px; font-family: ui-monospace, monospace; font-size: 10px;
+  letter-spacing: .15em; text-transform: uppercase; color: #f5a524;
+}
+#aetheris-panel .ae-gap {
+  margin-top: 8px; background: #14171c; border: 1px solid #2a2419; border-radius: 3px; padding: 8px 10px;
+}
+#aetheris-panel .ae-gap-head { display: flex; gap: 8px; align-items: center; font-family: ui-monospace, monospace; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
+#aetheris-panel .ae-gap-sev { font-weight: 700; }
+#aetheris-panel .ae-gap-cat { color: #888; }
+#aetheris-panel .ae-gap-title { color: #f3efe7; font-weight: 600; font-size: 12px; margin-top: 4px; }
+#aetheris-panel .ae-gap-desc { color: #b9b3a6; font-size: 11px; line-height: 1.45; margin-top: 4px; }
+#aetheris-panel .ae-gap-meta { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+#aetheris-panel .ae-leak-pill {
+  align-self: flex-start; font-family: ui-monospace, monospace; font-size: 10px;
+  color: #d94f3f; background: rgba(217, 79, 63, .1); padding: 2px 6px; border-radius: 2px;
+}
+#aetheris-panel .ae-fix { color: #b9b3a6; font-size: 11px; }
+#aetheris-panel .ae-fix::before { content: ""; }
+
+/* Chat */
+#aetheris-panel .ae-chat-log {
+  max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 8px; padding-right: 4px;
+}
+#aetheris-panel .ae-bubble { padding: 8px 10px; border-radius: 4px; font-size: 12px; line-height: 1.5; }
+#aetheris-panel .ae-bubble.user { background: #1a1f27; border: 1px solid #2a2419; color: #f3efe7; align-self: flex-end; max-width: 92%; }
+#aetheris-panel .ae-bubble.assistant { background: #0f1115; border: 1px solid #3a2f1a; color: #f3efe7; max-width: 96%; }
+#aetheris-panel .ae-bubble-tag {
+  display: block; font-family: ui-monospace, monospace; font-size: 9px;
+  letter-spacing: .15em; color: #f5a524; margin-bottom: 4px;
+}
+#aetheris-panel .ae-bubble-text { white-space: pre-wrap; word-wrap: break-word; }
+
+#aetheris-panel .ae-chat-controls { display: flex; flex-direction: column; gap: 6px; }
+#aetheris-panel .ae-chat-actions { display: flex; gap: 6px; align-items: center; }
+#aetheris-panel .ae-chat-actions .ae-btn { flex: 1; }
+#aetheris-panel .ae-check { color: #888; font-size: 11px; display: flex; gap: 4px; align-items: center; flex: 1; }
+#aetheris-panel .ae-snip-preview {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(245,165,36,.1); border: 1px solid #f5a524; color: #f5a524;
+  padding: 4px 8px; border-radius: 3px; font-size: 11px; margin-bottom: 6px;
+  font-family: ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase;
+}
+
+/* Snip overlay (lives in page, not panel) */
+#ae-snip-overlay {
+  position: fixed; inset: 0; z-index: 2147483646;
+  background: rgba(0, 0, 0, 0.4); cursor: crosshair;
+}
+#ae-snip-overlay .ae-snip-hint {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: #14171c; color: #f5a524; border: 1px solid #f5a524;
+  padding: 6px 12px; font-family: ui-monospace, monospace; font-size: 11px;
+  letter-spacing: .1em; text-transform: uppercase; border-radius: 3px;
+  pointer-events: none;
+}
+#ae-snip-overlay .ae-snip-rect {
+  position: absolute; border: 2px solid #f5a524; background: rgba(245,165,36,.1);
+  pointer-events: none;
+}

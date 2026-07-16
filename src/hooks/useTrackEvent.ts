@@ -23,7 +23,7 @@ export function useTrackEvent() {
         user_agent: navigator.userAgent,
       }]);
     } catch (e) {
-      // Silent fail — don't break UX for analytics
+      // Silent fail, don't break UX for analytics
     }
   }, []);
 

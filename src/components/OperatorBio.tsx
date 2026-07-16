@@ -32,9 +32,12 @@ export const OperatorBio: React.FC = () => {
               The Operator
             </div>
             <h2 className="font-forensic text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Joseph Toney —{' '}
-              <span className="text-amber">Business Forensics Operator</span>
+              Joseph Toney,{" "}
+              <span className="text-amber">Chaos Theory Forensics Operator</span>
             </h2>
+            <p className="mt-3 text-base text-muted-foreground max-w-2xl mx-auto">
+              Marine Corps veteran · MS Marketing, Liberty University, 4.0 GPA · Doctorate in Digital Forensics · Based in Noblesville, Indiana
+            </p>
           </div>
         </RevealOnScroll>
 
@@ -73,15 +76,19 @@ export const OperatorBio: React.FC = () => {
               <div className="space-y-2 text-xs font-case uppercase tracking-wider">
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
                   <span className="text-muted-foreground">Background</span>
-                  <span className="text-foreground">Marine · Operator</span>
+                  <span className="text-foreground">Marine Corps veteran · Operator</span>
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
-                  <span className="text-muted-foreground">Discipline</span>
-                  <span className="text-foreground">Psychology · Systems</span>
+                  <span className="text-muted-foreground">Education</span>
+                  <span className="text-foreground">MS Marketing, Liberty University, 4.0 GPA</span>
                 </div>
                 <div className="flex justify-between border-b border-border/40 pb-1.5">
-                  <span className="text-muted-foreground">Marines Led</span>
-                  <span className="text-amber">200+</span>
+                  <span className="text-muted-foreground">Research</span>
+                  <span className="text-foreground">Doctorate in Digital Forensics</span>
+                </div>
+                <div className="flex justify-between border-b border-border/40 pb-1.5">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-amber">Noblesville, Indiana</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Revenue Diagnosed</span>
@@ -94,26 +101,68 @@ export const OperatorBio: React.FC = () => {
           <RevealOnScroll delay={0.15}>
             <div className="space-y-6">
               <p className="font-forensic text-2xl md:text-3xl text-foreground leading-snug">
-                "Most businesses don't have a marketing problem, a sales problem, or an AI problem.
-                They have a <span className="text-crimson">leak</span> problem — and they can't see
-                it from inside the building."
+                "What started as <span className="text-crimson">survival</span> eventually became{' '}
+                <span className="text-amber">purpose</span>."
+              </p>
+              <p className="text-base md:text-lg text-foreground/90 leading-relaxed">
+                I work with growth-minded businesses running $5M to $50M that know they should be further along.
+                Marine Corps veteran. MS Marketing, Liberty University, 4.0 GPA. This year I begin my doctorate
+                in Digital Forensics — formally defining Chaos Theory Forensics as a new field. Based in Noblesville,
+                Indiana.
               </p>
 
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  I'm not a consultant who ships decks. I'm an operator who runs autopsies on
-                  businesses, names exactly where revenue is bleeding out, and rebuilds the systems
-                  that stopped it from being seen in the first place.
+                  I'm a Marine Corps veteran who was wounded in Iraq and came home carrying more than
+                  just physical injuries. Like many veterans, I felt lost trying to rebuild my life and
+                  figure out where I fit in after the military. With no background in construction, no
+                  roadmap, and no safety net, I started a construction company from the ground up.
                 </p>
                 <p>
-                  The stack is unusual on purpose: psychology degree (so I see the human leaks, not
-                  just the tech ones), Marine Corps background (reconnaissance and systems-under-pressure),
-                  and 20 years actually building the production systems most consultants only describe.
+                  In the beginning, it was me out in the field freezing inside unfinished homes,
+                  dragging trailers through mud, getting stuck on job sites, and doing whatever it took
+                  to keep the business alive. Over time, that small operation grew into full crews,
+                  fleets of vehicles, and major contracts. It was built through long days, failures,
+                  stress, and persistence.
                 </p>
                 <p>
-                  Aetheris is the field kit. The Leak Audit<sup className="text-amber">™</sup> is
-                  the methodology. AI, automation, and CRM are the stitches — applied after the wound
-                  is named, never before.
+                  At the same time, life at home was testing us in ways I could never have prepared
+                  for. Every one of my children faced major medical challenges at a young age. We went
+                  through open heart surgery, surgeries to help one of them see, jaw extractions so
+                  another could breathe properly, and countless hospital visits, all while they were
+                  still babies. I still had to show up to work every day, keep the business running,
+                  support my family, and somehow hold everything together.
+                </p>
+                <p>
+                  What frustrated me most was realizing how much time business owners waste doing
+                  repetitive tasks they think are just "part of the job." Endless follow ups,
+                  paperwork, quoting, missed leads, scheduling chaos, disconnected systems, and
+                  constant busy work. I started building tools and systems simply because I was
+                  exhausted and needed a better way to operate.
+                </p>
+                <p>
+                  That became the foundation for{' '}
+                  <span className="text-amber font-semibold">Aetheris Technology</span>.
+                </p>
+                <p>
+                  I'm deeply devoted to helping people succeed because I know what it feels like to
+                  fight just to keep moving forward. Along the way, I've been burned by business
+                  partners, taken advantage of by companies, and even faced situations where people
+                  tried to claim or steal technology and systems I spent years building. But no
+                  matter what happens, I keep pushing forward. That mindset was built long before
+                  business. It was built through pain, pressure, setbacks, and refusing to quit when
+                  quitting would have been easier.
+                </p>
+                <p>
+                  Today, I build AI systems, automation tools, and operational solutions designed for
+                  real business owners because I've lived the reality myself. My goal is not to sell
+                  hype or complicated tech. It's to help businesses eliminate unnecessary friction,
+                  save time, grow smarter, and regain control of their lives and operations.
+                </p>
+                <p>
+                  Everything I create comes from experience in the trenches, not theory. I know what
+                  it feels like to carry pressure at work while carrying even heavier pressure at
+                  home. That perspective shapes every system I build.
                 </p>
               </div>
 
@@ -121,7 +170,7 @@ export const OperatorBio: React.FC = () => {
                 <CaseFileCard
                   caseNumber={47}
                   businessType="$4M/yr services firm"
-                  leakFound="Inbound leads dying inside one Gmail inbox — no routing, no SLA, no second touch."
+                  leakFound="Inbound leads dying inside one Gmail inbox, no routing, no SLA, no second touch."
                   amountBled="$380K / yr"
                   status="SEALED"
                 />

@@ -1,24 +1,36 @@
 import jsPDF from 'jspdf';
 import type { AdminLibraryItem } from '@/lib/adminLibrary';
+import {
+  BRIEF,
+  CONTENT_W,
+  BOTTOM,
+  sanitize,
+  paintBg,
+  briefCoverHeader,
+  briefInnerHeader,
+  briefDisplayTitle,
+  briefSectionLabel,
+  briefCallout,
+  stampFooters,
+} from '@/lib/briefPdfStyle';
 
 /**
- * Professional library PDF generator.
- * Light theme (white background, black text) — guarantees readability and printability.
- * Aetheris amber accents for brand consistency.
+ * Library PDF generator — Aetheris Executive Brief style.
+ * Dark charcoal page, amber accents, mono courier headers, branded footer.
+ * Matches the Miami DDA Executive Brief template across every tool download.
  */
 
-const AMBER: [number, number, number] = [217, 167, 71];
-const INK: [number, number, number] = [25, 25, 30];
-const SUB: [number, number, number] = [110, 110, 120];
-const RULE: [number, number, number] = [220, 220, 225];
-const SOFT: [number, number, number] = [248, 246, 240]; // soft amber-tinted card
-const RED: [number, number, number] = [180, 60, 60];
-const BLUE: [number, number, number] = [55, 110, 175];
+const AMBER: [number, number, number] = BRIEF.amber;
+const INK:   [number, number, number] = BRIEF.paper;      // body text on dark
+const SUB:   [number, number, number] = BRIEF.muted;
+const RULE:  [number, number, number] = BRIEF.amberDim;
+const SOFT:  [number, number, number] = BRIEF.panelAlt;
+const RED:   [number, number, number] = BRIEF.red;
+const BLUE:  [number, number, number] = [120, 170, 220];
 
-const PAGE_W = 210;
-const PAGE_H = 297;
-const MARGIN = 18;
-const CONTENT_W = PAGE_W - MARGIN * 2;
+const PAGE_W = BRIEF.pageW;
+const PAGE_H = BRIEF.pageH;
+const MARGIN = BRIEF.margin;
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content Pack',
@@ -29,19 +41,28 @@ const TOOL_LABELS: Record<string, string> = {
   brand_contradictions: 'Brand Contradictions Audit',
   friction_audit: 'Friction Vocabulary Audit',
   playbook: 'Strategic Playbook',
+  website_scan: 'Website Forensic Scan',
+  business_diagnostic: 'Business Diagnostic',
+  ai_detect: 'AI Writing Detector',
+  scam_check: 'Scam Check Report',
+  detective_case: 'Detective Case File',
+  linkedin_response: 'LinkedIn Reply',
+  linkedin_comment: 'LinkedIn Comment Pack',
+  linkedin_post: 'LinkedIn Post',
+  resume_analysis: 'Resume Forensic Analysis',
+  easy_mode: 'Easy-Mode Translation',
+  outreach_email: 'Outreach Email',
+  outreach_email_analysis: 'Outreach Email Analysis',
+  outreach_subjects: 'Subject-Line Hooks',
+  whats_wrong: "What's Wrong Diagnosis",
+  extension_scan: 'Chrome Extension · Forensic Scan',
+  extension_fix_all: 'Chrome Extension · Fix-All Run',
+  extension_agent: 'Chrome Extension · Agent Plan',
+  extension_linkedin: 'Chrome Extension · LinkedIn Draft',
+  extension_crm: 'Chrome Extension · HubSpot Autopsy',
+  extension_golden: 'Chrome Extension · Golden Report',
+  extension_misc: 'Chrome Extension · Capture',
 };
-
-type Block =
-  | { type: 'h1'; text: string }
-  | { type: 'h2'; text: string; count?: number }
-  | { type: 'h3'; text: string; color?: [number, number, number] }
-  | { type: 'p'; text: string; color?: [number, number, number]; size?: number; bold?: boolean }
-  | { type: 'kv'; label: string; value: string; labelColor?: [number, number, number] }
-  | { type: 'quote'; text: string }
-  | { type: 'spacer'; mm: number }
-  | { type: 'rule' }
-  | { type: 'card_start' }
-  | { type: 'card_end' };
 
 class PdfWriter {
   doc: jsPDF;
@@ -49,105 +70,79 @@ class PdfWriter {
   pageNum: number = 1;
   toolLabel: string;
   cardStartY: number | null = null;
+  innerSubtitle: string;
 
   constructor(toolLabel: string) {
     this.doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    this.y = MARGIN + 14;
     this.toolLabel = toolLabel;
-    this.drawHeader();
-    this.drawFooter();
+    this.innerSubtitle = `${toolLabel}  ·  Strategic Asset`;
+    paintBg(this.doc);
+    this.y = 42;
   }
 
-  drawHeader() {
-    // Amber bar
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(0, 0, PAGE_W, 3, 'F');
-    // Brand
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...INK);
-    this.doc.text('AETHERIS', MARGIN, 11);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
-    this.doc.text(this.toolLabel.toUpperCase(), PAGE_W - MARGIN, 11, { align: 'right' });
-    // Hairline under header
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
-    this.doc.line(MARGIN, 14, PAGE_W - MARGIN, 14);
-  }
-
-  drawFooter() {
-    const fy = PAGE_H - 12;
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
-    this.doc.line(MARGIN, fy - 4, PAGE_W - MARGIN, fy - 4);
-    this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
-    this.doc.text('aetheris.technology  ·  Strategic Asset', MARGIN, fy);
-    this.doc.text(`Page ${this.pageNum}`, PAGE_W - MARGIN, fy, { align: 'right' });
+  private newContentPage() {
+    if (this.cardStartY !== null) this.closeCard();
+    this.doc.addPage();
+    this.pageNum++;
+    paintBg(this.doc);
+    briefInnerHeader(this.doc, this.innerSubtitle);
+    this.y = 42;
   }
 
   ensure(needed: number) {
-    if (this.y + needed > PAGE_H - 22) {
-      this.doc.addPage();
-      this.pageNum++;
-      this.y = MARGIN + 14;
-      this.drawHeader();
-      this.drawFooter();
-    }
+    if (this.y + needed > BOTTOM) this.newContentPage();
   }
 
   textBlock(text: string, opts: { size?: number; bold?: boolean; color?: [number, number, number]; gapAfter?: number }) {
     if (!text) return;
     const size = opts.size ?? 10;
     const color = opts.color ?? INK;
-    const lh = size * 0.45;
+    const lh = size * 0.5;
     this.doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
     this.doc.setFontSize(size);
     this.doc.setTextColor(color[0], color[1], color[2]);
-    const wrapped = this.doc.splitTextToSize(String(text), CONTENT_W - 4);
+    const wrapped = this.doc.splitTextToSize(sanitize(text), CONTENT_W - 6) as string[];
     for (const line of wrapped) {
       this.ensure(lh + 1);
       this.y += lh;
-      this.doc.text(line, MARGIN + 2, this.y);
+      this.doc.text(line, MARGIN + 3, this.y);
     }
-    this.y += opts.gapAfter ?? 1.5;
+    this.y += opts.gapAfter ?? 1.8;
   }
 
   h1(text: string) {
-    this.ensure(20);
-    this.y += 4;
+    // Helvetica scales tighter than Courier — fits long tool/report titles
+    // without horizontal clipping while keeping the brief's amber accent rule.
+    const clean = sanitize(text);
+    let size = 22;
     this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(22);
-    this.doc.setTextColor(...INK);
-    const wrapped = this.doc.splitTextToSize(text, CONTENT_W);
-    for (const line of wrapped) {
-      this.ensure(10);
-      this.y += 9;
-      this.doc.text(line, MARGIN, this.y);
+    this.doc.setFontSize(size);
+    let wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    while (wrapped.length > 3 && size > 14) {
+      size -= 2;
+      this.doc.setFontSize(size);
+      wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
     }
-    // amber underline
-    this.doc.setDrawColor(...AMBER);
-    this.doc.setLineWidth(0.8);
-    this.doc.line(MARGIN, this.y + 2, MARGIN + 28, this.y + 2);
-    this.y += 8;
+    const lh = size * 0.5;
+    this.ensure(lh * wrapped.length + 10);
+    this.y += 4;
+    for (let i = 0; i < wrapped.length; i++) {
+      this.y += lh + 1;
+      this.doc.setTextColor(...(i === wrapped.length - 1 ? BRIEF.amber : BRIEF.paper));
+      this.doc.text(wrapped[i], MARGIN, this.y);
+    }
+    this.doc.setDrawColor(...BRIEF.amber);
+    this.doc.setLineWidth(0.6);
+    this.doc.line(MARGIN, this.y + 3, MARGIN + 36, this.y + 3);
+    this.y += 9;
   }
 
+
   h2(text: string, count?: number) {
-    this.ensure(16);
-    this.y += 6;
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(13);
-    this.doc.setTextColor(...INK);
+    this.ensure(14);
+    this.y += 4;
     const label = count !== undefined ? `${text}  (${count})` : text;
-    this.y += 5;
-    this.doc.text(label, MARGIN, this.y);
-    // small amber accent
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, this.y - 4, 3, 5, 'F');
-    this.y += 3;
+    this.y = briefSectionLabel(this.doc, label, this.y + 2);
   }
 
   paragraph(text: string, color: [number, number, number] = INK, size = 10, bold = false) {
@@ -156,18 +151,16 @@ class PdfWriter {
 
   kv(label: string, value: string, labelColor: [number, number, number] = AMBER) {
     if (!value) return;
-    // Two-piece line: bold colored label, then normal text
     const size = 9.5;
-    const lh = size * 0.45;
+    const lh = size * 0.5;
     this.doc.setFontSize(size);
     this.doc.setFont('helvetica', 'bold');
-    const labelText = `${label}: `;
+    const labelText = `${sanitize(label)}: `;
     const labelW = this.doc.getTextWidth(labelText);
 
-    // Wrap value to remaining width
     this.doc.setFont('helvetica', 'normal');
-    const maxValueWidth = CONTENT_W - 4 - labelW;
-    const wrapped = this.doc.splitTextToSize(String(value), maxValueWidth);
+    const maxValueWidth = CONTENT_W - 6 - labelW;
+    const wrapped = this.doc.splitTextToSize(sanitize(value), maxValueWidth) as string[];
 
     for (let i = 0; i < wrapped.length; i++) {
       this.ensure(lh + 1);
@@ -175,111 +168,117 @@ class PdfWriter {
       if (i === 0) {
         this.doc.setFont('helvetica', 'bold');
         this.doc.setTextColor(...labelColor);
-        this.doc.text(labelText, MARGIN + 2, this.y);
+        this.doc.text(labelText, MARGIN + 3, this.y);
         this.doc.setFont('helvetica', 'normal');
         this.doc.setTextColor(...INK);
-        this.doc.text(wrapped[i], MARGIN + 2 + labelW, this.y);
+        this.doc.text(wrapped[i], MARGIN + 3 + labelW, this.y);
       } else {
-        this.doc.text(wrapped[i], MARGIN + 2 + labelW, this.y);
+        this.doc.text(wrapped[i], MARGIN + 3 + labelW, this.y);
       }
     }
-    this.y += 1.5;
+    this.y += 1.8;
   }
 
   divider() {
     this.ensure(4);
     this.y += 2;
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.2);
+    this.doc.setDrawColor(...BRIEF.amberDim);
+    this.doc.setLineWidth(0.25);
     this.doc.line(MARGIN, this.y, PAGE_W - MARGIN, this.y);
     this.y += 3;
   }
 
-  /** Soft beige callout for grouping a block of related content. */
+  /** Card with amber left bar + amber-dim border outline on dark page. */
   beginCard() {
-    this.ensure(20);
-    this.cardStartY = this.y;
-    this.y += 3; // top inner padding
+    this.ensure(22);
+    this.cardStartY = this.y + 1;
+    this.y = this.cardStartY + 4;
   }
 
-  endCard() {
+  private closeCard() {
     if (this.cardStartY === null) return;
     const start = this.cardStartY;
-    const end = this.y + 2;
-    const h = end - start;
-    // Draw a left amber bar + soft fill BEHIND the already-drawn text by re-drawing the text on top.
-    // Simpler approach: draw the fill+left bar BEFORE the content using a deferred rectangle.
-    // jsPDF doesn't support layers, so we instead leave a thin left bar only — drawn AFTER text is fine.
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN - 2, start, 1.2, h, 'F');
-    // hairline bottom
-    this.doc.setDrawColor(...RULE);
-    this.doc.setLineWidth(0.15);
-    this.doc.line(MARGIN, end + 1, PAGE_W - MARGIN, end + 1);
+    const end = this.y + 3;
+    const h = Math.max(8, end - start);
+    this.doc.setFillColor(...BRIEF.amber);
+    this.doc.rect(MARGIN, start, 1.6, h, 'F');
+    this.doc.setDrawColor(...BRIEF.amberDim);
+    this.doc.setLineWidth(0.2);
+    this.doc.rect(MARGIN, start, CONTENT_W, h, 'S');
     this.cardStartY = null;
     this.y = end + 4;
   }
 
+  endCard() {
+    this.closeCard();
+  }
+
   drawCover(title: string) {
-    // Fresh first page: clear and redraw
-    // (Constructor already drew headers; for cover we want a clean look.)
-    // Top brand
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(11);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text('AETHERIS  ·  AI STUDIO', MARGIN, 30);
+    briefCoverHeader(this.doc, `${this.toolLabel}  ·  Confidential Asset`);
 
-    // Tool label chip
-    this.doc.setFillColor(...AMBER);
-    this.doc.rect(MARGIN, 90, 2, 20, 'F');
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(9);
-    this.doc.setTextColor(...AMBER);
-    this.doc.text(this.toolLabel.toUpperCase(), MARGIN + 6, 96);
-
-    // Title
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.setFontSize(28);
-    this.doc.setTextColor(...INK);
-    const titleLines = this.doc.splitTextToSize(title, CONTENT_W);
-    let ty = 105;
-    for (const line of titleLines) {
-      this.doc.text(line, MARGIN + 6, ty);
-      ty += 11;
+    // Wrap at the same font/size briefDisplayTitle renders with (Courier 30pt).
+    // Shrink the headline progressively until it fits in <=3 lines without clipping.
+    const clean = sanitize(title);
+    let displaySize = 30;
+    this.doc.setFont('courier', 'bold');
+    this.doc.setFontSize(displaySize);
+    let wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
+    while (wrapped.length > 3 && displaySize > 16) {
+      displaySize -= 2;
+      this.doc.setFontSize(displaySize);
+      wrapped = this.doc.splitTextToSize(clean, CONTENT_W) as string[];
     }
+    const head = wrapped.slice(0, 3);
+    // Manual render so we control the size (briefDisplayTitle hardcodes 30pt).
+    let ty = 86;
+    const dlh = displaySize * 0.45;
+    head.forEach((ln, i) => {
+      this.doc.setTextColor(...(i === head.length - 1 ? BRIEF.amber : BRIEF.paper));
+      this.doc.text(ln, MARGIN, ty);
+      ty += dlh + 2;
+    });
 
-    // Date
+    let y = ty + 4;
+
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(...SUB);
-    this.doc.text(
-      `Generated ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
-      MARGIN + 6,
-      ty + 4,
+    this.doc.setFontSize(11);
+    this.doc.setTextColor(...BRIEF.muted);
+    const sub = sanitize(
+      'Generated by Aetheris Technology. Real findings, no sugar. Built for execution, not for filing.',
+    );
+    const subLines = this.doc.splitTextToSize(sub, CONTENT_W) as string[];
+    subLines.forEach((ln) => { this.doc.text(ln, MARGIN, y); y += 6; });
+
+    y += 4;
+    briefCallout(
+      this.doc,
+      '78% of the leaks we find, the owner already felt. They just could not name them.',
+      y,
+      'Aetheris Technology, Forensic Case Files',
     );
 
-    // Bottom note
-    this.doc.setDrawColor(...AMBER);
-    this.doc.setLineWidth(0.6);
-    this.doc.line(MARGIN, PAGE_H - 35, MARGIN + 25, PAGE_H - 35);
-    this.doc.setFont('helvetica', 'bold');
+    const tagY = PAGE_H - 38;
+    this.doc.setFillColor(...BRIEF.amber);
+    this.doc.rect(MARGIN, tagY, 2, 12, 'F');
+    this.doc.setFont('courier', 'bold');
     this.doc.setFontSize(9);
-    this.doc.setTextColor(...INK);
-    this.doc.text('Confidential — Strategic Asset', MARGIN, PAGE_H - 28);
-    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(...BRIEF.amber);
+    this.doc.text(sanitize(this.toolLabel).toUpperCase(), MARGIN + 6, tagY + 5);
+    this.doc.setFont('courier', 'normal');
     this.doc.setFontSize(8);
-    this.doc.setTextColor(...SUB);
-    this.doc.text('Generated by Aetheris AI Studio. Built for execution, not for filing.', MARGIN, PAGE_H - 22);
+    this.doc.setTextColor(...BRIEF.muted);
+    this.doc.text(
+      `GENERATED ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}`,
+      MARGIN + 6,
+      tagY + 10,
+    );
 
-    // New content page
-    this.doc.addPage();
-    this.pageNum++;
-    this.y = MARGIN + 14;
-    this.drawHeader();
-    this.drawFooter();
+    this.newContentPage();
   }
 
   finish(filename: string) {
+    if (this.cardStartY !== null) this.closeCard();
+    stampFooters(this.doc, 'Aetheris Technology');
     this.doc.save(filename);
   }
 }
@@ -330,9 +329,9 @@ function renderSocial(w: PdfWriter, d: any) {
         if (c.fixTease) w.kv('Fix tease', c.fixTease);
         if (c.lesson) w.kv('Lesson', c.lesson);
         if (Array.isArray(c.carouselSlides) && c.carouselSlides.length) {
-          w.paragraph(`Carousel — ${c.carouselSlides.length} slides`, SUB, 9, true);
+          w.paragraph(`Carousel, ${c.carouselSlides.length} slides`, SUB, 9, true);
           c.carouselSlides.forEach((sl: any) => {
-            const line = `Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`;
+            const line = `Slide ${sl.slideNumber || ''}, ${sl.headline || ''}`;
             w.paragraph(line.trim(), INK, 9, true);
             if (sl.body) w.paragraph(String(sl.body), INK, 9);
           });
@@ -371,9 +370,9 @@ function renderSocial(w: PdfWriter, d: any) {
         if (t.threshold) w.kv('Threshold', t.threshold);
         if (t.whatItMeans) w.kv('What it means', t.whatItMeans);
         if (Array.isArray(t.carouselSlides) && t.carouselSlides.length) {
-          w.paragraph(`Carousel — ${t.carouselSlides.length} slides`, SUB, 9, true);
+          w.paragraph(`Carousel, ${t.carouselSlides.length} slides`, SUB, 9, true);
           t.carouselSlides.forEach((sl: any) => {
-            w.paragraph(`Slide ${sl.slideNumber || ''} — ${sl.headline || ''}`.trim(), INK, 9, true);
+            w.paragraph(`Slide ${sl.slideNumber || ''}, ${sl.headline || ''}`.trim(), INK, 9, true);
             if (sl.body) w.paragraph(String(sl.body), INK, 9);
           });
         }

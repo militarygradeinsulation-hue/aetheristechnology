@@ -4,15 +4,12 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
-import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, Lock, ShoppingCart, X, Volume2, VolumeX } from 'lucide-react';
+import { Download, FileText, BookOpen, TrendingUp, Shield, BarChart3, Video, Phone, Mail, ArrowRight, Loader2, Play, Pause, X, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/SEOHead';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PlaybookTopicBrowser } from '@/components/PlaybookTopicBrowser';
-import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import Player from '@vimeo/player';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -24,18 +21,18 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   BarChart3,
 };
 
-const FREE_PLAYBOOK_COUNT = 3;
+// All pre-built playbooks are free. Only custom AI-generated playbooks (via PlaybookTopicBrowser) are paid.
 
 const ResourcesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [checkoutPlaybookId, setCheckoutPlaybookId] = useState<string | null>(null);
-  const [checkoutPlaybookTitle, setCheckoutPlaybookTitle] = useState<string>('');
+  const [previewPlaybook, setPreviewPlaybook] = useState<any | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<Player | null>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
+
+
+  
 
   useEffect(() => {
     if (iframeRef.current) {
@@ -65,97 +62,27 @@ const ResourcesPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('playbooks')
-        .select('*')
+        .select('id, title, subtitle, description, summary, toc, best_for_who, best_for_industries, tags, file_url, icon_name, published_at')
         .order('published_at', { ascending: true });
       if (error) throw error;
       return data;
     },
-  });
-
-  // Check which playbooks the user has purchased
-  const { data: purchasedPlaybookIds } = useQuery({
-    queryKey: ['purchased-playbooks', user?.id],
-    queryFn: async () => {
-      if (!user) return new Set<string>();
-      const { data, error } = await supabase
-        .from('purchases')
-        .select('metadata')
-        .eq('user_id', user.id);
-      if (error) return new Set<string>();
-      const ids = new Set<string>();
-      (data || []).forEach((p: any) => {
-        if (p.metadata?.playbook_id) ids.add(p.metadata.playbook_id);
-      });
-      return ids;
-    },
-    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const existingTitles = (playbooks || []).map(p => p.title);
 
-  const handlePlaybookAction = (playbook: any, index: number) => {
-    const isFree = index < FREE_PLAYBOOK_COUNT;
-    const isPurchased = purchasedPlaybookIds?.has(playbook.id);
-
-    if (isFree || isPurchased) {
-      // Direct download
-      window.open(playbook.file_url, '_blank');
-      return;
-    }
-
-    // Need to purchase
-    if (!user) {
-      navigate('/login?redirect=/resources');
-      return;
-    }
-
-    setCheckoutPlaybookId(playbook.id);
-    setCheckoutPlaybookTitle(playbook.title);
+  const handlePlaybookAction = (playbook: any) => {
+    // All pre-built playbooks are free, no paywall.
+    if (playbook.file_url) window.open(playbook.file_url, '_blank');
   };
 
-  if (checkoutPlaybookId) {
-    return (
-      <div className="relative min-h-screen">
-        <Background />
-        <div className="relative z-10">
-          <Navbar onContactClick={() => setIsContactModalOpen(true)} />
-          <div className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setCheckoutPlaybookId(null)}>
-            <div className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden mx-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Unlock Playbook</p>
-                  <p className="text-xs text-muted-foreground">{checkoutPlaybookTitle}</p>
-                </div>
-                <button onClick={() => setCheckoutPlaybookId(null)} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                  <X className="w-5 h-5" /> Cancel
-                </button>
-              </div>
-              <div className="flex-1 overflow-auto p-4">
-                <StripeEmbeddedCheckout
-                  priceId="playbook_unlock_once"
-                  customerEmail={user?.email || undefined}
-                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=playbook_unlock&playbook_id=${checkoutPlaybookId}`}
-                  metadata={{
-                    userId: user?.id || '',
-                    playbook_id: checkoutPlaybookId,
-                    playbook_title: checkoutPlaybookTitle,
-                    priceId: 'playbook_unlock_once',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          <Footer />
-        </div>
-        <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
-      </div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Strategic Playbooks — AI & Marketing | Aetheris"
+        title="Strategic Playbooks, AI & Marketing | Aetheris"
         description="Free playbooks on AI search, digital influence, short-form video, and leadership. Built from real consulting engagements."
         path="/resources"
         jsonLd={{
@@ -229,15 +156,19 @@ const ResourcesPage = () => {
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
                 Field Manuals
               </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Founder — Joseph Toney, AI Architect MS, BA, IBM AI Certified
+              </p>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground mb-4">
                 Playbooks from the field.
               </h1>
+
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-                The frameworks behind The Leak Audit™ — the patterns we see bleeding revenue across operations, 
+                The frameworks behind The Leak Audit™, the patterns we see bleeding revenue across operations, 
                 marketing, and sales. Built from real engagements. No fluff, no fake case studies.
               </p>
               <p className="text-sm text-muted-foreground">
-                First {FREE_PLAYBOOK_COUNT} free. Premium playbooks — $29 each. <span className="text-amber font-medium">Buy any service and pick one free.</span>
+                <span className="text-amber font-medium">Every playbook here is free.</span> Want one tailored to your exact business and topic? Build a <a href="#build-your-own" className="text-amber underline">Custom Playbook</a> below.
               </p>
             </RevealOnScroll>
           </div>
@@ -250,80 +181,186 @@ const ResourcesPage = () => {
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-amber" />
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {(playbooks || []).map((resource, index) => {
-                  const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
-                  const isFree = index < FREE_PLAYBOOK_COUNT;
-                  const isPurchased = purchasedPlaybookIds?.has(resource.id);
-                  const isUnlocked = isFree || isPurchased;
-
-                  return (
-                    <RevealOnScroll key={resource.id} delay={index * 0.1}>
-                      <div className={`premium-tile rounded-2xl p-8 border transition-all group h-full flex flex-col ${
-                        isUnlocked
-                          ? 'border-border hover:border-amber/30'
-                          : 'border-border/50 hover:border-primary/30'
-                      }`}>
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                            isUnlocked
-                              ? 'bg-primary/20 group-hover:bg-primary/30'
-                              : 'bg-secondary/50 group-hover:bg-secondary/70'
-                          }`}>
-                            {isUnlocked ? (
-                              <IconComp className="w-6 h-6 text-amber" />
-                            ) : (
-                              <Lock className="w-5 h-5 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
-                              {isFree && (
-                                <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
-                              )}
-                              {!isFree && isPurchased && (
-                                <span className="text-[10px] font-bold bg-primary/15 text-primary border border-primary/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Unlocked</span>
-                              )}
-                              {!isUnlocked && (
-                                <span className="text-[10px] font-bold bg-secondary text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-wider">$25</span>
-                              )}
-                            </div>
-                            <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
-                          </div>
-                        </div>
-                        <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
-                        <div className="flex flex-wrap gap-2 mb-5">
-                          {(resource.tags || []).map((tag: string) => (
-                            <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
-                          ))}
-                        </div>
-                        <Button
-                          onClick={() => handlePlaybookAction(resource, index)}
-                          className={`w-full gap-2 ${
-                            isUnlocked
-                              ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                              : 'bg-secondary hover:bg-secondary/80 text-foreground border border-border'
-                          }`}
+            ) : (() => {
+              const visible = playbooks || [];
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {visible.map((resource, index) => {
+                    const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
+                    return (
+                      <RevealOnScroll key={resource.id} delay={index * 0.1}>
+                        <button
+                          type="button"
+                          onClick={() => { setPreviewPlaybook(resource); }}
+                          className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
                         >
-                          {isUnlocked ? (
-                            <><Download className="w-4 h-4" /> Download PDF</>
-                          ) : (
-                            <><ShoppingCart className="w-4 h-4" /> Unlock — $25</>
-                          )}
-                        </Button>
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
+                              <IconComp className="w-6 h-6 text-amber" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                                <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
+                              </div>
+                              <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
+                            </div>
+                          </div>
+                          <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
+                          <div className="flex flex-wrap gap-2 mb-5">
+                            {(resource.tags || []).map((tag: string) => (
+                              <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                            ))}
+                          </div>
+                          <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
+                            Preview what's inside <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </button>
+                      </RevealOnScroll>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+          </div>
+        </section>
+
+        {/* Preview Modal */}
+        {previewPlaybook && (() => {
+          const pb: any = previewPlaybook;
+          const IconC = ICON_MAP[pb.icon_name || 'FileText'] || FileText;
+          const toc: string[] = Array.isArray(pb.toc) ? pb.toc : [];
+          const summary: string = pb.summary || pb.description || '';
+          return (
+            <div
+              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setPreviewPlaybook(null)}
+            >
+              <div
+                className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-3 p-5 border-b border-border">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <IconC className="w-5 h-5 text-amber" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Playbook Preview</div>
+                      <h3 className="text-lg font-bold text-foreground font-display leading-tight">{pb.title}</h3>
+                      {pb.subtitle && <p className="text-sm text-muted-foreground mt-0.5">{pb.subtitle}</p>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setPreviewPlaybook(null)}
+                    aria-label="Close preview"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-auto p-5 space-y-5">
+                  <div>
+                    <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">What's Inside</h4>
+                    <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{summary}</p>
+                  </div>
+
+                  {toc.length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Table of Contents</h4>
+                      <ol className="space-y-1.5 list-decimal list-inside text-sm text-foreground/90">
+                        {toc.map((t, i) => (
+                          <li key={i} className="leading-snug">{t}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {pb.best_for_who && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Best For</h4>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{pb.best_for_who}</p>
+                    </div>
+                  )}
+
+                  {Array.isArray(pb.best_for_industries) && pb.best_for_industries.length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Industries</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {pb.best_for_industries.map((ind: string) => (
+                          <span key={ind} className="text-xs px-2 py-1 rounded-full border border-amber/40 text-amber bg-amber/5">{ind}</span>
+                        ))}
                       </div>
-                    </RevealOnScroll>
-                  );
-                })}
+                    </div>
+                  )}
+
+                  {(pb.tags || []).length > 0 && (
+                    <div>
+                      <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Topics</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(pb.tags || []).map((tag: string) => (
+                          <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-5 border-t border-border bg-background/40">
+                  <Button
+                    onClick={() => { handlePlaybookAction(pb); setPreviewPlaybook(null); }}
+                    className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    <Download className="w-4 h-4" /> Download Full PDF (Free)
+                  </Button>
+                </div>
               </div>
-            )}
+            </div>
+          );
+        })()}
+
+        {/* How to create a Custom Playbook. instructions */}
+        <section id="build-your-own" className="pb-8 px-4 scroll-mt-24">
+          <div className="max-w-4xl mx-auto">
+            <RevealOnScroll>
+              <div className="glass rounded-2xl border border-amber/30 p-8 md:p-10">
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">How it works</div>
+                <h2 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-3">
+                  How to create your <span className="text-amber">Custom Playbook</span>
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Every playbook above is free. Custom playbooks are built by our Strategic Business AI from one of 100+ topics, tailored to your business, and delivered as a 20+ page PDF. <span className="text-amber font-semibold">$29 each.</span>
+                </p>
+                <ol className="space-y-4 mb-6">
+                  {[
+                    { t: 'Browse or search topics', d: 'Use the topic library below. Filter by pillar (Operations, Marketing, Sales, Leadership, AI) or search by keyword to find the angle that matches the leak you want to seal.' },
+                    { t: 'Open a topic card', d: 'You will see the pillar, the sub-topics covered, and exactly what the deliverable includes (proprietary frameworks, KPIs, ROI models, real case metrics).' },
+                    { t: 'Sign in and click "Generate & Buy"', d: 'You need a free account so the playbook is saved to your library and can be re-downloaded later. Sign in or create one in 10 seconds.' },
+                    { t: 'Complete checkout. $29 one-time', d: 'Secure Stripe checkout. No subscription. The playbook generates immediately after payment, no waiting on a human.' },
+                    { t: 'Download your PDF', d: 'You will be returned to a download page and the playbook lands in your library at /portal. Re-download anytime. Use it. Hand it to your team. Sell the rebuild internally.' },
+                  ].map((step, i) => (
+                    <li key={i} className="flex gap-4">
+                      <div className="w-8 h-8 rounded-lg bg-amber/15 border border-amber/40 text-amber font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
+                      <div>
+                        <div className="font-semibold text-foreground">{step.t}</div>
+                        <div className="text-sm text-muted-foreground">{step.d}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <div className="rounded-lg border border-border bg-background/40 p-4 text-sm text-muted-foreground">
+                  <span className="font-semibold text-amber">Tip:</span> Buy any Aetheris service and you get one custom playbook free. Bundle the playbook with a <a href="/leak-audit" className="text-amber underline">Free Leak Audit™</a> for the sharpest read on which topic to pick.
+                </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 
         {/* On-Demand Playbook Generator */}
         <PlaybookTopicBrowser existingTitles={existingTitles} />
+
 
         <section className="pb-24 px-4">
           <div className="max-w-4xl mx-auto">
@@ -335,11 +372,11 @@ const ResourcesPage = () => {
                     Reading ≠ Sealing
                   </div>
                   <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
-                    Playbooks show the pattern. The <span className="text-crimson">Forensic Diagnostic</span> shows your wound.
+                    Playbooks show the pattern. The <span className="text-crimson">Revenue Diagnostic</span> shows your wound.
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                    Free playbooks teach the patterns we see across businesses. The Forensic Diagnostic ($2,500 flat) 
-                    names the leaks bleeding <em>your</em> revenue right now — and credits in full toward the rebuild.
+                    Free playbooks teach the patterns we see across businesses. The 21-Day Revenue Diagnostic ($18,500 flat) 
+                    names the leaks bleeding <em>your</em> revenue right now, and credits 1:1 toward the Implementation Retainer.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="/leak-audit">

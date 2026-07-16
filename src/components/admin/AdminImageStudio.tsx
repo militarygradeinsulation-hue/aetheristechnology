@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw, Maximize2, X } from 'lucide-react';
+import { Loader2, Sparkles, Upload, Download, Trash2, Wand2, ImageIcon, RefreshCw, Maximize2, X, Linkedin, Shuffle, Film, Copy } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +30,205 @@ export const AdminImageStudio: React.FC = () => {
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
+  const [animateTarget, setAnimateTarget] = useState<StudioImage | null>(null);
+  const [animatePrompt, setAnimatePrompt] = useState('Bring this image to life — subtle natural movement: hair flowing, slight head turn, eyes blinking, fabric drift, ambient breeze. Keep identity, lighting, and composition exact. Cinematic, photoreal, 5 seconds.');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // LinkedIn Banner Creator state
+  const BANNER_PRESETS = [
+    { key: 'stop_guessing', headline: 'Stop Guessing.', accent: 'Start Understanding.', sub: 'I break down where your business is leaking money — with real numbers, real costs, real fixes.' },
+    { key: 'leak_audit',    headline: 'Your business is leaking.', accent: "You just can't see it from the inside.", sub: 'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.' },
+    { key: 'forensics',     headline: 'Chaos Theory Forensics.', accent: 'Not Consulting.', sub: 'I find the leak, prove it with math, and plug it. No active cases. No fluff.' },
+    { key: 'autopsy',       headline: 'Every dead deal', accent: 'has a cause of death.', sub: 'I run the autopsy. You get the receipts. Then we stop the bleed.' },
+    { key: 'silent_bleed',  headline: 'The silent bleed', accent: 'is the expensive one.', sub: 'The leaks you can see are cheap. The ones you can\'t are killing your margin.' },
+    { key: 'six_figures',   headline: 'Six figures', accent: 'are walking out the back door.', sub: 'Most owners are within 90 days of finding the leak. They just need someone outside the building.' },
+    { key: 'not_a_growth',  headline: "You don't have a growth problem.", accent: 'You have a leak problem.', sub: 'Scaling a broken system just bleeds faster. Plug the holes first.' },
+    { key: 'evidence',      headline: 'Opinions are cheap.', accent: 'Evidence is forensic.', sub: 'Every recommendation comes with the math, the source, and the cost of doing nothing.' },
+    { key: 'cant_see',      headline: "You can't read the label", accent: 'from inside the jar.', sub: 'Outside operator. Inside view. Real numbers in 14 days.' },
+    { key: 'custom',        headline: '', accent: '', sub: '' },
+  ];
+
+  // Pools the Shuffle button samples from independently for each line.
+  const HEADLINE_POOL = [
+    'Stop Guessing.',
+    'Your business is leaking.',
+    'Chaos Theory Forensics.',
+    'Every dead deal',
+    'The silent bleed',
+    'Six figures',
+    "You don't have a growth problem.",
+    'Opinions are cheap.',
+    "You can't read the label",
+    'The leak is real.',
+    'Most owners are bleeding.',
+    'Your P&L is lying to you.',
+  ];
+  const ACCENT_POOL = [
+    'Start Understanding.',
+    "You just can't see it from the inside.",
+    'Not Consulting.',
+    'has a cause of death.',
+    'is the expensive one.',
+    'are walking out the back door.',
+    'You have a leak problem.',
+    'Evidence is forensic.',
+    'from inside the jar.',
+    "They just can't see it yet.",
+    'Find it. Prove it. Plug it.',
+    'The receipts say otherwise.',
+  ];
+  const SUBLINE_POOL = [
+    'I break down where your business is leaking money — with real numbers, real costs, real fixes.',
+    'Forensic Diagnostic. Operator-led. $2,500 flat, applied to engagement.',
+    'I find the leak, prove it with math, and plug it. No active cases. No fluff.',
+    'I run the autopsy. You get the receipts. Then we stop the bleed.',
+    "The leaks you can see are cheap. The ones you can't are killing your margin.",
+    'Most owners are within 90 days of finding the leak. They just need someone outside the building.',
+    'Scaling a broken system just bleeds faster. Plug the holes first.',
+    'Every recommendation comes with the math, the source, and the cost of doing nothing.',
+    'Outside operator. Inside view. Real numbers in 14 days.',
+    'Leak Audit. Ledger-grade evidence. No theater.',
+    'Operator, not consultant. Built on receipts, not slide decks.',
+  ];
+  const [bannerPreset, setBannerPreset] = useState('stop_guessing');
+  const [bannerHeadline, setBannerHeadline] = useState(BANNER_PRESETS[0].headline);
+  const [bannerAccent, setBannerAccent] = useState(BANNER_PRESETS[0].accent);
+  const [bannerSub, setBannerSub] = useState(BANNER_PRESETS[0].sub);
+  const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
+  const [bannerBusy, setBannerBusy] = useState(false);
+  const [packBusy, setPackBusy] = useState(false);
+  const [packProgress, setPackProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const LOGO_URL = 'https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/content-images/brand/aetheris-badge.png';
+
+  const applyPreset = (key: string) => {
+    setBannerPreset(key);
+    const p = BANNER_PRESETS.find(x => x.key === key);
+    if (p && key !== 'custom') {
+      setBannerHeadline(p.headline); setBannerAccent(p.accent); setBannerSub(p.sub);
+    }
+  };
+
+  const pick = <T,>(arr: T[], avoid?: T): T => {
+    if (arr.length <= 1) return arr[0];
+    let v = arr[Math.floor(Math.random() * arr.length)];
+    let guard = 0;
+    while (v === avoid && guard++ < 6) v = arr[Math.floor(Math.random() * arr.length)];
+    return v;
+  };
+
+  const shuffleField = (field: 'headline' | 'accent' | 'sub') => {
+    setBannerPreset('custom');
+    if (field === 'headline') setBannerHeadline(pick(HEADLINE_POOL, bannerHeadline));
+    if (field === 'accent')   setBannerAccent(pick(ACCENT_POOL, bannerAccent));
+    if (field === 'sub')      setBannerSub(pick(SUBLINE_POOL, bannerSub));
+  };
+
+  const shuffleAll = () => {
+    setBannerPreset('custom');
+    setBannerHeadline(pick(HEADLINE_POOL, bannerHeadline));
+    setBannerAccent(pick(ACCENT_POOL, bannerAccent));
+    setBannerSub(pick(SUBLINE_POOL, bannerSub));
+    const bgs = ['network', 'matrix', 'blueprint', 'noir', 'case_file'] as const;
+    setBannerBg(pick(bgs as any, bannerBg));
+  };
+
+
+  const BG_DESC: Record<string, string> = {
+    network:   'dark charcoal background (#0a0a0a) with subtle amber/gold constellation network — thin connected dots and lines like a node graph, very faint',
+    matrix:    'dark charcoal background with faint vertical amber matrix-rain code streams, subtle, low opacity',
+    blueprint: 'dark charcoal background with faint amber blueprint grid lines, schematic ticks, technical drafting feel',
+    noir:      'pure black background with a single hard amber rim light from upper right, cinematic shadow, near-empty',
+    case_file: 'dark manila / charcoal background with redaction bars, case-file stamp marks in faint crimson, forensic dossier feel',
+  };
+
+  const buildBannerPrompt = (headline: string, accent: string, sub: string, bg: keyof typeof BG_DESC) =>
+`LinkedIn banner image, 4:1 ultra-wide aspect ratio (1584 x 396 pixels), designed for the LinkedIn cover photo slot.
+
+A reference image of the AETHERIS BADGE LOGO is attached. You MUST composite that exact badge — unchanged, do NOT redraw it, do NOT alter its text, do NOT recolor it — into the TOP-RIGHT corner of the banner at roughly 140-180px tall, with ~24px padding from top and right edges. Preserve the badge's circular shape, magnifying glass, eye, "AETHERIS" arc, "BUSINESS FORENSICS. REAL FINDINGS. NO SUGAR." text and red ACTIVE stamp exactly as shown.
+
+LAYOUT (CRITICAL — LinkedIn profile photo sits as a ~400px circle anchored at the BOTTOM-LEFT of this banner and overlaps the lower-left quadrant; ALL TYPOGRAPHY MUST AVOID THAT ZONE):
+- Background fills the entire banner: ${BG_DESC[bg]}
+- RESERVED EMPTY ZONE: the entire LEFT 32% of the banner AND the bottom 60% of that left area must stay clean background — NO text, NO logo, NO key graphic elements there (this is where the profile photo will cover everything)
+- The AETHERIS badge logo lives in the TOP-RIGHT corner (see above)
+- Place ALL typography in the CENTER region, horizontally centered between roughly 35% and 78% of the width, vertically centered
+- Big serif display headline in TWO COLORS on one or two lines:
+  · "${headline}" rendered in CRISP WHITE (#FFFFFF)
+  · "${accent}" rendered in WARM AMBER GOLD (#E8A33D)
+- Use a high-end serif similar to Fraunces / Playfair — bold, elegant
+- Below the headline, smaller body line in light grey (#D4D4D4), sans-serif, max ~110 chars, center-aligned:
+  "${sub}"
+- Tiny amber monospace eyebrow label above the headline (center-aligned): "AETHERIS · BUSINESS FORENSICS"
+- Bottom-right corner (below the badge): small amber monospace watermark "aetheris.technology"
+
+STYLE: Aetheris forensic brand — dark, editorial, investigative, cinematic. Text perfectly legible, NO spelling errors, NO duplicated letters.
+
+Exact text to render (do not change spelling):
+HEADLINE WHITE: "${headline}"
+HEADLINE AMBER: "${accent}"
+SUBLINE: "${sub}"
+EYEBROW: "AETHERIS · BUSINESS FORENSICS"
+WATERMARK: "aetheris.technology"`;
+
+  const generateBanner = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    setBannerBusy(true);
+    try {
+      const { data, error } = await invoke({
+        action: 'edit',
+        source_image_url: LOGO_URL,
+        prompt: buildBannerPrompt(bannerHeadline, bannerAccent, bannerSub, bannerBg),
+        model: 'google/gemini-3.1-flash-image-preview',
+        aetheris_style: false,
+        share_to_reps: true,
+        is_banner: true,
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Banner generated', description: 'Logo embedded. Also pushed to reps shared library.' });
+      load();
+    } catch (e: any) {
+      toast({ title: 'Banner generation failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBannerBusy(false);
+    }
+  };
+
+  const generateBannerPack = async () => {
+    if (!bannerHeadline.trim()) { toast({ title: 'Headline required' }); return; }
+    const bgs: Array<keyof typeof BG_DESC> = ['network', 'matrix', 'blueprint', 'noir', 'case_file'];
+    setPackBusy(true);
+    setPackProgress({ done: 0, total: bgs.length });
+    let ok = 0;
+    try {
+      for (let i = 0; i < bgs.length; i++) {
+        try {
+          const { data, error } = await invoke({
+            action: 'edit',
+            source_image_url: LOGO_URL,
+            prompt: buildBannerPrompt(bannerHeadline, bannerAccent, bannerSub, bgs[i]),
+            model: 'google/gemini-3.1-flash-image-preview',
+            aetheris_style: false,
+            share_to_reps: true,
+            is_banner: true,
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          ok++;
+          load();
+        } catch (e: any) {
+          toast({ title: `Variation "${bgs[i].replace('_',' ')}" failed`, description: e.message, variant: 'destructive' });
+        }
+        setPackProgress({ done: i + 1, total: bgs.length });
+      }
+      toast({ title: 'Variation pack done', description: `${ok}/${bgs.length} banners pushed to reps shared library.` });
+    } finally {
+      setPackBusy(false);
+      setTimeout(() => setPackProgress(null), 2500);
+    }
+  };
+
+
 
   const invoke = async (body: Record<string, unknown>) => {
     const token = getAdminToken();
@@ -48,7 +246,7 @@ export const AdminImageStudio: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (aetherisStyle = false) => {
+  const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -56,11 +254,12 @@ export const AdminImageStudio: React.FC = () => {
         action: editTarget ? 'edit' : 'generate',
         prompt, model,
         source_image_url: editTarget?.url,
-        aetheris_style: aetherisStyle,
+        aetheris_style: !!opts.aetherisStyle,
+        cartoon_style: !!opts.cartoon,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : aetherisStyle ? 'Image generated in Aetheris style' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
@@ -160,19 +359,30 @@ export const AdminImageStudio: React.FC = () => {
             {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
           <div className="flex flex-wrap gap-2 flex-1">
-            <Button onClick={() => generate(false)} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
+            <Button onClick={() => generate()} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
               {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
               {editTarget ? 'Edit Image' : 'Generate'}
             </Button>
             {!editTarget && (
-              <Button
-                onClick={() => generate(true)}
-                disabled={busy || !prompt.trim()}
-                className="flex-1 min-w-[180px] bg-amber text-background hover:bg-amber/90"
-              >
-                {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
-                Generate in Aetheris Style
-              </Button>
+              <>
+                <Button
+                  onClick={() => generate({ aetherisStyle: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[180px] bg-amber text-background hover:bg-amber/90"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Generate in Aetheris Style
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ cartoon: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[180px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Editorial Cartoon
+                </Button>
+              </>
             )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
               <Upload className="w-4 h-4 mr-1" /> Upload
@@ -184,6 +394,125 @@ export const AdminImageStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* LinkedIn Banner Creator */}
+      <div className="glass p-6 rounded-xl space-y-4 border border-amber/20">
+        <div className="flex items-center gap-2">
+          <Linkedin className="w-5 h-5 text-amber" />
+          <h2 className="text-xl font-bold text-foreground font-display">LinkedIn Banner Creator</h2>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber/70 ml-2">1584 × 396 · 4:1</span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          One-click Aetheris-branded LinkedIn cover banners. Pick a hook, choose a background, generate. Lands in your library below at the right ratio.
+        </p>
+
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Hook preset</label>
+            <button
+              type="button"
+              onClick={shuffleAll}
+              className="text-[10px] uppercase tracking-wider font-mono text-amber hover:text-amber/80 flex items-center gap-1"
+            >
+              <Shuffle className="w-3 h-3" /> Shuffle all
+            </button>
+          </div>
+          <select
+            value={bannerPreset}
+            onChange={e => applyPreset(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            {BANNER_PRESETS.map(p => (
+              <option key={p.key} value={p.key}>
+                {p.key === 'custom' ? '— Custom (write your own)' : `${p.headline} ${p.accent}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] uppercase tracking-wider text-foreground/85 font-mono">Headline (white)</label>
+              <button type="button" onClick={() => shuffleField('headline')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+                <Shuffle className="w-3 h-3" /> Random
+              </button>
+            </div>
+            <Input value={bannerHeadline} onChange={e => { setBannerHeadline(e.target.value); setBannerPreset('custom'); }} placeholder="Stop Guessing." />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Accent (amber)</label>
+              <button type="button" onClick={() => shuffleField('accent')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+                <Shuffle className="w-3 h-3" /> Random
+              </button>
+            </div>
+            <Input value={bannerAccent} onChange={e => { setBannerAccent(e.target.value); setBannerPreset('custom'); }} placeholder="Start Understanding." />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase tracking-wider text-foreground/85 font-mono">Subline</label>
+            <button type="button" onClick={() => shuffleField('sub')} className="text-[10px] text-amber/80 hover:text-amber flex items-center gap-1 font-mono uppercase">
+              <Shuffle className="w-3 h-3" /> Random
+            </button>
+          </div>
+          <Textarea
+            rows={2}
+            value={bannerSub}
+            onChange={e => { setBannerSub(e.target.value); setBannerPreset('custom'); }}
+            placeholder="One short line. Real numbers. Real fixes. No fluff."
+            className="resize-none"
+          />
+        </div>
+
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Background style</label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {(['network', 'matrix', 'blueprint', 'noir', 'case_file'] as const).map(k => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setBannerBg(k)}
+                className={`text-xs font-mono uppercase tracking-wider px-2 py-2 rounded-md border transition-colors ${
+                  bannerBg === k
+                    ? 'border-amber bg-amber/15 text-amber'
+                    : 'border-border bg-background/50 text-muted-foreground hover:border-amber/40'
+                }`}
+              >
+                {k.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          onClick={generateBanner}
+          disabled={bannerBusy || packBusy || !bannerHeadline.trim()}
+          className="w-full bg-amber text-background hover:bg-amber/90"
+        >
+          {bannerBusy
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Painting banner (~30s)...</>
+            : <><Linkedin className="w-4 h-4 mr-2" /> Generate Banner (+ Push to Reps)</>}
+        </Button>
+        <Button
+          onClick={generateBannerPack}
+          disabled={bannerBusy || packBusy || !bannerHeadline.trim()}
+          variant="outline"
+          className="w-full border-amber/40 text-amber hover:bg-amber/10"
+        >
+          {packBusy
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating pack {packProgress ? `(${packProgress.done}/${packProgress.total})` : ''}...</>
+            : <><Linkedin className="w-4 h-4 mr-2" /> Generate Variation Pack (5 backgrounds → Reps)</>}
+        </Button>
+        <p className="text-[10px] text-muted-foreground text-center">
+          Logo is auto-embedded top-right. Every banner is pushed to the reps shared banner library.
+        </p>
+      </div>
+
+
 
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
@@ -218,6 +547,9 @@ export const AdminImageStudio: React.FC = () => {
                   <Button size="sm" variant="outline" onClick={() => { setEditTarget(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" /> Edit
                   </Button>
+                  <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => setAnimateTarget(img)}>
+                    <Film className="w-3.5 h-3.5 mr-1" /> Animate
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => download(img)}>
                     <Download className="w-3.5 h-3.5" />
                   </Button>
@@ -244,6 +576,51 @@ export const AdminImageStudio: React.FC = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Animate (Bring to Life) request dialog — generates a chat-ready handoff for the Lovable agent to fulfill via internal video model. */}
+      <Dialog open={!!animateTarget} onOpenChange={(o) => !o && setAnimateTarget(null)}>
+        <DialogContent className="max-w-2xl bg-background border-amber/40">
+          {animateTarget && (() => {
+            const handoff = `Bring this image to life as a 5s MP4 (subject motion, not camera). Save it to the Video Library.\n\nImage URL: ${animateTarget.url}\nOriginal prompt: ${animateTarget.prompt || '(none)'}\n\nMotion direction:\n${animatePrompt}`;
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Film className="w-5 h-5 text-amber" />
+                  <h3 className="font-display text-lg">Bring this image to life</h3>
+                </div>
+                <p className="text-xs text-muted-foreground font-mono">
+                  Live video generation needs a connector. Until one is connected, paste the block below into Lovable chat and the agent will render the MP4 with its internal video model and drop it in your Video Library.
+                </p>
+                <img src={animateTarget.url} alt="" className="w-full max-h-64 object-contain rounded border border-border" />
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Motion direction</label>
+                  <Textarea value={animatePrompt} onChange={(e) => setAnimatePrompt(e.target.value)} rows={3} className="mt-1 text-xs" />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider text-amber font-mono">Copy this into Lovable chat</label>
+                  <Textarea value={handoff} readOnly rows={6} className="mt-1 text-xs font-mono" />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(handoff);
+                        toast({ title: 'Copied', description: 'Paste into Lovable chat to generate the animation.' });
+                      } catch {
+                        toast({ title: 'Copy failed', description: 'Select the text and copy manually.', variant: 'destructive' });
+                      }
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-1" /> Copy handoff
+                  </Button>
+                  <Button variant="outline" onClick={() => setAnimateTarget(null)}>Close</Button>
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

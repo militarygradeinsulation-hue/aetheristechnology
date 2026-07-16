@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { ReadAloudButton } from "@/components/ReadAloudButton";
 
 const NewsPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -67,7 +68,10 @@ const NewsPostPage = () => {
                   {post.published_at && format(new Date(post.published_at), "MMM d, yyyy")} · {post.author_name}
                 </span>
               </div>
-              <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground leading-[1.1] mb-6">{post.title}</h1>
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground leading-[1.1] flex-1">{post.title}</h1>
+                <ReadAloudButton text={[post.title, post.summary || '', post.body || ''].filter(Boolean).join('. ')} label="Listen" />
+              </div>
               {post.summary && <p className="text-lg text-muted-foreground leading-relaxed mb-8">{post.summary}</p>}
               {post.cover_image_url && (
                 <img src={post.cover_image_url} alt={post.title} className="w-full rounded-xl border border-border mb-10" />

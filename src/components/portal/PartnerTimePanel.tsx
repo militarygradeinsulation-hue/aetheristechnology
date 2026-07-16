@@ -45,7 +45,7 @@ export const PartnerTimePanel: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <CardTitle className="font-display flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber" /> Rep Time Tracker — pay vs. hours
+            <Clock className="w-5 h-5 text-amber" /> Rep Time Tracker, pay vs. hours
           </CardTitle>
           <div className="flex items-center gap-1">
             {WINDOWS.map((w) => (
@@ -65,7 +65,7 @@ export const PartnerTimePanel: React.FC = () => {
           </div>
         </div>
         <p className="text-sm text-muted-foreground mt-2">
-          Hours logged in the selected window vs. <strong>lifetime commission</strong>. The $/hr column is your effective payout rate — high $/hr = the rep is efficient, low $/hr = pay-to-time is unfair.
+          Hours logged in the selected window vs. <strong>lifetime commission</strong>. The $/hr column is your effective payout rate, high $/hr = the rep is efficient, low $/hr = pay-to-time is unfair.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -82,7 +82,7 @@ export const PartnerTimePanel: React.FC = () => {
           <div className="rounded-lg border border-border/50 bg-card/40 p-3">
             <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Blended $/hr</p>
             <p className="text-2xl font-semibold text-foreground mt-1 inline-flex items-center gap-2">
-              {blendedRate !== null ? `$${blendedRate.toFixed(2)}` : "—"}
+              {blendedRate !== null ? `$${blendedRate.toFixed(2)}` : ", "}
               <TrendingUp className="w-4 h-4 text-amber" />
             </p>
           </div>
@@ -129,12 +129,12 @@ export const PartnerTimePanel: React.FC = () => {
                     <TableCell className="text-right font-mono">{formatDuration(r.seconds_window)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{r.sessions_window}</TableCell>
                     <TableCell className="text-right text-muted-foreground text-xs">
-                      {lastSeen ? lastSeen.toLocaleDateString() : "—"}
+                      {lastSeen ? lastSeen.toLocaleDateString() : ", "}
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">{fmtUsd(r.total_sales_cents)}</TableCell>
                     <TableCell className="text-right font-semibold text-amber">{fmtUsd(r.total_commission_cents)}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      {r.dollars_per_hour !== null ? `$${r.dollars_per_hour.toFixed(2)}` : <span className="text-muted-foreground">—</span>}
+                      {r.dollars_per_hour !== null ? `$${r.dollars_per_hour.toFixed(2)}` : <span className="text-muted-foreground">, </span>}
                     </TableCell>
                     <TableCell className="text-right">
                       {r.currently_open ? (
@@ -155,7 +155,7 @@ export const PartnerTimePanel: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Effective $/hr = lifetime commission ÷ hours logged in this window. A rep with high commission and few hours has the best ratio. A rep with many hours and little commission needs coaching or a different role. Time data is permanent — every clock-in/out is recorded.
+          Effective $/hr = lifetime commission ÷ hours logged in this window. A rep with high commission and few hours has the best ratio. A rep with many hours and little commission needs coaching or a different role. Time data is permanent, every clock-in/out is recorded.
         </p>
       </CardContent>
     </Card>

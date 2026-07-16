@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_podcasts ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'ready'; ALTER TABLE public.admin_podcasts ADD COLUMN IF NOT EXISTS error text;

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chaos Theory Forensics — Operator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="cockpit-header" data-case="2026-CT-0710">
+    <div class="brand">
+      <img src="icon.png" alt="Aetheris" class="brand-logo" />
+      <div>
+        <div class="brand-title">Chaos Theory Forensics</div>
+        <div class="brand-sub">Case File · Operator</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="overlay-toggle" class="ghost" title="Toggle on-page X-ray overlay">X-RAY</button>
+    </div>
+  </header>
+
+  <div id="portal-sync-bar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 10px;background:rgba(255,176,32,0.08);border-bottom:1px solid rgba(255,176,32,0.25);font-size:11px">
+    <span style="color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Portal Sync</span>
+    <input id="portal-sync-code" type="text" placeholder="Your rep code" autocomplete="off" spellcheck="false" style="flex:1;min-width:110px;text-transform:uppercase;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+    <button id="portal-sync-save" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Save</button>
+    <button id="portal-sync-clear" class="ghost" type="button" style="padding:3px 8px;font-size:11px">Forget</button>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input id="portal-sync-auto" type="checkbox" checked />Auto-save</label>
+    <button id="portal-sync-toggle" class="ghost" type="button" title="Hide / show active lead" style="padding:3px 8px;font-size:11px;margin-left:auto">▾</button>
+
+    <div id="portal-sync-collapsible" style="width:100%;display:flex;flex-direction:column;gap:6px">
+      <div style="width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px">
+        <span style="color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:10px">Active Lead</span>
+        <input id="portal-lead-name" type="text" placeholder="Lead / company" autocomplete="off" spellcheck="false" style="flex:2;min-width:120px;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+        <input id="portal-lead-contact" type="text" placeholder="Email / phone" autocomplete="off" spellcheck="false" style="flex:2;min-width:120px;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px" />
+        <select id="portal-lead-kind" style="background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px">
+          <option value="lead">Lead</option>
+          <option value="complaint">Complaint</option>
+          <option value="objection">Objection</option>
+          <option value="follow_up">Follow-up</option>
+          <option value="note">Note</option>
+          <option value="meeting">Meeting</option>
+        </select>
+        <textarea id="portal-lead-notes" rows="1" placeholder="Quick notes — what happened, what they said, what you need" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:4px;padding:4px 6px;color:#fff;font-size:11px;resize:vertical"></textarea>
+        <button id="portal-lead-log" class="primary" type="button" style="padding:4px 10px;font-size:11px;background:var(--amber);color:#000">⚡ Log to Portal Now</button>
+        <button id="portal-lead-clear" class="ghost" type="button" style="padding:4px 8px;font-size:11px">Clear</button>
+      </div>
+
+      <div id="portal-sync-status" style="width:100%;color:#aaa;font-size:10.5px"></div>
+    </div>
+    <div id="portal-sync-summary" style="width:100%;color:#9ca3af;font-size:10.5px;display:none"></div>
+  </div>
+
+  <nav class="tabs" role="tablist" id="tabs-nav">
+    <button class="tab active" draggable="true" data-tab="instruments">Instruments</button>
+    <button class="tab" draggable="true" data-tab="agents">Agents</button>
+    <button class="tab" draggable="true" data-tab="scan">Scan</button>
+    <button class="tab" draggable="true" data-tab="operator">Operator</button>
+    <button class="tab" draggable="true" data-tab="nexus">Nexus</button>
+    <button class="tab" draggable="true" data-tab="fix">Fix</button>
+    <button class="tab" draggable="true" data-tab="crm">CRM</button>
+    <button class="tab" draggable="true" data-tab="autofix">Auto-Fix Site</button>
+    <button class="tab" draggable="true" data-tab="growth">Growth</button>
+    <button class="tab" draggable="true" data-tab="case">Case File</button>
+    <button class="tab" draggable="true" data-tab="golden">Golden Report</button>
+    <button class="tab" draggable="true" data-tab="record">Record</button>
+  </nav>
+
+
+  <main>
+    <!-- INSTRUMENTS — public forensic tools, mirror of the site's Chaos Map -->
+    <section class="panel active" id="tab-instruments">
+      <div class="card">
+        <div class="card-title">Five Instruments · Zero paywall</div>
+        <div class="muted" style="margin-bottom:10px">
+          Same free forensic tools as the main site. Open any instrument in a new tab — no signup, email only for the Report PDF.
+        </div>
+        <div class="instrument-grid">
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/chaos-scan">
+            <div class="ins-chip">NODE 01 · FREE</div>
+            <div class="ins-title">Chaos Scan</div>
+            <div class="ins-tag">Feed a URL. Watch the leaks connect.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument amber" target="_blank" rel="noopener" href="https://aetheris.technology/head-to-head">
+            <div class="ins-chip">NODE 02 · FREE</div>
+            <div class="ins-title">Head-to-Head</div>
+            <div class="ins-tag">Your site vs. theirs. Every difference exposed.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/reciprocation">
+            <div class="ins-chip">NODE 03 · FREE</div>
+            <div class="ins-title">Reciprocation Engine</div>
+            <div class="ins-tag">The gifts that make prospects owe you a reply.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument amber" target="_blank" rel="noopener" href="https://aetheris.technology/golden-report">
+            <div class="ins-chip">NODE 04 · FREE</div>
+            <div class="ins-title">Golden Report</div>
+            <div class="ins-tag">The full forensic scan. 14 chapters. No filter.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+          <a class="instrument crimson" target="_blank" rel="noopener" href="https://aetheris.technology/aetheris-iq">
+            <div class="ins-chip">NODE 05 · FREE</div>
+            <div class="ins-title">Aetheris IQ</div>
+            <div class="ins-tag">The forensic AI operator. Ask it anything.</div>
+            <div class="ins-open">OPEN INSTRUMENT →</div>
+          </a>
+        </div>
+        <div class="muted" style="margin-top:10px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase">
+          Chaos Map · v2 · use every tool free
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENTS -->
+    <section class="panel" id="tab-agents">
+
+      <div class="card">
+        <div class="card-title">One-Click AI Agents</div>
+        <div class="muted" style="margin-bottom:8px">
+          Uses your current tab as the target. Each agent plans first — you confirm before it saves or pushes anything.
+        </div>
+        <label class="li-lbl">Optional brief</label>
+        <textarea id="ag-brief" rows="2" placeholder="e.g. focus on enterprise buyers, ignore SMB"></textarea>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button class="primary" data-agent="detective">Detective</button>
+          <button class="primary" data-agent="marketer">Marketer</button>
+          <button class="primary" data-agent="consultant">Consultant</button>
+          <button class="primary" data-agent="programmer">Programmer</button>
+        </div>
+        <div id="ag-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <div id="ag-out" class="out" style="margin-top:10px"></div>
+        <div id="ag-actions" class="row" style="gap:6px;margin-top:8px;display:none">
+          <button id="ag-confirm" class="primary" style="background:var(--amber);color:#000">Confirm + Save to Library</button>
+          <button id="ag-discard" class="ghost">Discard</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCAN -->
+    <section class="panel" id="tab-scan">
+      <div class="row" style="flex-wrap:wrap;gap:6px">
+        <button id="scan-run" class="primary">Run Forensic Scan</button>
+        <button id="scan-fix-all" class="primary" style="background:var(--amber);color:#000" title="Apply every safe in-page fix at once. No review.">⚡ Fix ALL issues</button>
+        <button id="scan-read-all" class="ghost" title="Read every finding aloud">🔊 Read all</button>
+        <button id="scan-read-stop" class="ghost hidden" title="Stop reading">⏹ Stop</button>
+        <button id="scan-clear" class="ghost" title="Clear this scan, remove overlays, and undo preview fixes">Clear / Start Over</button>
+        <button id="scan-deepen" class="ghost" title="AI dossier on these findings">Deepen (Detective)</button>
+        <button id="scan-contradictions" class="ghost" title="Find brand contradictions on this page">Contradictions</button>
+        <button id="scan-friction" class="ghost" title="Find friction vocabulary on this page">Friction</button>
+        <button id="scan-contacts" class="ghost" title="Scrape the site + RocketReach for decision-makers, emails, phones">Find Contacts</button>
+        <button id="scan-download" class="ghost" title="Download full report as Markdown">Download Report</button>
+        <button id="scan-collapse-all" class="ghost" title="Collapse all expanded sections">Collapse all</button>
+        <button id="scan-expand-all" class="ghost" title="Expand all sections">Expand all</button>
+      </div>
+      <div id="scan-meta" class="meta hidden"></div>
+      <div id="scan-dossier"></div>
+      <div id="scan-extra"></div>
+      <div id="scan-contacts-out"></div>
+      <div id="scan-results"></div>
+    </section>
+
+    <!-- OPERATOR -->
+    <section class="panel" id="tab-operator">
+      <div class="operator-controls" id="operator-controls">
+        <button class="ghost" data-op-action="scan">Scan</button>
+        <button class="ghost" data-op-action="detective">Detective</button>
+        <button class="ghost" data-op-action="fixes">Fixes</button>
+        <button class="ghost" data-op-action="overlay">X-Ray</button>
+        <button class="ghost" data-op-action="undo">Undo</button>
+        <button class="ghost" data-op-action="clear">Clear</button>
+      </div>
+      <div id="operator-live-actions" class="op-actions hidden"></div>
+      <div id="op-chips" class="chips">
+        <button class="chip" data-prompt="What is the single biggest leak on this page right now? Name it and the fix.">Biggest leak</button>
+        <button class="chip" data-prompt="Rewrite the hero headline + subhead. Give me 3 sharp options. Keep each under 12 words.">Rewrite hero</button>
+        <button class="chip" data-prompt="Rewrite the primary CTA. Give me 3 options that name an outcome, not an action.">Rewrite CTA</button>
+        <button class="chip" data-prompt="Audit the proof on this page. What's missing, what's weak, what should be added above the fold?">Audit proof</button>
+        <button class="chip" data-prompt="Find the contradictions on this page — places where the brand says one thing and shows another.">Contradictions</button>
+        <button class="chip" data-prompt="Estimate the annual revenue this page is leaking in USD. Show your reasoning in 3 short lines.">$ leak estimate</button>
+        <button class="chip" data-prompt="If I had 1 week and 1 developer, what 3 changes would compound? List in priority order.">Ship-this-week plan</button>
+        <button class="chip" data-prompt="Score this page 1-10 on: clarity, proof, friction, capture, urgency. One sentence each.">5-axis scorecard</button>
+      </div>
+      <div id="chat-log" class="chat"></div>
+      <form id="chat-form" class="composer">
+        <textarea id="chat-input" rows="2" placeholder="Ask the Operator about what's on this page…"></textarea>
+        <button type="submit" class="primary">Send</button>
+      </form>
+      <div class="hint" id="op-hint">Vision-aware. The Operator sees the page URL, scraped text, and a viewport screenshot.</div>
+    </section>
+
+    <!-- FIX -->
+    <section class="panel" id="tab-fix">
+      <div class="empty" id="fix-empty">Run a scan first. Leaks that can be patched in-page will appear here.</div>
+      <div id="fix-toolbar" class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div id="fix-list"></div>
+    </section>
+
+    <!-- GROWTH -->
+    <section class="panel" id="tab-growth">
+      <div class="growth-tabs">
+        <button class="gt active" data-gt="reply">LinkedIn Reply</button>
+        <button class="gt" data-gt="post">Post From Page</button>
+        <button class="gt" data-gt="cold">Cold Opener</button>
+        <button class="gt" data-gt="hooks">Hooks</button>
+      </div>
+
+      <!-- LinkedIn Reply -->
+      <div class="gpanel active" id="gpanel-reply">
+        <div class="card" id="li-auto-card">
+          <div class="card-title">Auto-Reply Mode · LinkedIn notifications</div>
+          <div class="muted" style="margin-bottom:8px">
+            While you're on linkedin.com, this scans your notifications every hour for new comments/replies on your posts and answers them automatically in your voice (no dashes).
+          </div>
+          <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="li-auto-enabled" />
+              <span><strong>Auto-Reply ON</strong></span>
+            </label>
+            <select id="li-auto-cadence" title="Scan cadence">
+              <option value="60" selected>Every 60 min</option>
+              <option value="30">Every 30 min</option>
+              <option value="15">Every 15 min</option>
+            </select>
+            <select id="li-auto-mode" title="Send mode">
+              <option value="send" selected>Auto-send</option>
+              <option value="draft">Draft only (don't send)</option>
+            </select>
+            <button id="li-auto-scan-now" class="ghost" type="button">Scan now</button>
+          </div>
+          <div id="li-auto-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+          <div id="li-auto-log" class="muted" style="margin-top:6px;font-size:11px;max-height:140px;overflow:auto;border:1px solid var(--border,#333);border-radius:6px;padding:6px;display:none"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">LinkedIn reply drafter</div>
+          <div class="muted" style="margin-bottom:8px">Same engine as the Content Studio. Vision-aware. Three source modes.</div>
+
+          <div class="modepill" id="li-source-pill" style="margin-bottom:10px">
+            <button class="m active" data-src="image">Screenshot</button>
+            <button class="m" data-src="text">Paste post</button>
+            <button class="m" data-src="reply">Reply to reply</button>
+          </div>
+
+          <!-- IMAGE source -->
+          <div class="li-src" id="li-src-image">
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <button id="li-img-capture" class="ghost" title="Capture the current tab's full viewport">📸 Capture tab</button>
+              <button id="li-img-snip" class="ghost" title="Drag a rectangle on the page to capture just that area">✂️ Select area</button>
+              <label class="ghost btn-file">Upload<input type="file" id="li-img-file" accept="image/*" hidden /></label>
+              <button id="li-img-clear" class="ghost" type="button">Clear</button>
+            </div>
+            <img id="li-img-preview" class="li-thumb hidden" alt="post screenshot" />
+          </div>
+
+
+          <!-- TEXT source -->
+          <div class="li-src hidden" id="li-src-text">
+            <textarea id="li-post" rows="5" placeholder="Paste the LinkedIn post you want to reply to, or click 'Grab selection' to pull text from the current page."></textarea>
+            <div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap">
+              <button id="li-grab" class="ghost">Grab selection</button>
+              <button id="li-post-clear" class="ghost" type="button" title="Clear the post box">Clear post</button>
+            </div>
+          </div>
+
+          <!-- REPLY-TO-REPLY source -->
+          <div class="li-src hidden" id="li-src-reply">
+            <div class="li-lbl-row">
+              <span class="li-lbl">Original post (optional context)</span>
+              <button class="link-btn" type="button" data-li-clear="li-r-orig">Clear</button>
+            </div>
+            <textarea id="li-r-orig" rows="2" placeholder="Optional: paste the original post you commented on."></textarea>
+            <label class="li-lbl-row">
+              <span class="li-lbl">Your prior comment</span>
+              <span style="display:flex;gap:8px;align-items:center">
+                <label class="link-btn">Attach image<input type="file" data-li-img="myComment" accept="image/*" hidden /></label>
+                <button class="link-btn" type="button" data-li-clear="li-r-mine" data-li-clear-img="myComment">Clear</button>
+              </span>
+            </label>
+            <textarea id="li-r-mine" rows="3" placeholder="Paste the comment YOU wrote."></textarea>
+            <img class="li-thumb hidden" data-li-prev="myComment" alt="" />
+
+            <label class="li-lbl-row">
+              <span class="li-lbl">Their reply to you</span>
+              <span style="display:flex;gap:8px;align-items:center">
+                <label class="link-btn">Attach image<input type="file" data-li-img="theirReply" accept="image/*" hidden /></label>
+                <button class="link-btn" type="button" data-li-clear="li-r-theirs" data-li-clear-img="theirReply">Clear</button>
+              </span>
+            </label>
+            <textarea id="li-r-theirs" rows="3" placeholder="Paste their reply to your comment. This is what you're answering."></textarea>
+            <img class="li-thumb hidden" data-li-prev="theirReply" alt="" />
+
+            <div class="row" style="margin-top:8px">
+              <button id="li-reply-clear-all" class="ghost" type="button" title="Clear all comment boxes">Clear all comments</button>
+            </div>
+          </div>
+
+          <!-- Controls (mirror portal LinkedInPostStudio) -->
+          <div class="li-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+            <div>
+              <div class="li-lbl" style="margin-bottom:6px">Response Format</div>
+              <select id="li-length" title="Response length" style="width:100%">
+                <option value="micro">Micro Reply (40-70 words)</option>
+                <option value="brief" selected>Short Comment (90-140 words)</option>
+                <option value="medium">Medium Comment (150-210 words)</option>
+                <option value="long">Long Comment (220-300 words)</option>
+                <option value="full">Standalone Repost (180-260 words)</option>
+              </select>
+            </div>
+            <div>
+              <div class="li-lbl" style="margin-bottom:6px">Extra Direction (optional)</div>
+              <input id="li-direction" placeholder="e.g. Disagree with their framing. Lead with a stat." style="width:100%" />
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+                <select id="li-tone" title="Tone" data-aeth-opts="tone"></select>
+                <select id="li-style" title="Style / structure" data-aeth-opts="style"></select>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="li-lbl" style="margin-bottom:6px">Personality (pick 1+ to fuse — style/rhythm only, no slang or name-drops)</div>
+            <div id="li-persona-picker" class="aeth-multipicker" data-aeth-multi="persona"></div>
+          </div>
+
+          <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+            <button id="li-go" class="primary" style="flex:1;min-width:200px">Respond to this post</button>
+            <button id="li-freshen" class="ghost" type="button" title="Getting repetitive? Force fresh openings, fresh word choice, and a new angle.">✨ Freshen Voice</button>
+            <button id="li-copy" class="ghost" type="button">Copy</button>
+            <button id="li-regen" class="ghost" type="button">Redo</button>
+          </div>
+          <pre id="li-out" class="out"></pre>
+        </div>
+      </div>
+
+      <!-- Post from page -->
+      <div class="gpanel" id="gpanel-post">
+        <div class="card">
+          <div class="card-title">LinkedIn post from this page</div>
+          <div class="muted" style="margin-bottom:8px">Pulls the current tab's visible text and drafts a forensic LinkedIn post.</div>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <select id="gp-tone" data-aeth-opts="tone" title="Tone"></select>
+            <select id="gp-style" data-aeth-opts="style" title="Style / structure"></select>
+            <select id="gp-persona" data-aeth-opts="persona" title="Persona"></select>
+            <select id="gp-length" title="Length">
+              <option value="auto" selected>Auto length</option>
+              <option value="one-liner">One-liner</option>
+              <option value="short">Short (2-3 sentences)</option>
+              <option value="medium">Medium (1 paragraph)</option>
+              <option value="long">Long (2-3 paragraphs)</option>
+            </select>
+            <input id="gp-direction" placeholder="Optional direction / angle" />
+            <button id="gp-go" class="primary">Draft post</button>
+          </div>
+          <pre id="gp-out" class="out"></pre>
+        </div>
+      </div>
+
+      <!-- Cold opener -->
+      <div class="gpanel" id="gpanel-cold">
+        <div class="card">
+          <div class="card-title">Cold email opener for this prospect</div>
+          <div class="muted" style="margin-bottom:8px">Uses the current page as the prospect's site. Outputs a sharp first line + 2-sentence pitch.</div>
+          <input id="gc-name" placeholder="Recipient first name (optional)" />
+          <div class="row" style="margin-top:8px">
+            <button id="gc-go" class="primary">Draft opener</button>
+          </div>
+          <pre id="gc-out" class="out"></pre>
+        </div>
+      </div>
+
+      <!-- Hooks -->
+      <div class="gpanel" id="gpanel-hooks">
+        <div class="card">
+          <div class="card-title">5 contrarian hooks from this page</div>
+          <div class="muted" style="margin-bottom:8px">Reads the current page and returns 5 pattern-breaking opening lines you can use as posts or ad headlines.</div>
+          <button id="gh-go" class="primary">Generate hooks</button>
+          <pre id="gh-out" class="out"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASE FILE -->
+    <section class="panel" id="tab-case">
+      <div class="row" style="flex-wrap:wrap;gap:6px">
+        <input id="case-search" placeholder="Search domains…" />
+        <button id="case-compare" class="ghost">Compare 2</button>
+        <button id="case-back" class="ghost hidden">← Back</button>
+      </div>
+      <div id="case-list"></div>
+      <div id="case-detail"></div>
+      <div id="case-diff"></div>
+    </section>
+
+    <!-- CRM (HubSpot bridge) -->
+    <section class="panel" id="tab-crm">
+      <div class="card">
+        <div class="card-title">HubSpot CRM Autopsy</div>
+        <div class="muted" style="margin-bottom:8px">No API key needed. Reads the HubSpot tab you have open, or uses your session cookie to pull pipelines directly. Then runs the same leak detectors we use in the operator backend.</div>
+
+        <label class="li-lbl" for="crm-access-code">Access code (rep code or client unlock code)</label>
+        <div class="row" style="gap:6px;align-items:center;margin-bottom:8px">
+          <input id="crm-access-code" type="text" placeholder="e.g. JOSEPH-OPS or client unlock code" autocomplete="off" spellcheck="false" style="flex:1;text-transform:uppercase" />
+          <button id="crm-code-save" class="ghost" type="button" title="Save this code for future sessions">Save</button>
+          <button id="crm-code-clear" class="ghost" type="button" title="Forget the saved code">Forget</button>
+        </div>
+        <div id="crm-code-status" class="muted" style="font-size:11px;margin-bottom:8px"></div>
+
+        <div class="row" style="flex-wrap:wrap;gap:6px">
+          <button id="crm-scrape" class="primary" title="Read what's on the open HubSpot tab">Scan visible HubSpot tab</button>
+          <button id="crm-pull-deals" class="ghost" title="Pull deal pipeline via your HubSpot session">Pull deals (session)</button>
+          <button id="crm-pull-contacts" class="ghost" title="Pull contacts via your HubSpot session">Pull contacts (session)</button>
+          <button id="crm-clear" class="ghost">Clear</button>
+        </div>
+        <div id="crm-out" class="out" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- AUTO-FIX SITE -->
+    <section class="panel" id="tab-autofix">
+      <div class="card">
+        <div class="card-title">Auto-Fix Live Site</div>
+        <div class="muted" style="margin-bottom:8px">Pushes the scan's recommended copy fixes back to your WordPress site through the REST API. Uses an Application Password — never your main password. Credentials live only in this tab; nothing is stored on our server.</div>
+        <div id="af-detect" class="muted" style="font-size:11px;margin-bottom:6px">Open the site you want to fix in another tab, then click Detect.</div>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button id="af-detect-btn" class="ghost">Detect CMS</button>
+        </div>
+        <div class="af-fields" style="margin-top:10px;display:grid;gap:6px">
+          <input id="af-site" placeholder="WordPress site URL (e.g. https://acme.com)" />
+          <input id="af-user" placeholder="WP username" autocomplete="off" />
+          <input id="af-pass" type="password" placeholder="Application Password (Users → Profile → Application Passwords)" autocomplete="off" />
+          <input id="af-pageurl" placeholder="Page URL to patch (defaults to the active tab)" />
+        </div>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button id="af-verify" class="ghost">Verify connection</button>
+          <button id="af-preview" class="primary" title="Dry run — see what would change">Preview patch</button>
+          <button id="af-apply" class="primary" style="background:var(--amber);color:#000" title="Actually write to your live site">Push fixes LIVE</button>
+        </div>
+        <div id="af-out" class="out" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <!-- AUTOPSY (sticky) -->
+    <div id="autopsy-bar" class="autopsy-bar hidden">
+      <span class="dot"></span><span id="autopsy-status">Recording funnel autopsy…</span>
+      <button id="autopsy-stop" class="primary">Stop</button>
+    </div>
+
+    <!-- AETHERIS NEXUS — live embed of the forensic AI operator -->
+    <section class="panel" id="tab-nexus">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)">
+          <div>
+            <div class="card-title" style="margin:0">Aetheris Nexus</div>
+            <div class="muted" style="font-size:10.5px;margin-top:2px">The forensic AI operator. Ask it anything.</div>
+          </div>
+          <a class="ghost" target="_blank" rel="noopener" href="https://aetheris.technology/aetheris-iq" style="text-decoration:none;font-size:10.5px">Open Full Page ↗</a>
+        </div>
+        <iframe
+          id="nexus-frame"
+          src="https://aetheris.technology/aetheris-iq?embed=1"
+          style="width:100%;height:75vh;border:0;background:#0a0a0a"
+          allow="clipboard-write; clipboard-read; microphone"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+        <div class="muted" style="padding:8px 12px;font-size:10.5px;border-top:1px solid var(--line)">
+          Runs on aetheris.technology. If the frame stays blank, use "Open Full Page ↗".
+        </div>
+      </div>
+    </section>
+
+
+    <!-- GOLDEN REPORT -->
+    <section class="panel" id="tab-golden">
+      <div class="card">
+        <div class="card-title">Forensic Scan All — Golden Report</div>
+        <div class="muted" style="margin-bottom:8px">
+          Runs every diagnostic against the current tab and builds the 14-chapter Smart PDF you can search or ask questions of.
+        </div>
+        <label class="li-lbl">Target URL</label>
+        <input id="golden-url" type="text" placeholder="https://example.com" />
+        <label class="li-lbl">Company (optional)</label>
+        <input id="golden-company" type="text" placeholder="Acme Inc." />
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button id="golden-run" class="primary">Run Scan All</button>
+          <button id="golden-open" class="ghost" disabled>Open Smart PDF Chat</button>
+        </div>
+        <div id="golden-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <div id="golden-progress" class="out" style="margin-top:8px"></div>
+        <div id="golden-report" class="out" style="margin-top:10px;max-height:60vh;overflow-y:auto"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="tab-record">
+      <div class="card">
+        <div class="card-title">Screen / Audio Recorder</div>
+        <div class="muted" style="margin-bottom:8px">
+          Capture screen + mic + system audio. The video auto-uploads to <strong>your Rep History</strong>
+          and — if an Active Lead is set above — also to that <strong>lead's history</strong> for download.
+        </div>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-include-mic" checked /> Mic
+          </label>
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-include-system" checked /> System audio
+          </label>
+          <label class="li-lbl" style="display:flex;align-items:center;gap:4px;font-size:11px">
+            <input type="checkbox" id="rec-audio-only" /> Audio only
+          </label>
+        </div>
+        <label class="li-lbl" style="margin-top:8px">Title (optional)</label>
+        <input id="rec-title" type="text" placeholder="Discovery call — Acme" />
+        <label class="li-lbl">Outcome / notes (optional)</label>
+        <textarea id="rec-notes" rows="2" placeholder="What happened, next step…"></textarea>
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button id="rec-start" class="primary">● Start Recording</button>
+          <button id="rec-stop" class="ghost" disabled>■ Stop &amp; Save</button>
+          <span id="rec-timer" class="muted" style="margin-left:auto;font-family:'JetBrains Mono',monospace">00:00</span>
+        </div>
+        <div id="rec-status" class="muted" style="margin-top:8px;font-size:11px"></div>
+        <video id="rec-preview" controls style="display:none;width:100%;margin-top:10px;border:1px solid #333;border-radius:4px;background:#000"></video>
+      </div>
+    </section>
+  </main>
+
+
+
+
+  <footer class="cockpit-footer">
+    <button id="autopsy-start" class="ghost">REC · Funnel Autopsy</button>
+    <span class="muted">v0.9.6 · Portal Sync</span>
+  </footer>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

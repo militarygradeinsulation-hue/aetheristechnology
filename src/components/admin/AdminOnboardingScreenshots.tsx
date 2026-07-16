@@ -236,7 +236,7 @@ export const AdminOnboardingScreenshots: React.FC = () => {
           })}
         </div>
 
-        {/* Hidden capture iframe — sized like a desktop preview */}
+        {/* Hidden capture iframe, sized like a desktop preview */}
         <div className="border border-dashed border-border rounded-md overflow-hidden" style={{ height: activeKey ? 720 : 0, transition: "height 0.3s" }}>
           <iframe
             ref={iframeRef}

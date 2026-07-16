@@ -56,7 +56,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
       if (adminMode || isPortalSession()) {
         saveToolRun({
           tool_type: 'sales_scripts',
-          title: `${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`,
+          title: `${form.industry}, ${form.product}, ${new Date().toLocaleDateString()}`,
           input_data: form,
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -110,7 +110,7 @@ export const SalesScriptGenerator: React.FC<{ adminMode?: boolean }> = ({ adminM
 
       {result && (
         <div className="space-y-8">
-          <QuickDownloadBar toolType="sales_scripts" title={`${form.industry} — ${form.product} — ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
+          <QuickDownloadBar toolType="sales_scripts" title={`${form.industry}, ${form.product}, ${new Date().toLocaleDateString()}`} outputData={result} inputData={form} />
           {/* Call Script - always visible */}
           <div>
             <div className="flex items-center gap-2 mb-4">

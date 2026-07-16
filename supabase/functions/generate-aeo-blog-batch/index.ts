@@ -28,7 +28,7 @@ const TOPICS: BlogTopic[] = [
     title: "How to Implement AI in Business: 7-Step Framework",
     metaDescription: "A blunt 7-step framework for implementing AI in your business — common pitfalls, 90-day roadmap, and what to ignore. By Aetheris AI.",
     excerpt: "A 7-step framework for implementing AI in business — covering use case selection, data foundations, governance, pilots, scale, and the pitfalls that kill 80% of corporate AI initiatives.",
-    tags: ["AI Strategy", "AI Implementation", "AI Adoption", "Digital Transformation"],
+    tags: ["AI Strategy", "AI Implementation", "AI Adoption", "Chaos Theory Forensics"],
     tldr: "Most AI implementations fail because they start with the model, not the workflow. The 7-step framework: (1) audit revenue-leaking workflows, (2) score use cases by ROI and risk, (3) pick 1–3 pilots with measurable cost lines, (4) build the data foundation, (5) deploy with humans in the loop, (6) measure and govern, (7) scale by quarterly review. Time-to-first-ROI: 90 days when scoped correctly.",
     outline: `# How to Implement AI in Business: 7-Step Framework
 
@@ -78,7 +78,7 @@ End with a sharp single-line punch.`,
     title: "The AI Adoption Roadmap: 5 Maturity Stages",
     metaDescription: "A 5-stage AI adoption roadmap with milestones, KPIs, and the moves that compress each stage. By Aetheris AI.",
     excerpt: "A 5-stage AI adoption roadmap with milestones, KPIs by stage, and the specific moves that compress months off each transition.",
-    tags: ["AI Strategy", "AI Adoption", "AI Roadmap", "Digital Transformation"],
+    tags: ["AI Strategy", "AI Adoption", "AI Roadmap", "Chaos Theory Forensics"],
     tldr: "The 5 AI adoption stages: (1) Ad hoc — random tool experiments, (2) Pilot — first measured deployments, (3) Scaled — multiple production AI workflows, (4) Embedded — AI in core business processes, (5) AI-Native — AI is the operational fabric. Most companies are stuck at Stage 1–2. The fastest path: pick a single P&L-impacting workflow and deploy a measured pilot in 90 days.",
     outline: `# The AI Adoption Roadmap: 5 Maturity Stages
 
@@ -281,7 +281,7 @@ const SYSTEM_PROMPT = `${FORENSIC_BLUEPRINT_PROMPT}
 COMPANY CONTEXT
 ═══════════════════════════════════════════════════════════════════
 
-You are a Business Forensics Operator writing for Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Headquartered in Indianapolis, Indiana, led by Joseph Toney. Core methodology: The Leak Audit™ (7 steps). Entry point: Forensic Diagnostic ($2,500, applied toward engagement).
+You are a Chaos Theory Forensics Operator writing for Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Headquartered in Indianapolis, Indiana, led by Joseph Toney. Core methodology: The Leak Audit™ (7 steps). Entry point: 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer).
 
 ## TONE — NON-NEGOTIABLE
 Raw. Blunt. Aggressive. Non-corporate. Short sentences that hit hard. Write like you're presenting forensic evidence to a CEO — every finding backed by data, every paragraph a diagnosis. No hedging. No "consider thinking about." Say what's broken and why it costs them money.
@@ -309,20 +309,10 @@ You are an Operator, not a consultant. You find where businesses bleed and you s
 - End with a single-line punch closing
 
 ## AETHERIS POSITIONING
-Reference the Forensic Diagnostic ($2,500, applied toward engagement), The Leak Audit™ (7-step methodology), and Indianapolis HQ where naturally relevant — but never as a sales pitch. Position Aetheris as the operator who finds the leaks, not another consultant who writes decks.
+Reference the 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer), The Leak Audit™ (7-step methodology), and Indianapolis HQ where naturally relevant — but never as a sales pitch. Position Aetheris as the operator who finds the leaks, not another consultant who writes decks.
 
 ## OUTPUT FORMAT
-Return ONLY valid JSON with these exact fields (no markdown wrapper, no explanation):
-{
-  "title": "string (use the exact title provided)",
-  "content": "string (full markdown article)"
-}
-
-CRITICAL JSON ESCAPING:
-- Escape all newlines inside string values as \\n
-- Escape all double quotes inside string values as \\"
-- Escape all backslashes as \\\\
-- Do NOT include literal newlines inside JSON string values`;
+Return ONLY the full markdown article. Do NOT wrap in JSON. Do NOT add commentary, headers, code fences, or YAML frontmatter. Start directly with the H1 line "# <title>" and end with the punch closing.`;
 
 async function generatePost(topic: BlogTopic, apiKey: string): Promise<{ title: string; content: string }> {
   const userPrompt = `Write the blog post for: "${topic.title}"
@@ -336,7 +326,11 @@ ${topic.tldr}
 REQUIRED OUTLINE (follow exactly):
 ${topic.outline}
 
-Return ONLY the JSON object as specified.`;
+Hard requirements:
+- Minimum 2,800 words. Aim for 3,200.
+- Every section in the outline must appear, in order, with all subsections.
+- At least 2 markdown tables and one 5-question FAQ section.
+- Return ONLY the raw markdown article — no JSON, no code fences, no preface.`;
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -350,7 +344,7 @@ Return ONLY the JSON object as specified.`;
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt },
       ],
-      response_format: { type: "json_object" },
+      max_tokens: 16000,
     }),
   });
 
@@ -361,18 +355,17 @@ Return ONLY the JSON object as specified.`;
 
   const data = await res.json();
   const raw = data?.choices?.[0]?.message?.content;
-  if (!raw) throw new Error("AI response missing content");
+  if (!raw || typeof raw !== "string") throw new Error("AI response missing content");
 
-  let parsed: { title?: string; content?: string };
-  try {
-    parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-  } catch (e) {
-    throw new Error(`Failed to parse AI JSON: ${e instanceof Error ? e.message : String(e)}`);
+  // Strip optional code fences if model wrapped despite instructions
+  let content = raw.trim();
+  const fence = content.match(/^```(?:markdown|md)?\s*([\s\S]*?)```\s*$/i);
+  if (fence) content = fence[1].trim();
+
+  if (content.length < 6000) {
+    throw new Error(`AI returned insufficient content (length: ${content.length})`);
   }
-  if (!parsed.content || parsed.content.length < 1500) {
-    throw new Error(`AI returned insufficient content (length: ${parsed.content?.length ?? 0})`);
-  }
-  return { title: parsed.title || topic.title, content: parsed.content };
+  return { title: topic.title, content };
 }
 
 serve(async (req) => {

@@ -6,7 +6,7 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-portal-token, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -52,12 +52,23 @@ serve(async (req) => {
       );
     }
 
+    const clampInt = (v: unknown, max: number) =>
+      typeof v === "number" && isFinite(v) ? Math.max(0, Math.min(max, Math.floor(v))) : null;
+
     if (action === "update" && persist) {
       const patch: Record<string, unknown> = {};
       if (typeof body.notifications_reposted === "boolean") patch.notifications_reposted = body.notifications_reposted;
       if (typeof body.blog_posted === "boolean") patch.blog_posted = body.blog_posted;
-      if (typeof body.connections_added === "number") {
-        patch.connections_added = Math.max(0, Math.min(50, Math.floor(body.connections_added)));
+      const numericFields: Array<[string, number]> = [
+        ["connections_added", 500],
+        ["calls_made", 500],
+        ["emails_sent", 500],
+        ["linkedin_dms", 500],
+        ["linkedin_comments", 500],
+      ];
+      for (const [k, max] of numericFields) {
+        const v = clampInt((body as Record<string, unknown>)[k], max);
+        if (v !== null) patch[k] = v;
       }
       if (Object.keys(patch).length > 0) {
         await admin.from("rep_daily_checklist").update(patch).eq("rep_code", repCode).eq("for_date", today);
@@ -67,20 +78,106 @@ serve(async (req) => {
     // Fetch checklist row
     const { data: checklist } = persist
       ? await admin.from("rep_daily_checklist")
-          .select("notifications_reposted, connections_added, blog_posted")
+          .select("notifications_reposted, connections_added, blog_posted, calls_made, emails_sent, linkedin_dms, linkedin_comments, admin_notified_at")
           .eq("rep_code", repCode).eq("for_date", today).maybeSingle()
       : { data: null };
 
-    // Today's blog: latest published post
-    const { data: blog } = await admin.from("blog_posts")
-      .select("id, title, slug, excerpt, tags, featured_image, published_at")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
+    // Fire admin notification once when all 5 daily quotas are hit.
+    const QUOTAS = { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 };
+    if (persist && checklist && !checklist.admin_notified_at) {
+      const allHit = (Object.entries(QUOTAS) as Array<[keyof typeof QUOTAS, number]>)
+        .every(([k, need]) => (checklist as Record<string, number>)[k] >= need);
+      if (allHit) {
+        const { data: repRow } = await admin.from("rep_codes").select("rep_name").eq("code", repCode).maybeSingle();
+        const repName = repRow?.rep_name || repCode;
+        await admin.from("shared_notifications").insert({
+          recipient: "admin",
+          kind: "daily_quota_hit",
+          title: `Daily quota DONE — ${repName}`,
+          body: `${repName} (${repCode}) hit all 5 minimums today: 20 calls, 30 emails, 20 DMs, 20 comments, 20 new connections.`,
+        });
+        await admin.from("rep_daily_checklist")
+          .update({ admin_notified_at: new Date().toISOString() })
+          .eq("rep_code", repCode).eq("for_date", today);
+        (checklist as Record<string, unknown>).admin_notified_at = new Date().toISOString();
+      }
+    }
+
+    // Today's content: pick the most recent blog OR playbook (whichever is newest).
+    // Today = anything published in the last 36h so the post stays fresh through evening.
+    const sinceISO = new Date(Date.now() - 36 * 3600 * 1000).toISOString();
+
+    const [{ data: latestBlog }, { data: todayBlog }, { data: latestPlaybook }, { data: todayPlaybook }] =
+      await Promise.all([
+        admin.from("blog_posts")
+          .select("id, title, slug, excerpt, tags, featured_image, published_at")
+          .eq("is_published", true)
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle(),
+        admin.from("blog_posts")
+          .select("id, title, slug, excerpt, tags, featured_image, published_at")
+          .eq("is_published", true)
+          .gte("published_at", sinceISO)
+          .order("published_at", { ascending: false })
+          .limit(1).maybeSingle(),
+        admin.from("playbooks")
+          .select("id, title, subtitle, description, tags, file_url, published_at")
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(1).maybeSingle(),
+        admin.from("playbooks")
+          .select("id, title, subtitle, description, tags, file_url, published_at")
+          .gte("published_at", sinceISO)
+          .order("published_at", { ascending: false })
+          .limit(1).maybeSingle(),
+      ]);
+
+    // Prefer something published today (blog beats playbook on tie). Fall back to latest ever.
+    const blogPick = todayBlog || latestBlog;
+    const pbPick = todayPlaybook || latestPlaybook;
+    let kind: "blog" | "playbook" = "blog";
+    let content:
+      | { title: string; excerpt: string | null; tags: string[]; featured_image: string | null; published_at: string | null; share_url: string }
+      | null = null;
+
+    const refCode = repCode === "ADMIN" ? "" : repCode;
+    const refSuffix = refCode ? `?ref=${refCode}` : "";
+
+    const blogIsToday = !!todayBlog;
+    const pbIsToday = !!todayPlaybook;
+    if (pbIsToday && (!blogIsToday ||
+        new Date(todayPlaybook!.published_at!).getTime() > new Date(todayBlog!.published_at!).getTime())) {
+      kind = "playbook";
+      content = pbPick && {
+        title: pbPick.title,
+        excerpt: pbPick.subtitle || pbPick.description || null,
+        tags: pbPick.tags || [],
+        featured_image: null,
+        published_at: pbPick.published_at,
+        share_url: `${SITE_URL}/playbooks${refSuffix}`,
+      };
+    } else if (blogPick) {
+      kind = "blog";
+      content = {
+        title: blogPick.title,
+        excerpt: blogPick.excerpt,
+        tags: blogPick.tags || [],
+        featured_image: blogPick.featured_image,
+        published_at: blogPick.published_at,
+        share_url: `${SITE_URL}/blog/${blogPick.slug}${refSuffix}`,
+      };
+    } else if (pbPick) {
+      kind = "playbook";
+      content = {
+        title: pbPick.title,
+        excerpt: pbPick.subtitle || pbPick.description || null,
+        tags: pbPick.tags || [],
+        featured_image: null,
+        published_at: pbPick.published_at,
+        share_url: `${SITE_URL}/playbooks${refSuffix}`,
+      };
+    }
 
     // Latest pulled LinkedIn post from main account (for the "repost" CTA).
-    // Falls back to company page link if none exist yet.
     const { data: latestMainPost } = await admin.from("linkedin_post_queue")
       .select("linkedin_post_id, posted_at, content")
       .eq("status", "posted")
@@ -89,22 +186,21 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const refCode = repCode === "ADMIN" ? "" : repCode;
-    const refSuffix = refCode ? `?ref=${refCode}` : "";
-    const blogUrl = blog ? `${SITE_URL}/blog/${blog.slug}${refSuffix}` : null;
-
-    const shareSnippet = blog
+    const shareSnippet = content
       ? [
-          blog.title,
+          content.title,
           "",
-          blog.excerpt,
+          content.excerpt || "",
           "",
-          "Run the free 14-Point Leak Audit on your business — takes 90 seconds:",
-          blogUrl,
+          kind === "playbook"
+            ? "Grab the free playbook (and run the 14-Point Leak Audit on your business — 90 seconds):"
+            : "Run the free 14-Point Leak Audit on your business — takes 90 seconds:",
+          content.share_url,
           "",
           "#BusinessForensics #LeakAudit #Indianapolis",
-        ].join("\n")
+        ].filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n")
       : null;
+
 
     let mainPostUrl = MAIN_LINKEDIN;
     if (latestMainPost?.linkedin_post_id) {
@@ -119,15 +215,24 @@ serve(async (req) => {
         notifications_reposted: false,
         connections_added: 0,
         blog_posted: false,
+        calls_made: 0,
+        emails_sent: 0,
+        linkedin_dms: 0,
+        linkedin_comments: 0,
+        admin_notified_at: null,
       },
-      blog: blog ? {
-        title: blog.title,
-        slug: blog.slug,
-        excerpt: blog.excerpt,
-        tags: blog.tags || [],
-        featured_image: blog.featured_image,
-        share_url: blogUrl,
+      quotas: { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 },
+      blog: content ? {
+        kind,
+        title: content.title,
+        slug: kind === "blog" ? blogPick?.slug : null,
+        excerpt: content.excerpt,
+        tags: content.tags,
+        featured_image: content.featured_image,
+        share_url: content.share_url,
         share_snippet: shareSnippet,
+        published_at: content.published_at,
+        is_today: kind === "blog" ? blogIsToday : pbIsToday,
       } : null,
       main_linkedin: {
         latest_post_url: mainPostUrl,

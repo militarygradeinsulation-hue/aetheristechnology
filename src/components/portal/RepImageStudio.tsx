@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { LinkedInBannerCreator } from '@/components/LinkedInBannerCreator';
 
 interface StudioImage {
   id: string;
@@ -23,8 +24,8 @@ const MODELS = [
 ];
 
 const PROMPT_STARTERS: { label: string; prompt: string; infographic?: boolean }[] = [
-  { label: '5 ways your business is leaking', prompt: '5 ways small business owners are silently losing $50k+ a year — show each leak as a forensic case-file fragment with a $ amount.', infographic: true },
-  { label: 'Before / After Leak Audit', prompt: 'Before and after the Leak Audit — left side: chaotic dashboard bleeding red. Right side: clean, profitable, amber-lit operation.', infographic: true },
+  { label: '5 ways your business is leaking', prompt: '5 ways small business owners are silently losing $50k+ a year, show each leak as a forensic case-file fragment with a $ amount.', infographic: true },
+  { label: 'Before / After Leak Audit', prompt: 'Before and after the Leak Audit, left side: chaotic dashboard bleeding red. Right side: clean, profitable, amber-lit operation.', infographic: true },
   { label: 'Forensic dashboard hero', prompt: 'A dramatic forensic business dashboard with redacted bars, glowing amber metrics, and a single crimson "ACTIVE LEAK" stamp.' },
   { label: '7-step Leak Audit infographic', prompt: 'The 7-step Leak Audit methodology shown as numbered evidence cards laid on a dark dossier desk.', infographic: true },
 ];
@@ -37,6 +38,7 @@ export const RepImageStudio: React.FC = () => {
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
   const [preview, setPreview] = useState<StudioImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
 
   const invoke = async (body: Record<string, unknown>) => {
     const token = getPortalToken();
@@ -54,7 +56,7 @@ export const RepImageStudio: React.FC = () => {
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (opts: { aetherisStyle?: boolean; infographic?: boolean } = {}) => {
+  const generate = async (opts: { aetherisStyle?: boolean; infographic?: boolean; cartoon?: boolean } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -64,10 +66,11 @@ export const RepImageStudio: React.FC = () => {
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         infographic: !!opts.infographic,
+        cartoon_style: !!opts.cartoon,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : opts.infographic ? 'Infographic ready' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.infographic ? 'Infographic ready' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
@@ -140,11 +143,33 @@ export const RepImageStudio: React.FC = () => {
       <div className="glass p-6 rounded-xl space-y-4">
         <div className="flex items-center gap-2">
           <Wand2 className="w-5 h-5 text-amber" />
-          <h2 className="text-xl font-bold text-foreground font-display">Art Studio</h2>
+          <h2 className="text-xl font-bold text-foreground font-display">Personal Creation Studio</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Generate on-brand images and infographics to send your leads. Anything you make is saved here — download or copy a link to share.
+          Generate on-brand images and infographics to send your leads. Upload a photo of yourself to use as a base for personalized graphics, headshots, or pitch visuals, anything you make is saved here.
         </p>
+
+        {/* Upload Your Photo CTA */}
+        <div className="rounded-lg border border-amber/30 bg-amber/[0.04] p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-2 text-sm flex-1">
+            <ImageIcon className="w-4 h-4 text-amber shrink-0" />
+            <span className="text-foreground font-medium">Upload a photo of yourself</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">,  use it as a base for branded portraits, social posts, or LinkedIn graphics</span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => portraitRef.current?.click()}
+            className="border-amber/40 text-amber hover:bg-amber/10"
+          >
+            <Upload className="w-3.5 h-3.5 mr-1" /> Upload Your Photo
+          </Button>
+          <input
+            ref={portraitRef} type="file" accept="image/*" className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); }}
+          />
+        </div>
 
         {editTarget && (
           <div className="flex items-center gap-3 p-3 rounded-md border border-amber/30 bg-amber/5">
@@ -214,6 +239,15 @@ export const RepImageStudio: React.FC = () => {
                   {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BarChart3 className="w-4 h-4 mr-1" />}
                   Make Infographic
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ cartoon: true })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[170px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Editorial Cartoon
+                </Button>
               </>
             )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
@@ -226,6 +260,10 @@ export const RepImageStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <LinkedInBannerCreator invoke={invoke} onSaved={load} />
+
+
 
       <div className="glass p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">

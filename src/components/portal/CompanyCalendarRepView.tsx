@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -6,8 +6,9 @@ import {
   List, LayoutGrid, CalendarRange, Lock, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listCompanyCalendar, KIND_META, type CompanyCalendarEntry } from "@/lib/companyCalendar";
-import { supabase } from "@/integrations/supabase/client";
+import { listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 type ViewMode = "list" | "week" | "month";
@@ -21,12 +22,13 @@ const endOfMonth = (d: Date) => { const x = new Date(d.getFullYear(), d.getMonth
 const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
-export const CompanyCalendarRepView: React.FC = () => {
+export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmin = false }) => {
   const [entries, setEntries] = useState<CompanyCalendarEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("month");
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
+  const dialogOpenRef = useRef(false);
 
   const range = useMemo(() => {
     if (view === "week") {
@@ -44,27 +46,36 @@ export const CompanyCalendarRepView: React.FC = () => {
     return { from, to };
   }, [view, anchor]);
 
-  const refresh = async () => {
-    setLoading(true);
+  const rangeFrom = useMemo(() => isoDate(range.from), [range.from]);
+  const rangeTo = useMemo(() => isoDate(range.to), [range.to]);
+
+  const refresh = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const list = await listCompanyCalendar({
-        from: isoDate(range.from),
-        to: isoDate(range.to),
+        from: rangeFrom,
+        to: rangeTo,
       });
       setEntries(list);
+      setSelectedEntry(current => {
+        if (!current) return null;
+        return list.find(e => e.id === current.id) || current;
+      });
     } catch (e: any) {
       toast.error("Couldn't load company calendar", { description: e.message });
-    } finally { setLoading(false); }
-  };
+    } finally { if (showLoading) setLoading(false); }
+  }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
-    void refresh();
-    const ch = supabase.channel("company_calendar_live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "company_calendar" }, () => void refresh())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, anchor]);
+    dialogOpenRef.current = !!selectedEntry;
+  }, [selectedEntry]);
+
+  useEffect(() => {
+    void refresh(true);
+    // Polling fallback — paused while a dialog is open so reads don't clobber the popup.
+    const id = setInterval(() => { if (!dialogOpenRef.current) void refresh(false); }, 15000);
+    return () => { clearInterval(id); };
+  }, [refresh]);
 
   const todayStr = isoDate(new Date());
 
@@ -72,7 +83,7 @@ export const CompanyCalendarRepView: React.FC = () => {
     if (view === "month") return anchor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
     if (view === "week") {
       const s = startOfWeek(anchor); const e = addDays(s, 6);
-      return `${s.toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${e.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+      return `${s.toLocaleDateString(undefined, { month: "short", day: "numeric" })} - ${e.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
     }
     return "Upcoming";
   }, [view, anchor]);
@@ -98,7 +109,7 @@ export const CompanyCalendarRepView: React.FC = () => {
                 Daily goals, vertical focuses, topics to post, sales pushes, and team events from leadership.
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mt-2 inline-flex items-center gap-1">
-                <Lock className="w-3 h-3" /> Read-only — managed by leadership
+                <Lock className="w-3 h-3" /> Read-only, managed by leadership
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -113,7 +124,7 @@ export const CompanyCalendarRepView: React.FC = () => {
                   <LayoutGrid className="w-3 h-3 mr-1" /> Month
                 </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+              <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={loading}>
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
               </Button>
             </div>
@@ -129,6 +140,19 @@ export const CompanyCalendarRepView: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Color legend */}
+          <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-x-3 gap-y-1.5">
+            {(Object.keys(CATEGORY_META) as Array<keyof typeof CATEGORY_META>).map(k => {
+              const m = CATEGORY_META[k];
+              return (
+                <div key={k} className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                  <span className={`inline-block w-2.5 h-2.5 rounded ${m.swatch}`} />
+                  <span>{m.icon} {m.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </CardHeader>
       </Card>
 
@@ -152,7 +176,13 @@ export const CompanyCalendarRepView: React.FC = () => {
       )}
 
       {selectedEntry && (
-        <EntryDialog entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
+        <EntryDialog
+          entry={selectedEntry}
+          isAdmin={isAdmin}
+          onClose={() => setSelectedEntry(null)}
+          onSaved={(e) => { setSelectedEntry(e); void refresh(false); }}
+          onDeleted={() => { setSelectedEntry(null); void refresh(true); }}
+        />
       )}
     </div>
   );
@@ -184,7 +214,7 @@ const UpcomingSidebar: React.FC<{ entries: CompanyCalendarEntry[]; todayStr: str
         {upcoming.length === 0 ? (
           <p className="text-xs text-muted-foreground italic">Nothing on the schedule.</p>
         ) : upcoming.map(e => {
-          const meta = KIND_META[e.kind];
+          const meta = entryDisplay(e);
           return (
             <button key={e.id} onClick={() => onPick(e)}
               className={`w-full text-left rounded-md border p-2 text-xs ${meta.color} hover:opacity-90 transition`}>
@@ -216,7 +246,7 @@ const ListView: React.FC<{ entries: CompanyCalendarEntry[]; todayStr: string; on
     const date = new Date(d + "T12:00:00");
     const isToday = d === todayStr;
     const label = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-    return isToday ? `Today — ${label}` : label;
+    return isToday ? `Today, ${label}` : label;
   };
 
   return (
@@ -274,7 +304,7 @@ const WeekView: React.FC<{ entries: CompanyCalendarEntry[]; weekStart: Date; tod
             </CardHeader>
             <CardContent className="space-y-2 min-h-[80px]">
               {list.length === 0
-                ? <p className="text-[11px] text-muted-foreground italic">—</p>
+                ? <p className="text-[11px] text-muted-foreground italic">, </p>
                 : list.map(e => <EntryCard key={e.id} e={e} onPick={onPick} compact />)}
             </CardContent>
           </Card>
@@ -312,7 +342,7 @@ const MonthView: React.FC<{ entries: CompanyCalendarEntry[]; anchor: Date; today
                 ${inMonth ? "bg-background/40" : "bg-muted/20 opacity-60"}`}>
                 <div className={`font-mono ${isToday ? "text-amber font-bold" : "text-muted-foreground"}`}>{d.getDate()}</div>
                 {list.slice(0, 3).map(e => {
-                  const meta = KIND_META[e.kind];
+                  const meta = entryDisplay(e);
                   return (
                     <button key={e.id} onClick={() => onPick(e)}
                       className={`text-left truncate rounded px-1 py-0.5 border ${meta.color} hover:opacity-80`}>
@@ -334,7 +364,7 @@ const MonthView: React.FC<{ entries: CompanyCalendarEntry[]; anchor: Date; today
 
 // ---------- Entry card ----------
 const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalendarEntry) => void; compact?: boolean }> = ({ e, onPick, compact }) => {
-  const meta = KIND_META[e.kind];
+  const meta = entryDisplay(e);
   return (
     <button
       type="button"
@@ -353,8 +383,48 @@ const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalenda
 };
 
 // ---------- Detail dialog ----------
-const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }> = ({ entry, onClose }) => {
-  const meta = KIND_META[entry.kind];
+const EntryDialog: React.FC<{
+  entry: CompanyCalendarEntry;
+  isAdmin?: boolean;
+  onClose: () => void;
+  onSaved?: (e: CompanyCalendarEntry) => void;
+  onDeleted?: () => void;
+}> = ({ entry, isAdmin = false, onClose, onSaved, onDeleted }) => {
+  const meta = entryDisplay(entry);
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(entry.title || "");
+  const [body, setBody] = useState(entry.body || "");
+  const [date, setDate] = useState(entry.date || "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setTitle(entry.title || ""); setBody(entry.body || ""); setDate(entry.date || "");
+  }, [entry.id]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const saved = await upsertCompanyEntry({ id: entry.id, title, body, date });
+      toast.success("Entry updated");
+      setEditing(false);
+      onSaved?.(saved);
+    } catch (e: any) {
+      toast.error("Save failed", { description: e.message });
+    } finally { setSaving(false); }
+  };
+
+  const remove = async () => {
+    if (!confirm("Delete this calendar entry? This cannot be undone.")) return;
+    setSaving(true);
+    try {
+      await deleteCompanyEntry(entry.id);
+      toast.success("Entry deleted");
+      onDeleted?.();
+    } catch (e: any) {
+      toast.error("Delete failed", { description: e.message });
+    } finally { setSaving(false); }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-background border border-border rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
@@ -364,9 +434,30 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
           {entry.pinned && <Badge variant="outline" className="text-[10px]"><Pin className="w-3 h-3 mr-1" />Pinned</Badge>}
           <span className="text-xs text-muted-foreground ml-auto font-mono">{new Date(entry.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span>
         </div>
-        <h3 className="text-xl font-display font-bold text-foreground">{entry.title}</h3>
-        {entry.body && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{entry.body}</p>}
-        {entry.attachments?.length > 0 && (
+
+        {editing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Title</label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Date</label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Body</label>
+              <Textarea rows={6} value={body} onChange={(e) => setBody(e.target.value)} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-xl font-display font-bold text-foreground">{entry.title}</h3>
+            {entry.body && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{entry.body}</p>}
+          </>
+        )}
+
+        {entry.attachments?.length > 0 && !editing && (
           <div className="mt-4 flex flex-wrap gap-2">
             {entry.attachments.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
@@ -376,7 +467,7 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
             ))}
           </div>
         )}
-        {entry.ai_plan && (entry.ai_plan.summary || entry.ai_plan.tactics?.length || entry.ai_plan.kpis?.length) && (
+        {!editing && entry.ai_plan && (entry.ai_plan.summary || entry.ai_plan.tactics?.length || entry.ai_plan.kpis?.length) && (
           <div className="mt-4 p-3 rounded-md border border-amber/30 bg-amber/5">
             <p className="text-[10px] font-mono uppercase text-amber mb-1">Tactical Plan</p>
             {entry.ai_plan.summary && <p className="text-xs text-foreground mb-2">{entry.ai_plan.summary}</p>}
@@ -395,12 +486,28 @@ const EntryDialog: React.FC<{ entry: CompanyCalendarEntry; onClose: () => void }
             ) : null}
           </div>
         )}
-        <div className="mt-4 flex justify-end">
+
+        <div className="mt-4 flex justify-end gap-2 flex-wrap">
+          {isAdmin && !editing && (
+            <>
+              <Button variant="destructive" size="sm" onClick={remove} disabled={saving}>Delete</Button>
+              <Button variant="default" size="sm" onClick={() => setEditing(true)}>Edit</Button>
+            </>
+          )}
+          {isAdmin && editing && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</Button>
+              <Button variant="default" size="sm" onClick={save} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+            </>
+          )}
           <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
-          <Lock className="w-3 h-3" /> Read-only — only leadership can edit this entry
-        </p>
+
+        {!isAdmin && (
+          <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
+            <Lock className="w-3 h-3" /> Read-only, only leadership can edit this entry
+          </p>
+        )}
       </div>
     </div>
   );

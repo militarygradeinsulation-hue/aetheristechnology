@@ -30,33 +30,74 @@ serve(async (req) => {
     const { action } = body;
 
     if (action === "list") {
-      const { data, error } = await supabase
+      const limit = Math.max(1, Math.min(200, Number(body.limit) || 50));
+      const offset = Math.max(0, Number(body.offset) || 0);
+      const toolType: string | undefined = typeof body.tool_type === "string" ? body.tool_type : undefined;
+      // Lightweight by default, but include input_data/output_data whenever a
+      // specific tool view or full-memory scan asks for it. Otherwise saved
+      // response rows reload as blank shells with no reply body.
+      const includeBlobs = !!toolType || body.include_data === true;
+      const cols = includeBlobs
+        ? "id, tool_type, title, file_url, created_at, input_data, output_data"
+        : "id, tool_type, title, file_url, created_at";
+      let q = supabase
         .from("admin_library")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select(cols)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
+      if (toolType) q = q.eq("tool_type", toolType);
+      const { data, error } = await q;
       if (error) throw error;
-      return new Response(JSON.stringify({ items: data || [] }), {
+      const items = (data || []).map((r: any) => ({
+        ...r,
+        input_data: r.input_data ?? {},
+        output_data: r.output_data ?? {},
+      }));
+      return new Response(JSON.stringify({ items, limit, offset, hasMore: items.length === limit }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (action === "save") {
-      const { tool_type, title, input_data, output_data, file_url } = body;
-      if (!tool_type || !title) {
-        return new Response(JSON.stringify({ error: "tool_type and title required" }), {
+    if (action === "get") {
+      const { id } = body;
+      if (!id) {
+        return new Response(JSON.stringify({ error: "id required" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const { data, error } = await supabase
         .from("admin_library")
-        .insert({
-          tool_type,
-          title,
-          input_data: input_data || {},
-          output_data: output_data || {},
-          file_url: file_url || null,
-        })
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({ item: data }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "save") {
+      const { tool_type, title, input_data, output_data, file_url, created_at } = body;
+      if (!tool_type || !title) {
+        return new Response(JSON.stringify({ error: "tool_type and title required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const insertRow: Record<string, unknown> = {
+        tool_type,
+        title,
+        input_data: input_data || {},
+        output_data: output_data || {},
+        file_url: file_url || null,
+      };
+      if (created_at && typeof created_at === "string" && !isNaN(Date.parse(created_at))) {
+        insertRow.created_at = created_at;
+      }
+      const { data, error } = await supabase
+        .from("admin_library")
+        .insert(insertRow)
         .select()
         .single();
       if (error) throw error;
@@ -66,16 +107,28 @@ serve(async (req) => {
     }
 
     if (action === "update") {
-      const { id, output_data } = body;
-      if (!id || !output_data) {
-        return new Response(JSON.stringify({ error: "id and output_data required" }), {
+      const { id, output_data, created_at, title } = body;
+      if (!id) {
+        return new Response(JSON.stringify({ error: "id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const updateRow: Record<string, unknown> = {};
+      if (output_data !== undefined) updateRow.output_data = output_data;
+      if (typeof title === "string" && title.length) updateRow.title = title;
+      if (created_at && typeof created_at === "string" && !isNaN(Date.parse(created_at))) {
+        updateRow.created_at = created_at;
+      }
+      if (Object.keys(updateRow).length === 0) {
+        return new Response(JSON.stringify({ error: "nothing to update" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const { data, error } = await supabase
         .from("admin_library")
-        .update({ output_data })
+        .update(updateRow)
         .eq("id", id)
         .select()
         .single();
@@ -96,6 +149,45 @@ serve(async (req) => {
       const { error } = await supabase.from("admin_library").delete().eq("id", id);
       if (error) throw error;
       return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "publish_playbook") {
+      const { title, subtitle, description, tags, file_url, icon_name, summary, toc } = body;
+      if (!title || !file_url) {
+        return new Response(JSON.stringify({ error: "title and file_url required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Avoid duplicates by file_url
+      const { data: existing } = await supabase
+        .from("playbooks")
+        .select("id")
+        .eq("file_url", file_url)
+        .maybeSingle();
+      if (existing) {
+        return new Response(JSON.stringify({ item: existing, alreadyPublished: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data, error } = await supabase
+        .from("playbooks")
+        .insert({
+          title,
+          subtitle: subtitle || null,
+          description: description || subtitle || title,
+          summary: summary || description || subtitle || null,
+          toc: Array.isArray(toc) ? toc : [],
+          tags: Array.isArray(tags) ? tags : [],
+          file_url,
+          icon_name: icon_name || "BookOpen",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return new Response(JSON.stringify({ item: data }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

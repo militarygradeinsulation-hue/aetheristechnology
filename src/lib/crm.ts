@@ -72,15 +72,18 @@ export interface CrmDataset {
 
 export const EMPTY_DATASET: CrmDataset = { companies: [], contacts: [], deals: [], interactions: [] };
 
-export function formatMoney(cents: number, currency = "usd"): string {
+// CURRENCY LOCK: every monetary figure in Aetheris is US Dollars. The optional
+// `currency` arg is intentionally ignored — even if upstream data (Stripe,
+// HubSpot, imports) carries a non-USD code, we always render USD/$.
+export function formatMoney(cents: number, _currency?: string): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: currency.toUpperCase(),
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(cents / 100);
 }
 
-/** Public demo — anyone can read. */
+/** Public demo, anyone can read. */
 export async function loadDemoDataset(): Promise<CrmDataset> {
   const { data, error } = await supabase
     .from("crm_demo_data")
@@ -97,7 +100,7 @@ export async function loadDemoDataset(): Promise<CrmDataset> {
   };
 }
 
-/** Real CRM — admin only (RLS-locked, but we also have a service-role
+/** Real CRM, admin only (RLS-locked, but we also have a service-role
  * edge function `admin-data` you could route through if desired). For now
  * authenticated admin reads work directly via the supabase client. */
 export async function loadAdminDataset(): Promise<CrmDataset> {

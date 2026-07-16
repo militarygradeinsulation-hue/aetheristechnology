@@ -118,7 +118,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
       };
       setLocal(next);
       onAppUpdated?.(next);
-      toast({ title: `Fit score: ${data.fit_score}/100` });
+      toast({ title: `Fit score: ${data.fit_score}/60` });
     } catch (e) {
       toast({ title: 'AI analysis failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setAnalyzing(false); }
@@ -157,8 +157,8 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
   if (!app || !local) return null;
 
   const scoreColor = (s: number) =>
-    s >= 80 ? 'bg-green-500/20 text-green-400 border-green-500/40' :
-    s >= 60 ? 'bg-amber/20 text-amber border-amber/40' :
+    s >= 45 ? 'bg-green-500/20 text-green-400 border-green-500/40' :
+    s >= 30 ? 'bg-amber/20 text-amber border-amber/40' :
     'bg-destructive/20 text-destructive border-destructive/40';
 
   const isPdf = resumeMime === 'application/pdf';
@@ -172,7 +172,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
             {local.candidate_name}
             <Badge variant="outline" className="font-mono text-xs">{local.share_code}</Badge>
             {local.ai_fit_score != null && (
-              <Badge className={`border ${scoreColor(local.ai_fit_score)}`}>Fit {local.ai_fit_score}/100</Badge>
+              <Badge className={`border ${scoreColor(local.ai_fit_score)}`}>Fit {local.ai_fit_score}/60</Badge>
             )}
             <span className="text-xs text-muted-foreground font-normal ml-1">{local.candidate_email}</span>
           </DialogTitle>
@@ -249,7 +249,7 @@ export const ResumeReviewDialog: React.FC<Props> = ({ app, onClose, onAppUpdated
               <div className="px-3 py-2 border-b flex items-center gap-2 text-xs">
                 <Lock className="w-3 h-3 text-amber" />
                 <span className="font-mono uppercase tracking-wider text-muted-foreground">Private notes & messages</span>
-                <span className="text-muted-foreground/70">(only you can see these)</span>
+                <span className="text-muted-foreground">(only you can see these)</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {loadingMsgs ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> :

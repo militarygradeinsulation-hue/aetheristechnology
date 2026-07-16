@@ -1,0 +1,679 @@
+import React, { useRef, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Mail, Image as ImageIcon, ClipboardPaste, Sparkles, Copy, Check, X, Loader2, Wand2, Type, ScanSearch, AlertTriangle, AlertCircle, Info, ThumbsUp, Linkedin } from 'lucide-react';
+import { useActiveLeadAutofill } from '@/lib/activeLead';
+import { saveToolRun } from '@/lib/toolSaveHelper';
+
+type Mode = 'create' | 'rewrite' | 'subjects' | 'analyze' | 'linkedin_intro';
+
+interface Props {
+  /** 'admin' uses x-admin-token header, 'rep' uses x-portal-token. */
+  authMode: 'admin' | 'rep';
+  /** Auth token already retrieved by the caller. */
+  token: string | null;
+  defaultSenderName?: string;
+}
+
+interface EmailOut { subject: string; body: string; why_it_works: string }
+interface SubjectHook { subject: string; angle: string; why: string }
+interface SubjectsOut { hooks: SubjectHook[] }
+interface AnalysisProblem { severity: 'critical' | 'major' | 'minor'; category: string; quote: string; issue: string; fix: string }
+interface AnalysisPillar { key: string; label: string; score: number; max: number; note: string }
+interface AnalysisTrigger { phrase: string; category: string; why_bad: string; swap_with: string }
+interface AnalysisGuard { level: 'low' | 'medium' | 'high' | 'hostile'; why: string; fix: string }
+interface Analysis {
+  overall_grade: string;
+  verdict: string;
+  total_score?: number;
+  score_bar?: 'danger' | 'weak' | 'decent' | 'strong' | 'elite';
+  pillars?: AnalysisPillar[];
+  trigger_words_found?: AnalysisTrigger[];
+  guard_meter?: AnalysisGuard;
+  subject_critique: { current: string; score: number; problems: string[]; rewrites: string[] };
+  problems: AnalysisProblem[];
+  what_works: string[];
+  rewritten_body: string;
+  next_moves: string[];
+}
+
+function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const comma = result.indexOf(',');
+      resolve({ base64: result.slice(comma + 1), mime: file.type || 'image/png' });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const TONES = [
+  { value: '', label: 'Default (forensic operator)' },
+  { value: 'blunt', label: 'Blunt & direct' },
+  { value: 'curious', label: 'Curious & probing' },
+  { value: 'warm', label: 'Warm & respectful' },
+  { value: 'urgent', label: 'Urgent & high-stakes' },
+  { value: 'contrarian', label: 'Contrarian & provocative' },
+  { value: 'dry-humor', label: 'Dry humor' },
+  { value: 'consultative', label: 'Consultative & calm' },
+];
+
+const PERSONALITIES = [
+  { value: '', label: 'Default (Aetheris operator)' },
+  { value: 'forensic-auditor', label: 'Forensic auditor (numbers-first)' },
+  { value: 'seasoned-cfo', label: 'Seasoned CFO' },
+  { value: 'street-smart-operator', label: 'Street-smart operator' },
+  { value: 'no-bs-founder', label: 'No-BS founder' },
+  { value: 'investigative-journalist', label: 'Investigative journalist' },
+  { value: 'trusted-advisor', label: 'Trusted advisor / mentor' },
+  { value: 'analytical-strategist', label: 'Analytical strategist' },
+];
+
+export const OutreachEmailCreator: React.FC<Props> = ({ authMode, token, defaultSenderName }) => {
+  const { toast } = useToast();
+  const [mode, setMode] = useState<Mode>('create');
+  const [recipientName, setRecipientName] = useState('');
+  const [senderName, setSenderName] = useState(defaultSenderName || '');
+  const [prompt, setPrompt] = useState('');
+  const [pasted, setPasted] = useState('');
+  const [tone, setTone] = useState('');
+  const [personality, setPersonality] = useState('');
+  const [image, setImage] = useState<{ url: string; base64: string; mime: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<EmailOut | null>(null);
+  const [subjects, setSubjects] = useState<SubjectHook[] | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [copied, setCopied] = useState<string>('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useActiveLeadAutofill('outreach-email', (lead) => {
+    if (lead.contact_name) setRecipientName(n => n || lead.contact_name!);
+    // Seed the prompt with lead context so the AI has something to work with.
+    if (!prompt) {
+      const ctx = [
+        lead.business_name && `Company: ${lead.business_name}`,
+        lead.contact_name && `Contact: ${lead.contact_name}`,
+        lead.website && `Website: ${lead.website}`,
+        lead.industry && `Industry: ${lead.industry}`,
+        lead.location && `Location: ${lead.location}`,
+      ].filter(Boolean).join('\n');
+      if (ctx) setPrompt(`Write a first-touch outreach email.\n\n${ctx}\n\nAngle: leak/forensics, blunt, no fluff.`);
+    }
+  });
+
+  async function handleFile(file: File) {
+    if (file.size > 5_000_000) {
+      toast({ title: 'Image too large', description: 'Keep under 5MB.', variant: 'destructive' });
+      return;
+    }
+    const { base64, mime } = await fileToBase64(file);
+    setImage({ url: URL.createObjectURL(file), base64, mime });
+  }
+
+  function handlePasteCapture(e: React.ClipboardEvent) {
+    const items = Array.from(e.clipboardData.items);
+    const img = items.find((i) => i.type.startsWith('image/'));
+    if (img) {
+      const f = img.getAsFile();
+      if (f) { e.preventDefault(); void handleFile(f); }
+    }
+  }
+
+  async function generate() {
+    if (!token) { toast({ title: 'Not signed in', variant: 'destructive' }); return; }
+    if (!prompt && !pasted && !image) {
+      toast({ title: 'Give it something to work with', description: 'Add context, paste an email, or drop an image.', variant: 'destructive' });
+      return;
+    }
+    setLoading(true);
+    setResult(null);
+    setSubjects(null);
+    setAnalysis(null);
+    try {
+      const headers: Record<string, string> = {};
+      if (authMode === 'admin') headers['x-admin-token'] = token;
+      else headers['x-portal-token'] = token;
+
+      const { data, error } = await supabase.functions.invoke('outreach-email-creator', {
+        body: {
+          mode,
+          prompt,
+          pastedText: pasted,
+          recipientName,
+          senderName,
+          tone,
+          personality,
+          imageBase64: image?.base64 || null,
+          imageMime: image?.mime || null,
+        },
+        headers,
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if (mode === 'subjects') {
+        const hooks = ((data as SubjectsOut)?.hooks) || [];
+        setSubjects(hooks);
+        if (hooks.length) {
+          saveToolRun({
+            tool_type: 'outreach_subjects',
+            title: `Subject Hooks — ${(prompt || pasted || recipientName || 'untitled').slice(0, 60)}`,
+            input_data: { prompt, pastedText: pasted, recipientName, senderName, mode },
+            output_data: { hooks },
+          });
+        }
+      } else if (mode === 'analyze') {
+        const analysisData = ((data as any)?.analysis) || null;
+        setAnalysis(analysisData);
+        if (analysisData) {
+          saveToolRun({
+            tool_type: 'outreach_email_analysis',
+            title: `Email Analysis — ${(recipientName || prompt || pasted || 'untitled').slice(0, 60)}`,
+            input_data: { pastedText: pasted, recipientName, senderName, mode },
+            output_data: analysisData,
+          });
+        }
+      } else {
+        const email = data as EmailOut;
+        setResult(email);
+        if (email?.body) {
+          saveToolRun({
+            tool_type: mode === 'linkedin_intro' ? 'linkedin_intro' : 'outreach_email',
+            title: (email.subject || `LinkedIn Intro — ${(recipientName || prompt || 'untitled').slice(0, 60)}`).slice(0, 80),
+            input_data: { mode, prompt, pastedText: pasted, recipientName, senderName },
+            output_data: email,
+          });
+        }
+      }
+    } catch (e) {
+      toast({ title: 'Generation failed', description: String((e as Error).message), variant: 'destructive' });
+    } finally { setLoading(false); }
+  }
+
+  async function copyText(key: string, text: string) {
+    await navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(''), 1500);
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="glass rounded-xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber to-orange-500 flex items-center justify-center shrink-0">
+            <Mail className="w-5 h-5 text-background" strokeWidth={2.5} />
+          </div>
+          <div>
+            <div className="font-display font-bold text-foreground text-lg leading-tight">Outreach Email Creator</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Aetheris voice. Bold. Direct. Forensic. <span className="text-amber font-semibold">Zero dashes.</span> Paste an email, drop a screenshot, or describe the prospect.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mode switch */}
+      <div className="flex flex-wrap gap-2">
+        {(['create','rewrite','subjects','analyze','linkedin_intro'] as Mode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${
+              mode === m ? 'bg-amber text-background' : 'glass text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {m === 'create' ? <><Sparkles className="w-3.5 h-3.5"/>Write New Email</>
+              : m === 'rewrite' ? <><Wand2 className="w-3.5 h-3.5"/>Rewrite Mine</>
+              : m === 'subjects' ? <><Type className="w-3.5 h-3.5"/>Subject Hooks</>
+              : m === 'linkedin_intro' ? <><Linkedin className="w-3.5 h-3.5"/>LinkedIn Intro (Soft)</>
+              : <><ScanSearch className="w-3.5 h-3.5"/>Critique My Email</>}
+          </button>
+        ))}
+      </div>
+
+      {/* Inputs */}
+      <Card className="glass p-5 space-y-4">
+        {(mode === 'create' || mode === 'subjects' || mode === 'linkedin_intro') && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Recipient (optional)</label>
+              <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Jordan, COO at Acme" />
+            </div>
+            {(mode === 'create' || mode === 'linkedin_intro') && (
+              <div>
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">From (your name)</label>
+                <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Your name" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {mode !== 'analyze' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Tone</label>
+              <select
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {TONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Personality</label>
+              <select
+                value={personality}
+                onChange={(e) => setPersonality(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-amber"
+              >
+                {PERSONALITIES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+            {mode === 'create' ? 'Context / Angle'
+              : mode === 'subjects' ? 'Context / Angle for the subject hooks'
+              : mode === 'analyze' ? 'Extra context (optional)'
+              : mode === 'linkedin_intro' ? 'Context about them (their post, role, company, what you noticed)'
+              : 'Notes for the rewrite (optional)'}
+          </label>
+          <Textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onPaste={handlePasteCapture}
+            placeholder={mode === 'create'
+              ? "What you found on their site. The leak you want to name. What you want them to do."
+              : mode === 'subjects'
+                ? "Their industry, the leak you spotted, the angle you want. Or paste their site copy below."
+                : mode === 'analyze'
+                  ? "Who it is going to, what you want it to do. Helps the critique stay on-target."
+                  : mode === 'linkedin_intro'
+                    ? "What caught your eye. Their recent post, a hire, their role, something specific. NO pitch ideas — this is a soft intro."
+                    : "What you want changed. Tone, urgency, specific facts to add."}
+            rows={4}
+          />
+        </div>
+
+        {(mode === 'rewrite' || mode === 'analyze') && (
+          <div>
+            <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-1.5">
+              <ClipboardPaste className="w-3 h-3"/> {mode === 'analyze' ? 'Paste the email text (or just upload a screenshot below)' : 'Paste your email here'}
+            </label>
+            <Textarea
+              value={pasted}
+              onChange={(e) => setPasted(e.target.value)}
+              onPaste={handlePasteCapture}
+              placeholder={mode === 'analyze' ? "Paste subject + body if you have the text. Otherwise rely on the screenshot." : "Paste the existing draft."}
+              rows={6}
+            />
+          </div>
+        )}
+
+        {/* Image drop */}
+        <div>
+          <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{mode === 'analyze' ? 'Screenshot of YOUR email (required if no pasted text)' : 'Screenshot of their site / post / ad (optional)'}</label>
+          {image ? (
+            <div className="relative mt-2 inline-block">
+              <img src={image.url} alt="reference" className="max-h-48 rounded-lg border border-border" />
+              <button
+                onClick={() => setImage(null)}
+                className="absolute -top-2 -right-2 bg-crimson text-white rounded-full p-1 hover:opacity-80"
+                aria-label="Remove image"
+              >
+                <X className="w-3 h-3"/>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="mt-2 w-full border-2 border-dashed border-border rounded-lg p-6 text-center text-muted-foreground hover:border-amber hover:text-amber transition flex flex-col items-center gap-1"
+            >
+              <ImageIcon className="w-6 h-6"/>
+              <span className="text-sm font-semibold">Click to upload, or paste a screenshot anywhere above</span>
+              <span className="text-xs">PNG, JPG, under 5MB</span>
+            </button>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
+          />
+        </div>
+
+        <Button
+          onClick={generate}
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90 font-bold uppercase tracking-wider"
+        >
+          {loading
+            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/>{mode === 'analyze' ? 'Critiquing...' : 'Writing...'}</>
+            : mode === 'create' ? <><Sparkles className="w-4 h-4 mr-2"/>Write the Email</>
+            : mode === 'rewrite' ? <><Wand2 className="w-4 h-4 mr-2"/>Rewrite It</>
+            : mode === 'subjects' ? <><Type className="w-4 h-4 mr-2"/>Generate 10 Subject Hooks</>
+            : mode === 'linkedin_intro' ? <><Linkedin className="w-4 h-4 mr-2"/>Write Soft LinkedIn Intro</>
+            : <><ScanSearch className="w-4 h-4 mr-2"/>Tear It Apart</>}
+        </Button>
+      </Card>
+
+      {/* Email result */}
+      {result && (
+        <Card className="glass p-5 space-y-4 border-amber/30">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-amber">{result.subject ? 'Operator Draft' : 'LinkedIn Intro (Soft First-Touch)'}</div>
+            <Button size="sm" variant="outline" onClick={() => copyText('all', result.subject ? `Subject: ${result.subject}\n\n${result.body}` : result.body)}>
+              {copied === 'all' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
+              Copy All
+            </Button>
+          </div>
+
+          {result.subject && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject</label>
+                <button onClick={() => copyText('subject', result.subject)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                  {copied === 'subject' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+                </button>
+              </div>
+              <div className="font-display font-bold text-lg text-foreground">{result.subject}</div>
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Body</label>
+              <button onClick={() => copyText('body', result.body)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                {copied === 'body' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+              </button>
+            </div>
+            <pre className="whitespace-pre-wrap font-sans text-sm text-foreground bg-background/40 border border-border rounded-lg p-4 leading-relaxed">
+{result.body}
+            </pre>
+          </div>
+
+          {result.why_it_works && (
+            <div className="border-t border-border pt-3">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Why this lands</div>
+              <div className="text-sm text-muted-foreground italic">{result.why_it_works}</div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Subject hooks result */}
+      {subjects && subjects.length > 0 && (
+        <Card className="glass p-5 space-y-3 border-amber/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Subject Hooks</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{subjects.length} options. Click any to copy.</div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => copyText('all-subjects', subjects.map((h, i) => `${i + 1}. ${h.subject}`).join('\n'))}
+            >
+              {copied === 'all-subjects' ? <Check className="w-3.5 h-3.5 mr-1.5"/> : <Copy className="w-3.5 h-3.5 mr-1.5"/>}
+              Copy All
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {subjects.map((h, i) => {
+              const k = `subj-${i}`;
+              return (
+                <button
+                  key={k}
+                  onClick={() => copyText(k, h.subject)}
+                  className="w-full text-left rounded-lg border border-border bg-background/40 p-3 hover:border-amber/50 transition group"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display font-bold text-foreground leading-snug">{h.subject}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        <span className="uppercase tracking-widest text-[10px] font-bold text-amber/80 mr-2">{h.angle}</span>
+                        {h.why}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground group-hover:text-amber shrink-0 pt-0.5">
+                      {copied === k ? <Check className="w-4 h-4"/> : <Copy className="w-4 h-4"/>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Analysis result */}
+      {analysis && (
+        <Card className="glass p-5 space-y-5 border-amber/30">
+          {/* Score header */}
+          {(() => {
+            const score = typeof analysis.total_score === 'number' ? analysis.total_score : null;
+            const bar = analysis.score_bar || (score === null ? 'decent' : score >= 85 ? 'elite' : score >= 70 ? 'strong' : score >= 55 ? 'decent' : score >= 35 ? 'weak' : 'danger');
+            const barStyle: Record<string, string> = {
+              elite: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40',
+              strong: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+              decent: 'bg-amber/15 text-amber border-amber/30',
+              weak: 'bg-amber/10 text-amber/80 border-amber/30',
+              danger: 'bg-crimson/15 text-crimson border-crimson/40',
+            };
+            const gradeStyle = ['A','B'].includes(analysis.overall_grade)
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+              : analysis.overall_grade === 'C' ? 'bg-amber/15 text-amber border-amber/30'
+              : 'bg-crimson/15 text-crimson border-crimson/30';
+            return (
+              <div className="flex items-start gap-4">
+                <div className={`shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center border-2 ${barStyle[bar]}`}>
+                  <div className="font-display font-bold text-4xl leading-none">{score ?? '—'}</div>
+                  <div className="text-[9px] uppercase tracking-widest font-bold opacity-80 mt-1">/ 100</div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Verdict</div>
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${gradeStyle}`}>Grade {analysis.overall_grade}</span>
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border ${barStyle[bar]}`}>{bar}</span>
+                  </div>
+                  <div className="font-display font-bold text-foreground text-lg leading-snug mt-1.5">{analysis.verdict}</div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Pillar bars */}
+          {analysis.pillars && analysis.pillars.length > 0 && (
+            <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Scorecard</div>
+              <div className="space-y-2.5">
+                {analysis.pillars.map((p) => {
+                  const ratio = p.max > 0 ? p.score / p.max : 0;
+                  const fill = ratio >= 0.8 ? 'bg-emerald-400' : ratio >= 0.5 ? 'bg-amber' : 'bg-crimson';
+                  const text = ratio >= 0.8 ? 'text-emerald-400' : ratio >= 0.5 ? 'text-amber' : 'text-crimson';
+                  return (
+                    <div key={p.key} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-foreground">{p.label}</span>
+                        <span className={`font-mono font-bold ${text}`}>{p.score}/{p.max}</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-background border border-border overflow-hidden">
+                        <div className={`h-full ${fill}`} style={{ width: `${Math.max(0, Math.min(100, ratio * 100))}%` }} />
+                      </div>
+                      {p.note && <div className="text-[11px] text-muted-foreground leading-snug">{p.note}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Guard meter */}
+          {analysis.guard_meter && (() => {
+            const lvl = analysis.guard_meter.level;
+            const map: Record<string, { bg: string; label: string }> = {
+              low: { bg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', label: 'Guard Low' },
+              medium: { bg: 'bg-amber/15 text-amber border-amber/40', label: 'Guard Medium' },
+              high: { bg: 'bg-crimson/15 text-crimson border-crimson/40', label: 'Guard High' },
+              hostile: { bg: 'bg-crimson/25 text-crimson border-crimson/60', label: 'Guard Hostile' },
+            };
+            const m = map[lvl] || map.medium;
+            return (
+              <div className={`rounded-lg border p-4 space-y-2 ${m.bg}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[10px] uppercase tracking-widest font-bold">Reader Guard</div>
+                  <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded border border-current">{m.label}</span>
+                </div>
+                {analysis.guard_meter.why && <div className="text-sm text-foreground"><span className="font-bold">Why:</span> {analysis.guard_meter.why}</div>}
+                {analysis.guard_meter.fix && <div className="text-sm text-foreground"><span className="font-bold">Lower it:</span> {analysis.guard_meter.fix}</div>}
+              </div>
+            );
+          })()}
+
+          {/* Trigger words */}
+          <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">
+                Trigger Words {analysis.trigger_words_found ? `(${analysis.trigger_words_found.length})` : ''}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">−5 each</div>
+            </div>
+            {(!analysis.trigger_words_found || analysis.trigger_words_found.length === 0) ? (
+              <div className="text-sm text-emerald-400 flex items-center gap-2">
+                <ThumbsUp className="w-3.5 h-3.5"/> No trigger words detected. Guard stays down.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {analysis.trigger_words_found.map((t, i) => (
+                  <div key={i} className="rounded-md border border-crimson/30 bg-crimson/5 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-crimson">{t.category.replace(/_/g,' ')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap text-sm">
+                      <span className="font-mono text-crimson line-through">"{t.phrase}"</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="text-emerald-400">{t.swap_with}</span>
+                    </div>
+                    {t.why_bad && <div className="text-xs text-muted-foreground">{t.why_bad}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Subject critique */}
+          <div className="border border-border rounded-lg p-4 space-y-3 bg-background/40">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Subject Line ({analysis.subject_critique.score}/10)</div>
+            </div>
+            {analysis.subject_critique.current && (
+              <div className="font-mono text-sm text-foreground">"{analysis.subject_critique.current}"</div>
+            )}
+            {analysis.subject_critique.problems.length > 0 && (
+              <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                {analysis.subject_critique.problems.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
+            )}
+            {analysis.subject_critique.rewrites.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber mb-1.5">Stronger options</div>
+                <div className="space-y-1.5">
+                  {analysis.subject_critique.rewrites.map((s, i) => {
+                    const k = `arew-${i}`;
+                    return (
+                      <button key={k} onClick={() => copyText(k, s)}
+                        className="w-full text-left text-sm rounded-md border border-border bg-background/60 px-3 py-2 hover:border-amber/50 flex items-center justify-between gap-2 group">
+                        <span className="font-semibold text-foreground">{s}</span>
+                        <span className="shrink-0 text-muted-foreground group-hover:text-amber">{copied === k ? <Check className="w-3.5 h-3.5"/> : <Copy className="w-3.5 h-3.5"/>}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Problems */}
+          <div className="space-y-2">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">What is wrong ({analysis.problems.length})</div>
+            {analysis.problems.map((p, i) => {
+              const sevStyle = p.severity === 'critical'
+                ? 'border-crimson/40 bg-crimson/5'
+                : p.severity === 'major' ? 'border-amber/40 bg-amber/5'
+                : 'border-border bg-background/40';
+              const Icon = p.severity === 'critical' ? AlertCircle : p.severity === 'major' ? AlertTriangle : Info;
+              const iconColor = p.severity === 'critical' ? 'text-crimson' : p.severity === 'major' ? 'text-amber' : 'text-muted-foreground';
+              return (
+                <div key={i} className={`rounded-lg border p-3 ${sevStyle}`}>
+                  <div className="flex items-start gap-2">
+                    <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${iconColor}`}/>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[10px] uppercase tracking-widest font-bold ${iconColor}`}>{p.severity}</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{p.category}</span>
+                      </div>
+                      {p.quote && (
+                        <div className="font-mono text-xs text-foreground/80 border-l-2 border-border pl-2 italic">"{p.quote}"</div>
+                      )}
+                      <div className="text-sm text-foreground"><span className="font-bold">Issue:</span> {p.issue}</div>
+                      <div className="text-sm text-emerald-400"><span className="font-bold">Fix:</span> {p.fix}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* What works */}
+          {analysis.what_works.length > 0 && (
+            <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <ThumbsUp className="w-3.5 h-3.5 text-emerald-400"/>
+                <div className="text-[10px] uppercase tracking-widest font-bold text-emerald-400">What actually works</div>
+              </div>
+              <ul className="text-sm text-foreground space-y-1 list-disc list-inside">
+                {analysis.what_works.map((s, i) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {/* Rewritten body */}
+          {analysis.rewritten_body && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-[10px] uppercase tracking-widest font-bold text-amber">Operator Rewrite</div>
+                <button onClick={() => copyText('arew-body', analysis.rewritten_body)} className="text-xs text-amber hover:underline flex items-center gap-1">
+                  {copied === 'arew-body' ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>} Copy
+                </button>
+              </div>
+              <pre className="whitespace-pre-wrap font-sans text-sm text-foreground bg-background/40 border border-border rounded-lg p-4 leading-relaxed">{analysis.rewritten_body}</pre>
+            </div>
+          )}
+
+          {/* Next moves */}
+          {analysis.next_moves.length > 0 && (
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">Next moves</div>
+              <ol className="text-sm text-foreground space-y-1 list-decimal list-inside">
+                {analysis.next_moves.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          )}
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default OutreachEmailCreator;

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Search, Map, GitBranch, Crosshair, DollarSign, Wrench, ShieldCheck, ChevronDown } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
-import leakAuditThumbnail from '@/assets/leak-audit-thumbnail.png';
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 const STEPS = [
   {
@@ -33,12 +34,12 @@ const STEPS = [
   {
     icon: Wrench,
     title: 'Prescribe',
-    desc: 'Exact fix per leak — system change, automation, AI agent, or human discipline. Ranked by ROI.',
+    desc: 'Exact fix per leak, system change, automation, AI agent, or human discipline. Ranked by ROI.',
   },
   {
     icon: ShieldCheck,
     title: 'Seal',
-    desc: 'Implement, instrument, verify the leak is closed. Not "delivered" — proven sealed in the data.',
+    desc: 'Implement, instrument, verify the leak is closed. Not "delivered", proven sealed in the data.',
   },
 ];
 
@@ -64,28 +65,26 @@ export const LeakAuditMethod: React.FC = () => {
         </RevealOnScroll>
 
         <RevealOnScroll>
-          <div className="max-w-4xl mx-auto mb-8">
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="group block w-full rounded-xl overflow-hidden border border-amber/30 hover:border-amber/60 transition-colors shimmer-border relative"
-              aria-expanded={expanded}
-              aria-controls="leak-audit-steps"
-            >
-              <div className="thumb-frame">
-                <span className="thumb-hairline" />
-                <img
-                  src={leakAuditThumbnail}
-                  alt="The Strategic Intelligence Platform — 7-step Leak Audit overview"
-                  className="w-full h-auto block"
-                  loading="lazy"
-                />
-              </div>
-              <div className="flex items-center justify-center gap-2 py-3 bg-background/60 font-case text-xs uppercase tracking-widest text-amber relative z-10">
+          <div className="max-w-5xl mx-auto mb-8">
+            <ForensicInfographic
+              image={INFOGRAPHICS.leakAuditBlueprint}
+              imageAlt="Isometric blueprint of a seven-stage revenue pipeline with one stage flagged as a breach"
+              caseNumber="002 · The Method"
+              title="Seven steps. One breach map."
+              summary="Intake → Reconnaissance → Trace → Identify → Quantify → Prescribe → Seal. Every business we engage gets run through the same forensic process. Each stage names a different class of leak, and produces evidence, not opinion."
+            />
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-amber/40 hover:border-amber/70 transition-colors font-case text-xs uppercase tracking-widest text-amber"
+                aria-expanded={expanded}
+                aria-controls="leak-audit-steps"
+              >
                 {expanded ? 'Hide the 7 Steps' : 'View the 7 Steps'}
                 <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
         </RevealOnScroll>
 
@@ -95,7 +94,7 @@ export const LeakAuditMethod: React.FC = () => {
               const Icon = step.icon;
               return (
                 <RevealOnScroll key={step.title} delay={i * 0.05}>
-                  <div className="premium-tile rounded-lg p-6 h-full group">
+                  <div className="forensic-tile rounded-lg p-6 h-full group">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 flex items-center gap-2">
                         <div className="font-case text-xs text-muted-foreground">

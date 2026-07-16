@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { sanitizePostgrestLike } from "../_shared/sanitize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -91,7 +92,7 @@ serve(async (req) => {
     if (action === "list_messages") {
       const folder = ["inbox", "sent", "drafts", "trash"].includes(body.folder) ? body.folder : "inbox";
       const limit = Math.min(Number(body.limit) || 50, 200);
-      const search = body.search ? String(body.search).slice(0, 200) : null;
+      const search = body.search ? sanitizePostgrestLike(String(body.search).slice(0, 200)) : null;
       let q = sb
         .from("rep_email_messages")
         .select("id,direction,folder,from_address,from_name,to_addresses,subject,body_text,is_read,is_starred,thread_id,attachments,created_at")
@@ -192,6 +193,13 @@ serve(async (req) => {
         if (f && !isValidEmail(f)) return json(400, { error: "Invalid forwarding address" });
         patch.forwarding_to = f;
       }
+      if ("personal_email" in body) {
+        const p = body.personal_email ? String(body.personal_email).trim().toLowerCase() : null;
+        if (p && !isValidEmail(p)) return json(400, { error: "Invalid personal email" });
+        patch.personal_email = p;
+      }
+      if (typeof body.forward_inbound === "boolean") patch.forward_inbound = body.forward_inbound;
+      if (typeof body.mask_outbound === "boolean") patch.mask_outbound = body.mask_outbound;
       if (typeof body.auto_reply_enabled === "boolean") patch.auto_reply_enabled = body.auto_reply_enabled;
       if (typeof body.auto_reply_body === "string") patch.auto_reply_body = body.auto_reply_body.slice(0, 2000);
       const { data, error } = await sb
@@ -252,6 +260,21 @@ serve(async (req) => {
       return json(200, { ok: true, message: saved });
     }
 
+    if (action === "upload_attachment") {
+      const name = String(body.name || "").slice(0, 200);
+      const mime = String(body.mime || "application/octet-stream").slice(0, 100);
+      const dataB64 = String(body.data_b64 || "");
+      if (!name || !dataB64) return json(400, { error: "name + data_b64 required" });
+      const bin = Uint8Array.from(atob(dataB64), c => c.charCodeAt(0));
+      if (bin.length > 10 * 1024 * 1024) return json(400, { error: "File exceeds 10MB" });
+      const path = `${mailbox.code}/${crypto.randomUUID()}-${name.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+      const { error: upErr } = await sb.storage
+        .from("rep-email-attachments")
+        .upload(path, bin, { contentType: mime, upsert: false });
+      if (upErr) return json(500, { error: upErr.message });
+      return json(200, { ok: true, attachment: { name, size: bin.length, mime, storage_path: path } });
+    }
+
     if (action === "send") {
       const to = Array.isArray(body.to) ? body.to.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
       const cc = Array.isArray(body.cc) ? body.cc.map((s: any) => String(s).trim().toLowerCase()).filter(Boolean) : [];
@@ -260,6 +283,21 @@ serve(async (req) => {
       const bodyText = String(body.body_text || "").slice(0, 100000);
       const inReplyTo = body.in_reply_to ? String(body.in_reply_to) : null;
       const threadId = body.thread_id ? String(body.thread_id) : null;
+      // Validate attachments (rep-email-attachments bucket; uploaded client-side before send)
+      const rawAtts = Array.isArray(body.attachments) ? body.attachments : [];
+      const attachments = rawAtts
+        .filter((a: any) => a && typeof a.storage_path === "string" && typeof a.name === "string")
+        .slice(0, 10)
+        .map((a: any) => ({
+          name: String(a.name).slice(0, 200),
+          size: Number(a.size) || 0,
+          mime: String(a.mime || "application/octet-stream").slice(0, 100),
+          storage_path: String(a.storage_path),
+        }));
+      const totalAttBytes = attachments.reduce((s: number, a: any) => s + (a.size || 0), 0);
+      if (totalAttBytes > 25 * 1024 * 1024) {
+        return json(400, { error: "Attachments exceed 25MB total" });
+      }
 
       if (to.length === 0) return json(400, { error: "At least one recipient required" });
       for (const a of [...to, ...cc, ...bcc]) {
@@ -294,8 +332,36 @@ serve(async (req) => {
       const fromName = mailbox.code; // simple display fallback
       const fromHeader = `<${addr}>`;
       const sigBlock = mailbox.signature ? `\n\n--\n${mailbox.signature}` : "";
-      const finalText = `${bodyText}${sigBlock}`;
-      const finalHtml = textToHtml(finalText);
+
+      // Sign attachment URLs (7-day expiry) so recipients can download them
+      const signedAtts: Array<{ name: string; size: number; mime: string; storage_path: string; signed_url: string }> = [];
+      for (const a of attachments) {
+        const { data: signed } = await sb.storage
+          .from("rep-email-attachments")
+          .createSignedUrl(a.storage_path, 60 * 60 * 24 * 7);
+        signedAtts.push({ ...a, signed_url: signed?.signedUrl || "" });
+      }
+
+      const attachmentTextBlock = signedAtts.length
+        ? `\n\n--\nAttachments:\n${signedAtts.map(a => `• ${a.name} (${Math.round(a.size / 1024)} KB) — ${a.signed_url}`).join("\n")}`
+        : "";
+      const finalText = `${bodyText}${attachmentTextBlock}${sigBlock}\n\nAetheris — Chaos Theory Forensics Operator\nhttps://aetheris.technology`;
+      const brandHtml = `
+<table cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #2a2a2a;padding-top:12px;font-family:Inter,Arial,sans-serif;font-size:12px;color:#6b7280;">
+  <tr>
+    <td style="padding-right:12px;vertical-align:middle;">
+      <a href="https://aetheris.technology" target="_blank" style="text-decoration:none;">
+        <img src="https://aetheris.technology/aetheris-logo.png" alt="Aetheris" width="44" height="44" style="display:block;border:0;outline:none;border-radius:6px;" />
+      </a>
+    </td>
+    <td style="vertical-align:middle;line-height:1.4;">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#111827;font-weight:600;letter-spacing:0.2px;">Aetheris</div>
+      <div style="color:#6b7280;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;">Chaos Theory Forensics Operator</div>
+      <div style="margin-top:2px;"><a href="https://aetheris.technology" target="_blank" style="color:#d97706;text-decoration:none;font-weight:600;">aetheris.technology</a></div>
+    </td>
+  </tr>
+</table>`;
+      const finalHtml = textToHtml(`${bodyText}${attachmentTextBlock}${sigBlock}`) + brandHtml;
 
       const messageId = `<${crypto.randomUUID()}@${EMAIL_DOMAIN}>`;
 
@@ -378,6 +444,7 @@ serve(async (req) => {
           in_reply_to: inReplyTo,
           thread_id: threadId || messageId,
           is_read: true,
+          attachments: signedAtts,
         })
         .select()
         .single();

@@ -15,7 +15,7 @@ export const AutonomousWorkforce: React.FC = () => {
               After the autopsy: <span className="text-amber">your autonomous workforce.</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Once the leaks are named, we rebuild with AI agents, automation, and CRM that handle the work — 
+              Once the leaks are named, we rebuild with AI agents, automation, and CRM that handle the work, 
               so your team operates on what compounds, not what bleeds.
             </p>
           </div>

@@ -4,6 +4,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
+import { buildLiveTraffic } from "../_shared/live-traffic.ts";
+import {
+  SHARED_TOOL_SCHEMAS,
+  webSearch,
+  hubspotMirrorSearch,
+  searchContentLibrary,
+  markContactRead,
+  addDripProspect,
+} from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,30 +36,8 @@ const SYSTEM_PROMPT = `You are the **Aetheris Operator Assistant** — a private
   <suggestions>["Follow-up 1","Follow-up 2","Follow-up 3"]</suggestions>
   Each suggestion ≤ 7 words, written in first person as Joseph would ask next, action-oriented.
 
-# Business knowledge (memorize)
-- **Brand**: Aetheris AI / aetheris.technology. Positioning: **Business Forensics Operator**. Hook: "Your business is leaking. You just can't see it from the inside."
-- **Methodology**: The **Leak Audit™** (7 steps). Free self-scan at /leak-audit.
-- **Owner**: Joseph Toney. Notify domain: aetheris.technology.
-- **Tone restrictions**: Crimson reserved for "leak" signal only. Forbidden: testimonials carousels, social-proof popups, "Magic Robot" analogies.
-
-# Pricing ladder (one-time unless noted)
-- Playbook Unlock $29 · Social Content Pack $39 · Content Calendar $39
-- Sales Script Pack $59 · Follow-Up Plan $59 · Full Website Report $59
-- Friction Vocabulary Audit $79 · Strategic Question Engine $99 · Brand Contradiction Finder $119
-- Digital Snapshot $149 · Strategy Blueprint $349
-- Website Evaluation $599 · Strategic Discovery Audit $599
-- **14-Day Forensic Diagnostic $2,900** (flat, applied toward engagement)
-- **Fractional CTO/CMO $5,900/mo** (recurring)
-- Subscription tiers: $25/$39/$49/$69/$99/$249/$419/$1,990 per month
-
-# Commission (3-way split, locked)
-Every closed sale tied to a rep code splits via the **tiered commission model** based on sale amount: **Tier 1 ≤ $59 = Company 50% / Rep 30% / Partner 20%**, **Tier 2 ≤ $349 = Company 60% / Rep 25% / Partner 15%**, **Tier 3 > $349 = Company 70% / Rep 20% / Partner 10%**. Applies to one-time AND recurring monthly invoices for life of subscription. No caps. No clawbacks. Paid within 7 days. Tier rates are the source of truth — rep_codes.commission_rate is ignored under the tiered model. Partner override paid to the active rep where role='partner'. Source-of-truth files: src/lib/repProducts.ts (TIER_RATES) and payments-webhook (ratesForAmount).
-
-# Site map (public routes)
-/, /leak-audit, /pricing, /blog, /blog/:slug, /resources, /careers (rep signup), /rep-portal, /scan-website, /diagnostic, /contact
-
-# Admin tools (inside this dashboard)
-All-In-One Generator · Social Content Generator · Sales Script Generator · 30-Day Content Calendar · Follow-Up System Plan · Strategic Question Engine · Brand Contradiction Finder · Friction Vocabulary Audit · Playbook Creator · Admin Library · Content Calendar · Content Engine · CRM · Campaign Control Center · SEO Optimizer · Retargeting · Visitor Companies · Outlook sync · LinkedIn posting schedule · Rep performance.
+# Canonical Aetheris knowledge (source of truth — never contradict)
+${AETHERIS_KNOWLEDGE}
 
 # Edge functions (name → purpose)
 - scan-website — runs the public Leak Audit scan
@@ -62,7 +50,7 @@ All-In-One Generator · Social Content Generator · Sales Script Generator · 30
 - send-transactional-email / process-email-queue / handle-email-suppression / handle-email-unsubscribe — email infra
 - linkedin-post / linkedin-auth — LinkedIn publishing
 - hubspot-oauth-start / hubspot-oauth-callback / hubspot-sync / hubspot-self-test / hubspot-disconnect — HubSpot connection
-- admin-data / admin-insights / admin-library / admin-pin-login / admin-assistant (this one) — admin endpoints
+- admin-data / admin-insights / admin-library / admin-pin-login / admin-assistant (this one) / admin-generate-briefing — admin endpoints
 - sales-chat — public Sales Advisor chat on the marketing site
 - content-engine-generate / content-engine-thumbnail — automated content engine`;
 
@@ -181,6 +169,18 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "get_live_traffic",
+      description:
+        "REAL-TIME site traffic snapshot: active visitors now (last 5 min), unique visitors in window, total page views, clicks, searches/scans, and the top pages, top clicks, top search terms, and top referrers. Use for ANY question about who's on the site right now, what people are viewing, clicking, or searching for.",
+      parameters: {
+        type: "object",
+        properties: { hours: { type: "integer", default: 24, maximum: 720, description: "Lookback window in hours" } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "search_crm",
       description: "Fuzzy ILIKE search across crm_contacts and crm_companies (name/email/company).",
       parameters: {
@@ -214,6 +214,12 @@ const TOOLS = [
       },
     },
   },
+  // Smart-connection tools (live web, HubSpot mirror, content library, safe writes)
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
+  SHARED_TOOL_SCHEMAS.mark_contact_read,
+  SHARED_TOOL_SCHEMAS.add_drip_prospect,
 ];
 
 const COUNTABLE_TABLES = new Set([
@@ -221,7 +227,7 @@ const COUNTABLE_TABLES = new Set([
   "drip_prospects", "drip_emails", "rep_codes", "rep_signups", "audit_runs", "hygiene_actions",
   "site_events", "crm_contacts", "crm_companies", "crm_deals", "email_send_log",
   "content_posting_schedule", "content_engine_posts", "claim_codes", "generated_playbooks",
-  "campaign_assets",
+  "campaign_assets", "mirror_contacts", "mirror_deals", "mirror_engagements",
 ]);
 
 // ---------- Tool executor ----------
@@ -360,6 +366,11 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
     }));
   }
 
+  if (name === "get_live_traffic") {
+    const hours = Math.min(Math.max(Number(args.hours) || 24, 1), 720);
+    return await buildLiveTraffic(sb, hours);
+  }
+
   if (name === "get_site_events") {
     const lim = limit(args.limit, 50, 200);
     const hours = limit(args.hours, 24, 720);
@@ -414,6 +425,12 @@ async function runTool(sb: Sb, name: string, args: Record<string, unknown>): Pro
     return { table: t, count: count || 0 };
   }
 
+  if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
+  if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
+  if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
+  if (name === "mark_contact_read") return markContactRead(sb, String(args.id || ""));
+  if (name === "add_drip_prospect") return addDripProspect(sb, args as any);
+
   return { error: `Unknown tool: ${name}` };
 }
 
@@ -449,7 +466,7 @@ serve(async (req) => {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-2.5-flash",
           messages: convo,
           tools: TOOLS,
           tool_choice: "auto",

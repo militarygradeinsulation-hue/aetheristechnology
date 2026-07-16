@@ -5,12 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getPortalToken } from '@/lib/portalAuth';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Loader2, Inbox, ListChecks, Upload as UploadIcon, Download, ExternalLink,
-  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2,
+  RotateCcw, Sparkles, Search, FileText, Phone, Mail, Zap, X, Crosshair, Trash2, Info, Send,
 } from 'lucide-react';
 import {
   portalLeads, leadsToCsv, downloadCsv, parseCsv,
@@ -18,9 +20,21 @@ import {
 } from '@/lib/portalLeads';
 import { upsertRepNote } from '@/lib/portalWorkspace';
 import { LeadGamePlan } from './LeadGamePlan';
+import { DetectiveMode } from './DetectiveMode';
+import { LeadCluesTrail } from './LeadCluesTrail';
+import { LeadActionChecklist } from './LeadActionChecklist';
+import { RecordingsHistoryPanel } from './RecordingsHistoryPanel';
+import { LeadPlaybookMatcher } from './LeadPlaybookMatcher';
+import { LeadScoreBadge } from '@/components/LeadScoreBadge';
+import { leadClues } from '@/lib/leadClues';
+import { setActiveLead, clearActiveLead, getActiveLead } from '@/lib/activeLead';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { openRepMail } from '@/lib/repMail';
+import { LeakChart } from '@/components/LeakChart';
+
 import { createCalendarEvent } from '@/lib/portalCalendar';
+import { openRepMail } from '@/lib/repMail';
+import { openLeadEmailWithTouchPrompt } from '@/lib/leadEmailTouchpoint';
+import { wb } from '@/lib/workbench';
 
 function nextBusinessMorningISO(): string {
   const d = new Date();
@@ -32,10 +46,77 @@ function nextBusinessMorningISO(): string {
   return d.toISOString();
 }
 
-const mailHandler = (email: string) => (e: React.MouseEvent) => {
-  e.preventDefault();
-  openRepMail(email);
+// Unified score badge — uses src/lib/leadScoring.ts (single source of truth).
+const ScoreBadge: React.FC<{ lead: RepLead; tone?: 'amber' | 'amber-soft' }> = ({ lead }) => {
+  if (typeof lead.score !== 'number') return null;
+  const breakdown: any[] | undefined =
+    (lead as any)?.enrichment?.score_breakdown
+    || (lead as any)?.enrichment?.scrape_score_breakdown
+    || undefined;
+  const reason: string | undefined = (lead as any)?.enrichment?.score_reason;
+  const stage: any = (lead as any)?.score_stage || ((lead as any)?.enrichment?.score_breakdown ? 'audit' : 'triage');
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
+      <LeadScoreBadge score={lead.score} stage={stage} parts={breakdown} reason={reason} compact />
+    </div>
+  );
 };
+
+const GENERIC_EMAIL_LOCAL = /^(info|contact|hello|hi|sales|support|admin|office|team|inquiries|enquiries|mail|marketing|help)@/i;
+function isGenericEmail(email?: string | null): boolean {
+  return !!email && GENERIC_EMAIL_LOCAL.test(email.trim());
+}
+function GenericEmailWarning({ email, compact = false }: { email?: string | null; compact?: boolean }) {
+  if (!isGenericEmail(email)) return null;
+  const prefix = (email || '').split('@')[0]?.toLowerCase() || 'info';
+  if (compact) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded border border-amber/40 bg-amber/10 px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-amber"
+        title={`${prefix}@ is a generic inbox — DM the company on LinkedIn instead`}
+      >
+        <Info className="w-2.5 h-2.5" /> {prefix}@ — DM on LinkedIn
+      </span>
+    );
+  }
+  return (
+    <div className="mt-1 flex items-start gap-1.5 rounded border border-amber/40 bg-amber/10 px-2 py-1 text-[11px] text-amber">
+      <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+      <span>
+        <span className="font-mono uppercase tracking-wider mr-1">Generic inbox</span>
+        <span className="text-amber/90">
+          <span className="font-mono">{prefix}@</span> rarely reaches a decision-maker. Contact the company directly through LinkedIn instead.
+        </span>
+      </span>
+    </div>
+  );
+}
+
+type LeadVerdictTone = 'go' | 'maybe' | 'skip';
+function buildLeadVerdict(lead: RepLead, scan: any): { label: string; tone: LeadVerdictTone; text: string } | null {
+  const exec: string | undefined = scan?.executiveSummary;
+  if (exec && typeof exec === 'string' && exec.trim().length > 0) {
+    const firstSentence = exec.split(/(?<=[.!?])\s+/)[0].slice(0, 220);
+    const s: number | undefined = typeof scan?.score === 'number' ? scan.score : undefined;
+    const tone: LeadVerdictTone = s == null ? 'maybe' : s >= 60 ? 'go' : s >= 40 ? 'maybe' : 'skip';
+    const label = tone === 'go' ? 'WORTH CHASING' : tone === 'maybe' ? 'WORTH A LOOK' : 'PROBABLY SKIP';
+    return { label, tone, text: firstSentence };
+  }
+  if (lead.why_fit && lead.why_fit.trim().length > 0) {
+    const s = lead.score ?? 0;
+    const tone: LeadVerdictTone = s >= 60 ? 'go' : s >= 40 ? 'maybe' : 'skip';
+    const label = tone === 'go' ? 'WORTH CHASING' : tone === 'maybe' ? 'WORTH A LOOK' : 'PROBABLY SKIP';
+    return { label, tone, text: lead.why_fit.slice(0, 220) };
+  }
+  if (typeof lead.score === 'number') {
+    if (lead.score >= 80) return { label: 'WORTH CHASING', tone: 'go', text: 'HOT score. Phone first, email second — these close fastest.' };
+    if (lead.score >= 60) return { label: 'WORTH CHASING', tone: 'go', text: 'WARM score. Personalized email + LinkedIn touch within 48h.' };
+    if (lead.score >= 40) return { label: 'WORTH A LOOK', tone: 'maybe', text: 'Decent fit. Send a tailored note, follow up in 48h.' };
+    if (lead.score > 0)  return { label: 'PROBABLY SKIP', tone: 'skip', text: 'Weak signal. Only work if your queue is empty — otherwise skip back to pool.' };
+  }
+  return { label: 'UNREAD', tone: 'maybe', text: 'No scan yet. Open the row and run a Deep Scan to see if it\'s worth your time.' };
+}
+
 
 type SubTab = 'drip' | 'pool' | 'hunt' | 'mine' | 'upload';
 
@@ -44,7 +125,7 @@ const STATUSES: LeadStatus[] = ['new','outreach','touched','replied','meeting','
 const INDUSTRY_PRESETS = [
   'Roofing', 'HVAC', 'Dental', 'Med Spa', 'Law Firms', 'Accounting',
   'Real Estate Brokerages', 'Auto Dealers', 'Home Services', 'Manufacturing',
-  'SaaS', 'Marketing Agencies',
+  'SaaS', 'Marketing Legacy shops',
 ];
 
 const SAMPLE_CSV = `business_name,contact_name,email,phone,website,industry,location,notes
@@ -58,11 +139,17 @@ export const LeadsBoard: React.FC = () => {
   const [pool, setPool] = useState<RepLead[]>([]);
   const [mine, setMine] = useState<RepLead[]>([]);
   const [activeCount, setActiveCount] = useState(0);
-  const [maxActive, setMaxActive] = useState(25);
+  const [maxActive, setMaxActive] = useState(100);
   const [dripCount, setDripCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({ industry: '', location: '', minScore: '' });
   const [preview, setPreview] = useState<RepLead | null>(null);
+  // My Leads organize controls
+  const [mineGroupBy, setMineGroupBy] = useState<'stage' | 'industry' | 'score' | 'contact'>('stage');
+  const [mineSort, setMineSort] = useState<'score' | 'recent' | 'oldest' | 'touches'>('score');
+  const [mineSearch, setMineSearch] = useState('');
+  const [mineMinScore, setMineMinScore] = useState('');
+  const [mineContactState, setMineContactState] = useState<'all' | 'contacted' | 'not_contacted' | 'connected'>('all');
   const [bulkScanning, setBulkScanning] = useState(false);
   const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
@@ -117,6 +204,14 @@ export const LeadsBoard: React.FC = () => {
     else if (sub === 'mine') refreshMine();
   }, [sub, refreshDrip, refreshPool, refreshMine]);
 
+  // Refresh the "mine" list whenever a rep checks off "Yes, I emailed them"
+  // from the touchpoint prompt — keeps touch_count / last_touched_at fresh.
+  useEffect(() => {
+    const handler = () => { if (sub === 'mine') refreshMine(); };
+    window.addEventListener('lead-touched', handler);
+    return () => window.removeEventListener('lead-touched', handler);
+  }, [sub, refreshMine]);
+
   const handleClaim = async (lead: RepLead, source: 'drip' | 'pool') => {
     try {
       await portalLeads.claim(lead.id);
@@ -130,7 +225,7 @@ export const LeadsBoard: React.FC = () => {
   const handleSkipDrip = async (lead: RepLead) => {
     try {
       await portalLeads.skipDrip(lead.id);
-      toast({ title: 'Skipped — back to pool' });
+      toast({ title: 'Skipped, back to pool' });
       refreshDrip();
     } catch (e) {
       toast({ title: 'Skip failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -143,21 +238,99 @@ export const LeadsBoard: React.FC = () => {
     return g;
   }, [mine]);
 
+  // Filter + sort + group "My Leads" by the rep's chosen organization mode
+  const mineGroups = useMemo(() => {
+    const q = mineSearch.trim().toLowerCase();
+    const minScore = mineMinScore ? Number(mineMinScore) : 0;
+    const CONTACTED_STATUSES: LeadStatus[] = ['outreach','touched','replied','meeting','won','lost'];
+    const CONNECTED_STATUSES: LeadStatus[] = ['replied','meeting','won'];
+    const filtered = mine.filter(l => {
+      if (minScore && (l.score ?? 0) < minScore) return false;
+      if (mineContactState === 'contacted' && !CONTACTED_STATUSES.includes(l.status) && (l.touch_count ?? 0) === 0) return false;
+      if (mineContactState === 'not_contacted' && (CONTACTED_STATUSES.includes(l.status) || (l.touch_count ?? 0) > 0)) return false;
+      if (mineContactState === 'connected' && !CONNECTED_STATUSES.includes(l.status)) return false;
+      if (!q) return true;
+      const hay = [l.business_name, l.contact_name, l.email, l.industry, l.location, l.notes]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+    const sorted = [...filtered].sort((a, b) => {
+      if (mineSort === 'score') return (b.score ?? 0) - (a.score ?? 0);
+      if (mineSort === 'touches') return (b.touch_count ?? 0) - (a.touch_count ?? 0);
+      const at = (x: RepLead) => new Date(x.last_touched_at || x.created_at).getTime();
+      return mineSort === 'recent' ? at(b) - at(a) : at(a) - at(b);
+    });
+
+    type Group = { key: string; label: string; color: string; items: RepLead[] };
+    const groups: Group[] = [];
+    const push = (key: string, label: string, color: string, items: RepLead[]) => {
+      if (items.length) groups.push({ key, label, color, items });
+    };
+
+    if (mineGroupBy === 'stage') {
+      STATUSES.forEach(s => push(s, STATUS_LABEL[s], STATUS_COLOR[s], sorted.filter(l => l.status === s)));
+    } else if (mineGroupBy === 'industry') {
+      const map = new Map<string, RepLead[]>();
+      sorted.forEach(l => {
+        const k = l.industry?.trim() || 'Unspecified';
+        if (!map.has(k)) map.set(k, []);
+        map.get(k)!.push(l);
+      });
+      [...map.entries()].sort((a, b) => b[1].length - a[1].length)
+        .forEach(([k, items]) => push(k, k, 'bg-amber/15 text-amber border-amber/30', items));
+    } else if (mineGroupBy === 'score') {
+      const buckets: Array<[string, string, string, (n: number) => boolean]> = [
+        ['hot', 'HOT (80+)', 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40', n => n >= 80],
+        ['warm', 'WARM (60-79)', 'bg-amber/15 text-amber border-amber/40', n => n >= 60 && n < 80],
+        ['shot', 'WORTH A SHOT (40-59)', 'bg-amber/10 text-amber/80 border-amber/20', n => n >= 40 && n < 60],
+        ['low', 'LOW PRIORITY (<40)', 'bg-muted text-muted-foreground border-border', n => n < 40],
+      ];
+      buckets.forEach(([k, label, color, test]) =>
+        push(k, label, color, sorted.filter(l => test(l.score ?? 0))));
+    } else {
+      push('not_contacted', 'NOT CONTACTED YET',
+        'bg-blue-500/15 text-blue-400 border-blue-500/30',
+        sorted.filter(l => (l.touch_count ?? 0) === 0 && !CONTACTED_STATUSES.includes(l.status)));
+      push('contacted', 'CONTACTED, NO REPLY',
+        'bg-amber/15 text-amber border-amber/30',
+        sorted.filter(l => ((l.touch_count ?? 0) > 0 || ['outreach','touched'].includes(l.status))
+          && !CONNECTED_STATUSES.includes(l.status) && l.status !== 'lost' && l.status !== 'dead'));
+      push('connected', 'CONNECTED / IN MOTION',
+        'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+        sorted.filter(l => CONNECTED_STATUSES.includes(l.status)));
+      push('closed', 'CLOSED / DEAD',
+        'bg-muted text-muted-foreground border-border',
+        sorted.filter(l => l.status === 'lost' || l.status === 'dead'));
+    }
+    return { groups, totalShown: filtered.length };
+  }, [mine, mineGroupBy, mineSort, mineSearch, mineMinScore, mineContactState]);
+
+  // All leads with a website/email — used as the picker list.
+  // We show already-deep-scanned ones too so the user can SEE what's been done,
+  // and choose to re-scan or skip them.
   const scanCandidates = useMemo(
-    () => mine.filter(l => !l.enrichment?.rocketreach && (l.website || l.email)),
+    () => mine.filter(l => l.website || l.email),
     [mine]
+  );
+  const isAlreadyScanned = useCallback(
+    (l: any) => !!(l?.enrichment?.rocketreach || l?.enrichment?.firecrawl),
+    []
+  );
+  const freshCandidates = useMemo(
+    () => scanCandidates.filter(l => !isAlreadyScanned(l)),
+    [scanCandidates, isAlreadyScanned]
   );
 
   const openBulkPicker = useCallback(() => {
     if (scanCandidates.length === 0) {
-      toast({ title: 'Nothing to scan', description: 'All your leads are already deep-scanned (or missing website/email).' });
+      toast({ title: 'Nothing to scan', description: 'No leads have a website or email yet.' });
       return;
     }
-    // Preselect first 10
-    setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)));
+    // Preselect first 10 leads that have NOT been deep-scanned yet
+    setBulkSelected(new Set(freshCandidates.slice(0, 10).map(l => l.id)));
     setBulkStatuses({});
     setBulkPickerOpen(true);
-  }, [scanCandidates, toast]);
+  }, [scanCandidates, freshCandidates, toast]);
 
   const toggleBulkPick = (id: string) => {
     setBulkSelected(prev => {
@@ -169,18 +342,24 @@ export const LeadsBoard: React.FC = () => {
     });
   };
 
-  const runBulkDeepScan = useCallback(async () => {
-    const ids = Array.from(bulkSelected);
-    const targets = scanCandidates.filter(l => ids.includes(l.id));
-    if (targets.length === 0) return;
+  const runBulkDeepScanFor = useCallback(async (ids: string[]) => {
+    const targets = scanCandidates.filter(l => ids.includes(l.id))
+      // include leads that already have RR but were just retried
+      .concat(mine.filter(l => ids.includes(l.id) && !scanCandidates.find(s => s.id === l.id)));
+    const unique = Array.from(new Map(targets.map(l => [l.id, l])).values());
+    if (unique.length === 0) return;
     setBulkScanning(true);
-    setBulkStatuses(Object.fromEntries(targets.map(l => [l.id, 'scanning' as const])));
-    toast({ title: `Deep-scanning ${targets.length} leads in parallel…` });
+    setBulkStatuses(prev => ({
+      ...prev,
+      ...Object.fromEntries(unique.map(l => [l.id, 'scanning' as const])),
+    }));
+    toast({ title: `Deep-scanning ${unique.length} lead${unique.length === 1 ? '' : 's'} in parallel…` });
     try {
       const results = await Promise.allSettled(
-        targets.map(async l => {
+        unique.map(async l => {
           try {
-            const out = await portalLeads.rocketReach(l.id, {});
+            // force: true so every selected lead gets a complete fresh scan
+            const out = await portalLeads.rocketReach(l.id, { force: true });
             setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
             return out;
           } catch (e) {
@@ -192,7 +371,7 @@ export const LeadsBoard: React.FC = () => {
       const ok = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.length - ok;
       await Promise.allSettled(
-        targets.map(async (l, i) => {
+        unique.map(async (l, i) => {
           const r = results[i];
           if (r.status !== 'fulfilled') return;
           const data: any = r.value;
@@ -201,7 +380,7 @@ export const LeadsBoard: React.FC = () => {
           await createCalendarEvent({
             kind: 'follow_up',
             title: `Follow up: ${businessName}`,
-            body: `Lead: ${businessName}\nDeep scan complete — review insights and reach out.`,
+            body: `Lead: ${businessName}\nDeep scan complete, review insights and reach out.`,
             start_at: nextBusinessMorningISO(),
             all_day: false,
             lead_id: l.id,
@@ -210,7 +389,7 @@ export const LeadsBoard: React.FC = () => {
       );
       toast({
         title: `Bulk deep scan finished`,
-        description: `${ok} succeeded${failed ? `, ${failed} failed` : ''}. Follow-ups added to your calendar.`,
+        description: `${ok} succeeded${failed ? `, ${failed} failed — use Retry failed` : ''}. Follow-ups added to your calendar.`,
         variant: failed && !ok ? 'destructive' : 'default',
       });
       refreshMine();
@@ -219,7 +398,130 @@ export const LeadsBoard: React.FC = () => {
     } finally {
       setBulkScanning(false);
     }
-  }, [bulkSelected, scanCandidates, refreshMine, toast]);
+  }, [scanCandidates, mine, refreshMine, toast]);
+
+  const runBulkDeepScan = useCallback(
+    () => runBulkDeepScanFor(Array.from(bulkSelected)),
+    [bulkSelected, runBulkDeepScanFor]
+  );
+
+  const retryFailedBulkScan = useCallback(() => {
+    const failedIds = Object.entries(bulkStatuses)
+      .filter(([, s]) => s === 'failed')
+      .map(([id]) => id);
+    if (failedIds.length === 0) return;
+    runBulkDeepScanFor(failedIds);
+  }, [bulkStatuses, runBulkDeepScanFor]);
+
+  // FULL FORENSIC SWEEP — for each selected lead: website scan + deep scan + detective mode, saved.
+  const runBulkFullForensic = useCallback(async () => {
+    const ids = Array.from(bulkSelected);
+    const targets = scanCandidates.filter(l => ids.includes(l.id))
+      .concat(mine.filter(l => ids.includes(l.id) && !scanCandidates.find(s => s.id === l.id)));
+    const unique = Array.from(new Map(targets.map(l => [l.id, l])).values()).slice(0, 10);
+    if (unique.length === 0) return;
+    const token = getPortalToken();
+    if (!token) { toast({ title: 'Portal session expired, sign in again.', variant: 'destructive' }); return; }
+    setBulkScanning(true);
+    setBulkStatuses(prev => ({
+      ...prev,
+      ...Object.fromEntries(unique.map(l => [l.id, 'scanning' as const])),
+    }));
+    toast({ title: `Full forensic sweep on ${unique.length} lead${unique.length === 1 ? '' : 's'}…`, description: 'Website scan → deep scan → detective mode. Running 3 in parallel.' });
+
+    // Run 3 leads at a time so the AI gateway doesn't get hammered.
+    const concurrency = 3;
+    let ok = 0, failed = 0;
+    const queue = [...unique];
+    const worker = async () => {
+      while (queue.length) {
+        const l = queue.shift()!;
+        try {
+          // 1) Website scan
+          let scanRes: any = null;
+          if (l.website) {
+            try {
+              scanRes = await portalLeads.scan(l.id, { url: l.website, force: false });
+              await leadClues.log(l.id, {
+                kind: 'scan',
+                label: scanRes?.cached ? 'Loaded saved website scan (batch)' : 'Ran website leak scan (batch)',
+                tool_key: 'website-scanner',
+                meta: { url: l.website, cached: !!scanRes?.cached, grade: scanRes?.scan?.grade, score: scanRes?.scan?.score },
+              });
+            } catch (e) { console.warn('batch scan failed', l.id, e); }
+          }
+          // 2) Deep scan (RocketReach + Firecrawl)
+          let rrRes: any = null;
+          try {
+            rrRes = await portalLeads.rocketReach(l.id, { force: true });
+            await leadClues.log(l.id, {
+              kind: 'rocketreach',
+              label: rrRes?.cached ? 'Loaded saved deep scan (batch)' : 'Deep scan complete (batch)',
+              tool_key: 'rocketreach',
+              meta: { cached: !!rrRes?.cached, name: rrRes?.person?.name, title: rrRes?.person?.current_title },
+            });
+          } catch (e) { console.warn('batch deep scan failed', l.id, e); }
+          // 3) Detective mode
+          const { data: detData, error: detErr } = await supabase.functions.invoke('portal-detective', {
+            body: {
+              lead: l,
+              scan: scanRes?.scan,
+              rocketreach: rrRes?.person,
+              firecrawl: rrRes?.firecrawl,
+              score: (l as any)?.score,
+              channel: 'email',
+            },
+            headers: { 'x-portal-token': token },
+          });
+          if (detErr) throw new Error(detErr.message);
+          if ((detData as any)?.error) throw new Error((detData as any).error);
+          const detective = (detData as any)?.result || null;
+          await leadClues.log(l.id, {
+            kind: 'detective',
+            label: `Detective verdict: ${detective?.best_angle?.title || detective?.best_angle?.leak_or_gap || 'angle locked'}`,
+            tool_key: 'detective-mode',
+            meta: { detective },
+          });
+          // Calendar follow-up
+          try {
+            const businessName = l.business_name || l.email || 'Lead';
+            await createCalendarEvent({
+              kind: 'follow_up',
+              title: `Forensic sweep ready: ${businessName}`,
+              body: [
+                `Lead: ${businessName}`,
+                detective?.best_angle?.title ? `Angle: ${detective.best_angle.title}` : null,
+                detective?.best_angle?.leak_or_gap ? `Leak: ${detective.best_angle.leak_or_gap}` : null,
+                'Full forensic sweep complete (scan + deep scan + detective). Open the lead to see the case file.',
+              ].filter(Boolean).join('\n'),
+              start_at: nextBusinessMorningISO(),
+              all_day: false,
+              lead_id: l.id,
+            });
+          } catch (calErr) { console.warn('calendar autosave failed:', calErr); }
+          setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
+          ok++;
+        } catch (e) {
+          console.warn('forensic sweep failed', l.id, e);
+          setBulkStatuses(prev => ({ ...prev, [l.id]: 'failed' }));
+          failed++;
+        }
+      }
+    };
+    try {
+      await Promise.all(Array.from({ length: Math.min(concurrency, unique.length) }, worker));
+      toast({
+        title: 'Forensic sweep finished',
+        description: `${ok} complete${failed ? `, ${failed} failed` : ''}. Case files saved to each lead's clue trail; follow-ups on your calendar.`,
+        variant: failed && !ok ? 'destructive' : 'default',
+      });
+      refreshMine();
+    } finally {
+      setBulkScanning(false);
+    }
+  }, [bulkSelected, scanCandidates, mine, refreshMine, toast]);
+
+
 
 
   return (
@@ -245,7 +547,7 @@ export const LeadsBoard: React.FC = () => {
         ))}
       </div>
 
-      {/* DRIP — Today's Drop */}
+      {/* DRIP, Today's Drop */}
       {sub === 'drip' && (
         <Card>
           <CardHeader>
@@ -276,22 +578,19 @@ export const LeadsBoard: React.FC = () => {
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || ', '}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
+                          {[l.industry, l.location].filter(Boolean).join(' · ') || ', '}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/40 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2 italic">{l.why_fit}</p>}
                     <div className="text-xs text-muted-foreground mt-2 space-y-0.5">
                       {l.email && <p className="truncate"><Mail className="w-3 h-3 inline mr-1" />{l.email}</p>}
                       {l.phone && <p className="truncate"><Phone className="w-3 h-3 inline mr-1" />{l.phone}</p>}
                     </div>
+                    <GenericEmailWarning email={l.email} />
                     <div className="mt-3 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="ghost" onClick={() => handleSkipDrip(l)} className="text-muted-foreground">
                         <X className="w-3 h-3 mr-1" /> Skip
@@ -316,7 +615,7 @@ export const LeadsBoard: React.FC = () => {
               <Sparkles className="w-5 h-5 text-amber" /> Admin-Pushed Leads
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Vetted prospects scraped by the company. Claim one and it's yours to work — others can't see it once claimed.
+              Vetted prospects scraped by the company. Claim one and it's yours to work, others can't see it once claimed.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -347,16 +646,12 @@ export const LeadsBoard: React.FC = () => {
                   <div key={l.id} className="rounded-lg border border-border/50 bg-card/40 p-3 hover:border-amber/40 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                        <p className="font-semibold text-foreground truncate">{l.business_name || l.email || ', '}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {[l.industry, l.location].filter(Boolean).join(' · ') || '—'}
+                          {[l.industry, l.location].filter(Boolean).join(' · ') || ', '}
                         </p>
                       </div>
-                      {typeof l.score === 'number' && (
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber/15 text-amber border border-amber/30 flex-shrink-0">
-                          {l.score}
-                        </span>
-                      )}
+                      <ScoreBadge lead={l} tone="amber-soft" />
                     </div>
                     {l.why_fit && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{l.why_fit}</p>}
                     {l.website && (
@@ -404,20 +699,93 @@ export const LeadsBoard: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Organize controls */}
+            {mine.length > 0 && (
+              <div className="rounded-lg border border-border/50 bg-card/30 p-3 space-y-3">
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="flex-1 min-w-[180px]">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Search</Label>
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input className="pl-7 h-9" placeholder="Name, email, industry…"
+                        value={mineSearch} onChange={e => setMineSearch(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Group by</Label>
+                    <select
+                      value={mineGroupBy}
+                      onChange={e => setMineGroupBy(e.target.value as typeof mineGroupBy)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="stage">Outreach stage</option>
+                      <option value="contact">Contacted vs not</option>
+                      <option value="score">Score tier</option>
+                      <option value="industry">Vertical / industry</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Sort</Label>
+                    <select
+                      value={mineSort}
+                      onChange={e => setMineSort(e.target.value as typeof mineSort)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="score">Score (high → low)</option>
+                      <option value="recent">Most recent activity</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="touches">Most touches</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Contact state</Label>
+                    <select
+                      value={mineContactState}
+                      onChange={e => setMineContactState(e.target.value as typeof mineContactState)}
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="all">All</option>
+                      <option value="not_contacted">Not contacted</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="connected">Connected (replied+)</option>
+                    </select>
+                  </div>
+                  <div className="w-28">
+                    <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Min score</Label>
+                    <Input className="h-9" type="number" placeholder="0"
+                      value={mineMinScore} onChange={e => setMineMinScore(e.target.value)} />
+                  </div>
+                  {(mineSearch || mineMinScore || mineContactState !== 'all' || mineGroupBy !== 'stage' || mineSort !== 'score') && (
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      setMineSearch(''); setMineMinScore(''); setMineContactState('all');
+                      setMineGroupBy('stage'); setMineSort('score');
+                    }}>Reset</Button>
+                  )}
+                </div>
+                <p className="text-[10px] font-mono text-muted-foreground">
+                  Showing <span className="text-amber">{mineGroups.totalShown}</span> of {mine.length} leads
+                </p>
+              </div>
+            )}
+
             {loading && mine.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
             ) : mine.length === 0 ? (
               <p className="py-12 text-center text-muted-foreground text-sm">
                 No claimed leads yet. Pull some from the Lead Pool or upload your own.
               </p>
+            ) : mineGroups.groups.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground text-sm">
+                No leads match your current filters.
+              </p>
             ) : (
-              STATUSES.map(s => grouped[s].length > 0 && (
-                <div key={s}>
-                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${STATUS_COLOR[s]} mb-2`}>
-                    {STATUS_LABEL[s]} · {grouped[s].length}
+              mineGroups.groups.map(g => (
+                <div key={g.key}>
+                  <p className={`inline-block text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${g.color} mb-2`}>
+                    {g.label} · {g.items.length}
                   </p>
                   <div className="space-y-2">
-                    {grouped[s].map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
+                    {g.items.map(l => <LeadRow key={l.id} lead={l} onChanged={refreshMine} />)}
                   </div>
                 </div>
               ))
@@ -426,7 +794,7 @@ export const LeadsBoard: React.FC = () => {
         </Card>
       )}
 
-      {/* HUNT — AI scraper */}
+      {/* HUNT, AI scraper */}
       {sub === 'hunt' && (
         <HuntPanel onScraped={(toMine) => {
           if (toMine) { setSub('drip'); refreshDrip(); }
@@ -442,20 +810,25 @@ export const LeadsBoard: React.FC = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber" /> Deep Scan — Pick up to 10
+              <Sparkles className="w-5 h-5 text-amber" /> Batch Forensics, Pick up to 10
             </DialogTitle>
             <DialogDescription>
-              Select which leads to enrich. We'll run them in parallel and add follow-ups to your calendar.
+              <span className="block"><span className="text-amber">Deep Scan</span> = RocketReach + Firecrawl enrichment only.</span>
+              <span className="block"><span className="text-amber">Full Forensic Sweep</span> = website scan + deep scan + Detective Mode verdict, saved to each lead's clue trail.</span>
             </DialogDescription>
+
           </DialogHeader>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{bulkSelected.size}/10 selected · {scanCandidates.length} eligible</span>
+            <span>
+              {bulkSelected.size}/10 selected · {freshCandidates.length} fresh ·{' '}
+              <span className="text-green-400">{scanCandidates.length - freshCandidates.length} already deep-scanned</span>
+            </span>
             <div className="flex gap-2">
               <button
                 className="text-amber hover:underline disabled:opacity-50"
                 disabled={bulkScanning}
-                onClick={() => setBulkSelected(new Set(scanCandidates.slice(0, 10).map(l => l.id)))}
-              >Select first 10</button>
+                onClick={() => setBulkSelected(new Set(freshCandidates.slice(0, 10).map(l => l.id)))}
+              >Select first 10 fresh</button>
               <button
                 className="text-muted-foreground hover:text-foreground disabled:opacity-50"
                 disabled={bulkScanning}
@@ -464,13 +837,17 @@ export const LeadsBoard: React.FC = () => {
             </div>
           </div>
           <div className="max-h-[50vh] overflow-y-auto space-y-1 border border-border/50 rounded-md p-2">
-            {scanCandidates.map(l => {
+            {/* Fresh leads first, already-scanned ones at the bottom so users see what's left to do */}
+            {[...freshCandidates, ...scanCandidates.filter(l => isAlreadyScanned(l))].map(l => {
               const checked = bulkSelected.has(l.id);
               const status = bulkStatuses[l.id];
+              const alreadyDone = isAlreadyScanned(l);
               return (
                 <label
                   key={l.id}
-                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${checked ? 'bg-amber/5' : ''}`}
+                  className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-muted/40 ${
+                    checked ? 'bg-amber/5' : alreadyDone ? 'bg-green-500/5 opacity-80' : ''
+                  }`}
                 >
                   <input
                     type="checkbox"
@@ -480,7 +857,14 @@ export const LeadsBoard: React.FC = () => {
                     className="accent-amber"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{l.business_name || l.email || '—'}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-2">
+                      {l.business_name || l.email || '—'}
+                      {alreadyDone && !status && (
+                        <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-green-400/40 text-green-400 bg-green-500/5">
+                          ✓ Already deep-scanned
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {[l.industry, l.location, l.website].filter(Boolean).join(' · ')}
                     </p>
@@ -490,14 +874,66 @@ export const LeadsBoard: React.FC = () => {
                   )}
                   {status === 'done' && <span className="text-xs text-green-400">✓ Done</span>}
                   {status === 'failed' && <span className="text-xs text-red-400">Failed</span>}
-                  {!status && checked && <span className="text-xs text-muted-foreground">Queued</span>}
+                  {!status && checked && (
+                    <span className="text-xs text-muted-foreground">{alreadyDone ? 'Will re-scan' : 'Queued'}</span>
+                  )}
                 </label>
               );
             })}
           </div>
+          {/* Live status summary so you can see exactly which leads were used + their scan state */}
+          {Object.keys(bulkStatuses).length > 0 && (() => {
+            const entries = Object.entries(bulkStatuses);
+            const done = entries.filter(([, s]) => s === 'done').length;
+            const failed = entries.filter(([, s]) => s === 'failed').length;
+            const scanning = entries.filter(([, s]) => s === 'scanning').length;
+            return (
+              <div className="rounded-md border border-amber/30 bg-amber/5 p-2 text-xs space-y-1">
+                <div className="flex flex-wrap items-center gap-3 font-mono uppercase tracking-wider">
+                  <span className="text-amber">Batch · {entries.length} leads</span>
+                  <span className="text-green-400">✓ {done} done</span>
+                  {scanning > 0 && <span className="text-amber inline-flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />{scanning} scanning</span>}
+                  {failed > 0 && <span className="text-red-400">✗ {failed} failed</span>}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {entries.map(([id, s]) => {
+                    const lead = mine.find(l => l.id === id);
+                    if (!lead) return null;
+                    const tone = s === 'done' ? 'border-green-400/40 text-green-400'
+                      : s === 'failed' ? 'border-red-400/40 text-red-400'
+                      : 'border-amber/40 text-amber';
+                    return (
+                      <span key={id} className={`px-2 py-0.5 rounded border ${tone} text-[10px] font-mono`}>
+                        {(lead.business_name || lead.email || 'lead').slice(0, 28)}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" disabled={bulkScanning} onClick={() => setBulkPickerOpen(false)}>
-              {bulkScanning ? 'Running…' : 'Cancel'}
+              {bulkScanning ? 'Running…' : 'Close'}
+            </Button>
+            {Object.values(bulkStatuses).some(s => s === 'failed') && (
+              <Button
+                variant="outline"
+                disabled={bulkScanning}
+                onClick={retryFailedBulkScan}
+                className="border-red-400/50 text-red-400 hover:bg-red-500/10"
+              >
+                <RotateCcw className="w-3 h-3 mr-1" /> Retry failed
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="border-amber/50 text-amber hover:bg-amber/10"
+              disabled={bulkScanning || bulkSelected.size === 0}
+              onClick={runBulkFullForensic}
+              title="Website scan + deep scan + Detective Mode, saved to each lead"
+            >
+              {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Sweeping {bulkSelected.size}…</> : <><Search className="w-3 h-3 mr-1" /> Full Forensic Sweep {bulkSelected.size}</>}
             </Button>
             <Button
               className="bg-amber text-background hover:bg-amber/90"
@@ -506,6 +942,7 @@ export const LeadsBoard: React.FC = () => {
             >
               {bulkScanning ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Scanning {bulkSelected.size}…</> : <>Deep Scan {bulkSelected.size}</>}
             </Button>
+
           </div>
         </DialogContent>
       </Dialog>
@@ -525,7 +962,7 @@ export const LeadsBoard: React.FC = () => {
                   )}
                 </DialogTitle>
                 <DialogDescription>
-                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || '—'}
+                  {[preview.industry, preview.location].filter(Boolean).join(' · ') || ', '}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3 text-sm">
@@ -534,7 +971,7 @@ export const LeadsBoard: React.FC = () => {
                 )}
                 {preview.email && (
                   <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-amber" />
-                    <a href={`mailto:${preview.email}`} onClick={mailHandler(preview.email!)} className="text-amber hover:underline break-all">{preview.email}</a>
+                    <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(preview.email!);}} className="text-amber hover:underline break-all">{preview.email}</a>
                   </p>
                 )}
                 {preview.phone && (
@@ -591,11 +1028,15 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
   const [assignToMe, setAssignToMe] = useState(true);
   const [running, setRunning] = useState(false);
 
+  // Paste-a-URL → instant lead
+  const [pasteUrl, setPasteUrl] = useState('');
+  const [pasteRunning, setPasteRunning] = useState(false);
+
   const run = async () => {
     setRunning(true);
     try {
       const token = getPortalToken();
-      if (!token) throw new Error('Portal session expired — sign in again.');
+      if (!token) throw new Error('Portal session expired, sign in again.');
       const { data, error } = await supabase.functions.invoke('portal-scrape-leads', {
         body: { industry, location, count, assign_to_me: assignToMe },
         headers: { 'x-portal-token': token },
@@ -615,88 +1056,187 @@ const HuntPanel: React.FC<{ onScraped: (toMine: boolean) => void }> = ({ onScrap
     } finally { setRunning(false); }
   };
 
+  const runPasteUrl = async () => {
+    const raw = pasteUrl.trim();
+    if (!raw) return;
+    setPasteRunning(true);
+    try {
+      const token = getPortalToken();
+      if (!token) throw new Error('Portal session expired, sign in again.');
+      const websiteUrl = raw.startsWith('http') ? raw : `https://${raw}`;
+      let host = '';
+      try { host = new URL(websiteUrl).hostname.replace(/^www\./, ''); } catch { /* noop */ }
+      const fallbackName = host.split('.').slice(0, -1).join('.').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) || host || raw;
+
+      // 1) Pull whatever Firecrawl + RocketReach can find so we prefill the lead.
+      let prefill: any = {};
+      try {
+        const { data: prepData } = await supabase.functions.invoke('detective-prep', {
+          body: { website: websiteUrl, scan: false, firecrawl: true, rocketreach: true },
+          headers: { 'x-portal-token': token },
+        });
+        const fc = (prepData as any)?.firecrawl;
+        const rr = (prepData as any)?.rocketreach;
+        const fj = fc?.json || {};
+        prefill = {
+          business_name: fj.legal_name || fc?.metadata?.title || rr?.employer || fallbackName,
+          contact_name: rr?.name || (Array.isArray(fj.leadership) ? fj.leadership[0]?.name : null) || null,
+          email: rr?.best_email || (Array.isArray(fj.emails) ? fj.emails[0] : null) || null,
+          phone: rr?.phones?.[0]?.number || (Array.isArray(fj.phones) ? fj.phones[0] : null) || null,
+          industry: Array.isArray(fj.industries) ? fj.industries[0] : (industry || null),
+          location: fj.headquarters || (Array.isArray(fj.locations) ? fj.locations[0] : null) || location || null,
+          notes: fc?.summary || fj.description || null,
+        };
+      } catch {
+        prefill = { business_name: fallbackName };
+      }
+
+      const row = {
+        ...prefill,
+        website: websiteUrl,
+      };
+
+      const res = await portalLeads.upload([row]);
+      const inserted = (res as any)?.inserted || 0;
+      toast({
+        title: inserted > 0 ? `Lead created from ${host || 'URL'}` : 'Could not create lead',
+        description: inserted > 0
+          ? 'Prefilled with company info + contact. Open it to run a Deep Scan or Detective Mode.'
+          : 'The site may already exist as a lead, or the row was missing a name and email.',
+      });
+      if (inserted > 0) {
+        setPasteUrl('');
+        onScraped(true);
+      }
+    } catch (e) {
+      toast({ title: 'Could not create lead', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally {
+      setPasteRunning(false);
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-display flex items-center gap-2">
-          <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode — AI Web Scraper
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label className="text-xs text-muted-foreground">Quick industries</Label>
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            {INDUSTRY_PRESETS.map(p => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setIndustry(p)}
-                className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
-                  industry === p
-                    ? 'bg-amber text-background border-amber'
-                    : 'border-border/50 text-muted-foreground hover:border-amber/40 hover:text-amber'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+    <div className="space-y-4">
+      {/* Paste a URL → instant lead */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display flex items-center gap-2">
+            <ExternalLink className="w-5 h-5 text-amber" /> Paste a URL, instant lead
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Drop any company website. We'll scrape it with Firecrawl + RocketReach, pull contact info,
+            and create a lead in your queue so the deep-scan and detective tools have something to chew on.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              value={pasteUrl}
+              onChange={(e) => setPasteUrl(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !pasteRunning && pasteUrl.trim()) runPasteUrl(); }}
+              placeholder="https://company.com"
+              className="flex-1"
+            />
+            <Button
+              onClick={runPasteUrl}
+              disabled={pasteRunning || !pasteUrl.trim()}
+              className="bg-amber text-background hover:bg-amber/90"
+            >
+              {pasteRunning
+                ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping…</>
+                : <><Sparkles className="w-4 h-4 mr-1" /> Scrape & create lead</>
+              }
+            </Button>
           </div>
-        </div>
+          <p className="text-xs text-muted-foreground italic">
+            Tip: works with any URL. We'll auto-fill business name, contact, email, phone and industry when we can find them.
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="grid sm:grid-cols-3 gap-3">
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display flex items-center gap-2">
+            <Crosshair className="w-5 h-5 text-amber" /> Hunt Mode, AI Web Scraper
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            AI scrapes the web for ICP-fit prospects in your chosen industry and location, scores them, and drops them into your queue.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <Label className="text-xs">Industry (optional)</Label>
-            <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+            <Label className="text-xs text-muted-foreground">Quick industries</Label>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {INDUSTRY_PRESETS.map(p => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setIndustry(p)}
+                  className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                    industry === p
+                      ? 'bg-amber text-background border-amber'
+                      : 'border-border/50 text-muted-foreground hover:border-amber/40 hover:text-amber'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <Label className="text-xs">Location</Label>
-            <Input value={location} onChange={e => setLocation(e.target.value)} />
+
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div>
+              <Label className="text-xs">Industry (optional)</Label>
+              <Input value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. dental, roofing, SaaS" />
+            </div>
+            <div>
+              <Label className="text-xs">Location</Label>
+              <Input value={location} onChange={e => setLocation(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-xs">Count (3-25)</Label>
+              <Input type="number" min={3} max={25} value={count}
+                onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
+            </div>
           </div>
-          <div>
-            <Label className="text-xs">Count (3–25)</Label>
-            <Input type="number" min={3} max={25} value={count}
-              onChange={e => setCount(Math.min(25, Math.max(3, Number(e.target.value) || 10)))} />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAssignToMe(true)}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Drop into my queue
+            </button>
+            <button
+              type="button"
+              onClick={() => setAssignToMe(false)}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                !assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Push to shared pool
+            </button>
           </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setAssignToMe(true)}
-            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-              assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Drop into my queue
-          </button>
-          <button
-            type="button"
-            onClick={() => setAssignToMe(false)}
-            className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-              !assignToMe ? 'bg-amber/15 border-amber/40 text-amber' : 'border-border/50 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Push to shared pool
-          </button>
-        </div>
+          <Button onClick={run} disabled={running} className="bg-amber text-background hover:bg-amber/90">
+            {running
+              ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping & scoring...</>
+              : <><Crosshair className="w-4 h-4 mr-1" /> Run scrape</>
+            }
+          </Button>
 
-        <Button onClick={run} disabled={running} className="bg-amber text-background hover:bg-amber/90">
-          {running
-            ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Scraping & scoring...</>
-            : <><Crosshair className="w-4 h-4 mr-1" /> Run scrape</>
-          }
-        </Button>
-
-        <p className="text-xs text-muted-foreground italic">
-          Tip: leave industry blank for a broad sweep of HubSpot/Salesforce-using SMBs in your location.
-        </p>
-      </CardContent>
-    </Card>
+          <p className="text-xs text-muted-foreground italic">
+            Tip: leave industry blank for a broad sweep of HubSpot/Salesforce-using SMBs in your location.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
+
 
 // ============================================================
 const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onChanged }) => {
@@ -721,6 +1261,29 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     location: lead.location || '',
   });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cluesTick, setCluesTick] = useState(0);
+  const bumpClues = () => setCluesTick(t => t + 1);
+  const jumpToTool = (toolKey: string) => {
+    const id = `lead-tool-${lead.id}-${toolKey}`;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-amber');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-amber'), 1800);
+      return;
+    }
+    // Fallback: open the tool inside the Floating Workbench so the clue
+    // actually goes somewhere even when the tool isn't rendered inline.
+    try {
+      const stack = wb.getStack();
+      if (!stack.some(w => w.toolId === toolKey)) {
+        wb.setStack([{ toolId: toolKey }, ...stack]);
+      }
+      wb.setOpen(true);
+      // Nudge listeners (FloatingWorkbench polls via storage events).
+      window.dispatchEvent(new StorageEvent('storage', { key: 'workbench.open' }));
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     setEditFields({
@@ -740,6 +1303,28 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
   useEffect(() => { setFc(lead.enrichment?.firecrawl || null); }, [lead.enrichment]);
   useEffect(() => { if (lead.website) setScanUrl(lead.website); }, [lead.website]);
 
+  // Active Lead context — when this row is open, mark it as the active lead
+  // so any tool the rep opens (Workbench, Detective Mode, Scanner, etc.)
+  // auto-fills url/business/contact and logs a clue. Cleared if this row
+  // closes AND it was the lead that set the context.
+  useEffect(() => {
+    if (!open) return;
+    setActiveLead({
+      leadId: lead.id,
+      business_name: lead.business_name || undefined,
+      website: lead.website || undefined,
+      contact_name: lead.contact_name || undefined,
+      email: lead.email || undefined,
+      phone: lead.phone || undefined,
+      industry: lead.industry || undefined,
+      location: lead.location || undefined,
+    });
+    return () => {
+      const cur = getActiveLead();
+      if (cur?.leadId === lead.id) clearActiveLead();
+    };
+  }, [open, lead.id, lead.business_name, lead.website, lead.contact_name, lead.email, lead.phone, lead.industry, lead.location]);
+
   const scheduleSaveNotes = (val: string) => {
     setNotes(val);
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -752,8 +1337,17 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
 
   const setStatus = async (status: LeadStatus) => {
     setSaving(true);
-    try { await portalLeads.updateStatus(lead.id, { status }); onChanged(); }
-    catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
+    const prev = lead.status;
+    try {
+      await portalLeads.updateStatus(lead.id, { status });
+      await leadClues.log(lead.id, {
+        kind: 'status_change',
+        label: `Status: ${STATUS_LABEL[prev]} → ${STATUS_LABEL[status]}`,
+        stage_from: prev, stage_to: status,
+      });
+      bumpClues();
+      onChanged();
+    } catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
     finally { setSaving(false); }
   };
 
@@ -761,6 +1355,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     setSaving(true);
     try {
       await portalLeads.updateStatus(lead.id, { touch: true, status: lead.status === 'new' ? 'touched' : lead.status });
+      await leadClues.log(lead.id, { kind: 'touch', label: 'Logged a touch' });
+      bumpClues();
       toast({ title: 'Touch logged' });
       onChanged();
     } catch { toast({ title: 'Failed', variant: 'destructive' }); }
@@ -771,6 +1367,39 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
     if (!confirm('Release this lead back to the pool? Other reps will be able to claim it.')) return;
     try { await portalLeads.release(lead.id); toast({ title: 'Released to pool' }); onChanged(); }
     catch { toast({ title: 'Failed', variant: 'destructive' }); }
+  };
+
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardReps, setForwardReps] = useState<{ code: string; rep_name: string | null }[]>([]);
+  const [forwardTarget, setForwardTarget] = useState('');
+  const [forwardNote, setForwardNote] = useState('');
+  const [forwardBusy, setForwardBusy] = useState(false);
+
+  const openForward = async () => {
+    setForwardOpen(true);
+    setForwardTarget('');
+    setForwardNote('');
+    if (forwardReps.length === 0) {
+      try {
+        const { reps } = await portalLeads.listReps();
+        setForwardReps(reps || []);
+      } catch (e) {
+        toast({ title: 'Could not load reps', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      }
+    }
+  };
+
+  const doForward = async () => {
+    if (!forwardTarget) { toast({ title: 'Pick a rep', variant: 'destructive' }); return; }
+    setForwardBusy(true);
+    try {
+      const res = await portalLeads.forward(lead.id, forwardTarget, forwardNote);
+      toast({ title: `Forwarded to ${res.target}`, description: 'Lead is now in their drip queue for 72h.' });
+      setForwardOpen(false);
+      onChanged();
+    } catch (e) {
+      toast({ title: 'Forward failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+    } finally { setForwardBusy(false); }
   };
 
   const remove = async () => {
@@ -799,7 +1428,19 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       const res = await portalLeads.scan(lead.id, { url: scanUrl, force });
       setScan(res.scan);
       setOpen(true); // ensure still open after data lands
-      toast({ title: res.cached ? 'Loaded saved scan' : 'Scan complete — saved to lead' });
+      await leadClues.log(lead.id, {
+        kind: 'scan',
+        label: res.cached ? 'Loaded saved website scan' : 'Ran website leak scan',
+        tool_key: 'website-scanner',
+        meta: { url: scanUrl, cached: !!res.cached, grade: res.scan?.grade, score: res.scan?.score },
+      });
+      bumpClues();
+      toast({
+        title: res.cached ? 'Loaded saved scan' : 'Scan complete, saved to lead',
+        description: !res.cached && res.scheduled
+          ? `${res.scheduled} fully-written touchpoints added to your calendar — scripts, talking points, objection handles, all set.`
+          : undefined,
+      });
       // Skip onChanged() so parent re-render doesn't collapse this row
     } catch (e) {
       toast({ title: 'Scan failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
@@ -814,6 +1455,13 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       setRr(res.person);
       if (res.firecrawl) setFc(res.firecrawl);
       setOpen(true);
+      await leadClues.log(lead.id, {
+        kind: 'rocketreach',
+        label: res.cached ? 'Loaded saved decision-maker enrichment' : 'Enriched decision-maker (RocketReach + Firecrawl)',
+        tool_key: 'rocketreach',
+        meta: { cached: !!res.cached, name: res.person?.name, title: res.person?.current_title },
+      });
+      bumpClues();
       if (res.note) {
         toast({ title: 'Deep scan note', description: res.note });
       } else {
@@ -833,7 +1481,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               lead.phone ? `Phone: ${lead.phone}` : null,
               lead.website ? `Website: ${lead.website}` : null,
               '',
-              'Deep scan complete — review insights and reach out.',
+              'Deep scan complete, review insights and reach out.',
             ].filter(Boolean).join('\n'),
             start_at: nextBusinessMorningISO(),
             all_day: false,
@@ -854,10 +1502,44 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
       <div className="w-full flex items-start gap-2 hover:bg-amber/5 transition-colors">
         <button type="button" onClick={() => setOpen(o => !o)} className="text-left p-3 flex items-start justify-between gap-2 flex-1 min-w-0">
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || '—'}</p>
+            <p className="font-semibold text-foreground truncate">{lead.business_name || lead.email || ', '}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {[lead.contact_name, lead.email, lead.phone].filter(Boolean).join(' · ') || lead.industry || '—'}
+              {lead.contact_name && <span>{lead.contact_name}</span>}
+              {lead.email && (
+                <>
+                  {lead.contact_name && <span> · </span>}
+                  <a
+                    href="#" onClick={(e)=>{e.preventDefault();e.stopPropagation();if(lead.email)openLeadEmailWithTouchPrompt(lead, { onLogged: onChanged });}}
+                    className="hover:text-amber hover:underline"
+                  >
+                    {lead.email}
+                  </a>
+                </>
+              )}
+              {lead.phone && (
+                <>
+                  {(lead.contact_name || lead.email) && <span> · </span>}
+                  <span>{lead.phone}</span>
+                </>
+              )}
+              {!lead.contact_name && !lead.email && !lead.phone && (lead.industry || ', ')}
             </p>
+            <GenericEmailWarning email={lead.email} />
+            {(() => {
+              const verdict = buildLeadVerdict(lead, scan);
+              if (!verdict) return null;
+              return (
+                <div className="mt-1.5 flex items-start gap-1.5">
+                  <span className={`mt-0.5 inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${verdict.tone === 'go' ? 'bg-green-400' : verdict.tone === 'maybe' ? 'bg-amber' : 'bg-muted-foreground/60'}`} />
+                  <p className="text-xs text-muted-foreground/90 italic line-clamp-2">
+                    <span className={`not-italic font-mono uppercase tracking-wider text-[10px] mr-1 ${verdict.tone === 'go' ? 'text-green-400' : verdict.tone === 'maybe' ? 'text-amber' : 'text-muted-foreground'}`}>
+                      {verdict.label}
+                    </span>
+                    {verdict.text}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
           <div className="text-right text-xs text-muted-foreground flex-shrink-0">
             {scan?.score != null && (
@@ -881,7 +1563,14 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
         <ErrorBoundary label="LeadRow">
         <div className="border-t border-border/50 p-3 space-y-3">
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground items-center">
-            {lead.email && <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" /> {lead.email}</span>}
+            {lead.email && (
+              <a
+                href="#" onClick={(e)=>{e.preventDefault();if(lead.email)openLeadEmailWithTouchPrompt(lead, { onLogged: onChanged });}}
+                className="inline-flex items-center gap-1 text-amber hover:underline"
+              >
+                <Mail className="w-3 h-3" /> {lead.email}
+              </a>
+            )}
             {lead.phone && <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3" /> {lead.phone}</span>}
             {lead.website && (
               <a href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`} target="_blank" rel="noopener noreferrer"
@@ -894,6 +1583,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               {editing ? 'Cancel' : 'Edit lead'}
             </Button>
           </div>
+          <GenericEmailWarning email={lead.email} compact />
           {editing && (
             <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {([
@@ -926,7 +1616,38 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <div className="text-xs text-muted-foreground italic border-l-2 border-amber/40 pl-2">{lead.why_fit}</div>
           )}
 
-          {/* Rep Game Plan — adaptive coaching */}
+          {/* Clue Trail + Detective Mode — side by side on large screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-3 items-start">
+            <div id={`lead-tool-${lead.id}-detective-mode`} className="space-y-3 transition-shadow rounded-lg">
+              {/* Detective Mode — picks best angle, shows deduction, writes the message */}
+              <DetectiveMode lead={lead} scan={scan} rr={rr} fc={fc} />
+            </div>
+            <div className="lg:sticky lg:top-4">
+              <LeadCluesTrail
+                lead={lead}
+                refreshSignal={cluesTick}
+                onAdvanceStatus={async (s) => { await setStatus(s); }}
+                onJumpToTool={jumpToTool}
+              />
+            </div>
+          </div>
+
+          {/* Recordings attached to this lead — saved automatically by extension/app */}
+          <RecordingsHistoryPanel
+            leadId={lead.id}
+            strictLead
+            title={`Recordings for ${lead.business_name || lead.website || 'this lead'}`}
+            allowDelete
+            maxHeightClass="max-h-[45vh]"
+          />
+
+          {/* Per-lead Action Checklist (touch steps + auto-generated follow-up sequence) */}
+          <LeadActionChecklist leadId={lead.id} leadLabel={lead.business_name || lead.website || undefined} />
+
+          {/* Industry-matched playbooks the rep can download or attach to the next email */}
+          <LeadPlaybookMatcher lead={lead} />
+
+          {/* Rep Game Plan, adaptive coaching */}
           <LeadGamePlan lead={lead} scan={scan} rr={rr} fc={fc} />
           <div className="flex flex-wrap gap-2">
             <select
@@ -938,6 +1659,9 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
               {STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
             </select>
             <Button size="sm" variant="outline" onClick={logTouch} disabled={saving}>Log touch</Button>
+            <Button size="sm" variant="ghost" onClick={openForward} className="text-amber hover:text-amber hover:bg-amber/10">
+              <Send className="w-3 h-3 mr-1" /> Forward to rep
+            </Button>
             <Button size="sm" variant="ghost" onClick={release} className="text-muted-foreground">
               <RotateCcw className="w-3 h-3 mr-1" /> Repool
             </Button>
@@ -947,7 +1671,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           </div>
 
           {/* Company Scan */}
-          <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
+          <div id={`lead-tool-${lead.id}-website-scanner`} className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2 transition-shadow">
+
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
                 <Search className="w-3 h-3" /> Company Scan
@@ -989,16 +1714,140 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   <p className="text-xs text-muted-foreground italic whitespace-pre-wrap">{scan.executiveSummary}</p>
                 )}
                 {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Top Gaps</p>
-                    {scan.gaps.slice(0, 6).map((g: any, i: number) => (
-                      <div key={i} className="text-xs border-l-2 border-amber/40 pl-2">
-                        <p className="font-semibold text-foreground">{g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span></p>
-                        <p className="text-muted-foreground">{g.description}</p>
-                        <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+                  <LeakChart gaps={scan.gaps as any} className="mt-2" />
+                )}
+
+                {scan.outreach && (
+                  <div className="rounded-md border-2 border-amber/60 bg-amber/10 p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-amber">⚡ How to reach this lead</p>
+                      <span className="text-[10px] font-mono text-muted-foreground">Confidence: {scan.outreach.channel_confidence || 'medium'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded font-mono text-xs font-bold uppercase ${scan.outreach.recommended_channel === 'call' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-blue-500/20 text-blue-400 border border-blue-500/40'}`}>
+                        {scan.outreach.recommended_channel === 'call' ? '📞 CALL FIRST' : '✉️ EMAIL FIRST'}
+                      </span>
+                      {scan.outreach.secondary_channel && (
+                        <span className="text-[10px] text-muted-foreground">then: {scan.outreach.secondary_channel}</span>
+                      )}
+                    </div>
+                    {scan.outreach.why_this_channel && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Why: </span>
+                        <span className="text-foreground">{scan.outreach.why_this_channel}</span>
                       </div>
-                    ))}
+                    )}
+                    {scan.outreach.best_time_to_reach && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Best time: </span>
+                        <span className="text-foreground">{scan.outreach.best_time_to_reach}</span>
+                      </div>
+                    )}
+                    {scan.outreach.persona_read && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Persona: </span>
+                        <span className="text-muted-foreground italic">{scan.outreach.persona_read}</span>
+                      </div>
+                    )}
+                    {scan.outreach.tone_to_use && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-muted-foreground">Tone: </span>
+                        <span className="text-foreground">{scan.outreach.tone_to_use}</span>
+                      </div>
+                    )}
+                    {Array.isArray(scan.outreach.do_not_do) && scan.outreach.do_not_do.length > 0 && (
+                      <div className="text-xs">
+                        <span className="font-mono text-[10px] uppercase text-red-400">Do NOT: </span>
+                        <span className="text-muted-foreground">{scan.outreach.do_not_do.join(' · ')}</span>
+                      </div>
+                    )}
+                    {scan.outreach.first_touch_script && (
+                      <div className="text-xs border-t border-amber/30 pt-2 mt-1">
+                        <p className="font-mono text-[10px] uppercase text-amber mb-1">First-touch script</p>
+                        <p className="text-foreground whitespace-pre-wrap bg-background/40 rounded p-2 border border-amber/20">{scan.outreach.first_touch_script}</p>
+                      </div>
+                    )}
+                    {scan.outreach.email_timing && (
+                      <div className="text-xs border-t border-amber/30 pt-2 mt-1 space-y-1.5">
+                        <p className="font-mono text-[10px] uppercase text-amber">📧 Best Email Timing</p>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[11px]">
+                          {scan.outreach.email_timing.inferred_timezone && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">TZ:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_timezone}</span></div>
+                          )}
+                          {scan.outreach.email_timing.inferred_industry && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">Industry:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_industry}</span></div>
+                          )}
+                          {scan.outreach.email_timing.inferred_company_size && (
+                            <div><span className="font-mono text-[10px] uppercase text-muted-foreground">Size:</span> <span className="text-foreground">{scan.outreach.email_timing.inferred_company_size}</span></div>
+                          )}
+                          {scan.outreach.email_timing.timezone_evidence && (
+                            <div className="col-span-2 text-muted-foreground text-[10px] italic">TZ source: {scan.outreach.email_timing.timezone_evidence}</div>
+                          )}
+                          {scan.outreach.email_timing.size_evidence && (
+                            <div className="col-span-2 text-muted-foreground text-[10px] italic">Size source: {scan.outreach.email_timing.size_evidence}</div>
+                          )}
+                        </div>
+                        {Array.isArray(scan.outreach.email_timing.best_send_windows) && scan.outreach.email_timing.best_send_windows.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="font-mono text-[10px] uppercase text-amber/80">Send Windows (best → good)</p>
+                            {scan.outreach.email_timing.best_send_windows.map((w: any, i: number) => (
+                              <div key={i} className="bg-background/40 rounded p-1.5 border border-amber/20">
+                                <p className="text-foreground font-semibold">{w.day} · <span className="text-amber">{w.local_time}</span> <span className="text-muted-foreground">({w.eastern_time})</span></p>
+                                {w.reasoning && <p className="text-muted-foreground text-[10px]">{w.reasoning}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {Array.isArray(scan.outreach.email_timing.avoid_windows) && scan.outreach.email_timing.avoid_windows.length > 0 && (
+                          <div className="text-[11px]">
+                            <span className="font-mono text-[10px] uppercase text-red-400">Avoid:</span>{' '}
+                            <span className="text-muted-foreground">{scan.outreach.email_timing.avoid_windows.join(' · ')}</span>
+                          </div>
+                        )}
+                        {scan.outreach.email_timing.subject_line_angle && (
+                          <div className="text-[11px]"><span className="font-mono text-[10px] uppercase text-muted-foreground">Subject angle:</span> <span className="text-foreground">{scan.outreach.email_timing.subject_line_angle}</span></div>
+                        )}
+                        {scan.outreach.email_timing.follow_up_cadence && (
+                          <div className="text-[11px]"><span className="font-mono text-[10px] uppercase text-muted-foreground">Cadence:</span> <span className="text-foreground">{scan.outreach.email_timing.follow_up_cadence}</span></div>
+                        )}
+                        {scan.outreach.email_timing.seasonality_note && (
+                          <div className="text-[11px] text-amber/80 italic">⚠ {scan.outreach.email_timing.seasonality_note}</div>
+                        )}
+                      </div>
+                    )}
                   </div>
+                )}
+                {scan.leadImpact && (
+                  <div className="rounded-md border border-crimson/40 bg-crimson/5 p-3 space-y-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-crimson">Lead Drop-Off Analysis</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Currently bleeding</p>
+                        <p className="text-crimson font-bold">{scan.leadImpact.currentLeadsLostPerMonth || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">Recoverable / mo</p>
+                        <p className="text-emerald-400 font-bold">{scan.leadImpact.recoverableLeadsPerMonth || '—'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-[10px] uppercase font-mono text-muted-foreground">$ per closed lead</p>
+                        <p className="text-foreground">{scan.leadImpact.dollarPerLead || '—'}</p>
+                      </div>
+                    </div>
+                    {scan.leadImpact.assumptionsNote && (
+                      <p className="text-[10px] text-muted-foreground italic">{scan.leadImpact.assumptionsNote}</p>
+                    )}
+                  </div>
+                )}
+                {scan.repTalkTrack && <RepTalkTrackPanel track={scan.repTalkTrack} companyName={scan.companyName} />}
+                {Array.isArray(scan.gaps) && scan.gaps.length > 0 && (
+                  <LeakChecklist
+                    leadId={lead.id}
+                    gaps={scan.gaps}
+                    initialProgress={scan.gapProgress || {}}
+                    onChange={(p) => setScan((prev: any) => prev ? { ...prev, gapProgress: p } : prev)}
+                    lead={lead}
+                  />
                 )}
                 {Array.isArray(scan.nextSteps) && scan.nextSteps.length > 0 && (
                   <div>
@@ -1008,6 +1857,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     </ul>
                   </div>
                 )}
+                <PostScanNextSteps lead={lead} scan={scan} />
               </div>
             )}
           </div>
@@ -1016,7 +1866,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-mono uppercase tracking-wider text-amber flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Deep Scan — Person + Company
+                <Sparkles className="w-3 h-3" /> Deep Scan, Person + Company
               </p>
               {(rr?.fetched_at || fc?.fetched_at) && (
                 <span className="text-[10px] text-muted-foreground">
@@ -1060,7 +1910,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     {rr.best_email && (
                       <div className="mb-2 p-2 rounded border border-amber/40 bg-amber/10">
                         <p className="text-[10px] font-mono uppercase tracking-wider text-amber mb-0.5">★ Use This Email</p>
-                        <a href={`mailto:${rr.best_email}`} onClick={mailHandler(rr.best_email)} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
+                        <a href="#" onClick={(e)=>{e.preventDefault();openRepMail(rr.best_email);}} className="text-amber font-semibold hover:underline">{rr.best_email}</a>
                         {rr.best_email_reason && <p className="text-[10px] text-muted-foreground mt-0.5">{rr.best_email_reason}</p>}
                       </div>
                     )}
@@ -1068,8 +1918,8 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                       const isBest = rr.best_email && e.email === rr.best_email;
                       return (
                         <p key={i} className={isBest ? 'opacity-60' : ''}>
-                          <a href={`mailto:${e.email}`} onClick={mailHandler(e.email)} className="text-amber hover:underline">{e.email}</a>
-                          <span className="text-muted-foreground ml-2">[{e.type || '—'}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
+                          <a href="#" onClick={(ev)=>{ev.preventDefault();openRepMail(e.email);}} className="text-amber hover:underline">{e.email}</a>
+                          <span className="text-muted-foreground ml-2">[{e.type || ', '}{e.grade ? ` · ${e.grade}` : ''}{e.smtp_valid ? ` · ${e.smtp_valid}` : ''}]</span>
                           {isBest && <span className="ml-2 text-[10px] text-amber">★ best</span>}
                         </p>
                       );
@@ -1082,7 +1932,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     {rr.phones.map((p: any, i: number) => (
                       <p key={i}>
                         <a href={`tel:${p.number}`} className="text-amber hover:underline">{p.number}</a>
-                        <span className="text-muted-foreground ml-2">[{p.type || '—'}]</span>
+                        <span className="text-muted-foreground ml-2">[{p.type || ', '}]</span>
                       </p>
                     ))}
                   </div>
@@ -1092,7 +1942,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                     <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1">Work History</p>
                     <ul className="space-y-0.5 text-muted-foreground">
                       {rr.job_history.map((j: any, i: number) => (
-                        <li key={i}>{j.title} @ {j.company_name} <span className="text-[10px]">({j.start_date || '?'} – {j.end_date || 'present'})</span></li>
+                        <li key={i}>{j.title} @ {j.company_name} <span className="text-[10px]">({j.start_date || '?'} - {j.end_date || 'present'})</span></li>
                       ))}
                     </ul>
                   </div>
@@ -1119,11 +1969,11 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                           </div>
                           {c.best_email && (
                             <p className="mt-1">
-                              <a href={`mailto:${c.best_email}`} onClick={mailHandler(c.best_email)} className="text-amber hover:underline">{c.best_email}</a>
+                              <a href="#" onClick={(ev)=>{ev.preventDefault();openRepMail(c.best_email);}} className="text-amber hover:underline">{c.best_email}</a>
                             </p>
                           )}
                           {Array.isArray(c.phones) && c.phones[0]?.number && (
-                            <p><a href={`tel:${c.phones[0].number}`} className="text-amber hover:underline">{c.phones[0].number}</a> <span className="text-muted-foreground text-[10px]">[{c.phones[0].type || '—'}]</span></p>
+                            <p><a href={`tel:${c.phones[0].number}`} className="text-amber hover:underline">{c.phones[0].number}</a> <span className="text-muted-foreground text-[10px]">[{c.phones[0].type || ', '}]</span></p>
                           )}
                         </div>
                       ))}
@@ -1134,7 +1984,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             )}
             {fc && (
               <div className="space-y-2 mt-3 pt-3 border-t border-amber/20 text-xs">
-                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Firecrawl — Company Intel</p>
+                <p className="text-[10px] font-mono uppercase tracking-wider text-amber">Firecrawl, Company Intel</p>
                 {fc.json && (
                   <div className="space-y-1">
                     {fc.json.legal_name && <p><span className="text-muted-foreground">Legal name:</span> <span className="text-foreground font-semibold">{fc.json.legal_name}</span></p>}
@@ -1159,14 +2009,14 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                           {fc.json.leadership.slice(0, 8).map((p: any, i: number) => {
                             const name = typeof p?.name === 'string' ? p.name : (typeof p === 'string' ? p : '');
                             const title = typeof p?.title === 'string' ? p.title : '';
-                            return <li key={i}>{name}{title ? ` — ${title}` : ''}</li>;
+                            return <li key={i}>{name}{title ? `, ${title}` : ''}</li>;
                           })}
                         </ul>
                       </div>
                     )}
                     {Array.isArray(fc.json.emails) && fc.json.emails.length > 0 && (
                       <p><span className="text-muted-foreground">Emails on site:</span> {fc.json.emails.map((e: string, i: number) => (
-                        <a key={i} href={`mailto:${e}`} onClick={mailHandler(e)} className="text-amber hover:underline mr-2">{e}</a>
+                        <a key={i} href="#" onClick={(ev)=>{ev.preventDefault();openRepMail(e);}} className="text-amber hover:underline mr-2">{e}</a>
                       ))}</p>
                     )}
                     {Array.isArray(fc.json.phones) && fc.json.phones.length > 0 && (
@@ -1204,7 +2054,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                         const title = typeof w?.title === 'string' ? w.title : (w?.title ? JSON.stringify(w.title) : '');
                         const desc = typeof w?.description === 'string' ? w.description : '';
                         if (!url && !title) return null;
-                        return <li key={i}><a href={url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{title || url}</a>{desc ? ` — ${desc}` : ''}</li>;
+                        return <li key={i}><a href={url} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline">{title || url}</a>{desc ? `, ${desc}` : ''}</li>;
                       })}
                     </ul>
                   </details>
@@ -1228,7 +2078,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                Lead notes — autosaves (visible to admin)
+                Lead notes, autosaves (visible to admin)
               </p>
               <Button
                 size="sm"
@@ -1243,7 +2093,7 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
                   try {
                     await upsertRepNote({
                       title: `Lead: ${lead.business_name || lead.contact_name || 'Untitled'}`,
-                      body: `${trimmed}\n\n— from lead ${lead.id}`,
+                      body: `${trimmed}\n\n,  from lead ${lead.id}`,
                       pinned: false,
                       tags: ['lead'],
                       attachments: [],
@@ -1260,13 +2110,85 @@ const LeadRow: React.FC<{ lead: RepLead; onChanged: () => void }> = ({ lead, onC
             <Textarea
               value={notes}
               onChange={e => scheduleSaveNotes(e.target.value)}
-              placeholder="Notes about this lead — autosaves and visible on the lead. Use 'Save copy to My Notes' to keep a private snapshot in your workspace."
+              placeholder="Notes about this lead, autosaves and visible on the lead. Use 'Save copy to My Notes' to keep a private snapshot in your workspace."
               className="min-h-[80px] text-sm"
             />
           </div>
         </div>
         </ErrorBoundary>
       )}
+
+      <Dialog open={forwardOpen} onOpenChange={(o) => !forwardBusy && setForwardOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Send className="w-5 h-5 text-amber" /> Forward lead to a rep
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Pass <span className="text-amber font-semibold">{lead.business_name || 'this lead'}</span> — including all your research, scan results, and notes — to another rep. They'll get it in their drip queue for 72 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Send to</Label>
+              <select
+                value={forwardTarget}
+                onChange={(e) => setForwardTarget(e.target.value)}
+                disabled={forwardBusy || forwardReps.length === 0}
+                className="w-full bg-background border border-input rounded-md px-2 h-9 text-sm"
+              >
+                <option value="">{forwardReps.length === 0 ? 'Loading reps…' : 'Pick a rep'}</option>
+                {forwardReps.map(r => (
+                  <option key={r.code} value={r.code}>{r.rep_name || r.code}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Note for them (optional)</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  "Not my industry — better fit for you",
+                  "Tried multiple times, no response. Fresh eyes needed.",
+                  "Too small / too big for my tier",
+                  "Client asked for someone local / specific vertical",
+                  "Great lead, I'm over capacity. Take it.",
+                  "They need a different service / solution",
+                  "Low hanging fruit — easy close",
+                  "Great niche to connect with",
+                  "High intent, move fast",
+                  "Warm intro possible — use my name",
+                  "Price sensitive — needs discount talk",
+                  "Decision maker already sold",
+                ].map((note) => (
+                  <button
+                    key={note}
+                    type="button"
+                    onClick={() => setForwardNote(note)}
+                    className="text-[11px] px-2 py-1 rounded border border-amber/30 bg-amber/5 text-amber/90 hover:bg-amber/15 hover:border-amber/50 transition-colors"
+                    disabled={forwardBusy}
+                  >
+                    {note}
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                value={forwardNote}
+                onChange={(e) => setForwardNote(e.target.value)}
+                placeholder="Why you're forwarding, what you learned, who to ask for…"
+                className="min-h-[70px] text-sm"
+                disabled={forwardBusy}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setForwardOpen(false)} disabled={forwardBusy}>Cancel</Button>
+              <Button size="sm" className="bg-amber text-background hover:bg-amber/90" onClick={doForward} disabled={forwardBusy || !forwardTarget}>
+                {forwardBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Send className="w-3 h-3 mr-1" />}
+                Forward
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -1328,10 +2250,10 @@ const UploadDownloadPanel: React.FC<{ onUploaded: () => void }> = ({ onUploaded 
           </button>
           {rows.length > 0 && (
             <div className="rounded-lg border border-border/50 bg-card/40 p-3 space-y-2">
-              <p className="text-sm text-foreground font-semibold">{filename} — {rows.length} row{rows.length === 1 ? '' : 's'}</p>
+              <p className="text-sm text-foreground font-semibold">{filename}, {rows.length} row{rows.length === 1 ? '' : 's'}</p>
               <div className="text-xs text-muted-foreground max-h-40 overflow-y-auto space-y-1">
                 {rows.slice(0, 5).map((r, i) => (
-                  <p key={i} className="truncate">• {r.business_name || r.email || '—'} {r.industry && `(${r.industry})`}</p>
+                  <p key={i} className="truncate">• {r.business_name || r.email || ', '} {r.industry && `(${r.industry})`}</p>
                 ))}
                 {rows.length > 5 && <p>… and {rows.length - 5} more</p>}
               </div>
@@ -1356,6 +2278,351 @@ const UploadDownloadPanel: React.FC<{ onUploaded: () => void }> = ({ onUploaded 
           </Button>
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+// ---------- Leak Checklist (per-gap checkoff + touch log) ----------
+type GapProgress = Record<string, { checked: boolean; touches: { at: string; note: string }[]; closedAt?: string }>;
+
+const LeakChecklist: React.FC<{
+  leadId: string;
+  gaps: any[];
+  initialProgress: GapProgress;
+  onChange?: (p: GapProgress) => void;
+  lead?: RepLead;
+}> = ({ leadId, gaps, initialProgress, onChange, lead }) => {
+  const { toast } = useToast();
+  const [progress, setProgress] = useState<GapProgress>(initialProgress || {});
+  const [openTouchIdx, setOpenTouchIdx] = useState<number | null>(null);
+  const [touchNote, setTouchNote] = useState('');
+  const [busy, setBusy] = useState<number | null>(null);
+
+  useEffect(() => { setProgress(initialProgress || {}); }, [leadId, initialProgress]);
+
+  const update = (next: GapProgress) => { setProgress(next); onChange?.(next); };
+
+  const toggleChecked = async (i: number, checked: boolean) => {
+    setBusy(i);
+    try {
+      const res = await portalLeads.updateScanProgress(leadId, i, { checked });
+      update(res.gapProgress as GapProgress);
+    } catch (e: any) {
+      toast({ title: 'Could not save', description: e?.message, variant: 'destructive' });
+    } finally { setBusy(null); }
+  };
+
+  const addTouch = async (i: number) => {
+    const note = touchNote.trim();
+    if (!note) { toast({ title: 'Add a quick note about the touch point', variant: 'destructive' }); return; }
+    setBusy(i);
+    try {
+      const res = await portalLeads.updateScanProgress(leadId, i, { addTouch: true, touchNote: note });
+      update(res.gapProgress as GapProgress);
+      setTouchNote(''); setOpenTouchIdx(null);
+      toast({ title: 'Touch logged', description: 'Lead status bumped to Touched.' });
+    } catch (e: any) {
+      toast({ title: 'Could not log touch', description: e?.message, variant: 'destructive' });
+    } finally { setBusy(null); }
+  };
+
+  const closed = Object.values(progress).filter(p => p?.checked).length;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+          Top Gaps · {closed}/{gaps.length} closed
+        </p>
+        {closed > 0 && (
+          <span className="text-[10px] font-mono text-emerald-400">✓ {closed} fixed/handled</span>
+        )}
+      </div>
+      {gaps.slice(0, 8).map((g: any, i: number) => {
+        const p = progress[String(i)] || { checked: false, touches: [] };
+        const touches = Array.isArray(p.touches) ? p.touches : [];
+        return (
+          <div
+            key={i}
+            className={`text-xs border-l-2 pl-2 py-1 ${p.checked ? 'border-emerald-500/60 opacity-70' : 'border-amber/40'}`}
+          >
+            <div className="flex items-start gap-2">
+              <Checkbox
+                checked={!!p.checked}
+                disabled={busy === i}
+                onCheckedChange={(v) => toggleChecked(i, !!v)}
+                className="mt-0.5"
+                aria-label={`Mark "${g.title}" handled`}
+              />
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold ${p.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                  {g.title} <span className="text-[10px] font-mono text-muted-foreground">[{g.category}]</span>
+                </p>
+                <p className="text-muted-foreground">{g.description}</p>
+                <p className="text-amber text-[11px]">Cost: {g.annualCost} → Fix: {g.recommendedFix} (ROI {g.projectedROI})</p>
+                {(g.leadsLostPerMonth || g.leadsRecoverablePerMonth) && (
+                  <p className="text-[11px] mt-0.5">
+                    {g.leadsLostPerMonth && <span className="text-crimson">Losing {g.leadsLostPerMonth}</span>}
+                    {g.leadsLostPerMonth && g.leadsRecoverablePerMonth && <span className="text-muted-foreground"> · </span>}
+                    {g.leadsRecoverablePerMonth && <span className="text-emerald-400">Recoverable {g.leadsRecoverablePerMonth}</span>}
+                  </p>
+                )}
+
+                {touches.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
+                    {touches.slice(-4).map((t, ti) => (
+                      <li key={ti} className="text-[11px] text-muted-foreground">
+                        <span className="font-mono text-[10px] text-amber/80">[{new Date(t.at).toLocaleDateString()}]</span> {t.note}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {openTouchIdx === i ? (
+                  <div className="mt-1.5 flex gap-1.5">
+                    <Input
+                      value={touchNote}
+                      onChange={(e) => setTouchNote(e.target.value)}
+                      placeholder="Touch point: e.g. emailed CFO re: stalled deals leak"
+                      className="h-7 text-xs"
+                      autoFocus
+                      onKeyDown={(e) => { if (e.key === 'Enter') addTouch(i); if (e.key === 'Escape') { setOpenTouchIdx(null); setTouchNote(''); } }}
+                    />
+                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => addTouch(i)} disabled={busy === i}>Log</Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setOpenTouchIdx(null); setTouchNote(''); }}>Cancel</Button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <button
+                      type="button"
+                      className="text-[11px] text-amber hover:text-amber/80 underline-offset-2 hover:underline"
+                      onClick={() => { setOpenTouchIdx(i); setTouchNote(''); }}
+                    >
+                      + Add touch point{touches.length > 0 ? ` (${touches.length})` : ''}
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[11px] text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline"
+                      onClick={async () => {
+                        const contactFirst = (lead?.contact_name || '').split(' ')[0] || 'there';
+                        const company = lead?.business_name || 'your operation';
+                        const subject = `${company}: ${g.title}`;
+                        const body =
+`Hi ${contactFirst},
+
+I ran a quick forensic scan on ${company} and one leak stood out:
+
+▸ ${g.title} (${g.category})
+${g.description || ''}
+
+Estimated cost: ${g.annualCost || '—'}
+Recommended fix: ${g.recommendedFix || '—'}
+Projected ROI: ${g.projectedROI || '—'}
+
+If I'm right, this is bleeding revenue every week it stays open. Worth a 15-minute Leak Audit call to walk you through what we found and how we'd close it?
+
+—`;
+                        const full = `Subject: ${subject}\n\n${body}`;
+                        try {
+                          await navigator.clipboard.writeText(full);
+                          toast({ title: 'Email copied', description: 'Subject + body copied to clipboard.' });
+                        } catch {
+                          toast({ title: 'Copy failed', description: 'Clipboard blocked — opening composer instead.', variant: 'destructive' });
+                        }
+                        if (lead?.email) {
+                          openLeadEmailWithTouchPrompt(lead, { subject, body });
+                        }
+                      }}
+                    >
+                      ✉ Make this an email & copy
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------- Post-Scan Next Steps (crystal-clear CTAs) ----------
+const PostScanNextSteps: React.FC<{ lead: RepLead; scan: any }> = ({ lead, scan }) => {
+  const { toast } = useToast();
+  const openCoachWithDraft = (intent: 'email' | 'linkedin' | 'call') => {
+    // Lock lead context for the coach
+    setActiveLead({
+      leadId: lead.id,
+      business_name: lead.business_name || undefined,
+      website: lead.website || undefined,
+      contact_name: lead.contact_name || undefined,
+      email: lead.email || undefined,
+      phone: lead.phone || undefined,
+      industry: lead.industry || undefined,
+      location: lead.location || undefined,
+    });
+    const promptMap = {
+      email: `Draft a tight outreach email to ${lead.contact_name || 'the decision maker'} at ${lead.business_name || 'this company'}. Lead with the #1 leak from the scan and propose a 15-min Leak Audit call. Keep it under 110 words.`,
+      linkedin: `Write a 3-line LinkedIn DM to ${lead.contact_name || 'the decision maker'} at ${lead.business_name || 'this company'} that names the most expensive leak from the scan and asks one question.`,
+      call: `Give me a 30-second cold-call opener for ${lead.business_name || 'this company'} that names the top 1-2 leaks from the scan and gets to a meeting ask.`,
+    } as const;
+    window.dispatchEvent(new CustomEvent('coach:prefill', { detail: { prompt: promptMap[intent], leadId: lead.id } }));
+  };
+
+  return (
+    <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 mt-2">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 mb-2">
+        ▸ Next Step — pick one and go
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        <Button size="sm" className="h-8 text-xs" onClick={() => openCoachWithDraft('email')}>
+          ✉ Draft outreach email
+        </Button>
+        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => openCoachWithDraft('linkedin')}>
+          in LinkedIn DM
+        </Button>
+        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => openCoachWithDraft('call')}>
+          ☎ Cold-call opener
+        </Button>
+        {lead.email && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => openLeadEmailWithTouchPrompt(lead, {
+              subject: `Quick read on ${lead.business_name || 'your operation'}`,
+              body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks. The biggest: ${scan?.gaps?.[0]?.title || '—'}.\n\nWorth a 15-minute look?\n\n—`,
+            })}
+          >
+            ➜ Open in Mail
+          </Button>
+        )}
+      </div>
+      {lead.email && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-sm border border-amber/30 bg-background/40 px-2 py-1.5">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-amber">To:</span>
+          <a
+            href={`mailto:${lead.email}`}
+            onClick={(e) => {
+              e.preventDefault();
+              openLeadEmailWithTouchPrompt(lead, {
+                subject: `Quick read on ${lead.business_name || 'your operation'}`,
+                body: `Hi ${lead.contact_name || 'there'},\n\nI ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.\n\nTop leaks:\n${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title} — ${g.annualCost || ''}`).join('\n')}\n\nWorth a 15-minute Leak Audit call to walk you through it?\n\n—`,
+              });
+            }}
+            className="text-xs text-amber hover:underline font-mono break-all"
+          >
+            {lead.email}
+          </a>
+          <button
+            type="button"
+            className="ml-auto text-[11px] text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline"
+            onClick={async () => {
+              const subject = `Quick read on ${lead.business_name || 'your operation'}`;
+              const body =
+`Hi ${lead.contact_name || 'there'},
+
+I ran a quick forensic scan on ${lead.business_name || 'your operation'} and flagged ${scan?.gaps?.length || 'a handful'} revenue leaks.
+
+Top leaks:
+${(scan?.gaps || []).slice(0, 3).map((g: any) => `• ${g.title}${g.annualCost ? ` — ${g.annualCost}` : ''}`).join('\n')}
+
+Worth a 15-minute Leak Audit call to walk you through it?
+
+—`;
+              try {
+                await navigator.clipboard.writeText(`To: ${lead.email}\nSubject: ${subject}\n\n${body}`);
+                toast({ title: 'Email copied', description: `To ${lead.email}` });
+              } catch {
+                toast({ title: 'Copy failed', variant: 'destructive' });
+              }
+            }}
+          >
+            Copy full email
+          </button>
+        </div>
+      )}
+      <p className="text-[10px] text-muted-foreground mt-2">
+        The Sales Coach already has this lead's scan loaded — ask follow-ups and it remembers every leak.
+      </p>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// Rep Talk Track — tailor-made scripts built from the scan's
+// actual leaks, dollar loss, and lead recovery numbers.
+// ─────────────────────────────────────────────────────────────
+const RepTalkTrackPanel: React.FC<{ track: any; companyName?: string }> = ({ track, companyName }) => {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const sections: Array<{ key: string; label: string }> = [
+    { key: 'cold_call_opener', label: 'Cold Call Opener' },
+    { key: 'voicemail', label: 'Voicemail' },
+    { key: 'cold_email', label: 'Cold Email' },
+    { key: 'linkedin_dm', label: 'LinkedIn DM' },
+    { key: 'in_person_pitch', label: 'In-Person / Zoom Pitch' },
+    { key: 'close_ask', label: 'The Close Ask' },
+  ];
+  const copy = (label: string, text: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => toast({ title: `${label} copied` }),
+      () => toast({ title: 'Copy failed', variant: 'destructive' })
+    );
+  };
+  return (
+    <div className="rounded-md border-2 border-amber/60 bg-amber/10 p-3 space-y-2">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-2"
+      >
+        <p className="text-[10px] font-mono uppercase tracking-wider text-amber">
+          🎯 Rep Talk Track {companyName ? `· ${companyName}` : ''}
+        </p>
+        <span className="text-[10px] font-mono text-amber/80">{open ? 'Hide' : 'Show all scripts'}</span>
+      </button>
+      {open && (
+        <div className="space-y-2 pt-1">
+          {sections.map(({ key, label }) => {
+            const text = (track as any)[key];
+            if (!text || typeof text !== 'string') return null;
+            return (
+              <div key={key} className="rounded bg-background/40 border border-amber/20 p-2">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <p className="font-mono text-[10px] uppercase text-amber">{label}</p>
+                  <button
+                    type="button"
+                    onClick={() => copy(label, text)}
+                    className="text-[10px] text-amber hover:underline"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="text-xs text-foreground whitespace-pre-wrap">{text}</p>
+              </div>
+            );
+          })}
+          {Array.isArray(track.discovery_questions) && track.discovery_questions.length > 0 && (
+            <div className="rounded bg-background/40 border border-amber/20 p-2">
+              <p className="font-mono text-[10px] uppercase text-amber mb-1">Discovery Questions</p>
+              <ul className="text-xs text-foreground list-disc pl-4 space-y-0.5">
+                {track.discovery_questions.map((q: string, i: number) => <li key={i}>{q}</li>)}
+              </ul>
+            </div>
+          )}
+          {Array.isArray(track.objection_handles) && track.objection_handles.length > 0 && (
+            <div className="rounded bg-background/40 border border-amber/20 p-2">
+              <p className="font-mono text-[10px] uppercase text-amber mb-1">Objection Handles</p>
+              <ul className="text-xs text-foreground space-y-0.5">
+                {track.objection_handles.map((q: string, i: number) => <li key={i}>{q}</li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

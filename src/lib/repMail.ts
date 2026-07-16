@@ -1,5 +1,19 @@
-// Builds a compose-email URL based on the rep's saved email provider preference.
+// Builds a compose-email URL based on the rep's (or admin's) saved email provider preference.
 import { getRepSettings } from '@/lib/portalWorkspace';
+import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
+
+const LOGO_URL = 'https://businessforensics.tech/aetheris-logo.png';
+
+export function buildDefaultSignature(fullName?: string | null): string {
+  const first = (fullName || '').trim().split(/\s+/)[0] || '';
+  return [
+    first,
+    'Operator',
+    'Aetheris Chaos Theory Forensics',
+    'https://businessforensics.tech/',
+    LOGO_URL,
+  ].filter(Boolean).join('\n');
+}
 
 export type EmailProvider = 'default' | 'gmail' | 'outlook' | 'yahoo';
 
@@ -9,21 +23,50 @@ export interface RepMailPrefs {
   signature?: string;
 }
 
+const ADMIN_PREFS_KEY = 'aetheris_admin_mail_prefs';
+
+export function getAdminMailPrefs(): RepMailPrefs {
+  try {
+    const raw = localStorage.getItem(ADMIN_PREFS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { email_provider: 'default' };
+}
+
+export function saveAdminMailPrefs(prefs: RepMailPrefs) {
+  try {
+    localStorage.setItem(ADMIN_PREFS_KEY, JSON.stringify(prefs));
+    cached = prefs;
+  } catch {}
+}
+
 let cached: RepMailPrefs | null = null;
+
+export function clearMailPrefsCache() { cached = null; }
 
 export async function loadRepMailPrefs(force = false): Promise<RepMailPrefs> {
   if (cached && !force) return cached;
-  try {
-    const s = await getRepSettings();
-    const d = (s?.defaults || {}) as Record<string, string>;
-    cached = {
-      sender_email: d.sender_email || '',
-      email_provider: (d.email_provider as EmailProvider) || 'default',
-      signature: d.signature || '',
-    };
-  } catch {
-    cached = { email_provider: 'default' };
+  // If signed into the rep portal, use rep settings; otherwise fall back to admin localStorage prefs.
+  if (getPortalToken()) {
+    try {
+      const s = await getRepSettings();
+      const d = (s?.defaults || {}) as Record<string, string>;
+      const profile = getPortalProfile();
+      cached = {
+        sender_email: d.sender_email || '',
+        email_provider: (d.email_provider as EmailProvider) || 'default',
+        signature: d.signature?.trim() ? d.signature : buildDefaultSignature(profile?.rep_name),
+      };
+      return cached;
+    } catch {
+      // fall through to admin prefs
+    }
   }
+  const admin = getAdminMailPrefs();
+  if (!admin.signature?.trim()) {
+    admin.signature = buildDefaultSignature(getPortalProfile()?.rep_name);
+  }
+  cached = admin;
   return cached;
 }
 
@@ -59,9 +102,18 @@ export function buildComposeUrl(
 }
 
 export async function openRepMail(to: string, opts: { subject?: string; body?: string } = {}) {
+  // If signed into the portal, prefer the in-app Outlook drawer.
+  if (getPortalToken()) {
+    try {
+      const { openOutlookCompose } = await import('@/lib/outlookMail');
+      openOutlookCompose(to, opts);
+      return;
+    } catch {
+      // fall through to legacy compose
+    }
+  }
   const prefs = await loadRepMailPrefs();
   const url = buildComposeUrl(to, prefs, opts);
-  // mailto: must use location to trigger handler; web URLs open in new tab
   if (url.startsWith('mailto:')) window.location.href = url;
   else window.open(url, '_blank', 'noopener,noreferrer');
 }

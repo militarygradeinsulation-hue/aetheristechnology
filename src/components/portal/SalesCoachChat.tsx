@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Target, Mic, Square, Paperclip, FileText, Image as ImageIcon, Crop } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getPortalToken, getPortalProfile } from '@/lib/portalAuth';
+import { useActiveLead } from '@/lib/activeLead';
+
+import { ScreenSnip } from '@/components/ScreenSnip';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 type Attachment =
   | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
@@ -40,11 +44,11 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const initialMessage: Msg = {
     role: 'assistant',
     content: isPartner
-      ? "**Sales Coach + Company View online.** Ask me anything — coaching, scripts, objections, OR live company stats (leads, reps, submissions). I pull live data when you ask for numbers."
-      : "**Sales Coach online.** Ask me anything: how to handle an objection, what to pitch a specific prospect, exact words for a follow-up email, commission math, or how to explain any service.",
+      ? "**Aetheris Nexus online — Advisor + Coach + Trainer + Company View, one chat.**\n\nAsk me to pitch, coach a live objection, drill you on a script, quiz you on the playbook, rewrite an email, or pull live company numbers (leads, reps, submissions, forecast). I route myself — you just talk."
+      : "**Aetheris Nexus online — Advisor + Coach + Trainer, one chat.**\n\nAsk me to pitch a specific prospect, coach you through an objection, drill you on a script, quiz you on the playbook, rewrite an email, or explain commission math. I route myself — you just talk.",
     suggestions: isPartner
-      ? ['Give me a company summary', 'Show recent leads', 'Coach me through a price objection']
-      : ['Coach me through "too expensive"', 'Write a cold LinkedIn DM', 'What should I pitch a 10-person agency?'],
+      ? ['Give me a company summary', 'Coach me through "too expensive"', 'Quiz me on the 21-Day Diagnostic']
+      : ['Pitch a 10-person operator', 'Coach me through "too expensive"', 'Quiz me on the Leak Audit'],
   };
 
   const [isOpen, setIsOpen] = useState(embedded);
@@ -65,6 +69,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [snipping, setSnipping] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,6 +81,49 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
   useEffect(() => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
+
+  // --- Active Lead context: keep the bot locked on whichever lead the rep last opened. ---
+  const activeLead = useActiveLead();
+  const [leadSummary, setLeadSummary] = useState<{ business?: string; contact?: string; openLeaks?: number; totalLeaks?: number } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setLeadSummary(null);
+    if (!activeLead?.leadId) return;
+    (async () => {
+      // Pull a lightweight summary via portal-leads (auth'd) so the chip can show counts.
+      try {
+        const token = getPortalToken();
+        if (!token) return;
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/portal-leads`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-portal-token': token,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ action: 'list', view: 'mine' }),
+        });
+        const data = await res.json();
+        const lead = (data?.leads || []).find((l: any) => l.id === activeLead.leadId);
+        if (cancelled || !lead) return;
+        const scan = (lead.enrichment as any)?.scan;
+        const gaps = Array.isArray(scan?.gaps) ? scan.gaps : [];
+        const progress = scan?.gapProgress || {};
+        const closed = Object.values(progress).filter((p: any) => p?.checked).length;
+        setLeadSummary({
+          business: lead.business_name,
+          contact: lead.contact_name,
+          openLeaks: Math.max(0, gaps.length - closed),
+          totalLeaks: gaps.length,
+        });
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [activeLead?.leadId]);
+
+
+
 
   const buildApiContent = (text: string, atts: Attachment[]) => {
     const textParts: string[] = [];
@@ -122,7 +170,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, activeLeadId: activeLead?.leadId || null }),
       });
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -139,7 +187,21 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages]);
+  }, [isLoading, messages, activeLead?.leadId]);
+
+  // Listen for prefill events from LeadsBoard (e.g. "Draft outreach email")
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {};
+      const prompt = String(detail.prompt || '').trim();
+      if (!prompt) return;
+      setIsOpen(true);
+      // small delay so context (active lead + scan) can hydrate
+      setTimeout(() => { runChat(prompt, []); }, 250);
+    };
+    window.addEventListener('coach:prefill', handler);
+    return () => window.removeEventListener('coach:prefill', handler);
+  }, [runChat]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,7 +244,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     if (errors.length) {
       setMessages((prev) => [...prev, {
         role: 'assistant',
-        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet — paste the relevant text instead.`,
+        content: `**Attachment issue:**\n${errors.map((e) => `- ${e}`).join('\n')}\n\nSupported: images (JPG/PNG/WEBP) and text files (.txt, .md, .csv, .json). PDFs aren't supported yet, paste the relevant text instead.`,
       }]);
     }
   }, []);
@@ -261,11 +323,11 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     <div className={
       embedded
         ? 'flex flex-col h-[640px] rounded-xl border border-amber/40 bg-background/95 backdrop-blur overflow-hidden'
-        : 'fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden'
+        : 'w-[min(420px,calc(100vw-2rem))] h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-xl border border-amber/40 bg-background/95 backdrop-blur shadow-2xl shadow-black/60 overflow-hidden'
     }>
       <div className="flex items-center justify-between px-4 py-3 border-b border-amber/30 bg-card/60">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">
-          Case File · Sales Coach{isPartner ? ' + Company View' : ''}
+          Case File · Aetheris Nexus{isPartner ? ' · Company View' : ''}
         </span>
         <div className="flex items-center gap-1">
           <button
@@ -282,6 +344,21 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           )}
         </div>
       </div>
+      {leadSummary && (
+        <div className="px-4 py-1.5 border-b border-amber/20 bg-amber/5 text-[11px] flex items-center justify-between gap-2">
+          <span className="text-amber font-mono uppercase tracking-wider text-[10px]">▸ Locked on</span>
+          <span className="flex-1 min-w-0 truncate text-foreground">
+            {leadSummary.business || 'Untitled lead'}
+            {leadSummary.contact ? ` · ${leadSummary.contact}` : ''}
+          </span>
+          {!!leadSummary.totalLeaks && (
+            <span className="font-mono text-[10px] text-emerald-400">
+              {(leadSummary.totalLeaks - (leadSummary.openLeaks ?? 0))}/{leadSummary.totalLeaks} leaks closed
+            </span>
+          )}
+        </div>
+      )}
+
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
         {messages.map((msg, i) => {
@@ -385,10 +462,20 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
           </button>
           <button
             type="button"
+            onClick={() => setSnipping(true)}
+            disabled={isLoading || isRecording || isTranscribing}
+            aria-label="Snip an area of the screen"
+            title="Drag-select an area of the page and ask about it"
+            className="p-2 rounded-md border bg-background/60 border-border/50 text-amber hover:bg-amber/10 hover:border-amber/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Crop className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
             onClick={toggleRecording}
             disabled={isLoading || isTranscribing}
             aria-label={isRecording ? 'Stop recording' : 'Record voice'}
-            title={isRecording ? 'Stop recording' : 'Hold a call to your mic — I\'ll transcribe & coach'}
+            title={isRecording ? 'Stop recording' : 'Hold a call to your mic, I\'ll transcribe & coach'}
             className={`p-2 rounded-md border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
               isRecording
                 ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
@@ -416,22 +503,44 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     </div>
   );
 
-  if (embedded) return Panel;
+  const snipOverlay = snipping ? (
+    <ScreenSnip
+      onCancel={() => setSnipping(false)}
+      onCapture={(dataUrl) => {
+        setSnipping(false);
+        setAttachments((prev) => [
+          ...prev,
+          { kind: 'image', name: `screen-snip-${Date.now()}.png`, dataUrl, mimeType: 'image/png' },
+        ]);
+        setIsOpen(true);
+        setInput((cur) => cur || 'Explain what is in this part of the screen and answer my questions about it.');
+      }}
+    />
+  ) : null;
+
+  if (embedded) return <>{Panel}{snipOverlay}</>;
 
   return (
     <>
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open Sales Coach"
-          className="fixed bottom-6 right-6 z-50 group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
-        >
-          <Target className="w-4 h-4" />
-          <span className="font-mono text-xs uppercase tracking-wider font-bold">Coach</span>
-          <MessageCircle className="w-4 h-4" />
-        </button>
+        <PinnableFloater storageKey="floater.salescoach.launcher" defaultCorner="bottom-right" width={160} height={48} zIndex={50}>
+          <button
+            onClick={() => setIsOpen(true)}
+            aria-label="Open Sales Coach"
+            className="group flex items-center gap-2 rounded-full bg-amber px-4 py-3 text-background shadow-lg shadow-amber/30 hover:shadow-amber/50 transition-shadow"
+          >
+            <Target className="w-4 h-4" />
+            <span className="font-mono text-xs uppercase tracking-wider font-bold">Coach</span>
+            <MessageCircle className="w-4 h-4" />
+          </button>
+        </PinnableFloater>
       )}
-      {isOpen && Panel}
+      {isOpen && (
+        <PinnableFloater storageKey="floater.salescoach.panel" defaultCorner="bottom-right" width={420} height={640} zIndex={50} disableBodyDrag>
+          {Panel}
+        </PinnableFloater>
+      )}
+      {snipOverlay}
     </>
   );
 };

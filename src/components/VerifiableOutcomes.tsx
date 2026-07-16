@@ -1,6 +1,8 @@
 import React from 'react';
 import { TrendingUp, Clock, DollarSign } from 'lucide-react';
 import { RevealOnScroll } from './RevealOnScroll';
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
 
 interface Outcome {
   industry: string;
@@ -52,8 +54,20 @@ export const VerifiableOutcomes: React.FC = () => {
               Anonymized. <span className="text-gradient-amber">Quantified.</span> Real.
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              We don't publish testimonials we can't verify. These are anonymized outcomes from real engagements — industry, metric, and the engagement type that produced them.
+              We don't publish testimonials we can't verify. These are anonymized outcomes from real engagements, industry, metric, and the engagement type that produced them.
             </p>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll>
+          <div className="max-w-5xl mx-auto mb-10">
+            <ForensicInfographic
+              image={INFOGRAPHICS.outcomesTerminal}
+              imageAlt="Terminal screen showing before/after revenue metrics with one row stamped Recovered"
+              caseNumber="003 · The Evidence"
+              title="Before. After. On the same screen."
+              summary="Every outcome we publish is tied to a measurable pre-fix baseline and a post-fix re-measure of the same metric on the same population. Same definition, same query, only the number changes."
+            />
           </div>
         </RevealOnScroll>
 
@@ -62,7 +76,7 @@ export const VerifiableOutcomes: React.FC = () => {
             const Icon = outcome.icon;
             return (
               <RevealOnScroll key={outcome.industry} delay={idx * 0.08}>
-                <article className="premium-tile amber-corner group rounded-2xl p-7 h-full flex flex-col">
+                <article className="forensic-tile amber-corner group rounded-2xl p-7 h-full flex flex-col">
                   <div className="w-11 h-11 rounded-xl bg-amber/[0.08] border border-amber/15 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5 text-amber" aria-hidden="true" />
                   </div>
@@ -79,7 +93,7 @@ export const VerifiableOutcomes: React.FC = () => {
                     <span className="text-[11px] font-semibold text-muted-foreground tracking-wide uppercase">
                       Engagement
                     </span>
-                    <p className="text-xs text-foreground/70 mt-1 leading-snug">
+                    <p className="text-xs text-foreground/85 mt-1 leading-snug">
                       {outcome.engagement}
                     </p>
                   </div>
@@ -90,8 +104,8 @@ export const VerifiableOutcomes: React.FC = () => {
         </div>
 
         <RevealOnScroll delay={0.3}>
-          <p className="text-center text-xs text-muted-foreground/70 mt-8 max-w-2xl mx-auto italic">
-            Client identities and proprietary data withheld by agreement. Outcomes representative of typical engagement results — your situation may differ.
+          <p className="text-center text-xs text-muted-foreground mt-8 max-w-2xl mx-auto italic">
+            Client identities and proprietary data withheld by agreement. Outcomes representative of typical engagement results, your situation may differ.
           </p>
         </RevealOnScroll>
       </div>

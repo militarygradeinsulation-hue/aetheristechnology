@@ -18,11 +18,14 @@ export const BlogList: React.FC = () => {
         .from('blog_posts')
         .select('id, title, slug, excerpt, author, published_at, tags, location_focus, featured_image')
         .eq('is_published', true)
-        .order('published_at', { ascending: false });
+        .order('published_at', { ascending: false })
+        .limit(60);
 
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   // Top tags for filter chips
@@ -66,7 +69,7 @@ export const BlogList: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We break down exactly how businesses waste money on AI, marketing, and disconnected systems —
+            We break down exactly how businesses waste money on AI, marketing, and disconnected systems , 
             with real numbers, real costs, and real solutions. No fluff. No hype.
           </p>
         </div>
@@ -147,6 +150,7 @@ export const BlogList: React.FC = () => {
               </div>
             )}
           </>
+
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground">
@@ -156,13 +160,13 @@ export const BlogList: React.FC = () => {
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-20 premium-tile rounded-2xl p-8 md:p-12 text-center">
+        <div className="mt-20 forensic-tile rounded-2xl p-8 md:p-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 font-display">
             Stop Wasting Money on Broken Systems
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM
-            systems — and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
+            Our 21-Day Revenue Diagnostic tears apart your marketing, AI, and CRM
+            systems, and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a

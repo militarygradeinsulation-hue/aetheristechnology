@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MessageCircle, X, Linkedin, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { PinnableFloater } from '@/components/ui/PinnableFloater';
 
 export const FloatingContact: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
   const { trackEvent } = useTrackEvent();
+  const location = useLocation();
+  // Bookings are reserved for clients. On the careers funnel we hide the
+  // meeting CTA so applicants can't shortcut the application + test gate.
+  const isCareersContext = location.pathname.startsWith('/careers');
 
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 8000);
@@ -16,7 +21,8 @@ export const FloatingContact: React.FC = () => {
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-3">
+      <PinnableFloater storageKey="floater.floatingcontact" defaultCorner="bottom-left" width={isExpanded ? 220 : 64} height={isExpanded ? 320 : 64} zIndex={50}>
+      <div className="flex flex-col items-start gap-3">
         {isExpanded && (
           <div className="flex flex-col gap-2 mb-2 animate-in slide-in-from-bottom-4 fade-in duration-300">
             <a
@@ -45,16 +51,18 @@ export const FloatingContact: React.FC = () => {
               <Linkedin className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">LinkedIn</span>
             </a>
-            <a
-              href={BOOK_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-amber px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
-              onClick={() => trackEvent('book_meeting_click', { location: 'floating' })}
-            >
-              <Calendar className="w-5 h-5 text-background" />
-              <span className="text-sm font-bold text-background">Book a Meeting</span>
-            </a>
+            {!isCareersContext && (
+              <a
+                href={BOOK_MEETING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-amber px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
+                onClick={() => trackEvent('book_meeting_click', { location: 'floating' })}
+              >
+                <Calendar className="w-5 h-5 text-background" />
+                <span className="text-sm font-bold text-background">Book a Meeting</span>
+              </a>
+            )}
             <a
               href="https://gamma.app/docs/The-14-Day-Operational-Systems-Diagnostic-e8i6rcv30d33m8s"
               target="_blank"
@@ -70,21 +78,27 @@ export const FloatingContact: React.FC = () => {
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`relative w-16 h-16 rounded-full bg-primary shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 ${
+          className={`relative w-16 h-16 rounded-full bg-background border-2 border-amber/60 shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 overflow-hidden ${
             showPulse ? 'animate-pulse' : ''
           }`}
-          aria-label="Contact us"
+          aria-label="Contact Aetheris"
         >
           {showPulse && (
-            <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+            <span className="absolute inset-0 rounded-full bg-amber/30 animate-ping" />
           )}
           {isExpanded ? (
-            <X className="w-7 h-7 text-primary-foreground relative z-10" />
+            <X className="w-7 h-7 text-amber relative z-10" />
           ) : (
-            <MessageCircle className="w-7 h-7 text-primary-foreground relative z-10" />
+            <img
+              src="/aetheris-logo.png"
+              alt="Aetheris"
+              className="w-12 h-12 object-contain relative z-10 pointer-events-none"
+              draggable={false}
+            />
           )}
         </button>
       </div>
+      </PinnableFloater>
 
       <StickyContactBar />
     </>

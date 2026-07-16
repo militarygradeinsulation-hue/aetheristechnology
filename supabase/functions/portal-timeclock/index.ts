@@ -30,7 +30,42 @@ serve(async (req) => {
     const action = String(body.action ?? "status");
 
     // ── REP ACTIONS (operate on their own code) ──────────────────────────
+    // Helper: auto-close a stale open entry (tab-closed cases) to the rep's
+    // last server-side activity timestamp. Idle threshold = 5 minutes.
+    const IDLE_MS = 5 * 60 * 1000;
+    async function autoCloseStale(repCode: string) {
+      const { data: open } = await supabase
+        .from("rep_time_entries")
+        .select("id, clock_in_at")
+        .eq("rep_code", repCode)
+        .is("clock_out_at", null)
+        .order("clock_in_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!open) return;
+      const { data: act } = await supabase
+        .from("rep_activity")
+        .select("created_at")
+        .eq("rep_code", repCode)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const startMs = new Date(open.clock_in_at).getTime();
+      const lastActMs = act?.created_at ? new Date(act.created_at).getTime() : startMs;
+      const nowMs = Date.now();
+      // If they haven't done anything in 5+ minutes, close the session to
+      // whichever is most recent: their last activity OR their clock-in.
+      if (nowMs - lastActMs >= IDLE_MS) {
+        const endMs = Math.min(Math.max(lastActMs, startMs), nowMs);
+        await supabase
+          .from("rep_time_entries")
+          .update({ clock_out_at: new Date(endMs).toISOString(), note: "Auto clock-out (stale session)" })
+          .eq("id", open.id);
+      }
+    }
+
     if (action === "status") {
+      await autoCloseStale(claims.code);
       const { data, error } = await supabase
         .from("rep_time_entries")
         .select("id, clock_in_at, clock_out_at, note")
@@ -42,6 +77,7 @@ serve(async (req) => {
       if (error) return json(500, { error: error.message });
       return json(200, { open: data ?? null });
     }
+
 
     if (action === "clock_in") {
       // Refuse if there's already an open entry.
@@ -65,7 +101,7 @@ serve(async (req) => {
     if (action === "clock_out") {
       const { data: open } = await supabase
         .from("rep_time_entries")
-        .select("id")
+        .select("id, clock_in_at")
         .eq("rep_code", claims.code)
         .is("clock_out_at", null)
         .order("clock_in_at", { ascending: false })
@@ -73,7 +109,21 @@ serve(async (req) => {
         .maybeSingle();
       if (!open) return json(409, { error: "Not clocked in" });
 
-      const patch: Record<string, unknown> = { clock_out_at: new Date().toISOString() };
+      // Accept an explicit end timestamp so the client can backdate the
+      // session to the rep's actual last-activity time. Clamp to:
+      //   - never before clock_in_at  (no negative durations)
+      //   - never after now           (no future timestamps)
+      let endIso = new Date().toISOString();
+      if (typeof body.end_at === "string") {
+        const parsed = new Date(body.end_at);
+        if (!Number.isNaN(parsed.getTime())) {
+          const startMs = new Date(open.clock_in_at).getTime();
+          const nowMs = Date.now();
+          const endMs = Math.min(Math.max(parsed.getTime(), startMs), nowMs);
+          endIso = new Date(endMs).toISOString();
+        }
+      }
+      const patch: Record<string, unknown> = { clock_out_at: endIso };
       if (typeof body.note === "string") patch.note = body.note;
 
       const { data, error } = await supabase

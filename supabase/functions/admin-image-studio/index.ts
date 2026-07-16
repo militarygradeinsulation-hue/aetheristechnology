@@ -41,73 +41,103 @@ serve(async (req) => {
       return json({ images: data || [] });
     }
 
-    if (action === "delete") {
+    if (action === "list_all") {
+      // Combined library: admin-side images + every rep portal image, newest first.
+      const [adminRes, repRes] = await Promise.all([
+        supabase.from("admin_image_studio").select("*").order("created_at", { ascending: false }).limit(300),
+        supabase.from("rep_image_studio").select("*").order("created_at", { ascending: false }).limit(300),
+      ]);
+      if (adminRes.error) throw adminRes.error;
+      if (repRes.error) throw repRes.error;
+      const adminItems = (adminRes.data || []).map((r: any) => ({ ...r, source_table: "admin_image_studio", owner_label: "Admin" }));
+      const repItems = (repRes.data || []).map((r: any) => ({ ...r, source_table: "rep_image_studio", owner_label: r.rep_code ? `Rep ${r.rep_code}` : "Rep" }));
+      const merged = [...adminItems, ...repItems].sort(
+        (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      return json({ images: merged });
+    }
+
+    if (action === "delete" || action === "delete_any") {
       const id = body.id as string;
-      const { data: row } = await supabase.from("admin_image_studio").select("storage_path").eq("id", id).maybeSingle();
+      const sourceTable = (body.source_table as string) || "admin_image_studio";
+      if (sourceTable !== "admin_image_studio" && sourceTable !== "rep_image_studio") {
+        return json({ error: "invalid source_table" }, 400);
+      }
+      const { data: row } = await supabase.from(sourceTable).select("storage_path").eq("id", id).maybeSingle();
       if (row?.storage_path) {
         await supabase.storage.from(BUCKET).remove([row.storage_path]);
       }
-      const { error } = await supabase.from("admin_image_studio").delete().eq("id", id);
+      const { error } = await supabase.from(sourceTable).delete().eq("id", id);
       if (error) throw error;
       return json({ ok: true });
     }
 
     if (action === "generate" || action === "edit") {
-      if (!LOVABLE_API_KEY) return json({ error: "LOVABLE_API_KEY not configured" }, 500);
+      const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
+      if (!LEONARDO_API_KEY) return json({ error: "LEONARDO_API_KEY not configured" }, 500);
+      const { generateImage, LEONARDO_PHOENIX_MODEL_ID } = await import("../_shared/leonardo.ts");
+
       const rawPrompt = (body.prompt as string || "").trim();
       if (!rawPrompt) return json({ error: "prompt required" }, 400);
-      const model = (body.model as string) || "google/gemini-3.1-flash-image-preview";
+      const model = (body.model as string) || LEONARDO_PHOENIX_MODEL_ID;
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
+      const cartoon = !!body.cartoon_style;
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nKeep composition clean and intentional. Subject:`;
 
-      const finalPrompt = aetherisStyle ? `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}` : rawPrompt;
+      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
 
-      const messages: any[] = [];
+      let finalPrompt = rawPrompt;
+      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
+      else if (cartoon) finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
       if (action === "edit" && sourceImageUrl) {
-        messages.push({
-          role: "user",
-          content: [
-            { type: "text", text: finalPrompt },
-            { type: "image_url", image_url: { url: sourceImageUrl } },
-          ],
+        finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
+      }
+
+      let gen;
+      try {
+        gen = await generateImage({
+          prompt: finalPrompt.slice(0, 1450),
+          apiKey: LEONARDO_API_KEY,
+          modelId: model,
+          width: 1024,
+          height: 1024,
         });
-      } else {
-        messages.push({ role: "user", content: finalPrompt });
+      } catch (err) {
+        return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
       }
 
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages, modalities: ["image", "text"] }),
-      });
-      if (!aiRes.ok) {
-        const t = await aiRes.text();
-        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
-        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
-        return json({ error: `AI gateway: ${t}` }, 502);
-      }
-      const aiData = await aiRes.json();
-      const dataUrl: string | undefined = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-      if (!dataUrl?.startsWith("data:image/")) return json({ error: "No image returned" }, 502);
-
-      const m = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/)!;
-      const ext = m[1] === "jpeg" ? "jpg" : m[1];
-      const bytes = Uint8Array.from(atob(m[2]), c => c.charCodeAt(0));
-      const path = `${STUDIO_PREFIX}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, bytes, {
-        contentType: `image/${ext === "jpg" ? "jpeg" : ext}`, upsert: false,
+      const path = `${STUDIO_PREFIX}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${gen.ext}`;
+      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, gen.bytes, {
+        contentType: gen.contentType, upsert: false,
       });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const { data: row, error: insErr } = await supabase.from("admin_image_studio").insert({
-        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
         source: action === "edit" ? "edited" : "generated",
-        metadata: { ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}), aetheris_style: aetherisStyle },
+        metadata: {
+          provider: "leonardo",
+          generation_id: gen.generationId,
+          ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
+          aetheris_style: aetherisStyle,
+          cartoon_style: cartoon,
+        },
       }).select().single();
       if (insErr) throw insErr;
+
+      // Mirror to rep library as SHARED so all reps see it in their banner library.
+      if (body.share_to_reps) {
+        await supabase.from("rep_image_studio").insert({
+          rep_code: "SHARED",
+          prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+          source: action === "edit" ? "edited" : "generated",
+          metadata: { shared_from_admin: true, is_banner: !!body.is_banner, provider: "leonardo" },
+        });
+      }
+
       return json({ image: row });
     }
 

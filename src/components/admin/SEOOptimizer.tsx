@@ -76,7 +76,7 @@ export const SEOOptimizer: React.FC = () => {
       toast({
         title: data?.queued ? "Optimization started" : "Optimization complete",
         description: data?.queued
-          ? "Running in background — refresh in 2-3 minutes to see results."
+          ? "Running in background, refresh in 2-3 minutes to see results."
           : `Processed ${data?.results?.length ?? 0} route(s).`,
       });
       await fetchData();
@@ -134,7 +134,7 @@ export const SEOOptimizer: React.FC = () => {
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
             disabled={running !== null}
@@ -146,7 +146,7 @@ export const SEOOptimizer: React.FC = () => {
                 toast({
                   title: data?.queued ? "AEO blog batch started" : "AEO blog batch complete",
                   description: data?.queued
-                    ? `Generating ${data?.topic_count ?? 5} posts in background — check the blog in 3-5 minutes.`
+                    ? `Generating ${data?.topic_count ?? 5} posts in background, check the blog in 3-5 minutes.`
                     : `${data?.results?.length ?? 0} posts processed.`,
                 });
               } catch (e) {
@@ -158,6 +158,28 @@ export const SEOOptimizer: React.FC = () => {
           >
             {running === "aeo-blogs" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
             Generate AEO Blog Batch
+          </Button>
+          <Button
+            variant="outline"
+            disabled={running !== null}
+            onClick={async () => {
+              setRunning("expand-short");
+              try {
+                const { data, error } = await supabase.functions.invoke("expand-short-blogs", { body: { threshold: 6000, limit: 10 } });
+                if (error) throw error;
+                toast({
+                  title: "Short blogs expanded",
+                  description: `${data?.expanded ?? 0} expanded · ${data?.failed ?? 0} failed (of ${data?.processed ?? 0}). Re-run to keep going.`,
+                });
+              } catch (e) {
+                toast({ title: "Expand failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+              } finally {
+                setRunning(null);
+              }
+            }}
+          >
+            {running === "expand-short" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Expand Short Blogs
           </Button>
           <Button onClick={() => runOptimization()} disabled={running !== null}>
             {running === "all" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
@@ -199,10 +221,10 @@ export const SEOOptimizer: React.FC = () => {
                           {ov?.title ?? <span className="text-muted-foreground italic">page default</span>}
                         </TableCell>
                         <TableCell>
-                          {ov ? <Badge variant="secondary">v{ov.version}</Badge> : <Badge variant="outline">—</Badge>}
+                          {ov ? <Badge variant="secondary">v{ov.version}</Badge> : <Badge variant="outline">, </Badge>}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {ov ? formatDistanceToNow(new Date(ov.applied_at), { addSuffix: true }) : "—"}
+                          {ov ? formatDistanceToNow(new Date(ov.applied_at), { addSuffix: true }) : ", "}
                         </TableCell>
                         <TableCell className="text-right space-x-1">
                           <Button size="sm" variant="outline" disabled={running !== null} onClick={() => runOptimization(path)}>
@@ -256,7 +278,7 @@ export const SEOOptimizer: React.FC = () => {
                           {l.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs">{l.score_after ?? "—"}</TableCell>
+                      <TableCell className="text-xs">{l.score_after ?? ", "}</TableCell>
                       <TableCell className="text-right space-x-1">
                         <Button size="sm" variant="outline" onClick={() => setViewLog(l)}>
                           <Eye className="h-3 w-3" />
@@ -280,7 +302,7 @@ export const SEOOptimizer: React.FC = () => {
       <Dialog open={!!viewLog} onOpenChange={(o) => !o && setViewLog(null)}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{viewLog?.route} — Optimization Detail</DialogTitle>
+            <DialogTitle>{viewLog?.route}, Optimization Detail</DialogTitle>
           </DialogHeader>
           {viewLog && (
             <div className="space-y-4 text-sm">

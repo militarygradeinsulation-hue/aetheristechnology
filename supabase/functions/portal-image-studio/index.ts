@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { consumeStudioQuota } from "../_shared/studio-quota.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,12 +37,13 @@ serve(async (req) => {
     const action = body.action as string;
 
     if (action === "list") {
+      // Include this rep's images PLUS shared admin-pushed banners (rep_code='SHARED')
       const { data, error } = await supabase
         .from("rep_image_studio")
         .select("*")
-        .eq("rep_code", repCode)
+        .in("rep_code", [repCode, "SHARED"])
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(300);
       if (error) throw error;
       return json({ images: data || [] });
     }
@@ -63,69 +65,74 @@ serve(async (req) => {
     }
 
     if (action === "generate" || action === "edit") {
-      if (!LOVABLE_API_KEY) return json({ error: "AI not configured" }, 500);
+      const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
+      if (!LEONARDO_API_KEY) return json({ error: "Leonardo AI not configured" }, 500);
+      const { generateImage, LEONARDO_PHOENIX_MODEL_ID } = await import("../_shared/leonardo.ts");
+
       const rawPrompt = (body.prompt as string || "").trim();
       if (!rawPrompt) return json({ error: "prompt required" }, 400);
-      if (rawPrompt.length > 2000) return json({ error: "prompt too long" }, 400);
-      const model = (body.model as string) || "google/gemini-3.1-flash-image-preview";
+      if (rawPrompt.length > 2000) return json({ error: "prompt too long (max 2000 chars)" }, 400);
+      // Daily per-rep cap — stops runaway credit use.
+      const quota = await consumeStudioQuota(
+        SERVICE_KEY, SUPABASE_URL, repCode,
+        action === "edit" ? "image_edit" : "image_generate",
+      );
+      if (!quota.ok) return json({ error: quota.error, limit: quota.limit, used: quota.used }, 429);
+      const model = (body.model as string) || LEONARDO_PHOENIX_MODEL_ID;
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
       const infographic = !!body.infographic;
+      const cartoon = !!body.cartoon_style;
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nSubject:`;
 
       const INFOGRAPHIC_SUFFIX = `\n\n--- INFOGRAPHIC LAYOUT ---\nDesign as a single-image infographic suitable for sharing with a business prospect:\n- Clear visual hierarchy with a bold headline at the top\n- 3-5 numbered or icon-led data points / steps stacked vertically\n- Stats or numbers rendered LARGE and legible (no fake/garbled text)\n- Use minimal, crisp typography — every word must be readable, no lorem-ipsum\n- Square or 4:5 portrait composition, social-share friendly\nTopic to visualize:`;
 
+      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
+
       let finalPrompt = rawPrompt;
-      if (infographic) finalPrompt = `${INFOGRAPHIC_SUFFIX} ${finalPrompt}`;
-      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${finalPrompt}`;
-
-      const messages: any[] = [];
+      if (aetherisStyle) {
+        finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}${infographic ? `\n\n${INFOGRAPHIC_SUFFIX} ${rawPrompt}` : ""}`;
+      } else if (infographic) {
+        finalPrompt = `${INFOGRAPHIC_SUFFIX} ${rawPrompt}`;
+      } else if (cartoon) {
+        finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
+      }
       if (action === "edit" && sourceImageUrl) {
-        messages.push({
-          role: "user",
-          content: [
-            { type: "text", text: finalPrompt },
-            { type: "image_url", image_url: { url: sourceImageUrl } },
-          ],
+        finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
+      }
+
+      let gen;
+      try {
+        gen = await generateImage({
+          prompt: finalPrompt.slice(0, 1450),
+          apiKey: LEONARDO_API_KEY,
+          modelId: model,
+          width: infographic ? 832 : 1024,
+          height: infographic ? 1216 : 1024,
         });
-      } else {
-        messages.push({ role: "user", content: finalPrompt });
+      } catch (err) {
+        return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
       }
 
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages, modalities: ["image", "text"] }),
-      });
-      if (!aiRes.ok) {
-        const t = await aiRes.text();
-        if (aiRes.status === 429) return json({ error: "Rate limited. Try again shortly." }, 429);
-        if (aiRes.status === 402) return json({ error: "AI credits exhausted." }, 402);
-        return json({ error: `AI gateway: ${t}` }, 502);
-      }
-      const aiData = await aiRes.json();
-      const dataUrl: string | undefined = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-      if (!dataUrl?.startsWith("data:image/")) return json({ error: "No image returned" }, 502);
-
-      const m = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/)!;
-      const ext = m[1] === "jpeg" ? "jpg" : m[1];
-      const bytes = Uint8Array.from(atob(m[2]), c => c.charCodeAt(0));
-      const path = `${PREFIX}/${repCode}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, bytes, {
-        contentType: `image/${ext === "jpg" ? "jpeg" : ext}`, upsert: false,
+      const path = `${PREFIX}/${repCode}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${gen.ext}`;
+      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, gen.bytes, {
+        contentType: gen.contentType, upsert: false,
       });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const { data: row, error: insErr } = await supabase.from("rep_image_studio").insert({
         rep_code: repCode,
-        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
         source: action === "edit" ? "edited" : "generated",
         metadata: {
+          provider: "leonardo",
+          generation_id: gen.generationId,
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           infographic,
+          cartoon_style: cartoon,
         },
       }).select().single();
       if (insErr) throw insErr;

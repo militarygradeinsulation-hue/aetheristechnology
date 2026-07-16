@@ -26,13 +26,14 @@ import { getImageForSlug } from '@/components/BlogCard';
 import { generateBlogPdf } from '@/lib/generateBlogPdf';
 import { BlogMidCTA } from '@/components/BlogMidCTA';
 import { articleSchema, breadcrumbSchema, speakableSchema, combineSchemas } from '@/lib/schemas';
+import { ReadAloudButton } from '@/components/ReadAloudButton';
 
 const SITE_URL = 'https://aetheris.technology';
 
 // Clean up encoding artifacts
 const cleanText = (text: string): string => {
   return text
-    .replace(/â€"/g, '—')
+    .replace(/â€"/g, ', ')
     .replace(/â€"/g, '–')
     .replace(/â€œ/g, '"')
     .replace(/â€[^a-zA-Z]/g, '"')
@@ -239,6 +240,11 @@ const BlogPostPage = () => {
                       {isGeneratingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                       <span className="hidden sm:inline">{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
                     </button>
+                    <ReadAloudButton
+                      text={[post.title, post.excerpt || '', (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()].filter(Boolean).join('. ')}
+                      label="Listen"
+                      className="shrink-0"
+                    />
                   </div>
                   
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
@@ -260,7 +266,7 @@ const BlogPostPage = () => {
                     )}
                   </div>
 
-                  {/* AEO TL;DR — AI engines extract this verbatim */}
+                  {/* AEO TL;DR, AI engines extract this verbatim */}
                   {post.excerpt && (
                     <div
                       className="tldr glass rounded-xl border border-amber/30 p-4 md:p-5 mb-6"
@@ -325,8 +331,8 @@ const BlogPostPage = () => {
                     Stop Wasting Money. Start Building Systems That Work.
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                    Our 14-Day Operational Systems Diagnostic exposes exactly where your business 
-                    is leaking revenue — and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
+                    Our 21-Day Revenue Diagnostic exposes exactly where your business 
+                    is leaking revenue, and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                     <a 

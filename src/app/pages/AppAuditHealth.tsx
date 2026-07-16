@@ -135,9 +135,9 @@ const AppAuditHealth = () => {
 
         {/* Latest health */}
         <div className="grid md:grid-cols-4 gap-4">
-          <StatBlock label="Latest health" value={latest ? `${latest.health_score}/100` : "—"} icon={<Sparkles className="h-4 w-4" />} highlight={latest?.health_score && latest.health_score < 70} />
-          <StatBlock label="Last run duration" value={latest ? `${(latest.total_ms / 1000).toFixed(1)}s` : "—"} icon={<Clock className="h-4 w-4" />} />
-          <StatBlock label="Bottleneck" value={latest?.bottleneck_stage || "—"} icon={<AlertTriangle className="h-4 w-4" />} />
+          <StatBlock label="Latest health" value={latest ? `${latest.health_score}/100` : ", "} icon={<Sparkles className="h-4 w-4" />} highlight={latest?.health_score && latest.health_score < 70} />
+          <StatBlock label="Last run duration" value={latest ? `${(latest.total_ms / 1000).toFixed(1)}s` : ", "} icon={<Clock className="h-4 w-4" />} />
+          <StatBlock label="Bottleneck" value={latest?.bottleneck_stage || ", "} icon={<AlertTriangle className="h-4 w-4" />} />
           <StatBlock label="Pending proposals" value={String(pendingTuning.length + pendingCode.length)} icon={<Activity className="h-4 w-4" />} highlight={pendingTuning.length + pendingCode.length > 0} />
         </div>
 
@@ -169,7 +169,7 @@ const AppAuditHealth = () => {
                       <td className="py-2 pr-4">{(m.total_ms / 1000).toFixed(1)}s</td>
                       <td className="py-2 pr-4">{m.ai_call_count}</td>
                       <td className="py-2 pr-4">{m.ai_error_count > 0 ? <span className="text-destructive">{m.ai_error_count}</span> : "0"}</td>
-                      <td className="py-2 pr-4 text-muted-foreground">{m.bottleneck_stage || "—"}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{m.bottleneck_stage || ", "}</td>
                     </tr>
                   ))}
                 </tbody>

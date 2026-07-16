@@ -3,7 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
-import { FORENSIC_BLUEPRINT_COMPACT } from "../_shared/contentBlueprint.ts";
+import { FORENSIC_BLUEPRINT_PROMPT, AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +12,16 @@ const corsHeaders = {
 };
 
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+// Live Gemini generation — every script written fresh in Aetheris voice, no canned phrases.
 const PLAN_MODEL = "google/gemini-2.5-flash";
-const SCRIPT_MODEL = "openai/gpt-5-mini";
+const SCRIPT_MODEL = "google/gemini-2.5-pro";
+
+const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
+const signCaption = (cap: unknown): string => {
+  const s = typeof cap === "string" ? cap.trimEnd() : "";
+  if (!s) return AETHERIS_SIGNATURE;
+  return s.includes("Aetheris.Technology") ? s : `${s}\n\n${AETHERIS_SIGNATURE}`;
+};
 
 type Strategy = {
   business_description: string;
@@ -58,29 +66,34 @@ function getNextNDates(strategy: Strategy, count: number) {
 
 // ---- AI prompts ----
 function systemPrompt(s: Strategy) {
-  return `${FORENSIC_BLUEPRINT_COMPACT}
+  return `${FORENSIC_BLUEPRINT_PROMPT}
+
+${AETHERIS_FORENSIC_OPERATOR_VOICE}
 
 ═══════════════════════════════════════════════════════════════════
 CHANNEL: LINKEDIN SHORT-FORM VIDEO (60–90s scripts)
 ═══════════════════════════════════════════════════════════════════
 
-You are a LinkedIn short-form video strategist writing for ${s.business_description}.
+You are Joseph writing for ${s.business_description}. Every script is a fresh
+forensic diagnosis — never a template, never a recycled phrase. Write it the way
+you'd say it on camera, in one take, with no script in your hand.
 
 NICHE: ${s.niche}
 TARGET BUYER: ${s.target_buyer}
 GOALS: ${s.goals.join(", ")}
 CTA URL: ${s.cta_link}
 
-VOICE REFERENCE (mimic this tone exactly):
+VOICE REFERENCE (mimic exactly — cadence, vocabulary, rhythm):
 ${s.voice_reference}
 
 CHANNEL-SPECIFIC RULES:
-- First 1.5 seconds = Phase 1 Hook. Punchline, dollar figure, contrarian claim. NEVER "Hey guys" or "Today I'm going to talk about."
-- 60–90 second scripts (~150–220 words). Re-hook every 20–30 seconds with a Loop Opener or Contrast Word — "but actually," "turns out," "the part nobody mentions."
+- First 1.5 seconds = Phase 1 Hook. Diagnosis, dollar figure, contradiction. Never "Hey guys," never "Today I'm going to talk about."
+- 60–90 second scripts (~150–220 words). Re-hook every 20–30s with a Loop Opener or Contrast Word.
 - Real numbers beat round numbers. "$847K" beats "almost a million."
 - One idea per video. Operator Close at the end — drop and move.
-- End with soft CTA: "if this hits, the link in bio runs this scan on your business free."
-- Max 3 niche hashtags. No emoji decoration.`;
+- CTA must be original to THIS script — pulled from the mechanism you just named, not a stock line. Vary every time. Reference the leak, the audit, the diagnostic, the recovery — your call. Never reuse a phrase across scripts in the same batch.
+- Max 3 niche hashtags. No emoji decoration. Em dashes BANNED. Never close on a question.
+- HARD BAN on canned phrases: do not write "link in bio runs this scan free," "wonder what we'd find on yours," or any other recycled sign-off. Invent the close fresh, in voice, every time.`;
 }
 
 async function callAI(model: string, system: string, user: string, tool: any) {
@@ -167,15 +180,17 @@ const SCRIPT_TOOL = {
 
 function scriptUserPrompt(s: Strategy, slot: { format: string; topicAngle: string; targetEmotion: string }) {
   const guides: Record<string, string> = {
-    auditRoast: `Write an AUDIT ROAST. Open with the dollar figure or the most broken thing. Walk through 2-3 specific findings about a hypothetical ${s.niche} business with real numbers. End: "wonder what we'd find on yours? link in bio runs this scan free."`,
-    patternReveal: `Write a PATTERN REVEAL. Open with "Here's a leak I find in 80% of ${s.niche} businesses." Expose the pattern with real numbers. Give the EXACT fix (workflow, sequence, automation). End with the soft CTA.`,
-    founderPOV: `Write a FOUNDER POV. Behind-the-scenes of building or finding a recent win. First-person, specific. Show momentum without bragging. End with the soft CTA.`,
-    counterTake: `Write a COUNTER-TAKE. Open with "Everyone tells [target buyer] to [common advice]. That's wrong." Explain why with reasoning. Give the better play. End with the soft CTA.`,
+    auditRoast: `FORMAT — AUDIT ROAST. Open cold with the dollar figure or the most broken finding from a hypothetical ${s.niche} business. Walk through 2–3 specific forensic findings with real numbers. Name the mechanism. Close with an original Operator Close written in voice — invite the viewer to get audited without using any stock phrase.`,
+    patternReveal: `FORMAT — PATTERN REVEAL. Expose a leak you see across ${s.niche} operators. Quantify the pattern with real numbers (X out of 10, % drag, $ leak). Give the exact mechanism and the exact fix. Close with an original Operator Close in voice — no canned CTA.`,
+    founderPOV: `FORMAT — FOUNDER POV. First-person diagnostic. Something you walked into, audited, or fixed recently. Specific numbers, specific mechanism. No bragging. Close with an original Operator Close in voice — no canned CTA.`,
+    counterTake: `FORMAT — COUNTER-TAKE. Reframe a piece of common ${s.niche} advice. Name what's actually true and why. Quantify the cost of the wrong play. Close with an original Operator Close in voice — no canned CTA.`,
   };
   return `${guides[slot.format] || guides.auditRoast}
 
 TOPIC ANGLE: ${slot.topicAngle}
-TARGET EMOTION: ${slot.targetEmotion}`;
+TARGET EMOTION: ${slot.targetEmotion}
+
+Write this fresh. Do not lift phrases from prior scripts. The voice spec and blueprint above are the rules — execute them live.`;
 }
 
 // ---- handlers ----
@@ -264,6 +279,16 @@ serve(async (req) => {
       return json({ success: true });
     }
 
+    // ---- clear all scheduled posts ----
+    if (action === "clear_posts") {
+      const { error } = await supabase
+        .from("content_engine_posts")
+        .delete()
+        .not("id", "is", null);
+      if (error) throw error;
+      return json({ success: true });
+    }
+
     // ---- duplicate post +7d ----
     if (action === "duplicate_post") {
       const { id } = body;
@@ -282,7 +307,7 @@ serve(async (req) => {
           target_emotion: post.target_emotion,
           hook: post.hook,
           script: post.script,
-          caption: post.caption,
+          caption: signCaption(post.caption),
           hashtags: post.hashtags,
           status: "draft",
         })
@@ -318,7 +343,7 @@ serve(async (req) => {
         .update({
           hook: result.hook,
           script: result.script,
-          caption: result.caption,
+          caption: signCaption(result.caption),
           hashtags: result.hashtags || [],
           generated_at: new Date().toISOString(),
         })
@@ -332,6 +357,13 @@ serve(async (req) => {
     // ---- plan + generate batch ----
     if (action === "plan_and_generate") {
       const numPosts = Math.min(Math.max(parseInt(body.numPosts) || 12, 1), 30);
+      const userPrompt: string = (body.userPrompt || "").toString().trim();
+      const blogIds: string[] = Array.isArray(body.blogIds) ? body.blogIds.slice(0, 10) : [];
+      const playbookIds: string[] = Array.isArray(body.playbookIds) ? body.playbookIds.slice(0, 10) : [];
+      const topicSeeds: string[] = Array.isArray(body.topicSeeds)
+        ? body.topicSeeds.map((t: any) => String(t).trim()).filter(Boolean).slice(0, 20)
+        : [];
+
       const { data: strategy, error: serr } = await supabase
         .from("content_engine_strategy").select("*").limit(1).maybeSingle();
       if (serr || !strategy) throw serr || new Error("Strategy missing");
@@ -341,23 +373,58 @@ serve(async (req) => {
         return json({ error: "No posting slots available. Configure posting days in Strategy." }, 400);
       }
 
+      // Pull source context (blogs + playbooks) if any selected
+      const sourceSnippets: string[] = [];
+      if (blogIds.length) {
+        const { data: blogs } = await supabase
+          .from("blog_posts")
+          .select("title, excerpt, content")
+          .in("id", blogIds);
+        for (const b of blogs || []) {
+          const body = (b.excerpt || b.content || "").toString().replace(/<[^>]+>/g, " ").slice(0, 1200);
+          sourceSnippets.push(`BLOG — ${b.title}\n${body}`);
+        }
+      }
+      if (playbookIds.length) {
+        const { data: pbs } = await supabase
+          .from("playbooks")
+          .select("title, description, content")
+          .in("id", playbookIds);
+        for (const p of pbs || []) {
+          const body = (p.description || p.content || "").toString().replace(/<[^>]+>/g, " ").slice(0, 1200);
+          sourceSnippets.push(`PLAYBOOK — ${p.title}\n${body}`);
+        }
+      }
+
+      const directionBlock = [
+        userPrompt && `OPERATOR DIRECTION (highest priority — every post must serve this):\n${userPrompt}`,
+        topicSeeds.length && `TOPIC SEEDS (mix into the angles, do not just repeat):\n- ${topicSeeds.join("\n- ")}`,
+        sourceSnippets.length && `SOURCE MATERIAL (mine these for hooks, numbers, and angles — do not paraphrase, extract the sharpest insights):\n\n${sourceSnippets.join("\n\n---\n\n")}`,
+      ].filter(Boolean).join("\n\n");
+
       const planUserPrompt = `Plan ${slots.length} LinkedIn video posts across these dates: ${slots.map(s => s.date).join(", ")}.
 
 Format mix to respect approximately: ${JSON.stringify((strategy as Strategy).format_mix)}
 
 For each date return: date, format (auditRoast|patternReveal|founderPOV|counterTake), topicAngle (1 sentence), targetEmotion (curiosity|urgency|validation|contrarian).
 
-Topic angles must be DIVERSE. Mine the full landscape of ${(strategy as Strategy).niche} pain points: lead leakage, follow-up failures, sales process gaps, CRM hygiene, quote-to-close gaps, ghosted deals, owner workload, missed re-engagement, broken intake forms, response time, attribution gaps, automation gaps.`;
+${directionBlock || `Topic angles must be DIVERSE. Mine the full landscape of ${(strategy as Strategy).niche} pain points: lead leakage, follow-up failures, sales process gaps, CRM hygiene, quote-to-close gaps, ghosted deals, owner workload, missed re-engagement, broken intake forms, response time, attribution gaps, automation gaps.`}
+
+${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the same angle twice.` : ""}`;
 
       const plan = await callAI(PLAN_MODEL, systemPrompt(strategy as Strategy), planUserPrompt, PLAN_TOOL);
       if (!plan?.slots?.length) throw new Error("Planner returned no slots");
+
+      const scriptDirection = directionBlock
+        ? `\n\n--- OPERATOR DIRECTION & SOURCE MATERIAL ---\n${directionBlock}\n\nUse this material to ground the script in real specifics — pull numbers, phrases, and angles from it where possible.`
+        : "";
 
       const scriptResults = await Promise.all(plan.slots.map(async (planSlot: any, i: number) => {
         try {
           const r = await callAI(
             SCRIPT_MODEL,
             systemPrompt(strategy as Strategy),
-            scriptUserPrompt(strategy as Strategy, planSlot),
+            scriptUserPrompt(strategy as Strategy, planSlot) + scriptDirection,
             SCRIPT_TOOL,
           );
           return { ok: true, planSlot, script: r, i };
@@ -379,7 +446,7 @@ Topic angles must be DIVERSE. Mine the full landscape of ${(strategy as Strategy
             target_emotion: r.planSlot.targetEmotion,
             hook: r.script.hook,
             script: r.script.script,
-            caption: r.script.caption,
+            caption: signCaption(r.script.caption),
             hashtags: r.script.hashtags || [],
             status: "draft",
           };

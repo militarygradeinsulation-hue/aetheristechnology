@@ -80,7 +80,7 @@ const AppChanges = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-semibold tracking-tight">Changes pushed to HubSpot</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Every write the system makes — Co-Pilot or Hygiene — verified and undoable.
+          Every write the system makes, Co-Pilot or Hygiene, verified and undoable.
         </p>
       </div>
 

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { Person, SharedNotification, personLabel } from "@/lib/sharedWorkspace";
 
@@ -33,12 +34,20 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
   const unread = items.filter(i => !i.read_at).length;
 
   const markOne = async (id: string) => {
-    await supabase.from("shared_notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
+    setItems(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
+    try {
+      const { markNotificationRead } = await import("@/lib/sharedWorkspaceApi");
+      await markNotificationRead(id);
+    } catch { /* ignore */ }
     load();
   };
   const markAll = async () => {
-    await supabase.from("shared_notifications").update({ read_at: new Date().toISOString() })
-      .eq("recipient", me).is("read_at", null);
+    const now = new Date().toISOString();
+    setItems(prev => prev.map(n => n.read_at ? n : { ...n, read_at: now }));
+    try {
+      const { markAllNotificationsRead } = await import("@/lib/sharedWorkspaceApi");
+      await markAllNotificationsRead(me);
+    } catch { /* ignore */ }
     load();
   };
 
@@ -77,9 +86,12 @@ export const NotificationBell: React.FC<Props> = ({ me, onCountChange }) => {
                   {n.body && <div className="text-muted-foreground mt-0.5 line-clamp-2">{n.body}</div>}
                 </div>
                 {!n.read_at && (
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => markOne(n.id)} title="Mark read">
-                    <Check className="w-3 h-3" />
-                  </Button>
+                  <Switch
+                    checked={false}
+                    onCheckedChange={() => markOne(n.id)}
+                    title="Mark read"
+                    className="scale-75"
+                  />
                 )}
               </div>
             </div>

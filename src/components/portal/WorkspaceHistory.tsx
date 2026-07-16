@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, Copy, Download, Trash2, Eye, X, ExternalLink, Search } from 'lucide-react';
 import {
-  listRepLibrary, deleteFromRepLibrary, type RepLibraryItem,
+  listRepLibrary, deleteFromRepLibrary, getRepLibraryItem, type RepLibraryItem,
 } from '@/lib/portalWorkspace';
 import { LibraryItemRenderer } from '@/components/LibraryItemRenderer';
 import { downloadLibraryItemAsPdf } from '@/lib/generateLibraryPdf';
 import { formatLibraryItemAsText, downloadText } from '@/lib/adminLibrary';
+import { RecordingsHistoryPanel } from '@/components/portal/RecordingsHistoryPanel';
+import { getPortalProfile } from '@/lib/portalAuth';
 
 const TOOL_LABELS: Record<string, string> = {
   social_content: 'Social Content',
@@ -20,7 +23,17 @@ const TOOL_LABELS: Record<string, string> = {
   friction_audit: 'Friction Audit',
   playbook: 'Playbook',
   website_scan: 'Website Scan',
+  lead_deep_scan: 'Lead Deep Scan',
   business_diagnostic: 'Business Diagnostic',
+  ai_detect: 'AI Writing Detector',
+  detective_case: 'Detective Case File',
+  extension_scan: 'Extension · Forensic Scan',
+  extension_fix_all: 'Extension · Fix-All Run',
+  extension_agent: 'Extension · Agent Plan',
+  extension_linkedin: 'Extension · LinkedIn Draft',
+  extension_crm: 'Extension · HubSpot Autopsy',
+  extension_golden: 'Extension · Golden Report',
+  extension_misc: 'Extension · Capture',
 };
 
 interface Props {
@@ -32,6 +45,7 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [viewItem, setViewItem] = useState<RepLibraryItem | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,8 +80,17 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
 
   const types = Array.from(new Set(items.map(i => i.tool_type)));
 
+  const repCode = getPortalProfile()?.code;
+
   return (
     <div className="space-y-4">
+      {repCode && (
+        <RecordingsHistoryPanel
+          repCode={repCode}
+          title="Call & screen recordings"
+          allowDelete
+        />
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="text-sm text-muted-foreground">
           {items.length} saved item{items.length === 1 ? '' : 's'}
@@ -114,12 +137,38 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                 <p className="text-sm font-bold text-foreground truncate">{item.title}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" title="View" onClick={() => setViewItem(item)}><Eye className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="View" onClick={async () => {
+                  setViewItem(item);
+                  const needs = !item.output_data || Object.keys(item.output_data || {}).length === 0;
+                  if (!needs) return;
+                  setViewLoading(true);
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    if (full) setViewItem(full);
+                    else toast({ title: 'Could not load full content', variant: 'destructive' });
+                  } catch (e: any) {
+                    toast({ title: 'Failed to load', description: e?.message, variant: 'destructive' });
+                  } finally {
+                    setViewLoading(false);
+                  }
+                }}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" title="Copy" onClick={async () => {
-                  await navigator.clipboard.writeText(formatLibraryItemAsText(item as any));
-                  toast({ title: 'Copied' });
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    await navigator.clipboard.writeText(formatLibraryItemAsText(full as any));
+                    toast({ title: 'Copied' });
+                  } catch (e: any) {
+                    toast({ title: 'Copy failed', description: e?.message, variant: 'destructive' });
+                  }
                 }}><Copy className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => downloadLibraryItemAsPdf(item as any)}><Download className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" title="Download PDF" onClick={async () => {
+                  try {
+                    const full = await getRepLibraryItem(item.id);
+                    downloadLibraryItemAsPdf(full as any);
+                  } catch (e: any) {
+                    toast({ title: 'Download failed', description: e?.message, variant: 'destructive' });
+                  }
+                }}><Download className="w-4 h-4" /></Button>
                 {item.file_url && (
                   <a href={item.file_url} target="_blank" rel="noopener noreferrer">
                     <Button variant="ghost" size="icon" title="Open PDF"><ExternalLink className="w-4 h-4" /></Button>
@@ -134,10 +183,16 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
         </div>
       )}
 
-      {viewItem && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative border border-border">
-            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setViewItem(null)}>
+      {viewItem && createPortal(
+        <div
+          className="fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-4"
+          onClick={() => setViewItem(null)}
+        >
+          <div
+            className="bg-background rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button variant="ghost" size="icon" className="absolute top-3 right-3 z-10" onClick={() => setViewItem(null)}>
               <X className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -157,12 +212,23 @@ export const WorkspaceHistory: React.FC<Props> = ({ searchQuery = '' }) => {
                 const safe = viewItem.title.replace(/[^a-zA-Z0-9-_]/g, '_').slice(0, 80);
                 downloadText(`${safe}.txt`, formatLibraryItemAsText(viewItem as any));
               }}>Download .txt</Button>
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setViewItem(null)}>
+                Close
+              </Button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto pr-2">
-              <LibraryItemRenderer item={viewItem as any} />
+              {viewLoading ? (
+                <div className="flex items-center justify-center gap-3 py-12 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber" />
+                  <span className="text-sm">Loading content…</span>
+                </div>
+              ) : (
+                <LibraryItemRenderer item={viewItem as any} />
+              )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

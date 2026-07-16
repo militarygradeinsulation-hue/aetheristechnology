@@ -106,11 +106,11 @@ export interface HygieneSettingsRow {
 export const severityClass = (s: HygieneSeverity): string => {
   switch (s) {
     case "high":
-      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      return "bg-rose-500/10 text-rose-400 border-rose-500/20";
     case "medium":
       return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "low":
-      return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
   }
 };
 
@@ -183,7 +183,7 @@ export const hygieneCostModels: Record<string, HygieneCostModel> = {
   duplicate_contacts: {
     perIssue: 18,
     basis: "wasted send + sales time",
-    why: "Duplicate contacts inflate marketing sends, double-count engagement, and cause reps to call the same person twice. Industry benchmarks (Validity, 2023) put the blended cost of a duplicate at ~$15–25 once you factor in storage, sends, and rep time.",
+    why: "Duplicate contacts inflate marketing sends, double-count engagement, and cause reps to call the same person twice. Industry benchmarks (Validity, 2023) put the blended cost of a duplicate at ~$15-25 once you factor in storage, sends, and rep time.",
     formula: "$18 × duplicates (sends + 5 min rep time per dup)",
   },
   missing_critical_fields: {
@@ -225,7 +225,7 @@ export const hygieneCostModels: Record<string, HygieneCostModel> = {
   engagement_orphans: {
     perIssue: 2,
     basis: "attribution loss",
-    why: "Orphan engagements (calls, emails, meetings not linked to a contact or deal) break attribution and clutter activity timelines. Cost is mostly reporting noise — small per record.",
+    why: "Orphan engagements (calls, emails, meetings not linked to a contact or deal) break attribution and clutter activity timelines. Cost is mostly reporting noise, small per record.",
     formula: "$2 × orphans (lost attribution credit)",
   },
 };

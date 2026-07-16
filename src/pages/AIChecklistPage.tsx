@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import { SEOHead } from '@/components/SEOHead';
 import { CheckCircle2, Download, FileText, Shield, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generateAIChecklistPdf } from '@/lib/generateAIChecklistPdf';
 import { toast } from '@/hooks/use-toast';
+import aiChecklistAsset from '@/assets/tools/ai-checklist.jpg.asset.json';
 
 export default function AIChecklistPage() {
   const { trackEvent } = useTrackEvent();
@@ -46,7 +47,7 @@ export default function AIChecklistPage() {
       setDone(true);
     } catch (err) {
       console.error(err);
-      toast({ title: 'Something went wrong', description: 'Please try again or email hello@aetheris.technology', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: 'Please try again or email aetheris.technology@outlook.com', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -59,13 +60,27 @@ export default function AIChecklistPage() {
 
   return (
     <>
-      <Helmet>
-        <title>AI Implementation Checklist for Operations Managers | Aetheris</title>
-        <meta name="description" content="Free 7-section forensic checklist for ops managers rolling out AI. Pre-flight, use-case triage, data hygiene, pilots, rollout, risk, and ROI measurement." />
-        <link rel="canonical" href="https://aetheris.technology/ai-implementation-checklist" />
-      </Helmet>
+      <SEOHead
+        title="AI Readiness Checklist — Free Scorecard | Aetheris"
+        description="Free 7-section AI readiness checklist for ops managers. Score your business, find rollout gaps, and get a 30-day implementation plan."
+        path="/ai-checklist"
+        keywords="AI readiness checklist, AI implementation checklist, AI adoption scorecard, operations AI audit"
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'AI Readiness Checklist', path: '/ai-checklist' },
+        ]}
+        speakable={['h1']}
+      />
 
       <div className="min-h-screen pt-32 pb-20 px-4">
+        <div className="max-w-5xl mx-auto mb-10 rounded-xl overflow-hidden border border-border">
+          <img
+            src={aiChecklistAsset.url}
+            alt="AI Readiness Checklist — Free Scorecard"
+            className="w-full h-auto object-cover"
+            loading="eager"
+          />
+        </div>
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
           {/* Left: pitch */}
           <div className="space-y-6">
@@ -76,16 +91,16 @@ export default function AIChecklistPage() {
               The AI Implementation Checklist <span className="text-amber italic">for Operations Managers</span>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              7 forensic sections. 35 checkboxes. Every box you cannot tick is a leak —
+              7 forensic sections. 35 checkboxes. Every box you cannot tick is a leak , 
               and pilots launched on top of unchecked boxes don't fail loudly. They fail
               quietly while the invoice keeps clearing.
             </p>
 
             <ul className="space-y-3 text-sm">
               {[
-                'Pre-flight operational readiness — what to confirm before any tool touches your stack',
+                'Pre-flight operational readiness, what to confirm before any tool touches your stack',
                 'Use-case triage: build vs. buy vs. skip (with a kill-it scoring rubric)',
-                'Data & access hygiene — the audit-log + DPA list ops managers always forget',
+                'Data & access hygiene, the audit-log + DPA list ops managers always forget',
                 '30-day pilot design with pre-defined kill criteria',
                 'Rollout, change management, risk, and ROI measurement',
               ].map((t) => (
@@ -130,12 +145,12 @@ export default function AIChecklistPage() {
                   </div>
                   <div>
                     <Label htmlFor="pain">Biggest operational leak right now</Label>
-                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={(e) => setForm({ ...form, biggest_pain: e.target.value })} placeholder="Optional — we read every one." />
+                    <Textarea id="pain" rows={3} value={form.biggest_pain} onChange={(e) => setForm({ ...form, biggest_pain: e.target.value })} placeholder="Optional, we read every one." />
                   </div>
                   <Button type="submit" size="lg" disabled={submitting} className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                     {submitting ? 'Generating PDF…' : (<><Download className="w-4 h-4 mr-2" />Download the Checklist</>)}
                   </Button>
-                  <p className="text-[11px] text-muted-foreground text-center font-case uppercase tracking-wider">PDF · 35 checkboxes · 4–5 pages</p>
+                  <p className="text-[11px] text-muted-foreground text-center font-case uppercase tracking-wider">PDF · 35 checkboxes · 4-5 pages</p>
                 </form>
               </>
             ) : (
@@ -152,7 +167,7 @@ export default function AIChecklistPage() {
                   </div>
                   <p className="text-sm text-foreground">
                     Want an operator to actually run this against your business? The
-                    <strong className="text-amber"> Forensic Diagnostic ($2,500 flat)</strong> applies 1:1 toward any engagement.
+                    <strong className="text-amber"> Forensic Diagnostic ($18,500 flat)</strong> applies 1:1 toward any engagement.
                   </p>
                   <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
                     <Button className="w-full mt-3 bg-amber hover:bg-amber/90 text-primary-foreground">Book the Forensic Diagnostic</Button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
@@ -8,56 +8,20 @@ import { ContactModal } from '@/components/ContactModal';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { ParallaxTilt } from '@/components/ParallaxTilt';
 import { SEOHead } from '@/components/SEOHead';
-import blogThumb from '@/assets/blog-thumb.jpg';
-import playbooksThumb from '@/assets/playbooks-thumb.jpg';
-import diagnosticThumb from '@/assets/diagnostic-thumb.jpg';
-import scannerThumb from '@/assets/scanner-thumb.jpg';
-import contentGenThumb from '@/assets/content-generator-thumb.jpg';
-import salesScriptsThumb from '@/assets/sales-scripts-thumb.jpg';
-import contentCalendarThumb from '@/assets/content-calendar-thumb.jpg';
-import followUpThumb from '@/assets/follow-up-plan-thumb.jpg';
-import strategicQuestionsThumb from '@/assets/strategic-questions-thumb.jpg';
-import brandContradictionsThumb from '@/assets/brand-contradictions-thumb.jpg';
-import frictionAuditThumb from '@/assets/friction-audit-thumb.jpg';
+import { problemGroups } from '@/lib/problemGroups';
 
-interface Tool {
-  thumbnail: string;
-  title: string;
-  description: string;
-  path: string;
-  category: 'Diagnostic' | 'Marketing' | 'Sales' | 'Brand' | 'Content';
-}
-
-const tools: Tool[] = [
-  { thumbnail: diagnosticThumb, title: 'Business Diagnostic', description: '20-question assessment that scores your operational health.', path: '/business-diagnostic', category: 'Diagnostic' },
-  { thumbnail: scannerThumb, title: 'Website Scanner', description: "Instant audit of your site's SEO, speed, and conversion gaps.", path: '/scan', category: 'Diagnostic' },
-  { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', description: 'Expose blind spots across leadership, sales, and operations.', path: '/strategic-questions', category: 'Diagnostic' },
-  { thumbnail: brandContradictionsThumb, title: 'Brand Contradiction Finder', description: 'See where your brand says one thing but signals another.', path: '/brand-contradictions', category: 'Brand' },
-  { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', description: 'Find the words quietly weakening trust and authority.', path: '/friction-audit', category: 'Brand' },
-  { thumbnail: contentGenThumb, title: 'Social Content Generator', description: 'Scan your site — get 25 ready-to-post social pieces.', path: '/content-generator', category: 'Content' },
-  { thumbnail: contentCalendarThumb, title: '30-Day Content Calendar', description: 'Daily post ideas, hooks, and topics for your industry.', path: '/content-calendar', category: 'Content' },
-  
-  { thumbnail: salesScriptsThumb, title: 'Sales Script Generator', description: 'AI call scripts, objection handlers, and follow-up templates.', path: '/sales-scripts', category: 'Sales' },
-  { thumbnail: followUpThumb, title: 'Follow-Up System Plan', description: '14-day multi-channel sales cadence with templates.', path: '/follow-up-plan', category: 'Sales' },
-  { thumbnail: blogThumb, title: 'Free Blog Articles', description: 'Actionable insights on AI, operations, and growth.', path: '/blog', category: 'Content' },
-  { thumbnail: playbooksThumb, title: 'Free Playbooks', description: 'Step-by-step guides you can implement today.', path: '/resources', category: 'Content' },
-];
-
-const CATEGORIES = ['All', 'Diagnostic', 'Brand', 'Marketing', 'Sales', 'Content'] as const;
 
 const CapabilitiesPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [filter, setFilter] = useState<(typeof CATEGORIES)[number]>('All');
-
-  const filtered = filter === 'All' ? tools : tools.filter((t) => t.category === filter);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Capability Demonstrations — Aetheris AI"
-        description="Working examples of the AI systems Aetheris AI deploys for clients. Diagnostics, brand audits, marketing tools, sales engines, and content generators."
+        title="What's leaking? Tools by problem. Aetheris"
+        description="Free AI tools from Aetheris, organized by the problem you're trying to solve: revenue leaks, brand contradictions, cold pipeline, content drought, bad hires."
         path="/capabilities"
-        keywords="AI capability demos, free AI tools, AI diagnostic tools, AI marketing tools, AI sales tools"
+        keywords="business problem tools, revenue leak audit, sales follow-up, content generator, hiring forensics"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Capabilities', path: '/capabilities' },
@@ -74,73 +38,138 @@ const CapabilitiesPage = () => {
               </Link>
               <div className="text-center mb-12">
                 <span className="text-amber/80 font-medium text-xs tracking-[0.22em] uppercase mb-4 block">
-                  See Our AI in Action
+                  Pick the problem. Run the tool.
                 </span>
                 <h1 className="text-4xl md:text-6xl font-bold text-foreground font-display mb-4 text-float">
-                  Capability <span className="text-gradient-amber">Demonstrations</span>
+                  What's <span className="text-gradient-amber">actually broken</span>?
                 </h1>
                 <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-                  Every tool here is a working example of an AI system we deploy for paying clients. Use them free — then talk to us about a custom-built version.
+                  Tap the picture that looks like your week. The case file opens underneath.
                 </p>
               </div>
             </RevealOnScroll>
 
-            {/* Category filter */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {problemGroups.map((group, gi) => {
+                const isExpanded = expandedIdx === gi;
+                return (
+                  <RevealOnScroll key={gi} variant="float" delay={(gi % 3) * 0.05}>
+                    <ParallaxTilt intensity={0.25} className="h-full">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedIdx(isExpanded ? null : gi)}
+                        aria-expanded={isExpanded}
+                        aria-label={group.problem}
+                        className={`group relative w-full text-left forensic-tile amber-corner rounded-xl overflow-hidden flex flex-col transition-all ${isExpanded ? 'ring-2 ring-amber/60' : ''}`}
+                      >
+                        {group.image ? (
+                          <div className="thumb-frame relative w-full aspect-[4/3] overflow-hidden">
+                            <span className="thumb-hairline" />
+                            <img
+                              src={group.image}
+                              alt={group.problem}
+                              loading="lazy"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            />
+                            <div className="absolute top-2 left-2 font-case text-[9px] uppercase tracking-[0.22em] text-crimson bg-background/70 backdrop-blur px-2 py-1 rounded-sm">
+                              Case {String(gi + 1).padStart(2, '0')}
+                            </div>
+                            <div className="absolute bottom-2 right-2 text-[10px] font-case uppercase tracking-[0.2em] text-amber bg-background/70 backdrop-blur px-2 py-1 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                              {isExpanded ? 'Tap to close' : 'Tap to open'}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-5">
+                            <div className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson mb-2">
+                              Case {String(gi + 1).padStart(2, '0')}
+                            </div>
+                            <p className="font-display text-base md:text-lg font-bold text-foreground leading-snug">
+                              "{group.problem}"
+                            </p>
+                          </div>
+                        )}
+                      </button>
+                    </ParallaxTilt>
+
+                    {isExpanded && (
+                      <div className="mt-4 rounded-xl border border-amber/30 bg-background/60 backdrop-blur p-6 animate-fade-in">
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <p className="font-display text-base md:text-lg font-bold text-foreground leading-snug">
+                            "{group.problem}"
+                          </p>
+                          <button
+                            onClick={() => setExpandedIdx(null)}
+                            className="shrink-0 text-muted-foreground hover:text-amber transition-colors"
+                            aria-label="Close"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4">
+                          {group.symptom}
+                        </p>
+                        <div className="font-case text-[10px] uppercase tracking-[0.22em] text-amber mb-3">
+                          Tools that plug this leak
+                        </div>
+                        <div className="space-y-2">
+                          {group.tools.map((tool) => (
+                            <Link
+                              key={tool.title}
+                              to={tool.path}
+                              className="group flex items-start gap-3 p-3 rounded-lg border border-border/60 hover:border-amber/40 hover:bg-amber/5 transition-all"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="font-display text-sm font-bold text-foreground mb-0.5">
+                                  {tool.title}
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  {tool.solves}
+                                </p>
+                              </div>
+                              <span className="text-amber text-xs font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all shrink-0 mt-0.5">
+                                Run <ArrowRight className="w-3 h-3" />
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </RevealOnScroll>
+                );
+              })}
+            </div>
+
+            {/* Bottom conversion band */}
             <RevealOnScroll>
-              <div className="flex flex-wrap justify-center gap-2 mb-10">
-                {CATEGORIES.map((cat) => (
+              <div className="mt-16 max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
+                <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
+                  Skip the tools — go straight to the fix
+                </div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Fastest path</div>
+                <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-3">
+                  Don't have time to run every tool? <span className="text-crimson">We'll do it in 14 days.</span>
+                </h3>
+                <p className="text-sm md:text-base text-foreground/80 mb-5 max-w-2xl">
+                  The Leak Audit runs every one of these tools on your business, hands you a written report with prioritized fixes and ROI on each, and applies 100% of the $18,500+ fee toward implementation. <span className="text-amber font-semibold">If we don't find leaks worth more than the fee, you don't pay.</span>
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/leak-audit">
+                    <button className="inline-flex items-center justify-center gap-2 rounded-md bg-amber text-background hover:bg-amber/90 px-5 py-2.5 text-sm font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
+                      Book the 21-Day Revenue Diagnostic — $18,500 <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
                   <button
-                    key={cat}
-                    onClick={() => setFilter(cat)}
-                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
-                      filter === cat
-                        ? 'bg-amber/15 border-amber/50 text-amber'
-                        : 'border-border/60 text-muted-foreground hover:border-amber/30 hover:text-foreground'
-                    }`}
+                    onClick={() => setIsContactModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-amber/40 text-amber hover:bg-amber/10 px-5 py-2.5 text-sm font-semibold"
                   >
-                    {cat}
+                    Talk to the operator first
                   </button>
-                ))}
+                </div>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Guaranteed ROI · Applied to implementation · Limited slots this month
+                </p>
               </div>
             </RevealOnScroll>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((tool, idx) => (
-                <RevealOnScroll key={tool.title} variant="float" delay={(idx % 3) * 0.05}>
-                  <ParallaxTilt intensity={0.3} className="h-full">
-                    <Link
-                      to={tool.path}
-                      className="group glass hover:glass-shine hover-lift rounded-xl border border-border/60 hover:border-amber/40 flex flex-col h-full overflow-hidden transition-all"
-                    >
-                      <div className="w-full aspect-[16/10] overflow-hidden">
-                        <img
-                          src={tool.thumbnail}
-                          alt={tool.title}
-                          loading="lazy"
-                          width={512}
-                          height={320}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                      </div>
-                      <div className="p-6 flex flex-col flex-1">
-                        <span className="text-[10px] font-semibold text-amber/80 tracking-[0.18em] uppercase mb-2">
-                          {tool.category}
-                        </span>
-                        <h3 className="text-xl font-bold text-foreground font-display mb-2 leading-tight">
-                          {tool.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-5 flex-1 leading-relaxed">
-                          {tool.description}
-                        </p>
-                        <span className="text-amber text-sm font-semibold inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all tracking-wide">
-                          Explore Tool <ArrowRight className="w-4 h-4" />
-                        </span>
-                      </div>
-                    </Link>
-                  </ParallaxTilt>
-                </RevealOnScroll>
-              ))}
-            </div>
           </div>
         </div>
         <Footer />

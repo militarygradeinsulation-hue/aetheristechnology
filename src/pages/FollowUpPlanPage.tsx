@@ -14,7 +14,7 @@ const FollowUpPlanPage = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="AI Follow-Up System — 14-Day Cadence | Aetheris"
+        title="AI Follow-Up System, 14-Day Cadence | Aetheris"
         description="14-day multi-channel follow-up system with email, SMS, and call templates. First 4 days free, full system $49."
         path="/follow-up-plan"
       />

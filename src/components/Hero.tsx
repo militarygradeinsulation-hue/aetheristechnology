@@ -1,11 +1,15 @@
 import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Phone, Play, FileText, BadgeCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Phone, Play, FileText, BadgeCheck, ChevronDown, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import architectLogo from '@/assets/architect-logo.jpg';
 import heroLeakVideo from '@/assets/hero-leak.mp4';
+
+import { ForensicInfographic } from './ForensicInfographic';
+import { INFOGRAPHICS } from '@/lib/infographics';
+import { ProblemPicker } from './ProblemPicker';
 
 interface HeroProps {
   onContactClick: () => void;
@@ -18,6 +22,7 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [whatOpen, setWhatOpen] = useState(false);
 
   const toggleVideo = () => {
     const v = videoRef.current;
@@ -39,110 +44,148 @@ export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
     }
   };
 
+
+
+
   return (
     <section className="relative min-h-[78vh] flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="max-w-7xl mx-auto text-center">
+      <div className="max-w-[1600px] mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="space-y-6"
         >
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={toggleVideo}
-              aria-label={playing ? 'Pause video' : 'Play video'}
-              className="group relative w-72 md:w-96 aspect-square rounded-full overflow-hidden shadow-2xl focus:outline-none focus:ring-2 focus:ring-amber"
-            >
-              <img
-                src={architectLogo}
-                alt="Joseph Toney — Aetheris Operator"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-0' : 'opacity-100'}`}
-                loading="eager"
-              />
-              <video
-                ref={videoRef}
-                src={heroLeakVideo}
-                playsInline
-                onEnded={() => { setPlaying(false); if (videoRef.current) videoRef.current.currentTime = 0; }}
-                onPause={() => setPlaying(false)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${playing ? 'opacity-100' : 'opacity-0'}`}
-              />
-              {!playing && (
-                <span className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/30 transition-colors">
-                  <span className="rounded-full bg-amber/90 text-background p-5 shadow-xl group-hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 fill-current" />
-                  </span>
-                </span>
-              )}
-            </button>
+          <div className="w-full max-w-5xl mx-auto text-center space-y-2 pb-1">
+            <p className="font-forensic text-lg md:text-2xl lg:text-3xl text-foreground leading-tight">
+              Business is <span className="text-crimson italic">chaos</span> that starts somewhere.
+            </p>
+            <p className="font-forensic text-base md:text-lg lg:text-xl text-foreground/85 leading-snug">
+              We pinpoint it and give you the answers <span className="text-amber">— even if you tell us you're not interested.</span>
+            </p>
           </div>
+
+          <div className="flex flex-col items-center gap-3">
+            <div className="font-case text-[10px] md:text-xs uppercase tracking-widest text-crimson/80">
+              ↓ Press this first. Seriously.
+            </div>
+            <motion.button
+              type="button"
+              onClick={() => {
+                setWhatOpen((v) => !v);
+                trackEvent('click', { label: 'what_the_hell_toggle', location: 'hero' });
+              }}
+              aria-expanded={whatOpen}
+              animate={{ boxShadow: ['0 0 0 0 hsl(var(--crimson) / 0.45), inset 0 0 24px hsl(var(--crimson) / 0.15)', '0 0 0 14px hsl(var(--crimson) / 0), inset 0 0 32px hsl(var(--crimson) / 0.22)', '0 0 0 0 hsl(var(--crimson) / 0), inset 0 0 24px hsl(var(--crimson) / 0.15)'] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative inline-flex items-center gap-3 rounded-sm border border-crimson/60 bg-crimson/5 hover:bg-crimson/10 backdrop-blur-md px-6 md:px-10 py-4 md:py-5 font-forensic text-xl md:text-3xl lg:text-4xl font-bold uppercase tracking-tight text-crimson"
+            >
+              <span aria-hidden className="absolute inset-0 rounded-sm bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+              <span aria-hidden className="absolute -top-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/60 to-transparent" />
+              <span aria-hidden className="absolute -bottom-px left-3 right-3 h-px bg-gradient-to-r from-transparent via-crimson/40 to-transparent" />
+              <HelpCircle className="w-6 h-6 md:w-8 md:h-8 relative" />
+              <span className="relative drop-shadow-[0_0_12px_hsl(var(--crimson)/0.55)]">What The Hell Do You Actually Sell?</span>
+              <ChevronDown className={`w-6 h-6 md:w-8 md:h-8 relative transition-transform ${whatOpen ? 'rotate-180' : ''}`} />
+            </motion.button>
+            <AnimatePresence initial={false}>
+              {whatOpen && (
+                <motion.div
+                  key="what-panel"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-3xl overflow-hidden text-left"
+                >
+                  <div className="rounded-sm border border-amber/30 bg-background/70 px-5 md:px-6 py-5 md:py-6 space-y-3">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-amber">
+                      Case File · Plain English
+                    </div>
+                    <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                      What the Hell Do You <span className="text-amber italic">Actually</span> Sell?
+                    </h3>
+                    <div className="rounded-sm border-l-2 border-crimson/60 bg-crimson/5 px-4 py-3">
+                      <div className="font-case text-[10px] uppercase tracking-widest text-crimson/90 mb-1.5">
+                        I know what you're thinking
+                      </div>
+                      <p className="text-[14px] leading-relaxed text-foreground/85 italic">
+                        "Great. Another website scan. Another 'AI consultant' with a funnel and a Calendly link. Another tool every guru on LinkedIn is already selling."
+                      </p>
+                      <p className="text-[14px] leading-relaxed text-foreground/90 mt-2">
+                        I'd think the same thing. I <span className="text-amber">did</span> think the same thing. Every time I paid one of them and walked away poorer and more confused. That's exactly why this isn't that. Read the next part slowly.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2.5 text-[15px] leading-relaxed text-foreground/85">
+                      <p>Most consultants sell services.</p>
+                      <p className="text-foreground font-semibold">We solve problems.</p>
+                      <p>
+                        We investigate every part of your business to find hidden revenue leaks, operational bottlenecks, wasted effort, missed opportunities, and growth barriers.
+                      </p>
+                      <p>
+                        Then we quantify the impact, prioritize the fixes, and build the systems needed to solve them.
+                      </p>
+                      <p className="font-case text-xs uppercase tracking-widest text-amber/90">
+                        Marketing. AI. Automation. CRM. Websites. Operations. Sales.
+                      </p>
+                      <p className="italic text-foreground/90">Those are just tools.</p>
+                      <p>
+                        The real product is <span className="text-amber">finding what's broken</span> and helping you fix it.
+                      </p>
+                      <p className="border-l-2 border-crimson/60 pl-3 font-forensic text-base md:text-lg text-foreground">
+                        Diagnosis first. Solution second. <span className="text-crimson">Results always.</span>
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
 
           <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-sm border-amber/30">
             <span className="font-case text-xs uppercase tracking-widest text-amber">
-              Revenue systems for specialty manufacturers · Indianapolis
+              Reserved for exhausted owners · Indianapolis · US-wide · Risk-Free
             </span>
           </div>
 
-          <h1 className="font-forensic text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight max-w-6xl mx-auto">
-            <span className="text-foreground">We help specialty manufacturers find the </span>
-            <span className="text-amber">$200K–$2M</span>
-            <br className="hidden md:block" />
-            <span className="text-foreground"> they're </span>
-            <span className="text-crimson">losing</span>
-            <span className="text-foreground"> to broken </span>
-            <span className="text-crimson">CRM</span>
-            <span className="text-foreground">, sales, and operational systems — and fix it.</span>
+
+          <h1 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight max-w-[1500px] mx-auto">
+            <span className="text-foreground">I can find </span>
+            <span className="text-amber italic">instantly</span>
+            <span className="text-foreground"> where your leads are </span>
+            <span className="text-crimson italic">leaking</span>
+            <span className="text-foreground"> — and how to get them </span>
+            <span className="text-amber italic">all back.</span>
+            <span className="block mt-3 text-2xl md:text-3xl lg:text-4xl text-foreground/85">
+              Without <span className="text-amber">extra marketing</span>, <span className="text-amber">extra costs</span>, or <span className="text-amber">new systems</span>.
+            </span>
           </h1>
 
-          <h2 className="font-forensic text-xl md:text-2xl lg:text-3xl font-bold leading-[1.1] tracking-tight max-w-5xl mx-auto text-muted-foreground">
-            <span className="text-foreground">20 years building revenue systems for </span>
-            <span className="text-amber">manufacturers.</span>
-            <br className="hidden md:block" />
-            <span className="text-foreground"> Marine Corps veteran. Former Director of Strategy at a $25M aerospace firm with </span>
-            <span className="text-amber">SpaceX accounts.</span>
-          </h2>
+          <p className="font-case text-sm md:text-base uppercase tracking-widest text-amber max-w-3xl mx-auto">
+            78% of the leaks we find, the owner already felt, they just couldn't name them.
+          </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <a
-              href={HUBSPOT_MEETING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('click', { label: 'book_call_hero', location: 'hero' })}
-            >
-              <Button
-                size="lg"
-                className="bg-amber hover:bg-amber/90 text-primary-foreground group hover-lift font-bold"
-              >
-                Book a 15-minute call
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </a>
-            <Link to="/methodology" onClick={() => trackEvent('click', { label: 'methodology_hero', location: 'hero' })}>
-              <Button size="lg" variant="outline" className="glass-hover border-amber/40 text-amber hover:text-amber hover-lift">
-                <FileText className="mr-2 w-4 h-4" />
-                Read the methodology
-              </Button>
-            </Link>
-            <Link to="/credentials" onClick={() => trackEvent('click', { label: 'credentials_hero', location: 'hero' })}>
-              <Button size="lg" variant="outline" className="glass-hover border-border hover-lift">
-                <BadgeCheck className="mr-2 w-4 h-4" />
-                See credentials
-              </Button>
-            </Link>
+          <div className="max-w-3xl mx-auto pt-2">
+            <div className="forensic-tile rounded-sm border border-amber/40 px-5 py-4 md:px-6 md:py-5">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">
+                What you're actually buying
+              </div>
+              <p className="text-base md:text-lg text-foreground/90 leading-snug">
+                <span className="text-amber font-semibold">We don't sell tools.</span> We pair you with an
+                operator who sits down with you, finds every leak, and crafts the solutions — so you don't
+                have to.
+              </p>
+              <p className="mt-3 text-[15px] md:text-base leading-snug text-foreground/85 border-l-2 border-crimson/60 pl-3 italic">
+                Start with the scan below <span className="text-amber font-semibold not-italic">because</span> every 30 days you wait, the leak compounds — the same leads cost more to reheat later, and 7 out of 10 audits find the fix pays for itself in the first quarter.
+              </p>
+            </div>
           </div>
 
-          <div className="pt-3 flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <a
-              href="tel:+13173762110"
-              onClick={() => trackEvent('click', { label: 'call_hero', location: 'hero' })}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-amber transition-colors font-case uppercase tracking-wider"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              (317) 376-2110
-            </a>
-          </div>
+          <ProblemPicker />
+
         </motion.div>
       </div>
     </section>

@@ -184,12 +184,12 @@ export const FailedSends: React.FC = () => {
               <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">No failed sends 🎉</td></tr>
             )}
             {rows.slice(0, 200).map(r => {
-              const email = r.drip_prospects?.email || '—';
-              const type = email !== '—' ? providerType(email) : '';
+              const email = r.drip_prospects?.email || ', ';
+              const type = email !== ', ' ? providerType(email) : '';
               return (
                 <tr key={r.id} className="border-t border-border">
                   <td className="px-3 py-2 font-mono text-xs">{email}</td>
-                  <td className="px-3 py-2">{r.drip_prospects?.business_name || '—'}</td>
+                  <td className="px-3 py-2">{r.drip_prospects?.business_name || ', '}</td>
                   <td className="px-3 py-2">
                     <span className={type === 'free' ? 'text-amber-500' : 'text-emerald-500'}>{type}</span>
                   </td>
@@ -197,7 +197,7 @@ export const FailedSends: React.FC = () => {
                   <td className="px-3 py-2 text-xs">{new Date(r.scheduled_for).toLocaleString()}</td>
                   <td className="px-3 py-2">{r.attempt_count ?? 0}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground max-w-md truncate" title={r.error_message || ''}>
-                    {r.error_message || '— (no error captured)'}
+                    {r.error_message || ',  (no error captured)'}
                   </td>
                 </tr>
               );

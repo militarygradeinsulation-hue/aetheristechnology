@@ -7,9 +7,19 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        lg: "2rem",
+        xl: "3rem",
+        "2xl": "4rem",
+      },
       screens: {
-        "2xl": "1400px",
+        sm: "100%",
+        md: "100%",
+        lg: "100%",
+        xl: "100%",
+        "2xl": "100%",
       },
     },
     extend: {
@@ -18,6 +28,10 @@ export default {
         body: ["Inter", "sans-serif"],
         forensic: ["Fraunces", "Georgia", "serif"],
         case: ["JetBrains Mono", "ui-monospace", "monospace"],
+        edge: ["Bebas Neue", "Space Grotesk", "Impact", "sans-serif"],
+        script: ["Great Vibes", "cursive"],
+        engraved: ["Cinzel", "serif"],
+        atelier: ["Montserrat", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -84,12 +98,36 @@ export default {
           "0%": { opacity: "0", transform: "scale(0.96)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        "detective-scan": {
+          "0%": { transform: "translateY(0)", opacity: "0.9" },
+          "50%": { opacity: "0.4" },
+          "100%": { transform: "translateY(128px)", opacity: "0.9" },
+        },
+        "detective-float": {
+          "0%, 100%": { opacity: "0", transform: "translateY(4px)" },
+          "50%": { opacity: "0.9", transform: "translateY(-4px)" },
+        },
+        "detective-dot": {
+          "0%, 100%": { opacity: "0.3", transform: "scale(0.8)" },
+          "50%": { opacity: "1", transform: "scale(1.4)" },
+        },
+        "gold-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "signature-drift": {
+          "0%, 100%": { transform: "scale(1) translate(0, 0)" },
+          "50%": { transform: "scale(1.02) translate(-0.5%, 0.5%)" },
+        },
+
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out",
         "scale-in": "scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        "gold-float": "gold-float 6s ease-in-out infinite",
+        "signature-drift": "signature-drift 18s ease-in-out infinite",
       },
     },
   },

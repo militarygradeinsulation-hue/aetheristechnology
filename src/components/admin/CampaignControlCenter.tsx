@@ -152,7 +152,7 @@ export const CampaignControlCenter: React.FC = () => {
           continue;
         }
 
-        // Unknown response — stop and surface it.
+        // Unknown response, stop and surface it.
         stopReason = msg || 'Unknown response';
         break;
       }

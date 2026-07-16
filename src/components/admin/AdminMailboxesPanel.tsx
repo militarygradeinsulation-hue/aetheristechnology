@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { adminMailboxes, type AdminMailboxRow } from "@/lib/adminMailboxes";
+import { getAdminMailPrefs, saveAdminMailPrefs, type EmailProvider } from "@/lib/repMail";
 import { Loader2, Mail, Plus, Wand2, Trash2, Settings2 } from "lucide-react";
 
 export const AdminMailboxesPanel: React.FC = () => {
@@ -18,6 +19,13 @@ export const AdminMailboxesPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [editing, setEditing] = useState<AdminMailboxRow | null>(null);
+  const [adminPrefs, setAdminPrefs] = useState(() => getAdminMailPrefs());
+
+  const updatePref = (patch: Partial<{ email_provider: EmailProvider; sender_email: string }>) => {
+    const next = { ...adminPrefs, ...patch };
+    setAdminPrefs(next);
+    saveAdminMailPrefs(next);
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -83,6 +91,37 @@ export const AdminMailboxesPanel: React.FC = () => {
         </Button>
       </div>
 
+      <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+        <div>
+          <h3 className="font-semibold flex items-center gap-2"><Settings2 className="w-4 h-4" /> My email compose preference</h3>
+          <p className="text-xs text-muted-foreground">When you click a lead's email anywhere in the admin or CRM, we'll open a compose window in your chosen mail app.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs">Mail provider</Label>
+            <select
+              className="w-full mt-1 px-3 py-2 rounded-md border bg-background text-sm"
+              value={adminPrefs.email_provider || 'default'}
+              onChange={(e) => updatePref({ email_provider: e.target.value as EmailProvider })}
+            >
+              <option value="default">System default (mailto:)</option>
+              <option value="gmail">Gmail (web)</option>
+              <option value="outlook">Outlook (web)</option>
+              <option value="yahoo">Yahoo Mail (web)</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Your email (optional, used by Gmail authuser)</Label>
+            <Input
+              className="mt-1"
+              placeholder="you@gmail.com"
+              value={adminPrefs.sender_email || ''}
+              onChange={(e) => updatePref({ sender_email: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="py-12 text-center text-muted-foreground"><Loader2 className="w-6 h-6 mx-auto animate-spin" /></div>
       ) : (
@@ -110,7 +149,7 @@ export const AdminMailboxesPanel: React.FC = () => {
                     {r.mailbox ? (
                       <code className="text-xs">{r.mailbox.address}</code>
                     ) : (
-                      <span className="text-xs text-muted-foreground">— none —</span>
+                      <span className="text-xs text-muted-foreground">,  none , </span>
                     )}
                   </td>
                   <td className="p-3">
@@ -118,14 +157,14 @@ export const AdminMailboxesPanel: React.FC = () => {
                       r.mailbox.is_active
                         ? <Badge variant="default">active</Badge>
                         : <Badge variant="secondary">disabled</Badge>
-                    ) : "—"}
+                    ) : ", "}
                   </td>
-                  <td className="p-3 text-xs">{r.mailbox?.forwarding_to || "—"}</td>
+                  <td className="p-3 text-xs">{r.mailbox?.forwarding_to || ", "}</td>
                   <td className="p-3 text-right">{r.mailbox?.message_count ?? 0}</td>
                   <td className="p-3 text-xs">
                     {r.mailbox?.last_inbound_at
                       ? new Date(r.mailbox.last_inbound_at).toLocaleString()
-                      : "—"}
+                      : ", "}
                   </td>
                   <td className="p-3 text-right space-x-2 whitespace-nowrap">
                     {r.mailbox ? (
@@ -200,7 +239,7 @@ const EditDialog: React.FC<{ row: AdminMailboxRow | null; onClose: () => void }>
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit mailbox — {row.rep_name}</DialogTitle>
+          <DialogTitle>Edit mailbox, {row.rep_name}</DialogTitle>
           <DialogDescription>Manage address, forwarding, signature, and auto-reply.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -221,7 +260,7 @@ const EditDialog: React.FC<{ row: AdminMailboxRow | null; onClose: () => void }>
             <Switch checked={autoReplyEnabled} onCheckedChange={setAutoReplyEnabled} />
           </div>
           {autoReplyEnabled && (
-            <Textarea value={autoReplyBody} onChange={(e) => setAutoReplyBody(e.target.value)} rows={3} placeholder="Thanks for your message — I'll get back to you within 24 hours." />
+            <Textarea value={autoReplyBody} onChange={(e) => setAutoReplyBody(e.target.value)} rows={3} placeholder="Thanks for your message, I'll get back to you within 24 hours." />
           )}
           <div className="flex items-center justify-between">
             <Label>Mailbox active</Label>

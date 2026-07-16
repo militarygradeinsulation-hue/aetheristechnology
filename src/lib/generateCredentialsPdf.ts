@@ -56,11 +56,11 @@ export function generateCredentialsPdf() {
   );
   block(
     'EDUCATION',
-    'B.A. in Psychology and Communication. M.S. in Business Marketing. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
+    'B.A. in Psychology and Communication. M.S. in Business Marketing. Currently pursuing further Doctorate work in Digital Forensics. Foundation in human behavior, persuasion, and the marketing systems that move B2B revenue.',
   );
   block(
     'CERTIFICATIONS',
-    'Vibe Coding — Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis) — Google. AI for Business — Harvard edX AI for Business Systems. AI Engineer — IBM AI Engineering. HubSpot Certification — HubSpot. Biomedical & Health Science Researchers — CITI Program (Credential ID 76234047). Google Analytics Individual Qualification — Google Operations Center. Marketing & Analytics — Google Digital Academy (Skillshop).',
+    'Vibe Coding, Semrush (L5: Diamond, sourced from Lovable). Gemini 3 (AI Synthesis), Google. AI for Business, Harvard edX AI for Business Systems. AI Engineer, IBM AI Engineering. HubSpot Certification, HubSpot. Biomedical & Health Science Researchers, CITI Program (Credential ID 76234047). Google Analytics Individual Qualification, Google Operations Center. Marketing & Analytics, Google Digital Academy (Skillshop).',
   );
   block(
     'COMPANY',

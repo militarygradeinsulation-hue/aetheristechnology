@@ -99,15 +99,8 @@ export async function uploadTeamFile(file: File): Promise<TeamAttachment> {
 }
 
 export function subscribeTeamMessages(onChange: () => void) {
-  const ch = supabase
-    .channel("team_messages_live")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "team_messages" },
-      () => onChange(),
-    )
-    .subscribe();
-  return () => {
-    supabase.removeChannel(ch);
-  };
+  // Polling fallback (table removed from Realtime publication to prevent
+  // broadcasting internal team messages to any anon subscriber).
+  const id = setInterval(() => { try { onChange(); } catch { /* */ } }, 15000);
+  return () => { clearInterval(id); };
 }

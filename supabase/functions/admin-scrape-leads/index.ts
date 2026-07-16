@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { loadBlockedKeywords, isLeadBlocked } from "../_shared/lead-blocklist.ts";
+import { enrichLeadFromWebsite } from "../_shared/lead-enrichment.ts";
+import { computeScrapeScore } from "../_shared/lead-scoring.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,7 +37,8 @@ interface ScoredLead {
   website?: string;
   industry?: string;
   location?: string;
-  score: number;
+  score?: number;
+  score_breakdown?: Array<{ key: string; label: string; weight: number; earned: number }>;
   why_fit: string;
 }
 
@@ -68,7 +72,13 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
       messages: [
         {
           role: "system",
-          content: `You are a B2B prospecting analyst for Aetheris Technology — a Business Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks. ICP: small-to-mid-market businesses (10–500 employees), revenue $1M–$50M, especially HubSpot/Salesforce users, agencies, professional services, SaaS, e-commerce, and B2B in Indianapolis / Indiana / Midwest. We DON'T sell to: enterprises, freelancers, very small (<10 employees), or non-business entities. Score 0-100 based on ICP fit.`,
+          content: `You are a B2B prospecting analyst for Aetheris Technology — a Chaos Theory Forensics firm that runs "Leak Audits" on companies to find hidden revenue leaks.
+
+ICP — TWO TRACKS, both valid:
+  TRACK A (B2B / pro services): small-to-mid-market businesses, 10–500 employees, revenue $1M–$50M — HubSpot/Salesforce users, legacy shops, professional services, SaaS, e-commerce, B2B in Indianapolis / Indiana / Midwest.
+  TRACK B (LOCAL OPERATOR-LED): owner-operated local businesses with $500k–$15M revenue and a real sales/follow-up problem — Medspas, Auto repair shops, Dental practices, Roofing/HVAC/Plumbing, Law firms, Real estate brokerages, Chiropractors, Insurance legacy shops, Accounting/CPA firms, Restaurants (multi-unit), Home services. Single-location and multi-location both qualify if owner-run.
+
+HARD EXCLUSIONS (apply to BOTH tracks): never return enterprises >$100M revenue, publicly traded Fortune 1000 companies, large national chains (>500 employees), pure freelancers/solopreneurs, tiny shops with <3 staff, or non-business entities (gov, schools, churches, non-profits). If you cannot rule out >$100M revenue, skip the lead. Score is computed in code, do not include it.`,
         },
         {
           role: "user",
@@ -76,14 +86,14 @@ async function aiScoreLeads(searchResults: any[], industry: string, location: st
 
 CRITICAL: For every lead you MUST identify the company's official website URL (their primary domain — e.g. "acmeco.com", not a LinkedIn/Facebook/directory page). If the search result is a profile (LinkedIn, ZoomInfo, Yelp, BBB, etc.), infer the company they work at and return that company's real homepage URL. Never leave website blank — if you truly cannot determine it, skip the lead entirely. Prefer https:// root domains over deep links.
 
-For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), score (0-100), why_fit (one sentence). Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
+For each lead return: business_name, website (REQUIRED), industry, location, contact_name (if visible), email (if visible), phone (if visible), why_fit (one sentence that cites a SIZE signal — employee count, revenue, multi-location, owner name — AND a PAIN signal — manual process, missing automation, slow follow-up, no online booking, no review system, scaling pressure — whenever the source supports it). DO NOT return a score; the score is computed in code from observable signals. Skip directories, listicles, and irrelevant results. Use the return_leads function.\n\n${context}`,
         },
       ],
       tools: [{
         type: "function",
         function: {
           name: "return_leads",
-          description: "Return scored prospect leads",
+          description: "Return ICP-matching prospect leads (score is computed in code, do not include it).",
           parameters: {
             type: "object",
             properties: {
@@ -99,10 +109,9 @@ For each lead return: business_name, website (REQUIRED), industry, location, con
                     contact_name: { type: "string" },
                     email: { type: "string" },
                     phone: { type: "string" },
-                    score: { type: "number" },
                     why_fit: { type: "string" },
                   },
-                  required: ["business_name", "website", "score", "why_fit"],
+                  required: ["business_name", "website", "why_fit"],
                 },
               },
             },
@@ -151,8 +160,33 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing API keys" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Per-industry query expansion so verticals like "medspa" or "auto mechanic"
+    // actually return the right kind of result instead of just literal name matches.
+    const INDUSTRY_QUERY_HINTS: Record<string, string> = {
+      medspa: 'medspa OR "med spa" OR "medical spa" OR aesthetics clinic OR botox',
+      'med spa': 'medspa OR "med spa" OR "medical spa" OR aesthetics OR injectables',
+      mechanic: 'auto repair OR mechanic OR "tire shop" OR "transmission repair"',
+      'auto mechanic': 'auto repair OR mechanic OR "tire shop" OR "transmission repair"',
+      'auto repair': 'auto repair OR mechanic OR "collision center"',
+      dental: 'dental practice OR dentist OR orthodontist',
+      roofing: 'roofing contractor OR roofer OR roof replacement',
+      hvac: 'HVAC OR plumbing OR "air conditioning" OR heating contractor',
+      plumbing: 'plumber OR plumbing contractor',
+      'law firm': 'law firm OR attorney OR "personal injury"',
+      'real estate': 'real estate brokerage OR realtor',
+      chiropractor: 'chiropractor OR chiropractic',
+      insurance: 'insurance operator OR insurance broker',
+      accounting: '"accounting firm" OR CPA OR bookkeeping',
+      'marketing operator': 'marketing operator OR digital operator OR creative operator',
+      saas: 'B2B SaaS OR software company',
+      ecommerce: 'ecommerce brand OR Shopify store OR DTC brand',
+      'home services': 'landscaping OR pest control OR cleaning service',
+      restaurant: 'restaurant group OR multi-unit restaurant',
+    };
+    const key = industry.toLowerCase().trim();
+    const expanded = INDUSTRY_QUERY_HINTS[key] || industry;
     const query = industry
-      ? `${industry} companies in ${location}`
+      ? `(${expanded}) in ${location}`
       : `small to mid-market businesses ${location} HubSpot Salesforce`;
     const results = await firecrawlSearch(query, firecrawlKey, 15);
     if (results.length === 0) {
@@ -161,32 +195,71 @@ serve(async (req) => {
 
     const leads = await aiScoreLeads(results, industry, location, count, lovableKey);
 
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
-    let inserted = 0;
-    if (leads.length > 0) {
-      const rows = leads.map((l) => ({
-        business_name: l.business_name?.slice(0, 200) || null,
-        contact_name: l.contact_name?.slice(0, 200) || null,
-        email: l.email?.toLowerCase().slice(0, 200) || null,
-        phone: l.phone?.slice(0, 50) || null,
-        website: l.website?.slice(0, 500) || null,
-        industry: l.industry?.slice(0, 100) || industry || null,
-        location: l.location?.slice(0, 200) || location,
-        score: Math.max(0, Math.min(100, Math.round(l.score || 0))),
-        why_fit: l.why_fit?.slice(0, 1000) || null,
-        source: "firecrawl_indianapolis",
-        external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
-        status: "new",
-      })).filter((r) => r.business_name && r.website);
-
-      const { data, error } = await supabase.from("rep_leads")
-        .upsert(rows, { onConflict: "external_id", ignoreDuplicates: true })
-        .select("id");
-      if (error) throw error;
-      inserted = data?.length || 0;
+    // Enrich each lead by scraping its website for real contact info.
+    // Runs in parallel with a small concurrency cap to keep latency sane.
+    const enrich = async (l: ScoredLead): Promise<ScoredLead> => {
+      if (!l.website) return l;
+      // Skip enrichment if AI already found a same-domain person email.
+      const hasPerson = l.email && !/^(info|contact|sales|hello|support|admin|team|office|marketing|help|service|enquiries|inquiries)@/i.test(l.email);
+      if (hasPerson && l.phone) return l;
+      try {
+        const found = await enrichLeadFromWebsite(l.website, firecrawlKey);
+        return {
+          ...l,
+          email: l.email || found.email,
+          phone: l.phone || found.phone,
+          contact_name: l.contact_name || found.contact_name,
+        };
+      } catch { return l; }
+    };
+    const enriched: ScoredLead[] = [];
+    const CONC = 4;
+    for (let i = 0; i < leads.length; i += CONC) {
+      const chunk = await Promise.all(leads.slice(i, i + CONC).map(enrich));
+      enriched.push(...chunk);
     }
 
-    return new Response(JSON.stringify({ ok: true, inserted, leads }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+    const blocked = await loadBlockedKeywords(supabase);
+    let inserted = 0;
+    if (enriched.length > 0) {
+      const rows = enriched.map((l) => {
+        const breakdown = computeScrapeScore(l, location);
+        l.score = breakdown.total;
+        l.score_breakdown = breakdown.parts;
+        return {
+          business_name: l.business_name?.slice(0, 200) || null,
+          contact_name: l.contact_name?.slice(0, 200) || null,
+          email: l.email?.toLowerCase().slice(0, 200) || null,
+          phone: l.phone?.slice(0, 50) || null,
+          website: l.website?.slice(0, 500) || null,
+          industry: l.industry?.slice(0, 100) || industry || null,
+          location: l.location?.slice(0, 200) || location,
+          score: breakdown.total,
+          why_fit: l.why_fit?.slice(0, 1000) || null,
+          enrichment: { scrape_score_breakdown: breakdown.parts, scrape_score_total: breakdown.total },
+          source: "admin_scrape",
+          external_id: l.website ? `scraped:${l.website.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')}` : null,
+          status: "new",
+          score_stage: "triage",
+        };
+      }).filter((r) => r.business_name && r.website && !isLeadBlocked(r, blocked));
+
+      // Dedupe against existing external_ids (partial unique index prevents ON CONFLICT upsert)
+      const extIds = rows.map(r => r.external_id).filter(Boolean) as string[];
+      if (extIds.length > 0) {
+        const { data: existing } = await supabase.from("rep_leads").select("external_id").in("external_id", extIds);
+        const have = new Set((existing || []).map((r: any) => r.external_id));
+        const fresh = rows.filter(r => r.external_id && !have.has(r.external_id));
+        if (fresh.length > 0) {
+          const { data, error } = await supabase.from("rep_leads").insert(fresh).select("id");
+          if (error) throw error;
+          inserted = data?.length || 0;
+        }
+      }
+    }
+
+    return new Response(JSON.stringify({ ok: true, inserted, leads: enriched }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("admin-scrape-leads error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

@@ -9,26 +9,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Timer, CheckCircle2, XCircle, Upload, Copy, BookOpen, AlertTriangle } from 'lucide-react';
+import { Loader2, Timer, CheckCircle2, XCircle, Copy, BookOpen, AlertTriangle, Lock, DollarSign } from 'lucide-react';
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
+import { getStripe, getStripeEnvironment } from '@/lib/stripe';
+import { useSearchParams } from 'react-router-dom';
 
 type Choice = { id: string; text: string };
 type Question = { id: string; question: string; choices: Choice[] };
-type Phase = 'intro' | 'identify' | 'in_test' | 'graded' | 'apply' | 'done';
+type Phase = 'pay' | 'checkout' | 'verifying' | 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
 
 const STUDY_LINKS = [
-  { href: '/', label: 'Home — positioning & hook' },
+  { href: '/', label: 'Home, positioning & hook' },
   { href: '/leak-audit', label: 'The Leak Audit (free self-scan)' },
   { href: '/services', label: 'Services & pricing ladder' },
   { href: '/careers', label: 'Careers (commission structure)' },
 ];
 
+const PAID_LS_KEY = 'aetheris_careers_test_paid';
+
 const CareersTestPage = () => {
   const [contactOpen, setContactOpen] = useState(false);
-  const [phase, setPhase] = useState<Phase>('intro');
+  const [phase, setPhase] = useState<Phase>('pay');
+  const [paidEmail, setPaidEmail] = useState<string | null>(null);
+  const [paidSessionId, setPaidSessionId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [payerEmail, setPayerEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -40,6 +47,72 @@ const CareersTestPage = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [appNotes, setAppNotes] = useState('');
   const tickRef = useRef<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // On mount: check for prior paid state in localStorage, or a session_id in the URL (return from Stripe).
+  useEffect(() => {
+    const sessionFromUrl = searchParams.get('session_id');
+    if (sessionFromUrl) {
+      setPhase('verifying');
+      verifyPayment(sessionFromUrl);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(PAID_LS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { email?: string; ts?: number; session_id?: string };
+        // Treat as valid for 30 days
+        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30 && parsed?.session_id) {
+          setPaidEmail(parsed.email || null);
+          setPaidSessionId(parsed.session_id);
+          if (parsed.email) {
+            setForm(f => ({ ...f, email: parsed.email! }));
+          }
+          setPhase('intro');
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const verifyPayment = async (sessionId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-careers-test-payment', {
+        body: { session_id: sessionId, environment: getStripeEnvironment() },
+      });
+      if (error) throw new Error(error.message);
+      if (!(data as any)?.paid) throw new Error('Payment not confirmed');
+      const email = (data as any).email as string | undefined;
+      localStorage.setItem(PAID_LS_KEY, JSON.stringify({ email, ts: Date.now(), session_id: sessionId }));
+      setPaidEmail(email || null);
+      setPaidSessionId(sessionId);
+      if (email) setForm(f => ({ ...f, email }));
+      // Clean session_id from URL
+      searchParams.delete('session_id');
+      setSearchParams(searchParams, { replace: true });
+      toast({ title: 'Payment confirmed', description: 'Your $40 test access is unlocked.' });
+      setPhase('intro');
+    } catch (e) {
+      toast({ title: 'Could not verify payment', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      setPhase('pay');
+    }
+  };
+
+  const fetchClientSecret = async (): Promise<string> => {
+    const { data, error } = await supabase.functions.invoke('create-checkout', {
+      body: {
+        priceId: 'careers_test_fee_v2',
+        customerEmail: payerEmail || undefined,
+        returnUrl: `${window.location.origin}/careers/test?session_id={CHECKOUT_SESSION_ID}`,
+        environment: getStripeEnvironment(),
+        metadata: { purpose: 'careers_test_fee' },
+      },
+    });
+    if (error || !(data as any)?.clientSecret) {
+      throw new Error(error?.message || 'Failed to create checkout session');
+    }
+    return (data as any).clientSecret;
+  };
 
   useEffect(() => {
     if (phase === 'in_test') {
@@ -62,14 +135,29 @@ const CareersTestPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remainingMs, phase]);
 
+  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
+  const MIN_NOTE_WORDS = 150;
+
   const startTest = async () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
     }
+    if (!paidSessionId) {
+      toast({ title: 'Payment required', description: 'The $40 access fee is required to take the test.', variant: 'destructive' });
+      setPhase('pay');
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'start', name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() },
+        body: {
+          action: 'start',
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          payment_session_id: paidSessionId,
+          environment: getStripeEnvironment(),
+        },
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -84,8 +172,40 @@ const CareersTestPage = () => {
     } finally { setLoading(false); }
   };
 
+  const finalizeApplicationAfterPass = async (shareCode: string) => {
+    if (!resumeFile) return;
+    setLoading(true);
+    setPhase('finalizing');
+    try {
+      const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'upload_resume_url', share_code: shareCode, filename: resumeFile.name },
+      });
+      if (sErr) throw new Error(sErr.message);
+      if ((signed as any)?.error) throw new Error((signed as any).error);
+      const resumePath: string = (signed as any).path;
+      const { error: upErr } = await supabase.storage.from('careers-resumes')
+        .uploadToSignedUrl(resumePath, (signed as any).token, resumeFile);
+      if (upErr) throw upErr;
+
+      const { data, error } = await supabase.functions.invoke('careers-test', {
+        body: { action: 'finalize_application', share_code: shareCode, resume_path: resumePath, resume_filename: resumeFile.name, notes: appNotes },
+      });
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setPhase('done');
+    } catch (e) {
+      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
+      setPhase('apply');
+    } finally { setLoading(false); }
+  };
+
   const submit = async (auto = false) => {
     if (!attemptId) return;
+    if (!resumeFile) {
+      toast({ title: 'Resume missing', description: 'Your resume must be attached to submit. Both resume and test are required.', variant: 'destructive' });
+      setPhase('apply');
+      return;
+    }
     if (!auto && Object.keys(answers).length < questions.length) {
       if (!confirm(`You've answered ${Object.keys(answers).length}/${questions.length}. Submit anyway?`)) return;
     }
@@ -96,65 +216,116 @@ const CareersTestPage = () => {
       });
       if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
-      setResult(data as any);
-      setPhase((data as any).passed ? 'apply' : 'graded');
+      const r = data as any;
+      setResult(r);
+      if (r.passed && r.share_code) {
+        await finalizeApplicationAfterPass(r.share_code);
+      } else {
+        setPhase('graded');
+      }
     } catch (e) {
       toast({ title: 'Submit failed', description: e instanceof Error ? e.message : '', variant: 'destructive' });
     } finally { setLoading(false); }
   };
 
-  const noteWordCount = useMemo(() => appNotes.trim().split(/\s+/).filter(Boolean).length, [appNotes]);
-  const MIN_NOTE_WORDS = 150;
-
-  const submitApplication = async () => {
-    if (!result?.share_code) return;
-    if (!resumeFile) {
-      toast({ title: 'Resume required', description: 'Upload your resume (PDF or DOC) to apply.', variant: 'destructive' });
-      return;
-    }
-    if (noteWordCount < MIN_NOTE_WORDS) {
-      toast({ title: 'Note too short', description: `Write at least ${MIN_NOTE_WORDS} words on why I should interview you (currently ${noteWordCount}).`, variant: 'destructive' });
-      return;
-    }
-    setLoading(true);
-    try {
-      let resumePath: string | null = null;
-      if (resumeFile) {
-        const { data: signed, error: sErr } = await supabase.functions.invoke('careers-test', {
-          body: { action: 'upload_resume_url', share_code: result.share_code, filename: resumeFile.name },
-        });
-        if (sErr) throw new Error(sErr.message);
-        if ((signed as any)?.error) throw new Error((signed as any).error);
-        resumePath = (signed as any).path;
-        const { error: upErr } = await supabase.storage.from('careers-resumes')
-          .uploadToSignedUrl(resumePath!, (signed as any).token, resumeFile);
-        if (upErr) throw upErr;
-      }
-      const { data, error } = await supabase.functions.invoke('careers-test', {
-        body: { action: 'finalize_application', share_code: result.share_code, resume_path: resumePath, resume_filename: resumeFile?.name, notes: appNotes },
-      });
-      if (error) throw new Error(error.message);
-      if ((data as any)?.error) throw new Error((data as any).error);
-      setPhase('done');
-    } catch (e) {
-      toast({ title: 'Could not submit application', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-    } finally { setLoading(false); }
-  };
-
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Careers Test — Aetheris AI" description="Take the 20-question knowledge test to apply as a sales rep." path="/careers/test" />
+      <SEOHead title="Careers Test, Aetheris AI" description="Pay the $40 access fee and take the qualifying knowledge test for the Aetheris sales rep role." path="/careers/test" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <div className="pt-24 pb-32 px-4 max-w-3xl mx-auto">
 
-          {phase === 'intro' && (
-            <Card className="bg-card/60 backdrop-blur border-border/50 premium-tile">
+          {phase === 'pay' && (
+            <Card className="bg-card/60 backdrop-blur border-amber/40 forensic-tile">
               <CardHeader>
-                <CardTitle className="font-display text-3xl">Sales Rep Knowledge Test</CardTitle>
+                <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
+                  <Lock className="w-3.5 h-3.5" /> Step 1 of 3 · Test Access Fee
+                </div>
+                <CardTitle className="font-display text-3xl mt-2">Pay $40 to unlock the test</CardTitle>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                  We get a lot of curious clicks. The $40 access fee filters out tire-kickers and confirms you're serious enough to read the site and take a real test.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-sm space-y-2">
+                  <div className="flex items-start gap-2">
+                    <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Credited toward your 1099.</strong> If you're hired, the $40 is recorded as a business expense against your 1099 contractor income — your money, just routed through the test gate first.</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                    <span><strong className="text-foreground">Non-refundable.</strong> Pay it, take the test, give it your best shot. Pass or fail, the fee proves commitment.</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Email for receipt (we'll prefill your application with this)</Label>
+                  <Input
+                    type="email"
+                    value={payerEmail}
+                    onChange={e => setPayerEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    maxLength={255}
+                  />
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full bg-amber text-background hover:bg-amber/90"
+                  onClick={() => {
+                    if (!payerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail.trim())) {
+                      toast({ title: 'Valid email required', variant: 'destructive' });
+                      return;
+                    }
+                    setPhase('checkout');
+                  }}
+                >
+                  Continue to payment — $40 →
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Secure checkout by Stripe. No exceptions, no comp codes.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {phase === 'checkout' && (
+            <div className="space-y-4">
+              <Card className="bg-card/60 backdrop-blur border-border/50">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-display text-lg">Careers Test Access — $40</p>
+                    <p className="text-xs text-muted-foreground">Paying as {payerEmail}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setPhase('pay')}>Change</Button>
+                </CardContent>
+              </Card>
+              <div id="checkout" className="rounded-xl overflow-hidden">
+                <EmbeddedCheckoutProvider stripe={getStripe()} options={{ fetchClientSecret }}>
+                  <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+              </div>
+            </div>
+          )}
+
+          {phase === 'verifying' && (
+            <Card className="bg-card/60 backdrop-blur border-border/50">
+              <CardContent className="p-8 text-center space-y-3">
+                <Loader2 className="w-10 h-10 text-amber mx-auto animate-spin" />
+                <h2 className="font-display text-2xl">Confirming your payment…</h2>
+                <p className="text-sm text-muted-foreground">One moment while we unlock the test.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {phase === 'intro' && (
+            <Card className="bg-card/60 backdrop-blur border-border/50 forensic-tile">
+              <CardHeader>
+                <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Access fee paid · Step 2 of 3
+                </div>
+                <CardTitle className="font-display text-3xl mt-2">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  We don't accept random applications. To prove you've read the site, you'll take a 25-question multiple-choice test pulled from a 60-question bank. Score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day</strong>. Answer order is randomized per attempt — guessing one letter won't pass.
+                  <strong>Both are required, no exceptions.</strong> You must submit a resume <em>and</em> pass the test. <strong>1)</strong> Upload resume + 150-word pitch. <strong>2)</strong> 25 questions from a 60-question bank, score <strong>80%+</strong> in <strong>50 minutes</strong>. <strong>5 attempts per day.</strong>
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -162,31 +333,25 @@ const CareersTestPage = () => {
                   <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber flex items-center gap-2"><BookOpen className="w-3.5 h-3.5" /> Study these first</div>
                   <div className="flex flex-wrap gap-2">
                     {STUDY_LINKS.map(l => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="premium-pill-btn text-amber"
-                      >
+                      <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="premium-pill-btn text-amber">
                         {l.label}
                       </a>
                     ))}
                   </div>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                  <li>Topics: positioning, Leak Audit, pricing ($149 Snapshot · $599 Eval · $2,500 Forensic Diagnostic · Fractional retainers), commission (15% flat, recurring for life), sales process, brand rules.</li>
+                  <li>Topics: positioning, Leak Audit, pricing ladder, commission structure, sales process, brand rules.</li>
                   <li>Questions are randomized. No back-tracking once submitted.</li>
-                  <li>Pass &rarr; you'll get a unique <strong>code</strong> + a resume upload form. Save the code — it's how I review you.</li>
+                  <li>Pass → you'll get a unique <strong>code</strong> + resume upload. Save the code — that's how I review you.</li>
                 </ul>
-                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start the test &rarr;</Button>
+                <Button size="lg" className="bg-amber text-background hover:bg-amber/90" onClick={() => setPhase('identify')}>I've studied. Start my application →</Button>
               </CardContent>
             </Card>
           )}
 
           {phase === 'identify' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardHeader><CardTitle className="font-display text-2xl">Who are you?</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="font-display text-2xl">Step 2 of 3 — Who are you?</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div><Label>Full name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={100} /></div>
@@ -195,11 +360,67 @@ const CareersTestPage = () => {
                 <div><Label>Phone (optional)</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} maxLength={20} /></div>
                 <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                  <span>Once you click below, your <strong>50-minute timer</strong> starts. You get <strong>5 submitted attempts per day</strong>.</span>
+                  <span>Next you'll <strong>submit your application</strong> (resume + 150-word note). Only after that will the test unlock.</span>
                 </div>
-                <Button onClick={startTest} disabled={loading} className="bg-amber text-background hover:bg-amber/90">
+                <Button
+                  onClick={() => {
+                    if (!form.name.trim() || !form.email.trim()) {
+                      toast({ title: 'Name and email required', variant: 'destructive' }); return;
+                    }
+                    setPhase('apply');
+                  }}
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
+                  Continue to application →
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {phase === 'apply' && (
+            <Card className="bg-card/60 backdrop-blur border-amber/40">
+              <CardHeader>
+                <CardTitle className="font-display text-2xl">Step 3 of 3 — Submit your application</CardTitle>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload your resume and write your 150-word pitch. Once you submit, the <strong>50-minute test</strong> unlocks.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
+                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
+                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words, original writing only, paste disabled)</span></Label>
+                  <Textarea
+                    rows={8}
+                    maxLength={4000}
+                    value={appNotes}
+                    onChange={e => setAppNotes(e.target.value)}
+                    onPaste={e => { e.preventDefault(); toast({ title: 'Paste disabled', description: 'I want your original thoughts, not ChatGPT copy/paste.', variant: 'destructive' }); }}
+                    onDrop={e => { e.preventDefault(); toast({ title: 'Drag-and-drop disabled', description: 'Type your own answer.', variant: 'destructive' }); }}
+                    onContextMenu={e => e.preventDefault()}
+                    autoComplete="off"
+                    spellCheck={true}
+                    placeholder="Type your own answer. Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific, generic answers get rejected."
+                  />
+                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
+                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-amber/30 bg-amber/5 p-3 text-xs flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                  <span>Clicking below submits your application <strong>and</strong> immediately starts the 50-minute test timer. 5 attempts per day.</span>
+                </div>
+                <Button
+                  onClick={startTest}
+                  disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS}
+                  size="lg"
+                  className="bg-amber text-background hover:bg-amber/90"
+                >
                   {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Timer className="w-4 h-4 mr-1" />}
-                  Start 50-minute test
+                  Submit application & start test →
                 </Button>
               </CardContent>
             </Card>
@@ -258,46 +479,18 @@ const CareersTestPage = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 80%.</p>
-                <p className="text-sm text-muted-foreground">You can try again — up to 5 attempts per day. Re-read the site first; the questions test what's actually on it.</p>
+                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it. (Your $40 access fee covers all retries.)</p>
                 <Button variant="outline" onClick={() => { setPhase('intro'); setResult(null); setAnswers({}); setNotes(''); }}>Go back to intro</Button>
               </CardContent>
             </Card>
           )}
 
-          {phase === 'apply' && result?.share_code && (
-            <Card className="bg-card/60 backdrop-blur border-amber/40">
-              <CardHeader>
-                <CardTitle className="font-display text-2xl flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6 text-green-400" /> You passed — {result.score_pct}%
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-lg border border-amber bg-amber/10 p-4">
-                  <p className="text-xs uppercase font-mono text-amber mb-1">Your share code (save it)</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
-                    <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
-                      <Copy className="w-3 h-3 mr-1" /> Copy
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">I'll use this code to pull up your test results, resume, and notes. Don't lose it.</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Upload your resume (PDF/DOC, max 10 MB) <span className="text-destructive">*</span></Label>
-                  <Input type="file" accept=".pdf,.doc,.docx" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
-                  {resumeFile && <p className="text-xs text-muted-foreground">Selected: {resumeFile.name}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Why should I invite you to an interview? <span className="text-destructive">*</span> <span className="text-xs text-muted-foreground font-normal">(minimum {MIN_NOTE_WORDS} words)</span></Label>
-                  <Textarea rows={8} maxLength={4000} value={appNotes} onChange={e => setAppNotes(e.target.value)} placeholder="Tell me what jumped out from the site, why you specifically, what you'll bring, and how you'd open your first 5 conversations. Be specific — generic answers get rejected." />
-                  <p className={`text-xs font-mono ${noteWordCount >= MIN_NOTE_WORDS ? 'text-green-400' : 'text-amber'}`}>
-                    {noteWordCount} / {MIN_NOTE_WORDS} words {noteWordCount >= MIN_NOTE_WORDS ? '✓' : `(${MIN_NOTE_WORDS - noteWordCount} more needed)`}
-                  </p>
-                </div>
-                <Button onClick={submitApplication} disabled={loading || !resumeFile || noteWordCount < MIN_NOTE_WORDS} className="bg-amber text-background hover:bg-amber/90">
-                  {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
-                  Submit application
-                </Button>
+          {phase === 'finalizing' && (
+            <Card className="bg-card/60 backdrop-blur border-border/50">
+              <CardContent className="p-8 text-center space-y-3">
+                <Loader2 className="w-10 h-10 text-amber mx-auto animate-spin" />
+                <h2 className="font-display text-2xl">Filing your application…</h2>
+                <p className="text-sm text-muted-foreground">You passed. Uploading your resume and locking in your submission.</p>
               </CardContent>
             </Card>
           )}
@@ -306,9 +499,15 @@ const CareersTestPage = () => {
             <Card className="bg-card/60 backdrop-blur border-border/50">
               <CardContent className="p-8 text-center space-y-3">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
-                <h2 className="font-display text-2xl">Submitted</h2>
+                <h2 className="font-display text-2xl">Application submitted, you passed ({result.score_pct}%)</h2>
                 <p className="text-muted-foreground">I'll review your application and reach out if it's a fit.</p>
-                <Badge className="bg-amber text-background text-base font-mono">Code: {result.share_code}</Badge>
+                <div className="rounded-lg border border-amber bg-amber/10 p-4 inline-flex items-center gap-3">
+                  <span className="text-2xl font-mono font-bold text-amber tracking-widest">{result.share_code}</span>
+                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(result.share_code!); toast({ title: 'Copied' }); }}>
+                    <Copy className="w-3 h-3 mr-1" /> Copy
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Save this code — it's how I'll pull up your application.</p>
               </CardContent>
             </Card>
           )}

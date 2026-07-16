@@ -24,7 +24,7 @@ const DiagnosticQuizPage: React.FC = () => {
         { name: 'Open the Business Diagnostic', text: 'Go to aetheris.technology/business-diagnostic.' },
         { name: 'Answer 20 quick questions', text: 'Cover marketing, conversion, branding, systems, and growth.' },
         { name: 'Get your category scores', text: 'See exactly which area is bleeding revenue and why.' },
-        { name: 'Download your action plan', text: 'Receive a prioritized list of fixes — DIY or book a call to remediate.' },
+        { name: 'Download your action plan', text: 'Receive a prioritized list of fixes, DIY or book a call to remediate.' },
       ],
       'PT5M'
     )
@@ -35,7 +35,7 @@ const DiagnosticQuizPage: React.FC = () => {
     { question: 'How long does the diagnostic take?', answer: 'About 5 minutes. You answer 20 quick questions and get instant scoring across five categories with a personalized PDF report.' },
     { question: 'Is the Business Diagnostic free?', answer: 'Yes. The full 20-question diagnostic and PDF report are completely free with no credit card or login required.' },
     { question: 'What does it diagnose?', answer: 'Marketing efficiency, conversion friction, brand clarity, operational systems and automation gaps, and growth strategy maturity.' },
-    { question: 'How is this different from the AI Readiness Assessment?', answer: 'The AI Readiness Assessment focuses on AI maturity (5 questions). The Business Diagnostic is broader — 20 questions covering all five revenue-leak categories of your operation.' },
+    { question: 'How is this different from the AI Readiness Assessment?', answer: 'The AI Readiness Assessment focuses on AI maturity (5 questions). The Business Diagnostic is broader, 20 questions covering all five revenue-leak categories of your operation.' },
   ];
 
   return (
@@ -55,50 +55,45 @@ const DiagnosticQuizPage: React.FC = () => {
       />
       <Background />
       <Navbar onContactClick={() => setIsContactOpen(true)} />
-      <main className="relative z-10 pt-32 pb-20 px-4">
+      <main className="relative z-10 pt-32 pb-16 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="rounded-2xl border border-border bg-background/90 backdrop-blur-xl p-6 md:p-10 shadow-2xl">
-            <div className="text-center mb-8">
-              <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔥 Free Business Diagnostic</span>
-              <h1 className="text-4xl md:text-5xl font-bold font-display mt-3 text-foreground">
-                Where Is Your Business<br />Quietly Losing Money?
-              </h1>
-              <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-                Answer 20 quick questions to uncover hidden revenue leaks in your marketing, conversion, branding, systems, and growth strategy.
-              </p>
+          {/* Case-file header — forensic, matches home aesthetic */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="h-px w-8 bg-amber/50" />
+              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">
+                Case Intake · Free Self-Scan
+              </span>
+              <span className="h-px w-8 bg-amber/50" />
             </div>
+            <h1 className="font-forensic text-3xl md:text-5xl font-bold leading-[1.05] tracking-tight">
+              The <span className="text-amber italic">Leak Audit</span> — self-scan.
+            </h1>
+            <p className="mt-3 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
+              20 questions · 5 minutes · directional findings
+            </p>
+          </div>
 
-            {/* AEO TL;DR */}
-            <div
-              className="tldr rounded-xl border border-amber/30 bg-amber/5 p-5 mb-10 max-w-2xl mx-auto"
-              data-speakable="true"
-            >
-              <div className="text-xs font-bold text-amber uppercase tracking-wider mb-2">
-                Quick Answer
-              </div>
-              <p className="text-sm md:text-base text-foreground/90 leading-relaxed m-0">
-                The Business Diagnostic is a free 20-question, 5-minute audit that scores your business
-                on marketing, conversion, branding, systems, and growth — and returns a category-by-category
-                breakdown of where revenue is leaking, with prioritized fixes.
-              </p>
+          <div className="forensic-tile rounded-sm border border-amber/30 bg-background/70 backdrop-blur-xl p-5 md:p-8 relative">
+            <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
+              Active case
             </div>
-
             <BusinessDiagnostic />
+          </div>
+
+          {/* Optional deeper scan — no pitch, just the instrument */}
+          <div className="mt-10">
+            <div className="text-center mb-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">
+                Companion instrument
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight">
+                Website Chaos Scan
+              </h2>
+            </div>
           </div>
         </div>
       </main>
-
-      <div className="relative z-10 pt-10 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="text-primary text-sm font-semibold tracking-wider uppercase">🔍 Bonus Tool</span>
-          <h2 className="text-3xl md:text-4xl font-bold font-display mt-3 text-foreground">
-            Want a Deeper Look at Your Website?
-          </h2>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            Run a free AI-powered scan to uncover SEO issues, weak CTAs, and missed conversion opportunities — instantly.
-          </p>
-        </div>
-      </div>
       <WebsiteScanner onContactClick={() => setIsContactOpen(true)} hideHeader />
       <Footer />
       <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />

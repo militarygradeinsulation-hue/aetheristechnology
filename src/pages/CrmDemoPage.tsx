@@ -23,7 +23,7 @@ const CrmDemoPage: React.FC = () => {
       <SEOHead
         path="/crm-demo"
         title="Live CRM Demo | Aetheris AI"
-        description="Walk through a live demo of the Aetheris CRM — contacts, companies, deals pipeline, and activity timeline. Sample data only."
+        description="Walk through a live demo of the Aetheris CRM, contacts, companies, deals pipeline, and activity timeline. Sample data only."
       />
 
       <header className="border-b border-border px-4 py-4">
@@ -35,7 +35,7 @@ const CrmDemoPage: React.FC = () => {
               </Button>
             </Link>
             <Database className="w-5 h-5 text-amber" />
-            <h1 className="text-xl font-bold text-foreground font-display">Aetheris CRM — Live Demo</h1>
+            <h1 className="text-xl font-bold text-foreground font-display">Aetheris CRM, Live Demo</h1>
           </div>
           <Link to="/contact">
             <Button size="sm">

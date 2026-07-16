@@ -9,15 +9,15 @@ const corsHeaders = {
 
 // Forensic-aligned topic pool across three pillars
 const TOPIC_POOL = [
-  // Revenue Forensics Pillar
-  { title: "The Revenue Leak Audit Playbook", subtitle: "7 Steps to Finding Every Dollar Your Business Is Losing", pillar: "Revenue Forensics", tags: ["Leak Audit", "Revenue Recovery", "Pipeline Diagnostics"], icon: "Shield" },
-  { title: "The Pipeline Autopsy Framework", subtitle: "Why 35% of Your Deals Die Before Reaching a Proposal", pillar: "Revenue Forensics", tags: ["Pipeline Analysis", "Deal Velocity", "Sales Forensics"], icon: "BarChart3" },
-  { title: "The CRM Autopsy Guide", subtitle: "Your $50K CRM Has a 26% Adoption Rate — Here's the Fix", pillar: "Revenue Forensics", tags: ["CRM Strategy", "Sales Enablement", "Technology Adoption"], icon: "Shield" },
-  { title: "The Pricing Architecture Diagnostic", subtitle: "How Misaligned Pricing Drains 15-30% of Available Revenue", pillar: "Revenue Forensics", tags: ["Pricing Strategy", "Value-Based Pricing", "Revenue Architecture"], icon: "TrendingUp" },
-  { title: "The Client Retention Forensics Playbook", subtitle: "Diagnosing Why Clients Leave Before They Tell You", pillar: "Revenue Forensics", tags: ["Client Retention", "Churn Analysis", "Relationship Forensics"], icon: "BookOpen" },
-  { title: "The Revenue Attribution Autopsy", subtitle: "Closing the Gap Between Marketing Spend and Actual Pipeline Revenue", pillar: "Revenue Forensics", tags: ["Revenue Attribution", "Marketing ROI", "Pipeline Tracking"], icon: "BarChart3" },
-  { title: "The Follow-Up Failure Report", subtitle: "80% of Sales Need 5+ Touches — 44% of Reps Stop at One", pillar: "Revenue Forensics", tags: ["Sales Process", "Follow-Up Systems", "Lead Conversion"], icon: "TrendingUp" },
-  { title: "The Proposal-to-Close Leak Map", subtitle: "Finding the Invisible Drop-Off Between Yes and Signed Contract", pillar: "Revenue Forensics", tags: ["Proposal Management", "Close Rate", "Deal Forensics"], icon: "FileText" },
+  // Chaos Theory Forensics Pillar
+  { title: "The Revenue Leak Audit Playbook", subtitle: "7 Steps to Finding Every Dollar Your Business Is Losing", pillar: "Chaos Theory Forensics", tags: ["Leak Audit", "Revenue Recovery", "Pipeline Diagnostics"], icon: "Shield" },
+  { title: "The Pipeline Autopsy Framework", subtitle: "Why 35% of Your Deals Die Before Reaching a Proposal", pillar: "Chaos Theory Forensics", tags: ["Pipeline Analysis", "Deal Velocity", "Sales Forensics"], icon: "BarChart3" },
+  { title: "The CRM Autopsy Guide", subtitle: "Your $50K CRM Has a 26% Adoption Rate — Here's the Fix", pillar: "Chaos Theory Forensics", tags: ["CRM Strategy", "Sales Enablement", "Technology Adoption"], icon: "Shield" },
+  { title: "The Pricing Architecture Diagnostic", subtitle: "How Misaligned Pricing Drains 15-30% of Available Revenue", pillar: "Chaos Theory Forensics", tags: ["Pricing Strategy", "Value-Based Pricing", "Revenue Architecture"], icon: "TrendingUp" },
+  { title: "The Client Retention Forensics Playbook", subtitle: "Diagnosing Why Clients Leave Before They Tell You", pillar: "Chaos Theory Forensics", tags: ["Client Retention", "Churn Analysis", "Relationship Forensics"], icon: "BookOpen" },
+  { title: "The Revenue Attribution Autopsy", subtitle: "Closing the Gap Between Marketing Spend and Actual Pipeline Revenue", pillar: "Chaos Theory Forensics", tags: ["Revenue Attribution", "Marketing ROI", "Pipeline Tracking"], icon: "BarChart3" },
+  { title: "The Follow-Up Failure Report", subtitle: "80% of Sales Need 5+ Touches — 44% of Reps Stop at One", pillar: "Chaos Theory Forensics", tags: ["Sales Process", "Follow-Up Systems", "Lead Conversion"], icon: "TrendingUp" },
+  { title: "The Proposal-to-Close Leak Map", subtitle: "Finding the Invisible Drop-Off Between Yes and Signed Contract", pillar: "Chaos Theory Forensics", tags: ["Proposal Management", "Close Rate", "Deal Forensics"], icon: "FileText" },
 
   // Operational Intelligence Pillar
   { title: "The Operational X-Ray Playbook", subtitle: "Mapping the Gap Between What You Claim and What You Do", pillar: "Operational Intelligence", tags: ["Process Mapping", "Operational Audit", "Systems Diagnostics"], icon: "Shield" },
@@ -190,7 +190,7 @@ function renderBackCover(doc: any, pageW: number, pageH: number, margin: number)
   doc.setFont("helvetica", "normal");
   doc.setTextColor(200, 195, 185);
   const ctaLines = doc.splitTextToSize(
-    "This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $2,500, applied toward engagement.",
+    "This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan — a 14-day deep-dive custom-built for your business, your leaks, and your revenue goals. $18,500+, applied toward engagement.",
     contentW - 20
   );
   doc.text(ctaLines, pageW / 2, 108, { align: "center" });
@@ -203,7 +203,7 @@ function renderBackCover(doc: any, pageW: number, pageH: number, margin: number)
   doc.setTextColor(217, 158, 46);
   doc.setFont("helvetica", "bold");
   doc.text("(317) 376-2110", pageW / 2, contactY + 12, { align: "center" });
-  doc.text("joseph@aetheris.technology", pageW / 2, contactY + 26, { align: "center" });
+  doc.text("aetheris.technology@outlook.com", pageW / 2, contactY + 26, { align: "center" });
   doc.text("aetheris.technology", pageW / 2, contactY + 40, { align: "center" });
 
   doc.setFontSize(9);
@@ -255,11 +255,11 @@ ${HUMANIZED_PLAYBOOK_VOICE}
 COMPANY CONTEXT
 ═══════════════════════════════════════════════════════════════════
 
-You are a Business Forensics Operator at Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney. You write authoritative, data-rich strategic playbooks that read like forensic case files written by a human operator who's lived inside the businesses being autopsied — not consulting decks.
+You are a Chaos Theory Forensics Operator at Aetheris — a firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney. You write authoritative, data-rich strategic playbooks that read like forensic case files written by a human operator who's lived inside the businesses being autopsied — not consulting decks.
 
 BRAND VOICE: Direct. Forensic. Aggressive. No fluff. Use real statistics. Reference named diagnostic frameworks. Write like a forensic investigator presenting evidence to a CEO — every finding backed by data, every recommendation tied to a dollar amount.
 
-Core methodology: The Leak Audit™ (7 steps). Entry point: Forensic Diagnostic ($2,500, applied toward engagement). You find where businesses bleed and you stop the bleeding.
+Core methodology: The Leak Audit™ (7 steps). Entry point: 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer). You find where businesses bleed and you stop the bleeding.
 
 STRUCTURE REQUIREMENTS:
 1. Executive Summary (500 words) — The forensic findings summary. What's broken, what it costs, what to do.
@@ -269,7 +269,7 @@ STRUCTURE REQUIREMENTS:
 5. Case Study / Scenario Analysis (600 words) — Anonymized before/after forensic findings with specific metrics
 6. ROI Projection Model (400 words) — Data table with quarterly projections showing revenue recovered
 7. Risk Mitigation (400 words) — Common failure modes and prevention strategies
-8. Next Steps with Aetheris (300 words) — How the Forensic Diagnostic ($2,500) leads to execution
+8. Next Steps with Aetheris (300 words) — How the 21-Day Revenue Diagnostic ($18,500 flat) leads to execution
 
 FORMATTING:
 - Use markdown headers (##, ###)
@@ -479,10 +479,19 @@ CRITICAL: Write the full playbook content. Do not summarize or abbreviate any se
 
     const description = `A forensic playbook covering ${topic.tags.join(", ")} within the ${topic.pillar} domain. Includes proprietary diagnostic frameworks, implementation roadmaps, ROI projections, and anonymized case studies from real forensic engagements.`;
 
+    // Extract preview summary + table of contents from generated markdown
+    const tocMatches = Array.from(content.matchAll(/^##\s+(?!#)(.+?)$/gm)).map((m: any) => String(m[1]).trim());
+    const toc = tocMatches.slice(0, 12);
+    const execMatch = content.match(/##\s*Executive Summary[\s\S]*?\n([\s\S]*?)(?=\n##\s|$)/i);
+    const rawSummary = (execMatch ? execMatch[1] : content).replace(/[#*_`>|-]+/g, " ").replace(/\s+/g, " ").trim();
+    const summary = rawSummary.slice(0, 900) || description;
+
     const { error: insertError } = await supabase.from("playbooks").insert({
       title: topic.title,
       subtitle: topic.subtitle,
       description,
+      summary,
+      toc,
       tags: topic.tags,
       file_url: urlData.publicUrl,
       icon_name: topic.icon,

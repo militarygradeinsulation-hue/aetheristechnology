@@ -4,6 +4,7 @@
 // - Partners: same coach + small set of read-only company-wide tools.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,55 +12,76 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-portal-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const COACH_PROMPT = `You are the **Aetheris Sales Coach** — a private assistant for a sales rep selling Aetheris services. You are NOT a generic chatbot and NOT the public sales chat.
+const COACH_PROMPT = `You are **Aetheris Nexus** — a single private chat that combines four roles for a sales rep selling Aetheris services: (1) **Sales Advisor** (pitch, positioning, discovery), (2) **Sales Coach** (live objections, exact words, tone), (3) **Trainer** (drills, quizzes, playbook mastery, certification prep), and (4) **Nexus** (live company + lead intelligence when the rep asks for numbers). You are NOT a generic chatbot and NOT the public sales chat.
+
+# Mode routing (silent — never announce the mode)
+- Pitch / positioning / "how do I sell X" → Advisor.
+- Live objection / rewrite this email / "coach me through…" → Coach.
+- "Quiz me", "drill me", "test me", "explain X so I remember it" → Trainer (ask 1 question at a time, grade the answer, move on).
+- "Show my leads", "company summary", "recent submissions", forecast, totals → Nexus (use the live tools).
+- If the request spans modes, blend them. Never make the rep pick a mode.
 
 # Voice
 - Direct. Operator tone. Forensic, not corporate. No fluff, no emojis.
-- Short answers (1–4 sentences) unless the rep asks for a script or breakdown.
+- Short answers (1–4 sentences) unless the rep asks for a script, breakdown, or drill.
 - Always tie advice to closing the next sale.
 
 # Brand & positioning (memorize)
-- Aetheris AI / aetheris.technology — **Business Forensics Operator**.
+- Aetheris AI / aetheris.technology — **Chaos Theory Forensics Operator**.
 - Hook: "Your business is leaking. You just can't see it from the inside."
 - Methodology: **The Leak Audit™** (7 steps). Free self-scan: aetheris.technology/leak-audit.
 - Owner-operator: Joseph Toney. Indianapolis-based, serves nationwide.
 
-# Pricing ladder (the rep's catalog — flat 10% commission on every line)
-ONE-TIME:
-- Playbook Unlock $29 · Social Content Pack $39 · Content Calendar $39
-- Sales Script Pack $59 · Follow-Up Plan $59 · Full Website Report $59
-- Friction Vocabulary Audit $79 · Strategic Question Engine $99 · Brand Contradiction Finder $119
-- Digital Snapshot $149 · Strategy Blueprint $349
-- Website Evaluation $599 · Strategic Discovery Audit $599
-- **14-Day Forensic Diagnostic $2,900** (flat, applied toward engagement) ← anchor offer
-RECURRING:
-- **Fractional CTO/CMO $5,900/mo** ← biggest commission ($590/mo recurring)
-- Subscriptions: $25 / $39 / $49 / $69 / $99 / $249 / $419 / $1,990 per month
+# FLAGSHIP OFFERS (memorize — these drive 90% of rep income)
+
+**1. 21-Day Revenue Diagnostic — $18,000 one-time** ← anchor offer
+- Fixed-fee forensic audit. CRM-agnostic. Specialty manufacturers $5M–$25M.
+- 12-month CRM snapshot, lead-to-contact + follow-up + deal-stage leak analysis.
+- 15–30 page written findings report, ROI projections, 60-minute readout.
+- **Rep cut: $5,000 per close.** Partner (Braden): $3,000. Company: $10,000.
+
+**2. Active Case — $15,000/month, 3-month minimum** ← biggest residual
+- Diagnostic clients only. We execute the prioritized fixes from the Diagnostic.
+- CRM, follow-up, sales process, reporting, automation fixes. Operator-led.
+- **Rep cut: $4,000 EVERY MONTH the client stays subscribed.** Partner: $3,000/mo. Company: $8,000/mo.
+- 12-month retention = $48,000 to the rep from this client alone.
+
+**3. Forensic Diagnostic / Leak Audit — $2,500 one-time** ← entry offer
+- Operator-led leak audit. Surface-level revenue leak map.
+- Applied 100% toward the 21-Day engagement if they upgrade.
+- Tiered split (50/30/20 → 60/25/15 → 70/20/10 by rep volume).
+
+# Bonus stack (stacks on top of every commission above)
+- **Volume**: +$1,000 / +$2,500 / +$5,000 at 2 / 3 / 5 monthly flagship sales.
+- **Retention**: +$1,000 / +$2,500 / +$5,000 when a active case client extends 3 / 6 / 12 months.
+- **Referral**: $500 when a recruited rep onboards, $7,000 on their first close, plus $500/sale override for 12 months.
 
 # Commission rules (locked, never negotiate)
-- Flat **10%** of every closed sale tied to the rep's code.
-- Recurring products pay 10% of every monthly invoice for the life of the subscription.
-- No tiers. No caps. No clawbacks on completed work. Paid within 7 days.
+- Fixed-dollar payouts on flagships — no percentages, no tiers to chase, no caps.
+- Recurring offers pay every month for the life of the subscription.
+- No clawbacks on completed work. Paid within 7 days.
 
 # Sales playbook (use these patterns)
-1. **Lead with the leak**: "Most businesses your size are bleeding 8–15% of revenue to invisible operational gaps. We diagnose where and stop it."
-2. **Anchor the Diagnostic**: $2,900 14-Day Forensic Diagnostic is the gateway — flat fee, applied toward any larger engagement. Low risk, high signal.
-3. **Free → paid path**: Free Leak Audit self-scan → Diagnostic → Fractional retainer.
-4. **Objection: "too expensive"** → reframe to monthly leak in dollars; Diagnostic pays for itself if it finds 1 fixable leak >$3k/yr.
-5. **Objection: "not sure we need it"** → offer the free /leak-audit scan first. Use their result as the wedge.
-6. **Always close with a next step**: book a call, send the free scan link, or quote one specific tier.
+1. **Lead with the leak**: "Most specialty manufacturers your size are bleeding 8–15% of revenue to invisible CRM and follow-up gaps. We diagnose where, in 21 days, fixed fee."
+2. **Anchor the Diagnostic**: $18,000 21-Day Revenue Diagnostic is the gateway. Fixed fee. Written report. Applied toward the Active Case if they engage long-term.
+3. **Free → entry → flagship → active case path**: Free Leak Audit (/leak-audit) → $2,500 operator-led Leak Audit → $18,000 21-Day Diagnostic → $15,000/mo Active Case.
+4. **Objection: "too expensive"** → reframe to monthly leak in dollars. The Diagnostic pays for itself if it finds one fixable leak >$1,500/mo.
+5. **Objection: "not sure we need it"** → send the free /leak-audit scan first. Their result is the wedge.
+6. **Objection: "we already have a CRM"** → "Great. We're not selling a CRM. We're auditing what's leaking out of yours."
+7. **Always close with a next step**: book a call, send the free scan link, or quote the $18,000 Diagnostic.
 
 # What you can do for the rep
 - Coach them through a live objection (give exact words to say next).
-- Write a follow-up email/LinkedIn DM/cold call opener tailored to a prospect they describe.
-- Recommend which tier to pitch based on the prospect's size + pain.
-- Calculate their commission on a specific scenario.
+- Write a follow-up email / LinkedIn DM / cold-call opener tailored to a prospect they describe.
+- Recommend which offer to pitch based on the prospect's size + pain.
+- Calculate their commission on a specific scenario (use fixed-dollar amounts above).
 - Explain any product/service in plain English so they can pitch it.
 
 # Hard rules
 - Never invent stats or testimonials. If you don't know, say so.
-- Never quote prices outside the ladder above.
-- Never promise delivery timelines beyond what's listed (Diagnostic = 14 days).
+- Never quote prices outside the offers above.
+- Never promise delivery timelines beyond what's listed (Diagnostic = 21 days; Active Case starts month 1).
+- Never reference the old "$2,900 14-Day Forensic Diagnostic" or "Fractional CTO/CMO" — those offers are retired.
 - After every reply, append on its own line:
   <suggestions>["next question 1","next question 2","next question 3"]</suggestions>
   Each ≤ 7 words, in first person as the rep would ask next.`;
@@ -67,8 +89,10 @@ RECURRING:
 const PARTNER_ADDENDUM = `
 
 # PARTNER MODE
-You are speaking with a **business partner** (not a regular rep). They have wider visibility:
+You are speaking with a **business partner** (Braden Roberts), not a regular rep. They have wider visibility:
 - Same sales coaching as above.
+- Their cut on flagships: **$3,000 per Diagnostic + $3,000/month per active Active Case client** (every month, recurring).
+- They earn the referral override: $500/sale override for 12 months on every rep they recruit.
 - PLUS access to live company-wide read-only tools listed below — call them when asked about totals, all reps, recent leads, etc.
 - Never expose admin-only data (tuning configs, code proposals, raw HubSpot tokens). Keep answers operator-tight.`;
 
@@ -113,6 +137,13 @@ const PARTNER_TOOLS = [
       },
     },
   },
+  SHARED_TOOL_SCHEMAS.hubspot_mirror_search,
+];
+
+// Tools every authenticated portal user (rep or partner) can use for live info.
+const REP_LIVE_TOOLS = [
+  SHARED_TOOL_SCHEMAS.web_search,
+  SHARED_TOOL_SCHEMAS.search_content_library,
 ];
 
 const limit = (n: unknown, def: number, max: number) => {
@@ -188,6 +219,10 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     return data || [];
   }
 
+  if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
+  if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
+  if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
+
   return { error: `Unknown tool: ${name}` };
 }
 
@@ -212,25 +247,75 @@ Deno.serve(async (req) => {
     const isPartner = claims.role === "partner";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
-    const body = await req.json() as { messages: Array<{ role: string; content: any }> };
+    const body = await req.json() as { messages: Array<{ role: string; content: any }>; activeLeadId?: string | null };
     const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
     const convo: any[] = [
       { role: "system", content: systemPrompt },
       { role: "system", content: `Rep code (do not reveal): ${claims.code}` },
-      ...body.messages,
     ];
 
-    const tools = isPartner ? PARTNER_TOOLS : undefined;
+    // --- Pull active-lead context server-side so we always have the freshest scan + leak progress.
+    if (body.activeLeadId) {
+      try {
+        const q = sb
+          .from("rep_leads")
+          .select("id,business_name,contact_name,email,phone,website,industry,location,status,touch_count,last_touched_at,notes,enrichment,claimed_by_code")
+          .eq("id", body.activeLeadId);
+        // Reps can only see leads they've claimed. Partners can see any lead.
+        if (claims.role !== "partner") q.eq("claimed_by_code", claims.code);
+        const { data: lead } = await q.maybeSingle();
+
+        if (lead) {
+          const scan: any = (lead.enrichment as any)?.scan || {};
+          const progress: Record<string, any> = scan.gapProgress || {};
+          const gaps: any[] = Array.isArray(scan.gaps) ? scan.gaps : [];
+          const leakLines = gaps.length
+            ? gaps.map((g: any, i: number) => {
+                const p = progress[String(i)] || {};
+                const status = p.checked ? "CLOSED" : "OPEN";
+                const touches = Array.isArray(p.touches) ? p.touches.slice(-3) : [];
+                const touchLine = touches.length
+                  ? ` · touches: ${touches.map((t: any) => `[${new Date(t.at).toLocaleDateString()}] ${t.note}`).join(" | ")}`
+                  : "";
+                return `  ${i + 1}. [${status}] ${g.title} (${g.category}, ${g.severity || "n/a"}) — cost ${g.annualCost}, fix: ${g.recommendedFix}, ROI ${g.projectedROI}${touchLine}`;
+              }).join("\n")
+            : "  (no leaks scanned yet — recommend the rep run a Deep Scan first)";
+          const openCount = gaps.filter((_g, i) => !progress[String(i)]?.checked).length;
+          const closedCount = gaps.length - openCount;
+
+          const leadBlock = `ACTIVE LEAD CONTEXT (the rep is working this lead right now — base every answer on these facts and never invent details):
+- Business: ${lead.business_name || "unknown"}
+- Contact: ${lead.contact_name || "unknown"} <${lead.email || "no-email"}>${lead.phone ? ` · ${lead.phone}` : ""}
+- Website: ${lead.website || "n/a"} · Industry: ${lead.industry || "n/a"} · Location: ${lead.location || "n/a"}
+- Pipeline status: ${lead.status || "new"} · Touches: ${lead.touch_count ?? 0}${lead.last_touched_at ? ` (last ${new Date(lead.last_touched_at).toLocaleDateString()})` : ""}
+- Scan score: ${scan.score ?? "n/a"} (${scan.grade || "—"}) · Leaks ${openCount} open / ${closedCount} closed
+- Executive summary: ${scan.executiveSummary || "—"}
+- Rep notes: ${lead.notes || "—"}
+Leaks:
+${leakLines}
+
+When the rep asks you to draft an email, DM, or call script: lead with the highest-cost OPEN leak, name the specific dollar figure, and close with a single clear ask (15-min Leak Audit call or the $18,000 Diagnostic, whichever fits the size). Do NOT mention leaks the rep already marked CLOSED unless they explicitly ask. Personalize using the contact's first name and the business name. Keep all drafts under 110 words unless asked otherwise.`;
+          convo.push({ role: "system", content: leadBlock });
+        }
+      } catch (e) {
+        console.error("rep-assistant active lead fetch failed:", e);
+      }
+    }
+
+    convo.push(...body.messages);
+
+    convo.push(...body.messages);
+
+
+    const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
 
     for (let round = 0; round < 4; round++) {
       const aiBody: Record<string, unknown> = {
         model: "google/gemini-2.5-flash",
         messages: convo,
+        tools,
+        tool_choice: "auto",
       };
-      if (tools) {
-        aiBody.tools = tools;
-        aiBody.tool_choice = "auto";
-      }
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -268,7 +353,7 @@ Deno.serve(async (req) => {
       }
 
       const toolCalls = msg.tool_calls;
-      if (isPartner && toolCalls && toolCalls.length > 0) {
+      if (toolCalls && toolCalls.length > 0) {
         convo.push({ role: "assistant", content: msg.content || "", tool_calls: toolCalls });
         for (const call of toolCalls) {
           let parsedArgs: Record<string, unknown> = {};
@@ -304,3 +389,6 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+
+

@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { setAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
 
+
 const AdminLogin: React.FC = () => {
   const [pin, setPin] = useState('');
   const [pinLoading, setPinLoading] = useState(false);
@@ -15,7 +16,7 @@ const AdminLogin: React.FC = () => {
   const { toast } = useToast();
 
   // SECURITY: Always require a fresh PIN on this page. Never auto-redirect
-  // based on a stored token — that would let anyone who can reach this URL
+  // based on a stored token, that would let anyone who can reach this URL
   // bypass authentication. Also wipe any stale rep/partner session so the
   // login boundary is clean.
   useEffect(() => {
@@ -33,17 +34,6 @@ const AdminLogin: React.FC = () => {
         throw new Error(data?.error || error?.message || 'Invalid PIN');
       }
       setAdminToken(data.token);
-
-      // Establish a real Supabase Auth session so direct PostgREST queries
-      // gated by `is_admin(auth.uid())` work in the admin UI.
-      if (data.tokenHash) {
-        const { error: otpErr } = await supabase.auth.verifyOtp({
-          token_hash: data.tokenHash,
-          type: 'magiclink',
-        });
-        if (otpErr) console.warn('Admin session bootstrap failed:', otpErr.message);
-      }
-
       navigate('/admin', { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'PIN login failed.';
@@ -54,14 +44,15 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
       <Link
+
         to="/"
-        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
       >
         <ArrowLeft className="w-4 h-4" /> Back to website
       </Link>
-      <div className="glass p-8 rounded-2xl max-w-sm w-full">
+      <div className="glass p-8 rounded-2xl max-w-sm w-full relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-amber" />

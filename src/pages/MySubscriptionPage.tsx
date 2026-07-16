@@ -258,10 +258,10 @@ export default function MySubscriptionPage() {
                   ) : (
                     <>
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><span className="text-muted-foreground">Business:</span> <span className="text-foreground ml-1">{prof.business_name || '—'}</span></div>
-                        <div><span className="text-muted-foreground">Industry:</span> <span className="text-foreground ml-1">{prof.industry || '—'}</span></div>
-                        <div><span className="text-muted-foreground">Tone:</span> <span className="text-foreground ml-1">{prof.tone_preference || '—'}</span></div>
-                        <div><span className="text-muted-foreground">Website:</span> <span className="text-foreground ml-1">{prof.website_url || '—'}</span></div>
+                        <div><span className="text-muted-foreground">Business:</span> <span className="text-foreground ml-1">{prof.business_name || ', '}</span></div>
+                        <div><span className="text-muted-foreground">Industry:</span> <span className="text-foreground ml-1">{prof.industry || ', '}</span></div>
+                        <div><span className="text-muted-foreground">Tone:</span> <span className="text-foreground ml-1">{prof.tone_preference || ', '}</span></div>
+                        <div><span className="text-muted-foreground">Website:</span> <span className="text-foreground ml-1">{prof.website_url || ', '}</span></div>
                       </div>
                       {prof.goals?.length > 0 && (
                         <div className="mt-3 text-sm">

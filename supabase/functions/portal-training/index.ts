@@ -385,7 +385,7 @@ Answer: ${a?.answer ?? "(no answer)"}`;
           {
             role: "system",
             content:
-              "You are the in-house sales coach for Aetheris (Business Forensics). Answer the rep's question using the company training context below. Be blunt, tactical, and specific. If the context does not cover it, say so and give your best operator answer. Keep under 250 words.",
+              "You are the in-house sales coach for Aetheris (Chaos Theory Forensics). Answer the rep's question using the company training context below. Be blunt, tactical, and specific. If the context does not cover it, say so and give your best operator answer. Keep under 250 words.",
           },
           { role: "user", content: `Training context:\n${context}\n\nRep question: ${question}` },
         ]);

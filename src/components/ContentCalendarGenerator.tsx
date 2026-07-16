@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ScheduleSocialButton } from '@/components/admin/ScheduleSocialButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
+import { PostImageGenerator } from './admin/PostImageGenerator';
+import { QuickDownloadBar } from './QuickDownloadBar';
 
 const PHASES = [
   { label: 'Analyzing your industry...', target: 25 },
@@ -73,7 +76,7 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
       if (adminMode) {
         saveToAdminLibrary({
           tool_type: 'content_calendar',
-          title: `${form.industry} — 30-day calendar — ${new Date().toLocaleDateString()}`,
+          title: `${form.industry}, 30-day calendar, ${new Date().toLocaleDateString()}`,
           input_data: form,
           output_data: data,
         }).catch(e => console.error('Library save failed:', e));
@@ -116,7 +119,7 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
           </div>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div><Label>Industry *</Label><Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} placeholder="e.g. Fitness, SaaS, Real Estate" /></div>
-            <div><Label>Goals</Label><Input value={form.goals} onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="e.g. Lead gen, brand awareness" /></div>
+            <div><Label>Goals</Label><Input value={form.goals} onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="e.g. Lead gen, surface revenue leaks" /></div>
             <div className="md:col-span-2"><Label>Platforms</Label><Input value={form.platforms} onChange={(e) => setForm({ ...form, platforms: e.target.value })} placeholder="e.g. LinkedIn, Facebook, Instagram" /></div>
           </div>
           <Button onClick={handleGenerate} className="bg-amber hover:bg-amber/90 text-background font-bold px-8" disabled={!form.industry}>Generate Calendar</Button>
@@ -135,8 +138,14 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
         <div className="space-y-6">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-foreground font-display mb-2">Your <span className="text-amber">30-Day</span> Content Calendar</h2>
-            <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && '— unlock for the full calendar'}</p>
+            <p className="text-muted-foreground">Showing {unlocked ? 30 : FREE_DAYS} of 30 days {!unlocked && ',  unlock for the full calendar'}</p>
           </div>
+
+          <QuickDownloadBar
+            toolType="content_calendar"
+            title={`30-Day Content Calendar${result.businessName ? ' — ' + result.businessName : ''}`}
+            outputData={result}
+          />
 
           <div className="space-y-3">
             {days.map((day: any, i: number) => {
@@ -154,8 +163,8 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                         <span className="text-xs text-muted-foreground">{day.contentType} · {day.bestTime}</span>
                       </div>
                       <h4 className="text-sm font-bold text-foreground mb-1">{day.topic}</h4>
-                      <p className="text-sm text-amber font-semibold mb-1">"{day.hook}"</p>
-                      <p className="text-xs text-muted-foreground">{day.caption}</p>
+                      <p className="text-sm text-amber font-semibold mb-2">{day.hook}</p>
+                      <p className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed">{day.caption}</p>
                       {day.hashtags?.length > 0 && (
                         <p className="text-xs text-primary mt-1">{day.hashtags.map((h: string) => `#${h.replace('#', '')}`).join(' ')}</p>
                       )}
@@ -166,6 +175,20 @@ export const ContentCalendarGenerator: React.FC<{ adminMode?: boolean }> = ({ ad
                       </Button>
                     )}
                   </div>
+                  {visible && adminMode && (
+                    <div className="mt-4 space-y-2">
+                      <PostImageGenerator
+                        prompt={`${day.topic}. ${day.hook}. ${day.caption}`}
+                        editablePrompt
+                        onImageGenerated={() => {}}
+                      />
+                      <ScheduleSocialButton
+                        content={`${day.hook}\n\n${day.caption}\n\n${(day.hashtags || []).map((h: string) => `#${h.replace('#', '')}`).join(' ')}`}
+                        source={`content_calendar:day_${day.day}`}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
                 </div>
               );
             })}

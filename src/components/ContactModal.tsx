@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Mail, Phone, MapPin, Linkedin, ArrowRight, Calendar } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { BOOK_MEETING_URL } from '@/lib/links';
 
@@ -10,6 +11,9 @@ interface ContactModalProps {
 
 export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const { trackEvent } = useTrackEvent();
+  const location = useLocation();
+  // Bookings = clients only. Hide the meeting CTA inside the careers funnel.
+  const isCareersContext = location.pathname.startsWith('/careers');
 
   if (!isOpen) return null;
 
@@ -26,16 +30,17 @@ export const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) =
         <p className="text-muted-foreground mb-6">Pick what's easiest. No forms. No runaround.</p>
 
         <div className="space-y-4">
-          <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-amber/10 border border-amber/30 hover:bg-amber/20 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('book_meeting_click', { location: 'contact_modal' })}>
-            <div className="w-12 h-12 rounded-full bg-amber/20 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-amber" />
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Book a Meeting</div>
-              <div className="text-foreground font-bold text-lg">Pick a time on my calendar</div>
-            </div>
-          </a>
-
+          {!isCareersContext && (
+            <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 bg-amber/10 border border-amber/30 hover:bg-amber/20 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('book_meeting_click', { location: 'contact_modal' })}>
+              <div className="w-12 h-12 rounded-full bg-amber/20 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-amber" />
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Book a Meeting</div>
+                <div className="text-foreground font-bold text-lg">Pick a time on my calendar</div>
+              </div>
+            </a>
+          )}
           <a href="tel:+13173762110" className="flex items-center gap-4 p-4 glass-hover rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => trackEvent('click', { label: 'phone', location: 'contact_modal' })}>
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
               <Phone className="w-6 h-6 text-amber" />

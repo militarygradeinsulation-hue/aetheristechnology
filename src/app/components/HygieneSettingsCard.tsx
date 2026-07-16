@@ -64,7 +64,7 @@ export const HygieneSettingsCard = ({ accountId }: { accountId: string }) => {
       <div className="space-y-4">
         <Toggle label="Require my approval for every action" desc="Recommended for first 30 days" v={s.require_approval} onChange={(v) => setS({ ...s, require_approval: v })} />
         <Toggle label="Allow auto-execution of high-confidence actions" desc="Whitespace, casing, phone formatting only" v={s.allow_auto_high_conf} onChange={(v) => setS({ ...s, allow_auto_high_conf: v })} />
-        <Toggle label="Enable enrichment via Apollo / Clay" desc="Phase 2 — coming soon" v={s.enable_enrichment} onChange={(v) => setS({ ...s, enable_enrichment: v })} disabled />
+        <Toggle label="Enable enrichment via Apollo / Clay" desc="Phase 2, coming soon" v={s.enable_enrichment} onChange={(v) => setS({ ...s, enable_enrichment: v })} disabled />
 
         <div className="grid sm:grid-cols-2 gap-4 pt-2">
           <div>
