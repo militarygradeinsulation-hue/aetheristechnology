@@ -310,20 +310,29 @@ const AetherisUniversePage: React.FC = () => {
     if (!layer) return;
     const strength = Math.min(1, impactSpeed / 500);
     const size = 24 + strength * 60;
-    const el = document.createElement('div');
-    el.style.cssText = `
+    // outer wrapper positions in world; inner element does the scale/fade animation
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `
       position:absolute;left:50%;top:50%;
       width:${size}px;height:${size}px;margin-left:${-size / 2}px;margin-top:${-size / 2}px;
       transform:translate3d(${x}px, ${y}px, ${z}px);
-      border-radius:9999px;pointer-events:none;
-      background:radial-gradient(circle, ${color} 0%, ${color}80 30%, rgba(255,255,255,0) 70%);
+      pointer-events:none;transform-style:preserve-3d;
+    `;
+    const inner = document.createElement('div');
+    inner.style.cssText = `
+      width:100%;height:100%;
+      border-radius:9999px;
+      background:radial-gradient(circle, #ffffff 0%, ${color} 25%, ${color}80 45%, rgba(255,255,255,0) 75%);
       mix-blend-mode:screen;
+      box-shadow: 0 0 24px ${color}, 0 0 48px ${color}80;
       animation:aetherSpark 520ms ease-out forwards;
       will-change:transform,opacity;
     `;
-    layer.appendChild(el);
-    setTimeout(() => { el.remove(); }, 560);
+    wrap.appendChild(inner);
+    layer.appendChild(wrap);
+    setTimeout(() => { wrap.remove(); }, 560);
   }, []);
+
 
   // Pause work when page hidden or scene off-screen
   useEffect(() => {
