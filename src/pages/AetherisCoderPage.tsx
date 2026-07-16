@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
-import { Send, Loader2, Lock, Eye, Code2, ArrowRight } from 'lucide-react';
+import { Send, Loader2, Lock, Eye, Code2, ArrowRight, RotateCcw } from 'lucide-react';
 import { useTrackEvent } from '@/hooks/useTrackEvent';
 
 type Msg = { role: 'user' | 'assistant'; content: string; verify?: string[] };
