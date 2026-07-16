@@ -182,7 +182,7 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
     executiveSummary: `${companyName} is not broken, but the scan shows visible conversion leakage in the public-facing website. The biggest risks are unclear next steps, weak capture paths, and proof that is not carrying enough of the sales burden. Estimated annual leak: ${fmt$(leakRange.low)} - ${fmt$(leakRange.high)}.`,
     gaps,
     roadmap: [
-      { month: "Month 1", action: "Repair the first-screen message and primary CTA", estimatedCost: "$2,500 - $6,000", projectedRecovery: "$12,000 - $28,000" },
+      { month: "Month 1", action: "Repair the first-screen message and primary CTA", estimatedCost: "$4,000 - $9,000", projectedRecovery: "$12,000 - $28,000" },
       { month: "Month 2", action: "Add lead capture, response promise, and contact redundancy", estimatedCost: "$1,500 - $4,500", projectedRecovery: "$10,000 - $24,000" },
       { month: "Month 3", action: "Publish proof assets and objection-handling sections", estimatedCost: "$3,000 - $8,000", projectedRecovery: "$14,000 - $32,000" },
       { month: "Month 4", action: "Tighten technical SEO and page-speed priorities", estimatedCost: "$1,500 - $5,000", projectedRecovery: "$8,000 - $20,000" },

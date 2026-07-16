@@ -226,7 +226,7 @@ export function generateDiagnosticPdf(data: DiagnosticPdfData) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(200, 200, 200);
   const ctaLines = doc.splitTextToSize(
-    'Our 14-Day Operational Systems Diagnostic pinpoints exactly where revenue is leaking and builds a custom roadmap to fix it. No guesswork, just data-driven action steps tailored to your business.',
+    'Our 21-Day Revenue Diagnostic pinpoints exactly where revenue is leaking and builds a custom roadmap to fix it. No guesswork, just data-driven action steps tailored to your business.',
     contentW
   );
   doc.text(ctaLines, pageW / 2, 80, { align: 'center' });

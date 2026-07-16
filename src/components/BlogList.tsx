@@ -165,7 +165,7 @@ export const BlogList: React.FC = () => {
             Stop Wasting Money on Broken Systems
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Our 14-Day Operational Systems Diagnostic tears apart your marketing, AI, and CRM
+            Our 21-Day Revenue Diagnostic tears apart your marketing, AI, and CRM
             systems, and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
