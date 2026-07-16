@@ -4,7 +4,7 @@ import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-r
 import aetherisLogo from "@/assets/aetheris-a-logo.png.asset.json";
 
 /**
- * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
+ * "Companies Reviewed" dropdown — five sample Case File dossiers (Your Leak Report)
  * shown as an accordion. Illustrative specimens; subjects fictional. Rendered
  * on the homepage directly under the Golden Report chip block.
  */
