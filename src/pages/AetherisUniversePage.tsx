@@ -138,7 +138,7 @@ const AetherisUniversePage: React.FC = () => {
       />
 
       <div className="relative z-30">
-        <Navbar />
+        <Navbar onContactClick={() => {}} />
       </div>
 
       <main className="relative z-10">
