@@ -167,7 +167,7 @@ export default function AIChecklistPage() {
                   </div>
                   <p className="text-sm text-foreground">
                     Want an operator to actually run this against your business? The
-                    <strong className="text-amber"> Forensic Diagnostic ($18,500 flat)</strong> applies 1:1 toward any engagement.
+                    <strong className="text-amber"> Forensic Diagnostic (fixed-fee)</strong> applies 1:1 toward any engagement.
                   </p>
                   <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer">
                     <Button className="w-full mt-3 bg-amber hover:bg-amber/90 text-primary-foreground">Book the Forensic Diagnostic</Button>

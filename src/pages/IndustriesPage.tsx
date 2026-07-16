@@ -36,7 +36,7 @@ interface IndustryLeak {
 
 const DEFAULT_RECOMMENDED = {
   name: 'The Leak Audit (Forensic Diagnostic)',
-  price: '$18,500 flat',
+  price: 'fixed-fee',
   why: 'Operator-led forensic mini-audit. Fee applies 1:1 toward any engagement.',
   link: '/leak-audit',
 };
@@ -1011,14 +1011,14 @@ const IndustriesPage: React.FC = () => {
   const jsonLd = combineSchemas(
     serviceSchema(
       'Industries',
-      'Forensic Diagnostic ($18,500 flat) across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
+      'Forensic Diagnostic (fixed-fee) across 20+ industries including manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more. Fee applies 1:1 toward engagement.',
       { serviceType: 'Revenue Operations Diagnostic', areaServed: 'United States' }
     )
   );
 
   const faqs = [
     { question: 'What does the Leak Audit deliver per industry?', answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these industry files document.' },
-    { question: 'How much is the Leak Audit?', answer: '$18,500 flat fee, operator-led. Applied 1:1 toward any engagement that follows.' },
+    { question: 'How much is the Leak Audit?', answer: 'fixed-fee fee, operator-led. Applied 1:1 toward any engagement that follows.' },
     { question: 'What if my industry is not listed?', answer: 'The methodology travels. Type your niche in the search bar above, or book a 15-minute call and we will scope it.' },
     { question: 'How fast do you find the first leak?', answer: 'Free self-scan at /leak-audit runs in minutes. Operator-led Leak Audit surfaces first leaks inside Week 1.' },
   ];
@@ -1027,7 +1027,7 @@ const IndustriesPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Industries | Aetheris"
-        description="Forensic Diagnostic industries we investigate. $18,500 flat, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
+        description="Forensic Diagnostic industries we investigate. fixed-fee, applied to engagement. Manufacturing, construction, logistics, healthcare, finance, legal, real estate, SaaS, and more."
         path="/industries"
         keywords="revenue leak audit industries, manufacturing diagnostic, construction bid leak, logistics quote response, healthcare intake leak, legal intake, real estate lead response, SaaS churn audit"
         breadcrumbs={[
@@ -1055,7 +1055,7 @@ const IndustriesPage: React.FC = () => {
               Tap any industry to open the file. Type your niche below if you don't see it &mdash; the methodology travels.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
-              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; $18,500 flat.</span>
+              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit &mdash; fixed-fee.</span>
             </p>
 
             <div className="max-w-xl mx-auto relative">

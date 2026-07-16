@@ -94,7 +94,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
             
             <div className="relative z-10">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                Operator-Led · $18,500 Flat · Risk-Free · Credited Back
+                Operator-Led · fixed-fee Flat · Risk-Free · Credited Back
               </div>
               <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
                 The Forensic Diagnostic
@@ -118,7 +118,7 @@ export const Contact: React.FC<ContactProps> = ({ onContactClick }) => {
                 <div className="glass p-4 rounded-sm border border-border/40">
                   <ArrowRight className="w-6 h-6 text-amber mx-auto mb-2" />
                   <p className="text-sm font-semibold text-foreground">Credited Toward Fix</p>
-                  <p className="text-xs text-muted-foreground">$18,500 credited toward the Retainer</p>
+                  <p className="text-xs text-muted-foreground">fixed-fee credited toward the Retainer</p>
                 </div>
               </div>
 

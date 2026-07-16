@@ -48,7 +48,7 @@ const tiles: Tile[] = [
   },
   {
     sold: '21-Day Revenue Diagnostic',
-    soldDetail: '$18,500 forensic report on CRM + follow-up.',
+    soldDetail: 'fixed-fee forensic report on CRM + follow-up.',
     given: 'Finally know where it went.',
     givenShort: 'A written ledger of the $200K-$2M slipping through, line by line, with the fix attached.',
     Icon: Moon,
