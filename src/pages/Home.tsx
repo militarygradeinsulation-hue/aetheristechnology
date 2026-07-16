@@ -91,20 +91,20 @@ const Home = () => {
             </div>
           </section>
 
-          {/* One offer · The Leak Audit */}
+          {/* One offer · The Leak Check */}
           <section id="the-leak-audit" className="px-4 pb-10 scroll-mt-24">
             <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
                 Active case · limited slots this month
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                The offer
+                Step 1 · Free
               </div>
               <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-3">
-                The Leak Audit — <span className="text-crimson">fixed-fee.</span>
+                The Leak Check — <span className="text-crimson">free.</span>
               </h2>
               <p className="text-sm md:text-base text-foreground/80 mb-6 max-w-2xl">
-                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. We find every one in 14 days — written report, ROI on every fix, applied 100% toward implementation. <span className="text-amber font-semibold">If the leaks we find don't exceed fixed-fee, you don't pay.</span>
+                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. Five minutes, no card, no gate on the scan — we open a case file and hand you a written report with real dollar estimates on every leak we find.
               </p>
 
               <ChaosMindMap />
@@ -112,7 +112,7 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/leak-audit" className="w-full sm:w-auto">
                   <Button className="bg-amber text-background hover:bg-amber/90 font-bold w-full shadow-[0_0_25px_rgba(217,169,58,0.35)]">
-                    Book the 21-Day Revenue Diagnostic — fixed-fee <ArrowRight className="w-4 h-4 ml-1" />
+                    Get Your Free Leak Check <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
                 <button
@@ -124,7 +124,7 @@ const Home = () => {
                 </button>
               </div>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Guaranteed ROI · Applied to implementation · Payment plan available
+                Free · Written report · No card, no pitch
               </p>
             </div>
           </section>
