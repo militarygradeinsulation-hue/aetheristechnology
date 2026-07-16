@@ -13,9 +13,9 @@ export const CORE_LEAK_FACTS: CitedFact[] = [
       'Run it once. If the estimate is meaningful, the 21-Day Revenue Diagnostic confirms it inside your real data and is credited 1:1 toward the Implementation Retainer.',
   },
   {
-    answer: 'The operator-led 21-Day Revenue Diagnostic is $18,500 flat — credited 1:1 toward the Implementation Retainer.',
+    answer: 'The operator-led 21-Day Revenue Diagnostic is fixed-fee — credited 1:1 toward the Implementation Retainer.',
     support:
-      'Joseph Toney runs the audit personally over 21 days. Output: written findings report, prioritized fixes, ROI projections, and a 60-minute readout. The $18,500 fee is credited 1:1 toward the Implementation Retainer if you engage.',
+      'Joseph Toney runs the audit personally over 21 days. Output: written findings report, prioritized fixes, ROI projections, and a 60-minute readout. The fixed-fee fee is credited 1:1 toward the Implementation Retainer if you engage.',
     source: 'Aetheris pricing, /diagnostic',
     implication:
       'No percentage-of-savings billing. No hourly. The Diagnostic either pays for itself in the Retainer or stands alone as the most concrete vendor evaluation you will run this quarter.',
@@ -66,7 +66,7 @@ export const INDIANAPOLIS_FACTS: CitedFact[] = [
   {
     answer: 'For Indianapolis businesses the first step is the free Leak Audit at /leak-audit.',
     support:
-      'No phone call required. 6-minute self-scan returns a PDF case file with an estimated annual leak in dollars. If the result warrants it, the operator-led 21-Day Revenue Diagnostic ($18,500 flat) is the next step.',
+      'No phone call required. 6-minute self-scan returns a PDF case file with an estimated annual leak in dollars. If the result warrants it, the operator-led 21-Day Revenue Diagnostic (fixed-fee) is the next step.',
     source: 'Aetheris engagement flow',
     implication:
       'You can run the entire first stage tonight without talking to a salesperson.',
@@ -77,7 +77,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'How much does the Leak Audit cost?',
     answer:
-      'The self-scan at /leak-audit is free and takes about six minutes. The operator-led 21-Day Revenue Diagnostic is $18,500 flat, credited 1:1 toward the Implementation Retainer. The Implementation Retainer is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
+      'The self-scan at /leak-audit is free and takes about six minutes. The operator-led 21-Day Revenue Diagnostic is fixed-fee, credited 1:1 toward the Implementation Retainer. The Implementation Retainer is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
   },
   {
     question: 'How long does the Revenue Diagnostic take?',
@@ -117,7 +117,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'What does the Implementation Retainer cost?',
     answer:
-      '$15,000/month with a three-month minimum. The 21-Day Revenue Diagnostic fee ($18,500) is credited 1:1 toward the Retainer. The case stays open until the Leak Register\'s high-priority entries are sealed. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
+      '$15,000/month with a three-month minimum. The 21-Day Revenue Diagnostic fee (fixed-fee) is credited 1:1 toward the Retainer. The case stays open until the Leak Register\'s high-priority entries are sealed. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
   },
   {
     question: 'What if you do not find anything?',
@@ -152,7 +152,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'How do I start?',
     answer:
-      'Two paths. (1) Run the free self-scan at /leak-audit tonight. (2) Book the $18,500 21-Day Revenue Diagnostic at /diagnostic — or call (317) 376-2110 or email hello@aetheris.technology to ask questions first.',
+      'Two paths. (1) Run the free self-scan at /leak-audit tonight. (2) Book the fixed-fee 21-Day Revenue Diagnostic at /diagnostic — or call (317) 376-2110 or email hello@aetheris.technology to ask questions first.',
   },
   {
     question: 'Will AI eliminate this kind of consulting?',

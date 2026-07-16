@@ -42,8 +42,8 @@ const DiagnosticPage: React.FC = () => {
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden">
       <SEOHead
-        title="The Leak Audit™ — $18,500 21-Day Revenue Diagnostic | Aetheris"
-        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. $18,500 flat. Map where CRM, sales follow-up, and lead flow are losing money."
+        title="The Leak Audit™ — fixed-fee 21-Day Revenue Diagnostic | Aetheris"
+        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. fixed-fee. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
@@ -82,7 +82,7 @@ const DiagnosticPage: React.FC = () => {
                 We map where your CRM, sales follow-up, and lead flow are losing money. Written report with prioritized fixes, ROI projections, and an implementation roadmap.
               </p>
               <p className="mt-3 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-                $18,500 flat · One operator · Nothing ongoing
+                fixed-fee · One operator · Nothing ongoing
               </p>
 
               {/* video */}
@@ -110,7 +110,7 @@ const DiagnosticPage: React.FC = () => {
               <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)] text-center">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Fixed fee · Applied toward any engagement</div>
                 <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground leading-none">
-                  $18,500
+                  fixed-fee
                 </div>
                 <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-xl mx-auto">
                   Operator-led. No percentage-of-savings. No retainer. If the number sounds "expensive," the leak is bigger than you think — and you aren't our client.
@@ -148,10 +148,10 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '01',
                     name: 'Leak Audit',
-                    price: '$18,500',
+                    price: 'fixed-fee',
                     sub: 'Named leaks + dollar exposure',
                     note: 'Fastest way in.',
-                    why: 'Why $18,500',
+                    why: 'Why fixed-fee',
                     whyBody:
                       'One operator, 8–12 focused hours across your CRM export, site, funnels, and follow-up. You get a written leak map with dollar figures — enough to prove the bleed is real without committing to a full engagement. Priced as a rounding error against a leak that typically costs 10–40× the fee every year unfixed.',
                     scope: ['8–12 operator hours', '5–10 named leaks, $-tagged', 'Written report + 30-min readout', '100% credited to Tier 02 or 03'],
@@ -159,11 +159,11 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '02',
                     name: '21-Day Revenue Diagnostic',
-                    price: '$18,500',
+                    price: 'fixed-fee',
                     sub: 'Full forensic dig',
                     note: 'Credited 1:1 to Active Case.',
                     featured: true,
-                    why: 'Why $18,500',
+                    why: 'Why fixed-fee',
                     whyBody:
                       'Three weeks of operator time running all 9 forensic instruments against live data — CRM, pipeline, site, brand, follow-up, content, AI-readiness. Replaces $82K–$215K worth of separate audits. Every dollar credits 1:1 toward the Active Case, so it costs nothing if you continue.',
                     scope: ['21 days · 1 operator', 'All 9 instruments run live', '15–30 page report + roadmap', 'Fully credited to Tier 03'],
@@ -295,7 +295,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-2 text-sm text-foreground/90 leading-relaxed">
                     <li>— A human operator runs 9 forensic instruments <strong className="text-amber">against your business</strong></li>
                     <li>— You get a written leak map, not a software login</li>
-                    <li>— One fixed fee. $18,500. Nothing else owed to read the report</li>
+                    <li>— One fixed fee. fixed-fee. Nothing else owed to read the report</li>
                     <li>— 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>— Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>— We tell you exactly where the money is leaking and what to fix first</li>
@@ -320,7 +320,7 @@ const DiagnosticPage: React.FC = () => {
                 <p className="mt-1 text-xs text-foreground/60 italic">Said by every CFO who hasn't done the math. Here's the math.</p>
 
                 <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground mt-5 mb-4 leading-snug">
-                  $18,500 buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
+                  fixed-fee buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
                 </h3>
 
                 <div className="overflow-x-auto rounded-sm border border-amber/20 bg-background/40">
@@ -343,7 +343,7 @@ const DiagnosticPage: React.FC = () => {
                       <tr className="border-t-2 border-amber/50 bg-amber/[0.03]">
                         <td className="py-2.5 pl-3 pr-2 font-bold text-foreground">TOTAL</td>
                         <td className="py-2.5 px-2 font-bold text-muted-foreground whitespace-nowrap">$82K – $215K</td>
-                        <td className="py-2.5 px-2 font-bold text-amber whitespace-nowrap">$18,500 flat</td>
+                        <td className="py-2.5 px-2 font-bold text-amber whitespace-nowrap">fixed-fee</td>
                       </tr>
                     </tbody>
                   </table>
@@ -364,7 +364,7 @@ const DiagnosticPage: React.FC = () => {
 
                 <p className="mt-5 text-sm text-foreground/85 leading-relaxed text-center">
                   Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot.{' '}
-                  <span className="text-amber font-semibold">$18,500 to find it is a rounding error.</span> One recovered deal usually pays 100×.
+                  <span className="text-amber font-semibold">fixed-fee to find it is a rounding error.</span> One recovered deal usually pays 100×.
                 </p>
               </div>
             </section>

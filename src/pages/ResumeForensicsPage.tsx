@@ -395,7 +395,7 @@ export default function ResumeForensicsPage() {
                     <CTA
                       eyebrow="Lock this hire in"
                       title="Stress-test your hiring system before they start."
-                      body="A great resume hides bad onboarding. Run our $18,500 21-Day Revenue Diagnostic and we'll find the leaks before your new hire steps on them."
+                      body="A great resume hides bad onboarding. Run our fixed-fee 21-Day Revenue Diagnostic and we'll find the leaks before your new hire steps on them."
                       href="/leak-audit"
                       cta="Book the Revenue Diagnostic"
                     />

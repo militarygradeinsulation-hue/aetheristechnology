@@ -150,12 +150,12 @@ const CapabilitiesPage = () => {
                   Don't have time to run every tool? <span className="text-crimson">We'll do it in 14 days.</span>
                 </h3>
                 <p className="text-sm md:text-base text-foreground/80 mb-5 max-w-2xl">
-                  The Leak Audit runs every one of these tools on your business, hands you a written report with prioritized fixes and ROI on each, and applies 100% of the $18,500+ fee toward implementation. <span className="text-amber font-semibold">If we don't find leaks worth more than the fee, you don't pay.</span>
+                  The Leak Audit runs every one of these tools on your business, hands you a written report with prioritized fixes and ROI on each, and applies 100% of the fixed-fee fee toward implementation. <span className="text-amber font-semibold">If we don't find leaks worth more than the fee, you don't pay.</span>
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link to="/leak-audit">
                     <button className="inline-flex items-center justify-center gap-2 rounded-md bg-amber text-background hover:bg-amber/90 px-5 py-2.5 text-sm font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
-                      Book the 21-Day Revenue Diagnostic — $18,500 <ArrowRight className="w-4 h-4" />
+                      Book the 21-Day Revenue Diagnostic — fixed-fee <ArrowRight className="w-4 h-4" />
                     </button>
                   </Link>
                   <button

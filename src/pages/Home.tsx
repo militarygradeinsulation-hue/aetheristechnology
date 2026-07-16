@@ -101,10 +101,10 @@ const Home = () => {
                 The offer
               </div>
               <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight mb-3">
-                The Leak Audit — <span className="text-crimson">$18,500 flat.</span>
+                The Leak Audit — <span className="text-crimson">fixed-fee.</span>
               </h2>
               <p className="text-sm md:text-base text-foreground/80 mb-6 max-w-2xl">
-                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. We find every one in 14 days — written report, ROI on every fix, applied 100% toward implementation. <span className="text-amber font-semibold">If the leaks we find don't exceed $18,500+, you don't pay.</span>
+                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. We find every one in 14 days — written report, ROI on every fix, applied 100% toward implementation. <span className="text-amber font-semibold">If the leaks we find don't exceed fixed-fee, you don't pay.</span>
               </p>
 
               <ChaosMindMap />
@@ -112,7 +112,7 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/leak-audit" className="w-full sm:w-auto">
                   <Button className="bg-amber text-background hover:bg-amber/90 font-bold w-full shadow-[0_0_25px_rgba(217,169,58,0.35)]">
-                    Book the 21-Day Revenue Diagnostic — $18,500 <ArrowRight className="w-4 h-4 ml-1" />
+                    Book the 21-Day Revenue Diagnostic — fixed-fee <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
                 <button
@@ -152,7 +152,7 @@ const Home = () => {
                 Want every forensic tool we use? <span className="text-amber">Free.</span>
               </h3>
               <p className="text-sm md:text-base text-foreground/80 mb-5">
-                One email unlocks the whole vault — scanners, diagnostics, report generators, closer kits, the same weapons we bill $18,500+/session with. <span className="text-amber font-semibold">No card. No password. No spam.</span> You'll be inside in 3 seconds.
+                One email unlocks the whole vault — scanners, diagnostics, report generators, closer kits, the same weapons we bill fixed-fee/session with. <span className="text-amber font-semibold">No card. No password. No spam.</span> You'll be inside in 3 seconds.
               </p>
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
                 <Input

@@ -58,7 +58,7 @@ const RUNGS: Rung[] = [
     icon: Microscope,
     label: 'Tier 2 · The Full Investigation',
     name: 'The Chaos Diagnostic',
-    price: '$18,500',
+    price: 'fixed-fee',
     priceNote: '21 days · one investigator on your case',
     lead: 'The complete forensic examination of your business. Lead flow, sales process, follow up, internal operations, customer experience, brand signal, and the infrastructure connecting all of it. Twenty one days. We work your business like a case, because it is one.',
     bullets: [

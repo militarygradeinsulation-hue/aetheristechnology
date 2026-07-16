@@ -17,7 +17,7 @@ const AIConsultantPage = () => {
         ]}
         faqs={[
           { question: 'What is the free AI Business Consultant tool?', answer: 'A free, no-login AI chat tool from Aetheris AI that gives you on-demand business consulting advice, strategy, AI use cases, operations, backed by our consulting framework.' },
-          { question: 'Is the AI consultant really free?', answer: 'Yes. No login, no credit card. For deeper engagements, book the 21-Day Revenue Diagnostic ($18,500 flat, credited 1:1 toward the Retainer) or the Implementation Retainer ($15,000/month, three-month minimum, Diagnostic clients only).' },
+          { question: 'Is the AI consultant really free?', answer: 'Yes. No login, no credit card. For deeper engagements, book the 21-Day Revenue Diagnostic (fixed-fee, credited 1:1 toward the Retainer) or the Implementation Retainer ($15,000/month, three-month minimum, Diagnostic clients only).' },
           { question: 'How is this different from ChatGPT?', answer: 'It is fine-tuned for B2B AI consulting questions, runs against the Aetheris consulting framework, and links directly to actionable next steps with our team.' },
         ]}
       />

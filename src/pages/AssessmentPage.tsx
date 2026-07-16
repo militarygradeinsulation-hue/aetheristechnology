@@ -34,7 +34,7 @@ const AssessmentPage = () => {
     { question: 'How long does the AI Readiness Assessment take?', answer: 'About 2 minutes. You answer 5 quick questions about your operations and receive an instant maturity score with a personalized roadmap.' },
     { question: 'Is the AI Readiness Assessment really free?', answer: 'Yes. The 5-question assessment is 100% free with no login or credit card required. You receive an instant score and a category-by-category breakdown.' },
     { question: 'What does the assessment score me on?', answer: 'Automation maturity, CRM and data infrastructure, AI adoption stage, team capability, and operational efficiency. The score identifies where you are leaking time and money.' },
-    { question: 'What happens after I get my score?', answer: 'You see a prioritized list of AI use cases to pursue first. From there, you can book a discovery call or run our deeper 21-Day Revenue Diagnostic ($18,500 flat).' },
+    { question: 'What happens after I get my score?', answer: 'You see a prioritized list of AI use cases to pursue first. From there, you can book a discovery call or run our deeper 21-Day Revenue Diagnostic (fixed-fee).' },
   ];
 
   return (
