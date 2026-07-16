@@ -28,13 +28,18 @@ type PlacedTool = {
   category: string;
   route: string;
   img: string | null;
+  // initial spawn position
   x: number;
   y: number;
   z: number;
-  phaseY: number; phaseX: number; phaseZ: number;
-  freqY: number; freqX: number; freqZ: number;
-  ampY: number; ampX: number; ampZ: number;
 };
+
+// physics bounds (cube half-extents) and node collision radius
+const BOUND_X = 520;
+const BOUND_Y = 300;
+const BOUND_Z = 520;
+const NODE_RADIUS = 96;
+const RESTITUTION = 0.92;
 
 // Deterministic pseudo-random so layout is stable between renders
 function seeded(i: number, salt: number) {
@@ -198,24 +203,27 @@ const AetherisUniversePage: React.FC = () => {
   const tools: PlacedTool[] = useMemo(() => {
     return SHOP_TOOLS.map((t, i) => {
       const angle = seeded(i, 1) * Math.PI * 2;
-      const radius = 340 + seeded(i, 2) * 260;
-      const y = (seeded(i, 3) - 0.5) * 520;
+      const radius = 260 + seeded(i, 2) * 220;
+      const y = (seeded(i, 3) - 0.5) * 400;
       return {
         id: t.id, name: t.name, tagline: t.tagline, category: t.category, route: t.route,
         img: IMG_BY_ID[t.id] ?? null,
         x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius,
-        phaseY: seeded(i, 4) * Math.PI * 2,
-        phaseX: seeded(i, 5) * Math.PI * 2,
-        phaseZ: seeded(i, 6) * Math.PI * 2,
-        freqY: 0.5 + seeded(i, 7) * 1.3,
-        freqX: 0.3 + seeded(i, 8) * 1.1,
-        freqZ: 0.25 + seeded(i, 9) * 0.9,
-        ampY: 10 + seeded(i, 10) * 22,
-        ampX: 6 + seeded(i, 11) * 18,
-        ampZ: 8 + seeded(i, 12) * 20,
       };
     });
   }, []);
+
+  // Physics state — position + velocity per tool. Mutated in the rAF loop.
+  const physicsRef = useRef<{ x: number; y: number; z: number; vx: number; vy: number; vz: number }[]>([]);
+  if (physicsRef.current.length !== tools.length) {
+    physicsRef.current = tools.map((t, i) => ({
+      x: t.x, y: t.y, z: t.z,
+      // seeded initial drift, ~40..110 px/s per axis, signed
+      vx: (seeded(i, 21) - 0.5) * 160,
+      vy: (seeded(i, 22) - 0.5) * 110,
+      vz: (seeded(i, 23) - 0.5) * 160,
+    }));
+  }
 
   const registerAnimator = React.useCallback((id: string, el: HTMLButtonElement) => {
     nodesRef.current.set(id, el);
@@ -270,17 +278,60 @@ const AetherisUniversePage: React.FC = () => {
             `translateZ(-200px) rotateX(${rx}deg) rotateY(${ry}deg)`;
         }
 
-        // Counter-rotate so cards face camera + apply per-tool drift
+        // ----- Physics: integrate + wall bounce + pairwise elastic collisions -----
+        const phys = physicsRef.current;
+        const N = phys.length;
+        // integrate + walls
+        for (let i = 0; i < N; i++) {
+          const p = phys[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.z += p.vz * dt;
+          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * RESTITUTION; }
+          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * RESTITUTION; }
+          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * RESTITUTION; }
+          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * RESTITUTION; }
+          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * RESTITUTION; }
+          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * RESTITUTION; }
+        }
+        // pairwise collisions (equal mass elastic: swap normal-component velocities)
+        const minDist = NODE_RADIUS * 2;
+        const minDistSq = minDist * minDist;
+        for (let i = 0; i < N; i++) {
+          const a = phys[i];
+          for (let j = i + 1; j < N; j++) {
+            const b = phys[j];
+            const dxp = b.x - a.x;
+            const dyp = b.y - a.y;
+            const dzp = b.z - a.z;
+            const d2 = dxp * dxp + dyp * dyp + dzp * dzp;
+            if (d2 >= minDistSq || d2 === 0) continue;
+            const d = Math.sqrt(d2) || 0.0001;
+            const nx = dxp / d, ny = dyp / d, nz = dzp / d;
+            // positional correction — push each half the overlap out
+            const overlap = (minDist - d) * 0.5;
+            a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
+            b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
+            // relative velocity along normal
+            const rvx = b.vx - a.vx, rvy = b.vy - a.vy, rvz = b.vz - a.vz;
+            const relN = rvx * nx + rvy * ny + rvz * nz;
+            if (relN >= 0) continue; // moving apart
+            const jimp = -(1 + RESTITUTION) * relN * 0.5; // equal mass
+            a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+            b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+          }
+        }
+
+        // Counter-rotate so cards face camera + write physics transform
         const cardCounter = `rotateY(${-ry}deg) rotateX(${-rx}deg)`;
         for (let i = 0; i < toolList.length; i++) {
           const tool = toolList[i];
           const el = nodesRef.current.get(tool.id);
           if (!el) continue;
-          const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
-          const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
-          const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
+          const p = phys[i];
           el.style.transform =
-            `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) ${cardCounter}`;
+            `translate3d(${p.x}px, ${p.y}px, ${p.z}px) ${cardCounter}`;
+          el.style.zIndex = String(Math.round(1000 + p.z));
         }
 
         // Update HUD ~4× per second (React state) instead of every frame
