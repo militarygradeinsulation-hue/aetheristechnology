@@ -667,8 +667,20 @@ const AetherisUniversePage: React.FC = () => {
                 registerAnimator={registerAnimator}
                 unregisterAnimator={unregisterAnimator}
                 onOpen={setSelected}
+                onDragDown={onNodeDown}
+                onDragMove={onNodeMove}
+                onDragUp={onNodeUp}
               />
             ))}
+
+            {/* Spark VFX layer (children injected imperatively during collisions) */}
+            <div
+              ref={sparkLayerRef}
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{ transformStyle: 'preserve-3d' }}
+            />
+
 
             <div
               aria-hidden
