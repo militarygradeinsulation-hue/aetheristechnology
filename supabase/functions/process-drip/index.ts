@@ -144,8 +144,10 @@ serve(async (req) => {
 
           const kind = classifyOutlookError(status, errBody);
 
-          if (kind === "soft" && nextAttempt < MAX_ATTEMPTS) {
-            const retryAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+          if ((kind === "soft" || kind === "quota") && nextAttempt < MAX_ATTEMPTS) {
+            // Quota errors reset daily — back off 24h. Other soft errors retry in 1h.
+            const backoffMs = kind === "quota" ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+            const retryAt = new Date(Date.now() + backoffMs).toISOString();
             await supabase.from("drip_emails").update({
               status: "pending",
               attempt_count: nextAttempt,
