@@ -88,6 +88,7 @@ const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
 const DetectiveModePage = lazy(() => import("./pages/DetectiveModePage"));
 const EcosystemPage = lazy(() => import("./pages/EcosystemPage"));
+const AetherisUniversePage = lazy(() => import("./pages/AetherisUniversePage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const NewPortalPage = lazy(() => import("./pages/NewPortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
@@ -240,6 +241,8 @@ const App = () => (
                       <Route path="/detective" element={<DetectiveModePage />} />
                       <Route path="/detective-mode" element={<DetectiveModePage />} />
                       <Route path="/ecosystem" element={<EcosystemPage />} />
+                      <Route path="/aetheris-universe" element={<AetherisUniversePage />} />
+                      <Route path="/universe" element={<Navigate to="/aetheris-universe" replace />} />
                       <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools-shop" element={<Navigate to="/" replace />} />
