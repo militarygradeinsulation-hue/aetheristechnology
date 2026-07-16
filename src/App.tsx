@@ -78,6 +78,7 @@ const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboardingPage"));
 const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
+import { VERTICAL_BY_SLUG } from "@/config/verticals";
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
