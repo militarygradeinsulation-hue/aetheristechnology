@@ -134,79 +134,38 @@ export function LimitedOfferPopup() {
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : dismiss(true))}>
-      <DialogContent className="max-w-lg border-crimson/40 bg-background/95 backdrop-blur-xl">
+      <DialogContent className="max-w-lg border-amber/40 bg-background/95 backdrop-blur-xl">
         <DialogHeader>
-          <Badge className="w-fit bg-crimson text-white uppercase tracking-widest text-[10px] font-mono">
-            <AlertTriangle className="h-3 w-3 mr-1" /> Limited — 25 companies only
-          </Badge>
-          <DialogTitle className="font-serif text-3xl leading-tight">
-            Free Revenue Leak Snapshot
-            <span className="block text-sm font-mono text-muted-foreground mt-2">
-              Normally <span className="line-through">$2,500</span> — free this week
-            </span>
+          <DialogTitle className="font-serif text-2xl leading-snug">
+            One honest question for every founder:
           </DialogTitle>
-          <DialogDescription className="text-foreground/85 text-base pt-2">
-            We'll name your <span className="text-amber font-semibold">top 3 revenue leaks</span> and the
-            annual dollar cost of each — before you spend a cent. No call required. Delivered to your inbox.
+          <DialogDescription className="text-foreground/90 text-lg pt-3 font-serif italic">
+            "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales?"
           </DialogDescription>
         </DialogHeader>
 
-        {done ? (
-          <div className="py-6 text-center space-y-3">
-            <div className="font-serif text-2xl">You're on the list.</div>
-            <p className="text-muted-foreground">
-              Watch your inbox — your Leak Snapshot instructions arrive within 24 hours.
-            </p>
-            <Button onClick={() => dismiss(true)} className="mt-2">Close</Button>
-          </div>
-        ) : (
-          <form onSubmit={submit} className="space-y-3 pt-2">
-            <Input
-              placeholder="Full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={120}
-              required
-              autoFocus
-            />
-            <Input
-              type="email"
-              placeholder="Work email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              maxLength={255}
-              required
-            />
-            <Input
-              placeholder="Company (optional)"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              maxLength={200}
-            />
-            {err && <p className="text-sm text-crimson">{err}</p>}
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-crimson hover:bg-crimson/90 text-white font-bold uppercase tracking-wider"
-            >
-              {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Claiming…</>
-              ) : (
-                "Claim my free leak snapshot"
-              )}
+        <div className="pt-2 space-y-4">
+          <p className="text-foreground/85 text-base">
+            If so, here's my gift to you.
+          </p>
+          <a
+            href="https://businessforensics.tech/try/golden-report"
+            className="block"
+            onClick={() => dismiss(true)}
+          >
+            <Button className="w-full bg-amber hover:bg-amber/90 text-background font-bold uppercase tracking-wider">
+              Get the Golden Report
             </Button>
-            <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
-              <Lock className="h-3 w-3" /> No spam. One email. Unsubscribe anytime.
-            </p>
-            <button
-              type="button"
-              onClick={() => dismiss(true)}
-              className="w-full text-xs text-muted-foreground/70 hover:text-muted-foreground underline"
-            >
-              No thanks, I'll keep leaking revenue
-            </button>
-          </form>
-        )}
+          </a>
+          <p className="text-sm text-muted-foreground text-center">Hope it helps.</p>
+          <button
+            type="button"
+            onClick={() => dismiss(true)}
+            className="w-full text-xs text-muted-foreground/70 hover:text-muted-foreground underline"
+          >
+            Close
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );
