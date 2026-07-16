@@ -321,6 +321,8 @@ const NewPortalPage: React.FC = () => {
 
           {/* START — Getting Started overview */}
           <TabsContent value="start" className="mt-8 space-y-4">
+            <DailyHustleCard />
+
             <ToolCard
               eyebrow="// Getting Started //"
               title="You're in the new portal"
