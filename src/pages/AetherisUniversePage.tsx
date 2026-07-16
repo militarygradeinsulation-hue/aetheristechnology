@@ -202,7 +202,9 @@ const AetherisUniversePage: React.FC = () => {
             }}
           >
             {tools.map((tool, i) => {
-              const floatY = Math.sin(t + tool.spin) * 14;
+              const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
+              const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
+              const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
               const isHover = hoverId === tool.id;
               const color = categoryColor[tool.category] || '#d9a93a';
               return (
