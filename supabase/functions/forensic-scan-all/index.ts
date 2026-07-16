@@ -336,34 +336,44 @@ Currency: USD only. Every $ amount rendered as $X,XXX. Never €/£/¥.
 Output: production-grade prose suitable for a printed forensic report.`;
 
 async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, model = "google/gemini-2.5-flash") {
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    signal: AbortSignal.timeout(timeoutMs),
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: maxTokens,
-      temperature: 0.4,
-    }),
-  });
-  if (!r.ok) throw new Error(`AI call failed ${r.status}: ${(await r.text()).slice(0, 300)}`);
-  const j = await r.json();
-  const raw = j.choices?.[0]?.message?.content || "{}";
+  const doCall = async (t: number) => {
+    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      signal: AbortSignal.timeout(t),
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: maxTokens,
+        temperature: 0.4,
+      }),
+    });
+    if (!r.ok) throw new Error(`AI call failed ${r.status}: ${(await r.text()).slice(0, 300)}`);
+    const j = await r.json();
+    const raw = j.choices?.[0]?.message?.content || "{}";
+    try {
+      return JSON.parse(raw);
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      return m ? JSON.parse(m[0]) : {};
+    }
+  };
+  // One retry: many 499/timeout aborts on Gemini clear on the second attempt.
   try {
-    return JSON.parse(raw);
-  } catch {
-    const m = raw.match(/\{[\s\S]*\}/);
-    return m ? JSON.parse(m[0]) : {};
+    return await doCall(timeoutMs);
+  } catch (e) {
+    console.warn("aiJson retry after:", String((e as Error).message).slice(0, 120));
+    return await doCall(Math.max(timeoutMs, 90_000));
   }
 }
+
 
 const CHAPTER_SHAPE = `{
   "no": <int>, "slug": "<slug>", "title": "<title>",
