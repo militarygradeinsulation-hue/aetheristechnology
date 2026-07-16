@@ -83,7 +83,16 @@ const AetherisUniversePage: React.FC = () => {
         x: Math.cos(angle) * radius,
         y,
         z: Math.sin(angle) * radius,
-        spin: seeded(i, 4) * Math.PI * 2,
+        // per-tool motion params — every one drifts on its own clock
+        phaseY: seeded(i, 4) * Math.PI * 2,
+        phaseX: seeded(i, 5) * Math.PI * 2,
+        phaseZ: seeded(i, 6) * Math.PI * 2,
+        freqY: 0.5 + seeded(i, 7) * 1.3,
+        freqX: 0.3 + seeded(i, 8) * 1.1,
+        freqZ: 0.25 + seeded(i, 9) * 0.9,
+        ampY: 10 + seeded(i, 10) * 22,
+        ampX: 6 + seeded(i, 11) * 18,
+        ampZ: 8 + seeded(i, 12) * 20,
       };
     });
   }, []);
