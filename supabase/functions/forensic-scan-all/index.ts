@@ -148,6 +148,7 @@ async function generateBrandKit(id: string, brand: Brand): Promise<Record<string
     social_error: socialRes.status === "rejected" ? String(socialRes.reason).slice(0, 200) : null,
     generated_at: nowIso(),
   };
+}
 
 async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs: number, label: string) {
   const controller = new AbortController();
