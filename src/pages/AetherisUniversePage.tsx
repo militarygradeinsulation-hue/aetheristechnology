@@ -29,7 +29,9 @@ type PlacedTool = {
   x: number; // px
   y: number; // px
   z: number; // px (depth)
-  spin: number;
+  phaseY: number; phaseX: number; phaseZ: number;
+  freqY: number; freqX: number; freqZ: number;
+  ampY: number; ampX: number; ampZ: number;
 };
 
 // Deterministic pseudo-random so layout is stable between renders
@@ -83,7 +85,16 @@ const AetherisUniversePage: React.FC = () => {
         x: Math.cos(angle) * radius,
         y,
         z: Math.sin(angle) * radius,
-        spin: seeded(i, 4) * Math.PI * 2,
+        // per-tool motion params — every one drifts on its own clock
+        phaseY: seeded(i, 4) * Math.PI * 2,
+        phaseX: seeded(i, 5) * Math.PI * 2,
+        phaseZ: seeded(i, 6) * Math.PI * 2,
+        freqY: 0.5 + seeded(i, 7) * 1.3,
+        freqX: 0.3 + seeded(i, 8) * 1.1,
+        freqZ: 0.25 + seeded(i, 9) * 0.9,
+        ampY: 10 + seeded(i, 10) * 22,
+        ampX: 6 + seeded(i, 11) * 18,
+        ampZ: 8 + seeded(i, 12) * 20,
       };
     });
   }, []);
@@ -191,7 +202,9 @@ const AetherisUniversePage: React.FC = () => {
             }}
           >
             {tools.map((tool, i) => {
-              const floatY = Math.sin(t + tool.spin) * 14;
+              const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
+              const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
+              const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
               const isHover = hoverId === tool.id;
               const color = categoryColor[tool.category] || '#d9a93a';
               return (
@@ -206,7 +219,7 @@ const AetherisUniversePage: React.FC = () => {
                   }}
                   className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px] group"
                   style={{
-                    transform: `translate3d(${tool.x}px, ${tool.y + floatY}px, ${tool.z}px) rotateY(${-rot.y}deg) rotateX(${-rot.x}deg) scale(${isHover ? 1.12 : 1})`,
+                    transform: `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) rotateY(${-rot.y}deg) rotateX(${-rot.x}deg) scale(${isHover ? 1.12 : 1})`,
                     transformStyle: 'preserve-3d',
                     transition: 'transform 0.25s ease-out',
                     zIndex: Math.round(1000 + tool.z),
