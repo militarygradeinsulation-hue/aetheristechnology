@@ -61,7 +61,7 @@ export function EasyModeRecommender() {
     const ids = rec.picks.filter(p => !dismissedTools.has(p.id)).map(p => p.id);
     if (ids.length === 0) return;
     setBuyIds(ids);
-    setBuyPlan(ids.length >= 3 ? "triple" : "single");
+    setBuyPlan(ids.length >= 2 ? "triple" : "single");
     setBuyOpen(true);
   };
 
