@@ -182,7 +182,7 @@ async function callAI({
     signal,
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "google/gemini-2.5-flash",
         temperature: 1.08,
         top_p: 0.97,
       messages: [

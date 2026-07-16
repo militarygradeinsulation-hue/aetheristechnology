@@ -87,7 +87,7 @@ async function fetchSiteSummary(rawUrl: string): Promise<string | null> {
   try {
     const url = new URL(rawUrl);
     const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 6000);
+    const t = setTimeout(() => controller.abort(), 25000);
     const res = await fetch(url.toString(), {
       redirect: "follow",
       signal: controller.signal,
@@ -185,7 +185,7 @@ Reference what they're viewing only when relevant. Never pitch tools or checkout
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...(contextMsg ? [contextMsg] : []),

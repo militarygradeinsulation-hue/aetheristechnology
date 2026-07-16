@@ -675,8 +675,8 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     // Keep total AI budget below the edge wall-clock. If the gateway is slow,
     // return the deterministic scan instead of letting the tool hang/fail.
     const models: Array<{ id: string; timeoutMs: number }> = [
-      { id: "google/gemini-3-flash-preview", timeoutMs: 14_000 },
-      { id: "google/gemini-2.5-flash", timeoutMs: 12_000 },
+      { id: "google/gemini-2.5-flash", timeoutMs: 25_000 },
+      { id: "google/gemini-3-flash-preview", timeoutMs: 20_000 },
     ];
     let aiResponse: Response | null = null;
     let lastErrText = "";

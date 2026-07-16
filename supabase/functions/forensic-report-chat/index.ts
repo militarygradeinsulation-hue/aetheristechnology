@@ -65,7 +65,7 @@ ${context}` },
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages, temperature: 0.3 }),
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages, temperature: 0.3 }),
     });
     if (r.status === 429) return new Response(JSON.stringify({ error: "Rate limited, try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (r.status === 402) return new Response(JSON.stringify({ error: "Workspace AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });

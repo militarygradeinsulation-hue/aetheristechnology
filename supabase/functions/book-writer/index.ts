@@ -53,7 +53,7 @@ async function callLLM(system: string, user: string, opts: { json?: boolean } = 
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY missing");
   const body: Record<string, unknown> = {
-    model: "google/gemini-3-flash-preview",
+    model: "google/gemini-2.5-flash",
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
