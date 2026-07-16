@@ -1156,22 +1156,24 @@ $("li-reply-clear-all")?.addEventListener("click", () => {
   toast("Comments cleared.");
 });
 
-async function draftLinkedInReply() {
+async function draftLinkedInReply(opts) {
+  const freshen = !!(opts && opts.freshen);
   const out = $("li-out");
   const mode = $("li-length").value || "brief";
   const direction = $("li-direction").value.trim();
   const tone = $("li-tone")?.value || "";
   const style = $("li-style")?.value || "";
-  const persona = $("li-persona")?.value || "";
+  const personas = getMultiPersonas();
 
-  const styleDirective = buildStyleDirective({ tone, style, persona });
-  const extraContext = [styleDirective, direction].filter(Boolean).join("\n\n");
+  const styleDirective = buildStyleDirective({ tone, style, personas });
+  const freshnessTail = freshen ? buildFreshnessDirective() : "";
+  const extraContext = [styleDirective, direction, freshnessTail].filter(Boolean).join("\n\n");
 
   let body = {
     mode,
     extraContext,
-    personaKeys: persona ? [persona] : [],
-    personaActive: !!persona,
+    personaKeys: personas,
+    personaActive: personas.length > 0,
     tone,
     style,
     recentDrafts: await getLinkedInDraftMemory(),
