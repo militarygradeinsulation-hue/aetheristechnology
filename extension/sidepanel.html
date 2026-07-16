@@ -301,6 +301,9 @@
 
           <!-- Controls -->
           <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
+            <select id="li-tone" title="Tone" data-aeth-opts="tone"></select>
+            <select id="li-style" title="Style / structure" data-aeth-opts="style"></select>
+            <select id="li-persona" title="Persona" data-aeth-opts="persona"></select>
             <select id="li-length" title="Response length">
               <option value="micro">Micro · 35-65 words</option>
               <option value="brief" selected>Brief · 70-120 words</option>
@@ -324,12 +327,18 @@
         <div class="card">
           <div class="card-title">LinkedIn post from this page</div>
           <div class="muted" style="margin-bottom:8px">Pulls the current tab's visible text and drafts a forensic LinkedIn post.</div>
-          <div class="row">
-            <select id="gp-tone">
-              <option value="forensic">Forensic operator</option>
-              <option value="story">Mini case study</option>
-              <option value="contrarian">Contrarian take</option>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <select id="gp-tone" data-aeth-opts="tone" title="Tone"></select>
+            <select id="gp-style" data-aeth-opts="style" title="Style / structure"></select>
+            <select id="gp-persona" data-aeth-opts="persona" title="Persona"></select>
+            <select id="gp-length" title="Length">
+              <option value="auto" selected>Auto length</option>
+              <option value="one-liner">One-liner</option>
+              <option value="short">Short (2-3 sentences)</option>
+              <option value="medium">Medium (1 paragraph)</option>
+              <option value="long">Long (2-3 paragraphs)</option>
             </select>
+            <input id="gp-direction" placeholder="Optional direction / angle" />
             <button id="gp-go" class="primary">Draft post</button>
           </div>
           <pre id="gp-out" class="out"></pre>
