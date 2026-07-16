@@ -152,6 +152,11 @@ const VerticalLandingPage: React.FC = () => {
           </div>
         </section>
 
+        {/* THE LEAK ECOSYSTEM */}
+        <HomeMindMapSection onBookAudit={() => setIsContactModalOpen(true)} />
+
+
+
 
         {/* STATS / ROI */}
         <section className="py-16 px-4">
