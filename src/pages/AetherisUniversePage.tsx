@@ -219,7 +219,7 @@ const AetherisUniversePage: React.FC = () => {
                   }}
                   className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px] group"
                   style={{
-                    transform: `translate3d(${tool.x}px, ${tool.y + floatY}px, ${tool.z}px) rotateY(${-rot.y}deg) rotateX(${-rot.x}deg) scale(${isHover ? 1.12 : 1})`,
+                    transform: `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) rotateY(${-rot.y}deg) rotateX(${-rot.x}deg) scale(${isHover ? 1.12 : 1})`,
                     transformStyle: 'preserve-3d',
                     transition: 'transform 0.25s ease-out',
                     zIndex: Math.round(1000 + tool.z),
