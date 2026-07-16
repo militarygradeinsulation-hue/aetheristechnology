@@ -184,7 +184,7 @@ export const RealCaseStudiesSection: React.FC = () => {
               ))}
             </div>
 
-            {filtered.length > 9 && (
+            {filtered.length > INITIAL && (
               <div className="text-center mt-8">
                 <Button
                   variant="outline"
@@ -192,8 +192,8 @@ export const RealCaseStudiesSection: React.FC = () => {
                   className="border-amber/40 text-amber hover:bg-amber/10 font-case uppercase tracking-widest text-xs"
                 >
                   {expanded
-                    ? `Collapse — showing all ${filtered.length}`
-                    : `Open the rest — ${filtered.length - 9} more case files`}
+                    ? `Show fewer`
+                    : `Show all ${filtered.length} cases`}
                 </Button>
               </div>
             )}
