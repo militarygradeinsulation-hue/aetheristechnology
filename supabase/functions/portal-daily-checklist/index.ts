@@ -215,7 +215,13 @@ serve(async (req) => {
         notifications_reposted: false,
         connections_added: 0,
         blog_posted: false,
+        calls_made: 0,
+        emails_sent: 0,
+        linkedin_dms: 0,
+        linkedin_comments: 0,
+        admin_notified_at: null,
       },
+      quotas: { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 },
       blog: content ? {
         kind,
         title: content.title,
