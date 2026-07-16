@@ -18,18 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { PinnableFloater } from "@/components/ui/PinnableFloater";
 import { useActiveLead, clearActiveLead } from "@/lib/activeLead";
 
-// Reps see ONLY the Golden Report. Admin (Joseph), Dean (482917), and
-// Braden (963169) keep the full workbench. Everyone else is locked to
-// forensic-scan-all so their demo portal stays front-and-center on the
-// one tool that matters.
+// Every rep gets the full classic workbench — same tool lineup admins see,
+// including Golden Report (forensic-scan-all). No rep code is locked out
+// of the workbench anymore.
 const GOLDEN_ONLY_TOOL_ID = "forensic-scan-all";
-const FULL_ACCESS_REP_CODES = new Set(["482917", "963169"]);
 function isRepRestrictedToGolden(): boolean {
-  if (hasValidAdminToken()) return false;
-  const p = getPortalProfile();
-  if (!p) return false;
-  if (FULL_ACCESS_REP_CODES.has(p.code)) return false;
-  return true;
+  return false;
 }
 
 // Widths applied at ALL viewports (no sm: prefix) so mobile users can
