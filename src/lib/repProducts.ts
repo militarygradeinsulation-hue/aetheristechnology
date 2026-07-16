@@ -135,7 +135,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     bundle: true,
     legacy: true,
     description: 'One-day forensic snapshot: website scan, CRM data audit, top-of-funnel leak map. Operator walks the report with you.',
-    forWho: 'Legacy bundle — replaced by the Single-Leak Investigation in the public funnel.',
+    forWho: 'Legacy bundle — replaced by the One-Leak Investigation in the public funnel.',
   },
   {
     name: 'Revenue Pack',
@@ -144,7 +144,7 @@ export const REP_PRODUCTS: RepProduct[] = [
     bundle: true,
     legacy: true,
     description: 'Signal Pack + 2-week sales-cycle teardown. Includes call-recording review, deal-stage forensics, and 3 hands-on rebuilds.',
-    forWho: 'Legacy bundle — replaced by the Chaos Diagnostic in the public funnel.',
+    forWho: 'Legacy bundle — replaced by the Full Leak Investigation in the public funnel.',
   },
   {
     name: 'Operator Suite',
