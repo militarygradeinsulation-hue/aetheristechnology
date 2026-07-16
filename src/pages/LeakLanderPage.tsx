@@ -269,67 +269,8 @@ const LeakLanderPage: React.FC = () => {
 
 
 
-          {/* HERO — Chaos Theory Forensics */}
+          {/* Chaos Theory Forensics hero + CTAs removed per request */}
 
-          <section
-            className="mt-3 max-w-6xl mx-auto text-center animate-fade-in"
-            style={{ animationDelay: "120ms", animationFillMode: "both" }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="h-px w-8 bg-amber/50" />
-              <span className="text-[9px] tracking-[0.35em] font-mono text-amber/80 uppercase">Chaos Theory Forensics · Indianapolis · US-Wide</span>
-              <span className="h-px w-8 bg-amber/50" />
-            </div>
-            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
-              Business is <span className="text-amber italic">chaos</span>.<br />
-              Chaos always has <span className="text-crimson italic">cause</span>.
-            </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              <br />
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span> on your revenue engine.&nbsp;
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-foreground max-w-4xl mx-auto">
-              {"\n"}
-            </p>
-            <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-4xl mx-auto">
-              If we can't name wasted marketing dollars worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
-            </p>
-            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Wasted dollars. Named leaks. Right leads. More sales.
-            </p>
-          </section>
-
-          {/* CTAs */}
-          <section
-            className="mt-5 flex flex-col items-center gap-3 animate-fade-in"
-            style={{ animationDelay: "180ms", animationFillMode: "both" }}
-          >
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full">
-              <Button asChild variant="outline" size="default" className="h-11 px-6 text-sm border-white/20 bg-white/[0.06] hover:border-amber/50 hover:bg-amber/10 text-foreground font-mono uppercase tracking-wider">
-                <Link to="/leak-audit">
-                  <FileText className="w-4 h-4 mr-2 text-amber" />
-                  Run the 60-second Leak Scan
-                </Link>
-              </Button>
-              <Button
-                size="default"
-                onClick={() => setBookingOpen(true)}
-                className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Book the Forensic Call
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </div>
-            <Link
-              to="/chaos-scan"
-              className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber hover:underline underline-offset-4"
-            >
-              Or generate the free Chaos Scan report <ArrowRight className="w-3 h-3" />
-            </Link>
-          </section>
 
 
 
