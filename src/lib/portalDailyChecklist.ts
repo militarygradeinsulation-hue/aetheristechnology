@@ -33,6 +33,7 @@ export interface DailyBlogPayload {
 export interface DailyChecklistResponse {
   date: string;
   checklist: DailyChecklistState;
+  quotas: DailyQuotas;
   blog: DailyBlogPayload | null;
   main_linkedin: { latest_post_url: string; company_url: string };
   rep_code: string;
