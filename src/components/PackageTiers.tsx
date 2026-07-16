@@ -4,13 +4,21 @@ import { Link } from 'react-router-dom';
 import { RevealOnScroll } from './RevealOnScroll';
 
 /**
- * Reciprocity Engine — 4 rungs, one funnel.
- * Source of truth: aetheris-reciprocity-engine-spec.pdf, Parts 2 & 3.
- * No em-dashes in copy per spec.
+ * The Renamed Offer Ladder (per naming + placement guide):
+ *   1. The Leak Check              — Free
+ *   2. The One-Leak Investigation  — $4,500–$6,500
+ *   3. The Full Leak Investigation — $18,500  (dominant card)
+ *   4. Leak Removal & System Build — from $15,000/mo  (no button)
+ *
+ * The bundle-math anchor renders ABOVE the ladder so the reader sees what a
+ * contractor would pay buying these capabilities separately before they see
+ * the number. Anchors only work placed before the price, never after.
+ *
+ * House style: no em-dashes in copy.
  */
 
 interface Rung {
-  id: 'leak-audit' | 'single-leak' | 'diagnostic' | 'implementation';
+  id: 'leak-check' | 'one-leak' | 'full' | 'removal';
   icon: React.ElementType;
   label: string;
   name: string;
@@ -27,61 +35,61 @@ interface Rung {
 
 const RUNGS: Rung[] = [
   {
-    id: 'leak-audit',
+    id: 'leak-check',
     icon: Search,
-    label: 'Tier 0 · Free',
-    name: 'The Leak Audit',
+    label: 'Step 1 · Free',
+    name: 'The Leak Check',
     price: 'Free',
-    priceNote: '5 minutes · no gate on the scan',
-    lead: 'You answer questions about how your business actually runs. We open a case file, run the analysis, and hand you preliminary findings with real dollar estimates attached. The PDF costs you an email address, because we send the file, not a link.',
-    cta: { label: 'Open Your Case File', to: '/leak-audit' },
+    priceNote: '5 minutes · no card, no gate on the scan',
+    lead: 'You answer questions about how your business actually runs. We open a case file, run the analysis, and hand you a written report with real dollar estimates attached to every leak we find.',
+    cta: { label: 'Get Your Free Leak Check', to: '/leak-audit' },
   },
   {
-    id: 'single-leak',
+    id: 'one-leak',
     icon: FileSearch,
-    label: 'Tier 1',
-    name: 'Single-Leak Investigation',
-    price: '$2,500',
+    label: 'Step 2',
+    name: 'The One-Leak Investigation',
+    price: '$4,500 – $6,500',
     priceNote: '5 business days · one leak, traced to origin',
-    lead: 'You already know where it hurts, or your preliminary findings named it. We take your single worst leak and trace it to its origin. Not the symptom. The cause.',
+    lead: 'You already know where it hurts, or your Leak Check named it. We take your single worst leak and trace it to its origin. Not the symptom. The cause.',
     bullets: [
       'The full trace: where the leak starts, what path it travels, what it touches on the way',
       'The true cost: what this leak takes from you annually in dollars, hours, and lost deals',
       'The removal plan: exactly what has to change, in what order, whether or not you hire us to do it',
     ],
-    credit: 'Every dollar is credited toward the Chaos Diagnostic within 90 days. If you continue the investigation, this cost disappears into it.',
+    credit: 'Every dollar is credited toward The Full Leak Investigation within 90 days. If you continue, this cost disappears into it.',
     cta: { label: 'Trace One Leak', onRequest: true },
     footnote: 'For operators who want proof before commitment. Most cases start here.',
   },
   {
-    id: 'diagnostic',
+    id: 'full',
     icon: Microscope,
-    label: 'Tier 2 · The Full Investigation',
-    name: 'The Chaos Diagnostic',
-    price: 'fixed-fee',
+    label: 'Step 3 · Most Common Starting Point',
+    name: 'The Full Leak Investigation',
+    price: '$18,500',
     priceNote: '21 days · one investigator on your case',
     lead: 'The complete forensic examination of your business. Lead flow, sales process, follow up, internal operations, customer experience, brand signal, and the infrastructure connecting all of it. Twenty one days. We work your business like a case, because it is one.',
     bullets: [
-      'Full-system investigation across every function where chaos hides',
+      'Full-system investigation across every function where leaks hide',
       'The Findings Report: every leak, traced to origin, with the annual cost of each in plain language',
       'The Removal Roadmap: what to fix, in what order, and what each fix is worth',
-      'The Findings Presentation: we walk you and your leadership through the evidence live',
+      'The Findings Call: we walk you and your leadership through the evidence live',
     ],
-    guarantee: 'If the investigation does not identify recoverable losses of at least three times the diagnostic fee, we discount the follow-on engagement by the shortfall. In writing.',
-    credit: 'Every dollar is credited 1:1 toward implementation. Proceed to removal and the diagnostic was free.',
+    guarantee: 'If the investigation does not identify recoverable losses of at least three times the fee, we discount the follow-on engagement by the shortfall. In writing.',
+    credit: 'Every dollar is credited 1:1 toward removal and system build. Proceed to Step 4 and the investigation was free.',
     cta: { label: 'Request the Full Investigation', onRequest: true },
-    footnote: 'We take a limited number of cases per quarter. One investigator works your case, not a rotating team.',
+    footnote: 'Limited number of cases per quarter. One investigator works your case, not a rotating team.',
     highlight: true,
   },
   {
-    id: 'implementation',
+    id: 'removal',
     icon: Wrench,
-    label: 'Tier 3',
-    name: 'Implementation',
-    price: 'From $15,000/mo',
+    label: 'Step 4',
+    name: 'Leak Removal & System Build',
+    price: 'from $15,000/mo',
     priceNote: '3-month minimum',
-    lead: 'We do not patch symptoms. We remove causes and build what belongs in their place: custom AI systems, automation, and strategic infrastructure engineered so the chaos cannot come back.',
-    footnote: 'Implementation is only proposed inside a completed Diagnostic. We will not build fixes for problems we have not investigated, and you should not trust anyone who will.',
+    lead: 'We do not patch symptoms. We remove causes and build what belongs in their place: custom AI systems, automation, and strategic infrastructure engineered so the leaks cannot come back.',
+    footnote: 'Proposed inside a completed Full Leak Investigation. You do not buy this directly, you graduate into it. Never sold cold.',
   },
 ];
 
@@ -94,7 +102,7 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
     <section className="px-4 pb-20">
       <div className="max-w-4xl mx-auto">
         {/* Page frame */}
-        <div className="mb-12">
+        <div className="mb-10">
           <div className="font-case text-[10px] uppercase tracking-[0.3em] text-amber mb-3">
             Chaos Theory Forensics · Pricing
           </div>
@@ -106,7 +114,43 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
           </p>
         </div>
 
-        {/* Tier 0 — slim strip */}
+        {/* Bundle-math anchor — ABOVE the price ladder */}
+        <RevealOnScroll variant="float">
+          <div className="mb-10 rounded-sm border border-amber/30 bg-background/40 p-6 md:p-7">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
+              Before you see our number, see what this normally costs
+            </div>
+            <p className="text-sm md:text-base text-foreground/85 leading-relaxed mb-5">
+              To get what a Full Leak Investigation delivers, a growth-stage business typically hires three vendors separately:
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3 mb-5">
+              <div className="rounded-sm border border-border/60 p-4">
+                <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Vendor 1</div>
+                <div className="font-forensic text-lg font-bold mb-1">Forensic investigation</div>
+                <div className="font-forensic text-xl text-foreground/90">$25k – $100k</div>
+              </div>
+              <div className="rounded-sm border border-border/60 p-4">
+                <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Vendor 2</div>
+                <div className="font-forensic text-lg font-bold mb-1">Fractional COO</div>
+                <div className="font-forensic text-xl text-foreground/90">$20k – $80k</div>
+              </div>
+              <div className="rounded-sm border border-border/60 p-4">
+                <div className="font-case text-[9px] uppercase tracking-widest text-amber/80 mb-1">Vendor 3</div>
+                <div className="font-forensic text-lg font-bold mb-1">AI implementation partner</div>
+                <div className="font-forensic text-xl text-foreground/90">$15k – $70k+</div>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-amber/25 pt-4">
+              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">Buying separately, from three vendors</div>
+              <div className="font-forensic text-2xl md:text-3xl font-bold text-crimson">$60,000 – $250,000+</div>
+            </div>
+            <p className="text-xs text-muted-foreground italic mt-3 leading-relaxed">
+              That is the anchor. Now read the ladder.
+            </p>
+          </div>
+        </RevealOnScroll>
+
+        {/* Step 1 — slim strip */}
         {(() => {
           const t = RUNGS[0];
           const Icon = t.icon;
@@ -134,7 +178,7 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
           );
         })()}
 
-        {/* Tiers 1, 2, 3 — stacked cards */}
+        {/* Steps 2, 3, 4 — stacked cards */}
         <div className="space-y-6">
           {RUNGS.slice(1).map((t, i) => {
             const Icon = t.icon;
@@ -149,7 +193,7 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
                 >
                   {t.highlight && (
                     <div className="absolute -top-3 left-6 font-case text-[9px] uppercase tracking-widest text-background bg-amber px-3 py-1 rounded-sm">
-                      The Full Investigation
+                      Most Common Starting Point
                     </div>
                   )}
                   <div className="flex items-start gap-4 mb-5">
@@ -241,16 +285,16 @@ export const PackageTiers: React.FC<PackageTiersProps> = ({ onRequest }) => {
         {/* Closing strip */}
         <div className="mt-16 text-center border-t border-amber/20 pt-10">
           <h3 className="font-forensic text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Not sure where you stand? That is what the case file is for.
+            Not sure where you stand? That is what the Leak Check is for.
           </h3>
           <Link
             to="/leak-audit"
             className="inline-flex items-center justify-center gap-2 rounded-sm px-6 py-3 font-bold bg-amber text-background hover:bg-amber/90 transition-colors"
           >
-            Open Your Case File <ArrowRight className="w-4 h-4" />
+            Get Your Free Leak Check <ArrowRight className="w-4 h-4" />
           </Link>
           <p className="text-xs text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">
-            Takes five minutes and costs nothing. If your case is not worth investigating, your findings will say so, and so will we.
+            Takes five minutes and costs nothing. If your case is not worth investigating, your report will say so, and so will we.
           </p>
           <div className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/70 mt-6">
             Aetheris · Chaos Theory Forensics · Real Findings. No Sugar.
