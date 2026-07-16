@@ -28,13 +28,18 @@ type PlacedTool = {
   category: string;
   route: string;
   img: string | null;
+  // initial spawn position
   x: number;
   y: number;
   z: number;
-  phaseY: number; phaseX: number; phaseZ: number;
-  freqY: number; freqX: number; freqZ: number;
-  ampY: number; ampX: number; ampZ: number;
 };
+
+// physics bounds (cube half-extents) and node collision radius
+const BOUND_X = 520;
+const BOUND_Y = 300;
+const BOUND_Z = 520;
+const NODE_RADIUS = 96;
+const RESTITUTION = 0.92;
 
 // Deterministic pseudo-random so layout is stable between renders
 function seeded(i: number, salt: number) {
