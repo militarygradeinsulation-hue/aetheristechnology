@@ -16,8 +16,9 @@ function appendSignature(body: string, signature: string): string {
   return `${body}\n${signature}`;
 }
 
-function classifyOutlookError(status: number, body: string): "hard" | "soft" {
+function classifyOutlookError(status: number, body: string): "hard" | "soft" | "quota" {
   const lower = body.toLowerCase();
+  if (lower.includes("exceededmessagelimit") || lower.includes("refusequota")) return "quota";
   if (status === 429) return "soft";
   if (status >= 500) return "soft";
   if (
