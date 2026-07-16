@@ -5,6 +5,18 @@ export interface DailyChecklistState {
   notifications_reposted: boolean;
   connections_added: number;
   blog_posted: boolean;
+  calls_made: number;
+  emails_sent: number;
+  linkedin_dms: number;
+  linkedin_comments: number;
+  admin_notified_at: string | null;
+}
+export interface DailyQuotas {
+  calls_made: number;
+  emails_sent: number;
+  linkedin_dms: number;
+  linkedin_comments: number;
+  connections_added: number;
 }
 export interface DailyBlogPayload {
   kind: "blog" | "playbook";
