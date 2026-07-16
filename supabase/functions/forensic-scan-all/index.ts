@@ -409,7 +409,7 @@ Requirements:
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 55_000);
+  return await aiJson(prompt, 2200, 90_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
