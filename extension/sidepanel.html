@@ -299,24 +299,38 @@
             </div>
           </div>
 
-          <!-- Controls -->
-          <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
-            <select id="li-tone" title="Tone" data-aeth-opts="tone"></select>
-            <select id="li-style" title="Style / structure" data-aeth-opts="style"></select>
-            <select id="li-persona" title="Persona" data-aeth-opts="persona"></select>
-            <select id="li-length" title="Response length">
-              <option value="micro">Micro · 35-65 words</option>
-              <option value="brief" selected>Brief · 70-120 words</option>
-              <option value="medium">Medium · 130-190 words</option>
-              <option value="long">Long · 200-280 words</option>
-              <option value="full">Full · standalone post</option>
-            </select>
-            <input id="li-direction" placeholder="Optional direction (e.g. push back on their 2nd point)" />
+          <!-- Controls (mirror portal LinkedInPostStudio) -->
+          <div class="li-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+            <div>
+              <div class="li-lbl" style="margin-bottom:6px">Response Format</div>
+              <select id="li-length" title="Response length" style="width:100%">
+                <option value="micro">Micro Reply (40-70 words)</option>
+                <option value="brief" selected>Short Comment (90-140 words)</option>
+                <option value="medium">Medium Comment (150-210 words)</option>
+                <option value="long">Long Comment (220-300 words)</option>
+                <option value="full">Standalone Repost (180-260 words)</option>
+              </select>
+            </div>
+            <div>
+              <div class="li-lbl" style="margin-bottom:6px">Extra Direction (optional)</div>
+              <input id="li-direction" placeholder="e.g. Disagree with their framing. Lead with a stat." style="width:100%" />
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+                <select id="li-tone" title="Tone" data-aeth-opts="tone"></select>
+                <select id="li-style" title="Style / structure" data-aeth-opts="style"></select>
+              </div>
+            </div>
           </div>
-          <div class="row" style="margin-top:8px;gap:8px">
-            <button id="li-go" class="primary">Draft reply</button>
+
+          <div style="margin-top:10px">
+            <div class="li-lbl" style="margin-bottom:6px">Personality (pick 1+ to fuse — style/rhythm only, no slang or name-drops)</div>
+            <div id="li-persona-picker" class="aeth-multipicker" data-aeth-multi="persona"></div>
+          </div>
+
+          <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+            <button id="li-go" class="primary" style="flex:1;min-width:200px">Respond to this post</button>
+            <button id="li-freshen" class="ghost" type="button" title="Getting repetitive? Force fresh openings, fresh word choice, and a new angle.">✨ Freshen Voice</button>
             <button id="li-copy" class="ghost" type="button">Copy</button>
-            <button id="li-regen" class="ghost" type="button">Regenerate</button>
+            <button id="li-regen" class="ghost" type="button">Redo</button>
           </div>
           <pre id="li-out" class="out"></pre>
         </div>

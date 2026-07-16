@@ -925,12 +925,101 @@ function populateAethSelects() {
 }
 populateAethSelects();
 
-function buildStyleDirective({ tone, style, persona, length }) {
+// ------- Multi-select picker (mirrors LinkedInPostStudio MultiPersonaPicker) -------
+function mountMultiPicker(container) {
+  if (container.dataset.aethMultiMounted === "1") return;
+  const kind = container.dataset.aethMulti;
+  const list = (AETH_OPTS[kind] || []).filter(([v]) => v); // skip empty "none" row
+  const storeKey = `aeth-multi-${kind}`;
+  let selected = [];
+  try {
+    const raw = localStorage.getItem(storeKey);
+    if (raw) selected = JSON.parse(raw).filter(v => list.some(([lv]) => lv === v));
+  } catch {}
+
+  container.innerHTML = `
+    <button type="button" class="amp-trigger">
+      <span class="amp-label">Select personalities…</span>
+      <span class="amp-count"></span>
+    </button>
+    <div class="amp-menu hidden"></div>
+  `;
+  const trigger = container.querySelector(".amp-trigger");
+  const menu = container.querySelector(".amp-menu");
+  const label = container.querySelector(".amp-label");
+  const count = container.querySelector(".amp-count");
+
+  function persist() { try { localStorage.setItem(storeKey, JSON.stringify(selected)); } catch {} }
+  function render() {
+    menu.innerHTML = list.map(([v, l]) => `
+      <label class="amp-item ${selected.includes(v) ? "selected" : ""}">
+        <input type="checkbox" value="${v}" ${selected.includes(v) ? "checked" : ""}/>
+        <span>${l.replace(/</g, "&lt;")}</span>
+      </label>
+    `).join("") + (selected.length ? `<button type="button" class="amp-clear">Clear all</button>` : "");
+    // labels
+    if (!selected.length) { label.textContent = "Personality"; count.textContent = ""; }
+    else {
+      const names = selected.map(v => (labelFor("persona", v) || v).split(" — ")[0]).join(", ");
+      label.textContent = names.length > 40 ? names.slice(0, 40) + "…" : names;
+      count.textContent = selected.length > 1 ? `FUSE ${selected.length}` : "";
+    }
+    menu.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const v = cb.value;
+        if (cb.checked) { if (!selected.includes(v)) selected.push(v); }
+        else selected = selected.filter(x => x !== v);
+        persist(); render();
+      });
+    });
+    menu.querySelector(".amp-clear")?.addEventListener("click", () => { selected = []; persist(); render(); });
+  }
+  trigger.addEventListener("click", () => {
+    const open = !menu.classList.contains("hidden");
+    menu.classList.toggle("hidden", open);
+  });
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) menu.classList.add("hidden");
+  });
+  container.getSelected = () => selected.slice();
+  render();
+  container.dataset.aethMultiMounted = "1";
+}
+document.querySelectorAll("[data-aeth-multi]").forEach(mountMultiPicker);
+
+function getMultiPersonas() {
+  const el = document.getElementById("li-persona-picker");
+  return el?.getSelected ? el.getSelected() : [];
+}
+
+// Freshness directive — mirrors LinkedInPostStudio.buildFreshnessDirective (compact).
+function buildFreshnessDirective() {
+  return [
+    "",
+    "=== FRESHNESS DIALS — HARD OVERRIDE ===",
+    "The last drafts are getting repetitive. Force fresh voice on this one:",
+    "1. NEW OPENER — do NOT reuse the first 4 words of any recent draft. No 'Most people/founders/operators…' openers. Lead with a specific noun, number, acronym, or contradiction pulled from THIS source.",
+    "2. NEW CLOSER — do NOT reuse the final 6 words of any recent draft. No 'That is the whole game.' No canned mic-drop.",
+    "3. NEW ANGLE — pick a different diagnostic frame than the recent drafts (if they went causal, go structural; if they went numeric, go behavioral; if they went process, go incentive).",
+    "4. NEW SENTENCE SHAPES — vary sentence length pattern from recent drafts; do not clone the same rhythm.",
+    "5. NO 6-WORD PHRASE from any recent draft may appear verbatim.",
+    "",
+  ].join("\n");
+}
+
+function buildStyleDirective({ tone, style, personas, length }) {
   const bits = [];
   if (tone) bits.push(`TONE DIRECTIVE — write with a "${labelFor("tone", tone) || tone}" tone.`);
   if (style) bits.push(`STRUCTURE DIRECTIVE — use the "${labelFor("style", style) || style}" structure.`);
   if (length) bits.push(`LENGTH DIRECTIVE — target "${length}".`);
-  if (persona) bits.push(`PERSONA STYLE-TRANSFER — channel the cadence/rhythm of "${labelFor("persona", persona) || persona}" WITHOUT naming them, their companies, or catchphrases. Style only; do not impersonate.`);
+  if (personas && personas.length) {
+    if (personas.length === 1) {
+      bits.push(`PERSONA STYLE-TRANSFER — channel the cadence/rhythm of "${labelFor("persona", personas[0])}" WITHOUT naming them, their companies, or catchphrases. Style only; do not impersonate.`);
+    } else {
+      const names = personas.map(p => labelFor("persona", p) || p).join(" + ");
+      bits.push(`PERSONA BLEND (FUSE ${personas.length} VOICES) — fuse the cadence, sentence-length pattern, vocab, and energy of: ${names}. Every paragraph must carry at least one signature sentence-shape from EACH persona. NEVER name any of them, their companies, or their catchphrases. Style transfer only.`);
+    }
+  }
   return bits.join("\n");
 }
 
@@ -1067,22 +1156,24 @@ $("li-reply-clear-all")?.addEventListener("click", () => {
   toast("Comments cleared.");
 });
 
-async function draftLinkedInReply() {
+async function draftLinkedInReply(opts) {
+  const freshen = !!(opts && opts.freshen);
   const out = $("li-out");
   const mode = $("li-length").value || "brief";
   const direction = $("li-direction").value.trim();
   const tone = $("li-tone")?.value || "";
   const style = $("li-style")?.value || "";
-  const persona = $("li-persona")?.value || "";
+  const personas = getMultiPersonas();
 
-  const styleDirective = buildStyleDirective({ tone, style, persona });
-  const extraContext = [styleDirective, direction].filter(Boolean).join("\n\n");
+  const styleDirective = buildStyleDirective({ tone, style, personas });
+  const freshnessTail = freshen ? buildFreshnessDirective() : "";
+  const extraContext = [styleDirective, direction, freshnessTail].filter(Boolean).join("\n\n");
 
   let body = {
     mode,
     extraContext,
-    personaKeys: persona ? [persona] : [],
-    personaActive: !!persona,
+    personaKeys: personas,
+    personaActive: personas.length > 0,
     tone,
     style,
     recentDrafts: await getLinkedInDraftMemory(),
@@ -1131,8 +1222,9 @@ async function draftLinkedInReply() {
     out.textContent = `Failed: ${e.message}`;
   }
 }
-$("li-go").addEventListener("click", draftLinkedInReply);
-$("li-regen").addEventListener("click", draftLinkedInReply);
+$("li-go").addEventListener("click", () => draftLinkedInReply());
+$("li-regen").addEventListener("click", () => draftLinkedInReply());
+$("li-freshen")?.addEventListener("click", () => draftLinkedInReply({ freshen: true }));
 $("li-copy").addEventListener("click", async () => {
   if (!liState.lastDraft) return toast("Nothing to copy yet.");
   try { await navigator.clipboard.writeText(liState.lastDraft); toast("Copied."); }
