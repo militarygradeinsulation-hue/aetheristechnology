@@ -138,10 +138,21 @@ const AetherisCoderPage = () => {
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
 
-        <div className="pt-32 pb-4 px-4 text-center">
+        <div className="pt-32 pb-4 px-4 text-center relative">
           <span className="font-case text-[10px] uppercase tracking-widest text-amber">Free Tool · No Login</span>
           <h1 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mt-2">Aetheris Coder</h1>
           <p className="text-muted-foreground mt-1">Tell it what to build. It remembers. Watch it appear.</p>
+          <div className="mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 text-xs font-case uppercase tracking-wide text-muted-foreground hover:text-amber border border-border rounded-full px-3 py-1 transition-colors disabled:opacity-40"
+              title="Wipe the saved prototype and start over"
+            >
+              <RotateCcw className="w-3 h-3" /> Reset session
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 px-4 pb-6">
