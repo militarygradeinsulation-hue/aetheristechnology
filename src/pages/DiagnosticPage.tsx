@@ -110,7 +110,7 @@ const DiagnosticPage: React.FC = () => {
               <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)] text-center">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Fixed fee · Applied toward any engagement</div>
                 <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground leading-none">
-                  $18,500+
+                  $18,500
                 </div>
                 <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-xl mx-auto">
                   Operator-led. No percentage-of-savings. No retainer. If the number sounds "expensive," the leak is bigger than you think — and you aren't our client.
@@ -148,10 +148,10 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '01',
                     name: 'Leak Audit',
-                    price: '$18,500+',
+                    price: '$18,500',
                     sub: 'Named leaks + dollar exposure',
                     note: 'Fastest way in.',
-                    why: 'Why $18,500+',
+                    why: 'Why $18,500',
                     whyBody:
                       'One operator, 8–12 focused hours across your CRM export, site, funnels, and follow-up. You get a written leak map with dollar figures — enough to prove the bleed is real without committing to a full engagement. Priced as a rounding error against a leak that typically costs 10–40× the fee every year unfixed.',
                     scope: ['8–12 operator hours', '5–10 named leaks, $-tagged', 'Written report + 30-min readout', '100% credited to Tier 02 or 03'],
@@ -295,7 +295,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-2 text-sm text-foreground/90 leading-relaxed">
                     <li>— A human operator runs 9 forensic instruments <strong className="text-amber">against your business</strong></li>
                     <li>— You get a written leak map, not a software login</li>
-                    <li>— One fixed fee. $18,500+. Nothing else owed to read the report</li>
+                    <li>— One fixed fee. $18,500. Nothing else owed to read the report</li>
                     <li>— 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>— Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>— We tell you exactly where the money is leaking and what to fix first</li>
@@ -320,7 +320,7 @@ const DiagnosticPage: React.FC = () => {
                 <p className="mt-1 text-xs text-foreground/60 italic">Said by every CFO who hasn't done the math. Here's the math.</p>
 
                 <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground mt-5 mb-4 leading-snug">
-                  $18,500+ buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
+                  $18,500 buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
                 </h3>
 
                 <div className="overflow-x-auto rounded-sm border border-amber/20 bg-background/40">
@@ -364,7 +364,7 @@ const DiagnosticPage: React.FC = () => {
 
                 <p className="mt-5 text-sm text-foreground/85 leading-relaxed text-center">
                   Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot.{' '}
-                  <span className="text-amber font-semibold">$18,500+ to find it is a rounding error.</span> One recovered deal usually pays 100×.
+                  <span className="text-amber font-semibold">$18,500 to find it is a rounding error.</span> One recovered deal usually pays 100×.
                 </p>
               </div>
             </section>
