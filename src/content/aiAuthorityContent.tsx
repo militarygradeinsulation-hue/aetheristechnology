@@ -139,9 +139,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'Is the Revenue Score free?', a: 'Yes. The first scan and score are free. The detailed Leak Register and fix path are gated behind a quick form.' },
-      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60-70% of what a full forensic scan finds. The operator-led Forensic Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
+      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60-70% of what a full forensic scan finds. The 21-Day Revenue Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
       { q: 'Can I share my Revenue Score?', a: 'Yes — that is the point. The Revenue Score is designed as a public, citable standard. Use it on LinkedIn, in proposals, in board decks.' },
-      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70-84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a Forensic Diagnostic is warranted.' },
+      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70-84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a 21-Day Revenue Diagnostic is warranted.' },
       { q: 'Can I run the scan on a competitor?', a: 'Yes. The Competitor Teardown points the same scanner at any URL and returns a Revenue Score plus the named leaks. It is one of the structural moats of the platform.' },
     ],
     body: (
