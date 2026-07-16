@@ -1142,12 +1142,19 @@ $("li-copy").addEventListener("click", async () => {
 // Post from page
 const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
 $("gp-go").addEventListener("click", async () => {
-  const tone = $("gp-tone").value;
+  const tone = $("gp-tone")?.value || "";
+  const style = $("gp-style")?.value || "";
+  const persona = $("gp-persona")?.value || "";
+  const length = $("gp-length")?.value || "auto";
+  const direction = $("gp-direction")?.value.trim() || "";
   const out = $("gp-out"); out.textContent = "Drafting…";
+
+  const directive = buildStyleDirective({ tone, style, persona, length: length === "auto" ? "" : length });
+  const base = `Draft a LinkedIn post based on what is on the current tab. Lead with a pattern-claim hook. No emojis, no hashtags, no em dashes. End with one sharp question or a one-line CTA.`;
+  const userText = [directive, base, direction && `User direction: ${direction}`].filter(Boolean).join("\n\n");
+
   try {
-    let reply = await callOperator(
-      `Draft a LinkedIn post in the "${tone}" voice based on what is on the current tab. 4-7 short lines. Lead with a pattern-claim hook. No emojis, no hashtags, no em dashes. End with one sharp question or a one-line CTA.`
-    );
+    let reply = await callOperator(userText);
     if (reply && !reply.includes("Aetheris.Technology")) reply = `${reply.trimEnd()}\n\n${AETHERIS_SIGNATURE}`;
     out.textContent = reply;
   } catch (e) { out.textContent = `Failed: ${e.message}`; }
