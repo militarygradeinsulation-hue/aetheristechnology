@@ -566,7 +566,7 @@ const NewsPage = () => {
                 </div>
 
                 <div className="border border-border rounded-xl bg-card/30 p-7 flex flex-col">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Field notes</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-3">Blog</div>
                   <div className="font-display text-xl font-semibold text-foreground leading-tight">Get one operator dispatch a week</div>
                   <p className="text-sm text-muted-foreground mt-2">Real teardowns, real leak math, no engagement bait. Sent only when there's something worth sending.</p>
                   <ul className="mt-4 space-y-1.5">
