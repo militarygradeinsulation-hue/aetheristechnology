@@ -175,21 +175,29 @@ const LeakLanderPage: React.FC = () => {
                     n: "01",
                     t: "Free Scan",
                     d: "I run a scan on your company — free.",
+                    actions: [
+                      { label: "See a sample Golden Report", href: "/golden-report", internal: true },
+                    ],
                   },
                   {
                     n: "02",
                     t: "Find the Leaks",
                     d: "I show you exactly where you're losing money.",
+                    actions: [] as { label: string; href: string; internal?: boolean }[],
                   },
                   {
                     n: "03",
                     t: "Recover & Scale",
                     d: "Build the system and plan to recover your money and scale.",
+                    actions: [
+                      { label: "Book a time on my calendar", href: BOOK_MEETING_URL, internal: false },
+                      { label: "aetheris.technology@outlook.com", href: "mailto:aetheris.technology@outlook.com?subject=Recover%20%26%20Scale%20-%20Ready%20to%20talk", internal: false },
+                    ],
                   },
                 ].map((s) => (
                   <div
                     key={s.n}
-                    className="relative rounded-sm border border-amber/25 bg-background/40 px-5 py-6 hover:border-amber/50 transition-colors"
+                    className="relative rounded-sm border border-amber/25 bg-background/40 px-5 py-6 hover:border-amber/50 transition-colors flex flex-col"
                   >
                     <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber/70 mb-2">
                       Step {s.n}
@@ -200,6 +208,32 @@ const LeakLanderPage: React.FC = () => {
                     <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">
                       {s.d}
                     </p>
+                    {s.actions.length > 0 && (
+                      <div className="mt-4 flex flex-col gap-2">
+                        {s.actions.map((a) =>
+                          a.internal ? (
+                            <Link
+                              key={a.href}
+                              to={a.href}
+                              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-amber border border-amber/40 hover:bg-amber/10 px-3 py-2 rounded-sm transition-colors"
+                            >
+                              {a.label} <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+                          ) : (
+                            <a
+                              key={a.href}
+                              href={a.href}
+                              target={a.href.startsWith("mailto:") ? undefined : "_blank"}
+                              rel={a.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-amber border border-amber/40 hover:bg-amber/10 px-3 py-2 rounded-sm transition-colors break-all"
+                            >
+                              {a.href.startsWith("mailto:") ? <Mail className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
+                              {a.label}
+                            </a>
+                          )
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
