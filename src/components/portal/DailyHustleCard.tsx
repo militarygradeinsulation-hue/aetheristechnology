@@ -12,7 +12,17 @@ import {
 } from "@/lib/portalDailyChecklist";
 import { getCurrentSprintDay, getTodaySprintGoal } from "./Sprint90View";
 
-const CONN_TARGET = 10;
+const CONN_TARGET = 20;
+const DEFAULT_QUOTAS = { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 };
+
+type QuotaKey = keyof typeof DEFAULT_QUOTAS;
+const QUOTA_META: Array<{ key: QuotaKey; label: string; verb: string }> = [
+  { key: "calls_made", label: "Calls", verb: "dialed" },
+  { key: "emails_sent", label: "Emails", verb: "sent" },
+  { key: "linkedin_dms", label: "LinkedIn DMs", verb: "sent" },
+  { key: "linkedin_comments", label: "LinkedIn comments", verb: "left" },
+  { key: "connections_added", label: "New connections", verb: "added" },
+];
 
 export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onViewSprint }) => {
   const { toast } = useToast();
