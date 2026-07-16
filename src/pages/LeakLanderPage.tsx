@@ -240,10 +240,10 @@ const LeakLanderPage: React.FC = () => {
               <br />
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span> on your revenue engine. Every leak in your funnel is <span className="text-crimson font-semibold">wasted marketing money</span> — dollars you already spent that never turned into the right leads or sales.
+              Aetheris practices <span className="text-amber font-semibold">Chaos Theory Forensics</span> on your revenue engine.&nbsp;
             </p>
             <p className="mt-4 text-base sm:text-lg text-foreground max-w-4xl mx-auto">
-              We trace those wasted dollars back to their origin across ads, site, CRM, follow-up, and sales handoff — then we stop the bleed and reroute the spend into revenue. Documented client outcome: <span className="text-crimson font-bold">30% average recovery</span> on the leaks we name and fix.
+              {"\n"}
             </p>
             <p className="mt-3 font-forensic text-xl sm:text-2xl text-foreground/90 max-w-4xl mx-auto">
               If we can't name wasted marketing dollars worth more than our fee, <span className="text-crimson">you pay nothing</span>. Written guarantee.
