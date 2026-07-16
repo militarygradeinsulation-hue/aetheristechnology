@@ -391,11 +391,11 @@ export const BusinessDiagnostic: React.FC = () => {
               <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />
               <h3 className="text-xl font-semibold text-foreground">Your Action Plan Has Been Downloaded!</h3>
               <p className="text-muted-foreground text-sm">
-                Check your downloads folder for your personalized PDF. Ready to book the Findings Read-Out? 15 minutes, no pitch, we walk you through your own case file.
+                Check your downloads folder for your personalized PDF. Ready to book The Findings Call? 15 minutes, free, we walk you through your own case file.
               </p>
               <a href="/contact">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 mt-2">
-                  Book the Findings Read-Out <ArrowRight className="w-4 h-4 ml-1" />
+                  Book The Findings Call (15 min, free) <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </a>
             </div>
