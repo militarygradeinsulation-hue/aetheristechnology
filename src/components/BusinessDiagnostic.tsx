@@ -391,11 +391,11 @@ export const BusinessDiagnostic: React.FC = () => {
               <CheckCircle className="w-10 h-10 text-green-400 mx-auto" />
               <h3 className="text-xl font-semibold text-foreground">Your Action Plan Has Been Downloaded!</h3>
               <p className="text-muted-foreground text-sm">
-                Check your downloads folder for your personalized PDF. Ready to book the Findings Read-Out? 15 minutes, no pitch, we walk you through your own case file.
+                Check your downloads folder for your personalized PDF. Ready to book The Findings Call? 15 minutes, free, we walk you through your own case file.
               </p>
               <a href="/contact">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 mt-2">
-                  Book the Findings Read-Out <ArrowRight className="w-4 h-4 ml-1" />
+                  Book The Findings Call (15 min, free) <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </a>
             </div>
@@ -439,11 +439,11 @@ export const BusinessDiagnostic: React.FC = () => {
           )}
         </div>
 
-        {/* Evidence Kit unlock — appears after PDF download per spec Part 5 */}
+        {/* Bonus Leak Tools unlock — appears after PDF download per spec Part 5 */}
         {pdfDownloaded && (
           <div className="rounded-2xl border border-amber/30 bg-amber/5 p-6 space-y-4">
             <div className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
-              Your case file unlocks the evidence kit
+              Your case file unlocks bonus leak tools
             </div>
             <h3 className="text-xl font-semibold text-foreground">7 investigation tools, now open to you</h3>
             <p className="text-muted-foreground text-sm">
@@ -451,7 +451,7 @@ export const BusinessDiagnostic: React.FC = () => {
             </p>
             <a href="/ecosystem">
               <Button size="lg" variant="outline" className="border-amber/40 text-amber hover:bg-amber/10">
-                Open the Evidence Kit <ArrowRight className="w-4 h-4 ml-1" />
+                Open the Bonus Leak Tools <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </a>
           </div>
@@ -462,7 +462,7 @@ export const BusinessDiagnostic: React.FC = () => {
           <div className="rounded-2xl border border-border bg-card p-6 text-center space-y-4">
             <h3 className="text-xl font-semibold text-foreground">👉 Recommendation: {tier.rec}</h3>
             <p className="text-muted-foreground text-sm">
-              Ready to trace your worst leak to origin? The Single-Leak Investigation is fixed-fee, delivered in 5 business days, and every dollar is credited toward the Chaos Diagnostic within 90 days.
+              Ready to trace your worst leak to origin? The One-Leak Investigation is fixed-fee, delivered in 5 business days, and every dollar is credited toward The Full Leak Investigation within 90 days.
             </p>
             <a href="/catalog">
               <Button size="lg" variant="outline">

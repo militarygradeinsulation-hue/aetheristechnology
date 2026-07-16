@@ -4,7 +4,7 @@ import { ChevronDown, FileText, Lock, ArrowRight, FolderArchive } from "lucide-r
 import aetherisLogo from "@/assets/aetheris-a-logo.png.asset.json";
 
 /**
- * "Companies Reviewed" dropdown — five sample Preliminary Findings dossiers
+ * "Companies Reviewed" dropdown — five sample Case File dossiers (Your Leak Report)
  * shown as an accordion. Illustrative specimens; subjects fictional. Rendered
  * on the homepage directly under the Golden Report chip block.
  */
@@ -366,7 +366,7 @@ function DossierCard({ file }: { file: CaseFile }) {
         ))}
         <div className="font-case text-[10px] text-crimson tracking-wider pt-3 leading-relaxed flex items-start gap-2">
           <Lock className="w-3 h-3 mt-0.5 flex-shrink-0" />
-          <span>EXHIBITS 03–05 ARE NAMED IN FULL ON YOUR FINDINGS READ-OUT. 15 MINUTES. NO COST. NO PITCH.</span>
+          <span>EXHIBITS 03–05 ARE NAMED IN FULL ON YOUR FINDINGS CALL. 15 MINUTES. FREE.</span>
         </div>
       </section>
 
@@ -376,7 +376,7 @@ function DossierCard({ file }: { file: CaseFile }) {
 
       <div className="px-5 py-5 text-center">
         <a href="/leak-audit" className="inline-block font-case text-xs font-semibold tracking-[0.18em] uppercase text-background bg-amber px-5 py-2.5 hover:bg-amber/90 transition-colors">
-          Book the Findings Read-Out
+          Book The Findings Call (15 min, free)
         </a>
         <div className="font-case text-[10px] text-amber/60 tracking-[0.22em] mt-2.5 uppercase">
           or request the full investigation · aetheris.technology
@@ -494,7 +494,7 @@ export function SampleCaseFiles() {
                 <span className="font-case text-[9px] uppercase tracking-[0.22em] text-crimson/90 border border-crimson/40 px-1.5 py-0.5 rounded-sm">Samples · 15</span>
               </div>
               <div className="font-forensic text-base md:text-lg mt-1">
-                Past Preliminary Findings
+                Past Case Files
               </div>
               <div
                 key={tickerIdx}

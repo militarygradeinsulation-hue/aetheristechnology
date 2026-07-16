@@ -497,13 +497,13 @@ const LeakLanderPage: React.FC = () => {
       <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
         <DialogContent className="max-w-3xl w-[95vw] p-0 border border-amber/30 bg-card/95 backdrop-blur-xl overflow-hidden">
           <DialogHeader className="sr-only">
-            <DialogTitle>Book the Diagnostic</DialogTitle>
-            <DialogDescription>Pick a time to talk through your business leaks.</DialogDescription>
+            <DialogTitle>Book The Findings Call</DialogTitle>
+            <DialogDescription>Pick a time to walk through your leaks. 15 minutes, free.</DialogDescription>
           </DialogHeader>
           <div className="p-2 md:p-4">
             <iframe
               src={`${BOOK_MEETING_URL}?embed=true`}
-              title="Book the Diagnostic"
+              title="Book The Findings Call"
               className="w-full h-[70vh] min-h-[500px] rounded-sm border-0"
               loading="lazy"
             />
