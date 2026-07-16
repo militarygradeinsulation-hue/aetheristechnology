@@ -107,6 +107,20 @@ const AetherisCoderPage = () => {
     send(input);
   };
 
+  const handleReset = () => {
+    if (loading) return;
+    if (!confirm('Clear this session and start a fresh prototype? This wipes the current build and chat history.')) return;
+    sessionStorage.removeItem(STORAGE_KEY);
+    hasBuilt.current = false;
+    setMessages([INITIAL_MESSAGE]);
+    setHtml('');
+    setMemory({ summary: '', locked: [], verify: [] });
+    setInput('');
+    setError(null);
+    setView('preview');
+    trackEvent('click', { label: 'aetheris_coder_reset', location: 'aetheris_coder' });
+  };
+
   return (
     <div className="relative min-h-screen">
       <SEOHead
