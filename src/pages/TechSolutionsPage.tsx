@@ -302,31 +302,50 @@ const TechSolutionsPage: React.FC = () => {
           {/* Access bar — email or code required to run tools free */}
           <TechSolutionsAccessBar />
 
-          {/* Featured: Aetheris Coder */}
-          <a
-            href="https://obsidiancoder.lovable.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group block mb-8 mt-6 rounded-sm border border-amber/40 hover:border-amber bg-gradient-to-r from-amber/10 via-background to-background p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.4)]"
-          >
-            <div className="flex items-center gap-4">
-              <div className="shrink-0 w-10 h-10 rounded-sm bg-amber/15 border border-amber/40 flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-amber" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/80 mb-1">
-                  // New · External Tool
+          {/* Featured: Aetheris Coder — gated behind client/employee code */}
+          {hasFullAccess ? (
+            <a
+              href="https://obsidiancoder.lovable.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block mb-8 mt-6 rounded-sm border border-amber/40 hover:border-amber bg-gradient-to-r from-amber/10 via-background to-background p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.4)]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-sm bg-amber/15 border border-amber/40 flex items-center justify-center">
+                  <Cpu className="w-5 h-5 text-amber" />
                 </div>
-                <h3 className="font-forensic text-xl font-bold group-hover:text-amber transition-colors">
-                  Aetheris Coder
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Describe what you want built, watch it ship. Our in-house build engine — open access.
-                </p>
+                <div className="flex-1 min-w-0">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/80 mb-1">
+                    // New · External Tool
+                  </div>
+                  <h3 className="font-forensic text-xl font-bold group-hover:text-amber transition-colors">
+                    Aetheris Coder
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Describe what you want built, watch it ship. Our in-house build engine.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
               </div>
-              <ArrowRight className="w-5 h-5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+            </a>
+          ) : (
+            <div className="mb-8 mt-6 rounded-sm border border-amber/30 bg-background/40 p-5 opacity-90">
+              <div className="flex items-center gap-4">
+                <div className="shrink-0 w-10 h-10 rounded-sm bg-amber/10 border border-amber/30 flex items-center justify-center">
+                  <Cpu className="w-5 h-5 text-amber/70" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-crimson mb-1 inline-flex items-center gap-1">
+                    <KeyRound className="w-3 h-3" /> Locked · client or employee code required
+                  </div>
+                  <h3 className="font-forensic text-xl font-bold">Aetheris Coder</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Our in-house build engine. Enter your access code above to unlock.
+                  </p>
+                </div>
+              </div>
             </div>
-          </a>
+          )}
 
           {/* Pricing tiers */}
 
