@@ -278,17 +278,60 @@ const AetherisUniversePage: React.FC = () => {
             `translateZ(-200px) rotateX(${rx}deg) rotateY(${ry}deg)`;
         }
 
-        // Counter-rotate so cards face camera + apply per-tool drift
+        // ----- Physics: integrate + wall bounce + pairwise elastic collisions -----
+        const phys = physicsRef.current;
+        const N = phys.length;
+        // integrate + walls
+        for (let i = 0; i < N; i++) {
+          const p = phys[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.z += p.vz * dt;
+          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * RESTITUTION; }
+          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * RESTITUTION; }
+          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * RESTITUTION; }
+          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * RESTITUTION; }
+          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * RESTITUTION; }
+          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * RESTITUTION; }
+        }
+        // pairwise collisions (equal mass elastic: swap normal-component velocities)
+        const minDist = NODE_RADIUS * 2;
+        const minDistSq = minDist * minDist;
+        for (let i = 0; i < N; i++) {
+          const a = phys[i];
+          for (let j = i + 1; j < N; j++) {
+            const b = phys[j];
+            const dxp = b.x - a.x;
+            const dyp = b.y - a.y;
+            const dzp = b.z - a.z;
+            const d2 = dxp * dxp + dyp * dyp + dzp * dzp;
+            if (d2 >= minDistSq || d2 === 0) continue;
+            const d = Math.sqrt(d2) || 0.0001;
+            const nx = dxp / d, ny = dyp / d, nz = dzp / d;
+            // positional correction — push each half the overlap out
+            const overlap = (minDist - d) * 0.5;
+            a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
+            b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
+            // relative velocity along normal
+            const rvx = b.vx - a.vx, rvy = b.vy - a.vy, rvz = b.vz - a.vz;
+            const relN = rvx * nx + rvy * ny + rvz * nz;
+            if (relN >= 0) continue; // moving apart
+            const jimp = -(1 + RESTITUTION) * relN * 0.5; // equal mass
+            a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+            b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+          }
+        }
+
+        // Counter-rotate so cards face camera + write physics transform
         const cardCounter = `rotateY(${-ry}deg) rotateX(${-rx}deg)`;
         for (let i = 0; i < toolList.length; i++) {
           const tool = toolList[i];
           const el = nodesRef.current.get(tool.id);
           if (!el) continue;
-          const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
-          const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
-          const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
+          const p = phys[i];
           el.style.transform =
-            `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) ${cardCounter}`;
+            `translate3d(${p.x}px, ${p.y}px, ${p.z}px) ${cardCounter}`;
+          el.style.zIndex = String(Math.round(1000 + p.z));
         }
 
         // Update HUD ~4× per second (React state) instead of every frame
