@@ -423,7 +423,7 @@ Return JSON:
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 45_000);
+  return await aiJson(prompt, 3500, 90_000);
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
