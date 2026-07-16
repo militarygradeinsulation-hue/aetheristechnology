@@ -356,8 +356,8 @@ const NewsPage = () => {
                 {/* Operator-led upgrade */}
                 <div className="border border-border rounded-xl bg-card/30 p-5">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Operator-led</div>
-                  <div className="font-display text-lg font-semibold text-foreground leading-tight">Forensic Diagnostic, $2,500 flat</div>
-                  <p className="text-sm text-muted-foreground mt-2">A live, operator-led teardown of your funnel, ops, and tech stack. The full $2,500 applies toward any engagement.</p>
+                  <div className="font-display text-lg font-semibold text-foreground leading-tight">21-Day Revenue Diagnostic, $18,500 flat</div>
+                  <p className="text-sm text-muted-foreground mt-2">A live, operator-led teardown of your funnel, ops, and tech stack. The full $18,500 credits 1:1 toward the Implementation Retainer.</p>
                   <button onClick={() => setIsContactModalOpen(true)} className="mt-3 inline-flex items-center gap-2 text-amber font-mono text-xs uppercase tracking-widest hover:gap-3 transition-all">
                     Book the diagnostic <ArrowRight className="w-3.5 h-3.5" />
                   </button>
