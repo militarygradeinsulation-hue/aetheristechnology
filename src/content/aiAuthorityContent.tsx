@@ -293,8 +293,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     path: '/revenue-audit-cost',
     title: 'What does a revenue audit cost?',
     metaTitle: 'What does a revenue audit cost? Honest pricing | Aetheris',
-    description: 'Free entry, $2,500 operator-led starting fee, $18,500 flat for the full 21-Day Revenue Diagnostic. No percentage-of-savings billing. No hidden retainer.',
-    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The operator-led Forensic Diagnostic starts at $2,500 flat and is applied toward the full engagement. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
+    description: 'Free entry via Website Gap Scanner. $18,500 flat for the 21-Day Revenue Diagnostic, credited toward the Implementation Retainer. No percentage-of-savings billing. No hidden retainer.',
+    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The 21-Day Revenue Diagnostic is $18,500 flat and credits 1:1 toward the Implementation Retainer. The Implementation Retainer is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
