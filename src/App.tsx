@@ -191,7 +191,7 @@ const App = () => (
                       <Route path="/reciprocation" element={<ReciprocationPage />} />
                       <Route path="/gift" element={<Navigate to="/reciprocation" replace />} />
                       <Route path="/golden-report" element={<GoldenReportPage />} />
-                      <Route path="/golden" element={<Navigate to="/golden-report" replace />} />
+                      <Route path="/golden" element={<GoldenLanderPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
                       <Route path="/careers/test" element={<CareersTestPage />} />
