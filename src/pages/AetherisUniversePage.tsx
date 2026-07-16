@@ -586,9 +586,9 @@ const AetherisUniversePage: React.FC = () => {
     <div className="relative min-h-screen overflow-hidden bg-[#05060a] text-foreground">
       <style>{`
         @keyframes aetherSpark {
-          0%   { opacity: 0.9; transform: translate3d(var(--sx,0), var(--sy,0), var(--sz,0)) scale(0.4); }
-          40%  { opacity: 1;   }
-          100% { opacity: 0;   transform: translate3d(var(--sx,0), var(--sy,0), var(--sz,0)) scale(2.4); }
+          0%   { opacity: 0; transform: scale(0.3); }
+          15%  { opacity: 1; }
+          100% { opacity: 0; transform: scale(2.6); }
         }
       `}</style>
       <SEOHead
