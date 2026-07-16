@@ -372,22 +372,34 @@ const AetherisUniversePage: React.FC = () => {
         }
 
         // ----- Physics: integrate + wall bounce + pairwise elastic collisions -----
+        const P = paramsRef.current;
+        const R = P.restitution;
+        const dragI = dragNodeRef.current?.i ?? -1;
+        const dampMul = Math.exp(-P.damping * dt);
         const phys = physicsRef.current;
         const N = phys.length;
-        // integrate + walls
+        // integrate + damping + drift + walls
         for (let i = 0; i < N; i++) {
+          if (i === dragI) continue; // node is being held by the user
           const p = phys[i];
+          // small random drift acceleration keeps things alive
+          if (P.drift > 0) {
+            p.vx += (Math.random() - 0.5) * P.drift * dt * 2;
+            p.vy += (Math.random() - 0.5) * P.drift * dt * 2;
+            p.vz += (Math.random() - 0.5) * P.drift * dt * 2;
+          }
+          p.vx *= dampMul; p.vy *= dampMul; p.vz *= dampMul;
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.z += p.vz * dt;
-          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * RESTITUTION; }
-          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * RESTITUTION; }
-          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * RESTITUTION; }
-          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * RESTITUTION; }
-          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * RESTITUTION; }
-          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * RESTITUTION; }
+          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * R; }
+          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * R; }
+          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * R; }
+          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * R; }
+          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * R; }
+          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * R; }
         }
-        // pairwise collisions (equal mass elastic: swap normal-component velocities)
+        // pairwise collisions (equal mass elastic; dragged node treated as immovable)
         const minDist = NODE_RADIUS * 2;
         const minDistSq = minDist * minDist;
         for (let i = 0; i < N; i++) {
@@ -401,17 +413,44 @@ const AetherisUniversePage: React.FC = () => {
             if (d2 >= minDistSq || d2 === 0) continue;
             const d = Math.sqrt(d2) || 0.0001;
             const nx = dxp / d, ny = dyp / d, nz = dzp / d;
-            // positional correction — push each half the overlap out
-            const overlap = (minDist - d) * 0.5;
-            a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
-            b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
-            // relative velocity along normal
+            const aHeld = i === dragI;
+            const bHeld = j === dragI;
+            const overlap = minDist - d;
+            if (aHeld && !bHeld) {
+              b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
+            } else if (bHeld && !aHeld) {
+              a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
+            } else {
+              const half = overlap * 0.5;
+              a.x -= nx * half; a.y -= ny * half; a.z -= nz * half;
+              b.x += nx * half; b.y += ny * half; b.z += nz * half;
+            }
             const rvx = b.vx - a.vx, rvy = b.vy - a.vy, rvz = b.vz - a.vz;
             const relN = rvx * nx + rvy * ny + rvz * nz;
             if (relN >= 0) continue; // moving apart
-            const jimp = -(1 + RESTITUTION) * relN * 0.5; // equal mass
-            a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
-            b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            const impactSpeed = -relN;
+            if (aHeld && !bHeld) {
+              const jimp = -(1 + R) * relN;
+              b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            } else if (bHeld && !aHeld) {
+              const jimp = -(1 + R) * relN;
+              a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+            } else {
+              const jimp = -(1 + R) * relN * 0.5;
+              a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+              b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            }
+            // VFX + sound only for reasonably firm impacts
+            if (impactSpeed > 40) {
+              const midX = (a.x + b.x) * 0.5;
+              const midY = (a.y + b.y) * 0.5;
+              const midZ = (a.z + b.z) * 0.5;
+              const catA = toolList[i]?.category ?? 'diagnostics';
+              const catB = toolList[j]?.category ?? 'diagnostics';
+              const col = categoryColor[catA] || categoryColor[catB] || '#ffd58a';
+              spawnSpark(midX, midY, midZ, impactSpeed, col);
+              playImpact(impactSpeed);
+            }
           }
         }
 
