@@ -299,7 +299,7 @@ const TechSolutionsPage: React.FC = () => {
 
           {/* Featured: Aetheris Coder */}
           <a
-            href="https://aetheris.technology/aetheris-coder"
+            href="https://obsidiancoder.lovable.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="group block mb-8 mt-6 rounded-sm border border-amber/40 hover:border-amber bg-gradient-to-r from-amber/10 via-background to-background p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.4)]"
