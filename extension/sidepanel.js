@@ -836,6 +836,104 @@ async function callOperator(userText, withScreenshot = false) {
 }
 
 // ---------------- LinkedIn Reply Drafter (mirrors Content Studio) ----------------
+// Shared option catalogs — mirror portal LinkedInPostStudio / Content Engine.
+const AETH_OPTS = {
+  tone: [
+    ["", "Tone: Auto (brand default)"],
+    ["blunt-operator", "Blunt Operator — direct, no fluff"],
+    ["forensic-cold", "Forensic / Cold — clinical case-file"],
+    ["aggressive-callout", "Aggressive Call-Out — name the leak"],
+    ["mentor-calm", "Calm Mentor — patient, teaching"],
+    ["contrarian", "Contrarian — flip the conventional take"],
+    ["storyteller", "Storyteller — 1st-person field story"],
+    ["dry-witty", "Dry / Witty — restrained humor"],
+    ["empathetic-peer", "Empathetic Peer — founder-to-founder"],
+    ["data-driven", "Data-Driven — stat-led, numeric proof"],
+    ["professional", "Professional — polished, corporate-safe"],
+    ["casual", "Casual — relaxed, conversational"],
+    ["confident", "Confident — assertive, self-assured"],
+    ["playful", "Playful — light, cheeky"],
+  ],
+  style: [
+    ["", "Style: Auto (model picks)"],
+    ["reaction", "Natural reaction — no template"],
+    ["hook-list-close", "Hook → numbered list → sharp close"],
+    ["micro-story", "Micro-story with one dollar figure"],
+    ["case-file", "Case-File (Subject / Findings / Verdict)"],
+    ["one-paragraph", "One dense paragraph, no breaks"],
+    ["stat-led", "Stat-led open, 3 supporting points"],
+    ["verdict-first", "Verdict first, then the proof"],
+    ["question-frame", "Question → answer → twist"],
+    ["before-after", "Before / After / What changed"],
+    ["problem-solution", "Problem → 2-3 concrete moves"],
+    ["agree-extend", "Agree → extend with sharper detail"],
+    ["polite-pushback", "Polite pushback — name the assumption"],
+  ],
+  persona: [
+    ["", "Persona: None (default voice)"],
+    ["alex-hormozi", "Alex Hormozi — offer-stacked money math"],
+    ["machiavellian", "Machiavellian — strategic, power-aware"],
+    ["elon-musk", "Elon Musk — terse, first-principles"],
+    ["ryan-reynolds", "Ryan Reynolds — deadpan wit"],
+    ["robin-williams", "Robin Williams — rapid-fire warmth"],
+    ["clint-eastwood", "Clint Eastwood — spare, quiet menace"],
+    ["hemingway", "Hemingway — short, declarative, iceberg"],
+    ["aaron-sorkin", "Aaron Sorkin — walk-and-talk cadence"],
+    ["anthony-bourdain", "Bourdain — gritty, observational"],
+    ["churchill", "Churchill — gravitas, cadenced resolve"],
+    ["denzel", "Denzel — measured, moral weight"],
+    ["steve-jobs", "Steve Jobs — reductive conviction"],
+    ["tony-soprano", "Tony Soprano — blunt North-Jersey menace"],
+    ["don-draper", "Don Draper — mid-century pitch cadence"],
+    ["bill-burr", "Bill Burr — frustrated everyman rant"],
+    ["naval-ravikant", "Naval — aphoristic, leverage-aware"],
+    ["david-goggins", "Goggins — confrontational accountability"],
+    ["jocko-willink", "Jocko — disciplined command voice"],
+    ["mr-rogers", "Mr. Rogers — gentle, radically kind"],
+    ["samuel-jackson", "Samuel L. Jackson — emphatic indignation"],
+    ["mark-twain", "Mark Twain — wry, folksy demolition"],
+    ["robert-greene", "Greene — 48 Laws power-strategist"],
+    ["robert-cialdini", "Cialdini — 6 principles of influence"],
+    ["aetheris-strategist", "Aetheris Strategist (Greene+Cialdini+Godin)"],
+  ],
+};
+
+function labelFor(kind, key) {
+  const row = (AETH_OPTS[kind] || []).find(([v]) => v === key);
+  return row ? row[1] : "";
+}
+
+function populateAethSelects() {
+  document.querySelectorAll("select[data-aeth-opts]").forEach((sel) => {
+    if (sel.dataset.aethPopulated === "1") return;
+    const kind = sel.dataset.aethOpts;
+    const list = AETH_OPTS[kind];
+    if (!list) return;
+    sel.innerHTML = list
+      .map(([v, l]) => `<option value="${v}">${l.replace(/</g, "&lt;")}</option>`)
+      .join("");
+    // restore saved
+    try {
+      const saved = localStorage.getItem(`aeth-opt-${sel.id}`);
+      if (saved != null) sel.value = saved;
+    } catch {}
+    sel.addEventListener("change", () => {
+      try { localStorage.setItem(`aeth-opt-${sel.id}`, sel.value); } catch {}
+    });
+    sel.dataset.aethPopulated = "1";
+  });
+}
+populateAethSelects();
+
+function buildStyleDirective({ tone, style, persona, length }) {
+  const bits = [];
+  if (tone) bits.push(`TONE DIRECTIVE — write with a "${labelFor("tone", tone) || tone}" tone.`);
+  if (style) bits.push(`STRUCTURE DIRECTIVE — use the "${labelFor("style", style) || style}" structure.`);
+  if (length) bits.push(`LENGTH DIRECTIVE — target "${length}".`);
+  if (persona) bits.push(`PERSONA STYLE-TRANSFER — channel the cadence/rhythm of "${labelFor("persona", persona) || persona}" WITHOUT naming them, their companies, or catchphrases. Style only; do not impersonate.`);
+  return bits.join("\n");
+}
+
 const liState = {
   source: "image",                // image | text | reply
   imageDataUrl: null,             // for source=image
