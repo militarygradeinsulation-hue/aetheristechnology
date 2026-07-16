@@ -624,7 +624,7 @@ const AetherisUniversePage: React.FC = () => {
       <main className="relative z-10">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> AetherisUniverse · v1
+            <Sparkles className="w-3 h-3" /> Aetheris Universe · v1
           </p>
           <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight">
             Every tool we own. <span className="text-amber italic">Floating in space.</span>
