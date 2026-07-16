@@ -1222,8 +1222,9 @@ async function draftLinkedInReply(opts) {
     out.textContent = `Failed: ${e.message}`;
   }
 }
-$("li-go").addEventListener("click", draftLinkedInReply);
-$("li-regen").addEventListener("click", draftLinkedInReply);
+$("li-go").addEventListener("click", () => draftLinkedInReply());
+$("li-regen").addEventListener("click", () => draftLinkedInReply());
+$("li-freshen")?.addEventListener("click", () => draftLinkedInReply({ freshen: true }));
 $("li-copy").addEventListener("click", async () => {
   if (!liState.lastDraft) return toast("Nothing to copy yet.");
   try { await navigator.clipboard.writeText(liState.lastDraft); toast("Copied."); }
