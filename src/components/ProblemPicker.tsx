@@ -59,7 +59,7 @@ const groupMeta = [
     felt: "You've paid six figures to consultants and you're still asking the same questions.",
     fix: 'Stop paying for decks. Get an operator-led ledger with dollar amounts on every leak.',
     backstory:
-      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $2,500 Forensic Diagnostic is the opposite of that experience. Flat fee, written ledger, credit toward the work.",
+      "I spent $87K across four consultants before I figured out none of them had ever run a P&L. The $18,500 21-Day Revenue Diagnostic is the opposite of that experience. Flat fee, written ledger, credit toward the work.",
   },
   {
     icon: Anchor,

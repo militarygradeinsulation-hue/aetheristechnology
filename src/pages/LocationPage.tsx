@@ -33,7 +33,7 @@ const LOCATIONS: Record<LocationKey, LocationConfig> = {
     fullName: 'Indianapolis, Indiana',
     metaTitle: 'Chaos Theory Forensics in Indianapolis | Aetheris',
     metaDescription:
-      'Indianapolis Chaos Theory Forensics Operator. Find revenue leaks in your Indianapolis business. Free Leak Audit, $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic.',
+      'Indianapolis Chaos Theory Forensics Operator. Find revenue leaks in your Indianapolis business. Free Leak Audit, $18,500 21-Day Revenue Diagnostic, $18,500 21-Day Revenue Diagnostic.',
     h1: 'Chaos Theory Forensics in Indianapolis',
     intro:
       'Aetheris is an Indianapolis-based Chaos Theory Forensics Operator. We expose revenue leaks Indianapolis owners can\'t see from the inside. broken systems, dropped follow-ups, vocabulary friction, brand contradictions. then rebuild the broken systems causing them.',
@@ -157,7 +157,7 @@ const LocationPage: React.FC = () => {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/diagnostic">Book the $2,500 Forensic Diagnostic</Link>
+                <Link to="/diagnostic">Book the $18,500 21-Day Revenue Diagnostic</Link>
               </Button>
             </div>
 
@@ -167,8 +167,8 @@ const LocationPage: React.FC = () => {
               </h2>
               <ol className="space-y-3 text-foreground/85 leading-relaxed">
                 <li><strong className="text-amber">1. Free Leak Audit ($0).</strong> 14-question self-scan. PDF case file with an estimated annual leak in dollars.</li>
-                <li><strong className="text-amber">2. Forensic Diagnostic ($2,500).</strong> Operator-led walk-through with Joseph Toney. Flagged leak list, prioritization, rebuild order. Fee applied 1:1 toward any engagement.</li>
-                <li><strong className="text-amber">3. 14-Day Operational Diagnostic ($7,500).</strong> Full forensic breakdown of workflow inefficiencies, disconnected systems, and automation opportunities. Guaranteed.</li>
+                <li><strong className="text-amber">2. 21-Day Revenue Diagnostic ($18,500 flat).</strong> Operator-led walk-through with Joseph Toney. Flagged leak list, prioritization, rebuild order. Fee applied 1:1 toward any engagement.</li>
+                <li><strong className="text-amber">3. 21-Day Revenue Diagnostic ($18,500 flat).</strong> Full forensic breakdown of workflow inefficiencies, disconnected systems, and automation opportunities. Guaranteed.</li>
                 <li><strong className="text-amber">4. Active Case ($15K/mo).</strong> 3-month minimum. The forensic case stays open while we execute the prioritized fixes. Available only to Diagnostic clients.</li>
               </ol>
             </section>

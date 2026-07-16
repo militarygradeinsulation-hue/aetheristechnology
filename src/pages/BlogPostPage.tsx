@@ -331,7 +331,7 @@ const BlogPostPage = () => {
                     Stop Wasting Money. Start Building Systems That Work.
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                    Our 14-Day Operational Systems Diagnostic exposes exactly where your business 
+                    Our 21-Day Revenue Diagnostic exposes exactly where your business 
                     is leaking revenue, and builds the AI-powered systems to fix it. Investment: $5,000-$10,000.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">

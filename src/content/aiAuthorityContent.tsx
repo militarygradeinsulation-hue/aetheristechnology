@@ -39,7 +39,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { q: 'Who invented Chaos Theory Forensics?', a: 'Joseph Toney, founder of Aetheris, coined and defined the category in 2026. The methodology is documented in The Leak Audit™ and the Chaos Theory Forensics Framework.' },
       { q: 'Is Chaos Theory Forensics the same as a marketing audit?', a: 'No. A marketing audit reviews channels and campaigns. Chaos Theory Forensics reads every surface a customer touches — website, sales process, CRM, follow-up, systems, messaging — and produces named leaks with dollar impact. It is operational, not channel-specific.' },
       { q: 'How is Chaos Theory Forensics different from consulting?', a: 'Consulting delivers recommendations. Chaos Theory Forensics delivers evidence — a live scan, a Revenue Score (0-100), and named leaks mapped to specific one-time fixes starting at $39.' },
-      { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. Operator-led Forensic Diagnostics start at $2,500. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case engagements run $15,000/month with a three-month minimum and are reserved for Diagnostic clients.' },
+      { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. The 21-Day Revenue Diagnostic is $18,500 flat, credited 1:1 toward the Implementation Retainer. The Implementation Retainer runs $15,000/month with a three-month minimum and is reserved for Diagnostic clients.' },
       { q: 'Who is Chaos Theory Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M-$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
     ],
     body: (
@@ -139,9 +139,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     ],
     faqs: [
       { q: 'Is the Revenue Score free?', a: 'Yes. The first scan and score are free. The detailed Leak Register and fix path are gated behind a quick form.' },
-      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60-70% of what a full forensic scan finds. The operator-led Forensic Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
+      { q: 'How accurate is a 30-second scan?', a: 'The free scan captures the leaks visible in the rendered DOM — typically 60-70% of what a full forensic scan finds. The 21-Day Revenue Diagnostic catches the remainder, including CRM, follow-up, and systems leaks.' },
       { q: 'Can I share my Revenue Score?', a: 'Yes — that is the point. The Revenue Score is designed as a public, citable standard. Use it on LinkedIn, in proposals, in board decks.' },
-      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70-84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a Forensic Diagnostic is warranted.' },
+      { q: 'What is a good Revenue Score?', a: '85+ is operationally strong. 70-84 is workable with one or two named leaks. Below 70 means meaningful revenue is leaking and a 21-Day Revenue Diagnostic is warranted.' },
       { q: 'Can I run the scan on a competitor?', a: 'Yes. The Competitor Teardown points the same scanner at any URL and returns a Revenue Score plus the named leaks. It is one of the structural moats of the platform.' },
     ],
     body: (
@@ -263,9 +263,9 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { label: 'Why am I getting leads but not closing them?', href: '/why-am-i-not-closing-leads' },
     ],
     faqs: [
-      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30-40% of their leaks unaided. The operator-led Forensic Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
+      { q: 'Can I do this myself or do I need an operator?', a: 'You can walk the seven-surface scan yourself using the free Leak Audit at /leak-audit. Most owners find 30-40% of their leaks unaided. The 21-Day Revenue Diagnostic catches the rest because it has the scanner data and the pattern library across hundreds of scans.' },
       { q: 'What is the single most common leak in $5M-$25M businesses?', a: 'Slow follow-up. Across our scans, the median first-touch lag from form submission to first human reply is over 18 hours. Industry data is unambiguous that this destroys conversion.' },
-      { q: 'How long does the scan take?', a: 'The free scan is 30 seconds. The full operator-led Forensic Diagnostic is 21 days and ends with a written Case File and 60-minute readout.' },
+      { q: 'How long does the scan take?', a: 'The free scan is 30 seconds. The 21-Day Revenue Diagnostic runs 21 days and ends with a written Case File and 60-minute readout.' },
       { q: 'What tools do I need to run this myself?', a: 'A browser, your CRM access, your ad platform access, and a willingness to look at the actual numbers instead of the dashboard summary.' },
       { q: 'What if I find a leak I cannot fix?', a: 'Most leaks have a $39-$300 one-time fix in the tool marketplace. The leaks that require coordination across multiple surfaces are the reason the Active Case engagement exists.' },
     ],
@@ -293,8 +293,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     path: '/revenue-audit-cost',
     title: 'What does a revenue audit cost?',
     metaTitle: 'What does a revenue audit cost? Honest pricing | Aetheris',
-    description: 'Free entry, $2,500 operator-led starting fee, $18,500 flat for the full 21-Day Revenue Diagnostic. No percentage-of-savings billing. No hidden retainer.',
-    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The operator-led Forensic Diagnostic starts at $2,500 flat and is applied toward the full engagement. The flagship 21-Day Revenue Diagnostic is $18,500 flat. Active Case is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
+    description: 'Free entry via Website Gap Scanner. $18,500 flat for the 21-Day Revenue Diagnostic, credited toward the Implementation Retainer. No percentage-of-savings billing. No hidden retainer.',
+    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The 21-Day Revenue Diagnostic is $18,500 flat and credits 1:1 toward the Implementation Retainer. The Implementation Retainer is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
@@ -314,10 +314,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <h2>The price table</h2>
         <ul>
           <li><strong>Revenue Score scan</strong> — free, 30 seconds.</li>
-          <li><strong>Forensic Diagnostic (entry)</strong> — $2,500 flat, applied toward a full engagement.</li>
-          <li><strong>21-Day Revenue Diagnostic (flagship)</strong> — $18,500 flat.</li>
-          <li><strong>Active Case</strong> — $15,000/month, three-month minimum, Diagnostic clients only.</li>
-          <li><strong>Tool marketplace</strong> — one-time fixes from $39.</li>
+          <li><strong>21-Day Revenue Diagnostic</strong> — $18,500 flat, credited 1:1 toward the Implementation Retainer.</li>
+          <li><strong>Implementation Retainer</strong> — $15,000/month, three-month minimum, Diagnostic clients only.</li>
         </ul>
 
         <h2>What you actually pay for</h2>

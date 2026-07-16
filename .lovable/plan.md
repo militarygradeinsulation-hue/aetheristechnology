@@ -1,60 +1,44 @@
-# Aetheris Leadership Calendar — 3 Principals, Clear Lanes
+# Update chatbot pricing + answer email question
 
-Extend the existing Company Calendar into a **leadership-aware** system with three lanes locked to your org chart. Keep it simple: one calendar, color-coded by principal, filter by lane. Add an AI "Playbook Generator" that reads the role definitions and produces a week's worth of tasks for each principal automatically.
+## Am I sending those emails?
+**No.** I do not send email. I only edit code in this project. Emails going out from `aetheris.technology` / `businessforensics.tech` are sent by the app itself — the Lovable Cloud email queue + edge functions (`send-transactional-email`, `auth-email-hook`, `process-email-queue`, subscription/onboarding senders, etc.) — using templates and triggers already wired into the codebase. If a message went out at 8:30 PM to `andrel@ezbreathe.com`, it came from one of those app flows (or from you sending manually from your inbox), not from me. I can show which function/template produced any given send if you forward the message.
 
-## The Three Lanes (locked)
+## Current pricing (authoritative, per project memory)
+- **Free:** Leak Audit self-scan at `/leak-audit`
+- **21-Day Revenue Diagnostic — $18,500 flat** (credited 1:1 toward the Retainer)
+- **Implementation Retainer — $15,000/month, 3-month minimum** (Diagnostic clients only)
 
-```text
-FOUNDER (Joseph, "The Architect")   → brand · product · methodology · findings
-COO (Dean)                          → delivery · people · accountability · quality
-CHIEF OF SALES (Braden)             → pipeline · training · tool vetting
-```
+## Old prices to purge everywhere the chatbot can see
+- `$2,500` Forensic Diagnostic
+- `$7,500` 14-Day Operational Systems Diagnostic
+- `$750` Rapid Evaluation
+- `$25,000+` Custom Implementation
+- Any "14-Day Diagnostic" framing
 
-## What gets built
+## The chatbot itself (`supabase/functions/sales-chat`)
+Already hard-blocks quoting any dollar figure and any product/tier name. **No edit needed to the system prompt.** However, it injects live page context and page copy into the model, so stale prices on the page can leak through. Fix = scrub the pages/content the bot reads.
 
-### 1. Backend — extend `company_calendar`
+## Files to update
 
-New migration adds two columns (non-breaking):
-- `owner_role text` — `'founder' | 'coo' | 'chief_sales' | 'team'` (default `'team'`)
-- `owner_name text` — display label ("Joseph", "Dean", "Braden", "Team")
-- `status text` — `'todo' | 'doing' | 'done'` (default `'todo'`)
-- `due_time time` — optional time-of-day for the task
+1. **`src/components/seo/seoContent.ts`** — rewrite `CORE_LEAK_FACTS` and `LEAK_AUDIT_FAQS` to reflect the two current offers only:
+   - Replace every `$2,500 Forensic Diagnostic` with `$18,500 21-Day Revenue Diagnostic`.
+   - Remove the `$7,500 14-Day Operational Systems Diagnostic` fact + FAQ entirely (retired offer).
+   - Update `/implementation` retainer FAQ to keep `$15,000/mo, 3-mo min`, credited from the $18,500 Diagnostic.
+   - Update the "How do I start?" FAQ to two paths: free self-scan, or the $18,500 Diagnostic.
+   - Remove the "à la carte $79–$400 tools" FAQ (retired per `llms.txt`).
+   - Update the "confidential / equity / ownership / sample report" answers to stay accurate under the new offer set.
 
-Index on `owner_role, date`. Grants + RLS unchanged (service-role managed like today).
+2. **`src/pages/AIConsultantPage.tsx`** — line 20 FAQ: replace `"Rapid Evaluation $750, 14-Day Diagnostic $7,500, or Custom Implementation $25,000+"` with `"21-Day Revenue Diagnostic ($18,500 flat) or the $15,000/month Implementation Retainer"`.
 
-New table `leadership_roles` seeded with the 3 principals (name, role, owns, does_not_own, decision_authority) so the AI planner and UI both read from one source of truth. You can edit these later without a code deploy.
+3. **Grep sweep** for any remaining `2,500`, `7,500`, `750`, `25,000+`, `Rapid Evaluation`, `14-Day Diagnostic`, `Operational Systems Diagnostic` in `src/pages/*` (WhyUsPage, ServicesPage, MethodologyPage, ImplementationPage, DiagnosticPage, ResourcesPage, GlossaryPage, LocationPage, CaseStudiesPage, CapabilitiesPage, Home, SalesCompassPage) and rewrite to `$18,500 / $15,000/mo`. Leave `src/lib/repProducts.ts`, `repToolTips.ts`, `problemGroups.ts` alone unless they reference the retired flagship prices — I'll inspect and only touch flagship refs.
 
-### 2. Edge function — `company-calendar` extended
+4. **Optional hard guard in `sales-chat`** — add `$2,500`, `$7,500`, `$750`, `$25,000`, `Rapid Evaluation`, `14-Day Diagnostic` to the existing forbidden-token list so even if stale copy is fed as context, the bot cannot echo it. Keep the existing "no pricing in chat" rule intact.
 
-- `list` accepts `owner_role` filter
-- `create`/`update` persist `owner_role`, `owner_name`, `status`, `due_time`
-- New action `ai_playbook`: takes a goal + week start date, calls Lovable AI (gemini-2.5-flash), returns a JSON array of tasks pre-assigned to each principal based on their lane definition from `leadership_roles`. Refuses to cross lanes (e.g. won't hand Sales tasks to the Founder).
-- New action `mark_status`: quick toggle todo→doing→done.
+## Out of scope
+- No changes to email templates, cron, queues, or send logic.
+- No changes to Stripe products/prices.
+- No design or layout changes.
 
-### 3. Frontend — `AdminCompanyCalendarPanel`
-
-Simple, not busy:
-- **Header strip**: 3 principal pills (Joseph amber · Dean blue · Braden emerald · Team muted). Click to filter. "All" resets.
-- **Leadership Structure** collapsible card at top showing each principal's `owns / does not own / decision authority` (pulled from `leadership_roles`, editable inline by admin).
-- **Calendar grid**: existing month view, entries color-bordered by `owner_role`.
-- **Editor dialog**: adds "Assign to" (Joseph/Dean/Braden/Team), "Status", "Time".
-- **"Generate week's playbook" button** (top-right): dialog asks for the week's north-star goal ("Close 3 Diagnostics", "Onboard Dean", etc.), then AI drafts 3–6 tasks per principal for the next 7 days. Preview → accept-all or edit before saving.
-
-### 4. Rep-side (`CompanyCalendarRepView`)
-
-Add a small "Leadership" legend row so reps see who owns what that day. No behavior change beyond the color chips.
-
-## Technical details
-
-- Migration file: `supabase/migrations/<ts>_leadership_calendar.sql`
-- New lib: `src/lib/leadershipRoles.ts` (typed CRUD for `leadership_roles`)
-- `src/lib/companyCalendar.ts` gets `OwnerRole` type + `OWNER_META` (name, color, swatch)
-- AI prompt for `ai_playbook` embeds the leadership doctrine from the uploaded infographic verbatim (lanes, decision authority, standing principle: "each person owns their lane fully").
-- No new external secrets — uses existing `LOVABLE_API_KEY`.
-
-## Out of scope for this pass
-- Notifications / email digests
-- Recurring tasks
-- Cross-linking tasks to CRM leads
-
-Say "go" and I'll ship it. If you want to trim (e.g. skip the editable roles table and hardcode the 3 principals for now) tell me and I'll cut that piece.
+## Verification
+- `rg -n "2,500|7,500|\\$750|25,000\\+|Rapid Evaluation|14-Day Diagnostic|Operational Systems Diagnostic" src/ supabase/functions/` returns zero hits after edits (allowlist: none).
+- Load `/ai-consultant` and `/leak-audit`, open the chat, ask "how much does it cost?" — bot still refuses to quote and offers the booking link (unchanged behavior).

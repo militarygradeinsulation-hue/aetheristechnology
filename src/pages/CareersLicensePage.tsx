@@ -112,7 +112,7 @@ export default function CareersLicensePage() {
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                   $500 one-time gets you a personal rep code and the right to resell every Aetheris tool in the Chaos Ecosystem.
-                  <span className="text-amber font-semibold"> One $2,500 diagnostic pays your license back 5x.</span> One $18,500 flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
+                  <span className="text-amber font-semibold"> One $18,500+ diagnostic pays your license back 5x.</span> One $18,500 flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
                   1099 independent — no employment, no manager, no quotas.
                 </p>
               </CardHeader>

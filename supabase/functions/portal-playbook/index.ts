@@ -57,7 +57,7 @@ serve(async (req) => {
       {
         id: "seed-3", category: "Discovery Call", industry: null, is_published: true,
         title: "Opening 90 seconds — Forensic Diagnostic frame",
-        body: `"This isn't a sales call. It's a 12-minute Forensic Diagnostic. I'll ask three questions, name the leak I'm seeing, and quantify what it's costing you per month. If it's worth fixing, we go to the $2,500 deep-dive. If not, you keep the diagnosis. Sound fair?"`,
+        body: `"This isn't a sales call. It's a 12-minute Forensic Diagnostic. I'll ask three questions, name the leak I'm seeing, and quantify what it's costing you per month. If it's worth fixing, we go to the $18,500+ deep-dive. If not, you keep the diagnosis. Sound fair?"`,
       },
       {
         id: "seed-4", category: "Objection Handling", industry: null, is_published: true,
@@ -72,7 +72,7 @@ serve(async (req) => {
       {
         id: "seed-6", category: "Closing", industry: null, is_published: true,
         title: "Trial close — \"Stop the leak\"",
-        body: `"Two paths from here. (1) You keep the diagnosis and try to plug the leak internally. (2) We run the Forensic Diagnostic — flat $2,500, applied to engagement, full report in 14 days. Which one fits your next 30 days?"`,
+        body: `"Two paths from here. (1) You keep the diagnosis and try to plug the leak internally. (2) We run the Forensic Diagnostic — flat $18,500+, applied to engagement, full report in 21 days. Which one fits your next 30 days?"`,
       },
     ];
 

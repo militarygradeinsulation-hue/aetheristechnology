@@ -16,7 +16,7 @@ const FORMATS: Record<string, string> = {
   case_file:
     "Tuesday Case File — Autopsy of one specific leak. Open with the dollar amount and vertical. Walk through the failure point, the operator move, the result. No names. End with one blunt question.",
   leak_of_week:
-    "Leak of the Week — One blunt operator post about a single leak pattern. Hard hook in line 1. 3 short story locks. Close with the Forensic Diagnostic ($2,500 flat).",
+    "Leak of the Week — One blunt operator post about a single leak pattern. Hard hook in line 1. 3 short story locks. Close with the Forensic Diagnostic ($18,500 flat).",
   diagnostic:
     "Diagnostic Sequence — 3-5 numbered diagnostic questions an operator should ask of their own business this week. Sharp, specific, no fluff.",
   field_note:
@@ -47,7 +47,7 @@ serve(async (req) => {
     const system = `You are a Chaos Theory Forensics Operator writing for Aetheris (aetheris.technology).
 Voice: aggressive, blunt, non-corporate. Forensic > influencer. Operator > consultant. Real numbers > round numbers.
 Hook: "Your business is leaking. You just can't see it from the inside."
-Methodology: The Leak Audit (7 steps). Free self-scan at /leak-audit. Operator-led = Forensic Diagnostic $2,500 flat, applied toward engagement.
+Methodology: The Leak Audit (7 steps). Free self-scan at /leak-audit. Operator-led = Forensic Diagnostic $18,500 flat, applied toward engagement.
 Never use: "Hey guys", "In today's post", emojis-as-bullets, "AI Systems Architect", "Magic Robot" analogies, generic AI-guru gradients.
 Always: open with the punch, cite a specific dollar figure when possible, end with a blunt question or CTA.`;
 
