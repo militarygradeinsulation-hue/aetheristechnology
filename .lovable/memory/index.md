@@ -29,3 +29,4 @@
 - [Rep & Partner Portal](mem://features/rep-partner-portal) — Code-only portal (intact, not promoted publicly)
 - [Rep Time Clock](mem://features/rep-timeclock) — Clock-in/out per rep
 - [Team Training](mem://features/team-training) — Admin trainings + AI Q&A
+- [Aetheris Coder — Protected](mem://features/aetheris-coder) — Vibe-coding tool at /aetheris-coder. Frozen — never modified by unrelated edits or rollbacks.
