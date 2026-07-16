@@ -129,13 +129,18 @@ type NodeProps = {
   registerAnimator: (id: string, el: HTMLButtonElement) => void;
   unregisterAnimator: (id: string) => void;
   onOpen: (t: PlacedTool) => void;
+  onDragDown: (index: number, e: React.PointerEvent) => void;
+  onDragMove: (index: number, e: React.PointerEvent) => void;
+  onDragUp: (index: number, e: React.PointerEvent) => boolean; // returns true if it was a drag (suppress click)
 };
 
 const ToolNode = memo(function ToolNode({
   tool, index, color, registerAnimator, unregisterAnimator, onOpen,
+  onDragDown, onDragMove, onDragUp,
 }: NodeProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [hover, setHover] = useState(false);
+  const draggedRef = useRef(false);
 
   useEffect(() => {
     const el = btnRef.current;
@@ -150,20 +155,27 @@ const ToolNode = memo(function ToolNode({
       type="button"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      onClick={(e) => { e.stopPropagation(); onOpen(tool); }}
-      className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px]"
+      onPointerDown={(e) => { draggedRef.current = false; onDragDown(index, e); }}
+      onPointerMove={(e) => onDragMove(index, e)}
+      onPointerUp={(e) => { draggedRef.current = onDragUp(index, e); }}
+      onPointerCancel={(e) => { draggedRef.current = onDragUp(index, e); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (draggedRef.current) { draggedRef.current = false; return; }
+        onOpen(tool);
+      }}
+      className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px] cursor-grab active:cursor-grabbing"
       style={{
         transformStyle: 'preserve-3d',
         willChange: 'transform',
-        // GPU compositing + isolation for cheap redraws
         contain: 'layout paint style',
-        // initial pos — animator will overwrite immediately
         transform: `translate3d(${tool.x}px, ${tool.y}px, ${tool.z}px)`,
         zIndex: Math.round(1000 + tool.z),
+        touchAction: 'none',
       }}
     >
       <div
-        className="rounded-md overflow-hidden border bg-[#0b0d14]/85"
+        className="rounded-md overflow-hidden border bg-[#0b0d14]/85 pointer-events-none"
         style={{
           borderColor: hover ? color : 'rgba(217,169,58,0.25)',
           boxShadow: hover
