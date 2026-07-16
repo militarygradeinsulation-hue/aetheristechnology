@@ -575,6 +575,13 @@ const AetherisUniversePage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05060a] text-foreground">
+      <style>{`
+        @keyframes aetherSpark {
+          0%   { opacity: 0.9; transform: translate3d(var(--sx,0), var(--sy,0), var(--sz,0)) scale(0.4); }
+          40%  { opacity: 1;   }
+          100% { opacity: 0;   transform: translate3d(var(--sx,0), var(--sy,0), var(--sz,0)) scale(2.4); }
+        }
+      `}</style>
       <SEOHead
         title="AetherisUniverse — Every Forensic Tool, Floating in 3D"
         description="A living 3D map of every Aetheris tool and technology. Fly through the universe, open any tool, try it live."
