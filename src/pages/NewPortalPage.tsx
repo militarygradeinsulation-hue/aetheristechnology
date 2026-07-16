@@ -36,6 +36,7 @@ import { ForensicScanAllPanel } from '@/components/ForensicScanAllPanel';
 import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 import { EngagementBoard } from '@/components/portal/EngagementBoard';
+import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
@@ -320,6 +321,8 @@ const NewPortalPage: React.FC = () => {
 
           {/* START — Getting Started overview */}
           <TabsContent value="start" className="mt-8 space-y-4">
+            <DailyHustleCard />
+
             <ToolCard
               eyebrow="// Getting Started //"
               title="You're in the new portal"

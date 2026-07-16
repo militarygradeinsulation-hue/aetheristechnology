@@ -52,12 +52,23 @@ serve(async (req) => {
       );
     }
 
+    const clampInt = (v: unknown, max: number) =>
+      typeof v === "number" && isFinite(v) ? Math.max(0, Math.min(max, Math.floor(v))) : null;
+
     if (action === "update" && persist) {
       const patch: Record<string, unknown> = {};
       if (typeof body.notifications_reposted === "boolean") patch.notifications_reposted = body.notifications_reposted;
       if (typeof body.blog_posted === "boolean") patch.blog_posted = body.blog_posted;
-      if (typeof body.connections_added === "number") {
-        patch.connections_added = Math.max(0, Math.min(50, Math.floor(body.connections_added)));
+      const numericFields: Array<[string, number]> = [
+        ["connections_added", 500],
+        ["calls_made", 500],
+        ["emails_sent", 500],
+        ["linkedin_dms", 500],
+        ["linkedin_comments", 500],
+      ];
+      for (const [k, max] of numericFields) {
+        const v = clampInt((body as Record<string, unknown>)[k], max);
+        if (v !== null) patch[k] = v;
       }
       if (Object.keys(patch).length > 0) {
         await admin.from("rep_daily_checklist").update(patch).eq("rep_code", repCode).eq("for_date", today);
@@ -67,9 +78,30 @@ serve(async (req) => {
     // Fetch checklist row
     const { data: checklist } = persist
       ? await admin.from("rep_daily_checklist")
-          .select("notifications_reposted, connections_added, blog_posted")
+          .select("notifications_reposted, connections_added, blog_posted, calls_made, emails_sent, linkedin_dms, linkedin_comments, admin_notified_at")
           .eq("rep_code", repCode).eq("for_date", today).maybeSingle()
       : { data: null };
+
+    // Fire admin notification once when all 5 daily quotas are hit.
+    const QUOTAS = { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 };
+    if (persist && checklist && !checklist.admin_notified_at) {
+      const allHit = (Object.entries(QUOTAS) as Array<[keyof typeof QUOTAS, number]>)
+        .every(([k, need]) => (checklist as Record<string, number>)[k] >= need);
+      if (allHit) {
+        const { data: repRow } = await admin.from("rep_codes").select("rep_name").eq("code", repCode).maybeSingle();
+        const repName = repRow?.rep_name || repCode;
+        await admin.from("shared_notifications").insert({
+          recipient: "admin",
+          kind: "daily_quota_hit",
+          title: `Daily quota DONE — ${repName}`,
+          body: `${repName} (${repCode}) hit all 5 minimums today: 20 calls, 30 emails, 20 DMs, 20 comments, 20 new connections.`,
+        });
+        await admin.from("rep_daily_checklist")
+          .update({ admin_notified_at: new Date().toISOString() })
+          .eq("rep_code", repCode).eq("for_date", today);
+        (checklist as Record<string, unknown>).admin_notified_at = new Date().toISOString();
+      }
+    }
 
     // Today's content: pick the most recent blog OR playbook (whichever is newest).
     // Today = anything published in the last 36h so the post stays fresh through evening.
@@ -183,7 +215,13 @@ serve(async (req) => {
         notifications_reposted: false,
         connections_added: 0,
         blog_posted: false,
+        calls_made: 0,
+        emails_sent: 0,
+        linkedin_dms: 0,
+        linkedin_comments: 0,
+        admin_notified_at: null,
       },
+      quotas: { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 },
       blog: content ? {
         kind,
         title: content.title,

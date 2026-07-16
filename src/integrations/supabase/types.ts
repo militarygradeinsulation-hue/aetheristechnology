@@ -4686,31 +4686,46 @@ export type Database = {
       }
       rep_daily_checklist: {
         Row: {
+          admin_notified_at: string | null
           blog_posted: boolean
+          calls_made: number
           connections_added: number
           created_at: string
+          emails_sent: number
           for_date: string
           id: string
+          linkedin_comments: number
+          linkedin_dms: number
           notifications_reposted: boolean
           rep_code: string
           updated_at: string
         }
         Insert: {
+          admin_notified_at?: string | null
           blog_posted?: boolean
+          calls_made?: number
           connections_added?: number
           created_at?: string
+          emails_sent?: number
           for_date?: string
           id?: string
+          linkedin_comments?: number
+          linkedin_dms?: number
           notifications_reposted?: boolean
           rep_code: string
           updated_at?: string
         }
         Update: {
+          admin_notified_at?: string | null
           blog_posted?: boolean
+          calls_made?: number
           connections_added?: number
           created_at?: string
+          emails_sent?: number
           for_date?: string
           id?: string
+          linkedin_comments?: number
+          linkedin_dms?: number
           notifications_reposted?: boolean
           rep_code?: string
           updated_at?: string

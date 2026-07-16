@@ -12,7 +12,17 @@ import {
 } from "@/lib/portalDailyChecklist";
 import { getCurrentSprintDay, getTodaySprintGoal } from "./Sprint90View";
 
-const CONN_TARGET = 10;
+const CONN_TARGET = 20;
+const DEFAULT_QUOTAS = { calls_made: 20, emails_sent: 30, linkedin_dms: 20, linkedin_comments: 20, connections_added: 20 };
+
+type QuotaKey = keyof typeof DEFAULT_QUOTAS;
+const QUOTA_META: Array<{ key: QuotaKey; label: string; verb: string }> = [
+  { key: "calls_made", label: "Calls", verb: "dialed" },
+  { key: "emails_sent", label: "Emails", verb: "sent" },
+  { key: "linkedin_dms", label: "LinkedIn DMs", verb: "sent" },
+  { key: "linkedin_comments", label: "LinkedIn comments", verb: "left" },
+  { key: "connections_added", label: "New connections", verb: "added" },
+];
 
 export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onViewSprint }) => {
   const { toast } = useToast();
@@ -100,11 +110,22 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
   }
   if (!state) return null;
 
-  const { checklist, blog, main_linkedin } = state;
+  const { checklist, blog, main_linkedin, quotas } = state;
+  const Q = quotas || DEFAULT_QUOTAS;
+  const quotasHit = QUOTA_META.filter(m => (checklist as any)[m.key] >= (Q as any)[m.key]).length;
+  const allQuotasHit = quotasHit === QUOTA_META.length;
   const completed = (checklist.notifications_reposted ? 1 : 0)
-    + (checklist.connections_added >= CONN_TARGET ? 1 : 0)
+    + (allQuotasHit ? 1 : 0)
     + (checklist.blog_posted ? 1 : 0);
   const allDone = completed === 3;
+
+  const bumpQuota = (k: QuotaKey, delta: number) => {
+    const next = Math.max(0, ((checklist as any)[k] || 0) + delta);
+    patch({ [k]: next } as any);
+  };
+  const setQuota = (k: QuotaKey, v: number) => {
+    patch({ [k]: Math.max(0, v) } as any);
+  };
 
   return (
     <Card className="border-amber/30">
@@ -116,13 +137,64 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
               Daily Hustle, {new Date(state.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
             </CardTitle>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mt-1">
-              {completed}/3 complete {allDone && "· streak day banked"}
+              Quotas {quotasHit}/{QUOTA_META.length} · Hustle {completed}/3 {checklist.admin_notified_at && "· admin notified ✓"}
             </p>
           </div>
           {saving && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* DAILY QUOTAS — hard minimums */}
+        <div className={`rounded-lg border p-3 space-y-2 ${allQuotasHit ? "border-amber bg-amber/10" : "border-crimson/40 bg-crimson/5"}`}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Target className={`w-4 h-4 ${allQuotasHit ? "text-amber" : "text-crimson"}`} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em]">
+                {allQuotasHit ? "Daily minimums HIT — quota banked" : "Daily minimums — hit every one, every day"}
+              </span>
+            </div>
+            <span className="font-mono text-[10px] text-muted-foreground">
+              {allQuotasHit ? "Admin auto-notified" : "Admin pinged when all 5 clear"}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {QUOTA_META.map(({ key, label, verb }) => {
+              const current = (checklist as any)[key] as number;
+              const target = (Q as any)[key] as number;
+              const hit = current >= target;
+              const pct = Math.min(100, (current / target) * 100);
+              return (
+                <div key={key} className="rounded border border-border/60 bg-card/40 p-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="text-sm">
+                      <span className={`font-semibold ${hit ? "text-amber" : "text-foreground"}`}>{label}</span>
+                      <span className="text-muted-foreground text-xs ml-1">· {verb} today</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button size="icon" variant="outline" className="h-6 w-6"
+                        disabled={current <= 0}
+                        onClick={() => bumpQuota(key, -1)}><Minus className="w-3 h-3" /></Button>
+                      <input
+                        type="number"
+                        value={current}
+                        min={0}
+                        onChange={(e) => setQuota(key, parseInt(e.target.value || "0", 10))}
+                        className="w-14 h-6 text-center font-mono tabular-nums text-xs bg-background border border-border rounded"
+                      />
+                      <span className="font-mono text-xs text-muted-foreground">/ {target}</span>
+                      <Button size="icon" variant="outline" className="h-6 w-6"
+                        onClick={() => bumpQuota(key, 1)}><Plus className="w-3 h-3" /></Button>
+                    </div>
+                  </div>
+                  <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full transition-all ${hit ? "bg-amber" : "bg-crimson"}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {(() => {
           const sprint = getCurrentSprintDay(new Date());
           const today = getTodaySprintGoal(new Date());
@@ -178,45 +250,6 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           </div>
         </div>
 
-        {/* TASK 2, 10 connections */}
-        <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
-          <Checkbox
-            checked={checklist.connections_added >= CONN_TARGET}
-            onCheckedChange={(v) => patch({ connections_added: v ? CONN_TARGET : 0 })}
-            className="mt-1"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Users className="w-4 h-4 text-amber" />
-              <span className="font-semibold text-foreground">
-                Add 10 new LinkedIn connections
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Owners, ops leads, GMs in Indianapolis. Personalize the note when you can.
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <Button
-                size="icon" variant="outline" className="h-7 w-7"
-                disabled={checklist.connections_added <= 0}
-                onClick={() => patch({ connections_added: Math.max(0, checklist.connections_added - 1) })}
-              ><Minus className="w-3 h-3" /></Button>
-              <span className="font-mono text-sm tabular-nums w-14 text-center">
-                {checklist.connections_added}/{CONN_TARGET}
-              </span>
-              <Button
-                size="icon" variant="outline" className="h-7 w-7"
-                onClick={() => patch({ connections_added: checklist.connections_added + 1 })}
-              ><Plus className="w-3 h-3" /></Button>
-              <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden ml-2">
-                <div
-                  className="h-full bg-amber transition-all"
-                  style={{ width: `${Math.min(100, (checklist.connections_added / CONN_TARGET) * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* TASK 3, Post today's blog */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
