@@ -160,6 +160,54 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          {/* 3-step process */}
+          <section
+            className="mt-6 max-w-6xl mx-auto animate-fade-in"
+            aria-label="How it works in three steps"
+          >
+            <div className="forensic-tile rounded-sm px-6 py-8 sm:px-10 sm:py-10">
+              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.24em] text-amber/80 mb-6 text-center">
+                // How It Works · Three Steps
+              </div>
+              <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+                {[
+                  {
+                    n: "01",
+                    t: "Free Scan",
+                    d: "I run a scan on your company — free.",
+                  },
+                  {
+                    n: "02",
+                    t: "Find the Leaks",
+                    d: "I show you exactly where you're losing money.",
+                  },
+                  {
+                    n: "03",
+                    t: "Recover & Scale",
+                    d: "Build the system and plan to recover your money and scale.",
+                  },
+                ].map((s) => (
+                  <div
+                    key={s.n}
+                    className="relative rounded-sm border border-amber/25 bg-background/40 px-5 py-6 hover:border-amber/50 transition-colors"
+                  >
+                    <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber/70 mb-2">
+                      Step {s.n}
+                    </div>
+                    <div className="font-forensic text-xl sm:text-2xl text-foreground mb-2">
+                      {s.t}
+                    </div>
+                    <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">
+                      {s.d}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+
+
 
           {/* Aetheris positioning */}
           <section className="mt-6 max-w-6xl mx-auto text-center animate-fade-in">
