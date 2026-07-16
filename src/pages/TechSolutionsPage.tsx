@@ -297,9 +297,34 @@ const TechSolutionsPage: React.FC = () => {
           {/* Access bar — email or code required to run tools free */}
           <TechSolutionsAccessBar />
 
-
+          {/* Featured: Aetheris Coder */}
+          <a
+            href="https://aetheris.technology/aetheris-coder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block mb-8 mt-6 rounded-sm border border-amber/40 hover:border-amber bg-gradient-to-r from-amber/10 via-background to-background p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-10px_hsl(38_92%_55%/0.4)]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 w-10 h-10 rounded-sm bg-amber/15 border border-amber/40 flex items-center justify-center">
+                <Cpu className="w-5 h-5 text-amber" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber/80 mb-1">
+                  // New · External Tool
+                </div>
+                <h3 className="font-forensic text-xl font-bold group-hover:text-amber transition-colors">
+                  Aetheris Coder
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Describe what you want built, watch it ship. Our in-house build engine — open access.
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-amber shrink-0 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </a>
 
           {/* Pricing tiers */}
+
           <section className="mb-14 grid md:grid-cols-3 gap-4">
             <div className="forensic-tile rounded-sm border border-amber/30 p-5">
               <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Single</div>
