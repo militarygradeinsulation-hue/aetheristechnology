@@ -372,11 +372,11 @@ const ResourcesPage = () => {
                     Reading ≠ Sealing
                   </div>
                   <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground mb-4">
-                    Playbooks show the pattern. The <span className="text-crimson">Forensic Diagnostic</span> shows your wound.
+                    Playbooks show the pattern. The <span className="text-crimson">Revenue Diagnostic</span> shows your wound.
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                    Free playbooks teach the patterns we see across businesses. The Forensic Diagnostic ($2,500 flat) 
-                    names the leaks bleeding <em>your</em> revenue right now, and credits in full toward the rebuild.
+                    Free playbooks teach the patterns we see across businesses. The 21-Day Revenue Diagnostic ($18,500 flat) 
+                    names the leaks bleeding <em>your</em> revenue right now, and credits 1:1 toward the Implementation Retainer.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="/leak-audit">
