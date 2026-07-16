@@ -78,6 +78,7 @@ const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboardingPage"));
 const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
+import { VERTICAL_BY_SLUG } from "@/config/verticals";
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
@@ -222,7 +223,9 @@ const App = () => (
                       <Route path="/my-subscription" element={<MySubscriptionPage />} />
                       <Route path="/industries" element={<IndustriesPage />} />
                       <Route path="/case-studies" element={<CaseStudiesPage />} />
-                      <Route path="/ai-for-:slug" element={<VerticalLandingPage />} />
+                      {Object.keys(VERTICAL_BY_SLUG).map((slug) => (
+                        <Route key={slug} path={`/${slug}`} element={<VerticalLandingPage />} />
+                      ))}
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
                       <Route path="/leak-audit" element={<Navigate to="/diagnostic" replace />} />
