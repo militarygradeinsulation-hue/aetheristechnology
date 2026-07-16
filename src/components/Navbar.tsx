@@ -46,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const navItems: NavItem[] = [
     { label: 'Home', href: '/home', blood: true },
     { label: 'Tech Solutions', href: '/tech-solutions', accent: true },
+    { label: 'AetherisUniverse', href: '/aetheris-universe', accent: true },
     { label: 'Case Studies', href: '/case-studies' },
     { label: 'Industries', href: '/industries' },
     { label: 'Blog', href: '/blog' },
