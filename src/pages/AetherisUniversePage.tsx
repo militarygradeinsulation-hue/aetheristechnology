@@ -39,7 +39,22 @@ const BOUND_X = 520;
 const BOUND_Y = 300;
 const BOUND_Z = 520;
 const NODE_RADIUS = 96;
-const RESTITUTION = 0.92;
+
+type PhysicsParams = {
+  restitution: number; // bounciness 0..1.2
+  damping: number;     // 0..3 (v decays as exp(-damping*dt))
+  drift: number;       // 0..80 px/s^2 random jitter to keep motion alive
+  soundOn: boolean;
+  soundVolume: number; // 0..1
+};
+
+const DEFAULT_PARAMS: PhysicsParams = {
+  restitution: 0.92,
+  damping: 0.35,
+  drift: 22,
+  soundOn: true,
+  soundVolume: 0.5,
+};
 
 // Deterministic pseudo-random so layout is stable between renders
 function seeded(i: number, salt: number) {
