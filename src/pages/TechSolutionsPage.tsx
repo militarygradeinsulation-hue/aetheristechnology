@@ -363,10 +363,7 @@ const TechSolutionsPage: React.FC = () => {
             </div>
           </section>
 
-          <Section title="Diagnostics" tools={diagnostics} icon={Cpu} />
-          <Section title="Reports & Deliverables" tools={reports} icon={Trophy} />
-          <Section title="Sales Enablement" tools={sales} icon={Users} />
-          <Section title="Content Systems" tools={content} icon={Sparkles} />
+          <Section title="Featured Systems" tools={featured} icon={Trophy} />
 
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
             <p className="text-sm text-muted-foreground">
