@@ -88,6 +88,7 @@ const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
 const DetectiveModePage = lazy(() => import("./pages/DetectiveModePage"));
 const EcosystemPage = lazy(() => import("./pages/EcosystemPage"));
+const AetherisUniversePage = lazy(() => import("./pages/AetherisUniversePage"));
 const PortalPage = lazy(() => import("./pages/PortalPage"));
 const NewPortalPage = lazy(() => import("./pages/NewPortalPage"));
 const LinkedInPlaybookPage = lazy(() => import("./pages/LinkedInPlaybookPage"));
