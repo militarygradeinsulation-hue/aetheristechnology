@@ -311,7 +311,7 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
 
     for (let round = 0; round < 4; round++) {
       const aiBody: Record<string, unknown> = {
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: convo,
         tools,
         tool_choice: "auto",
