@@ -110,11 +110,22 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
   }
   if (!state) return null;
 
-  const { checklist, blog, main_linkedin } = state;
+  const { checklist, blog, main_linkedin, quotas } = state;
+  const Q = quotas || DEFAULT_QUOTAS;
+  const quotasHit = QUOTA_META.filter(m => (checklist as any)[m.key] >= (Q as any)[m.key]).length;
+  const allQuotasHit = quotasHit === QUOTA_META.length;
   const completed = (checklist.notifications_reposted ? 1 : 0)
-    + (checklist.connections_added >= CONN_TARGET ? 1 : 0)
+    + (allQuotasHit ? 1 : 0)
     + (checklist.blog_posted ? 1 : 0);
   const allDone = completed === 3;
+
+  const bumpQuota = (k: QuotaKey, delta: number) => {
+    const next = Math.max(0, ((checklist as any)[k] || 0) + delta);
+    patch({ [k]: next } as any);
+  };
+  const setQuota = (k: QuotaKey, v: number) => {
+    patch({ [k]: Math.max(0, v) } as any);
+  };
 
   return (
     <Card className="border-amber/30">
@@ -126,13 +137,64 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
               Daily Hustle, {new Date(state.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
             </CardTitle>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber mt-1">
-              {completed}/3 complete {allDone && "· streak day banked"}
+              Quotas {quotasHit}/{QUOTA_META.length} · Hustle {completed}/3 {checklist.admin_notified_at && "· admin notified ✓"}
             </p>
           </div>
           {saving && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* DAILY QUOTAS — hard minimums */}
+        <div className={`rounded-lg border p-3 space-y-2 ${allQuotasHit ? "border-amber bg-amber/10" : "border-crimson/40 bg-crimson/5"}`}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Target className={`w-4 h-4 ${allQuotasHit ? "text-amber" : "text-crimson"}`} />
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em]">
+                {allQuotasHit ? "Daily minimums HIT — quota banked" : "Daily minimums — hit every one, every day"}
+              </span>
+            </div>
+            <span className="font-mono text-[10px] text-muted-foreground">
+              {allQuotasHit ? "Admin auto-notified" : "Admin pinged when all 5 clear"}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {QUOTA_META.map(({ key, label, verb }) => {
+              const current = (checklist as any)[key] as number;
+              const target = (Q as any)[key] as number;
+              const hit = current >= target;
+              const pct = Math.min(100, (current / target) * 100);
+              return (
+                <div key={key} className="rounded border border-border/60 bg-card/40 p-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="text-sm">
+                      <span className={`font-semibold ${hit ? "text-amber" : "text-foreground"}`}>{label}</span>
+                      <span className="text-muted-foreground text-xs ml-1">· {verb} today</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button size="icon" variant="outline" className="h-6 w-6"
+                        disabled={current <= 0}
+                        onClick={() => bumpQuota(key, -1)}><Minus className="w-3 h-3" /></Button>
+                      <input
+                        type="number"
+                        value={current}
+                        min={0}
+                        onChange={(e) => setQuota(key, parseInt(e.target.value || "0", 10))}
+                        className="w-14 h-6 text-center font-mono tabular-nums text-xs bg-background border border-border rounded"
+                      />
+                      <span className="font-mono text-xs text-muted-foreground">/ {target}</span>
+                      <Button size="icon" variant="outline" className="h-6 w-6"
+                        onClick={() => bumpQuota(key, 1)}><Plus className="w-3 h-3" /></Button>
+                    </div>
+                  </div>
+                  <div className="mt-1 h-1 rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full transition-all ${hit ? "bg-amber" : "bg-crimson"}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {(() => {
           const sprint = getCurrentSprintDay(new Date());
           const today = getTodaySprintGoal(new Date());
