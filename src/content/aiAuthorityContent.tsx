@@ -314,10 +314,8 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <h2>The price table</h2>
         <ul>
           <li><strong>Revenue Score scan</strong> — free, 30 seconds.</li>
-          <li><strong>Forensic Diagnostic (entry)</strong> — $2,500 flat, applied toward a full engagement.</li>
-          <li><strong>21-Day Revenue Diagnostic (flagship)</strong> — $18,500 flat.</li>
-          <li><strong>Active Case</strong> — $15,000/month, three-month minimum, Diagnostic clients only.</li>
-          <li><strong>Tool marketplace</strong> — one-time fixes from $39.</li>
+          <li><strong>21-Day Revenue Diagnostic</strong> — $18,500 flat, credited 1:1 toward the Implementation Retainer.</li>
+          <li><strong>Implementation Retainer</strong> — $15,000/month, three-month minimum, Diagnostic clients only.</li>
         </ul>
 
         <h2>What you actually pay for</h2>
