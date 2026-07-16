@@ -699,13 +699,37 @@ const AetherisUniversePage: React.FC = () => {
             <span>rot.y {(hudRot.y % 360).toFixed(0)}°</span>
             <span>nodes {tools.length}</span>
           </div>
-          <button
-            type="button"
-            onClick={recenter}
-            className="absolute bottom-3 right-3 font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
-          >
-            Recenter
-          </button>
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setParamsUI(p => ({ ...p, soundOn: !p.soundOn }))}
+              title={paramsUI.soundOn ? 'Mute impacts' : 'Enable impact sound'}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
+            >
+              {paramsUI.soundOn ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowControls(s => !s)}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
+            >
+              <SlidersHorizontal className="w-3 h-3" /> Physics
+            </button>
+            <button
+              type="button"
+              onClick={shake}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+            >
+              Shake
+            </button>
+            <button
+              type="button"
+              onClick={recenter}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+            >
+              Recenter
+            </button>
+          </div>
           <div className="absolute top-3 left-3 flex gap-2 flex-wrap max-w-[70%]">
             {Object.entries(categoryColor).map(([k, c]) => (
               <span
@@ -717,7 +741,86 @@ const AetherisUniversePage: React.FC = () => {
               </span>
             ))}
           </div>
+
+          {showControls && (
+            <div
+              className="absolute top-3 right-3 w-64 bg-[#0b0d14]/95 border border-amber/40 rounded-md p-3 pointer-events-auto"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Physics Console</span>
+                <button onClick={() => setShowControls(false)} className="text-foreground/60 hover:text-amber">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Bounce</span><span>{paramsUI.restitution.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={1.2} step={0.01}
+                  value={paramsUI.restitution}
+                  onChange={(e) => setParamsUI(p => ({ ...p, restitution: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Damping</span><span>{paramsUI.damping.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={3} step={0.01}
+                  value={paramsUI.damping}
+                  onChange={(e) => setParamsUI(p => ({ ...p, damping: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Drift</span><span>{paramsUI.drift.toFixed(0)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={80} step={1}
+                  value={paramsUI.drift}
+                  onChange={(e) => setParamsUI(p => ({ ...p, drift: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-3">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Volume</span><span>{Math.round(paramsUI.soundVolume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={1} step={0.01}
+                  value={paramsUI.soundVolume}
+                  onChange={(e) => setParamsUI(p => ({ ...p, soundVolume: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setParamsUI(DEFAULT_PARAMS)}
+                  className="flex-1 font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+                >
+                  Defaults
+                </button>
+                <button
+                  onClick={resetPhysics}
+                  className="flex-1 font-mono text-[10px] uppercase tracking-widest text-foreground/70 border border-foreground/20 px-2 py-1 rounded-sm hover:bg-foreground/10"
+                >
+                  Reset Positions
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
 
         <section className="max-w-5xl mx-auto px-4 pb-16">
           <h2 className="font-forensic text-xl md:text-2xl font-bold mb-3">
