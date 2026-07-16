@@ -1071,10 +1071,20 @@ async function draftLinkedInReply() {
   const out = $("li-out");
   const mode = $("li-length").value || "brief";
   const direction = $("li-direction").value.trim();
+  const tone = $("li-tone")?.value || "";
+  const style = $("li-style")?.value || "";
+  const persona = $("li-persona")?.value || "";
+
+  const styleDirective = buildStyleDirective({ tone, style, persona });
+  const extraContext = [styleDirective, direction].filter(Boolean).join("\n\n");
 
   let body = {
     mode,
-    extraContext: direction,
+    extraContext,
+    personaKeys: persona ? [persona] : [],
+    personaActive: !!persona,
+    tone,
+    style,
     recentDrafts: await getLinkedInDraftMemory(),
   };
 
