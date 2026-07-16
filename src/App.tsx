@@ -249,9 +249,10 @@ const App = () => (
                       <Route path="/tools-shop/redeem" element={<ToolsShopRedeemPage />} />
                       <Route path="/tools-shop/return" element={<ToolsShopReturnPage />} />
                       <Route path="/try/:toolId" element={<TryToolPage />} />
-                     <Route path="/tech-solutions" element={<TechSolutionsPage />} />
-                     <Route path="/tech-solutions/:toolId" element={<ToolInfoPage />} />
-                     <Route path="/tech" element={<Navigate to="/tech-solutions" replace />} />
+                     {/* Tech Solutions page hidden — routes redirect home. */}
+                     <Route path="/tech-solutions" element={<Navigate to="/" replace />} />
+                     <Route path="/tech-solutions/:toolId" element={<Navigate to="/" replace />} />
+                     <Route path="/tech" element={<Navigate to="/" replace />} />
 
                       {/* Reps now log into the new portal by default. Old portal preserved for admins only at /portal/legacy. */}
                       <Route path="/portal" element={<NewPortalPage />} />

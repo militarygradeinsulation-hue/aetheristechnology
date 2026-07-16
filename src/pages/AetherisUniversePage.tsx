@@ -592,7 +592,7 @@ const AetherisUniversePage: React.FC = () => {
         }
       `}</style>
       <SEOHead
-        title="AetherisUniverse — Every Forensic Tool, Floating in 3D"
+        title="Aetheris Universe — Every Forensic Tool, Floating in 3D"
         description="A living 3D map of every Aetheris tool and technology. Fly through the universe, open any tool, try it live."
         path="/aetheris-universe"
       />
@@ -624,7 +624,7 @@ const AetherisUniversePage: React.FC = () => {
       <main className="relative z-10">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> AetherisUniverse · v1
+            <Sparkles className="w-3 h-3" /> Aetheris Universe · v1
           </p>
           <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight">
             Every tool we own. <span className="text-amber italic">Floating in space.</span>
