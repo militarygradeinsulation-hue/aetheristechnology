@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { combineSchemas, howToSchema, serviceSchema, speakableSchema } from '@/lib/schemas';
 import { VERTICAL_BY_SLUG, type VerticalUseCase } from '@/config/verticals';
 import LeakMindMap, { type MindMapNodeData } from '@/components/LeakMindMap';
+import { HomeMindMapSection } from '@/components/HomeMindMapSection';
 
 const CATEGORY_ICONS: Record<VerticalUseCase['category'], typeof Target> = {
   'Strategy': Target,
