@@ -250,45 +250,6 @@ export const DailyHustleCard: React.FC<{ onViewSprint?: () => void }> = ({ onVie
           </div>
         </div>
 
-        {/* TASK 2, 10 connections */}
-        <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
-          <Checkbox
-            checked={checklist.connections_added >= CONN_TARGET}
-            onCheckedChange={(v) => patch({ connections_added: v ? CONN_TARGET : 0 })}
-            className="mt-1"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Users className="w-4 h-4 text-amber" />
-              <span className="font-semibold text-foreground">
-                Add 10 new LinkedIn connections
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Owners, ops leads, GMs in Indianapolis. Personalize the note when you can.
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <Button
-                size="icon" variant="outline" className="h-7 w-7"
-                disabled={checklist.connections_added <= 0}
-                onClick={() => patch({ connections_added: Math.max(0, checklist.connections_added - 1) })}
-              ><Minus className="w-3 h-3" /></Button>
-              <span className="font-mono text-sm tabular-nums w-14 text-center">
-                {checklist.connections_added}/{CONN_TARGET}
-              </span>
-              <Button
-                size="icon" variant="outline" className="h-7 w-7"
-                onClick={() => patch({ connections_added: checklist.connections_added + 1 })}
-              ><Plus className="w-3 h-3" /></Button>
-              <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden ml-2">
-                <div
-                  className="h-full bg-amber transition-all"
-                  style={{ width: `${Math.min(100, (checklist.connections_added / CONN_TARGET) * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* TASK 3, Post today's blog */}
         <div className="rounded-lg border border-border/60 bg-card/40 p-3 flex items-start gap-3">
