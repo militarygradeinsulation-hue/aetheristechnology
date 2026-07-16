@@ -29,7 +29,9 @@ type PlacedTool = {
   x: number; // px
   y: number; // px
   z: number; // px (depth)
-  spin: number;
+  phaseY: number; phaseX: number; phaseZ: number;
+  freqY: number; freqX: number; freqZ: number;
+  ampY: number; ampX: number; ampZ: number;
 };
 
 // Deterministic pseudo-random so layout is stable between renders
