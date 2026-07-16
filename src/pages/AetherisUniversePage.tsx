@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, X, Sparkles, Move3d, RotateCcw } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
@@ -11,13 +11,15 @@ const assetModules = import.meta.glob('/src/assets/tools/*.asset.json', {
   eager: true,
 }) as Record<string, { default: { url: string; original_filename: string } }>;
 
-function getToolImage(id: string): string | null {
+const IMG_BY_ID: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
   for (const path in assetModules) {
     const file = path.split('/').pop() ?? '';
-    if (file.startsWith(`${id}.`)) return assetModules[path].default.url;
+    const id = file.replace(/\.(png|jpg|jpeg|webp)\.asset\.json$/, '');
+    map[id] = assetModules[path].default.url;
   }
-  return null;
-}
+  return map;
+})();
 
 type PlacedTool = {
   id: string;
@@ -26,9 +28,9 @@ type PlacedTool = {
   category: string;
   route: string;
   img: string | null;
-  x: number; // px
-  y: number; // px
-  z: number; // px (depth)
+  x: number;
+  y: number;
+  z: number;
   phaseY: number; phaseX: number; phaseZ: number;
   freqY: number; freqX: number; freqZ: number;
   ampY: number; ampX: number; ampZ: number;
@@ -40,52 +42,168 @@ function seeded(i: number, salt: number) {
   return x - Math.floor(x);
 }
 
+const categoryColor: Record<string, string> = {
+  diagnostics: '#e63946',
+  content: '#d9a93a',
+  reports: '#7fd1ff',
+  sales: '#9be37f',
+};
+
+// ---------- Lazy thumbnail (IntersectionObserver-backed) ----------
+const LazyThumb = memo(function LazyThumb({
+  src,
+  alt,
+  fallback,
+}: { src: string | null; alt: string; fallback: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!src || !ref.current || visible) return;
+    const el = ref.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { root: null, rootMargin: '300px', threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [src, visible]);
+
+  return (
+    <div ref={ref} className="w-full h-full">
+      {src && visible ? (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          // @ts-expect-error non-standard but honored by Chromium
+          fetchpriority="low"
+          onLoad={() => setLoaded(true)}
+          draggable={false}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-amber font-forensic italic text-lg bg-black/40">
+          {fallback}
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ---------- Single tool node (ref-driven animation, no re-render on tick) ----------
+type NodeProps = {
+  tool: PlacedTool;
+  index: number;
+  color: string;
+  registerAnimator: (id: string, el: HTMLButtonElement) => void;
+  unregisterAnimator: (id: string) => void;
+  onOpen: (t: PlacedTool) => void;
+};
+
+const ToolNode = memo(function ToolNode({
+  tool, index, color, registerAnimator, unregisterAnimator, onOpen,
+}: NodeProps) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [hover, setHover] = useState(false);
+
+  useEffect(() => {
+    const el = btnRef.current;
+    if (!el) return;
+    registerAnimator(tool.id, el);
+    return () => unregisterAnimator(tool.id);
+  }, [tool.id, registerAnimator, unregisterAnimator]);
+
+  return (
+    <button
+      ref={btnRef}
+      type="button"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={(e) => { e.stopPropagation(); onOpen(tool); }}
+      className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px]"
+      style={{
+        transformStyle: 'preserve-3d',
+        willChange: 'transform',
+        // GPU compositing + isolation for cheap redraws
+        contain: 'layout paint style',
+        // initial pos — animator will overwrite immediately
+        transform: `translate3d(${tool.x}px, ${tool.y}px, ${tool.z}px)`,
+        zIndex: Math.round(1000 + tool.z),
+      }}
+    >
+      <div
+        className="rounded-md overflow-hidden border bg-[#0b0d14]/85"
+        style={{
+          borderColor: hover ? color : 'rgba(217,169,58,0.25)',
+          boxShadow: hover
+            ? `0 0 40px ${color}80, 0 0 8px ${color}`
+            : `0 8px 24px rgba(0,0,0,0.55)`,
+          transform: hover ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s',
+        }}
+      >
+        <div className="relative aspect-square bg-black/50 overflow-hidden">
+          <LazyThumb src={tool.img} alt={tool.name} fallback={tool.name.slice(0, 2)} />
+          <div
+            className="absolute top-1.5 left-1.5 font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm border"
+            style={{ color, borderColor: `${color}80`, background: `${color}18` }}
+          >
+            {tool.category}
+          </div>
+        </div>
+        <div className="px-2.5 py-2 border-t border-amber/15">
+          <div className="font-forensic text-[13px] leading-tight font-semibold truncate" title={tool.name}>
+            {tool.name}
+          </div>
+          <div className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
+            #{String(index + 1).padStart(2, '0')} · signal
+          </div>
+        </div>
+      </div>
+      <div
+        aria-hidden
+        className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-24 h-2 rounded-full blur-[3px] pointer-events-none"
+        style={{ background: `radial-gradient(ellipse, ${color}90 0%, transparent 70%)` }}
+      />
+    </button>
+  );
+});
+
+// ---------- Page ----------
 const AetherisUniversePage: React.FC = () => {
   const navigate = useNavigate();
   const sceneRef = useRef<HTMLDivElement>(null);
-  const [rot, setRot] = useState({ x: -8, y: 0 });
-  const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null); // rotating "camera" stage
   const [selected, setSelected] = useState<PlacedTool | null>(null);
-  const [hoverId, setHoverId] = useState<string | null>(null);
-  const [t, setT] = useState(0);
+  const [hudRot, setHudRot] = useState({ x: -8, y: 0 }); // display-only
 
-  // gentle time tick for float animation
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      setT((v) => v + 0.008);
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // Auto-rotate slowly when not dragging
-  useEffect(() => {
-    if (drag) return;
-    const id = setInterval(() => {
-      setRot((r) => ({ ...r, y: r.y + 0.08 }));
-    }, 40);
-    return () => clearInterval(id);
-  }, [drag]);
+  // Mutable state (avoids re-renders during animation / drag)
+  const rotRef = useRef({ x: -8, y: 0 });
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const nodesRef = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const inViewRef = useRef(true);
+  const visibleRef = useRef(true);
 
   const tools: PlacedTool[] = useMemo(() => {
     return SHOP_TOOLS.map((t, i) => {
-      // Distribute across a shell / cloud
       const angle = seeded(i, 1) * Math.PI * 2;
       const radius = 340 + seeded(i, 2) * 260;
       const y = (seeded(i, 3) - 0.5) * 520;
       return {
-        id: t.id,
-        name: t.name,
-        tagline: t.tagline,
-        category: t.category,
-        route: t.route,
-        img: getToolImage(t.id),
-        x: Math.cos(angle) * radius,
-        y,
-        z: Math.sin(angle) * radius,
-        // per-tool motion params — every one drifts on its own clock
+        id: t.id, name: t.name, tagline: t.tagline, category: t.category, route: t.route,
+        img: IMG_BY_ID[t.id] ?? null,
+        x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius,
         phaseY: seeded(i, 4) * Math.PI * 2,
         phaseX: seeded(i, 5) * Math.PI * 2,
         phaseZ: seeded(i, 6) * Math.PI * 2,
@@ -99,25 +217,105 @@ const AetherisUniversePage: React.FC = () => {
     });
   }, []);
 
-  // Mouse drag to rotate the "camera"
+  const registerAnimator = React.useCallback((id: string, el: HTMLButtonElement) => {
+    nodesRef.current.set(id, el);
+  }, []);
+  const unregisterAnimator = React.useCallback((id: string) => {
+    nodesRef.current.delete(id);
+  }, []);
+
+  // Pause work when page hidden or scene off-screen
+  useEffect(() => {
+    const onVis = () => { visibleRef.current = document.visibilityState === 'visible'; };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
+
+  useEffect(() => {
+    if (!sceneRef.current) return;
+    const io = new IntersectionObserver(
+      ([e]) => { inViewRef.current = e.isIntersecting; },
+      { threshold: 0.05 },
+    );
+    io.observe(sceneRef.current);
+    return () => io.disconnect();
+  }, []);
+
+  // Single rAF loop drives EVERY node + stage via DOM writes
+  useEffect(() => {
+    const toolList = tools;
+    let raf = 0;
+    let last = performance.now();
+    let t = 0;
+    let hudCounter = 0;
+
+    const tick = (now: number) => {
+      const dt = Math.min(64, now - last) / 1000; // sec
+      last = now;
+
+      if (visibleRef.current && inViewRef.current) {
+        t += dt;
+
+        // Auto-rotate when not dragging
+        if (!dragRef.current) {
+          rotRef.current.y += dt * 6; // deg/sec
+        }
+
+        const rx = rotRef.current.x;
+        const ry = rotRef.current.y;
+
+        // Stage transform (single write per frame)
+        if (stageRef.current) {
+          stageRef.current.style.transform =
+            `translateZ(-200px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        }
+
+        // Counter-rotate so cards face camera + apply per-tool drift
+        const cardCounter = `rotateY(${-ry}deg) rotateX(${-rx}deg)`;
+        for (let i = 0; i < toolList.length; i++) {
+          const tool = toolList[i];
+          const el = nodesRef.current.get(tool.id);
+          if (!el) continue;
+          const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
+          const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
+          const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
+          el.style.transform =
+            `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) ${cardCounter}`;
+        }
+
+        // Update HUD ~4× per second (React state) instead of every frame
+        hudCounter += dt;
+        if (hudCounter > 0.25) {
+          hudCounter = 0;
+          setHudRot({ x: rx, y: ry });
+        }
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [tools]);
+
+  // Drag to orbit — mutates refs, no re-render
   const onDown = (e: React.PointerEvent) => {
-    setDrag({ x: e.clientX, y: e.clientY });
+    dragRef.current = { x: e.clientX, y: e.clientY };
     (e.target as Element).setPointerCapture?.(e.pointerId);
   };
   const onMove = (e: React.PointerEvent) => {
-    if (!drag) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    setRot((r) => ({ x: Math.max(-40, Math.min(40, r.x - dy * 0.3)), y: r.y + dx * 0.3 }));
-    setDrag({ x: e.clientX, y: e.clientY });
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    rotRef.current.x = Math.max(-40, Math.min(40, rotRef.current.x - dy * 0.3));
+    rotRef.current.y += dx * 0.3;
+    dragRef.current = { x: e.clientX, y: e.clientY };
   };
-  const onUp = () => setDrag(null);
+  const onUp = () => { dragRef.current = null; };
 
-  const categoryColor: Record<string, string> = {
-    diagnostics: '#e63946',
-    content: '#d9a93a',
-    reports: '#7fd1ff',
-    sales: '#9be37f',
+  const recenter = () => {
+    rotRef.current = { x: -8, y: 0 };
+    setHudRot({ x: -8, y: 0 });
   };
 
   return (
@@ -128,7 +326,6 @@ const AetherisUniversePage: React.FC = () => {
         path="/aetheris-universe"
       />
 
-      {/* Starfield backdrop */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none opacity-70"
@@ -144,7 +341,8 @@ const AetherisUniversePage: React.FC = () => {
             'radial-gradient(1px 1px at 10% 55%, #fff 40%, transparent 60%),' +
             'radial-gradient(1px 1px at 90% 85%, #fff 40%, transparent 60%),' +
             '#05060a',
-          backgroundSize: '100% 100%, 100% 100%, 240px 240px, 320px 320px, 400px 400px, 260px 260px, 300px 300px, 380px 380px, 220px 220px',
+          backgroundSize:
+            '100% 100%, 100% 100%, 240px 240px, 320px 320px, 400px 400px, 260px 260px, 300px 300px, 380px 380px, 220px 220px',
         }}
       />
 
@@ -169,7 +367,6 @@ const AetherisUniversePage: React.FC = () => {
           </div>
         </header>
 
-        {/* 3D scene */}
         <div
           ref={sceneRef}
           onPointerDown={onDown}
@@ -177,9 +374,13 @@ const AetherisUniversePage: React.FC = () => {
           onPointerUp={onUp}
           onPointerLeave={onUp}
           className="relative mx-auto my-6 h-[70vh] min-h-[520px] max-w-6xl select-none touch-none cursor-grab active:cursor-grabbing rounded-lg border border-amber/20 overflow-hidden"
-          style={{ perspective: '1400px', perspectiveOrigin: '50% 45%' }}
+          style={{
+            perspective: '1400px',
+            perspectiveOrigin: '50% 45%',
+            contain: 'layout paint style',
+            contentVisibility: 'auto',
+          }}
         >
-          {/* subtle grid floor */}
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none opacity-20"
@@ -194,90 +395,29 @@ const AetherisUniversePage: React.FC = () => {
           />
 
           <div
+            ref={stageRef}
             className="absolute inset-0"
             style={{
               transformStyle: 'preserve-3d',
-              transform: `translateZ(-200px) rotateX(${rot.x}deg) rotateY(${rot.y}deg)`,
-              transition: drag ? 'none' : 'transform 0.4s ease-out',
+              transform: `translateZ(-200px) rotateX(-8deg) rotateY(0deg)`,
+              willChange: 'transform',
             }}
           >
-            {tools.map((tool, i) => {
-              const dx = Math.sin(t * tool.freqX + tool.phaseX) * tool.ampX;
-              const dy = Math.sin(t * tool.freqY + tool.phaseY) * tool.ampY;
-              const dz = Math.cos(t * tool.freqZ + tool.phaseZ) * tool.ampZ;
-              const isHover = hoverId === tool.id;
-              const color = categoryColor[tool.category] || '#d9a93a';
-              return (
-                <button
-                  key={tool.id}
-                  type="button"
-                  onMouseEnter={() => setHoverId(tool.id)}
-                  onMouseLeave={() => setHoverId((h) => (h === tool.id ? null : h))}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelected(tool);
-                  }}
-                  className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px] group"
-                  style={{
-                    transform: `translate3d(${tool.x + dx}px, ${tool.y + dy}px, ${tool.z + dz}px) rotateY(${-rot.y}deg) rotateX(${-rot.x}deg) scale(${isHover ? 1.12 : 1})`,
-                    transformStyle: 'preserve-3d',
-                    transition: 'transform 0.25s ease-out',
-                    zIndex: Math.round(1000 + tool.z),
-                  }}
-                >
-                  <div
-                    className="rounded-md overflow-hidden border backdrop-blur-sm bg-[#0b0d14]/85"
-                    style={{
-                      borderColor: isHover ? color : 'rgba(217,169,58,0.25)',
-                      boxShadow: isHover
-                        ? `0 0 40px ${color}80, 0 0 8px ${color}`
-                        : `0 8px 24px rgba(0,0,0,0.55)`,
-                    }}
-                  >
-                    <div className="relative aspect-square bg-black/50 overflow-hidden">
-                      {tool.img ? (
-                        <img
-                          src={tool.img}
-                          alt={tool.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                          draggable={false}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-amber font-forensic italic text-lg">
-                          {tool.name.slice(0, 2)}
-                        </div>
-                      )}
-                      <div
-                        className="absolute top-1.5 left-1.5 font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm border"
-                        style={{ color, borderColor: `${color}80`, background: `${color}18` }}
-                      >
-                        {tool.category}
-                      </div>
-                    </div>
-                    <div className="px-2.5 py-2 border-t border-amber/15">
-                      <div className="font-forensic text-[13px] leading-tight font-semibold truncate" title={tool.name}>
-                        {tool.name}
-                      </div>
-                      <div className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-                        #{String(i + 1).padStart(2, '0')} · signal
-                      </div>
-                    </div>
-                  </div>
-                  {/* holo base ring */}
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-24 h-2 rounded-full blur-[3px]"
-                    style={{ background: `radial-gradient(ellipse, ${color}90 0%, transparent 70%)` }}
-                  />
-                </button>
-              );
-            })}
+            {tools.map((tool, i) => (
+              <ToolNode
+                key={tool.id}
+                tool={tool}
+                index={i}
+                color={categoryColor[tool.category] || '#d9a93a'}
+                registerAnimator={registerAnimator}
+                unregisterAnimator={unregisterAnimator}
+                onOpen={setSelected}
+              />
+            ))}
 
-            {/* central core */}
             <div
               aria-hidden
-              className="absolute left-1/2 top-1/2 w-24 h-24 -ml-12 -mt-12 rounded-full"
+              className="absolute left-1/2 top-1/2 w-24 h-24 -ml-12 -mt-12 rounded-full pointer-events-none"
               style={{
                 transformStyle: 'preserve-3d',
                 background:
@@ -287,15 +427,14 @@ const AetherisUniversePage: React.FC = () => {
             />
           </div>
 
-          {/* HUD */}
           <div className="absolute bottom-3 left-3 font-mono text-[9px] uppercase tracking-widest text-foreground/60 flex gap-3 pointer-events-none">
-            <span>rot.x {rot.x.toFixed(0)}°</span>
-            <span>rot.y {(rot.y % 360).toFixed(0)}°</span>
+            <span>rot.x {hudRot.x.toFixed(0)}°</span>
+            <span>rot.y {(hudRot.y % 360).toFixed(0)}°</span>
             <span>nodes {tools.length}</span>
           </div>
           <button
             type="button"
-            onClick={() => setRot({ x: -8, y: 0 })}
+            onClick={recenter}
             className="absolute bottom-3 right-3 font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
           >
             Recenter
@@ -313,7 +452,6 @@ const AetherisUniversePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Below-fold list fallback for accessibility / SEO */}
         <section className="max-w-5xl mx-auto px-4 pb-16">
           <h2 className="font-forensic text-xl md:text-2xl font-bold mb-3">
             All signals · <span className="text-amber italic">indexed</span>
@@ -330,7 +468,13 @@ const AetherisUniversePage: React.FC = () => {
               >
                 <div className="w-10 h-10 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
                   {tool.img && (
-                    <img src={tool.img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    <img
+                      src={tool.img}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   )}
                 </div>
                 <div className="min-w-0">
@@ -344,7 +488,6 @@ const AetherisUniversePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Detail dialog */}
         {selected && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
@@ -364,7 +507,7 @@ const AetherisUniversePage: React.FC = () => {
               </button>
               {selected.img && (
                 <div className="aspect-video bg-black overflow-hidden border-b border-amber/20">
-                  <img src={selected.img} alt={selected.name} className="w-full h-full object-cover" />
+                  <img src={selected.img} alt={selected.name} className="w-full h-full object-cover" decoding="async" />
                 </div>
               )}
               <div className="p-5">
@@ -375,10 +518,7 @@ const AetherisUniversePage: React.FC = () => {
                 <p className="text-sm text-foreground/80 mb-5">{selected.tagline}</p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      setSelected(null);
-                      navigate(selected.route);
-                    }}
+                    onClick={() => { setSelected(null); navigate(selected.route); }}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 bg-amber text-background hover:bg-amber/90 font-bold py-2 rounded-sm text-sm"
                   >
                     Open {selected.name} <ArrowRight className="w-4 h-4" />
