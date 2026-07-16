@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, X, Sparkles, Move3d, RotateCcw } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
@@ -39,7 +39,22 @@ const BOUND_X = 520;
 const BOUND_Y = 300;
 const BOUND_Z = 520;
 const NODE_RADIUS = 96;
-const RESTITUTION = 0.92;
+
+type PhysicsParams = {
+  restitution: number; // bounciness 0..1.2
+  damping: number;     // 0..3 (v decays as exp(-damping*dt))
+  drift: number;       // 0..80 px/s^2 random jitter to keep motion alive
+  soundOn: boolean;
+  soundVolume: number; // 0..1
+};
+
+const DEFAULT_PARAMS: PhysicsParams = {
+  restitution: 0.92,
+  damping: 0.35,
+  drift: 22,
+  soundOn: true,
+  soundVolume: 0.5,
+};
 
 // Deterministic pseudo-random so layout is stable between renders
 function seeded(i: number, salt: number) {
@@ -114,13 +129,18 @@ type NodeProps = {
   registerAnimator: (id: string, el: HTMLButtonElement) => void;
   unregisterAnimator: (id: string) => void;
   onOpen: (t: PlacedTool) => void;
+  onDragDown: (index: number, e: React.PointerEvent) => void;
+  onDragMove: (index: number, e: React.PointerEvent) => void;
+  onDragUp: (index: number, e: React.PointerEvent) => boolean; // returns true if it was a drag (suppress click)
 };
 
 const ToolNode = memo(function ToolNode({
   tool, index, color, registerAnimator, unregisterAnimator, onOpen,
+  onDragDown, onDragMove, onDragUp,
 }: NodeProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [hover, setHover] = useState(false);
+  const draggedRef = useRef(false);
 
   useEffect(() => {
     const el = btnRef.current;
@@ -135,20 +155,27 @@ const ToolNode = memo(function ToolNode({
       type="button"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      onClick={(e) => { e.stopPropagation(); onOpen(tool); }}
-      className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px]"
+      onPointerDown={(e) => { draggedRef.current = false; onDragDown(index, e); }}
+      onPointerMove={(e) => onDragMove(index, e)}
+      onPointerUp={(e) => { draggedRef.current = onDragUp(index, e); }}
+      onPointerCancel={(e) => { draggedRef.current = onDragUp(index, e); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (draggedRef.current) { draggedRef.current = false; return; }
+        onOpen(tool);
+      }}
+      className="absolute left-1/2 top-1/2 w-[168px] -ml-[84px] -mt-[110px] cursor-grab active:cursor-grabbing"
       style={{
         transformStyle: 'preserve-3d',
         willChange: 'transform',
-        // GPU compositing + isolation for cheap redraws
         contain: 'layout paint style',
-        // initial pos — animator will overwrite immediately
         transform: `translate3d(${tool.x}px, ${tool.y}px, ${tool.z}px)`,
         zIndex: Math.round(1000 + tool.z),
+        touchAction: 'none',
       }}
     >
       <div
-        className="rounded-md overflow-hidden border bg-[#0b0d14]/85"
+        className="rounded-md overflow-hidden border bg-[#0b0d14]/85 pointer-events-none"
         style={{
           borderColor: hover ? color : 'rgba(217,169,58,0.25)',
           boxShadow: hover
@@ -200,6 +227,25 @@ const AetherisUniversePage: React.FC = () => {
   const inViewRef = useRef(true);
   const visibleRef = useRef(true);
 
+  // Physics parameters (live-tunable, ref = no re-render on slider drag)
+  const [paramsUI, setParamsUI] = useState<PhysicsParams>(DEFAULT_PARAMS);
+  const paramsRef = useRef<PhysicsParams>(DEFAULT_PARAMS);
+  paramsRef.current = paramsUI;
+  const [showControls, setShowControls] = useState(false);
+
+  // Spark container + audio context
+  const sparkLayerRef = useRef<HTMLDivElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const lastBlipRef = useRef(0);
+
+  // Drag-throw state
+  const dragNodeRef = useRef<{
+    i: number; pointerId: number;
+    lastX: number; lastY: number; lastT: number;
+    vx: number; vy: number; vz: number;
+    moved: number;
+  } | null>(null);
+
   const tools: PlacedTool[] = useMemo(() => {
     return SHOP_TOOLS.map((t, i) => {
       const angle = seeded(i, 1) * Math.PI * 2;
@@ -218,7 +264,6 @@ const AetherisUniversePage: React.FC = () => {
   if (physicsRef.current.length !== tools.length) {
     physicsRef.current = tools.map((t, i) => ({
       x: t.x, y: t.y, z: t.z,
-      // seeded initial drift, ~40..110 px/s per axis, signed
       vx: (seeded(i, 21) - 0.5) * 160,
       vy: (seeded(i, 22) - 0.5) * 110,
       vz: (seeded(i, 23) - 0.5) * 160,
@@ -231,6 +276,63 @@ const AetherisUniversePage: React.FC = () => {
   const unregisterAnimator = React.useCallback((id: string) => {
     nodesRef.current.delete(id);
   }, []);
+
+  // ----- Audio: short click blip on collision (throttled) -----
+  const playImpact = React.useCallback((impactSpeed: number) => {
+    const P = paramsRef.current;
+    if (!P.soundOn) return;
+    const now = performance.now();
+    if (now - lastBlipRef.current < 35) return;
+    lastBlipRef.current = now;
+    try {
+      const AC = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+      if (!audioCtxRef.current) audioCtxRef.current = new AC();
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      const strength = Math.min(1, impactSpeed / 500);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.value = 240 + Math.random() * 260 + strength * 200;
+      const vol = Math.max(0.02, Math.min(0.22, strength * 0.22)) * P.soundVolume;
+      g.gain.setValueAtTime(0, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
+      o.connect(g).connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.15);
+    } catch { /* audio unavailable */ }
+  }, []);
+
+  // ----- Spark VFX: append a short-lived DOM element at world position -----
+  const spawnSpark = React.useCallback((x: number, y: number, z: number, impactSpeed: number, color: string) => {
+    const layer = sparkLayerRef.current;
+    if (!layer) return;
+    const strength = Math.min(1, impactSpeed / 500);
+    const size = 24 + strength * 60;
+    // outer wrapper positions in world; inner element does the scale/fade animation
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `
+      position:absolute;left:50%;top:50%;
+      width:${size}px;height:${size}px;margin-left:${-size / 2}px;margin-top:${-size / 2}px;
+      transform:translate3d(${x}px, ${y}px, ${z}px);
+      pointer-events:none;transform-style:preserve-3d;
+    `;
+    const inner = document.createElement('div');
+    inner.style.cssText = `
+      width:100%;height:100%;
+      border-radius:9999px;
+      background:radial-gradient(circle, #ffffff 0%, ${color} 25%, ${color}80 45%, rgba(255,255,255,0) 75%);
+      mix-blend-mode:screen;
+      box-shadow: 0 0 24px ${color}, 0 0 48px ${color}80;
+      animation:aetherSpark 520ms ease-out forwards;
+      will-change:transform,opacity;
+    `;
+    wrap.appendChild(inner);
+    layer.appendChild(wrap);
+    setTimeout(() => { wrap.remove(); }, 560);
+  }, []);
+
 
   // Pause work when page hidden or scene off-screen
   useEffect(() => {
@@ -279,22 +381,34 @@ const AetherisUniversePage: React.FC = () => {
         }
 
         // ----- Physics: integrate + wall bounce + pairwise elastic collisions -----
+        const P = paramsRef.current;
+        const R = P.restitution;
+        const dragI = dragNodeRef.current?.i ?? -1;
+        const dampMul = Math.exp(-P.damping * dt);
         const phys = physicsRef.current;
         const N = phys.length;
-        // integrate + walls
+        // integrate + damping + drift + walls
         for (let i = 0; i < N; i++) {
+          if (i === dragI) continue; // node is being held by the user
           const p = phys[i];
+          // small random drift acceleration keeps things alive
+          if (P.drift > 0) {
+            p.vx += (Math.random() - 0.5) * P.drift * dt * 2;
+            p.vy += (Math.random() - 0.5) * P.drift * dt * 2;
+            p.vz += (Math.random() - 0.5) * P.drift * dt * 2;
+          }
+          p.vx *= dampMul; p.vy *= dampMul; p.vz *= dampMul;
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.z += p.vz * dt;
-          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * RESTITUTION; }
-          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * RESTITUTION; }
-          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * RESTITUTION; }
-          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * RESTITUTION; }
-          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * RESTITUTION; }
-          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * RESTITUTION; }
+          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * R; }
+          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * R; }
+          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * R; }
+          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * R; }
+          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * R; }
+          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * R; }
         }
-        // pairwise collisions (equal mass elastic: swap normal-component velocities)
+        // pairwise collisions (equal mass elastic; dragged node treated as immovable)
         const minDist = NODE_RADIUS * 2;
         const minDistSq = minDist * minDist;
         for (let i = 0; i < N; i++) {
@@ -308,17 +422,44 @@ const AetherisUniversePage: React.FC = () => {
             if (d2 >= minDistSq || d2 === 0) continue;
             const d = Math.sqrt(d2) || 0.0001;
             const nx = dxp / d, ny = dyp / d, nz = dzp / d;
-            // positional correction — push each half the overlap out
-            const overlap = (minDist - d) * 0.5;
-            a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
-            b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
-            // relative velocity along normal
+            const aHeld = i === dragI;
+            const bHeld = j === dragI;
+            const overlap = minDist - d;
+            if (aHeld && !bHeld) {
+              b.x += nx * overlap; b.y += ny * overlap; b.z += nz * overlap;
+            } else if (bHeld && !aHeld) {
+              a.x -= nx * overlap; a.y -= ny * overlap; a.z -= nz * overlap;
+            } else {
+              const half = overlap * 0.5;
+              a.x -= nx * half; a.y -= ny * half; a.z -= nz * half;
+              b.x += nx * half; b.y += ny * half; b.z += nz * half;
+            }
             const rvx = b.vx - a.vx, rvy = b.vy - a.vy, rvz = b.vz - a.vz;
             const relN = rvx * nx + rvy * ny + rvz * nz;
             if (relN >= 0) continue; // moving apart
-            const jimp = -(1 + RESTITUTION) * relN * 0.5; // equal mass
-            a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
-            b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            const impactSpeed = -relN;
+            if (aHeld && !bHeld) {
+              const jimp = -(1 + R) * relN;
+              b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            } else if (bHeld && !aHeld) {
+              const jimp = -(1 + R) * relN;
+              a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+            } else {
+              const jimp = -(1 + R) * relN * 0.5;
+              a.vx -= jimp * nx; a.vy -= jimp * ny; a.vz -= jimp * nz;
+              b.vx += jimp * nx; b.vy += jimp * ny; b.vz += jimp * nz;
+            }
+            // VFX + sound only for reasonably firm impacts
+            if (impactSpeed > 40) {
+              const midX = (a.x + b.x) * 0.5;
+              const midY = (a.y + b.y) * 0.5;
+              const midZ = (a.z + b.z) * 0.5;
+              const catA = toolList[i]?.category ?? 'diagnostics';
+              const catB = toolList[j]?.category ?? 'diagnostics';
+              const col = categoryColor[catA] || categoryColor[catB] || '#ffd58a';
+              spawnSpark(midX, midY, midZ, impactSpeed, col);
+              playImpact(impactSpeed);
+            }
           }
         }
 
@@ -350,6 +491,7 @@ const AetherisUniversePage: React.FC = () => {
 
   // Drag to orbit — mutates refs, no re-render
   const onDown = (e: React.PointerEvent) => {
+    if (dragNodeRef.current) return; // a card is being thrown; let it handle events
     dragRef.current = { x: e.clientX, y: e.clientY };
     (e.target as Element).setPointerCapture?.(e.pointerId);
   };
@@ -364,13 +506,91 @@ const AetherisUniversePage: React.FC = () => {
   };
   const onUp = () => { dragRef.current = null; };
 
+  // ----- Drag-throw a single card -----
+  const onNodeDown = React.useCallback((i: number, e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    const p = physicsRef.current[i];
+    if (!p) return;
+    p.vx = 0; p.vy = 0; p.vz = 0;
+    dragNodeRef.current = {
+      i, pointerId: e.pointerId,
+      lastX: e.clientX, lastY: e.clientY, lastT: performance.now(),
+      vx: 0, vy: 0, vz: 0, moved: 0,
+    };
+    // resume audio on the first gesture
+    if (audioCtxRef.current?.state === 'suspended') audioCtxRef.current.resume().catch(() => {});
+  }, []);
+
+  const onNodeMove = React.useCallback((i: number, e: React.PointerEvent) => {
+    const d = dragNodeRef.current;
+    if (!d || d.i !== i) return;
+    const dxPix = e.clientX - d.lastX;
+    const dyPix = e.clientY - d.lastY;
+    const now = performance.now();
+    const dt = Math.max(1, now - d.lastT) / 1000;
+    // convert screen delta into stage-local delta using stage rotation about Y
+    const ry = (rotRef.current.y * Math.PI) / 180;
+    const worldDX = dxPix * Math.cos(ry);
+    const worldDZ = -dxPix * Math.sin(ry);
+    const worldDY = dyPix;
+    const p = physicsRef.current[i];
+    p.x += worldDX; p.y += worldDY; p.z += worldDZ;
+    // clamp to bounds so we can't drag off-scene
+    p.x = Math.max(-BOUND_X, Math.min(BOUND_X, p.x));
+    p.y = Math.max(-BOUND_Y, Math.min(BOUND_Y, p.y));
+    p.z = Math.max(-BOUND_Z, Math.min(BOUND_Z, p.z));
+    d.vx = worldDX / dt; d.vy = worldDY / dt; d.vz = worldDZ / dt;
+    d.lastX = e.clientX; d.lastY = e.clientY; d.lastT = now;
+    d.moved += Math.hypot(dxPix, dyPix);
+  }, []);
+
+  const onNodeUp = React.useCallback((i: number, _e: React.PointerEvent) => {
+    const d = dragNodeRef.current;
+    if (!d || d.i !== i) return false;
+    const p = physicsRef.current[i];
+    // apply throw velocity, clamped
+    const cap = 1600;
+    const sp = Math.hypot(d.vx, d.vy, d.vz);
+    const scale = sp > cap ? cap / sp : 1;
+    p.vx = d.vx * scale; p.vy = d.vy * scale; p.vz = d.vz * scale;
+    const wasDrag = d.moved > 6;
+    dragNodeRef.current = null;
+    return wasDrag;
+  }, []);
+
   const recenter = () => {
     rotRef.current = { x: -8, y: 0 };
     setHudRot({ x: -8, y: 0 });
   };
 
+  const resetPhysics = () => {
+    physicsRef.current = tools.map((t, i) => ({
+      x: t.x, y: t.y, z: t.z,
+      vx: (seeded(i, 21) - 0.5) * 160,
+      vy: (seeded(i, 22) - 0.5) * 110,
+      vz: (seeded(i, 23) - 0.5) * 160,
+    }));
+  };
+
+  const shake = () => {
+    for (const p of physicsRef.current) {
+      p.vx += (Math.random() - 0.5) * 900;
+      p.vy += (Math.random() - 0.5) * 700;
+      p.vz += (Math.random() - 0.5) * 900;
+    }
+  };
+
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05060a] text-foreground">
+      <style>{`
+        @keyframes aetherSpark {
+          0%   { opacity: 0; transform: scale(0.3); }
+          15%  { opacity: 1; }
+          100% { opacity: 0; transform: scale(2.6); }
+        }
+      `}</style>
       <SEOHead
         title="AetherisUniverse — Every Forensic Tool, Floating in 3D"
         description="A living 3D map of every Aetheris tool and technology. Fly through the universe, open any tool, try it live."
@@ -463,8 +683,20 @@ const AetherisUniversePage: React.FC = () => {
                 registerAnimator={registerAnimator}
                 unregisterAnimator={unregisterAnimator}
                 onOpen={setSelected}
+                onDragDown={onNodeDown}
+                onDragMove={onNodeMove}
+                onDragUp={onNodeUp}
               />
             ))}
+
+            {/* Spark VFX layer (children injected imperatively during collisions) */}
+            <div
+              ref={sparkLayerRef}
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{ transformStyle: 'preserve-3d' }}
+            />
+
 
             <div
               aria-hidden
@@ -483,13 +715,37 @@ const AetherisUniversePage: React.FC = () => {
             <span>rot.y {(hudRot.y % 360).toFixed(0)}°</span>
             <span>nodes {tools.length}</span>
           </div>
-          <button
-            type="button"
-            onClick={recenter}
-            className="absolute bottom-3 right-3 font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
-          >
-            Recenter
-          </button>
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setParamsUI(p => ({ ...p, soundOn: !p.soundOn }))}
+              title={paramsUI.soundOn ? 'Mute impacts' : 'Enable impact sound'}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
+            >
+              {paramsUI.soundOn ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowControls(s => !s)}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
+            >
+              <SlidersHorizontal className="w-3 h-3" /> Physics
+            </button>
+            <button
+              type="button"
+              onClick={shake}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+            >
+              Shake
+            </button>
+            <button
+              type="button"
+              onClick={recenter}
+              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+            >
+              Recenter
+            </button>
+          </div>
           <div className="absolute top-3 left-3 flex gap-2 flex-wrap max-w-[70%]">
             {Object.entries(categoryColor).map(([k, c]) => (
               <span
@@ -501,7 +757,86 @@ const AetherisUniversePage: React.FC = () => {
               </span>
             ))}
           </div>
+
+          {showControls && (
+            <div
+              className="absolute top-3 right-3 w-64 bg-[#0b0d14]/95 border border-amber/40 rounded-md p-3 pointer-events-auto"
+              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-amber">Physics Console</span>
+                <button onClick={() => setShowControls(false)} className="text-foreground/60 hover:text-amber">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Bounce</span><span>{paramsUI.restitution.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={1.2} step={0.01}
+                  value={paramsUI.restitution}
+                  onChange={(e) => setParamsUI(p => ({ ...p, restitution: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Damping</span><span>{paramsUI.damping.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={3} step={0.01}
+                  value={paramsUI.damping}
+                  onChange={(e) => setParamsUI(p => ({ ...p, damping: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Drift</span><span>{paramsUI.drift.toFixed(0)}</span>
+                </div>
+                <input
+                  type="range" min={0} max={80} step={1}
+                  value={paramsUI.drift}
+                  onChange={(e) => setParamsUI(p => ({ ...p, drift: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <label className="block mb-3">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-foreground/60 mb-1">
+                  <span>Volume</span><span>{Math.round(paramsUI.soundVolume * 100)}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={1} step={0.01}
+                  value={paramsUI.soundVolume}
+                  onChange={(e) => setParamsUI(p => ({ ...p, soundVolume: parseFloat(e.target.value) }))}
+                  className="w-full accent-amber"
+                />
+              </label>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setParamsUI(DEFAULT_PARAMS)}
+                  className="flex-1 font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
+                >
+                  Defaults
+                </button>
+                <button
+                  onClick={resetPhysics}
+                  className="flex-1 font-mono text-[10px] uppercase tracking-widest text-foreground/70 border border-foreground/20 px-2 py-1 rounded-sm hover:bg-foreground/10"
+                >
+                  Reset Positions
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
 
         <section className="max-w-5xl mx-auto px-4 pb-16">
           <h2 className="font-forensic text-xl md:text-2xl font-bold mb-3">
