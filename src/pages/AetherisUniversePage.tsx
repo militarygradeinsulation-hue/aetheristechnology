@@ -482,6 +482,7 @@ const AetherisUniversePage: React.FC = () => {
 
   // Drag to orbit — mutates refs, no re-render
   const onDown = (e: React.PointerEvent) => {
+    if (dragNodeRef.current) return; // a card is being thrown; let it handle events
     dragRef.current = { x: e.clientX, y: e.clientY };
     (e.target as Element).setPointerCapture?.(e.pointerId);
   };
@@ -496,10 +497,81 @@ const AetherisUniversePage: React.FC = () => {
   };
   const onUp = () => { dragRef.current = null; };
 
+  // ----- Drag-throw a single card -----
+  const onNodeDown = React.useCallback((i: number, e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    const p = physicsRef.current[i];
+    if (!p) return;
+    p.vx = 0; p.vy = 0; p.vz = 0;
+    dragNodeRef.current = {
+      i, pointerId: e.pointerId,
+      lastX: e.clientX, lastY: e.clientY, lastT: performance.now(),
+      vx: 0, vy: 0, vz: 0, moved: 0,
+    };
+    // resume audio on the first gesture
+    if (audioCtxRef.current?.state === 'suspended') audioCtxRef.current.resume().catch(() => {});
+  }, []);
+
+  const onNodeMove = React.useCallback((i: number, e: React.PointerEvent) => {
+    const d = dragNodeRef.current;
+    if (!d || d.i !== i) return;
+    const dxPix = e.clientX - d.lastX;
+    const dyPix = e.clientY - d.lastY;
+    const now = performance.now();
+    const dt = Math.max(1, now - d.lastT) / 1000;
+    // convert screen delta into stage-local delta using stage rotation about Y
+    const ry = (rotRef.current.y * Math.PI) / 180;
+    const worldDX = dxPix * Math.cos(ry);
+    const worldDZ = -dxPix * Math.sin(ry);
+    const worldDY = dyPix;
+    const p = physicsRef.current[i];
+    p.x += worldDX; p.y += worldDY; p.z += worldDZ;
+    // clamp to bounds so we can't drag off-scene
+    p.x = Math.max(-BOUND_X, Math.min(BOUND_X, p.x));
+    p.y = Math.max(-BOUND_Y, Math.min(BOUND_Y, p.y));
+    p.z = Math.max(-BOUND_Z, Math.min(BOUND_Z, p.z));
+    d.vx = worldDX / dt; d.vy = worldDY / dt; d.vz = worldDZ / dt;
+    d.lastX = e.clientX; d.lastY = e.clientY; d.lastT = now;
+    d.moved += Math.hypot(dxPix, dyPix);
+  }, []);
+
+  const onNodeUp = React.useCallback((i: number, _e: React.PointerEvent) => {
+    const d = dragNodeRef.current;
+    if (!d || d.i !== i) return false;
+    const p = physicsRef.current[i];
+    // apply throw velocity, clamped
+    const cap = 1600;
+    const sp = Math.hypot(d.vx, d.vy, d.vz);
+    const scale = sp > cap ? cap / sp : 1;
+    p.vx = d.vx * scale; p.vy = d.vy * scale; p.vz = d.vz * scale;
+    const wasDrag = d.moved > 6;
+    dragNodeRef.current = null;
+    return wasDrag;
+  }, []);
+
   const recenter = () => {
     rotRef.current = { x: -8, y: 0 };
     setHudRot({ x: -8, y: 0 });
   };
+
+  const resetPhysics = () => {
+    physicsRef.current = tools.map((t, i) => ({
+      x: t.x, y: t.y, z: t.z,
+      vx: (seeded(i, 21) - 0.5) * 160,
+      vy: (seeded(i, 22) - 0.5) * 110,
+      vz: (seeded(i, 23) - 0.5) * 160,
+    }));
+  };
+
+  const shake = () => {
+    for (const p of physicsRef.current) {
+      p.vx += (Math.random() - 0.5) * 900;
+      p.vy += (Math.random() - 0.5) * 700;
+      p.vz += (Math.random() - 0.5) * 900;
+    }
+  };
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05060a] text-foreground">
