@@ -31,7 +31,7 @@ export type ShopTool = {
 
 export const SHOP_TOOLS: ShopTool[] = [
   // ── Client-facing diagnostics ──────────────────────────────────────────
-  { id: "website-scanner",      name: "Website Leak Scanner",       tagline: "Live scan for revenue leaks on any URL.",               category: "diagnostics", route: "/leak-audit",            priceCents:  25000, priceId: "tool_website_scanner_yearly" },
+  { id: "website-scanner",      name: "Website Leak Scanner",       tagline: "Live scan for revenue leaks on any URL.",               category: "diagnostics", route: "/scan",                  priceCents:  25000, priceId: "tool_website_scanner_yearly" },
   { id: "brand-contradictions", name: "Brand Contradictions",       tagline: "Where your brand says one thing and does another.",    category: "diagnostics", route: "/brand-contradictions",  priceCents:  25000, priceId: "tool_brand_contradictions_yearly" },
   { id: "friction-audit",       name: "Friction Audit",             tagline: "Every buyer step that quietly costs you deals.",       category: "diagnostics", route: "/friction-audit",        priceCents:  25000, priceId: "tool_friction_audit_yearly" },
   { id: "strategic-questions",  name: "Strategic Questions",        tagline: "AI-generated boardroom questions you're avoiding.",    category: "diagnostics", route: "/strategic-questions",   priceCents:  25000, priceId: "tool_strategic_questions_yearly" },
