@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal, KeyRound, Loader2 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Background } from '@/components/Background';
 import aetherisLogoAsset from '@/assets/aetheris-a-logo.png.asset.json';
@@ -8,6 +8,10 @@ const aetherisLogo = aetherisLogoAsset.url;
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
+import { useTechAccess } from '@/components/TechSolutionsAccessBar';
+import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 // Pull every tool asset json in one glob
 const assetModules = import.meta.glob('/src/assets/tools/*.asset.json', {
@@ -231,7 +235,116 @@ const ToolNode = memo(function ToolNode({
   );
 });
 
-// ---------- Page ----------
+// ---------- Access gate overlay (rep / employee / license code bypass) ----------
+const UniverseAccessGate: React.FC = () => {
+  const [access, setAccess] = useTechAccess();
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  if (access.unlockedAll || access.toolIds.length > 0) return null;
+
+  const redeem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const c = code.trim();
+    if (!c) return;
+    setBusy(true);
+    try {
+      if (c === '9822') {
+        setAccess({ ...access, code: 'STAFF', plan: 'staff', unlockedAll: true, toolIds: [] });
+        toast.success('Staff unlocked — Universe open.');
+        return;
+      }
+      try {
+        const { data: repOk } = await supabase.rpc('validate_rep_code', { _code: c });
+        if (repOk === true) {
+          setAccess({ ...access, code: c.toUpperCase(), plan: 'rep', unlockedAll: true, toolIds: [] });
+          toast.success(`Rep ${c.toUpperCase()} unlocked — Universe open.`);
+          return;
+        }
+      } catch { /* fall through */ }
+      const { data, error } = await supabase.functions.invoke('tool-shop', {
+        body: { action: 'redeem', code: c },
+      });
+      if (error || !data?.ok) { toast.error("That code isn't valid."); return; }
+      const unlockedAll = data.plan === 'unlimited';
+      setAccess({
+        ...access,
+        code: data.code,
+        plan: data.plan,
+        unlockedAll,
+        toolIds: unlockedAll ? [] : (data.tool_ids ?? []),
+        email: access.email ?? data.email ?? null,
+      });
+      toast.success(unlockedAll ? 'All-Access unlocked — Universe open.' : 'Code accepted.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center px-6"
+      style={{
+        backdropFilter: 'blur(6px) saturate(120%)',
+        WebkitBackdropFilter: 'blur(6px) saturate(120%)',
+        background: 'rgba(5,6,10,0.25)',
+      }}
+    >
+      <div className="max-w-lg w-full text-center rounded-2xl border border-amber/30 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
+        <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
+          <Sparkles className="w-3 h-3" /> Access Locked
+        </p>
+        <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground">
+          You can access <span className="text-amber italic">The Aetheris Universe</span> after you've tried our Golden Report.
+        </h2>
+        <p className="mt-4 text-sm text-foreground/70">
+          Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to="/golden"
+            className="inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
+          >
+            Run the Golden Report <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-6 py-3 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition"
+          >
+            Back to Home
+          </Link>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-amber/20">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-3 inline-flex items-center gap-2">
+            <KeyRound className="w-3 h-3" /> Rep · Employee · License code
+          </p>
+          <form onSubmit={redeem} className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Enter access code"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              className="flex-1 bg-background/70 border-amber/25 font-mono text-sm tracking-widest text-center"
+              maxLength={32}
+            />
+            <button
+              type="submit"
+              disabled={busy || !code.trim()}
+              className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition disabled:opacity-50"
+            >
+              {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Unlock'}
+            </button>
+          </form>
+          <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Aetheris reps & employees — bypass the gate with your code.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AetherisUniversePage: React.FC = () => {
   const navigate = useNavigate();
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -651,41 +764,9 @@ const AetherisUniversePage: React.FC = () => {
         <Navbar onContactClick={() => {}} />
       </div>
 
-      {/* Frosted-glass access gate */}
-      <div
-        className="fixed inset-0 z-40 flex items-center justify-center px-6"
-        style={{
-          backdropFilter: 'blur(6px) saturate(120%)',
-          WebkitBackdropFilter: 'blur(6px) saturate(120%)',
-          background: 'rgba(5,6,10,0.25)',
-        }}
-      >
-        <div className="max-w-lg w-full text-center rounded-2xl border border-amber/30 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> Access Locked
-          </p>
-          <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground">
-            You can access <span className="text-amber italic">The Aetheris Universe</span> after you've tried our Golden Report.
-          </h2>
-          <p className="mt-4 text-sm text-foreground/70">
-            Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/golden"
-              className="inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
-            >
-              Run the Golden Report <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-6 py-3 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition"
-            >
-              Back to Home
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* Frosted-glass access gate — bypass with rep/employee/license code */}
+      <UniverseAccessGate />
+
 
       <main className="relative z-10">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
