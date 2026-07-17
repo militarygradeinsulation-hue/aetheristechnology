@@ -1,15 +1,19 @@
 // Central catalog for the Aetheris Tool Shop.
 //
-// Pricing model (Nov 2025 reprice):
-//  - 7 client-facing tools are premium-priced: $250 each, Detective $500,
-//    Forensic Scan (All) $1,500.
+// Pricing model (2026 yearly reprice):
+//  - Every client-facing tool is sold as a yearly subscription, auto-renewing
+//    annually. Same $ anchors as before, now recurring: 4 singles at $250/yr,
+//    Detective $500/yr, AI Readiness Checklist $250/yr.
+//  - Forensic Scan (All) bundle (5 diagnostics) is $1,250/yr — saves $250 vs
+//    buying those 5 individually.
+//  - Aetheris Evidence Kit (everything, 7 tools) is $1,450/yr — saves $300
+//    vs the sum of parts. This is the top-of-ladder bundle.
 //  - Golden Report ($3,500) is NEVER sold standalone — it appears only as a
 //    value-stack line inside the $18,500 Full Leak Investigation.
 //  - Operator-only tools (Content, Sales, internal Reports) are flagged
 //    `internalOnly: true` and hidden from every public shop surface. They
 //    remain reachable via direct rep POS in `repProducts.ts` for legacy /
 //    internal use.
-//  - Evidence Kit bundle ($2,500) unlocks all client-facing tools at once.
 
 export type ShopTool = {
   id: string;
@@ -17,9 +21,9 @@ export type ShopTool = {
   tagline: string;
   category: "diagnostics" | "content" | "reports" | "sales";
   route: string;
-  /** Standalone lifetime price in cents. `null` = never sold standalone (Golden Report). */
+  /** Yearly subscription price in cents. `null` = never sold standalone (Golden Report). */
   priceCents: number | null;
-  /** Human-readable Stripe lookup key for this tool. `null` when not sold. */
+  /** Human-readable Stripe lookup key for this tool's yearly price. `null` when not sold. */
   priceId: string | null;
   /** Operator tool — hidden from public shop, buy bars, mind-map chips, etc. */
   internalOnly?: boolean;
@@ -27,15 +31,15 @@ export type ShopTool = {
 
 export const SHOP_TOOLS: ShopTool[] = [
   // ── Client-facing diagnostics ──────────────────────────────────────────
-  { id: "website-scanner",      name: "Website Leak Scanner",       tagline: "Live scan for revenue leaks on any URL.",               category: "diagnostics", route: "/leak-audit",            priceCents:  25000, priceId: "tool_website_scanner_lifetime" },
-  { id: "brand-contradictions", name: "Brand Contradictions",       tagline: "Where your brand says one thing and does another.",    category: "diagnostics", route: "/brand-contradictions",  priceCents:  25000, priceId: "tool_brand_contradictions_lifetime" },
-  { id: "friction-audit",       name: "Friction Audit",             tagline: "Every buyer step that quietly costs you deals.",       category: "diagnostics", route: "/friction-audit",        priceCents:  25000, priceId: "tool_friction_audit_lifetime" },
-  { id: "strategic-questions",  name: "Strategic Questions",        tagline: "AI-generated boardroom questions you're avoiding.",    category: "diagnostics", route: "/strategic-questions",   priceCents:  25000, priceId: "tool_strategic_questions_lifetime" },
-  { id: "detective-mode",       name: "Detective Mode",             tagline: "Deep forensic sweep on a single business surface.",    category: "diagnostics", route: "/detective",             priceCents:  50000, priceId: "tool_detective_mode_lifetime" },
-  { id: "forensic-scan-all",    name: "Forensic Scan (All)",        tagline: "Runs every diagnostic in one shot.",                   category: "diagnostics", route: "/try/forensic-scan-all", priceCents: 150000, priceId: "tool_forensic_scan_all_lifetime" },
+  { id: "website-scanner",      name: "Website Leak Scanner",       tagline: "Live scan for revenue leaks on any URL.",               category: "diagnostics", route: "/leak-audit",            priceCents:  25000, priceId: "tool_website_scanner_yearly" },
+  { id: "brand-contradictions", name: "Brand Contradictions",       tagline: "Where your brand says one thing and does another.",    category: "diagnostics", route: "/brand-contradictions",  priceCents:  25000, priceId: "tool_brand_contradictions_yearly" },
+  { id: "friction-audit",       name: "Friction Audit",             tagline: "Every buyer step that quietly costs you deals.",       category: "diagnostics", route: "/friction-audit",        priceCents:  25000, priceId: "tool_friction_audit_yearly" },
+  { id: "strategic-questions",  name: "Strategic Questions",        tagline: "AI-generated boardroom questions you're avoiding.",    category: "diagnostics", route: "/strategic-questions",   priceCents:  25000, priceId: "tool_strategic_questions_yearly" },
+  { id: "detective-mode",       name: "Detective Mode",             tagline: "Deep forensic sweep on a single business surface.",    category: "diagnostics", route: "/detective",             priceCents:  50000, priceId: "tool_detective_mode_yearly" },
+  { id: "forensic-scan-all",    name: "Forensic Scan (All)",        tagline: "Runs all 5 diagnostics in one shot. Saves $250/yr.",    category: "diagnostics", route: "/try/forensic-scan-all", priceCents: 125000, priceId: "tool_forensic_scan_all_yearly" },
 
   // ── Client-facing report ───────────────────────────────────────────────
-  { id: "ai-checklist",         name: "AI Readiness Checklist",     tagline: "Score a business on AI-readiness in one pass.",        category: "reports",     route: "/ai-checklist",          priceCents:  25000, priceId: "tool_ai_checklist_lifetime" },
+  { id: "ai-checklist",         name: "AI Readiness Checklist",     tagline: "Score a business on AI-readiness in one pass.",        category: "reports",     route: "/ai-checklist",          priceCents:  25000, priceId: "tool_ai_checklist_yearly" },
 
   // ── Golden Report — never sold standalone ──────────────────────────────
   { id: "golden-report",        name: "Golden Report",              tagline: "$3,500 deliverable — included in the $18,500 Full Leak Investigation.", category: "reports", route: "/golden-report", priceCents: null, priceId: null, internalOnly: true },
@@ -64,29 +68,29 @@ export const SHOP_TOOLS: ShopTool[] = [
 ];
 
 /**
- * Legacy plan shape — still consumed by BuyToolDialog. `single` now resolves
+ * Legacy plan shape — still consumed by BuyToolDialog. `single` resolves
  * per-tool at checkout time (the ShopTool's own priceId + priceCents wins over
- * these defaults). `bundle` = Evidence Kit (every client-facing tool, $2,500).
- * `triple` is retained for type compatibility only and is not surfaced in UI.
+ * these defaults). `unlimited` / `triple` = Evidence Kit yearly ($1,450/yr, all
+ * client-facing tools). `triple` is retained for type compatibility only.
  */
 export const SHOP_PRICES = {
   single: {
-    priceId: "tool_website_scanner_lifetime",
+    priceId: "tool_website_scanner_yearly",
     label: "1 Tool",
     amount: 25000,
-    subtitle: "Lifetime access, memory attached",
+    subtitle: "Yearly access · renews annually",
   },
   triple: {
-    priceId: "tool_evidence_kit_bundle",
+    priceId: "tool_evidence_kit_bundle_yearly",
     label: "Evidence Kit",
-    amount: 250000,
-    subtitle: "All 7 client-facing tools, lifetime",
+    amount: 145000,
+    subtitle: "All 7 client-facing tools · yearly",
   },
   unlimited: {
-    priceId: "tool_evidence_kit_bundle",
+    priceId: "tool_evidence_kit_bundle_yearly",
     label: "Evidence Kit — All Client-Facing Tools",
-    amount: 250000,
-    subtitle: "Every diagnostic + AI Readiness Checklist. Lifetime. Persistent memory.",
+    amount: 145000,
+    subtitle: "Every diagnostic + AI Readiness Checklist. Yearly · renews annually. Saves $300 vs à la carte.",
   },
 } as const;
 
