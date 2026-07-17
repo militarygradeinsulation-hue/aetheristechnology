@@ -71,12 +71,14 @@ const ToolInfoPage: React.FC = () => {
                     <Sparkles className="w-4 h-4 mr-1.5" /> Try free
                   </Link>
                 </Button>
-                <Button
-                  onClick={() => openBuy("single")}
-                  className="bg-amber text-background hover:bg-amber/90 font-semibold"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — ${SHOP_PRICES.single.amount / 100}
-                </Button>
+                {tool.priceCents != null && (
+                  <Button
+                    onClick={() => openBuy("single")}
+                    className="bg-amber text-background hover:bg-amber/90 font-semibold"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — {formatToolPrice(tool)}
+                  </Button>
+                )}
                 {tool.route && tool.route !== `/try/${tool.id}` && (
                   <Button asChild variant="ghost" className="text-amber hover:bg-amber/5">
                     <Link to={tool.route}>
