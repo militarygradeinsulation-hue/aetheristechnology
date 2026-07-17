@@ -167,7 +167,7 @@ const TechSolutionsPage: React.FC = () => {
                     // {t.category}
                   </div>
                   <div className="font-mono text-[9px] uppercase tracking-widest text-amber/60">
-                    ${SHOP_PRICES.single.amount / 100} · lifetime
+                    {formatToolPrice(t) || "included"}
                   </div>
                 </div>
 
