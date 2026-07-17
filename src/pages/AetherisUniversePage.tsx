@@ -31,11 +31,19 @@ type PlacedTool = {
   category: string;
   route: string;
   img: string | null;
+  priceCents: number | null;
   // initial spawn position
   x: number;
   y: number;
   z: number;
 };
+
+const formatPrice = (cents: number | null): string => {
+  if (cents == null) return 'Included';
+  const dollars = cents / 100;
+  return `$${dollars.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+};
+
 
 // physics bounds (cube half-extents) and node collision radius
 const BOUND_X = 520;
@@ -201,8 +209,16 @@ const ToolNode = memo(function ToolNode({
           <div className="font-forensic text-[13px] leading-tight font-semibold truncate" title={tool.name}>
             {tool.name}
           </div>
-          <div className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-            #{String(index + 1).padStart(2, '0')} · signal
+          <div className="mt-0.5 flex items-center justify-between gap-2">
+            <div className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">
+              #{String(index + 1).padStart(2, '0')} · signal
+            </div>
+            <div
+              className="font-mono text-[10px] font-bold tracking-tight"
+              style={{ color }}
+            >
+              {formatPrice(tool.priceCents)}
+            </div>
           </div>
         </div>
       </div>
@@ -257,6 +273,7 @@ const AetherisUniversePage: React.FC = () => {
       return {
         id: t.id, name: t.name, tagline: t.tagline, category: t.category, route: t.route,
         img: IMG_BY_ID[t.id] ?? null,
+        priceCents: t.priceCents,
         x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius,
       };
     });
@@ -849,11 +866,14 @@ const AetherisUniversePage: React.FC = () => {
                     />
                   )}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-lg md:text-xl font-forensic font-semibold truncate">{tool.name}</div>
                   <div className="text-xs font-mono uppercase tracking-widest text-foreground/60 truncate mt-1">
                     {tool.category}
                   </div>
+                </div>
+                <div className="flex-shrink-0 font-mono text-base md:text-lg font-bold text-amber">
+                  {formatPrice(tool.priceCents)}
                 </div>
               </button>
             ))}
