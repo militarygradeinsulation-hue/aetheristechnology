@@ -192,24 +192,24 @@ const ResourcesPage = () => {
                         <button
                           type="button"
                           onClick={() => { setPreviewPlaybook(resource); }}
-                          className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
+                          className="forensic-tile rounded-2xl p-5 md:p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
                         >
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
-                              <IconComp className="w-6 h-6 text-amber" />
+                          <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
+                              <IconComp className="w-5 h-5 md:w-6 md:h-6 text-amber" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                                <h2 className="text-base md:text-xl font-bold text-foreground font-display leading-snug">{resource.title}</h2>
                                 <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
                               </div>
-                              <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
+                              <p className="text-xs md:text-sm text-amber font-medium mt-0.5">{resource.subtitle}</p>
                             </div>
                           </div>
-                          <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-5">
+                          <p className="text-muted-foreground text-[13px] md:text-sm leading-relaxed mb-3 md:mb-4 flex-grow">{resource.description}</p>
+                          <div className="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-5">
                             {(resource.tags || []).map((tag: string) => (
-                              <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                              <span key={tag} className="text-[11px] md:text-xs px-2 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                             ))}
                           </div>
                           <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
