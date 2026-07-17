@@ -718,37 +718,8 @@ const AetherisUniversePage: React.FC = () => {
             <span>rot.y {(hudRot.y % 360).toFixed(0)}°</span>
             <span>nodes {tools.length}</span>
           </div>
-          <div className="absolute bottom-3 right-3 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setParamsUI(p => ({ ...p, soundOn: !p.soundOn }))}
-              title={paramsUI.soundOn ? 'Mute impacts' : 'Enable impact sound'}
-              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
-            >
-              {paramsUI.soundOn ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowControls(s => !s)}
-              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10 inline-flex items-center gap-1"
-            >
-              <SlidersHorizontal className="w-3 h-3" /> Physics
-            </button>
-            <button
-              type="button"
-              onClick={shake}
-              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
-            >
-              Shake
-            </button>
-            <button
-              type="button"
-              onClick={recenter}
-              className="font-mono text-[10px] uppercase tracking-widest text-amber border border-amber/40 px-2 py-1 rounded-sm hover:bg-amber/10"
-            >
-              Recenter
-            </button>
-          </div>
+          <div className="absolute bottom-3 right-3 hidden" />
+
           <div className="absolute top-3 left-3 flex gap-2 flex-wrap max-w-[70%]">
             {Object.entries(categoryColor).map(([k, c]) => (
               <span
