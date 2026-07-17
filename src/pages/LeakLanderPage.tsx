@@ -536,6 +536,22 @@ const LeakLanderPage: React.FC = () => {
               Aetheris · Chaos Theory Forensics · aetheris.technology
             </p>
           </section>
+          </section>
+
+          {/* Signature calling card — moved to bottom of page */}
+          <section className="mt-12 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
+            <div className="shimmer-gold-border">
+              <img
+                src={callingCard.url}
+                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
+                className="w-full h-auto animate-float rounded-sm"
+                loading="lazy"
+                decoding="async"
+                width={1280}
+                height={731}
+              />
+            </div>
+          </section>
         </div>
       </main>
 
