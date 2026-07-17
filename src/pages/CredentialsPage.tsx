@@ -67,7 +67,7 @@ const CredentialsPage: React.FC = () => {
                   Download as PDF
                 </Button>
                 <a
-                  href="https://meetings-na2.hubspot.com/jtoney"
+                  href="/book"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
