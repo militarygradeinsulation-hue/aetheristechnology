@@ -536,7 +536,7 @@ const LeakLanderPage: React.FC = () => {
               Aetheris · Chaos Theory Forensics · aetheris.technology
             </p>
           </section>
-          </section>
+
 
           {/* Signature calling card — moved to bottom of page */}
           <section className="mt-12 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
