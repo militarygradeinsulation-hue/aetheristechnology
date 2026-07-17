@@ -389,6 +389,11 @@ const AetherisUniversePage: React.FC = () => {
         const dampMul = Math.exp(-P.damping * dt);
         const phys = physicsRef.current;
         const N = phys.length;
+        // Dynamic bounds — bounce off the actual scene edges (viewport-scale)
+        const sceneRect = sceneRef.current?.getBoundingClientRect();
+        const bx = sceneRect ? Math.max(160, sceneRect.width / 2 - NODE_RADIUS) : BOUND_X;
+        const by = sceneRect ? Math.max(160, sceneRect.height / 2 - NODE_RADIUS) : BOUND_Y;
+        const bz = BOUND_Z;
         // integrate + damping + drift + walls
         for (let i = 0; i < N; i++) {
           if (i === dragI) continue; // node is being held by the user
@@ -403,12 +408,12 @@ const AetherisUniversePage: React.FC = () => {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.z += p.vz * dt;
-          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * R; }
-          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * R; }
-          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * R; }
-          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * R; }
-          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * R; }
-          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * R; }
+          if (p.x >  bx) { p.x =  bx; p.vx = -Math.abs(p.vx) * R; }
+          if (p.x < -bx) { p.x = -bx; p.vx =  Math.abs(p.vx) * R; }
+          if (p.y >  by) { p.y =  by; p.vy = -Math.abs(p.vy) * R; }
+          if (p.y < -by) { p.y = -by; p.vy =  Math.abs(p.vy) * R; }
+          if (p.z >  bz) { p.z =  bz; p.vz = -Math.abs(p.vz) * R; }
+          if (p.z < -bz) { p.z = -bz; p.vz =  Math.abs(p.vz) * R; }
         }
         // pairwise collisions (equal mass elastic; dragged node treated as immovable)
         const minDist = NODE_RADIUS * 2;
