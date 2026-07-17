@@ -277,21 +277,8 @@ const LeakLanderPage: React.FC = () => {
           </section>
 
 
-          {/* Signature calling card — gentle float + golden shimmer edge */}
-          <section className="mt-5 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
-            <div className="shimmer-gold-border">
-              <img
-                src={callingCard.url}
-                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
-                className="w-full h-auto animate-float rounded-sm"
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                width={1280}
-                height={731}
-              />
-            </div>
-          </section>
+
+
 
           {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
           <section
@@ -548,6 +535,22 @@ const LeakLanderPage: React.FC = () => {
             <p className="mt-2 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
               Aetheris · Chaos Theory Forensics · aetheris.technology
             </p>
+          </section>
+
+
+          {/* Signature calling card — moved to bottom of page */}
+          <section className="mt-12 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
+            <div className="shimmer-gold-border">
+              <img
+                src={callingCard.url}
+                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
+                className="w-full h-auto animate-float rounded-sm"
+                loading="lazy"
+                decoding="async"
+                width={1280}
+                height={731}
+              />
+            </div>
           </section>
         </div>
       </main>
