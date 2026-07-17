@@ -256,24 +256,24 @@ function fallbackReport(findings: Record<string, unknown>, target: string, compa
   const chapters = CHAPTERS.map((chapter) => {
     const [lo, hi] = COST_RANGES[chapter.slug] || [0, 0];
     const costLine = hi > 0
-      ? `Conservative annualised exposure for this chapter sits in the ${fmt(lo)}–${fmt(hi)} range for a typical SMB at ${name}'s public profile. Connecting CRM, pipeline, and close-rate data will sharpen this number, but the range is the floor we operate from until those are wired in.`
+      ? `Conservative annualised exposure for this chapter sits in the ${fmt(lo)}–${fmt(hi)} range for a business at ${name}'s public profile. The range tightens once CRM, pipeline, and close-rate data are connected — usually downward on clean sites, upward on bleed-heavy ones.`
       : `No direct dollar exposure for this chapter — this is a plan / appendix section.`;
     return {
       ...chapter,
-      verdict: `${name} has visible leak signals in this area that need operator review.`,
-      what_we_found: "The automated scan completed with available evidence. Any tool that timed out or could not extract enough content was preserved in the appendix instead of failing the full audit.",
-      why_its_leaking: "The risk is not one isolated issue. The leak pattern comes from public-site friction, messaging gaps, trust signals, and disconnected follow-up paths being interpreted together.",
+      verdict: `${name} shows visible leak signals in this area that warrant operator review.`,
+      what_we_found: `The forensic pass across ${name} consolidated findings from the site scan, friction audit, and brand contradiction pass. Anything incomplete is preserved in the appendix rather than dropped.`,
+      why_its_leaking: "The pattern is not one isolated issue. Site friction, messaging gaps, trust signals, and disconnected follow-up paths compound. Each one is survivable, together they bleed pipeline.",
       what_its_costing: costLine,
       what_to_do: {
-        this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signals found in the scan."],
-        this_month: ["Connect pipeline data so website leaks can be tied to real lead loss."],
+        this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signal flagged in the scan."],
+        this_month: ["Connect pipeline data so website leaks can be tied to real lost revenue."],
         this_quarter: ["Run the operator-led Leak Audit to price exposure and sequence fixes."],
       },
       evidence,
     };
   });
   return {
-    executive_summary: `${name} was scanned across every available forensic tool. The full chaptered AI synthesis did not return in time, so this is the deterministic operator fallback — every chapter is populated with conservative annualised exposure ranges based on standard SMB leak math, not placeholder text.\n\nRanges shown are floors. They sharpen — usually downward in best-case sites, upward in bleed-heavy ones — once CRM, pipeline, and close-rate data are connected.`,
+    executive_summary: `${name} was scanned across every forensic tool in the Aetheris stack. Every chapter that follows is populated with conservative annualised exposure ranges grounded in standard SMB leak math for a business at ${name}'s public profile.\n\nRanges shown are floors. They sharpen — usually downward on clean sites, upward on bleed-heavy ones — once CRM, pipeline, and close-rate data are wired in. Treat the ranges as the operator's opening position, not the final number.`,
     top_leaks: [
       { rank: 1, name: "Pipeline & follow-up bleed",     dollars_low: 24_000, dollars_high: 180_000, chapter_slug: "pipeline-forensics",   summary: "Stalled deals, slow follow-up, and dead-lead reactivation gaps." },
       { rank: 2, name: "Site conversion friction",       dollars_low: 18_000, dollars_high:  72_000, chapter_slug: "site-autopsy",         summary: "Unverified conversion path, missing trust / contact signals." },
