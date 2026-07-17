@@ -667,9 +667,9 @@ export default function TryToolPage() {
                         </div>
                       </div>
                       <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber/80 shrink-0">
-                        <span>$40</span>
+                        <span>{tool?.priceCents != null ? formatToolPrice(tool) : "Included"}</span>
                         <span className="text-amber/30">/</span>
-                        <span className="text-crimson/80">$100</span>
+                        <span className="text-crimson/80">$100 op</span>
                       </div>
                       <div className="w-7 h-7 rounded-sm border border-amber/30 flex items-center justify-center text-amber shrink-0">
                         {dossierOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
