@@ -78,6 +78,7 @@ const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompany
 const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
 const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
 const AdminLinkedInPublisher = lazy(() => import('@/components/admin/AdminLinkedInPublisher'));
+const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedInComments'));
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
 const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
 const SocialSchedulerPanel = lazy(() => import('@/components/admin/SocialSchedulerPanel').then(m => ({ default: m.SocialSchedulerPanel })));
@@ -583,10 +584,12 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="video"><Film className="w-4 h-4 mr-1.5" />Video Studio</TabsTrigger>
             <TabsTrigger value="image"><ImageIcon className="w-4 h-4 mr-1.5" />Image Studio</TabsTrigger>
             <TabsTrigger value="linkedin"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Publisher</TabsTrigger>
+            <TabsTrigger value="linkedin_comments"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Comments</TabsTrigger>
           </TabsList>
           <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
           <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
           <TabsContent value="linkedin" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInPublisher /></Suspense></TabsContent>
+          <TabsContent value="linkedin_comments" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInComments /></Suspense></TabsContent>
         </Tabs>
       );
       case 'documents': return <AdminDocumentsPanel />;
