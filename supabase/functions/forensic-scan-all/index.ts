@@ -840,7 +840,9 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
     // Auto-issue Aetheris Universe access code to the requester (best-effort).
     try {
-      const email = (typeof requestedBy === "string" ? requestedBy : "").trim().toLowerCase();
+      const { data: row } = await sb.from("forensic_scans")
+        .select("requested_by").eq("id", id).maybeSingle();
+      const email = String(row?.requested_by ?? "").trim().toLowerCase();
       if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         await sb.functions.invoke("universe-access", { body: { action: "issue", email } });
       }
