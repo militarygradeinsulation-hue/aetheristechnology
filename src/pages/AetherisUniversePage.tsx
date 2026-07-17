@@ -543,9 +543,12 @@ const AetherisUniversePage: React.FC = () => {
     const worldDY = dyPix;
     const p = physicsRef.current[i];
     p.x += worldDX; p.y += worldDY; p.z += worldDZ;
-    // clamp to bounds so we can't drag off-scene
-    p.x = Math.max(-BOUND_X, Math.min(BOUND_X, p.x));
-    p.y = Math.max(-BOUND_Y, Math.min(BOUND_Y, p.y));
+    // clamp to bounds so we can't drag off-scene (use live scene size)
+    const sr = sceneRef.current?.getBoundingClientRect();
+    const bxD = sr ? Math.max(160, sr.width / 2 - NODE_RADIUS) : BOUND_X;
+    const byD = sr ? Math.max(160, sr.height / 2 - NODE_RADIUS) : BOUND_Y;
+    p.x = Math.max(-bxD, Math.min(bxD, p.x));
+    p.y = Math.max(-byD, Math.min(byD, p.y));
     p.z = Math.max(-BOUND_Z, Math.min(BOUND_Z, p.z));
     d.vx = worldDX / dt; d.vy = worldDY / dt; d.vz = worldDZ / dt;
     d.lastX = e.clientX; d.lastY = e.clientY; d.lastT = now;
