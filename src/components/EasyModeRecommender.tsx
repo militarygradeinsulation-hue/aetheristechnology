@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
-import { SHOP_TOOLS, SHOP_PRICES } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, SHOP_PRICES, findTool } from "@/lib/tool-shop-catalog";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { Sparkles, ShoppingCart, CalendarClock, X, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -95,10 +95,15 @@ export function EasyModeRecommender() {
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   };
 
-  const visiblePicks = rec?.picks.filter(p => !dismissedTools.has(p.id)) || [];
+  const visiblePicks = (rec?.picks || []).filter(p => {
+    if (dismissedTools.has(p.id)) return false;
+    const t = findTool(p.id);
+    return !!t && !t.internalOnly && t.priceCents != null;
+  });
   const activeCount = visiblePicks.length;
-  const bundlePrice = activeCount >= 3 ? SHOP_PRICES.triple.amount : SHOP_PRICES.single.amount * activeCount;
-  const listPrice = SHOP_PRICES.single.amount * activeCount;
+  const listPrice = visiblePicks.reduce((sum, p) => sum + (findTool(p.id)?.priceCents ?? 0), 0);
+  // Evidence Kit caps the total once the pick list exceeds its price.
+  const bundlePrice = Math.min(listPrice, SHOP_PRICES.unlimited.amount);
   const savings = Math.max(0, listPrice - bundlePrice);
 
   return (

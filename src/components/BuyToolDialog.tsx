@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { SHOP_PRICES, SHOP_TOOLS, type ShopPlan } from "@/lib/tool-shop-catalog";
+import {
+  SHOP_PRICES,
+  SHOP_TOOLS,
+  findTool,
+  formatToolPrice,
+  sellableShopTools,
+  type ShopPlan,
+} from "@/lib/tool-shop-catalog";
 
 interface BuyToolDialogProps {
   open: boolean;
@@ -12,50 +18,65 @@ interface BuyToolDialogProps {
 }
 
 /**
- * Universal buy-flow modal. Handles single-tool, 3-tool bundle, and All-Access
- * purchases inline (no page navigation). For the "triple" plan, users pick 3
- * tools inside the dialog before checkout mounts.
+ * Universal buy-flow modal.
+ *  - `single`: buys one specific client-facing tool at its own priceId/amount.
+ *  - `unlimited` / `triple`: buys the Evidence Kit bundle ($2,500, all
+ *    client-facing tools). Legacy plan keys map to the same Stripe price.
  */
 export function BuyToolDialog({ open, onOpenChange, plan, preselectedToolIds = [] }: BuyToolDialogProps) {
-  const price = SHOP_PRICES[plan];
-  const [selected, setSelected] = useState<string[]>(preselectedToolIds);
+  // Filter preselected ids to sellable tools only — never let an internal
+  // tool land in the buy flow via a stale link.
+  const cleanPreselect = preselectedToolIds.filter(id => {
+    const t = findTool(id);
+    return !!t && !t.internalOnly && t.priceCents != null;
+  });
+  const [selected, setSelected] = useState<string[]>(cleanPreselect);
 
   useEffect(() => {
-    if (open) setSelected(preselectedToolIds);
-  }, [open, preselectedToolIds.join(",")]);
+    if (open) setSelected(cleanPreselect);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, cleanPreselect.join(",")]);
 
-  const maxSelect = plan === "single" ? 1 : plan === "triple" ? 3 : 0;
-  const needsPicker = plan === "triple";
-  const ready = plan === "unlimited"
-    || (plan === "single" && selected.length === 1)
-    || (plan === "triple" && selected.length === 3);
+  const isBundle = plan !== "single";
+  const tool = plan === "single" ? findTool(selected[0]) : undefined;
 
-  const toggle = (id: string) => {
-    setSelected(prev => {
-      if (prev.includes(id)) return prev.filter(x => x !== id);
-      if (maxSelect && prev.length >= maxSelect) return [...prev.slice(1), id];
-      return [...prev, id];
-    });
-  };
+  // Resolve priceId + display amount from the selected tool (single) or
+  // the Evidence Kit bundle price (bundle plans).
+  const resolved = useMemo(() => {
+    if (isBundle) {
+      return {
+        priceId: SHOP_PRICES.unlimited.priceId,
+        amountCents: SHOP_PRICES.unlimited.amount,
+        label: SHOP_PRICES.unlimited.label,
+      };
+    }
+    if (tool && tool.priceId && tool.priceCents != null) {
+      return { priceId: tool.priceId, amountCents: tool.priceCents, label: tool.name };
+    }
+    return null;
+  }, [isBundle, tool]);
+
+  const ready = isBundle || (plan === "single" && !!resolved);
 
   const title = useMemo(() => {
-    if (plan === "single") {
-      const t = SHOP_TOOLS.find(x => x.id === selected[0]);
-      return t ? `Buy ${t.name} — $${price.amount / 100}` : `Pick 1 tool — $${price.amount / 100}`;
-    }
-    if (plan === "triple") return `Pick 3 tools — $${price.amount / 100}`;
-    return `All-Access — $${price.amount / 100}`;
-  }, [plan, selected, price.amount]);
+    if (isBundle) return `Evidence Kit — ${formatPrice(SHOP_PRICES.unlimited.amount)}`;
+    if (tool) return `Buy ${tool.name} — ${formatToolPrice(tool)}`;
+    return "Pick a tool";
+  }, [isBundle, tool]);
 
-  const description = plan === "unlimited"
-    ? "Every tool. Every future release. Full Team access. Lifetime access with persistent memory. Replaces $2k/mo in agency retainers — one-time payment, keep it forever. 7-day money back."
-    : "Own it for life. Unlimited runs. Persistent memory tied to your account. Replaces a $200/mo SaaS subscription — 7-day money back if it doesn't earn its keep.";
+  const description = isBundle
+    ? "Every client-facing diagnostic + the AI Readiness Checklist. Lifetime access with persistent memory. One payment, keep it forever. 7-day money back."
+    : "Own it for life. Unlimited runs. Persistent memory tied to your account. 7-day money back if it doesn't earn its keep.";
 
   const metadata = {
     shop: "tools",
     plan,
-    tool_ids: JSON.stringify(plan === "unlimited" ? [] : selected),
-    product_name: `Leak Tool Shop — ${price.label}`,
+    tool_ids: JSON.stringify(isBundle
+      ? sellableShopTools().map(t => t.id)
+      : selected),
+    product_name: isBundle
+      ? "Aetheris Evidence Kit — All Client-Facing Tools"
+      : (tool ? `Aetheris Tool — ${tool.name}` : "Aetheris Tool"),
   };
 
   return (
@@ -66,39 +87,36 @@ export function BuyToolDialog({ open, onOpenChange, plan, preselectedToolIds = [
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        {needsPicker && (
+        {plan === "single" && !tool && (
           <div className="space-y-2">
             <div className="font-mono text-[10px] uppercase tracking-widest text-amber">
-              Pick 3 tools ({selected.length}/3)
+              Pick a tool
             </div>
             <div className="grid sm:grid-cols-2 gap-1.5 max-h-72 overflow-y-auto pr-1">
-              {SHOP_TOOLS.map(t => {
-                const on = selected.includes(t.id);
-                return (
-                  <label
-                    key={t.id}
-                    className={`flex items-start gap-2 rounded-sm border p-2 cursor-pointer transition-colors ${on ? "border-amber bg-amber/10" : "border-border/60 hover:border-amber/50"}`}
-                  >
-                    <Checkbox checked={on} onCheckedChange={() => toggle(t.id)} className="mt-0.5" />
-                    <div className="min-w-0">
-                      <div className="text-xs font-semibold truncate">{t.name}</div>
-                      <div className="text-[10px] text-muted-foreground truncate">{t.tagline}</div>
-                    </div>
-                  </label>
-                );
-              })}
+              {sellableShopTools().map(t => (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setSelected([t.id])}
+                  className="text-left rounded-sm border border-border/60 hover:border-amber/60 p-2 transition-colors"
+                >
+                  <div className="text-xs font-semibold truncate">{t.name}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{t.tagline}</div>
+                  <div className="text-[10px] font-mono text-amber mt-0.5">{formatToolPrice(t)}</div>
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {ready ? (
+        {ready && resolved ? (
           <StripeEmbeddedCheckout
-            priceId={price.priceId}
+            priceId={resolved.priceId}
             returnUrl={`${window.location.origin}/tools-shop/return?session_id={CHECKOUT_SESSION_ID}`}
             metadata={metadata}
           />
         ) : (
-          !needsPicker && (
+          plan === "single" && !tool && (
             <div className="text-sm text-muted-foreground p-4 text-center">
               Select a tool to continue.
             </div>
@@ -107,4 +125,8 @@ export function BuyToolDialog({ open, onOpenChange, plan, preselectedToolIds = [
       </DialogContent>
     </Dialog>
   );
+}
+
+function formatPrice(cents: number) {
+  return `$${(cents / 100).toLocaleString()}`;
 }

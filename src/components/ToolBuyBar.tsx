@@ -1,15 +1,15 @@
 import { useLocation } from "react-router-dom";
-import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, formatToolPrice } from "@/lib/tool-shop-catalog";
 import { CalendarClock, ShoppingCart, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
 /**
- * Sticky bottom bar shown on any tool page in SHOP_TOOLS.
- * Every visitor gets 3 free runs. After that the tool stays clickable and
- * viewable, but running it requires either buying the tool ($40 lifetime)
- * or booking an appointment.
+ * Sticky bottom bar shown on public tool pages. Every visitor gets 3 free
+ * runs; after that they either buy the tool at its listed price, or book a
+ * session. Hidden entirely on operator-only tools and on Golden Report
+ * (which is only ever included in the $18,500 Full Leak Investigation).
  */
 export function ToolBuyBar() {
   const { pathname } = useLocation();
@@ -20,6 +20,9 @@ export function ToolBuyBar() {
   useEffect(() => { setDismissed(false); }, [pathname]);
 
   if (!tool || dismissed) return null;
+  if (tool.internalOnly || tool.priceCents == null) return null;
+
+  const priceLabel = formatToolPrice(tool);
 
   return (
     <>
@@ -28,7 +31,7 @@ export function ToolBuyBar() {
           <div className="flex-1 min-w-0">
             <div className="text-[10px] uppercase tracking-widest text-amber-500 font-mono">Leak Ecosystem · 3 free tries</div>
             <div className="text-sm font-semibold truncate">{tool.name} — free to view, buy or book to keep running</div>
-            <div className="text-xs text-muted-foreground truncate">Own it for $40 lifetime, or book an appointment and we'll run it with you.</div>
+            <div className="text-xs text-muted-foreground truncate">Own it for {priceLabel} lifetime, or book an appointment and we'll run it with you.</div>
           </div>
           <a
             href={BOOK_MEETING_URL}
@@ -43,7 +46,7 @@ export function ToolBuyBar() {
             onClick={() => setBuyOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-md bg-amber-500 hover:bg-amber-600 text-black text-sm font-semibold px-3 py-2 whitespace-nowrap"
           >
-            <ShoppingCart className="w-4 h-4" /> Buy $40
+            <ShoppingCart className="w-4 h-4" /> Buy {priceLabel}
           </button>
           <button
             type="button"

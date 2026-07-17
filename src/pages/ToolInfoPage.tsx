@@ -9,7 +9,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
-import { findTool, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog";
+import { findTool, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { TOOL_INFO } from "@/lib/toolInfo";
 
 const ToolInfoPage: React.FC = () => {
@@ -71,12 +71,14 @@ const ToolInfoPage: React.FC = () => {
                     <Sparkles className="w-4 h-4 mr-1.5" /> Try free
                   </Link>
                 </Button>
-                <Button
-                  onClick={() => openBuy("single")}
-                  className="bg-amber text-background hover:bg-amber/90 font-semibold"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — ${SHOP_PRICES.single.amount / 100}
-                </Button>
+                {tool.priceCents != null && (
+                  <Button
+                    onClick={() => openBuy("single")}
+                    className="bg-amber text-background hover:bg-amber/90 font-semibold"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — {formatToolPrice(tool)}
+                  </Button>
+                )}
                 {tool.route && tool.route !== `/try/${tool.id}` && (
                   <Button asChild variant="ghost" className="text-amber hover:bg-amber/5">
                     <Link to={tool.route}>

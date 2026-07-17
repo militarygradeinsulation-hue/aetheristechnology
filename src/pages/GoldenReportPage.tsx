@@ -43,6 +43,9 @@ const GoldenReportPage: React.FC = () => {
                 SEO, pipeline signals — synthesized into a 14-chapter Smart PDF with verdicts, dollar leaks, and
                 evidence you can search or ask questions of.
               </p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-amber/80 max-w-2xl mx-auto">
+                $3,500 deliverable · included in the $18,500 Full Leak Investigation · not sold standalone
+              </p>
             </div>
             {hasSharedScan ? (
               <ForensicScanAllPanel />

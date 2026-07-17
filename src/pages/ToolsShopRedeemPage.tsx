@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle2, KeyRound } from "lucide-react";
-import { SHOP_TOOLS, findTool } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, findTool, publicShopTools, sellableShopTools } from "@/lib/tool-shop-catalog";
 import { useToolLicense, setStoredLicenseCode } from "@/hooks/useToolLicense";
 
 export default function ToolsShopRedeemPage() {
@@ -40,7 +40,7 @@ export default function ToolsShopRedeemPage() {
 
   const ownedTools = redeemed
     ? (redeemed.plan === "unlimited"
-        ? SHOP_TOOLS
+        ? sellableShopTools()
         : redeemed.tool_ids.map(findTool).filter(Boolean) as typeof SHOP_TOOLS)
     : [];
 
@@ -82,7 +82,7 @@ export default function ToolsShopRedeemPage() {
                     {busy ? "Checking..." : "Unlock"}
                   </Button>
                   <div className="text-xs text-muted-foreground text-center pt-2">
-                    Don't have one? <Link to="/" className="underline text-amber-500">Buy a tool for $40</Link>
+                    Don't have one? <Link to="/tools-shop" className="underline text-amber-500">Browse the tools</Link>
                   </div>
                 </div>
               </>

@@ -160,15 +160,23 @@ export const REP_PRODUCTS: RepProduct[] = [
 
   // ── LEAK ECOSYSTEM TOOL SHOP (public /tools-shop — lifetime tool unlocks) ──
   // Tiered commission applies (T1 / T2 / T3 by price band).
-  { name: 'Tool Shop · Single Tool ($40 lifetime)', priceCents: 4000, tier: 1,
-    description: 'Lifetime unlock for one Leak Ecosystem tool — unlimited runs + persistent memory attached to the buyer\'s code.',
-    forWho: 'Curious operators who tried the 3 free runs and want one tool for life.' },
-  { name: 'Tool Shop · 3-Tool Bundle ($100 lifetime)', priceCents: 10000, tier: 2,
-    description: 'Mix-and-match any 3 Leak Ecosystem tools, lifetime access, memory attached. Best per-tool price short of All Access.',
-    forWho: 'Owners who already know the 2-3 tools they will actually use every week.' },
-  { name: 'Tool Shop · All Access ($1,000 lifetime)', priceCents: 100000, tier: 3,
-    description: 'Every current + future Leak Ecosystem tool, unlimited runs, memory on all of them, one code for life.',
-    forWho: 'Power users, agencies, and reps who want the full toolbox with zero per-tool math.' },
+  { name: 'Tool Shop · Website Leak Scanner ($250 lifetime)', priceCents: 25000, tier: 2,
+    description: 'Lifetime unlock — Website Leak Scanner. Unlimited runs + persistent memory.', forWho: 'Prospects who ran the free scanner and want it forever.' },
+  { name: 'Tool Shop · Brand Contradictions ($250 lifetime)', priceCents: 25000, tier: 2,
+    description: 'Lifetime unlock — Brand Contradictions.', forWho: 'Founders whose site says one thing and does another.' },
+  { name: 'Tool Shop · Friction Audit ($250 lifetime)', priceCents: 25000, tier: 2,
+    description: 'Lifetime unlock — Friction Audit.', forWho: 'Owners bleeding at buyer-journey checkpoints.' },
+  { name: 'Tool Shop · Strategic Questions ($250 lifetime)', priceCents: 25000, tier: 2,
+    description: 'Lifetime unlock — Strategic Questions.', forWho: 'Operators who need to interrogate their own strategy quarterly.' },
+  { name: 'Tool Shop · AI Readiness Checklist ($250 lifetime)', priceCents: 25000, tier: 2,
+    description: 'Lifetime unlock — AI Readiness Checklist.', forWho: 'Teams evaluating whether AI can safely touch their workflow.' },
+  { name: 'Tool Shop · Detective Mode ($500 lifetime)', priceCents: 50000, tier: 2,
+    description: 'Lifetime unlock — Detective Mode. Deep forensic sweep on a single surface.', forWho: 'Buyers who want the upgrade mode, not the quick scan.' },
+  { name: 'Tool Shop · Forensic Scan All ($1,500 lifetime)', priceCents: 150000, tier: 3,
+    description: 'Lifetime unlock — Runs every diagnostic in one shot.', forWho: 'Owners who want a full evidence sweep on demand.' },
+  { name: 'Tool Shop · Evidence Kit — All Client-Facing Tools ($2,500 lifetime)', priceCents: 250000, tier: 3,
+    description: 'Lifetime unlock — every client-facing diagnostic + AI Readiness Checklist. One code, all tools.',
+    forWho: 'Buyers who want the full evidence kit without picking one tool at a time.' },
 
 
 

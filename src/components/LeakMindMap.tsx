@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { X, Sparkles, ShoppingCart } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
-import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, formatToolPrice } from "@/lib/tool-shop-catalog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 
 // Keyword → tool-id map. When a node is opened we suggest tools whose
@@ -440,7 +440,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
               const toolIds = pickToolsForNode(n);
               const tools = toolIds
                 .map((id) => SHOP_TOOLS.find((t) => t.id === id))
-                .filter(Boolean) as typeof SHOP_TOOLS;
+                .filter((t): t is (typeof SHOP_TOOLS)[number] => !!t && !t.internalOnly && t.priceCents != null);
               if (!tools.length) return null;
               return (
                 <div className="mt-3 pt-2 border-t border-amber/25">
@@ -448,7 +448,9 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                     Tools that fix this
                   </div>
                   <ul className="space-y-1.5">
-                    {tools.map((t) => (
+                    {tools.map((t) => {
+                      const priceLabel = formatToolPrice(t);
+                      return (
                       <li key={t.id} className="flex items-center justify-between gap-2 rounded-sm border border-amber/20 bg-background/60 px-2 py-1.5">
                         <span className="font-forensic text-[11px] font-bold text-foreground truncate">
                           {t.name}
@@ -466,13 +468,14 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setBuyToolId(t.id); }}
                             className="inline-flex items-center gap-1 rounded-sm bg-amber text-background px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
-                            title="Buy $40 lifetime"
+                            title={`Buy ${priceLabel} lifetime`}
                           >
-                            <ShoppingCart className="w-2.5 h-2.5" /> $40
+                            <ShoppingCart className="w-2.5 h-2.5" /> {priceLabel}
                           </button>
                         </span>
                       </li>
-                    ))}
+                      );
+                    })}
                   </ul>
                 </div>
               );
