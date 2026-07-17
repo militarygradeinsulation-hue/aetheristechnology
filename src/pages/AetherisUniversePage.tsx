@@ -2,6 +2,7 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
+import { Background } from '@/components/Background';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
@@ -596,6 +597,8 @@ const AetherisUniversePage: React.FC = () => {
         description="A living 3D map of every Aetheris tool and technology. Fly through the universe, open any tool, try it live."
         path="/aetheris-universe"
       />
+
+      <Background />
 
       <div
         aria-hidden
