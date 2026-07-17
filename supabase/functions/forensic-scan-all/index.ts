@@ -414,7 +414,7 @@ async function firecrawlScrapeOnce(
       body: JSON.stringify(body),
     },
     timeoutMs,
-    "Firecrawl scrape",
+    "External crawler scrape",
   );
 }
 
@@ -482,7 +482,7 @@ async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
     return r.ok ? json : { error: json?.error || `Function ${name} failed with ${r.status}`, status: r.status };
   } catch (e) {
     const message = e instanceof Error && e.name === "AbortError"
-      ? `Function ${name} timed out and was skipped so Scan All could continue.`
+      ? `Companion audit ${name} did not finish inside the scan window, so Golden Report continued with the core crawler.`
       : String(e);
     return { error: message };
   } finally {
@@ -747,8 +747,11 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
         const brand = parseFirecrawlBranding(scrape, url);
         await setBrandKitStage(id, "brand_scan", "done", { colors: brand.colors.length, fonts: brand.fonts.length });
-        const kit = await generateBrandKit(id, brand);
-        await sb.from("forensic_scans").update({ brand_kit: kit, updated_at: nowIso() }).eq("id", id);
+        // Brand assets are optional extras. Do not let calendars/images/social packs
+        // hold the Golden Report open or push it into the platform wall-clock limit.
+        generateBrandKit(id, brand)
+          .then((kit) => sb.from("forensic_scans").update({ brand_kit: kit, updated_at: nowIso() }).eq("id", id))
+          .catch((err) => setBrandKitStage(id, "assets", "failed", String(err?.message || err).slice(0, 200)));
       } catch (e) {
         await setBrandKitStage(id, "brand_scan", "failed", String((e as Error).message).slice(0, 200));
       }
@@ -756,8 +759,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     const siteTask = brandKitTask;
 
     const websiteTask = (async () => {
-      findings.scan_website = await invokeFn("scan-website", { url, company }, 55_000);
-      await stage("scan_website", "done", { cap_seconds: 55 });
+      findings.scan_website = await invokeFn("scan-website", { url, company }, 14_000);
+      await stage("scan_website", "done", { cap_seconds: 14 });
     })();
 
     const frictionTask = (async () => {
@@ -767,17 +770,17 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           desiredTone: ["direct", "credible", "trustworthy"],
           industry: company || "business services",
           targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 45_000),
+        }, 12_000),
         invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 45_000),
+        }, 12_000),
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 45 });
+      await stage("friction", "done", { cap_seconds: 12 });
     })();
 
 
@@ -801,14 +804,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       updated_at: nowIso(),
     }).eq("id", id);
 
-    await stage("synth", "running", { cap_seconds: 100, mode: "per-chapter-parallel" });
+    await stage("synth", "running", { cap_seconds: 45, mode: "per-chapter-parallel" });
     let report = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 100s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 45s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
       // from being stuck in "running" forever if Gemini stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 100_000));
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45_000));
       const result = await Promise.race([synth, watchdog]);
       if (result) {
         report = result;
@@ -819,7 +822,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           if (!report.top_leaks?.length) report.top_leaks = fbEarly.top_leaks;
         }
       } else {
-        findings.synthesis_error = "AI synthesis exceeded 100s watchdog — fallback report shipped.";
+        findings.synthesis_error = "AI synthesis exceeded scan window; fallback report shipped.";
       }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
