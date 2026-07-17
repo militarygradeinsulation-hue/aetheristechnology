@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Background } from '@/components/Background';
+import aetherisLogo from '@/assets/aetheris-a-logo.png';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
@@ -388,6 +389,11 @@ const AetherisUniversePage: React.FC = () => {
         const dampMul = Math.exp(-P.damping * dt);
         const phys = physicsRef.current;
         const N = phys.length;
+        // Dynamic bounds — bounce off the actual scene edges (viewport-scale)
+        const sceneRect = sceneRef.current?.getBoundingClientRect();
+        const bx = sceneRect ? Math.max(160, sceneRect.width / 2 - NODE_RADIUS) : BOUND_X;
+        const by = sceneRect ? Math.max(160, sceneRect.height / 2 - NODE_RADIUS) : BOUND_Y;
+        const bz = BOUND_Z;
         // integrate + damping + drift + walls
         for (let i = 0; i < N; i++) {
           if (i === dragI) continue; // node is being held by the user
@@ -402,12 +408,12 @@ const AetherisUniversePage: React.FC = () => {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.z += p.vz * dt;
-          if (p.x >  BOUND_X) { p.x =  BOUND_X; p.vx = -Math.abs(p.vx) * R; }
-          if (p.x < -BOUND_X) { p.x = -BOUND_X; p.vx =  Math.abs(p.vx) * R; }
-          if (p.y >  BOUND_Y) { p.y =  BOUND_Y; p.vy = -Math.abs(p.vy) * R; }
-          if (p.y < -BOUND_Y) { p.y = -BOUND_Y; p.vy =  Math.abs(p.vy) * R; }
-          if (p.z >  BOUND_Z) { p.z =  BOUND_Z; p.vz = -Math.abs(p.vz) * R; }
-          if (p.z < -BOUND_Z) { p.z = -BOUND_Z; p.vz =  Math.abs(p.vz) * R; }
+          if (p.x >  bx) { p.x =  bx; p.vx = -Math.abs(p.vx) * R; }
+          if (p.x < -bx) { p.x = -bx; p.vx =  Math.abs(p.vx) * R; }
+          if (p.y >  by) { p.y =  by; p.vy = -Math.abs(p.vy) * R; }
+          if (p.y < -by) { p.y = -by; p.vy =  Math.abs(p.vy) * R; }
+          if (p.z >  bz) { p.z =  bz; p.vz = -Math.abs(p.vz) * R; }
+          if (p.z < -bz) { p.z = -bz; p.vz =  Math.abs(p.vz) * R; }
         }
         // pairwise collisions (equal mass elastic; dragged node treated as immovable)
         const minDist = NODE_RADIUS * 2;
@@ -537,9 +543,12 @@ const AetherisUniversePage: React.FC = () => {
     const worldDY = dyPix;
     const p = physicsRef.current[i];
     p.x += worldDX; p.y += worldDY; p.z += worldDZ;
-    // clamp to bounds so we can't drag off-scene
-    p.x = Math.max(-BOUND_X, Math.min(BOUND_X, p.x));
-    p.y = Math.max(-BOUND_Y, Math.min(BOUND_Y, p.y));
+    // clamp to bounds so we can't drag off-scene (use live scene size)
+    const sr = sceneRef.current?.getBoundingClientRect();
+    const bxD = sr ? Math.max(160, sr.width / 2 - NODE_RADIUS) : BOUND_X;
+    const byD = sr ? Math.max(160, sr.height / 2 - NODE_RADIUS) : BOUND_Y;
+    p.x = Math.max(-bxD, Math.min(bxD, p.x));
+    p.y = Math.max(-byD, Math.min(byD, p.y));
     p.z = Math.max(-BOUND_Z, Math.min(BOUND_Z, p.z));
     d.vx = worldDX / dt; d.vy = worldDY / dt; d.vz = worldDZ / dt;
     d.lastX = e.clientX; d.lastY = e.clientY; d.lastT = now;
@@ -701,14 +710,16 @@ const AetherisUniversePage: React.FC = () => {
             />
 
 
-            <div
+            <img
+              src={aetherisLogo}
+              alt="Aetheris"
               aria-hidden
-              className="absolute left-1/2 top-1/2 w-24 h-24 -ml-12 -mt-12 rounded-full pointer-events-none"
+              className="absolute left-1/2 top-1/2 w-48 h-48 md:w-64 md:h-64 -translate-x-1/2 -translate-y-1/2 object-contain pointer-events-none select-none"
+              draggable={false}
               style={{
                 transformStyle: 'preserve-3d',
-                background:
-                  'radial-gradient(circle at 30% 30%, rgba(217,169,58,0.95), rgba(230,57,70,0.35) 55%, rgba(0,0,0,0) 75%)',
-                boxShadow: '0 0 80px rgba(217,169,58,0.55), 0 0 200px rgba(230,57,70,0.25)',
+                filter: 'drop-shadow(0 0 40px rgba(217,169,58,0.55)) drop-shadow(0 0 120px rgba(230,57,70,0.25))',
+                opacity: 0.95,
               }}
             />
           </div>
@@ -812,21 +823,21 @@ const AetherisUniversePage: React.FC = () => {
         </div>
 
 
-        <section className="max-w-5xl mx-auto px-4 pb-16">
-          <h2 className="font-forensic text-xl md:text-2xl font-bold mb-3">
+        <section className="max-w-7xl mx-auto px-4 pb-24">
+          <h2 className="font-forensic text-3xl md:text-5xl font-bold mb-4">
             All signals · <span className="text-amber italic">indexed</span>
           </h2>
-          <p className="text-sm text-foreground/60 mb-5">
+          <p className="text-base md:text-lg text-foreground/70 mb-8">
             Prefer a list? Every tool in the Universe, sorted. Click to open.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {tools.map((tool) => (
               <button
                 key={tool.id}
                 onClick={() => setSelected(tool)}
-                className="text-left forensic-tile rounded-sm border border-amber/20 hover:border-amber/60 transition-colors p-2 flex gap-2 items-center"
+                className="text-left forensic-tile rounded-md border border-amber/25 hover:border-amber/70 transition-colors p-4 flex gap-4 items-center"
               >
-                <div className="w-10 h-10 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
                   {tool.img && (
                     <img
                       src={tool.img}
@@ -838,8 +849,8 @@ const AetherisUniversePage: React.FC = () => {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate">{tool.name}</div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-foreground/50 truncate">
+                  <div className="text-lg md:text-xl font-forensic font-semibold truncate">{tool.name}</div>
+                  <div className="text-xs font-mono uppercase tracking-widest text-foreground/60 truncate mt-1">
                     {tool.category}
                   </div>
                 </div>
