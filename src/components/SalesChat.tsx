@@ -102,15 +102,15 @@ export const SalesChat: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Aggressive auto-open: once per browser session, ~10s after landing.
+  // Quick "I'm here to help" tip: shown once per session, auto-dismisses after 4s.
+  const [showTip, setShowTip] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem(AUTO_OPENED_KEY) === '1') return;
-    const t = setTimeout(() => {
-      setIsOpen(true);
-      sessionStorage.setItem(AUTO_OPENED_KEY, '1');
-      trackEvent('nexus_auto_open', { path: pathname, section: opener.label });
-    }, AUTO_OPEN_MS);
+    setShowTip(true);
+    sessionStorage.setItem(AUTO_OPENED_KEY, '1');
+    trackEvent('nexus_tip_shown', { path: pathname, section: opener.label });
+    const t = setTimeout(() => setShowTip(false), 4000);
     return () => clearTimeout(t);
   }, [pathname, opener.label, trackEvent]);
 
@@ -243,9 +243,15 @@ export const SalesChat: React.FC = () => {
     <>
       {/* Single floating button */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+          {showTip && (
+            <div className="animate-in fade-in slide-in-from-right-2 duration-300 bg-card border border-amber/40 shadow-xl rounded-full px-4 py-2 text-sm text-foreground whitespace-nowrap">
+              I'm here to help
+              <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-card border-r border-t border-amber/40" />
+            </div>
+          )}
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => { setIsOpen(true); setShowTip(false); }}
             className={`w-16 h-16 rounded-full bg-background border-2 border-amber/60 shadow-xl flex items-center justify-center hover:scale-105 transition-all active:scale-95 relative overflow-hidden ${
               showPulse ? 'animate-pulse' : ''
             }`}
