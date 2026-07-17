@@ -115,6 +115,7 @@ const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
+const LovableOptimizerPage = lazy(() => import("./pages/LovableOptimizerPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -300,6 +301,7 @@ const App = () => (
                       <Route path="/competitor-analysis" element={<AuthorityArticlePage />} />
                       <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
                       <Route path="/report/:scanId/ask" element={<ForensicReportAskPage />} />
+                      <Route path="/lovable" element={<LovableOptimizerPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
