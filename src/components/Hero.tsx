@@ -15,8 +15,7 @@ interface HeroProps {
   onContactClick: () => void;
 }
 
-const HUBSPOT_MEETING_URL =
-  'https://meetings-na2.hubspot.com/jtoney';
+const HUBSPOT_MEETING_URL = '/book';
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
