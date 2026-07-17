@@ -838,6 +838,16 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       completed_at: nowIso(),
     }).eq("id", id);
 
+    // Auto-issue Aetheris Universe access code to the requester (best-effort).
+    try {
+      const email = (typeof requestedBy === "string" ? requestedBy : "").trim().toLowerCase();
+      if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        await sb.functions.invoke("universe-access", { body: { action: "issue", email } });
+      }
+    } catch (e) {
+      console.error("universe-access auto-issue failed:", (e as Error).message);
+    }
+
     // Attach the Golden Report to the matching CRM company (upsert by website host).
     try {
       const host = new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
