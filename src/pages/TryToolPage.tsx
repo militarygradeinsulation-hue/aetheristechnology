@@ -693,8 +693,8 @@ export default function TryToolPage() {
                           </div>
                           <div>
                             <div className="flex items-baseline gap-2">
-                              <div className="font-forensic text-3xl font-bold text-amber leading-none">$40</div>
-                              <div className="text-[11px] text-muted-foreground">one-time</div>
+                              <div className="font-forensic text-3xl font-bold text-amber leading-none">{tool?.priceCents != null ? formatToolPrice(tool) : "Included"}</div>
+                              <div className="text-[11px] text-muted-foreground">{tool?.priceCents != null ? "one-time" : "in Full Leak Investigation"}</div>
                             </div>
                             <div className="text-xs text-foreground/75 leading-snug mt-2">
                               Own this tool. Unlimited runs. Persistent memory on your account.
