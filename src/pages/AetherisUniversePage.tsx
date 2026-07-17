@@ -670,12 +670,20 @@ const AetherisUniversePage: React.FC = () => {
           <p className="mt-4 text-sm text-foreground/70">
             Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
           </p>
-          <Link
-            to="/golden"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
-          >
-            Run the Golden Report <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/golden"
+              className="inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
+            >
+              Run the Golden Report <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-6 py-3 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition"
+            >
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
 
