@@ -169,22 +169,125 @@ async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs: n
   }
 }
 
-async function firecrawlScrape(url: string) {
-  if (!FIRECRAWL_API_KEY) return null;
-  return await fetchJsonWithTimeout(`${FIRECRAWL}/scrape`, {
+// Strip HTML → plain markdown-ish text for the direct-fetch fallback.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(h[1-6])[^>]*>/gi, "\n\n# ")
+    .replace(/<\/(h[1-6])>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+// Direct browser-UA fetch as a last-ditch fallback when Firecrawl can't get through.
+// Returns a Firecrawl v2-shaped envelope so downstream code doesn't need to branch.
+async function directFetchFallback(url: string): Promise<Record<string, unknown> | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12_000);
+    const r = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "user-agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9",
+      },
+      redirect: "follow",
+    }).finally(() => clearTimeout(timer));
+    if (!r.ok) return null;
+    const html = await r.text();
+    if (!html) return null;
+    const markdown = htmlToText(html).slice(0, 20_000);
+    if (markdown.length < 80) return null;
+    const title = (html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || "").trim();
+    const desc = (html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1] || "").trim();
+    const linksRaw = Array.from(html.matchAll(/href=["']([^"'#]+)["']/gi)).map((m) => m[1]);
+    const links = Array.from(new Set(linksRaw)).slice(0, 120);
+    return {
+      success: true,
+      _via: "direct_fetch_fallback",
+      data: {
+        markdown,
+        links,
+        summary: desc || markdown.slice(0, 400),
+        metadata: { title, description: desc, sourceURL: url, statusCode: r.status },
+      },
+    };
+  } catch (e) {
+    console.warn("directFetchFallback failed:", e instanceof Error ? e.message : String(e));
+    return null;
+  }
+}
+
+async function firecrawlScrapeOnce(
+  url: string,
+  opts: { waitFor: number; onlyMainContent: boolean; location?: boolean },
+  timeoutMs: number,
+) {
+  const body: Record<string, unknown> = {
+    url,
+    formats: ["markdown", "links", "branding", "summary"],
+    onlyMainContent: opts.onlyMainContent,
+    waitFor: opts.waitFor,
+  };
+  if (opts.location) body.location = { country: "US", languages: ["en"] };
+  return await fetchJsonWithTimeout(
+    `${FIRECRAWL}/scrape`,
+    {
       method: "POST",
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        url,
-        formats: ["markdown", "links", "branding", "summary"],
-        onlyMainContent: false,
-        waitFor: 1000,
-      }),
-    }, 14_000, "Firecrawl scrape");
+      body: JSON.stringify(body),
+    },
+    timeoutMs,
+    "Firecrawl scrape",
+  );
 }
+
+// True on any Firecrawl payload that gave us usable page text.
+function scrapeHasContent(res: unknown): boolean {
+  if (!res || typeof res !== "object") return false;
+  const r = res as Record<string, unknown>;
+  if (r.error) return false;
+  const data = ((r.data as Record<string, unknown> | undefined) ?? r) as Record<string, unknown>;
+  const md = (data.markdown as string) || "";
+  return typeof md === "string" && md.trim().length > 80;
+}
+
+async function firecrawlScrape(url: string) {
+  if (!FIRECRAWL_API_KEY) return await directFetchFallback(url);
+  // Attempt 1: fast pass, main content only.
+  let res = await firecrawlScrapeOnce(url, { waitFor: 0, onlyMainContent: true }, 14_000);
+  if (scrapeHasContent(res)) return res;
+  console.warn("Firecrawl attempt 1 empty/failed, retrying with waitFor+location");
+  // Attempt 2: slower pass with US location + wait, keeps the whole page. Beats most bot walls.
+  res = await firecrawlScrapeOnce(url, { waitFor: 3000, onlyMainContent: false, location: true }, 20_000);
+  if (scrapeHasContent(res)) return res;
+  console.warn("Firecrawl attempt 2 empty/failed, falling back to direct fetch");
+  // Attempt 3: plain browser-UA fetch. Anything > nothing.
+  const direct = await directFetchFallback(url);
+  if (direct) return direct;
+  // All paths failed: return the last Firecrawl envelope so downstream sees a real error.
+  return res;
+}
+
 
 async function firecrawlMap(url: string) {
   if (!FIRECRAWL_API_KEY) return null;
