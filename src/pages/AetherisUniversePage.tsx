@@ -710,14 +710,16 @@ const AetherisUniversePage: React.FC = () => {
             />
 
 
-            <div
+            <img
+              src={aetherisLogo}
+              alt="Aetheris"
               aria-hidden
-              className="absolute left-1/2 top-1/2 w-24 h-24 -ml-12 -mt-12 rounded-full pointer-events-none"
+              className="absolute left-1/2 top-1/2 w-48 h-48 md:w-64 md:h-64 -translate-x-1/2 -translate-y-1/2 object-contain pointer-events-none select-none"
+              draggable={false}
               style={{
                 transformStyle: 'preserve-3d',
-                background:
-                  'radial-gradient(circle at 30% 30%, rgba(217,169,58,0.95), rgba(230,57,70,0.35) 55%, rgba(0,0,0,0) 75%)',
-                boxShadow: '0 0 80px rgba(217,169,58,0.55), 0 0 200px rgba(230,57,70,0.25)',
+                filter: 'drop-shadow(0 0 40px rgba(217,169,58,0.55)) drop-shadow(0 0 120px rgba(230,57,70,0.25))',
+                opacity: 0.95,
               }}
             />
           </div>
