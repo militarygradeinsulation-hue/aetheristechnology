@@ -823,21 +823,21 @@ const AetherisUniversePage: React.FC = () => {
         </div>
 
 
-        <section className="max-w-5xl mx-auto px-4 pb-16">
-          <h2 className="font-forensic text-xl md:text-2xl font-bold mb-3">
+        <section className="max-w-7xl mx-auto px-4 pb-24">
+          <h2 className="font-forensic text-3xl md:text-5xl font-bold mb-4">
             All signals · <span className="text-amber italic">indexed</span>
           </h2>
-          <p className="text-sm text-foreground/60 mb-5">
+          <p className="text-base md:text-lg text-foreground/70 mb-8">
             Prefer a list? Every tool in the Universe, sorted. Click to open.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {tools.map((tool) => (
               <button
                 key={tool.id}
                 onClick={() => setSelected(tool)}
-                className="text-left forensic-tile rounded-sm border border-amber/20 hover:border-amber/60 transition-colors p-2 flex gap-2 items-center"
+                className="text-left forensic-tile rounded-md border border-amber/25 hover:border-amber/70 transition-colors p-4 flex gap-4 items-center"
               >
-                <div className="w-10 h-10 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
                   {tool.img && (
                     <img
                       src={tool.img}
@@ -849,8 +849,8 @@ const AetherisUniversePage: React.FC = () => {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate">{tool.name}</div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-foreground/50 truncate">
+                  <div className="text-lg md:text-xl font-forensic font-semibold truncate">{tool.name}</div>
+                  <div className="text-xs font-mono uppercase tracking-widest text-foreground/60 truncate mt-1">
                     {tool.category}
                   </div>
                 </div>
