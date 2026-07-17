@@ -102,15 +102,15 @@ export const SalesChat: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Aggressive auto-open: once per browser session, ~10s after landing.
+  // Quick "I'm here to help" tip: shown once per session, auto-dismisses after 4s.
+  const [showTip, setShowTip] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem(AUTO_OPENED_KEY) === '1') return;
-    const t = setTimeout(() => {
-      setIsOpen(true);
-      sessionStorage.setItem(AUTO_OPENED_KEY, '1');
-      trackEvent('nexus_auto_open', { path: pathname, section: opener.label });
-    }, AUTO_OPEN_MS);
+    setShowTip(true);
+    sessionStorage.setItem(AUTO_OPENED_KEY, '1');
+    trackEvent('nexus_tip_shown', { path: pathname, section: opener.label });
+    const t = setTimeout(() => setShowTip(false), 4000);
     return () => clearTimeout(t);
   }, [pathname, opener.label, trackEvent]);
 
