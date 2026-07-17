@@ -8,7 +8,7 @@ const aetherisLogo = aetherisLogoAsset.url;
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
-import { useTechAccess } from '@/components/TechSolutionsAccessBar';
+import { readAccess } from '@/components/TechSolutionsAccessBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -47,6 +47,74 @@ const formatPrice = (cents: number | null): string => {
   const dollars = cents / 100;
   return `$${dollars.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
+
+const UNIVERSE_ACCESS_KEY = 'aetheris_universe_access_v1';
+
+type UniverseAccess = {
+  unlocked: boolean;
+  code: string | null;
+  plan: string | null;
+  email: string | null;
+  unlockedAt: string | null;
+};
+
+const EMPTY_UNIVERSE_ACCESS: UniverseAccess = {
+  unlocked: false,
+  code: null,
+  plan: null,
+  email: null,
+  unlockedAt: null,
+};
+
+function readUniverseAccess(): UniverseAccess {
+  try {
+    const raw = localStorage.getItem(UNIVERSE_ACCESS_KEY);
+    if (!raw) return EMPTY_UNIVERSE_ACCESS;
+    const parsed = JSON.parse(raw);
+    return {
+      unlocked: parsed?.unlocked === true,
+      code: typeof parsed?.code === 'string' ? parsed.code : null,
+      plan: typeof parsed?.plan === 'string' ? parsed.plan : null,
+      email: typeof parsed?.email === 'string' ? parsed.email : null,
+      unlockedAt: typeof parsed?.unlockedAt === 'string' ? parsed.unlockedAt : null,
+    };
+  } catch {
+    return EMPTY_UNIVERSE_ACCESS;
+  }
+}
+
+function writeUniverseAccess(access: UniverseAccess) {
+  try {
+    localStorage.setItem(UNIVERSE_ACCESS_KEY, JSON.stringify(access));
+  } catch { /* storage unavailable */ }
+  try {
+    window.dispatchEvent(new Event('universe-access-changed'));
+  } catch { /* noop */ }
+}
+
+function useUniverseAccess(): [UniverseAccess, (access: UniverseAccess) => void] {
+  const [state, setState] = useState<UniverseAccess>(() => readUniverseAccess());
+
+  useEffect(() => {
+    const refresh = () => setState(readUniverseAccess());
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === UNIVERSE_ACCESS_KEY) refresh();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('universe-access-changed', refresh);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('universe-access-changed', refresh);
+    };
+  }, []);
+
+  const set = (next: UniverseAccess) => {
+    writeUniverseAccess(next);
+    setState(next);
+  };
+
+  return [state, set];
+}
 
 
 // physics bounds (cube half-extents) and node collision radius
@@ -236,15 +304,16 @@ const ToolNode = memo(function ToolNode({
 });
 
 // ---------- Access gate overlay (Golden Report → email code, or rep/staff code) ----------
-const UniverseAccessGate: React.FC = () => {
-  const [access, setAccess] = useTechAccess();
+const UniverseAccessGate: React.FC<{ unlocked: boolean; onUnlocked: () => void }> = ({ unlocked, onUnlocked }) => {
+  const [access, setAccess] = useUniverseAccess();
   const [code, setCode] = useState('');
-  const [email, setEmail] = useState(access.email ?? '');
+  const [email, setEmail] = useState(() => access.email ?? readAccess().email ?? '');
   const [busyCode, setBusyCode] = useState(false);
   const [busyEmail, setBusyEmail] = useState(false);
 
-  // Only a full unlock opens the Universe. Email/tool-license alone does NOT bypass.
-  if (access.unlockedAll) return null;
+  // Only a Universe-specific unlock opens the page. General Tech Solutions,
+  // purchased tool, or email/free-run unlocks do not bypass this gate.
+  if (unlocked || access.unlocked) return null;
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -277,14 +346,15 @@ const UniverseAccessGate: React.FC = () => {
         body: { action: 'redeem', code: c },
       });
       if (error || !data?.ok) { toast.error(data?.message || "That code isn't valid."); return; }
-      setAccess({
-        ...access,
+      const nextAccess: UniverseAccess = {
+        unlocked: true,
         code: String(data.code || c).toUpperCase(),
         plan: String(data.plan || 'universe'),
-        unlockedAll: true,
-        toolIds: [],
         email: access.email ?? data.email ?? null,
-      });
+        unlockedAt: new Date().toISOString(),
+      };
+      setAccess(nextAccess);
+      onUnlocked();
       const label = data.plan === 'staff' ? 'Staff' : data.plan === 'rep' ? `Rep ${data.code}` : 'Access';
       toast.success(`${label} unlocked — Universe open.`);
     } finally {
@@ -362,7 +432,7 @@ const UniverseAccessGate: React.FC = () => {
           <form onSubmit={redeem} className="flex gap-2">
             <Input
               type="text"
-              placeholder="Enter access code"
+              placeholder="Enter Universe code"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               className="flex-1 bg-background/70 border-amber/25 font-mono text-sm tracking-widest text-center"
@@ -388,6 +458,8 @@ const UniverseAccessGate: React.FC = () => {
 
 const AetherisUniversePage: React.FC = () => {
   const navigate = useNavigate();
+  const [universeAccess] = useUniverseAccess();
+  const [universeUnlocked, setUniverseUnlocked] = useState(() => readUniverseAccess().unlocked);
   const sceneRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null); // rotating "camera" stage
   const [selected, setSelected] = useState<PlacedTool | null>(null);
@@ -432,6 +504,10 @@ const AetherisUniversePage: React.FC = () => {
       };
     });
   }, []);
+
+  useEffect(() => {
+    setUniverseUnlocked(universeAccess.unlocked);
+  }, [universeAccess.unlocked]);
 
   // Physics state — position + velocity per tool. Mutated in the rAF loop.
   const physicsRef = useRef<{ x: number; y: number; z: number; vx: number; vy: number; vz: number }[]>([]);
@@ -805,11 +881,14 @@ const AetherisUniversePage: React.FC = () => {
         <Navbar onContactClick={() => {}} />
       </div>
 
-      {/* Frosted-glass access gate — bypass with rep/employee/license code */}
-      <UniverseAccessGate />
+      {/* Frosted-glass access gate — Golden Report code, rep code, or employee code only */}
+      <UniverseAccessGate unlocked={universeUnlocked} onUnlocked={() => setUniverseUnlocked(true)} />
 
 
-      <main className="relative z-10">
+      <main
+        className={`relative z-10 transition duration-500 ${universeUnlocked ? '' : 'pointer-events-none select-none blur-md opacity-70'}`}
+        aria-hidden={!universeUnlocked}
+      >
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
             <Sparkles className="w-3 h-3" /> Aetheris Universe · v1
