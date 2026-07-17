@@ -672,7 +672,7 @@ Requirements:
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 90_000);
+  return await aiJson(prompt, 2200, 24_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -686,7 +686,7 @@ Return JSON:
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 90_000);
+  return await aiJson(prompt, 3500, 24_000);
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
@@ -747,11 +747,12 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
         const brand = parseFirecrawlBranding(scrape, url);
         await setBrandKitStage(id, "brand_scan", "done", { colors: brand.colors.length, fonts: brand.fonts.length });
-        // Brand assets are optional extras. Do not let calendars/images/social packs
-        // hold the Golden Report open or push it into the platform wall-clock limit.
-        generateBrandKit(id, brand)
-          .then((kit) => sb.from("forensic_scans").update({ brand_kit: kit, updated_at: nowIso() }).eq("id", id))
-          .catch((err) => setBrandKitStage(id, "assets", "failed", String(err?.message || err).slice(0, 200)));
+        // Brand assets are optional extras. Keep this fast path crawler-only so
+        // Golden Report cannot be held open by image/social AI.
+        await sb.from("forensic_scans").update({
+          brand_kit: { brand, generated_at: nowIso(), mode: "crawler_fast_path" },
+          updated_at: nowIso(),
+        }).eq("id", id);
       } catch (e) {
         await setBrandKitStage(id, "brand_scan", "failed", String((e as Error).message).slice(0, 200));
       }
@@ -804,14 +805,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       updated_at: nowIso(),
     }).eq("id", id);
 
-    await stage("synth", "running", { cap_seconds: 45, mode: "per-chapter-parallel" });
+    await stage("synth", "running", { cap_seconds: 30, mode: "per-chapter-parallel" });
     let report = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 45s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 30s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
       // from being stuck in "running" forever if Gemini stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 45_000));
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30_000));
       const result = await Promise.race([synth, watchdog]);
       if (result) {
         report = result;
