@@ -198,7 +198,7 @@ const MethodologyPage: React.FC = () => {
               <p className="text-foreground font-semibold">Ready to see this run on your numbers?</p>
               <p className="text-sm text-muted-foreground mt-1">21 days. fixed-fee fixed fee. Specialty manufacturers, $5M-$25M.</p>
               <a
-                href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
+                href="https://meetings-na2.hubspot.com/jtoney"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block mt-4"

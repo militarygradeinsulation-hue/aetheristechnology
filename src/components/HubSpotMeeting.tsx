@@ -20,7 +20,7 @@ export const HubSpotMeeting: React.FC = () => {
           <div className="glass rounded-2xl p-6 md:p-10 border border-border">
             <GatedHubSpotEmbed
               className="meetings-iframe-container"
-              src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+              src="https://meetings-na2.hubspot.com/jtoney?embed=true"
             />
           </div>
         </RevealOnScroll>

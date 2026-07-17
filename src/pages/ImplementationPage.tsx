@@ -49,7 +49,7 @@ const ImplementationPage: React.FC = () => {
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Active Case · Open status</div>
               <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground">$15,000<span className="text-2xl text-muted-foreground"> / month</span></div>
               <p className="text-sm text-muted-foreground mt-2">3-month minimum. Diagnostic clients only. Case stays open until you close it.</p>
-              <a href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst" target="_blank" rel="noopener noreferrer" className="inline-block mt-5">
+              <a href="https://meetings-na2.hubspot.com/jtoney" target="_blank" rel="noopener noreferrer" className="inline-block mt-5">
                 <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
                   Open a case <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
