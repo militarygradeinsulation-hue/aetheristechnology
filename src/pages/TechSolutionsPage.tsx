@@ -258,7 +258,7 @@ const TechSolutionsPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Tech Solutions Store — Free Systems + Buy Direct | Aetheris"
-        description="Every Aetheris client-facing tool: 3 free tries, or own it lifetime from $250. Evidence Kit (all client-facing tools) — $2,500."
+        description="Every Aetheris client-facing tool: 3 free tries, or subscribe yearly from $250. Evidence Kit (all client-facing tools) — $1,450/yr."
         path="/tech-solutions"
         keywords="aetheris tools, ai tools store, free ai systems, business forensics tools"
       />
