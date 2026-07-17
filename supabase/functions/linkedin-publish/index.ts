@@ -1,9 +1,13 @@
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
-import { verifyAdminToken, getAdminTokenFromRequest } from '../_shared/admin-auth.ts';
+import { verifyAdminToken, getAdminTokenFromRequest } from '../_shared/admin-token.ts';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-token',
+};
 
 const GATEWAY = 'https://connector-gateway.lovable.dev/linkedin';
 
-function headers() {
+function liHeaders() {
   const lovable = Deno.env.get('LOVABLE_API_KEY');
   const li = Deno.env.get('LINKEDIN_API_KEY');
   if (!lovable) throw new Error('LOVABLE_API_KEY missing');
@@ -28,9 +32,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    // Admin auth
-    const token = getAdminTokenFromRequest(req);
-    if (!token || !(await verifyAdminToken(token))) {
+    const svcKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const ok = await verifyAdminToken(getAdminTokenFromRequest(req), svcKey);
+    if (!ok) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -40,10 +44,9 @@ Deno.serve(async (req) => {
     const action = body?.action ?? 'publish';
 
     if (action === 'profile') {
-      const res = await fetch(`${GATEWAY}/v2/userinfo`, { headers: headers() });
+      const res = await fetch(`${GATEWAY}/v2/userinfo`, { headers: liHeaders() });
       if (!res.ok) return relay(res, 'userinfo');
-      const data = await res.json();
-      return new Response(JSON.stringify(data), {
+      return new Response(await res.text(), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -62,8 +65,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      // 1) Get member sub
-      const uRes = await fetch(`${GATEWAY}/v2/userinfo`, { headers: headers() });
+      const uRes = await fetch(`${GATEWAY}/v2/userinfo`, { headers: liHeaders() });
       if (!uRes.ok) return relay(uRes, 'userinfo');
       const user = await uRes.json();
       const sub = user?.sub;
@@ -73,10 +75,8 @@ Deno.serve(async (req) => {
         });
       }
 
-      // 2) Publish UGC post (text-only)
-      const author = `urn:li:person:${sub}`;
       const payload = {
-        author,
+        author: `urn:li:person:${sub}`,
         lifecycleState: 'PUBLISHED',
         specificContent: {
           'com.linkedin.ugc.ShareContent': {
@@ -91,16 +91,17 @@ Deno.serve(async (req) => {
 
       const pRes = await fetch(`${GATEWAY}/v2/ugcPosts`, {
         method: 'POST',
-        headers: { ...headers(), 'X-Restli-Protocol-Version': '2.0.0' },
+        headers: { ...liHeaders(), 'X-Restli-Protocol-Version': '2.0.0' },
         body: JSON.stringify(payload),
       });
       if (!pRes.ok) return relay(pRes, 'ugcPosts');
 
       const postId = pRes.headers.get('x-restli-id') || pRes.headers.get('X-RestLi-Id');
-      const respBody = await pRes.text();
-      return new Response(JSON.stringify({ ok: true, postId, response: respBody }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(JSON.stringify({
+        ok: true,
+        postId,
+        member: { name: user?.name, email: user?.email },
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
