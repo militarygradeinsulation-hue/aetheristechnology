@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal, KeyRound, Loader2 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Background } from '@/components/Background';
 import aetherisLogoAsset from '@/assets/aetheris-a-logo.png.asset.json';
@@ -8,6 +8,10 @@ const aetherisLogo = aetherisLogoAsset.url;
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
+import { useTechAccess } from '@/components/TechSolutionsAccessBar';
+import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 // Pull every tool asset json in one glob
 const assetModules = import.meta.glob('/src/assets/tools/*.asset.json', {
