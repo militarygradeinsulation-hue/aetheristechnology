@@ -235,49 +235,60 @@ const ToolNode = memo(function ToolNode({
   );
 });
 
-// ---------- Access gate overlay (rep / employee / license code bypass) ----------
+// ---------- Access gate overlay (Golden Report → email code, or rep/staff code) ----------
 const UniverseAccessGate: React.FC = () => {
   const [access, setAccess] = useTechAccess();
   const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState(access.email ?? '');
+  const [busyCode, setBusyCode] = useState(false);
+  const [busyEmail, setBusyEmail] = useState(false);
 
-  if (access.unlockedAll || access.toolIds.length > 0) return null;
+  // Only a full unlock opens the Universe. Email/tool-license alone does NOT bypass.
+  if (access.unlockedAll) return null;
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  const requestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailValid) { toast.error('Enter a valid email.'); return; }
+    setBusyEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('universe-access', {
+        body: { action: 'issue', email: email.trim().toLowerCase() },
+      });
+      if (error || !data?.ok) {
+        toast.error(data?.message || "We couldn't find a completed Golden Report for that email. Run it first.");
+        return;
+      }
+      setAccess({ ...access, email: email.trim().toLowerCase() });
+      toast.success(data.message || 'Access code sent — check your inbox.');
+    } finally {
+      setBusyEmail(false);
+    }
+  };
 
   const redeem = async (e: React.FormEvent) => {
     e.preventDefault();
     const c = code.trim();
     if (!c) return;
-    setBusy(true);
+    setBusyCode(true);
     try {
-      if (c === '9822') {
-        setAccess({ ...access, code: 'STAFF', plan: 'staff', unlockedAll: true, toolIds: [] });
-        toast.success('Staff unlocked — Universe open.');
-        return;
-      }
-      try {
-        const { data: repOk } = await supabase.rpc('validate_rep_code', { _code: c });
-        if (repOk === true) {
-          setAccess({ ...access, code: c.toUpperCase(), plan: 'rep', unlockedAll: true, toolIds: [] });
-          toast.success(`Rep ${c.toUpperCase()} unlocked — Universe open.`);
-          return;
-        }
-      } catch { /* fall through */ }
-      const { data, error } = await supabase.functions.invoke('tool-shop', {
+      const { data, error } = await supabase.functions.invoke('universe-access', {
         body: { action: 'redeem', code: c },
       });
-      if (error || !data?.ok) { toast.error("That code isn't valid."); return; }
-      const unlockedAll = data.plan === 'unlimited';
+      if (error || !data?.ok) { toast.error(data?.message || "That code isn't valid."); return; }
       setAccess({
         ...access,
-        code: data.code,
-        plan: data.plan,
-        unlockedAll,
-        toolIds: unlockedAll ? [] : (data.tool_ids ?? []),
+        code: String(data.code || c).toUpperCase(),
+        plan: String(data.plan || 'universe'),
+        unlockedAll: true,
+        toolIds: [],
         email: access.email ?? data.email ?? null,
       });
-      toast.success(unlockedAll ? 'All-Access unlocked — Universe open.' : 'Code accepted.');
+      const label = data.plan === 'staff' ? 'Staff' : data.plan === 'rep' ? `Rep ${data.code}` : 'Access';
+      toast.success(`${label} unlocked — Universe open.`);
     } finally {
-      setBusy(false);
+      setBusyCode(false);
     }
   };
 
@@ -295,10 +306,11 @@ const UniverseAccessGate: React.FC = () => {
           <Sparkles className="w-3 h-3" /> Access Locked
         </p>
         <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground">
-          You can access <span className="text-amber italic">The Aetheris Universe</span> after you've tried our Golden Report.
+          You can access <span className="text-amber italic">The Aetheris Universe</span> after you've run the Golden Report.
         </h2>
         <p className="mt-4 text-sm text-foreground/70">
-          Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
+          Run your free forensic scan first. The moment it finishes, we email you a
+          Universe access code. Enter it below and the gate opens.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
@@ -315,9 +327,37 @@ const UniverseAccessGate: React.FC = () => {
           </Link>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-amber/20">
+        {/* Email → resend Universe access code (after Golden Report) */}
+        <div className="mt-8 pt-6 border-t border-amber/20 text-left">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-3 inline-flex items-center gap-2">
-            <KeyRound className="w-3 h-3" /> Rep · Employee · License code
+            <Sparkles className="w-3 h-3" /> Already ran the report? Email me my code
+          </p>
+          <form onSubmit={requestCode} className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="you@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-background/70 border-amber/25 font-mono text-sm"
+              maxLength={255}
+            />
+            <button
+              type="submit"
+              disabled={busyEmail || !emailValid}
+              className="inline-flex items-center gap-2 rounded-lg bg-amber px-4 py-2 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition disabled:opacity-50"
+            >
+              {busyEmail ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Send code'}
+            </button>
+          </form>
+          <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Same email you used on the Golden Report.
+          </p>
+        </div>
+
+        {/* Code redemption — access, rep, or staff code */}
+        <div className="mt-6 pt-6 border-t border-amber/20 text-left">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-3 inline-flex items-center gap-2">
+            <KeyRound className="w-3 h-3" /> Access · Rep · Employee code
           </p>
           <form onSubmit={redeem} className="flex gap-2">
             <Input
@@ -330,20 +370,21 @@ const UniverseAccessGate: React.FC = () => {
             />
             <button
               type="submit"
-              disabled={busy || !code.trim()}
+              disabled={busyCode || !code.trim()}
               className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition disabled:opacity-50"
             >
-              {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Unlock'}
+              {busyCode ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Unlock'}
             </button>
           </form>
           <p className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            Aetheris reps & employees — bypass the gate with your code.
+            Aetheris reps & employees — enter your code to bypass the gate.
           </p>
         </div>
       </div>
     </div>
   );
 };
+
 
 const AetherisUniversePage: React.FC = () => {
   const navigate = useNavigate();

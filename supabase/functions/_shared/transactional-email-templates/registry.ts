@@ -18,6 +18,7 @@ import { template as leadIntakeNotification } from './lead-intake-notification.t
 import { template as repInactivityAlert } from './rep-inactivity-alert.tsx'
 import { template as careersTestAccess } from './careers-test-access.tsx'
 import { template as dailyTouchpoints } from './daily-touchpoints.tsx'
+import { template as universeAccessCode } from './universe-access-code.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-welcome': repWelcome,
@@ -29,4 +30,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-inactivity-alert': repInactivityAlert,
   'careers-test-access': careersTestAccess,
   'daily-touchpoints': dailyTouchpoints,
+  'universe-access-code': universeAccessCode,
 }
