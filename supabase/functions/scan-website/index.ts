@@ -85,6 +85,81 @@ function applyDeterministicLeaks(analysis: any, host: string): any {
   return analysis;
 }
 
+const CRAWLER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+function htmlToText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<!--([\s\S]*?)-->/g, " ")
+    .replace(/<(h[1-6])[^>]*>/gi, "\n\n# ")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+function metaContent(html: string, name: string): string {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return (
+    html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${escaped}["'][^>]+content=["']([^"']+)["']`, "i"))?.[1] ||
+    html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${escaped}["']`, "i"))?.[1] ||
+    ""
+  ).trim();
+}
+
+function resolveHref(href: string, base: string): string | null {
+  try {
+    if (!href || /^(mailto:|tel:|javascript:)/i.test(href)) return null;
+    const u = new URL(href, base);
+    if (!/^https?:$/i.test(u.protocol)) return null;
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+async function internalScrape(formattedUrl: string): Promise<{ ok: boolean; data: any }> {
+  try {
+    const res = await fetch(formattedUrl, {
+      signal: AbortSignal.timeout(7000),
+      redirect: "follow",
+      headers: {
+        "user-agent": CRAWLER_UA,
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9",
+      },
+    });
+    if (!res.ok) return { ok: false, data: { code: "INTERNAL_CRAWLER_HTTP", status: res.status } };
+    const html = await res.text();
+    const markdown = htmlToText(html).slice(0, 24_000);
+    if (markdown.length < 80) return { ok: false, data: { code: "INTERNAL_CRAWLER_EMPTY" } };
+    const links = Array.from(new Set(Array.from(html.matchAll(/href=["']([^"'#]+)["']/gi))
+      .map((m) => resolveHref(m[1], res.url || formattedUrl))
+      .filter(Boolean) as string[])).slice(0, 160);
+    const metadata = {
+      title: (html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || "").trim(),
+      description: metaContent(html, "description") || metaContent(html, "og:description"),
+      sourceURL: res.url || formattedUrl,
+      statusCode: res.status,
+    };
+    return { ok: true, data: { success: true, data: { markdown, links, metadata }, _via: "aetheris_internal_crawler" } };
+  } catch (e) {
+    return { ok: false, data: { code: "INTERNAL_CRAWLER_TIMEOUT", error: e instanceof Error ? e.message : String(e) } };
+  }
+}
+
 function firstText(...values: unknown[]): string {
   for (const value of values) {
     if (typeof value === "string" && value.trim()) return value.trim();
@@ -260,13 +335,7 @@ serve(async (req) => {
       });
     }
 
-    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-    if (!FIRECRAWL_API_KEY) {
-      return new Response(JSON.stringify({ error: "Firecrawl not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
 
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
@@ -352,7 +421,7 @@ serve(async (req) => {
       });
     }
 
-    console.log("Scraping URL:", formattedUrl);
+    console.log("Scanning URL:", formattedUrl);
 
     async function firecrawlScrape(opts: { onlyMainContent: boolean; waitFor: number; timeout: number; }, wallMs = 18_000) {
       try {
@@ -380,15 +449,19 @@ serve(async (req) => {
       }
     }
 
-    let attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 15000 }, 18_000);
+    let attempt = await internalScrape(formattedUrl);
 
-    if (!attempt.ok) {
-      console.warn("Firecrawl first attempt failed, retrying:", attempt.data?.code || attempt.data?.error);
-      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 10000 }, 12_000);
+    if (!attempt.ok && FIRECRAWL_API_KEY) {
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 8000 }, 9_000);
+    }
+
+    if (!attempt.ok && FIRECRAWL_API_KEY) {
+      console.warn("External scrape first attempt failed, retrying:", attempt.data?.code || attempt.data?.error);
+      attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 6000 }, 7_000);
     }
 
     // DNS fallback: toggle www. prefix and retry once
-    if (!attempt.ok && attempt.data?.code === "SCRAPE_DNS_RESOLUTION_ERROR") {
+    if (!attempt.ok && attempt.data?.code === "SCRAPE_DNS_RESOLUTION_ERROR" && FIRECRAWL_API_KEY) {
       try {
         const u = new URL(formattedUrl);
         u.hostname = u.hostname.startsWith("www.")
@@ -397,7 +470,8 @@ serve(async (req) => {
         const altUrl = u.toString();
         console.warn("DNS failed, retrying with alternate hostname:", altUrl);
         formattedUrl = altUrl;
-        attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 12000 }, 15_000);
+        attempt = await internalScrape(formattedUrl);
+        if (!attempt.ok) attempt = await firecrawlScrape({ onlyMainContent: true, waitFor: 0, timeout: 6000 }, 7_000);
       } catch (_) { /* ignore */ }
     }
 
@@ -405,25 +479,38 @@ serve(async (req) => {
     const scrapeData = attempt.data;
 
     if (!attempt.ok) {
-      console.error("Firecrawl error:", scrapeData);
-      const code = scrapeData?.code;
-      const friendly =
-        code === "SCRAPE_TIMEOUT"
-          ? "That site took too long to respond. Try again in a moment, or scan the homepage directly."
-          : code === "SCRAPE_DNS_RESOLUTION_ERROR"
-          ? `We couldn't resolve that domain. Double-check the spelling — common pitfalls: extra hyphens (e.g. "tool-die" vs "tooldie"), wrong TLD (.com vs .net), or the company may have rebranded. Search the company name on Google to confirm the live URL, then re-scan.`
-          : (scrapeData?.error || "Failed to scrape website");
-      return new Response(
-        JSON.stringify({ error: friendly, code }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.warn("Crawler could not extract enough content; returning deterministic shell:", scrapeData);
+      const fallback = buildDeterministicAnalysis("", [], { title: parsedHost, description: "" }, formattedUrl, parsedHost);
+      fallback._fallback = true;
+      fallback._fallbackReason = "The site limited automated extraction, so Aetheris returned a conservative public-signal report instead.";
+      return new Response(JSON.stringify(fallback), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const markdown = scrapeData.data?.markdown || scrapeData.markdown || "";
     const links = scrapeData.data?.links || scrapeData.links || [];
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
 
-    console.log("Scrape successful, calling AI analyzer...");
+    console.log("Crawler successful; returning deterministic analyzer result.");
+
+    const deterministic = buildDeterministicAnalysis(markdown, links, metadata, formattedUrl, parsedHost);
+    await fetch(`${supabaseUrl}/rest/v1/website_scans`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ url: formattedUrl, score: deterministic.score, gaps: deterministic }),
+    });
+
+    return new Response(JSON.stringify(deterministic), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
