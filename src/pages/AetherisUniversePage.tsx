@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Background } from '@/components/Background';
+import aetherisLogo from '@/assets/aetheris-a-logo.png';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { SHOP_TOOLS } from '@/lib/tool-shop-catalog';
