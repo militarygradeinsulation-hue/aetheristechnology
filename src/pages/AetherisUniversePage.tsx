@@ -598,6 +598,8 @@ const AetherisUniversePage: React.FC = () => {
         path="/aetheris-universe"
       />
 
+      <Background />
+
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none opacity-70"
