@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { CheckCircle2, KeyRound } from "lucide-react";
-import { SHOP_TOOLS, findTool } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, findTool, publicShopTools, sellableShopTools } from "@/lib/tool-shop-catalog";
 import { useToolLicense, setStoredLicenseCode } from "@/hooks/useToolLicense";
 
 export default function ToolsShopRedeemPage() {
