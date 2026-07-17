@@ -173,6 +173,9 @@ const App = () => (
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                       <Route path="/" element={<LeakLanderPage />} />
+                      <Route path="/book" element={<BookRedirect />} />
+                      <Route path="/case-intake" element={<Navigate to="/book" replace />} />
+                      <Route path="/booking" element={<Navigate to="/book" replace />} />
                       <Route path="/home" element={<Navigate to="/" replace />} />
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
