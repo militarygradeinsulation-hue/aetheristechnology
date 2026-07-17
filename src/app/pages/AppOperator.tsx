@@ -2,6 +2,8 @@ import { useState } from "react";
 import { AppLayout } from "../AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Wrench, FileText } from "lucide-react";
+import { PortalSyncCard } from "../components/PortalSyncCard";
+import { syncToPortal, getPortalSyncCode } from "../lib/portalSync";
 
 function normalizeUrl(u: string) {
   const s = u.trim();
@@ -23,6 +25,15 @@ const AppOperator = () => {
       const { data, error } = await supabase.functions.invoke("forensic-scan-all", { body: { url } });
       if (error) throw error;
       setResult(data as Record<string, unknown>);
+      // Fire-and-forget: sync to the linked portal if a code is attached.
+      if (getPortalSyncCode()) {
+        syncToPortal({
+          tool_type: "golden_report",
+          title: `Golden Report · ${url}`,
+          input_data: { url },
+          output_data: (data ?? {}) as Record<string, unknown>,
+        }).catch(() => {});
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -44,7 +55,10 @@ const AppOperator = () => {
         </p>
       </div>
 
+      <PortalSyncCard />
+
       <div className="forensic-tile rounded-sm border border-amber/30 p-3 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+
         <label className="font-case text-[10px] uppercase tracking-widest text-amber shrink-0">
           Target URL
         </label>
