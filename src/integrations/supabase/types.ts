@@ -3346,6 +3346,48 @@ export type Database = {
         }
         Relationships: []
       }
+      linkedin_comment_drafts: {
+        Row: {
+          created_at: string
+          draft_text: string
+          id: string
+          notes: string | null
+          post_author: string | null
+          post_context: string | null
+          post_url: string | null
+          posted_at: string | null
+          status: string
+          tone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_text: string
+          id?: string
+          notes?: string | null
+          post_author?: string | null
+          post_context?: string | null
+          post_url?: string | null
+          posted_at?: string | null
+          status?: string
+          tone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_text?: string
+          id?: string
+          notes?: string | null
+          post_author?: string | null
+          post_context?: string | null
+          post_url?: string | null
+          posted_at?: string | null
+          status?: string
+          tone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_post_queue: {
         Row: {
           content: string
