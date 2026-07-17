@@ -32,6 +32,8 @@ const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const FIRECRAWL = "https://api.firecrawl.dev/v2";
+const CRAWLER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 const nowIso = () => new Date().toISOString();
 
 // ─────────────────────────────── helpers ────────────────────────────────────
@@ -161,12 +163,167 @@ async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs: n
   } catch (e) {
     return {
       error: e instanceof Error && e.name === "AbortError"
-        ? `${label} timed out and was skipped so Golden Report could continue.`
+        ? `${label} did not respond in time, so the Golden Report continued with the internal crawler.`
         : String(e),
     };
   } finally {
     clearTimeout(timer);
   }
+}
+
+function safeUrl(input: string): string {
+  const raw = String(input || "").trim();
+  if (!raw) return raw;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `https://${raw}`;
+}
+
+function resolveHref(href: string, base: string): string | null {
+  try {
+    if (!href || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("javascript:")) return null;
+    const u = new URL(href, base);
+    if (!/^https?:$/i.test(u.protocol)) return null;
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+function sameHost(a: string, b: string): boolean {
+  try {
+    return new URL(a).hostname.replace(/^www\./i, "").toLowerCase() === new URL(b).hostname.replace(/^www\./i, "").toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+function metaContent(html: string, name: string): string {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return (
+    html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${escaped}["'][^>]+content=["']([^"']+)["']`, "i"))?.[1] ||
+    html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${escaped}["']`, "i"))?.[1] ||
+    ""
+  ).trim();
+}
+
+function extractLinks(html: string, base: string): string[] {
+  const linksRaw = Array.from(html.matchAll(/href=["']([^"'#]+)["']/gi)).map((m) => m[1]);
+  return Array.from(new Set(linksRaw.map((h) => resolveHref(h, base)).filter(Boolean) as string[]));
+}
+
+function scoreInternalLink(link: string): number {
+  const path = (() => { try { return new URL(link).pathname.toLowerCase(); } catch { return ""; } })();
+  let score = 0;
+  if (/contact|quote|estimate|schedule|book|demo|consult/.test(path)) score += 50;
+  if (/service|solution|product|offer|pricing|work/.test(path)) score += 35;
+  if (/about|team|company|who-we-are/.test(path)) score += 25;
+  if (/case|portfolio|project|review|testimonial|result/.test(path)) score += 20;
+  if (/blog|news|privacy|terms|login|cart|wp-content|tag|category/.test(path)) score -= 25;
+  score -= Math.min(path.length / 20, 12);
+  return score;
+}
+
+async function fetchHtmlPage(url: string, timeoutMs = 6500): Promise<{ url: string; html: string; status: number } | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(safeUrl(url), {
+      signal: controller.signal,
+      headers: {
+        "user-agent": CRAWLER_UA,
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9",
+        "cache-control": "no-cache",
+      },
+      redirect: "follow",
+    });
+    const contentType = r.headers.get("content-type") || "";
+    if (!r.ok || !/text\/html|application\/xhtml\+xml|text\//i.test(contentType)) return null;
+    const html = await r.text();
+    return html ? { url: r.url || safeUrl(url), html, status: r.status } : null;
+  } catch (e) {
+    console.warn("internal crawler fetch failed:", e instanceof Error ? e.message : String(e));
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function extractBranding(html: string, baseUrl: string) {
+  const title = (html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || "").trim();
+  const description = metaContent(html, "description") || metaContent(html, "og:description");
+  const logo =
+    resolveHref(html.match(/<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]+href=["']([^"']+)["']/i)?.[1] || "", baseUrl) ||
+    resolveHref(html.match(/<img[^>]+(?:class|id|alt)=["'][^"']*logo[^"']*["'][^>]+src=["']([^"']+)["']/i)?.[1] || "", baseUrl) ||
+    "";
+  const colors = Array.from(new Set(Array.from(html.matchAll(/#[0-9a-f]{6}\b/gi)).map((m) => m[0].toLowerCase()))).slice(0, 8);
+  const fonts = Array.from(new Set(Array.from(html.matchAll(/font-family\s*:\s*([^;}{]+)/gi)).map((m) => m[1].replace(/["']/g, "").split(",")[0].trim()).filter(Boolean))).slice(0, 6);
+  return {
+    colorScheme: /dark|black|#000|#111|#0[0-9a-f]{2}/i.test(html.slice(0, 8000)) ? "dark" : "light",
+    logo,
+    colors: {
+      primary: colors[0] || "",
+      secondary: colors[1] || "",
+      accent: colors[2] || "",
+      background: colors[3] || "",
+      textPrimary: colors[4] || "",
+      textSecondary: colors[5] || "",
+    },
+    fonts: fonts.map((family) => ({ family })),
+    typography: { fontFamilies: { primary: fonts[0] || "", heading: fonts[1] || fonts[0] || "" } },
+    images: { logo },
+    metadata: { title, description, sourceURL: baseUrl },
+  };
+}
+
+async function internalCrawlerScrape(url: string): Promise<Record<string, unknown> | null> {
+  const startUrl = safeUrl(url);
+  const first = await fetchHtmlPage(startUrl, 7000);
+  if (!first) return null;
+
+  const homeLinks = extractLinks(first.html, first.url);
+  const internalLinks = homeLinks
+    .filter((link) => sameHost(link, first.url))
+    .sort((a, b) => scoreInternalLink(b) - scoreInternalLink(a))
+    .slice(0, 5);
+
+  const pages = [first];
+  for (const link of internalLinks.slice(0, 4)) {
+    const page = await fetchHtmlPage(link, 4500);
+    if (page && !pages.some((p) => p.url === page.url)) pages.push(page);
+  }
+
+  const markdown = pages
+    .map((page, index) => {
+      const title = (page.html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || page.url).trim();
+      return `\n\n## Crawled page ${index + 1}: ${title}\nSource: ${page.url}\n\n${htmlToText(page.html)}`;
+    })
+    .join("\n\n---\n\n")
+    .slice(0, 32_000);
+
+  if (markdown.trim().length < 80) return null;
+  const title = (first.html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || "").trim();
+  const description = metaContent(first.html, "description") || metaContent(first.html, "og:description") || markdown.slice(0, 400);
+  const links = Array.from(new Set([...homeLinks, ...pages.flatMap((p) => extractLinks(p.html, p.url))])).slice(0, 160);
+  return {
+    success: true,
+    _via: "aetheris_internal_crawler",
+    data: {
+      markdown,
+      links,
+      summary: description,
+      branding: extractBranding(first.html, first.url),
+      metadata: { title, description, sourceURL: first.url, statusCode: first.status, pagesCrawled: pages.length },
+    },
+  };
+}
+
+async function internalCrawlerMap(url: string): Promise<Record<string, unknown> | null> {
+  const first = await fetchHtmlPage(safeUrl(url), 6500);
+  if (!first) return null;
+  const links = extractLinks(first.html, first.url).filter((link) => sameHost(link, first.url)).slice(0, 75);
+  return { success: true, _via: "aetheris_internal_crawler", links };
 }
 
 // Strip HTML → plain markdown-ish text for the direct-fetch fallback.
@@ -193,7 +350,7 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-// Direct browser-UA fetch as a last-ditch fallback when Firecrawl can't get through.
+// Direct browser-UA fetch as a last-ditch fallback when the internal crawler and external crawler can't get through.
 // Returns a Firecrawl v2-shaped envelope so downstream code doesn't need to branch.
 async function directFetchFallback(url: string): Promise<Record<string, unknown> | null> {
   try {
@@ -203,7 +360,7 @@ async function directFetchFallback(url: string): Promise<Record<string, unknown>
       signal: controller.signal,
       headers: {
         "user-agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          CRAWLER_UA,
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "accept-language": "en-US,en;q=0.9",
       },
@@ -257,7 +414,7 @@ async function firecrawlScrapeOnce(
       body: JSON.stringify(body),
     },
     timeoutMs,
-    "Firecrawl scrape",
+    "External crawler scrape",
   );
 }
 
@@ -272,13 +429,17 @@ function scrapeHasContent(res: unknown): boolean {
 }
 
 async function firecrawlScrape(url: string) {
+  // Use our own crawler first. External Firecrawl is now only a short fallback,
+  // so public Golden Report scans do not stall on provider timeouts.
+  const internal = await internalCrawlerScrape(url);
+  if (scrapeHasContent(internal)) return internal;
   if (!FIRECRAWL_API_KEY) return await directFetchFallback(url);
   // Attempt 1: fast pass, main content only.
-  let res = await firecrawlScrapeOnce(url, { waitFor: 0, onlyMainContent: true }, 14_000);
+  let res = await firecrawlScrapeOnce(url, { waitFor: 0, onlyMainContent: true }, 8_000);
   if (scrapeHasContent(res)) return res;
   console.warn("Firecrawl attempt 1 empty/failed, retrying with waitFor+location");
   // Attempt 2: slower pass with US location + wait, keeps the whole page. Beats most bot walls.
-  res = await firecrawlScrapeOnce(url, { waitFor: 3000, onlyMainContent: false, location: true }, 20_000);
+  res = await firecrawlScrapeOnce(url, { waitFor: 1000, onlyMainContent: false, location: true }, 10_000);
   if (scrapeHasContent(res)) return res;
   console.warn("Firecrawl attempt 2 empty/failed, falling back to direct fetch");
   // Attempt 3: plain browser-UA fetch. Anything > nothing.
@@ -290,6 +451,8 @@ async function firecrawlScrape(url: string) {
 
 
 async function firecrawlMap(url: string) {
+  const internal = await internalCrawlerMap(url);
+  if (internal) return internal;
   if (!FIRECRAWL_API_KEY) return null;
   return await fetchJsonWithTimeout(`${FIRECRAWL}/map`, {
       method: "POST",
@@ -298,7 +461,7 @@ async function firecrawlMap(url: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ url, limit: 75, includeSubdomains: false }),
-    }, 10_000, "Firecrawl map");
+    }, 6_000, "External crawler map");
 }
 
 async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
@@ -319,7 +482,7 @@ async function invokeFn(name: string, body: unknown, timeoutMs = 25_000) {
     return r.ok ? json : { error: json?.error || `Function ${name} failed with ${r.status}`, status: r.status };
   } catch (e) {
     const message = e instanceof Error && e.name === "AbortError"
-      ? `Function ${name} timed out and was skipped so Scan All could continue.`
+      ? `Companion audit ${name} did not finish inside the scan window, so Golden Report continued with the core crawler.`
       : String(e);
     return { error: message };
   } finally {
@@ -509,7 +672,7 @@ Requirements:
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 90_000);
+  return await aiJson(prompt, 2200, 24_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -523,7 +686,7 @@ Return JSON:
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 90_000);
+  return await aiJson(prompt, 3500, 24_000);
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
@@ -584,8 +747,12 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
         const brand = parseFirecrawlBranding(scrape, url);
         await setBrandKitStage(id, "brand_scan", "done", { colors: brand.colors.length, fonts: brand.fonts.length });
-        const kit = await generateBrandKit(id, brand);
-        await sb.from("forensic_scans").update({ brand_kit: kit, updated_at: nowIso() }).eq("id", id);
+        // Brand assets are optional extras. Keep this fast path crawler-only so
+        // Golden Report cannot be held open by image/social AI.
+        await sb.from("forensic_scans").update({
+          brand_kit: { brand, generated_at: nowIso(), mode: "crawler_fast_path" },
+          updated_at: nowIso(),
+        }).eq("id", id);
       } catch (e) {
         await setBrandKitStage(id, "brand_scan", "failed", String((e as Error).message).slice(0, 200));
       }
@@ -593,8 +760,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     const siteTask = brandKitTask;
 
     const websiteTask = (async () => {
-      findings.scan_website = await invokeFn("scan-website", { url, company }, 55_000);
-      await stage("scan_website", "done", { cap_seconds: 55 });
+      findings.scan_website = await invokeFn("scan-website", { url, company }, 14_000);
+      await stage("scan_website", "done", { cap_seconds: 14 });
     })();
 
     const frictionTask = (async () => {
@@ -604,17 +771,17 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           desiredTone: ["direct", "credible", "trustworthy"],
           industry: company || "business services",
           targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 45_000),
+        }, 12_000),
         invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 45_000),
+        }, 12_000),
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 45 });
+      await stage("friction", "done", { cap_seconds: 12 });
     })();
 
 
@@ -638,14 +805,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       updated_at: nowIso(),
     }).eq("id", id);
 
-    await stage("synth", "running", { cap_seconds: 100, mode: "per-chapter-parallel" });
+    await stage("synth", "running", { cap_seconds: 30, mode: "per-chapter-parallel" });
     let report = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 100s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 30s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
       // from being stuck in "running" forever if Gemini stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 100_000));
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30_000));
       const result = await Promise.race([synth, watchdog]);
       if (result) {
         report = result;
@@ -656,7 +823,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           if (!report.top_leaks?.length) report.top_leaks = fbEarly.top_leaks;
         }
       } else {
-        findings.synthesis_error = "AI synthesis exceeded 100s watchdog — fallback report shipped.";
+        findings.synthesis_error = "AI synthesis exceeded scan window; fallback report shipped.";
       }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
