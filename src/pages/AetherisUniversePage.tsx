@@ -651,6 +651,34 @@ const AetherisUniversePage: React.FC = () => {
         <Navbar onContactClick={() => {}} />
       </div>
 
+      {/* Frosted-glass access gate */}
+      <div
+        className="fixed inset-0 z-40 flex items-center justify-center px-6"
+        style={{
+          backdropFilter: 'blur(18px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+          background: 'rgba(5,6,10,0.55)',
+        }}
+      >
+        <div className="max-w-lg w-full text-center rounded-2xl border border-amber/30 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
+          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
+            <Sparkles className="w-3 h-3" /> Access Locked
+          </p>
+          <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground">
+            You can access <span className="text-amber italic">The Aetheris Universe</span> after you've tried our Golden Report.
+          </h2>
+          <p className="mt-4 text-sm text-foreground/70">
+            Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
+          </p>
+          <Link
+            to="/golden"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
+          >
+            Run the Golden Report <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+
       <main className="relative z-10">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
