@@ -687,17 +687,17 @@ export default function TryToolPage() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70">
-                              § 01 · Lifetime License
+                              § 01 · Yearly License
                             </div>
                             <div className="font-mono text-[9px] text-amber/50">USD</div>
                           </div>
                           <div>
                             <div className="flex items-baseline gap-2">
                               <div className="font-forensic text-3xl font-bold text-amber leading-none">{tool?.priceCents != null ? formatToolPrice(tool) : "Included"}</div>
-                              <div className="text-[11px] text-muted-foreground">{tool?.priceCents != null ? "one-time" : "in Full Leak Investigation"}</div>
+                              <div className="text-[11px] text-muted-foreground">{tool?.priceCents != null ? "renews annually" : "in Full Leak Investigation"}</div>
                             </div>
                             <div className="text-xs text-foreground/75 leading-snug mt-2">
-                              Own this tool. Unlimited runs. Persistent memory on your account.
+                              Yearly access. Unlimited runs while active. Persistent memory on your account. Cancel anytime.
                             </div>
                           </div>
                           <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber border-t border-amber/15">
