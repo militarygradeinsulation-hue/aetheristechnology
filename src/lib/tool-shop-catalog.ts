@@ -112,8 +112,8 @@ export function sellableShopTools(): ShopTool[] {
   return SHOP_TOOLS.filter(t => !t.internalOnly && t.priceCents != null && t.priceId);
 }
 
-/** Format a tool's price for display, or a fallback string if unpriced. */
+/** Format a tool's yearly price for display, or a fallback string if unpriced. */
 export function formatToolPrice(tool: ShopTool | undefined): string {
   if (!tool || tool.priceCents == null) return "";
-  return `$${(tool.priceCents / 100).toLocaleString()}`;
+  return `$${(tool.priceCents / 100).toLocaleString()}/yr`;
 }
