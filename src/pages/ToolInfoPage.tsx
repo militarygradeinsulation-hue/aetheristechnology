@@ -89,7 +89,7 @@ const ToolInfoPage: React.FC = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-amber/15 flex flex-wrap gap-4 text-xs font-mono text-muted-foreground">
-                <span>Lifetime · one-time payment</span>
+                <span>Yearly access · renews annually</span>
                 <span>·</span>
                 <span>Sandbox runs are free</span>
                 <span>·</span>
