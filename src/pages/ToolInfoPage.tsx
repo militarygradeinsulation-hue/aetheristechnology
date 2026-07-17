@@ -76,7 +76,7 @@ const ToolInfoPage: React.FC = () => {
                     onClick={() => openBuy("single")}
                     className="bg-amber text-background hover:bg-amber/90 font-semibold"
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — {formatToolPrice(tool)}
+                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Subscribe — {formatToolPrice(tool)}
                   </Button>
                 )}
                 {tool.route && tool.route !== `/try/${tool.id}` && (
