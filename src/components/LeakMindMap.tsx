@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { X, Sparkles, ShoppingCart } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
-import { SHOP_TOOLS } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, formatToolPrice } from "@/lib/tool-shop-catalog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 
 // Keyword → tool-id map. When a node is opened we suggest tools whose
