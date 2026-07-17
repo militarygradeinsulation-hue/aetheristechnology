@@ -40,7 +40,7 @@ export default function ToolsShopRedeemPage() {
 
   const ownedTools = redeemed
     ? (redeemed.plan === "unlimited"
-        ? SHOP_TOOLS
+        ? sellableShopTools()
         : redeemed.tool_ids.map(findTool).filter(Boolean) as typeof SHOP_TOOLS)
     : [];
 
