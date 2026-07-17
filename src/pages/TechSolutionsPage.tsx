@@ -431,8 +431,8 @@ const TechSolutionsPage: React.FC = () => {
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
             <p className="text-sm text-muted-foreground">
               Same rules as the Try surface: sandbox runs are free, nothing is saved,
-              each run is independent. Purchase turns any tool into a lifetime instance
-              with persistent memory tied to your account.
+              each run is independent. A subscription turns any tool into a yearly instance
+              with persistent memory tied to your account. Renews annually. Cancel anytime.
             </p>
           </div>
         </main>
