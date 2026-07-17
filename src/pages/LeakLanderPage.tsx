@@ -74,7 +74,7 @@ const LeakLanderPage: React.FC = () => {
 
         {/* Free tools banner — value-first, prominent */}
         <Link
-          to="/tech-solutions"
+          to="/aetheris-universe"
           className="relative z-30 block w-full border-b-2 border-amber/60 transition-all hover:brightness-125 group mt-[92px] sm:mt-[100px]"
           style={{ background: 'linear-gradient(90deg, hsl(36 75% 14%) 0%, hsl(36 80% 22%) 50%, hsl(36 75% 14%) 100%)' }}
         >
