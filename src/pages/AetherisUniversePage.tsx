@@ -655,9 +655,9 @@ const AetherisUniversePage: React.FC = () => {
       <div
         className="fixed inset-0 z-40 flex items-center justify-center px-6"
         style={{
-          backdropFilter: 'blur(18px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(18px) saturate(140%)',
-          background: 'rgba(5,6,10,0.55)',
+          backdropFilter: 'blur(6px) saturate(120%)',
+          WebkitBackdropFilter: 'blur(6px) saturate(120%)',
+          background: 'rgba(5,6,10,0.25)',
         }}
       >
         <div className="max-w-lg w-full text-center rounded-2xl border border-amber/30 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
