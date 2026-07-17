@@ -116,7 +116,7 @@ const DiagnosticPage: React.FC = () => {
                   Operator-led. No percentage-of-savings. No retainer. If the number sounds "expensive," the leak is bigger than you think — and you aren't our client.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center mt-5">
-                  <a href="https://meetings-na2.hubspot.com/jtoney" target="_blank" rel="noopener noreferrer">
+                  <a href="/book" target="_blank" rel="noopener noreferrer">
                     <Button size="default" className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
                       <Calendar className="w-4 h-4 mr-2" />
                       Book a 15-min call
@@ -429,7 +429,7 @@ const DiagnosticPage: React.FC = () => {
                 Fifteen minutes on the phone. We tell you whether a Leak Audit is even the right instrument for your business. If it isn't, we say so.
               </p>
               <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="https://meetings-na2.hubspot.com/jtoney" target="_blank" rel="noopener noreferrer">
+                <a href="/book" target="_blank" rel="noopener noreferrer">
                   <Button size="default" className="h-11 px-6 text-sm bg-amber text-background hover:bg-amber/90 font-bold font-mono uppercase tracking-wider">
                     <Calendar className="w-4 h-4 mr-2" />
                     Request an Investigation

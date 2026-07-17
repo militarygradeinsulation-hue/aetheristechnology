@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const BOOK_MEETING_URL = "https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst";
+const BOOK_MEETING_URL = "https://aetheris.technology/book";
 
 const SYSTEM_PROMPT = `You are **Nexus** — the Aetheris Operator on aetheris.technology. You are a senior forensic operator running discovery on a live visitor. Blunt, useful, calm. Never a salesperson.
 
