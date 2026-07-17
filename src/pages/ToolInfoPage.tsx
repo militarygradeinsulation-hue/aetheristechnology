@@ -9,7 +9,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
-import { findTool, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog";
+import { findTool, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { TOOL_INFO } from "@/lib/toolInfo";
 
 const ToolInfoPage: React.FC = () => {
