@@ -16,7 +16,7 @@ interface HeroProps {
 }
 
 const HUBSPOT_MEETING_URL =
-  'https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst';
+  'https://meetings-na2.hubspot.com/jtoney';
 
 export const Hero: React.FC<HeroProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();

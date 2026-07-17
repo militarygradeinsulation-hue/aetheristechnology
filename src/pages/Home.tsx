@@ -202,7 +202,7 @@ const Home = () => {
               <div id="booking-embed" className="forensic-tile rounded-sm border border-amber/30 p-2 md:p-4 mt-6">
                 <div
                   className="meetings-iframe-container"
-                  data-src="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst?embed=true"
+                  data-src="https://meetings-na2.hubspot.com/jtoney?embed=true"
                 />
               </div>
             </div>
