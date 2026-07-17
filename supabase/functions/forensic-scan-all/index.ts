@@ -365,13 +365,10 @@ async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, mode
       return m ? JSON.parse(m[0]) : {};
     }
   };
-  // One retry: many 499/timeout aborts on Gemini clear on the second attempt.
-  try {
-    return await doCall(timeoutMs);
-  } catch (e) {
-    console.warn("aiJson retry after:", String((e as Error).message).slice(0, 120));
-    return await doCall(Math.max(timeoutMs, 90_000));
-  }
+  // Fail fast — the caller (synthesizeReport) runs 15 calls in parallel and is
+  // itself wrapped in a hard watchdog. A slow single call must not stall the
+  // whole Golden Report; the deterministic fallback fills any missing chapter.
+  return await doCall(timeoutMs);
 }
 
 
