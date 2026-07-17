@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
-import { SHOP_TOOLS, SHOP_PRICES } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, SHOP_PRICES, findTool } from "@/lib/tool-shop-catalog";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { Sparkles, ShoppingCart, CalendarClock, X, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
