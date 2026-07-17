@@ -30,6 +30,7 @@ import { ToolBuyBar } from "@/components/ToolBuyBar";
 // Eager: home + 404 (always needed)
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import BookRedirect from "./pages/BookRedirect";
 
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
