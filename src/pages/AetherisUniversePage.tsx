@@ -647,7 +647,7 @@ const AetherisUniversePage: React.FC = () => {
           onPointerMove={onMove}
           onPointerUp={onUp}
           onPointerLeave={onUp}
-          className="relative mx-auto my-6 h-[70vh] min-h-[520px] max-w-6xl select-none touch-none cursor-grab active:cursor-grabbing rounded-lg border border-amber/20 overflow-hidden"
+          className="relative w-screen left-1/2 -translate-x-1/2 h-[92vh] min-h-[640px] select-none touch-none cursor-grab active:cursor-grabbing overflow-hidden"
           style={{
             perspective: '1400px',
             perspectiveOrigin: '50% 45%',
