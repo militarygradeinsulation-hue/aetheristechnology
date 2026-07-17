@@ -209,8 +209,16 @@ const ToolNode = memo(function ToolNode({
           <div className="font-forensic text-[13px] leading-tight font-semibold truncate" title={tool.name}>
             {tool.name}
           </div>
-          <div className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground/50">
-            #{String(index + 1).padStart(2, '0')} · signal
+          <div className="mt-0.5 flex items-center justify-between gap-2">
+            <div className="font-mono text-[9px] uppercase tracking-widest text-foreground/50">
+              #{String(index + 1).padStart(2, '0')} · signal
+            </div>
+            <div
+              className="font-mono text-[10px] font-bold tracking-tight"
+              style={{ color }}
+            >
+              {formatPrice(tool.priceCents)}
+            </div>
           </div>
         </div>
       </div>
