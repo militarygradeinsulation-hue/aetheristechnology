@@ -31,11 +31,19 @@ type PlacedTool = {
   category: string;
   route: string;
   img: string | null;
+  priceCents: number | null;
   // initial spawn position
   x: number;
   y: number;
   z: number;
 };
+
+const formatPrice = (cents: number | null): string => {
+  if (cents == null) return 'Included';
+  const dollars = cents / 100;
+  return `$${dollars.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+};
+
 
 // physics bounds (cube half-extents) and node collision radius
 const BOUND_X = 520;
