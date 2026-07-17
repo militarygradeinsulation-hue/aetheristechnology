@@ -265,6 +265,7 @@ const AetherisUniversePage: React.FC = () => {
       return {
         id: t.id, name: t.name, tagline: t.tagline, category: t.category, route: t.route,
         img: IMG_BY_ID[t.id] ?? null,
+        priceCents: t.priceCents,
         x: Math.cos(angle) * radius, y, z: Math.sin(angle) * radius,
       };
     });
