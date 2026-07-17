@@ -655,41 +655,9 @@ const AetherisUniversePage: React.FC = () => {
         <Navbar onContactClick={() => {}} />
       </div>
 
-      {/* Frosted-glass access gate */}
-      <div
-        className="fixed inset-0 z-40 flex items-center justify-center px-6"
-        style={{
-          backdropFilter: 'blur(6px) saturate(120%)',
-          WebkitBackdropFilter: 'blur(6px) saturate(120%)',
-          background: 'rgba(5,6,10,0.25)',
-        }}
-      >
-        <div className="max-w-lg w-full text-center rounded-2xl border border-amber/30 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
-            <Sparkles className="w-3 h-3" /> Access Locked
-          </p>
-          <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight tracking-tight text-foreground">
-            You can access <span className="text-amber italic">The Aetheris Universe</span> after you've tried our Golden Report.
-          </h2>
-          <p className="mt-4 text-sm text-foreground/70">
-            Run your free forensic scan first. It shows you exactly where your business is leaking money — then the Universe opens up.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/golden"
-              className="inline-flex items-center gap-2 rounded-lg bg-amber px-6 py-3 font-mono text-xs uppercase tracking-widest text-black hover:bg-amber/90 transition"
-            >
-              Run the Golden Report <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-lg border border-amber/40 px-6 py-3 font-mono text-xs uppercase tracking-widest text-amber hover:bg-amber/10 transition"
-            >
-              Back to Home
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* Frosted-glass access gate — bypass with rep/employee/license code */}
+      <UniverseAccessGate />
+
 
       <main className="relative z-10">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
