@@ -352,7 +352,7 @@ const TechSolutionsPage: React.FC = () => {
           <section className="mb-14 grid md:grid-cols-3 gap-4">
             <div className="forensic-tile rounded-sm border border-amber/30 p-5">
               <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Single</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.single.amount / 100} once</div>
+              <div className="font-forensic text-3xl font-bold">from ${SHOP_PRICES.single.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
               <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.single.subtitle}</p>
               <Button
                 onClick={() => openBuy("single")}
@@ -364,25 +364,25 @@ const TechSolutionsPage: React.FC = () => {
             <div className="forensic-tile rounded-sm border border-amber/60 p-5 relative">
               <div className="absolute -top-2 right-3 font-mono text-[9px] tracking-widest uppercase bg-amber text-background px-1.5 py-0.5">Best</div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Bundle</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.triple.amount / 100} once</div>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.triple.subtitle}</p>
+              <div className="font-forensic text-3xl font-bold">$1,250<span className="text-base font-normal text-muted-foreground">/yr</span></div>
+              <p className="text-xs text-muted-foreground mt-1 mb-4">Forensic Scan (All) · 5 diagnostics · saves $250</p>
               <Button
-                onClick={() => openBuy("triple")}
+                onClick={() => openBuy("single")}
                 className="w-full bg-amber text-background hover:bg-amber/90 font-semibold"
               >
-                <Layers className="w-3.5 h-3.5 mr-1.5" /> Pick 3 tools
+                <Layers className="w-3.5 h-3.5 mr-1.5" /> Forensic Scan (All)
               </Button>
             </div>
             <div className="forensic-tile rounded-sm border border-crimson/50 p-5">
               <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">All-Access</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.unlimited.amount / 100} one time</div>
+              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.unlimited.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
               <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.unlimited.subtitle}</p>
               <Button
                 onClick={() => openBuy("unlimited")}
                 variant="outline"
                 className="w-full border-crimson/60 text-crimson hover:bg-crimson/10 font-semibold"
               >
-                <InfinityIcon className="w-3.5 h-3.5 mr-1.5" /> Own everything
+                <InfinityIcon className="w-3.5 h-3.5 mr-1.5" /> Evidence Kit
               </Button>
             </div>
           </section>
