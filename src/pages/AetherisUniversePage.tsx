@@ -866,11 +866,14 @@ const AetherisUniversePage: React.FC = () => {
                     />
                   )}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-lg md:text-xl font-forensic font-semibold truncate">{tool.name}</div>
                   <div className="text-xs font-mono uppercase tracking-widest text-foreground/60 truncate mt-1">
                     {tool.category}
                   </div>
+                </div>
+                <div className="flex-shrink-0 font-mono text-base md:text-lg font-bold text-amber">
+                  {formatPrice(tool.priceCents)}
                 </div>
               </button>
             ))}
