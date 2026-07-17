@@ -365,13 +365,10 @@ async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, mode
       return m ? JSON.parse(m[0]) : {};
     }
   };
-  // One retry: many 499/timeout aborts on Gemini clear on the second attempt.
-  try {
-    return await doCall(timeoutMs);
-  } catch (e) {
-    console.warn("aiJson retry after:", String((e as Error).message).slice(0, 120));
-    return await doCall(Math.max(timeoutMs, 90_000));
-  }
+  // Fail fast — the caller (synthesizeReport) runs 15 calls in parallel and is
+  // itself wrapped in a hard watchdog. A slow single call must not stall the
+  // whole Golden Report; the deterministic fallback fills any missing chapter.
+  return await doCall(timeoutMs);
 }
 
 
@@ -529,23 +526,40 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("crm", "skipped", "no account_id");
     }
 
-    await stage("synth", "running", { cap_seconds: 55, mode: "per-chapter-parallel" });
-    let report;
+    // Save the deterministic fallback report NOW, before synthesis, so the row
+    // is never left without a report even if the worker is killed mid-synth.
+    const fbEarly = fallbackReport(findings, url, company);
+    await sb.from("forensic_scans").update({
+      raw_findings: findings,
+      report: fbEarly,
+      updated_at: nowIso(),
+    }).eq("id", id);
+
+    await stage("synth", "running", { cap_seconds: 100, mode: "per-chapter-parallel" });
+    let report = fbEarly;
     try {
-      report = await synthesizeReport(findings, url, company);
-      // Fill any missing chapters from the deterministic fallback so the report is always complete.
-      if (!report.chapters || report.chapters.length < CHAPTERS.length) {
-        const fb = fallbackReport(findings, url, company);
-        const bySlug = new Map((report.chapters || []).map((c: { slug: string }) => [c.slug, c]));
-        report.chapters = CHAPTERS.map((c) => bySlug.get(c.slug) || fb.chapters.find((x) => x.slug === c.slug));
-        if (!report.executive_summary) report.executive_summary = fb.executive_summary;
-        if (!report.top_leaks?.length) report.top_leaks = fb.top_leaks;
+      // Hard watchdog: whatever synthesis returns inside 100s wins; otherwise
+      // we ship the fallback and mark the scan completed. Prevents the row
+      // from being stuck in "running" forever if Gemini stalls.
+      const synth = synthesizeReport(findings, url, company);
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 100_000));
+      const result = await Promise.race([synth, watchdog]);
+      if (result) {
+        report = result;
+        if (!report.chapters || report.chapters.length < CHAPTERS.length) {
+          const bySlug = new Map((report.chapters || []).map((c: { slug: string }) => [c.slug, c]));
+          report.chapters = CHAPTERS.map((c) => bySlug.get(c.slug) || fbEarly.chapters.find((x) => x.slug === c.slug));
+          if (!report.executive_summary) report.executive_summary = fbEarly.executive_summary;
+          if (!report.top_leaks?.length) report.top_leaks = fbEarly.top_leaks;
+        }
+      } else {
+        findings.synthesis_error = "AI synthesis exceeded 100s watchdog — fallback report shipped.";
       }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
-      report = fallbackReport(findings, url, company);
     }
     await stage("synth", "done");
+
 
     await sb.from("forensic_scans").update({
       raw_findings: findings,
