@@ -95,10 +95,15 @@ export function EasyModeRecommender() {
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   };
 
-  const visiblePicks = rec?.picks.filter(p => !dismissedTools.has(p.id)) || [];
+  const visiblePicks = (rec?.picks || []).filter(p => {
+    if (dismissedTools.has(p.id)) return false;
+    const t = findTool(p.id);
+    return !!t && !t.internalOnly && t.priceCents != null;
+  });
   const activeCount = visiblePicks.length;
-  const bundlePrice = activeCount >= 3 ? SHOP_PRICES.triple.amount : SHOP_PRICES.single.amount * activeCount;
-  const listPrice = SHOP_PRICES.single.amount * activeCount;
+  const listPrice = visiblePicks.reduce((sum, p) => sum + (findTool(p.id)?.priceCents ?? 0), 0);
+  // Evidence Kit caps the total once the pick list exceeds its price.
+  const bundlePrice = Math.min(listPrice, SHOP_PRICES.unlimited.amount);
   const savings = Math.max(0, listPrice - bundlePrice);
 
   return (
