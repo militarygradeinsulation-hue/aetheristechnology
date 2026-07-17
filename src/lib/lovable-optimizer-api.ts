@@ -64,41 +64,44 @@ function generatePromptLocally(
     .join(" ")
     .toLowerCase();
 
-  // Analyze project type
-  const isLanding =
-    lowerInput.includes("landing") ||
-    lowerInput.includes("homepage") ||
-    lowerInput.includes("hero");
-  const isDashboard =
-    lowerInput.includes("dashboard") ||
-    lowerInput.includes("analytics") ||
-    lowerInput.includes("chart");
-  const isMobile =
-    lowerInput.includes("mobile") ||
-    lowerInput.includes("app") ||
-    lowerInput.includes("ios") ||
-    lowerInput.includes("android");
-  const isForm =
-    lowerInput.includes("form") || lowerInput.includes("input");
-  const isMarketplace =
-    lowerInput.includes("marketplace") ||
-    lowerInput.includes("product listing") ||
-    lowerInput.includes("ecommerce");
+  // Combine current input with conversation history for better context detection
+  const fullContext = (conversationText + " " + lowerInput).toLowerCase();
 
-  // Analyze aesthetic preferences
+  // Analyze project type using full conversation context
+  const isLanding =
+    fullContext.includes("landing") ||
+    fullContext.includes("homepage") ||
+    fullContext.includes("hero");
+  const isDashboard =
+    fullContext.includes("dashboard") ||
+    fullContext.includes("analytics") ||
+    fullContext.includes("chart");
+  const isMobile =
+    fullContext.includes("mobile") ||
+    fullContext.includes("app") ||
+    fullContext.includes("ios") ||
+    fullContext.includes("android");
+  const isForm =
+    fullContext.includes("form") || fullContext.includes("input");
+  const isMarketplace =
+    fullContext.includes("marketplace") ||
+    fullContext.includes("product listing") ||
+    fullContext.includes("ecommerce");
+
+  // Analyze aesthetic preferences using full conversation context
   const isMinimal =
-    lowerInput.includes("minimal") ||
-    lowerInput.includes("clean") ||
-    lowerInput.includes("simple") ||
-    lowerInput.includes("minimalist");
+    fullContext.includes("minimal") ||
+    fullContext.includes("clean") ||
+    fullContext.includes("simple") ||
+    fullContext.includes("minimalist");
   const isPremium =
-    lowerInput.includes("premium") ||
-    lowerInput.includes("luxury") ||
-    lowerInput.includes("elegant");
+    fullContext.includes("premium") ||
+    fullContext.includes("luxury") ||
+    fullContext.includes("elegant");
   const isBold =
-    lowerInput.includes("bold") ||
-    lowerInput.includes("expressive") ||
-    lowerInput.includes("vibrant");
+    fullContext.includes("bold") ||
+    fullContext.includes("expressive") ||
+    fullContext.includes("vibrant");
 
   // Generate based on type
   if (isLanding) {
@@ -315,6 +318,12 @@ function generateFormPrompt(
   },
   userInput: string
 ): LovablePromptResult {
+  const designDirection = style.isPremium
+    ? "premium with refined spacing"
+    : style.isBold
+      ? "bold with clear visual hierarchy"
+      : "clean and minimal";
+
   const prompt = `Create a form component with:
 
 **Form Structure:**
@@ -326,14 +335,16 @@ function generateFormPrompt(
 - Optional: Validation feedback, helper text
 
 **Design Guidelines:**
+- Aesthetic: ${designDirection}
 - Proper spacing between fields (20-24px)
 - Clear label positioning (above input)
 - Error states in red with descriptive messages
 - Disabled states with reduced opacity
 - Focus states with border color change
+- Mobile-responsive with stacked layout on small screens
 
 **Functionality:**
-Ask me first:
+Before building, ask me:
 1. What fields does this form need?
 2. What are required vs optional fields?
 3. Where does the form submit to?
@@ -369,6 +380,12 @@ function generateMarketplacePrompt(
   },
   userInput: string
 ): LovablePromptResult {
+  const designDirection = style.isPremium
+    ? "premium with elegant spacing"
+    : style.isBold
+      ? "bold with vibrant visual contrast"
+      : "clean and minimal";
+
   const prompt = `Create a marketplace product card component:
 
 **Card Layout:**
@@ -381,6 +398,7 @@ function generateMarketplacePrompt(
 - Optional: Sale badge, availability status
 
 **Design:**
+- Aesthetic: ${designDirection}
 - Consistent card dimensions
 - Hover state: Lift effect + image zoom
 - Shadow and border styling

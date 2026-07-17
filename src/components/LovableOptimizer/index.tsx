@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Copy, ExternalLink, Send, Loader2, Code2, MessageCircle } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import { ArrowRight, Copy, ExternalLink, Send, Loader2, Code2, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { optimizeLovablePrompt, formatLovablePromptForCopy } from "@/lib/lovable-optimizer-api";
 
 interface Message {
@@ -105,20 +106,14 @@ export function LovableOptimizer() {
     if (optimizedPrompt) {
       const fullText = formatLovablePromptForCopy(optimizedPrompt);
       navigator.clipboard.writeText(fullText);
-      // Show toast notification
-      const event = new CustomEvent("toast", {
-        detail: {
-          title: "Copied!",
-          description: "Prompt copied to clipboard",
-        },
-      });
-      window.dispatchEvent(event);
+      toast.success("Prompt copied to clipboard");
     }
   };
 
   const copyPromptOnly = () => {
     if (optimizedPrompt) {
       navigator.clipboard.writeText(optimizedPrompt.prompt);
+      toast.success("Prompt copied to clipboard");
     }
   };
 
@@ -129,6 +124,12 @@ export function LovableOptimizer() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors mr-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Link>
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                 <Code2 className="w-6 h-6 text-white" />
               </div>
