@@ -192,24 +192,24 @@ const ResourcesPage = () => {
                         <button
                           type="button"
                           onClick={() => { setPreviewPlaybook(resource); }}
-                          className="forensic-tile rounded-2xl p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
+                          className="forensic-tile rounded-2xl p-5 md:p-8 border border-border hover:border-amber/30 transition-all group h-full w-full flex flex-col text-left"
                         >
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
-                              <IconComp className="w-6 h-6 text-amber" />
+                          <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors bg-primary/20 group-hover:bg-primary/30">
+                              <IconComp className="w-5 h-5 md:w-6 md:h-6 text-amber" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="text-xl font-bold text-foreground font-display">{resource.title}</h2>
+                                <h2 className="text-base md:text-xl font-bold text-foreground font-display leading-snug">{resource.title}</h2>
                                 <span className="text-[10px] font-bold bg-amber/15 text-amber border border-amber/40 px-2 py-0.5 rounded-full uppercase tracking-wider">Free</span>
                               </div>
-                              <p className="text-sm text-amber font-medium">{resource.subtitle}</p>
+                              <p className="text-xs md:text-sm text-amber font-medium mt-0.5">{resource.subtitle}</p>
                             </div>
                           </div>
-                          <p className="text-muted-foreground text-sm mb-4 flex-grow">{resource.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-5">
+                          <p className="text-muted-foreground text-[13px] md:text-sm leading-relaxed mb-3 md:mb-4 flex-grow">{resource.description}</p>
+                          <div className="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-5">
                             {(resource.tags || []).map((tag: string) => (
-                              <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                              <span key={tag} className="text-[11px] md:text-xs px-2 py-0.5 md:py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                             ))}
                           </div>
                           <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber group-hover:translate-x-1 transition-transform">
@@ -234,45 +234,45 @@ const ResourcesPage = () => {
           const summary: string = pb.summary || pb.description || '';
           return (
             <div
-              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 z-[9998] bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 safe-top safe-bottom"
               onClick={() => setPreviewPlaybook(null)}
             >
               <div
-                className="relative w-full max-w-2xl max-h-[90vh] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden"
+                className="relative w-full sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] bg-card border border-border rounded-t-2xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-start justify-between gap-3 p-5 border-b border-border">
+                <div className="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-border">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
                       <IconC className="w-5 h-5 text-amber" />
                     </div>
                     <div className="min-w-0">
                       <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Playbook Preview</div>
-                      <h3 className="text-lg font-bold text-foreground font-display leading-tight">{pb.title}</h3>
-                      {pb.subtitle && <p className="text-sm text-muted-foreground mt-0.5">{pb.subtitle}</p>}
+                      <h3 className="text-base sm:text-lg font-bold text-foreground font-display leading-tight break-words">{pb.title}</h3>
+                      {pb.subtitle && <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{pb.subtitle}</p>}
                     </div>
                   </div>
                   <button
                     onClick={() => setPreviewPlaybook(null)}
                     aria-label="Close preview"
-                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1 flex-shrink-0"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-auto p-5 space-y-5">
+                <div className="flex-1 overflow-auto p-4 sm:p-5 space-y-4 sm:space-y-5 overscroll-contain">
                   <div>
                     <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">What's Inside</h4>
-                    <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{summary}</p>
+                    <p className="text-[13px] sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{summary}</p>
                   </div>
 
                   {toc.length > 0 && (
                     <div>
                       <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Table of Contents</h4>
-                      <ol className="space-y-1.5 list-decimal list-inside text-sm text-foreground/90">
+                      <ol className="space-y-1.5 list-decimal list-inside text-[13px] sm:text-sm text-foreground/90">
                         {toc.map((t, i) => (
-                          <li key={i} className="leading-snug">{t}</li>
+                          <li key={i} className="leading-snug break-words">{t}</li>
                         ))}
                       </ol>
                     </div>
@@ -281,16 +281,16 @@ const ResourcesPage = () => {
                   {pb.best_for_who && (
                     <div>
                       <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Best For</h4>
-                      <p className="text-sm text-foreground/90 leading-relaxed">{pb.best_for_who}</p>
+                      <p className="text-[13px] sm:text-sm text-foreground/90 leading-relaxed">{pb.best_for_who}</p>
                     </div>
                   )}
 
                   {Array.isArray(pb.best_for_industries) && pb.best_for_industries.length > 0 && (
                     <div>
                       <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Industries</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {pb.best_for_industries.map((ind: string) => (
-                          <span key={ind} className="text-xs px-2 py-1 rounded-full border border-amber/40 text-amber bg-amber/5">{ind}</span>
+                          <span key={ind} className="text-[11px] sm:text-xs px-2 py-1 rounded-full border border-amber/40 text-amber bg-amber/5">{ind}</span>
                         ))}
                       </div>
                     </div>
@@ -299,19 +299,19 @@ const ResourcesPage = () => {
                   {(pb.tags || []).length > 0 && (
                     <div>
                       <h4 className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Topics</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {(pb.tags || []).map((tag: string) => (
-                          <span key={tag} className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
+                          <span key={tag} className="text-[11px] sm:text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{tag}</span>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="p-5 border-t border-border bg-background/40">
+                <div className="p-4 sm:p-5 border-t border-border bg-background/40 safe-bottom">
                   <Button
                     onClick={() => { handlePlaybookAction(pb); setPreviewPlaybook(null); }}
-                    className="w-full gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="w-full h-11 sm:h-10 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Download className="w-4 h-4" /> Download Full PDF (Free)
                   </Button>
