@@ -65,8 +65,8 @@ export function BuyToolDialog({ open, onOpenChange, plan, preselectedToolIds = [
   }, [isBundle, tool]);
 
   const description = isBundle
-    ? "Every client-facing diagnostic + the AI Readiness Checklist. Lifetime access with persistent memory. One payment, keep it forever. 7-day money back."
-    : "Own it for life. Unlimited runs. Persistent memory tied to your account. 7-day money back if it doesn't earn its keep.";
+    ? "Every client-facing diagnostic + the AI Readiness Checklist. Yearly access, auto-renews annually. Saves $300 vs buying individually. Cancel anytime."
+    : "Yearly access · renews annually. Unlimited runs while active. Persistent memory tied to your account. Cancel anytime.";
 
   const metadata = {
     shop: "tools",

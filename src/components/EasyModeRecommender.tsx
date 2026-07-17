@@ -197,7 +197,7 @@ export function EasyModeRecommender() {
                       <span className="ml-1 text-xs font-mono text-amber">save ${(savings / 100).toFixed(0)}</span>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground">Lifetime access. Or book a free call and we'll walk you through the findings.</div>
+                  <div className="text-xs text-muted-foreground">Yearly access · renews annually. Or book a free call and we'll walk you through the findings.</div>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button asChild size="sm" variant="outline" className="border-amber/50 text-amber hover:bg-amber/20">

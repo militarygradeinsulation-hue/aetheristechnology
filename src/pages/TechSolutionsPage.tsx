@@ -7,7 +7,7 @@ import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
-import { SHOP_TOOLS, SHOP_PRICES, type ShopPlan } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, SHOP_PRICES, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
@@ -167,7 +167,7 @@ const TechSolutionsPage: React.FC = () => {
                     // {t.category}
                   </div>
                   <div className="font-mono text-[9px] uppercase tracking-widest text-amber/60">
-                    ${SHOP_PRICES.single.amount / 100} · lifetime
+                    {formatToolPrice(t) || "included"}
                   </div>
                 </div>
 
@@ -258,7 +258,7 @@ const TechSolutionsPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Tech Solutions Store — Free Systems + Buy Direct | Aetheris"
-        description="Every Aetheris client-facing tool: 3 free tries, or own it lifetime from $250. Evidence Kit (all client-facing tools) — $2,500."
+        description="Every Aetheris client-facing tool: 3 free tries, or subscribe yearly from $250. Evidence Kit (all client-facing tools) — $1,450/yr."
         path="/tech-solutions"
         keywords="aetheris tools, ai tools store, free ai systems, business forensics tools"
       />
@@ -352,7 +352,7 @@ const TechSolutionsPage: React.FC = () => {
           <section className="mb-14 grid md:grid-cols-3 gap-4">
             <div className="forensic-tile rounded-sm border border-amber/30 p-5">
               <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Single</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.single.amount / 100} once</div>
+              <div className="font-forensic text-3xl font-bold">from ${SHOP_PRICES.single.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
               <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.single.subtitle}</p>
               <Button
                 onClick={() => openBuy("single")}
@@ -364,25 +364,25 @@ const TechSolutionsPage: React.FC = () => {
             <div className="forensic-tile rounded-sm border border-amber/60 p-5 relative">
               <div className="absolute -top-2 right-3 font-mono text-[9px] tracking-widest uppercase bg-amber text-background px-1.5 py-0.5">Best</div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Bundle</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.triple.amount / 100} once</div>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.triple.subtitle}</p>
+              <div className="font-forensic text-3xl font-bold">$1,250<span className="text-base font-normal text-muted-foreground">/yr</span></div>
+              <p className="text-xs text-muted-foreground mt-1 mb-4">Forensic Scan (All) · 5 diagnostics · saves $250</p>
               <Button
-                onClick={() => openBuy("triple")}
+                onClick={() => openBuy("single")}
                 className="w-full bg-amber text-background hover:bg-amber/90 font-semibold"
               >
-                <Layers className="w-3.5 h-3.5 mr-1.5" /> Pick 3 tools
+                <Layers className="w-3.5 h-3.5 mr-1.5" /> Forensic Scan (All)
               </Button>
             </div>
             <div className="forensic-tile rounded-sm border border-crimson/50 p-5">
               <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">All-Access</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.unlimited.amount / 100} one time</div>
+              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.unlimited.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
               <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.unlimited.subtitle}</p>
               <Button
                 onClick={() => openBuy("unlimited")}
                 variant="outline"
                 className="w-full border-crimson/60 text-crimson hover:bg-crimson/10 font-semibold"
               >
-                <InfinityIcon className="w-3.5 h-3.5 mr-1.5" /> Own everything
+                <InfinityIcon className="w-3.5 h-3.5 mr-1.5" /> Evidence Kit
               </Button>
             </div>
           </section>
@@ -431,8 +431,8 @@ const TechSolutionsPage: React.FC = () => {
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
             <p className="text-sm text-muted-foreground">
               Same rules as the Try surface: sandbox runs are free, nothing is saved,
-              each run is independent. Purchase turns any tool into a lifetime instance
-              with persistent memory tied to your account.
+              each run is independent. A subscription turns any tool into a yearly instance
+              with persistent memory tied to your account. Renews annually. Cancel anytime.
             </p>
           </div>
         </main>

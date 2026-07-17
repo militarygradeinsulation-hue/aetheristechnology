@@ -76,7 +76,7 @@ const ToolInfoPage: React.FC = () => {
                     onClick={() => openBuy("single")}
                     className="bg-amber text-background hover:bg-amber/90 font-semibold"
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Own it — {formatToolPrice(tool)}
+                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Subscribe — {formatToolPrice(tool)}
                   </Button>
                 )}
                 {tool.route && tool.route !== `/try/${tool.id}` && (
@@ -89,7 +89,7 @@ const ToolInfoPage: React.FC = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-amber/15 flex flex-wrap gap-4 text-xs font-mono text-muted-foreground">
-                <span>Lifetime · one-time payment</span>
+                <span>Yearly access · renews annually</span>
                 <span>·</span>
                 <span>Sandbox runs are free</span>
                 <span>·</span>

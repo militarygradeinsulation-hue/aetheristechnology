@@ -48,7 +48,7 @@ export default function ToolsShopRedeemPage() {
     <>
       <Helmet>
         <title>Redeem Your Tool Code — Leak Ecosystem</title>
-        <meta name="description" content="Redeem your lifetime tool access code and unlock your persistent AI memory." />
+        <meta name="description" content="Redeem your yearly tool access code and unlock your persistent AI memory." />
       </Helmet>
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-2xl mx-auto px-4 py-16">

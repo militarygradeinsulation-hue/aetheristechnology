@@ -31,7 +31,7 @@ export function ToolBuyBar() {
           <div className="flex-1 min-w-0">
             <div className="text-[10px] uppercase tracking-widest text-amber-500 font-mono">Leak Ecosystem · 3 free tries</div>
             <div className="text-sm font-semibold truncate">{tool.name} — free to view, buy or book to keep running</div>
-            <div className="text-xs text-muted-foreground truncate">Own it for {priceLabel} lifetime, or book an appointment and we'll run it with you.</div>
+            <div className="text-xs text-muted-foreground truncate">Subscribe for {priceLabel} · renews annually, or book an appointment and we'll run it with you.</div>
           </div>
           <a
             href={BOOK_MEETING_URL}
