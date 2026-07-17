@@ -252,6 +252,30 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          {/* Aetheris Case Intake — branded booking link */}
+          <section className="mt-6 max-w-3xl mx-auto animate-fade-in" aria-label="Book an Aetheris case intake">
+            <div className="relative rounded-lg border border-amber/40 bg-card/70 backdrop-blur-sm p-6 sm:p-8 text-center shadow-[0_0_60px_-20px_hsl(var(--amber)/0.5)]">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
+                // Aetheris · Case Intake //
+              </p>
+              <h2 className="font-forensic text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                Book the operator directly.
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-5 max-w-lg mx-auto">
+                30 minutes. No pitch deck. We look at your business and I tell you where the money is leaking.
+              </p>
+              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Open aetheris.technology/book
+                </Button>
+              </a>
+              <p className="mt-3 text-[11px] font-mono text-muted-foreground tracking-wide">
+                aetheris.technology/book
+              </p>
+            </div>
+          </section>
+
 
           {/* Signature calling card — gentle float + golden shimmer edge */}
           <section className="mt-5 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
