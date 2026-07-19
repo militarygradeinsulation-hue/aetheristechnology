@@ -182,9 +182,11 @@ const NewPortalPage: React.FC = () => {
   }
 
   const isPartner = profile!.role === 'partner';
-  // Playbook / Studio / Training / Forecast are partner-only surfaces.
-  // Reps (including admin-previewed rep views) never see them.
-  const showAdvanced = isPartner;
+  // Dean Young (rep 482917) has unlimited Nexus + full portal access.
+  const isUnlimitedRep = profile!.code === '482917';
+  // Playbook / Studio / Training / Forecast are partner-only surfaces,
+  // plus Dean gets the full partner-tier view.
+  const showAdvanced = isPartner || isUnlimitedRep;
   const commission = fmtUsd(profile!.total_commission_cents || 0);
   const sales = fmtUsd(profile!.total_sales_cents || 0);
 
