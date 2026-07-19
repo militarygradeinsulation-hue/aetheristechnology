@@ -244,7 +244,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const isPartner = claims.role === "partner";
+    // Dean Young (rep 482917) gets partner-tier Nexus access — full tool set + addendum.
+    const isPartner = claims.role === "partner" || claims.code === "482917";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const body = await req.json() as { messages: Array<{ role: string; content: any }>; activeLeadId?: string | null };
