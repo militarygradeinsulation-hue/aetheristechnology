@@ -37,6 +37,7 @@ import { DialerPanel } from '@/components/portal/DialerPanel';
 import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 import { EngagementBoard } from '@/components/portal/EngagementBoard';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
+import { GoldenSlowDownNudge } from '@/components/portal/GoldenSlowDownNudge';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
