@@ -3870,6 +3870,33 @@ export type Database = {
         }
         Relationships: []
       }
+      obsidian_waitlist: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          source: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          source?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       onboarding_modules: {
         Row: {
           created_at: string
