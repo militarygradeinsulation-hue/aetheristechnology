@@ -14,6 +14,7 @@ import { Navbar } from "@/components/Navbar";
 import { HomeMindMapSection } from "@/components/HomeMindMapSection";
 import { HomeFreeTrialArsenal } from "@/components/HomeFreeTrialArsenal";
 import { HomeToolShopGrid } from "@/components/HomeToolShopGrid";
+import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 
 
 
