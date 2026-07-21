@@ -277,6 +277,9 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </section>
 
+          <ObsidianVibeWaitlist />
+
+
 
 
 
