@@ -18,6 +18,14 @@ export interface CompanyCalendarAIPlan {
   kpis?: string[];
   raw?: string;
   generated_at?: string;
+  meta?: {
+    source?: string;
+    lead_id?: string | null;
+    lead_label?: string | null;
+    rep_code?: string | null;
+    rep_name?: string | null;
+    notes?: string | null;
+  };
 }
 
 export type OwnerRole = "founder" | "coo" | "chief_sales" | "team";
