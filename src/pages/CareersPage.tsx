@@ -247,22 +247,22 @@ const CareersPage = () => {
                 What you get on day one. Your name. Your license ID. Valid 12 months.
               </p>
 
-              {/* PRICE + SPLIT */}
+              {/* COMPENSATION */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="rounded-xl border border-amber/40 bg-background/50 p-5 text-center">
-                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">License fee</div>
-                  <div className="font-display text-4xl text-foreground font-bold">$500</div>
-                  <div className="text-xs text-muted-foreground mt-1">per year · non-refundable</div>
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">Upfront fee</div>
+                  <div className="font-display text-4xl text-foreground font-bold">$0</div>
+                  <div className="text-xs text-muted-foreground mt-1">no license purchase · apply and get reviewed</div>
                 </div>
                 <div className="rounded-xl border border-emerald-500/40 bg-background/50 p-5 text-center">
                   <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400 mb-2">Your cut</div>
-                  <div className="font-display text-4xl text-emerald-400 font-bold">40%</div>
-                  <div className="text-xs text-muted-foreground mt-1">of every sale tracked to your code</div>
+                  <div className="font-display text-4xl text-emerald-400 font-bold">15/10/10</div>
+                  <div className="text-xs text-muted-foreground mt-1">diagnostic · 12 mo Active Case · first implementation</div>
                 </div>
                 <div className="rounded-xl border border-foreground/20 bg-background/50 p-5 text-center">
-                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris cut</div>
-                  <div className="font-display text-4xl text-foreground font-bold">60%</div>
-                  <div className="text-xs text-muted-foreground mt-1">we cover build, delivery, support</div>
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris covers</div>
+                  <div className="font-display text-4xl text-foreground font-bold">100%</div>
+                  <div className="text-xs text-muted-foreground mt-1">outreach, diagnostic, delivery, support</div>
                 </div>
               </div>
 
