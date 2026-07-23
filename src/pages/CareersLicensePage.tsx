@@ -92,8 +92,8 @@ export default function CareersLicensePage() {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Instant Rep License — Aetheris Chaos Ecosystem"
-        description="Skip the test. Pay $100, get your rep code, sell every Aetheris tool at full commission. 1099 independent, no employment relationship."
+        title="Strategic Scout Program — Aetheris Forensic Alliance"
+        description="Introduce qualified businesses to Aetheris and earn on collected revenue: 15% of every paid 21-Day Revenue Diagnostic, 10% of Active Case revenue for 12 paid months, and 10% of the first custom implementation. 1099 independent."
         path="/careers/license"
       />
       <Background />
@@ -105,58 +105,112 @@ export default function CareersLicensePage() {
             <Card className="bg-card/60 backdrop-blur border-amber/40 forensic-tile">
               <CardHeader>
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Lock className="w-3.5 h-3.5" /> Instant License · $500 · No test · No interview
+                  <Lock className="w-3.5 h-3.5" /> Forensic Alliance · Strategic Scout Program · 1099 independent
                 </div>
                 <CardTitle className="font-display text-3xl mt-2">
-                  Skip the gatekeepers. <span className="text-crimson">Print your own paycheck.</span>
+                  Introduce the business. <span className="text-crimson">Earn on the revenue Aetheris collects.</span>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  $500 one-time gets you a personal rep code and the right to resell every Aetheris tool in the Chaos Ecosystem.
-                  <span className="text-amber font-semibold"> One fixed-fee diagnostic pays your license back 5x.</span> One fixed-fee flagship close puts <span className="text-amber font-semibold">$5,000 in your pocket.</span>
-                  1099 independent — no employment, no manager, no quotas.
+                  You provide a documented, qualified introduction. Aetheris runs the outreach, the diagnostic, the delivery, and the collection.
+                  You get paid <span className="text-amber font-semibold">only after cleared payment</span> — every commission calculated from collected net revenue.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
+
+                {/* Compensation at a glance */}
+                <div className="space-y-2">
+                  <p className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber">Scout compensation</p>
+                  <div className="grid gap-3">
+                    <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-foreground">21-Day Revenue Diagnostic</p>
+                        <span className="font-mono text-amber text-sm">15% of collected</span>
+                      </div>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Example: $2,775 on an $18,500 paid diagnostic. One-time per client.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-foreground">Active Case engagement</p>
+                        <span className="font-mono text-amber text-sm">10% monthly</span>
+                      </div>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        10% of collected monthly revenue for the client's first 12 paid months, while the account remains current and in good standing.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-foreground">First custom implementation</p>
+                        <span className="font-mono text-amber text-sm">10% of net collected</span>
+                      </div>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Example: $2,500 on a $25,000 implementation. First implementation only, per client.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-semibold text-foreground">Founding Scout incentive <span className="text-emerald-400 text-xs font-mono ml-1">(optional launch bonus)</span></p>
+                        <span className="font-mono text-emerald-400 text-sm">20% on first 3</span>
+                      </div>
+                      <p className="text-muted-foreground text-xs mt-1">
+                        Founding Strategic Scouts receive 20% ($3,700 on $18,500) on their first three qualified paid diagnostics.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* First-year worked example */}
+                <div className="rounded-xl border border-crimson/40 bg-crimson/5 p-4">
+                  <p className="font-mono uppercase text-[10px] tracking-[0.3em] text-crimson mb-2">First-year worked example</p>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    $18,500 diagnostic + $10,000/mo Active Case × 12 months + $25,000 implementation =
+                    <span className="font-mono text-amber font-semibold"> $17,275 total Scout compensation</span> on $163,500 of client revenue (10.6% effective).
+                  </p>
+                </div>
+
+                {/* Rules that protect the payout */}
                 <div className="grid sm:grid-cols-3 gap-3 text-sm">
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <ShieldCheck className="w-4 h-4 text-amber mb-1" />
-                    <p className="font-semibold text-foreground">Personal rep code</p>
-                    <p className="text-muted-foreground text-xs mt-1">Every sale tracked. Every commission auto-paid within 7 days of clearing.</p>
+                    <p className="font-semibold text-foreground">Paid only after collection</p>
+                    <p className="text-muted-foreground text-xs mt-1">Commissions earn after Aetheris receives cleared payment and any refund window has ended. No pay on refunds, disputes, or chargebacks.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <Rocket className="w-4 h-4 text-amber mb-1" />
-                    <p className="font-semibold text-foreground">Sell the whole stack</p>
-                    <p className="text-muted-foreground text-xs mt-1">Every tool, every flagship, every retainer. Highest split in the category.</p>
+                    <p className="font-semibold text-foreground">Documented warm intro</p>
+                    <p className="text-muted-foreground text-xs mt-1">A qualified intro means a shared email, message, scheduled call, or written confirmation the owner has given permission to be contacted. Attribution holds for 12 months.</p>
                   </div>
                   <div className="rounded-lg border border-amber/30 bg-background/40 p-3">
                     <DollarSign className="w-4 h-4 text-amber mb-1" />
-                    <p className="font-semibold text-foreground">Live in 5 minutes</p>
-                    <p className="text-muted-foreground text-xs mt-1">Pay, get your code, portal + playbook unlock instantly. Start selling today.</p>
+                    <p className="font-semibold text-foreground">Collected net revenue</p>
+                    <p className="text-muted-foreground text-xs mt-1">Commission excludes taxes, refunds, chargebacks, financing fees, vendor pass-throughs, ad spend, and client-purchased software.</p>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Your name</Label>
-                  <Input value={payerName} onChange={e => setPayerName(e.target.value)} maxLength={100} placeholder="Full name" />
+
+                {/* Fit criteria */}
+                <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
+                  <p className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">Who Aetheris is built for</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Established businesses with measurable revenue, active sales or marketing motion, operational complexity, and an owner who believes revenue, leads, time, or opportunities are being lost somewhere in the organization. Existing Aetheris clients, active opportunities, and companies already in the pipeline are excluded from attribution.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label>Email for receipt + license</Label>
-                  <Input
-                    type="email" value={payerEmail} onChange={e => setPayerEmail(e.target.value)}
-                    placeholder="you@example.com" maxLength={255}
-                  />
-                </div>
+
                 <Button
                   asChild
                   size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.4)]"
                 >
                   <a href="https://obsidianvibe.live/api/public/share/094n00556o155b#submit" target="_blank" rel="noopener noreferrer">
-                    Apply for your license — $500 →
+                    Apply to become a Strategic Scout →
                   </a>
                 </Button>
-                <p className="text-xs text-center text-muted-foreground">Secure application · Rep code issued after review · 1099 independent</p>
+                <p className="text-xs text-center text-muted-foreground">
+                  1099 independent contractor · Final terms in the executed Strategic Scout agreement · Subject to legal, tax, and compliance review
+                </p>
               </CardContent>
             </Card>
           )}
+
 
           {phase === 'checkout' && (
             <div className="space-y-4">
