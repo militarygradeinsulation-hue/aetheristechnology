@@ -168,3 +168,20 @@ export function entryDisplay(entry: Pick<CompanyCalendarEntry, "color" | "kind">
 export const categoryToColorToken = (c: CompanyCalendarCategory) => `cat:${c}`;
 
 export const COMPANY_CAL_BUCKET = "workspace-files";
+
+// ===== Rep meeting helpers =====
+export interface RepMeetingInput {
+  title: string;
+  date: string;      // YYYY-MM-DD
+  due_time?: string; // HH:MM
+  notes?: string;
+  lead_id?: string | null;
+  lead_label?: string | null;
+}
+
+export const createRepMeeting = (input: RepMeetingInput) =>
+  call<{ ok: true; entry: CompanyCalendarEntry }>({ action: "rep_meeting_create", ...input }).then(d => d.entry);
+
+export const deleteRepMeeting = (id: string) =>
+  call<{ ok: true }>({ action: "rep_meeting_delete", id });
+
