@@ -119,6 +119,7 @@ const LeakAuditPage = () => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qIndex, setQIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const currentQ = QUESTIONS[qIndex];
   const totalQs = QUESTIONS.length;
