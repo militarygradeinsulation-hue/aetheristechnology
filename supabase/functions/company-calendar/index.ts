@@ -13,7 +13,7 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const KINDS = new Set(["goal", "vertical", "topic", "event", "push", "note"]);
+const KINDS = new Set(["goal", "vertical", "topic", "event", "push", "note", "meeting"]);
 const OWNER_ROLES = new Set(["founder", "coo", "chief_sales", "team"]);
 const STATUSES = new Set(["todo", "doing", "done"]);
 
