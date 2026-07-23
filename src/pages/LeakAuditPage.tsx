@@ -513,27 +513,44 @@ const LeakAuditPage = () => {
                     investigation: 14 days inside your operation, every leak named, every dollar quantified.
                     <strong className="text-foreground"> Applied toward engagement if you proceed.</strong>
                   </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-amber text-primary-foreground hover:bg-amber/90"
-                  >
-                    <a href="/services">
-                      Book the Forensic Diagnostic
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </a>
-                  </Button>
-                  <div className="pt-2">
-                    <a
-                      href="https://meetings-na2.hubspot.com/jtoney/joseph-toney-business-signal-analyst"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      Or book a 15-min walkthrough first
-                    </a>
-                  </div>
+                  {!showCheckout ? (
+                    <>
+                      <Button
+                        size="lg"
+                        onClick={() => setShowCheckout(true)}
+                        className="bg-amber text-primary-foreground hover:bg-amber/90"
+                      >
+                        Pay $2,500 & Book the Forensic Diagnostic
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                      <div className="pt-2">
+                        <a
+                          href="/book"
+                          className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                          Or book a 15-min walkthrough first
+                        </a>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="pt-4 text-left">
+                      <StripeEmbeddedCheckout
+                        priceId="forensic_diagnostic_onetime"
+                        customerEmail={email || undefined}
+                        returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
+                        metadata={{ source: 'leak_audit', company: company || '' }}
+                      />
+                      <div className="text-center pt-3">
+                        <button
+                          onClick={() => setShowCheckout(false)}
+                          className="text-xs text-muted-foreground hover:text-amber underline"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
