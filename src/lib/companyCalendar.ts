@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 
-export type CompanyCalendarKind = "goal" | "vertical" | "topic" | "event" | "push" | "note";
+export type CompanyCalendarKind = "goal" | "vertical" | "topic" | "event" | "push" | "note" | "meeting";
 
 export interface CompanyCalendarAttachment {
   name: string;
@@ -18,6 +18,14 @@ export interface CompanyCalendarAIPlan {
   kpis?: string[];
   raw?: string;
   generated_at?: string;
+  meta?: {
+    source?: string;
+    lead_id?: string | null;
+    lead_label?: string | null;
+    rep_code?: string | null;
+    rep_name?: string | null;
+    notes?: string | null;
+  };
 }
 
 export type OwnerRole = "founder" | "coo" | "chief_sales" | "team";
@@ -120,6 +128,7 @@ export const KIND_META: Record<CompanyCalendarKind, { label: string; icon: strin
   event:    { label: "Event",           icon: "📅", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
   push:     { label: "Sales Push",      icon: "🔥", color: "bg-crimson/15 text-crimson border-crimson/40" },
   note:     { label: "Note",            icon: "📝", color: "bg-muted text-muted-foreground border-border" },
+  meeting:  { label: "Meeting",         icon: "🤝", color: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/40" },
 };
 
 // ===== Source categories (encoded in entry.color as `cat:<key>`) =====
@@ -167,3 +176,20 @@ export function entryDisplay(entry: Pick<CompanyCalendarEntry, "color" | "kind">
 export const categoryToColorToken = (c: CompanyCalendarCategory) => `cat:${c}`;
 
 export const COMPANY_CAL_BUCKET = "workspace-files";
+
+// ===== Rep meeting helpers =====
+export interface RepMeetingInput {
+  title: string;
+  date: string;      // YYYY-MM-DD
+  due_time?: string; // HH:MM
+  notes?: string;
+  lead_id?: string | null;
+  lead_label?: string | null;
+}
+
+export const createRepMeeting = (input: RepMeetingInput) =>
+  call<{ ok: true; entry: CompanyCalendarEntry }>({ action: "rep_meeting_create", ...input }).then(d => d.entry);
+
+export const deleteRepMeeting = (id: string) =>
+  call<{ ok: true }>({ action: "rep_meeting_delete", id });
+
