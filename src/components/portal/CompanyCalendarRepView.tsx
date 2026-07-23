@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry,
   createRepMeeting, deleteRepMeeting,
-  CATEGORY_META, entryDisplay, type CompanyCalendarEntry,
+  CATEGORY_META, KIND_META, entryDisplay, type CompanyCalendarEntry,
 } from "@/lib/companyCalendar";
 import { listCalendar, type LeadSummary } from "@/lib/portalCalendar";
 import { getPortalProfile } from "@/lib/portalAuth";
