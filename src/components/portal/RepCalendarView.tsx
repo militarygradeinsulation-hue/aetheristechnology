@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, Circle, Calendar as CalendarIcon,
+  ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, Circle, Calendar as CalendarIcon, Share2, Undo2,
 } from "lucide-react";
 import {
   listCalendar, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
+  pushCalendarEventToCompany, unpushCalendarEventFromCompany,
   type CalendarEvent, type CalendarKind, type LeadSummary, KIND_META,
 } from "@/lib/portalCalendar";
 
@@ -150,6 +151,40 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
       await refresh();
     } catch (e) {
       toast({ title: "Delete failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const pushToCompany = async () => {
+    if (!draft?.id) return;
+    setSaving(true);
+    try {
+      const res = await pushCalendarEventToCompany(draft.id);
+      setDraft({ ...draft, company_event_id: res.company_event_id || draft.company_event_id });
+      toast({
+        title: res.already ? "Already on the company calendar" : "Pushed to the company calendar",
+        description: "The whole team can now see this date.",
+      });
+      await refresh();
+    } catch (e) {
+      toast({ title: "Push failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const unpushFromCompany = async () => {
+    if (!draft?.id) return;
+    if (!confirm("Remove this entry from the company calendar? (Your personal entry stays.)")) return;
+    setSaving(true);
+    try {
+      await unpushCalendarEventFromCompany(draft.id);
+      setDraft({ ...draft, company_event_id: null });
+      toast({ title: "Removed from company calendar" });
+      await refresh();
+    } catch (e) {
+      toast({ title: "Remove failed", description: (e as Error).message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -470,11 +505,21 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
               )}
             </div>
           )}
-          <DialogFooter className="flex justify-between sm:justify-between gap-2">
-            <div>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {draft?.id && (
                 <Button variant="ghost" size="sm" onClick={remove} disabled={saving} className="text-crimson hover:text-crimson hover:bg-crimson/10">
                   <Trash2 className="w-4 h-4 mr-1" /> Delete
+                </Button>
+              )}
+              {draft?.id && !draft.company_event_id && (
+                <Button variant="outline" size="sm" onClick={pushToCompany} disabled={saving} className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                  <Share2 className="w-4 h-4 mr-1" /> Push to company calendar
+                </Button>
+              )}
+              {draft?.id && draft.company_event_id && (
+                <Button variant="outline" size="sm" onClick={unpushFromCompany} disabled={saving} className="border-amber/40 text-amber hover:bg-amber/10">
+                  <Undo2 className="w-4 h-4 mr-1" /> Remove from company calendar
                 </Button>
               )}
             </div>

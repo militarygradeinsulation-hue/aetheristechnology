@@ -4521,6 +4521,7 @@ export type Database = {
           admin_notes: string | null
           all_day: boolean
           body: string | null
+          company_event_id: string | null
           completed: boolean
           completed_at: string | null
           created_at: string
@@ -4539,6 +4540,7 @@ export type Database = {
           admin_notes?: string | null
           all_day?: boolean
           body?: string | null
+          company_event_id?: string | null
           completed?: boolean
           completed_at?: string | null
           created_at?: string
@@ -4557,6 +4559,7 @@ export type Database = {
           admin_notes?: string | null
           all_day?: boolean
           body?: string | null
+          company_event_id?: string | null
           completed?: boolean
           completed_at?: string | null
           created_at?: string
@@ -4572,6 +4575,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rep_calendar_events_company_event_id_fkey"
+            columns: ["company_event_id"]
+            isOneToOne: false
+            referencedRelation: "company_calendar"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rep_calendar_events_lead_id_fkey"
             columns: ["lead_id"]
