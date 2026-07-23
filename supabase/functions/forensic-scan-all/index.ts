@@ -718,12 +718,61 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   });
 
   const summary = summaryResult.status === "fulfilled" ? summaryResult.value : {};
+  const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
     executive_summary: summary.executive_summary || fb.executive_summary,
-    top_leaks: Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks,
+    top_leaks: dedupeTopLeaks(rawLeaks),
     chapters,
   };
 }
+
+// Strip patterns that historically caused false positives before findings reach the AI.
+// - Webflow / Framer / Wix dual success/failure DOM: both messages live in raw HTML,
+//   JS toggles which one displays. Presence alone is NOT proof of a broken form.
+// - Also collapses long repeated whitespace so the model doesn't re-emit template noise.
+function sanitizeFindingsForSynth(findings: Record<string, unknown>): Record<string, unknown> {
+  const FORM_NOISE_PATTERNS: RegExp[] = [
+    /Thank you!\s*Your submission has been received!?\s*Oops!?\s*Something went wrong while submitting the form\.?/gi,
+    /Oops!?\s*Something went wrong while submitting the form\.?\s*Thank you!\s*Your submission has been received!?/gi,
+  ];
+  const replaceIn = (s: string) => {
+    let out = s;
+    for (const re of FORM_NOISE_PATTERNS) {
+      out = out.replace(re, "[form_dual_message_template — unverified, requires live submission test]");
+    }
+    return out;
+  };
+  const walk = (v: unknown): unknown => {
+    if (typeof v === "string") return replaceIn(v);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, val] of Object.entries(v as Record<string, unknown>)) out[k] = walk(val);
+      return out;
+    }
+    return v;
+  };
+  return walk(findings) as Record<string, unknown>;
+}
+
+// Ensure top_leaks contains distinct root causes only. Prevents the same underlying
+// issue being priced two/three times in the executive summary.
+function dedupeTopLeaks(
+  leaks: Array<{ rank?: number; name?: string; dollars_low?: number; dollars_high?: number; chapter_slug?: string; summary?: string }>,
+) {
+  const seen = new Map<string, typeof leaks[number]>();
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  for (const leak of leaks) {
+    const key = norm(String(leak.name || "")) || norm(String(leak.summary || ""));
+    if (!key) continue;
+    if (!seen.has(key)) seen.set(key, leak);
+  }
+  return Array.from(seen.values())
+    .slice(0, 5)
+    .map((leak, i) => ({ ...leak, rank: i + 1 }));
+}
+
+
 
 
 // ──────────────────────────── background worker ─────────────────────────────
