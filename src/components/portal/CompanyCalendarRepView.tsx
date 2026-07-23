@@ -158,7 +158,7 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
                 Daily goals, vertical focuses, topics to post, sales pushes, and every rep's booked meetings — all in one view.
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mt-2 inline-flex items-center gap-1">
-                <Lock className="w-3 h-3" /> Leadership entries read-only · your meetings post here and notify the team
+                <Lock className="w-3 h-3" /> Leadership entries read-only · every rep's meetings & bookings show here for the whole team
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
