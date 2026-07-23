@@ -599,7 +599,15 @@ Identity: a forensic accountant for revenue leaks, not a consultant.
 Vocabulary: "leak", "bleed", "exposure", "active", "verified". Avoid "synergy",
 "unlock", "elevate", "leverage", "robust", "innovative", "cutting-edge".
 Currency: USD only. Every $ amount rendered as $X,XXX. Never €/£/¥.
-Output: production-grade prose suitable for a printed forensic report.`;
+Output: production-grade prose suitable for a printed forensic report.
+
+EVIDENCE RULES — non-negotiable, violating any of these invalidates the report:
+1. FORM ERROR STRINGS ARE NOT PROOF OF A BROKEN FORM. Scraped HTML routinely contains BOTH the success message ("Thank you! Your submission has been received!") and the failure message ("Oops! Something went wrong while submitting the form") as adjacent hidden DOM blocks — this is standard Webflow / Framer / Wix behavior. JavaScript toggles which one displays at runtime. Never treat the mere presence of "Oops! Something went wrong" as a confirmed active bug or price it as a leak. If you must reference it, label it "unverified form pattern — requires live submission test", assign zero dollar exposure, and do NOT include it in top_leaks.
+2. IDENTICAL STRINGS ARE NEVER CONTRADICTIONS. If two quoted snippets in the findings contain the same sentence, that is intentional messaging consistency across pages, not a brand voice conflict. Only flag a contradiction when the meaning genuinely differs (e.g. "money-back guarantee" on one page vs "all sales final" on another). Never price identical repetition as a leak.
+3. DATE MATH: the current year is ${new Date().getUTCFullYear()}. A copyright year LESS THAN the current year is STALE / IN THE PAST, never "a future date". A stale copyright is a small trust signal, not a priced leak on its own.
+4. DE-DUPLICATE ROOT CAUSES. Each distinct underlying issue is priced ONCE across the whole report. The top_leaks array must contain 3-5 DISTINCT root causes, no repeats of the same underlying issue with different dollar ranges. Chapters may reference a leak documented elsewhere but must not re-price it.
+5. Do not invent findings. If a tool returned an error, say so and pivot to what other tools showed. Empty findings for a chapter means write "no signal detected in this pass" — not a fabricated leak.`;
+
 
 async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, model = "google/gemini-2.5-flash") {
   const doCall = async (t: number) => {
@@ -690,8 +698,10 @@ Return JSON:
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
-  const findingsStr = JSON.stringify(findings).slice(0, 28_000);
+  const cleaned = sanitizeFindingsForSynth(findings);
+  const findingsStr = JSON.stringify(cleaned).slice(0, 28_000);
   const fb = fallbackReport(findings, target, company);
+
   // Run summary + 14 per-chapter calls in parallel so one failure doesn't poison the whole report.
   const [summaryResult, ...chapterResults] = await Promise.allSettled([
     synthesizeSummary(findingsStr, target, company),
@@ -708,12 +718,61 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   });
 
   const summary = summaryResult.status === "fulfilled" ? summaryResult.value : {};
+  const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
     executive_summary: summary.executive_summary || fb.executive_summary,
-    top_leaks: Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks,
+    top_leaks: dedupeTopLeaks(rawLeaks),
     chapters,
   };
 }
+
+// Strip patterns that historically caused false positives before findings reach the AI.
+// - Webflow / Framer / Wix dual success/failure DOM: both messages live in raw HTML,
+//   JS toggles which one displays. Presence alone is NOT proof of a broken form.
+// - Also collapses long repeated whitespace so the model doesn't re-emit template noise.
+function sanitizeFindingsForSynth(findings: Record<string, unknown>): Record<string, unknown> {
+  const FORM_NOISE_PATTERNS: RegExp[] = [
+    /Thank you!\s*Your submission has been received!?\s*Oops!?\s*Something went wrong while submitting the form\.?/gi,
+    /Oops!?\s*Something went wrong while submitting the form\.?\s*Thank you!\s*Your submission has been received!?/gi,
+  ];
+  const replaceIn = (s: string) => {
+    let out = s;
+    for (const re of FORM_NOISE_PATTERNS) {
+      out = out.replace(re, "[form_dual_message_template — unverified, requires live submission test]");
+    }
+    return out;
+  };
+  const walk = (v: unknown): unknown => {
+    if (typeof v === "string") return replaceIn(v);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, val] of Object.entries(v as Record<string, unknown>)) out[k] = walk(val);
+      return out;
+    }
+    return v;
+  };
+  return walk(findings) as Record<string, unknown>;
+}
+
+// Ensure top_leaks contains distinct root causes only. Prevents the same underlying
+// issue being priced two/three times in the executive summary.
+function dedupeTopLeaks(
+  leaks: Array<{ rank?: number; name?: string; dollars_low?: number; dollars_high?: number; chapter_slug?: string; summary?: string }>,
+) {
+  const seen = new Map<string, typeof leaks[number]>();
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  for (const leak of leaks) {
+    const key = norm(String(leak.name || "")) || norm(String(leak.summary || ""));
+    if (!key) continue;
+    if (!seen.has(key)) seen.set(key, leak);
+  }
+  return Array.from(seen.values())
+    .slice(0, 5)
+    .map((leak, i) => ({ ...leak, rank: i + 1 }));
+}
+
+
 
 
 // ──────────────────────────── background worker ─────────────────────────────
