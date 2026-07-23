@@ -40,7 +40,93 @@ serve(async (req) => {
       if (ownerRole) q = q.eq("owner_role", ownerRole);
       const { data, error } = await q;
       if (error) throw error;
-      return json({ ok: true, entries: data || [] });
+      const entries: any[] = Array.isArray(data) ? [...data] : [];
+
+      // Merge every rep's personal calendar into the company view so leadership
+      // sees the whole team in one place. Only when no owner_role filter is
+      // applied (rep events belong to "team").
+      if (!ownerRole) {
+        try {
+          const fromIso = from
+            ? new Date(from + "T00:00:00Z").toISOString()
+            : new Date(Date.now() - 1000 * 60 * 60 * 24 * 60).toISOString();
+          const toIso = to
+            ? new Date(to + "T23:59:59Z").toISOString()
+            : new Date(Date.now() + 1000 * 60 * 60 * 24 * 120).toISOString();
+          const { data: repEvents } = await supabase
+            .from("rep_calendar_events")
+            .select("id, rep_code, kind, title, body, start_at, end_at, all_day, lead_id, completed, rep_notes, admin_notes, created_by, created_at, updated_at")
+            .gte("start_at", fromIso)
+            .lte("start_at", toIso)
+            .order("start_at", { ascending: true })
+            .limit(2000);
+
+          const codes = Array.from(new Set((repEvents || []).map((e: any) => e.rep_code).filter(Boolean)));
+          const nameByCode: Record<string, string> = {};
+          if (codes.length) {
+            const { data: reps } = await supabase.from("rep_codes").select("code, rep_name").in("code", codes);
+            for (const r of reps || []) nameByCode[r.code] = r.rep_name || r.code;
+          }
+
+          const leadIds = Array.from(new Set((repEvents || []).map((e: any) => e.lead_id).filter(Boolean)));
+          const leadById: Record<string, { business_name: string | null; contact_name: string | null }> = {};
+          if (leadIds.length) {
+            const { data: leads } = await supabase.from("rep_leads").select("id, business_name, contact_name").in("id", leadIds as string[]);
+            for (const l of leads || []) leadById[l.id] = { business_name: l.business_name, contact_name: l.contact_name };
+          }
+
+          for (const e of repEvents || []) {
+            const start = new Date(e.start_at);
+            const dateStr = start.toISOString().slice(0, 10);
+            const hh = String(start.getUTCHours()).padStart(2, "0");
+            const mm = String(start.getUTCMinutes()).padStart(2, "0");
+            const dueTime = e.all_day ? null : `${hh}:${mm}:00`;
+            const repName = nameByCode[e.rep_code] || e.rep_code;
+            const lead = e.lead_id ? leadById[e.lead_id] : null;
+            const leadLabel = lead ? (lead.business_name || lead.contact_name || null) : null;
+            const bodyLines: string[] = [];
+            if (leadLabel) bodyLines.push(`Lead: ${leadLabel}`);
+            bodyLines.push(`Owner: ${repName} (${e.rep_code})`);
+            if (e.body) bodyLines.push("", String(e.body));
+            if (e.rep_notes) bodyLines.push("", `Rep notes: ${e.rep_notes}`);
+            if (e.admin_notes) bodyLines.push("", `Admin notes: ${e.admin_notes}`);
+
+            entries.push({
+              id: `rep-cal:${e.id}`,
+              date: dateStr,
+              kind: "meeting",
+              title: e.title,
+              body: bodyLines.join("\n"),
+              attachments: [],
+              ai_plan: {
+                meta: {
+                  source: "rep_calendar",
+                  rep_code: e.rep_code,
+                  rep_name: repName,
+                  lead_id: e.lead_id,
+                  lead_label: leadLabel,
+                  original_kind: e.kind,
+                  read_only: true,
+                },
+              },
+              pinned: false,
+              color: "cat:rep_calendar",
+              owner_role: "team",
+              owner_name: repName,
+              status: e.completed ? "done" : "todo",
+              due_time: dueTime,
+              created_by: `rep:${e.rep_code}`,
+              created_at: e.created_at,
+              updated_at: e.updated_at,
+            });
+          }
+          entries.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+        } catch (mergeErr) {
+          console.warn("rep_calendar merge failed", mergeErr);
+        }
+      }
+
+      return json({ ok: true, entries });
     }
 
     if (action === "list_roles") {
