@@ -208,6 +208,42 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
               );
             })}
           </div>
+
+          {/* Filters */}
+          <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Filter</span>
+            <select
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              value={personFilter}
+              onChange={(e) => setPersonFilter(e.target.value)}
+            >
+              <option value="all">Everyone</option>
+              {myRepPrefix && <option value="__mine">Just me</option>}
+              {people.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              value={kindFilter}
+              onChange={(e) => setKindFilter(e.target.value)}
+            >
+              <option value="all">All types</option>
+              {kindOptions.map(k => {
+                const cat = (CATEGORY_META as Record<string, { label: string; icon: string }>)[k];
+                const kind = (KIND_META as Record<string, { label: string; icon: string }>)[k];
+                const label = cat ? `${cat.icon} ${cat.label}` : kind ? `${kind.icon} ${kind.label}` : k;
+                return <option key={k} value={k}>{label}</option>;
+              })}
+            </select>
+            {(personFilter !== "all" || kindFilter !== "all") && (
+              <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setPersonFilter("all"); setKindFilter("all"); }}>
+                Clear
+              </Button>
+            )}
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground ml-auto">
+              Showing {filteredEntries.length} of {entries.length}
+            </span>
+          </div>
+
         </CardHeader>
       </Card>
 
