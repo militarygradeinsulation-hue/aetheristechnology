@@ -491,8 +491,9 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               <CardContent className="space-y-2">
                 {list.map(e => {
                   const meta = entryDisplay(e);
-                  const owner = OWNER_META[(e.owner_role || "team") as OwnerRole];
-                  const OwnerIcon = ROLE_ICONS[(e.owner_role || "team") as OwnerRole];
+                  const roleKey = (OWNER_META[(e.owner_role as OwnerRole)] ? e.owner_role : "team") as OwnerRole;
+                  const owner = OWNER_META[roleKey];
+                  const OwnerIcon = ROLE_ICONS[roleKey];
                   return (
                     <div
                       key={e.id}
