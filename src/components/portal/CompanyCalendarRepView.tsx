@@ -37,9 +37,46 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
   const [meetingOpen, setMeetingOpen] = useState(false);
+  const [personFilter, setPersonFilter] = useState<string>("all");
+  const [kindFilter, setKindFilter] = useState<string>("all");
   const dialogOpenRef = useRef(false);
   const profile = useMemo(() => getPortalProfile(), []);
   const myRepPrefix = profile?.code ? `rep:${profile.code}` : null;
+
+  const people = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of entries) {
+      const name = e.owner_name || (e.ai_plan?.meta?.rep_name ?? null);
+      if (name) s.add(name);
+    }
+    return Array.from(s).sort();
+  }, [entries]);
+
+  const kindOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of entries) {
+      const cat = e.color && e.color.startsWith("cat:") ? e.color.slice(4) : null;
+      s.add(cat || e.kind);
+    }
+    return Array.from(s).sort();
+  }, [entries]);
+
+  const filteredEntries = useMemo(() => {
+    return entries.filter(e => {
+      if (personFilter !== "all") {
+        const name = e.owner_name || (e.ai_plan?.meta?.rep_name ?? null);
+        if (personFilter === "__mine") {
+          if (!myRepPrefix || e.created_by !== myRepPrefix) return false;
+        } else if (name !== personFilter) return false;
+      }
+      if (kindFilter !== "all") {
+        const cat = e.color && e.color.startsWith("cat:") ? e.color.slice(4) : null;
+        const key = cat || e.kind;
+        if (key !== kindFilter) return false;
+      }
+      return true;
+    });
+  }, [entries, personFilter, kindFilter, myRepPrefix]);
 
 
   const range = useMemo(() => {
