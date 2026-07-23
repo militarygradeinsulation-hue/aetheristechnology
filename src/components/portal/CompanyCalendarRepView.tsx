@@ -527,6 +527,15 @@ const EntryDialog: React.FC<{
         )}
 
         <div className="mt-4 flex justify-end gap-2 flex-wrap">
+          {isMyMeeting && !isAdmin && (
+            <Button variant="destructive" size="sm" onClick={async () => {
+              if (!confirm("Delete your meeting from the company calendar?")) return;
+              setSaving(true);
+              try { await deleteRepMeeting(entry.id); toast.success("Meeting removed"); onDeleted?.(); }
+              catch (e: any) { toast.error("Delete failed", { description: e.message }); }
+              finally { setSaving(false); }
+            }} disabled={saving}><Trash2 className="w-3 h-3 mr-1" />Delete Meeting</Button>
+          )}
           {isAdmin && !editing && (
             <>
               <Button variant="destructive" size="sm" onClick={remove} disabled={saving}>Delete</Button>
@@ -542,7 +551,7 @@ const EntryDialog: React.FC<{
           <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
         </div>
 
-        {!isAdmin && (
+        {!isAdmin && !isMyMeeting && (
           <p className="text-[10px] text-muted-foreground mt-3 inline-flex items-center gap-1">
             <Lock className="w-3 h-3" /> Read-only, only leadership can edit this entry
           </p>
@@ -552,4 +561,95 @@ const EntryDialog: React.FC<{
   );
 };
 
+// ---------- Rep meeting scheduler ----------
+const ScheduleMeetingDialog: React.FC<{ onClose: () => void; onCreated: () => void }> = ({ onClose, onCreated }) => {
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [time, setTime] = useState("09:00");
+  const [notes, setNotes] = useState("");
+  const [leadId, setLeadId] = useState<string>("");
+  const [customLead, setCustomLead] = useState("");
+  const [leads, setLeads] = useState<LeadSummary[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    listCalendar({}).then(r => setLeads(r.active_leads || [])).catch(() => {});
+  }, []);
+
+  const submit = async () => {
+    if (!title.trim() || !date) { toast.error("Title and date required"); return; }
+    setSaving(true);
+    try {
+      const chosenLead = leadId ? leads.find(l => l.id === leadId) : null;
+      const leadLabel = chosenLead ? (chosenLead.business_name || chosenLead.contact_name || null) : (customLead.trim() || null);
+      await createRepMeeting({
+        title: title.trim(),
+        date,
+        due_time: time || undefined,
+        notes: notes.trim(),
+        lead_id: chosenLead?.id || null,
+        lead_label: leadLabel,
+      });
+      toast.success("Meeting scheduled — team notified");
+      onCreated();
+    } catch (e: any) {
+      toast.error("Could not schedule", { description: e.message });
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><User className="w-4 h-4 text-amber" />Schedule a Meeting</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <label className="text-[10px] font-mono uppercase text-muted-foreground">Title *</label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Discovery call with Acme Roofing" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Date *</label>
+              <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase text-muted-foreground">Time</label>
+              <Input type="time" value={time} onChange={e => setTime(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="text-[10px] font-mono uppercase text-muted-foreground">Attach a lead (optional)</label>
+            <select
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={leadId}
+              onChange={e => setLeadId(e.target.value)}
+            >
+              <option value="">— pick one of your active leads —</option>
+              {leads.map(l => (
+                <option key={l.id} value={l.id}>{l.business_name || l.contact_name || l.id}</option>
+              ))}
+            </select>
+            {!leadId && (
+              <Input className="mt-2" placeholder="Or type a lead / prospect name" value={customLead} onChange={e => setCustomLead(e.target.value)} />
+            )}
+          </div>
+          <div>
+            <label className="text-[10px] font-mono uppercase text-muted-foreground">Notes</label>
+            <Textarea rows={4} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Context, agenda, prep links…" />
+          </div>
+          <p className="text-[11px] text-muted-foreground">This posts on the company calendar and notifies every active rep.</p>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={submit} disabled={saving} className="bg-amber text-black hover:bg-amber/90">
+            {saving ? "Scheduling…" : "Schedule & Notify Team"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default CompanyCalendarRepView;
+
