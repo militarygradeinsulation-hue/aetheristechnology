@@ -114,13 +114,18 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
                 <CalendarDays className="w-5 h-5 text-amber" /> Company Calendar
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Daily goals, vertical focuses, topics to post, sales pushes, and team events from leadership.
+                Daily goals, vertical focuses, topics to post, sales pushes, and team meetings.
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mt-2 inline-flex items-center gap-1">
-                <Lock className="w-3 h-3" /> Read-only, managed by leadership
+                <Lock className="w-3 h-3" /> Leadership entries read-only · your meetings post here and notify the team
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {!isAdmin && (
+                <Button size="sm" className="h-8 bg-amber text-black hover:bg-amber/90" onClick={() => setMeetingOpen(true)}>
+                  <Plus className="w-3 h-3 mr-1" /> Schedule Meeting
+                </Button>
+              )}
               <div className="inline-flex rounded-md border border-border overflow-hidden">
                 <Button variant={view === "list" ? "default" : "ghost"} size="sm" className="rounded-none h-8" onClick={() => setView("list")}>
                   <List className="w-3 h-3 mr-1" /> List
@@ -136,6 +141,7 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
                 <RefreshCw className={`w-3 h-3 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
               </Button>
             </div>
+
           </div>
 
           {(view === "week" || view === "month") && (
