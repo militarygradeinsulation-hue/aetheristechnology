@@ -146,16 +146,14 @@ export default function CareersLicensePage() {
                   />
                 </div>
                 <Button
+                  asChild
                   size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.4)]"
-                  onClick={() => {
-                    if (!payerName.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail.trim())) { toast({ title: 'Valid email required', variant: 'destructive' }); return; }
-                    setPhase('checkout');
-                  }}
                 >
-                  Activate my license — $500 →
+                  <a href="https://obsidianvibe.live/api/public/share/094n00556o155b#submit" target="_blank" rel="noopener noreferrer">
+                    Apply for your license — $500 →
+                  </a>
                 </Button>
-                <p className="text-xs text-center text-muted-foreground">Secure Stripe checkout · Rep code in your inbox in 60 seconds · 1099 independent</p>
+                <p className="text-xs text-center text-muted-foreground">Secure application · Rep code issued after review · 1099 independent</p>
               </CardContent>
             </Card>
           )}
