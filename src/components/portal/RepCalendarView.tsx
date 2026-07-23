@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, Circle, Calendar as CalendarIcon,
+  ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, Circle, Calendar as CalendarIcon, Share2, Undo2,
 } from "lucide-react";
 import {
   listCalendar, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent,
+  pushCalendarEventToCompany, unpushCalendarEventFromCompany,
   type CalendarEvent, type CalendarKind, type LeadSummary, KIND_META,
 } from "@/lib/portalCalendar";
 

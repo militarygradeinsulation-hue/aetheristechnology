@@ -76,6 +76,12 @@ export const updateCalendarEvent = (id: string, patch: Partial<CalendarEvent>) =
 export const deleteCalendarEvent = (id: string) =>
   call<{ ok: boolean }>({ action: "delete", id });
 
+export const pushCalendarEventToCompany = (id: string) =>
+  call<{ ok: boolean; company_event_id?: string; already?: boolean }>({ action: "push_to_company", id });
+
+export const unpushCalendarEventFromCompany = (id: string) =>
+  call<{ ok: boolean }>({ action: "unpush_from_company", id });
+
 // ---- helpers ----
 export const KIND_META: Record<CalendarKind, { label: string; icon: string; color: string }> = {
   event:     { label: "Event",       icon: "📅", color: "bg-amber/15 text-amber border-amber/30" },
