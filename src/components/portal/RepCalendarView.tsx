@@ -505,11 +505,21 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
               )}
             </div>
           )}
-          <DialogFooter className="flex justify-between sm:justify-between gap-2">
-            <div>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {draft?.id && (
                 <Button variant="ghost" size="sm" onClick={remove} disabled={saving} className="text-crimson hover:text-crimson hover:bg-crimson/10">
                   <Trash2 className="w-4 h-4 mr-1" /> Delete
+                </Button>
+              )}
+              {draft?.id && !draft.company_event_id && (
+                <Button variant="outline" size="sm" onClick={pushToCompany} disabled={saving} className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                  <Share2 className="w-4 h-4 mr-1" /> Push to company calendar
+                </Button>
+              )}
+              {draft?.id && draft.company_event_id && (
+                <Button variant="outline" size="sm" onClick={unpushFromCompany} disabled={saving} className="border-amber/40 text-amber hover:bg-amber/10">
+                  <Undo2 className="w-4 h-4 mr-1" /> Remove from company calendar
                 </Button>
               )}
             </div>
