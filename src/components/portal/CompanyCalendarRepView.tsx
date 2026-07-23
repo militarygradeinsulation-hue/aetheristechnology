@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry,
   createRepMeeting, deleteRepMeeting,
-  CATEGORY_META, entryDisplay, type CompanyCalendarEntry,
+  CATEGORY_META, KIND_META, entryDisplay, type CompanyCalendarEntry,
 } from "@/lib/companyCalendar";
 import { listCalendar, type LeadSummary } from "@/lib/portalCalendar";
 import { getPortalProfile } from "@/lib/portalAuth";
@@ -37,9 +37,46 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
   const [meetingOpen, setMeetingOpen] = useState(false);
+  const [personFilter, setPersonFilter] = useState<string>("all");
+  const [kindFilter, setKindFilter] = useState<string>("all");
   const dialogOpenRef = useRef(false);
   const profile = useMemo(() => getPortalProfile(), []);
   const myRepPrefix = profile?.code ? `rep:${profile.code}` : null;
+
+  const people = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of entries) {
+      const name = e.owner_name || (e.ai_plan?.meta?.rep_name ?? null);
+      if (name) s.add(name);
+    }
+    return Array.from(s).sort();
+  }, [entries]);
+
+  const kindOptions = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of entries) {
+      const cat = e.color && e.color.startsWith("cat:") ? e.color.slice(4) : null;
+      s.add(cat || e.kind);
+    }
+    return Array.from(s).sort();
+  }, [entries]);
+
+  const filteredEntries = useMemo(() => {
+    return entries.filter(e => {
+      if (personFilter !== "all") {
+        const name = e.owner_name || (e.ai_plan?.meta?.rep_name ?? null);
+        if (personFilter === "__mine") {
+          if (!myRepPrefix || e.created_by !== myRepPrefix) return false;
+        } else if (name !== personFilter) return false;
+      }
+      if (kindFilter !== "all") {
+        const cat = e.color && e.color.startsWith("cat:") ? e.color.slice(4) : null;
+        const key = cat || e.kind;
+        if (key !== kindFilter) return false;
+      }
+      return true;
+    });
+  }, [entries, personFilter, kindFilter, myRepPrefix]);
 
 
   const range = useMemo(() => {
@@ -118,10 +155,10 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
                 <CalendarDays className="w-5 h-5 text-amber" /> Company Calendar
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Daily goals, vertical focuses, topics to post, sales pushes, and team meetings.
+                Daily goals, vertical focuses, topics to post, sales pushes, and every rep's booked meetings — all in one view.
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mt-2 inline-flex items-center gap-1">
-                <Lock className="w-3 h-3" /> Leadership entries read-only · your meetings post here and notify the team
+                <Lock className="w-3 h-3" /> Leadership entries read-only · every rep's meetings & bookings show here for the whole team
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -171,6 +208,42 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
               );
             })}
           </div>
+
+          {/* Filters */}
+          <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Filter</span>
+            <select
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              value={personFilter}
+              onChange={(e) => setPersonFilter(e.target.value)}
+            >
+              <option value="all">Everyone</option>
+              {myRepPrefix && <option value="__mine">Just me</option>}
+              {people.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select
+              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              value={kindFilter}
+              onChange={(e) => setKindFilter(e.target.value)}
+            >
+              <option value="all">All types</option>
+              {kindOptions.map(k => {
+                const cat = (CATEGORY_META as Record<string, { label: string; icon: string }>)[k];
+                const kind = (KIND_META as Record<string, { label: string; icon: string }>)[k];
+                const label = cat ? `${cat.icon} ${cat.label}` : kind ? `${kind.icon} ${kind.label}` : k;
+                return <option key={k} value={k}>{label}</option>;
+              })}
+            </select>
+            {(personFilter !== "all" || kindFilter !== "all") && (
+              <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setPersonFilter("all"); setKindFilter("all"); }}>
+                Clear
+              </Button>
+            )}
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground ml-auto">
+              Showing {filteredEntries.length} of {entries.length}
+            </span>
+          </div>
+
         </CardHeader>
       </Card>
 
@@ -179,17 +252,17 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
           <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
         </div>
       ) : view === "list" ? (
-        <ListView entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
+        <ListView entries={filteredEntries} todayStr={todayStr} onPick={setSelectedEntry} />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
           <div>
             {view === "week" ? (
-              <WeekView entries={entries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
+              <WeekView entries={filteredEntries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
             ) : (
-              <MonthView entries={entries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
+              <MonthView entries={filteredEntries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
             )}
           </div>
-          <UpcomingSidebar entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
+          <UpcomingSidebar entries={filteredEntries} todayStr={todayStr} onPick={setSelectedEntry} />
         </div>
       )}
 
