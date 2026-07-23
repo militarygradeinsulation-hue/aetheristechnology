@@ -7156,6 +7156,7 @@ export type Database = {
         }[]
       }
       get_avg_deal_size: { Args: { _account_id: string }; Returns: number }
+      get_careers_positions: { Args: never; Returns: Json }
       get_deliverables_by_session: {
         Args: { _session_id: string }
         Returns: {

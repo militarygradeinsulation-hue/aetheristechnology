@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Users, CheckCircle2, XCircle, Flame, BadgeCheck } from 'lucide-react';
+import { Users, CheckCircle2, XCircle, Flame, BadgeCheck, DoorOpen } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'aetheris_applicant_count_v3';
 const ATTEMPTS_KEY = 'aetheris_applicant_attempts_v1';
@@ -96,7 +97,28 @@ export const ApplicantPressure: React.FC = () => {
   const [event, setEvent] = useState<LiveEvent | null>(null);
   // Live pressure meter — moves up on pass/licensed, down on fail. 0-100.
   const [pressure, setPressure] = useState<number>(72);
+  const [positions, setPositions] = useState<{ total: number; filled: number; open: number }>({ total: 15, filled: 15, open: 0 });
   const { next } = useNameQueue();
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadPositions = async () => {
+      try {
+        const { data } = await supabase.rpc('get_careers_positions');
+        if (!cancelled && data && typeof data === 'object') {
+          setPositions({
+            total: (data as any).total ?? 15,
+            filled: (data as any).filled ?? 15,
+            open: (data as any).open ?? 0,
+          });
+        }
+      } catch {}
+    };
+    loadPositions();
+    const posInterval = setInterval(loadPositions, 60_000);
+    return () => { cancelled = true; clearInterval(posInterval); };
+  }, []);
+
 
   useEffect(() => {
     const initial = loadCount();
@@ -191,6 +213,27 @@ export const ApplicantPressure: React.FC = () => {
               </span>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Roster status — live open seats out of 15 */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-amber/30 bg-background/40 p-3 text-center">
+          <p className="font-mono uppercase text-[9px] tracking-[0.25em] text-amber">Seats filled</p>
+          <p className="font-display text-2xl text-foreground tabular-nums mt-1">{positions.filled}</p>
+        </div>
+        <div className={`rounded-lg border p-3 text-center ${positions.open > 0 ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-crimson/40 bg-crimson/5'}`}>
+          <p className={`font-mono uppercase text-[9px] tracking-[0.25em] ${positions.open > 0 ? 'text-emerald-400' : 'text-crimson'}`}>
+            <DoorOpen className="inline w-3 h-3 mr-1 -mt-0.5" />
+            Open now
+          </p>
+          <p className={`font-display text-2xl tabular-nums mt-1 ${positions.open > 0 ? 'text-emerald-300' : 'text-crimson'}`}>
+            {positions.open}
+          </p>
+        </div>
+        <div className="rounded-lg border border-amber/30 bg-background/40 p-3 text-center">
+          <p className="font-mono uppercase text-[9px] tracking-[0.25em] text-amber">Total seats</p>
+          <p className="font-display text-2xl text-foreground tabular-nums mt-1">{positions.total}</p>
         </div>
       </div>
 
