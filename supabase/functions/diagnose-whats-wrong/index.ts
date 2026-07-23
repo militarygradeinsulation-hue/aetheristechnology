@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,7 +23,7 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    if (!LOVABLE_API_KEY && !Deno.env.get("ABACUS_ROUTELLM_API_KEY")) {
       return new Response(JSON.stringify({ error: "AI not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -74,30 +75,23 @@ RULES:
 - Always push toward the package that solves the ROOT problem, not just symptoms
 - If issues span multiple areas, recommend the 21-Day Revenue Diagnostic`;
 
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+    let aiOut;
+    try {
+      aiOut = await routedChatCompletion({
+        tier: "bulk",
         messages: [
           { role: "system", content: "You are a business consultant. Return only valid JSON, no markdown fences." },
           { role: "user", content: prompt },
         ],
-      }),
-    });
-
-    if (!aiRes.ok) {
-      const status = aiRes.status;
+      });
+    } catch (e: any) {
+      const status = e?.status;
       if (status === 429) return new Response(JSON.stringify({ error: "Rate limited. Try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error("AI request failed");
+      throw e;
     }
 
-    const aiData = await aiRes.json();
-    let raw = aiData.choices?.[0]?.message?.content || "";
+    let raw = aiOut.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     raw = raw.replace(/[\x00-\x1F\x7F]/g, (ch: string) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '');
     const result = JSON.parse(raw);

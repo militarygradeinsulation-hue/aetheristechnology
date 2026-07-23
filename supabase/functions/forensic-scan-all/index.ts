@@ -17,6 +17,7 @@ import {
   SOCIAL_POST_RULES,
   type Brand,
 } from "../_shared/brand-prompts.ts";
+import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,24 +53,15 @@ async function setBrandKitStage(id: string, stage: string, state: string, extra:
 }
 
 // Call Lovable AI Gateway for text output. Terminal errors (400/402/etc.) surface as thrown Error.
-async function aiChat(system: string, user: string, opts: { model?: string; max_tokens?: number; jsonMode?: boolean } = {}): Promise<string> {
-  const body: Record<string, unknown> = {
-    model: opts.model || "google/gemini-2.5-flash",
+async function aiChat(system: string, user: string, opts: { model?: string; max_tokens?: number; jsonMode?: boolean; tier?: AiTier } = {}): Promise<string> {
+  const res = await routedChatCompletion({
+    tier: opts.tier ?? "bulk",
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
     max_tokens: opts.max_tokens ?? 1500,
-  };
-  if (opts.jsonMode) body.response_format = { type: "json_object" };
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    response_format: opts.jsonMode ? { type: "json_object" } : undefined,
+    timeoutMs: 90_000,
   });
-  if (!r.ok) {
-    const t = await r.text().catch(() => "");
-    throw new Error(`AI ${r.status}: ${t.slice(0, 200)}`);
-  }
-  const j = await r.json();
-  return j?.choices?.[0]?.message?.content ?? "";
+  return res.content;
 }
 
 async function aiImage(prompt: string): Promise<string> {
@@ -609,29 +601,20 @@ EVIDENCE RULES — non-negotiable, violating any of these invalidates the report
 5. Do not invent findings. If a tool returned an error, say so and pivot to what other tools showed. Empty findings for a chapter means write "no signal detected in this pass" — not a fabricated leak.`;
 
 
-async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, model = "google/gemini-2.5-flash") {
+async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _model?: string, tier: AiTier = "heavy") {
   const doCall = async (t: number) => {
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      signal: AbortSignal.timeout(t),
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
-          { role: "user", content: prompt },
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: maxTokens,
-        temperature: 0.4,
-      }),
+    const res = await routedChatCompletion({
+      tier,
+      messages: [
+        { role: "system", content: SYSTEM_VOICE + `\n\nCURRENT DATE: ${new Date().toISOString().slice(0,10)}. The current year is ${new Date().getUTCFullYear()}. Never reference 2024 or earlier as the current year.` },
+        { role: "user", content: prompt },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: maxTokens,
+      temperature: 0.4,
+      timeoutMs: t,
     });
-    if (!r.ok) throw new Error(`AI call failed ${r.status}: ${(await r.text()).slice(0, 300)}`);
-    const j = await r.json();
-    const raw = j.choices?.[0]?.message?.content || "{}";
+    const raw = res.content || "{}";
     try {
       return JSON.parse(raw);
     } catch {

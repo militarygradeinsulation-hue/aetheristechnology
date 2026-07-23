@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SYSTEM_SPECS, PLAYBOOK_STYLE_DIRECTIVE } from "../_shared/system-prompts.ts";
 import { HUMANIZED_PLAYBOOK_VOICE } from "../_shared/contentBlueprint.ts";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,7 +55,7 @@ serve(async (req) => {
     const intake = (deliverable.intake_data || {}) as Record<string, string>;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+    if (!LOVABLE_API_KEY && !Deno.env.get("ABACUS_ROUTELLM_API_KEY")) throw new Error("No AI provider configured");
 
     const businessName = (intake.businessName || "Client").toString();
     const today = new Date().toISOString().slice(0, 10);
@@ -65,27 +66,22 @@ serve(async (req) => {
 
     const systemContent = `${spec.systemPrompt}\n\n${playbookDirective}\n\n${HUMANIZED_PLAYBOOK_VOICE}`;
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+    let aiOut;
+    try {
+      aiOut = await routedChatCompletion({
+        tier: "bulk",
         messages: [
           { role: "system", content: systemContent },
           { role: "user", content: spec.userPrompt(intake) },
         ],
-      }),
-    });
-
-    if (!aiResp.ok) {
-      const t = await aiResp.text();
-      console.error("AI error:", aiResp.status, t);
+        max_tokens: 4000,
+        timeoutMs: 120_000,
+      });
+    } catch (e: any) {
+      console.error("AI error:", e?.message || e);
       await supabase
         .from("purchase_deliverables")
-        .update({ status: "failed", error_message: `AI ${aiResp.status}` })
+        .update({ status: "failed", error_message: `AI ${e?.status || ""} ${e?.message || ""}`.trim() })
         .eq("id", deliverableId);
       return new Response(JSON.stringify({ error: "AI failed" }), {
         status: 500,
@@ -93,8 +89,7 @@ serve(async (req) => {
       });
     }
 
-    const aiJson = await aiResp.json();
-    const content = aiJson.choices?.[0]?.message?.content || "";
+    const content = aiOut.content || "";
 
     await supabase
       .from("purchase_deliverables")
