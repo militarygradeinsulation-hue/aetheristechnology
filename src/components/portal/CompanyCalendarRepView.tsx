@@ -413,10 +413,14 @@ const EntryCard: React.FC<{ e: CompanyCalendarEntry; onPick?: (e: CompanyCalenda
 const EntryDialog: React.FC<{
   entry: CompanyCalendarEntry;
   isAdmin?: boolean;
+  myRepPrefix?: string | null;
   onClose: () => void;
   onSaved?: (e: CompanyCalendarEntry) => void;
   onDeleted?: () => void;
-}> = ({ entry, isAdmin = false, onClose, onSaved, onDeleted }) => {
+}> = ({ entry, isAdmin = false, myRepPrefix = null, onClose, onSaved, onDeleted }) => {
+  const isMyMeeting = entry.kind === "meeting" && !!myRepPrefix && entry.created_by === myRepPrefix;
+  const meetingMeta = entry.ai_plan?.meta as { lead_label?: string; rep_name?: string; notes?: string } | undefined;
+
   const meta = entryDisplay(entry);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(entry.title || "");
