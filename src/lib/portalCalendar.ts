@@ -21,6 +21,7 @@ export interface CalendarEvent {
   created_by: "rep" | "admin" | "system";
   created_at: string;
   updated_at: string;
+  company_event_id?: string | null;
 }
 export interface LeadSummary {
   id: string;
