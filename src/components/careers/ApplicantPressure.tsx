@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Users, CheckCircle2, XCircle, Flame, BadgeCheck } from 'lucide-react';
+import { Users, CheckCircle2, XCircle, Flame, BadgeCheck, DoorOpen } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'aetheris_applicant_count_v3';
 const ATTEMPTS_KEY = 'aetheris_applicant_attempts_v1';
