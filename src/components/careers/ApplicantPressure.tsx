@@ -97,7 +97,28 @@ export const ApplicantPressure: React.FC = () => {
   const [event, setEvent] = useState<LiveEvent | null>(null);
   // Live pressure meter — moves up on pass/licensed, down on fail. 0-100.
   const [pressure, setPressure] = useState<number>(72);
+  const [positions, setPositions] = useState<{ total: number; filled: number; open: number }>({ total: 15, filled: 15, open: 0 });
   const { next } = useNameQueue();
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadPositions = async () => {
+      try {
+        const { data } = await supabase.rpc('get_careers_positions');
+        if (!cancelled && data && typeof data === 'object') {
+          setPositions({
+            total: (data as any).total ?? 15,
+            filled: (data as any).filled ?? 15,
+            open: (data as any).open ?? 0,
+          });
+        }
+      } catch {}
+    };
+    loadPositions();
+    const posInterval = setInterval(loadPositions, 60_000);
+    return () => { cancelled = true; clearInterval(posInterval); };
+  }, []);
+
 
   useEffect(() => {
     const initial = loadCount();
