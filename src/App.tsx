@@ -41,6 +41,7 @@ import NewsPage from "./pages/NewsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 
 // Lazy: everything else (~1.5MB → split into per-route chunks)
+const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 const WhyUsPage = lazy(() => import("./pages/WhyUsPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
