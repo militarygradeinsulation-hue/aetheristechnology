@@ -385,7 +385,7 @@ const CareersPage = () => {
                   Two doors. Pick one.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  $40 to prove it with a test. $500 to skip it and become a Connector today. Everything else is noise.
+                  $40 to prove it with a test. Or apply as a Strategic Scout — no upfront fee, paid on collected revenue. Everything else is noise.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
@@ -395,7 +395,7 @@ const CareersPage = () => {
                   </a>
                   <a href="/careers/license" onClick={() => trackCareersCta('final_instant_license')} className="inline-block">
                     <Button size="lg" className="bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold">
-                      Become a Connector — $500 →
+                      Apply as a Strategic Scout →
                     </Button>
                   </a>
                 </div>
