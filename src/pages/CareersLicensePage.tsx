@@ -196,14 +196,52 @@ export default function CareersLicensePage() {
                   </p>
                 </div>
 
-                <Button
-                  asChild
-                  size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.4)]"
-                >
-                  <a href="https://obsidianvibe.live/api/public/share/094n00556o155b#submit" target="_blank" rel="noopener noreferrer">
-                    Apply to become a Strategic Scout →
-                  </a>
-                </Button>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Button
+                    asChild
+                    size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-bold shadow-[0_0_25px_rgba(217,169,58,0.4)]"
+                  >
+                    <a href="https://obsidianvibe.live/api/public/share/094n00556o155b#submit" target="_blank" rel="noopener noreferrer">
+                      Apply to become a Strategic Scout →
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg" variant="outline"
+                    className="w-full border-amber/50 text-amber hover:bg-amber/10 font-semibold"
+                  >
+                    <a href="https://cal.com/aetheristechnology/example" target="_blank" rel="noopener noreferrer">
+                      Book a call to discuss next steps →
+                    </a>
+                  </Button>
+                </div>
+
+                {/* Sell our products to YOUR clients */}
+                <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-5 space-y-3">
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
+                    Already have clients? · White-glove partner offer
+                  </div>
+                  <h3 className="font-display text-xl text-foreground">
+                    Sell Aetheris products to your existing client book.
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Agencies, consultants, fractional CFO/COOs, MSPs, and integrators: bring us your client roster,
+                    we run the Golden Report on each account, and you take the same Strategic Scout economics on every
+                    tool, diagnostic, and Active Case that closes — <span className="text-foreground font-semibold">15% on paid diagnostics,
+                    10% monthly for 12 paid months, 10% on the first implementation</span>. We build, deliver, and support.
+                    You stay the trusted face of your book.
+                  </p>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold"
+                  >
+                    <a href="https://cal.com/aetheristechnology/example" target="_blank" rel="noopener noreferrer">
+                      Book a partner call — sell Aetheris to your clients →
+                    </a>
+                  </Button>
+                </div>
+
                 <p className="text-xs text-center text-muted-foreground">
                   1099 independent contractor · Final terms in the executed Strategic Scout agreement · Subject to legal, tax, and compliance review
                 </p>
