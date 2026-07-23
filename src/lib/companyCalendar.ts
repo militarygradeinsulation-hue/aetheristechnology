@@ -120,6 +120,7 @@ export const KIND_META: Record<CompanyCalendarKind, { label: string; icon: strin
   event:    { label: "Event",           icon: "📅", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
   push:     { label: "Sales Push",      icon: "🔥", color: "bg-crimson/15 text-crimson border-crimson/40" },
   note:     { label: "Note",            icon: "📝", color: "bg-muted text-muted-foreground border-border" },
+  meeting:  { label: "Meeting",         icon: "🤝", color: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/40" },
 };
 
 // ===== Source categories (encoded in entry.color as `cat:<key>`) =====
