@@ -485,8 +485,16 @@ const EntryDialog: React.FC<{
           <>
             <h3 className="text-xl font-display font-bold text-foreground">{entry.title}</h3>
             {entry.body && <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{entry.body}</p>}
+            {entry.kind === "meeting" && meetingMeta && (
+              <div className="mt-3 p-3 rounded-md border border-fuchsia-500/30 bg-fuchsia-500/5 space-y-1 text-xs">
+                {meetingMeta.rep_name && <div><span className="font-mono uppercase text-muted-foreground">Scheduled by:</span> <span className="text-foreground">{meetingMeta.rep_name}</span></div>}
+                {meetingMeta.lead_label && <div><span className="font-mono uppercase text-muted-foreground">Lead:</span> <span className="text-foreground">{meetingMeta.lead_label}</span></div>}
+                {entry.due_time && <div><span className="font-mono uppercase text-muted-foreground">Time:</span> <span className="text-foreground">{entry.due_time.slice(0,5)}</span></div>}
+              </div>
+            )}
           </>
         )}
+
 
         {entry.attachments?.length > 0 && !editing && (
           <div className="mt-4 flex flex-wrap gap-2">
