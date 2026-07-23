@@ -156,6 +156,40 @@ export const RepCalendarView: React.FC<Props> = ({ isAdmin = false, repCode }) =
     }
   };
 
+  const pushToCompany = async () => {
+    if (!draft?.id) return;
+    setSaving(true);
+    try {
+      const res = await pushCalendarEventToCompany(draft.id);
+      setDraft({ ...draft, company_event_id: res.company_event_id || draft.company_event_id });
+      toast({
+        title: res.already ? "Already on the company calendar" : "Pushed to the company calendar",
+        description: "The whole team can now see this date.",
+      });
+      await refresh();
+    } catch (e) {
+      toast({ title: "Push failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const unpushFromCompany = async () => {
+    if (!draft?.id) return;
+    if (!confirm("Remove this entry from the company calendar? (Your personal entry stays.)")) return;
+    setSaving(true);
+    try {
+      await unpushCalendarEventFromCompany(draft.id);
+      setDraft({ ...draft, company_event_id: null });
+      toast({ title: "Removed from company calendar" });
+      await refresh();
+    } catch (e) {
+      toast({ title: "Remove failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const toggleComplete = async (e: CalendarEvent) => {
     try {
       await updateCalendarEvent(e.id, { completed: !e.completed });
