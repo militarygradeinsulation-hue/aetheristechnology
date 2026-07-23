@@ -85,6 +85,60 @@ const CareersPage = () => {
             {/* LIVE PRESSURE — applicant count + pass/fail ticker + spots */}
             <ApplicantPressure />
 
+            {/* BIG BOOKING CTA */}
+            <div className="rounded-2xl border-2 border-amber/60 bg-gradient-to-r from-amber/15 via-amber/5 to-amber/15 p-6 md:p-8 text-center space-y-4 shadow-[0_0_40px_-10px_rgba(217,169,58,0.5)]">
+              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-amber">
+                Want to talk it through first?
+              </div>
+              <h2 className="font-display text-2xl md:text-4xl text-foreground font-bold leading-tight">
+                Book a 20-minute call with Joseph.
+              </h2>
+              <p className="text-sm md:text-base text-foreground/85 max-w-2xl mx-auto">
+                Ask anything about the operator track, the Strategic Scout program, commissions, or bringing us your existing client book. No pitch, no pressure — just next steps.
+              </p>
+              <a
+                href="https://cal.com/aetheristechnology/example"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackCareersCta('careers_book_call_hero')}
+                className="inline-block"
+              >
+                <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-bold text-base px-8 py-6 shadow-lg">
+                  📅 Book a call — cal.com/aetheristechnology →
+                </Button>
+              </a>
+            </div>
+
+            {/* SELL TO YOUR CLIENTS */}
+            <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6 md:p-8 space-y-4">
+              <div className="font-mono uppercase text-[10px] tracking-[0.35em] text-emerald-400 text-center">
+                Fourth door · For agencies, consultants & advisors
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl text-foreground font-bold text-center leading-tight">
+                Already have clients? <span className="text-emerald-400">Sell Aetheris to your book.</span>
+              </h2>
+              <p className="text-sm md:text-base text-foreground/85 max-w-2xl mx-auto text-center leading-relaxed">
+                Agencies, fractional CFO/COOs, MSPs, consultants, and integrators: bring us your client roster.
+                We run the Golden Report on each account, package the diagnostic, and split the revenue with you on
+                Strategic Scout terms — <strong className="text-foreground">15% on paid diagnostics, 10% monthly for 12 paid months,
+                10% on the first implementation</strong>. We deliver and support. You stay the face of your book.
+              </p>
+              <div className="flex justify-center pt-2">
+                <a
+                  href="https://cal.com/aetheristechnology/example"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackCareersCta('careers_partner_book_call')}
+                  className="inline-block"
+                >
+                  <Button size="lg" className="bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold px-6">
+                    Book a partner call →
+                  </Button>
+                </a>
+              </div>
+            </div>
+
+
             {/* GATE — TWO PATHS IN */}
             <div className="grid md:grid-cols-2 gap-4">
               {/* PATH A — $40 test */}
