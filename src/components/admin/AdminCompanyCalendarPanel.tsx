@@ -149,7 +149,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   const counts = useMemo(() => {
     const c: Record<OwnerRole, number> = { founder: 0, coo: 0, chief_sales: 0, team: 0 };
-    for (const e of entries) c[(e.owner_role || "team") as OwnerRole]++;
+    for (const e of entries) { const k = (OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole; c[k]++; }
     return c;
   }, [entries]);
 
@@ -168,8 +168,8 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
     title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
-    owner_role: e.owner_role || "team",
-    owner_name: e.owner_name || OWNER_META[e.owner_role || "team"].short,
+    owner_role: (OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole,
+    owner_name: e.owner_name || OWNER_META[(OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole].short,
     status: e.status || "todo",
     due_time: e.due_time ? e.due_time.slice(0, 5) : "",
   });
@@ -491,8 +491,9 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               <CardContent className="space-y-2">
                 {list.map(e => {
                   const meta = entryDisplay(e);
-                  const owner = OWNER_META[(e.owner_role || "team") as OwnerRole];
-                  const OwnerIcon = ROLE_ICONS[(e.owner_role || "team") as OwnerRole];
+                  const roleKey = (OWNER_META[(e.owner_role as OwnerRole)] ? e.owner_role : "team") as OwnerRole;
+                  const owner = OWNER_META[roleKey];
+                  const OwnerIcon = ROLE_ICONS[roleKey];
                   return (
                     <div
                       key={e.id}
