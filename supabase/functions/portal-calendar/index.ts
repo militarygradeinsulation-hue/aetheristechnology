@@ -137,6 +137,24 @@ serve(async (req) => {
 
       const { data, error } = await admin.from("rep_calendar_events").update(patch).eq("id", id).select("*").single();
       if (error) throw error;
+
+      // Keep pushed company_calendar row in sync when relevant fields change.
+      if (existing.company_event_id) {
+        const companyPatch: Record<string, unknown> = {};
+        if (typeof body.title === "string") companyPatch.title = patch.title;
+        if (typeof body.body === "string") companyPatch.body = patch.body;
+        if (body.start_at) {
+          const sd = new Date(String(body.start_at));
+          companyPatch.date = `${sd.getUTCFullYear()}-${String(sd.getUTCMonth()+1).padStart(2,"0")}-${String(sd.getUTCDate()).padStart(2,"0")}`;
+          companyPatch.due_time = (data as any).all_day ? null : sd.toISOString().slice(11, 19);
+        }
+        if (typeof body.all_day === "boolean" && body.all_day) companyPatch.due_time = null;
+        if (typeof body.completed === "boolean") companyPatch.status = body.completed ? "done" : "pending";
+        if (Object.keys(companyPatch).length > 0) {
+          await admin.from("company_calendar").update(companyPatch).eq("id", existing.company_event_id);
+        }
+      }
+
       return json({ event: data });
     }
 
@@ -144,9 +162,12 @@ serve(async (req) => {
     if (action === "delete") {
       const id = String(body.id || "");
       if (!id) return json({ error: "id required" }, 400);
-      const { data: existing } = await admin.from("rep_calendar_events").select("rep_code").eq("id", id).maybeSingle();
+      const { data: existing } = await admin.from("rep_calendar_events").select("rep_code, company_event_id").eq("id", id).maybeSingle();
       if (!existing) return json({ ok: true });
       if (!isAdmin && existing.rep_code !== repCode) return json({ error: "Forbidden" }, 403);
+      if (existing.company_event_id) {
+        await admin.from("company_calendar").delete().eq("id", existing.company_event_id);
+      }
       await admin.from("rep_calendar_events").delete().eq("id", id);
       return json({ ok: true });
     }
