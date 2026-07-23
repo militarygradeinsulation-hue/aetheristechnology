@@ -3,13 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Loader2, CalendarDays, Pin, Paperclip, ExternalLink, RefreshCw,
-  List, LayoutGrid, CalendarRange, Lock, ChevronLeft, ChevronRight,
+  List, LayoutGrid, CalendarRange, Lock, ChevronLeft, ChevronRight, Plus, Trash2, User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry, CATEGORY_META, entryDisplay, type CompanyCalendarEntry } from "@/lib/companyCalendar";
+import {
+  listCompanyCalendar, upsertCompanyEntry, deleteCompanyEntry,
+  createRepMeeting, deleteRepMeeting,
+  CATEGORY_META, entryDisplay, type CompanyCalendarEntry,
+} from "@/lib/companyCalendar";
+import { listCalendar, type LeadSummary } from "@/lib/portalCalendar";
+import { getPortalProfile } from "@/lib/portalAuth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+
 
 type ViewMode = "list" | "week" | "month";
 
