@@ -149,7 +149,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   const counts = useMemo(() => {
     const c: Record<OwnerRole, number> = { founder: 0, coo: 0, chief_sales: 0, team: 0 };
-    for (const e of entries) c[(e.owner_role || "team") as OwnerRole]++;
+    for (const e of entries) { const k = (OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole; c[k]++; }
     return c;
   }, [entries]);
 
