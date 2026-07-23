@@ -33,6 +33,9 @@ const ROLE_ICONS: Record<OwnerRole, React.ComponentType<{ className?: string }>>
   founder: Crown, coo: ShieldCheck, chief_sales: TrendingUp, team: Users,
 };
 
+const normalizeOwnerRole = (role: unknown): OwnerRole =>
+  OWNER_META[role as OwnerRole] ? (role as OwnerRole) : "team";
+
 interface DraftEntry {
   id?: string;
   date: string;
@@ -149,7 +152,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
 
   const counts = useMemo(() => {
     const c: Record<OwnerRole, number> = { founder: 0, coo: 0, chief_sales: 0, team: 0 };
-    for (const e of entries) { const k = (OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole; c[k]++; }
+    for (const e of entries) { const k = normalizeOwnerRole(e.owner_role); c[k]++; }
     return c;
   }, [entries]);
 
@@ -168,8 +171,8 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     id: e.id, date: e.date, kind: e.kind, category: categoryOf(e) || "manual",
     title: e.title, body: e.body,
     pinned: e.pinned, attachments: e.attachments || [], ai_plan: e.ai_plan || {},
-    owner_role: (OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole,
-    owner_name: e.owner_name || OWNER_META[(OWNER_META[e.owner_role as OwnerRole] ? e.owner_role : "team") as OwnerRole].short,
+    owner_role: normalizeOwnerRole(e.owner_role),
+    owner_name: e.owner_name || OWNER_META[normalizeOwnerRole(e.owner_role)].short,
     status: e.status || "todo",
     due_time: e.due_time ? e.due_time.slice(0, 5) : "",
   });
@@ -274,16 +277,19 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     if (!playbookTasks) return;
     setPlaybookBusy(true);
     try {
-      const rows = playbookTasks.map(t => ({
+      const rows = playbookTasks.map(t => {
+        const ownerRole = normalizeOwnerRole(t.owner_role);
+        return {
         date: t.date,
         title: t.title.slice(0, 200),
         body: t.body || "",
         kind: t.kind || "goal",
-        owner_role: t.owner_role,
-        owner_name: t.owner_name || OWNER_META[t.owner_role].short,
+        owner_role: ownerRole,
+        owner_name: t.owner_name || OWNER_META[ownerRole].short,
         due_time: t.due_time || null,
         color: categoryToColorToken("manual"),
-      }));
+        };
+      });
       const saved = await bulkCreateEntries(rows);
       setEntries(prev => [...prev, ...saved].sort((a, b) => a.date.localeCompare(b.date)));
       toast.success(`Saved ${saved.length} playbook tasks`);
@@ -428,8 +434,9 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {roles.map(role => {
-                const m = OWNER_META[role.role_slug];
-                const Icon = ROLE_ICONS[role.role_slug];
+                const roleKey = normalizeOwnerRole(role.role_slug);
+                const m = OWNER_META[roleKey];
+                const Icon = ROLE_ICONS[roleKey];
                 return (
                   <div key={role.id} className={`rounded-md border p-3 space-y-2 ${m.badge}`}>
                     <div className="flex items-center gap-2">

@@ -170,7 +170,7 @@ export function entryDisplay(entry: Pick<CompanyCalendarEntry, "color" | "kind">
     const m = CATEGORY_META[cat];
     return { label: m.label, icon: m.icon, color: m.color };
   }
-  return KIND_META[entry.kind];
+  return KIND_META[entry.kind] || KIND_META.meeting || KIND_META.note;
 }
 
 export const categoryToColorToken = (c: CompanyCalendarCategory) => `cat:${c}`;
