@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 
-export type CompanyCalendarKind = "goal" | "vertical" | "topic" | "event" | "push" | "note";
+export type CompanyCalendarKind = "goal" | "vertical" | "topic" | "event" | "push" | "note" | "meeting";
 
 export interface CompanyCalendarAttachment {
   name: string;
