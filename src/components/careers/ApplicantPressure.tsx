@@ -216,6 +216,27 @@ export const ApplicantPressure: React.FC = () => {
         </div>
       </div>
 
+      {/* Roster status — live open seats out of 15 */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-amber/30 bg-background/40 p-3 text-center">
+          <p className="font-mono uppercase text-[9px] tracking-[0.25em] text-amber">Seats filled</p>
+          <p className="font-display text-2xl text-foreground tabular-nums mt-1">{positions.filled}</p>
+        </div>
+        <div className={`rounded-lg border p-3 text-center ${positions.open > 0 ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-crimson/40 bg-crimson/5'}`}>
+          <p className={`font-mono uppercase text-[9px] tracking-[0.25em] ${positions.open > 0 ? 'text-emerald-400' : 'text-crimson'}`}>
+            <DoorOpen className="inline w-3 h-3 mr-1 -mt-0.5" />
+            Open now
+          </p>
+          <p className={`font-display text-2xl tabular-nums mt-1 ${positions.open > 0 ? 'text-emerald-300' : 'text-crimson'}`}>
+            {positions.open}
+          </p>
+        </div>
+        <div className="rounded-lg border border-amber/30 bg-background/40 p-3 text-center">
+          <p className="font-mono uppercase text-[9px] tracking-[0.25em] text-amber">Total seats</p>
+          <p className="font-display text-2xl text-foreground tabular-nums mt-1">{positions.total}</p>
+        </div>
+      </div>
+
       {/* Live pressure meter — no fixed number of slots */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
