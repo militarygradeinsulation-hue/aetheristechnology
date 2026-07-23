@@ -36,7 +36,11 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
   const [view, setView] = useState<ViewMode>("month");
   const [anchor, setAnchor] = useState<Date>(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
   const [selectedEntry, setSelectedEntry] = useState<CompanyCalendarEntry | null>(null);
+  const [meetingOpen, setMeetingOpen] = useState(false);
   const dialogOpenRef = useRef(false);
+  const profile = useMemo(() => getPortalProfile(), []);
+  const myRepPrefix = profile?.code ? `rep:${profile.code}` : null;
+
 
   const range = useMemo(() => {
     if (view === "week") {
