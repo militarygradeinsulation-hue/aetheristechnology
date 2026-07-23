@@ -166,26 +166,26 @@ const CareersPage = () => {
                 </CardContent>
               </Card>
 
-              {/* PATH B — $500 instant license */}
+              {/* PATH B — Strategic Scout (no upfront fee) */}
               <Card className="bg-amber/15 border-amber/60 flex flex-col shadow-[0_0_24px_-6px_rgba(245,158,11,0.25)]">
                 <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
                   <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                    <Rocket className="w-3.5 h-3.5" /> Path B · $500 · Instant
+                    <Rocket className="w-3.5 h-3.5" /> Path B · Strategic Scout · No upfront fee
                   </div>
                   <h2 className="font-display text-2xl text-foreground leading-tight">
-                    Skip the test. Become a Connector today.
+                    Skip the test. Introduce the business. Earn on the revenue.
                   </h2>
                   <p className="text-sm text-foreground/85 flex-1">
-                    Pay $500, get your personal Connector code the same minute, and start selling every Aetheris tool at standard commission. You are a <strong className="text-foreground">1099 independent</strong> — not an employee, no manager, no interview. If you already know how to sell, this is the shortcut.
+                    No exam, no upfront fee. Bring a qualified introduction — Aetheris runs the diagnostic, delivery, and collection. You are a <strong className="text-foreground">1099 independent</strong>: <span className="text-amber font-semibold">15%</span> of every paid 21-Day Diagnostic, <span className="text-amber font-semibold">10%</span> monthly for 12 paid months on Active Case revenue, and <span className="text-amber font-semibold">10%</span> of the first custom implementation.
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>· Personal Connector code issued instantly on payment</li>
-                    <li>· Sell every tool + flagship at the standard split</li>
-                    <li>· Full Connector portal access (playbooks, leads, coach)</li>
+                    <li>· Apply, get reviewed, and receive your Scout attribution</li>
+                    <li>· Paid only after Aetheris receives cleared payment</li>
+                    <li>· 12-month attribution window per introduced business</li>
                   </ul>
                   <a href="/careers/license" onClick={() => trackCareersCta('gate_instant_license')} className="block mt-auto">
                     <Button size="lg" className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
-                      Become a Connector — $500 →
+                      Apply as a Strategic Scout →
                     </Button>
                   </a>
 
@@ -195,7 +195,7 @@ const CareersPage = () => {
 
             <div className="flex items-start gap-2 text-xs text-muted-foreground rounded-lg border border-amber/20 bg-background/30 p-3">
               <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-              <span><strong className="text-foreground">Neither price is the problem. You are.</strong> $40 tests you. $500 skips the test and hands you the license. Both are cheaper than one afternoon with a bad hire — and the companies you'll sit across from do $50M a year.</span>
+              <span><strong className="text-foreground">Two doors, one bar.</strong> $40 tests you into an operator seat. The Strategic Scout door has no upfront fee — you get paid on collected revenue when the businesses you introduce close and pay.</span>
             </div>
 
             {/* WHY + PERKS (merged) */}
@@ -247,22 +247,22 @@ const CareersPage = () => {
                 What you get on day one. Your name. Your license ID. Valid 12 months.
               </p>
 
-              {/* PRICE + SPLIT */}
+              {/* COMPENSATION */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="rounded-xl border border-amber/40 bg-background/50 p-5 text-center">
-                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">License fee</div>
-                  <div className="font-display text-4xl text-foreground font-bold">$500</div>
-                  <div className="text-xs text-muted-foreground mt-1">per year · non-refundable</div>
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-amber mb-2">Upfront fee</div>
+                  <div className="font-display text-4xl text-foreground font-bold">$0</div>
+                  <div className="text-xs text-muted-foreground mt-1">no license purchase · apply and get reviewed</div>
                 </div>
                 <div className="rounded-xl border border-emerald-500/40 bg-background/50 p-5 text-center">
                   <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400 mb-2">Your cut</div>
-                  <div className="font-display text-4xl text-emerald-400 font-bold">40%</div>
-                  <div className="text-xs text-muted-foreground mt-1">of every sale tracked to your code</div>
+                  <div className="font-display text-4xl text-emerald-400 font-bold">15/10/10</div>
+                  <div className="text-xs text-muted-foreground mt-1">diagnostic · 12 mo Active Case · first implementation</div>
                 </div>
                 <div className="rounded-xl border border-foreground/20 bg-background/50 p-5 text-center">
-                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris cut</div>
-                  <div className="font-display text-4xl text-foreground font-bold">60%</div>
-                  <div className="text-xs text-muted-foreground mt-1">we cover build, delivery, support</div>
+                  <div className="font-mono uppercase text-[10px] tracking-[0.3em] text-foreground/60 mb-2">Aetheris covers</div>
+                  <div className="font-display text-4xl text-foreground font-bold">100%</div>
+                  <div className="text-xs text-muted-foreground mt-1">outreach, diagnostic, delivery, support</div>
                 </div>
               </div>
 
@@ -313,14 +313,14 @@ const CareersPage = () => {
 
               {/* CTA */}
               <div className="text-center space-y-3 pt-2">
-                <a href="/careers/license?tier=reseller" onClick={() => trackCareersCta('reseller_license_buy')} className="inline-block">
+                <a href="/careers/license" onClick={() => trackCareersCta('reseller_license_buy')} className="inline-block">
                   <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-semibold px-8">
-                    Become a Connector — $500/yr →
+                    Apply as a Strategic Scout →
                   </Button>
 
                 </a>
                 <p className="text-xs text-muted-foreground">
-                  License auto-expires 12 months from issue date. Renew at the same rate. No auto-charge.
+                  12-month attribution per introduced business. Paid on collected net revenue.
                 </p>
               </div>
             </div>
@@ -385,7 +385,7 @@ const CareersPage = () => {
                   Two doors. Pick one.
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  $40 to prove it with a test. $500 to skip it and become a Connector today. Everything else is noise.
+                  $40 to prove it with a test. Or apply as a Strategic Scout — no upfront fee, paid on collected revenue. Everything else is noise.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <a href="/careers/test" onClick={() => trackCareersCta('final_take_test')} className="inline-block">
@@ -395,7 +395,7 @@ const CareersPage = () => {
                   </a>
                   <a href="/careers/license" onClick={() => trackCareersCta('final_instant_license')} className="inline-block">
                     <Button size="lg" className="bg-emerald-500 text-background hover:bg-emerald-500/90 font-semibold">
-                      Become a Connector — $500 →
+                      Apply as a Strategic Scout →
                     </Button>
                   </a>
                 </div>

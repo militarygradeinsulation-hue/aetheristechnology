@@ -164,11 +164,14 @@ serve(async (req) => {
       });
     }
 
+    const cappedBatch = Math.min(batchSize, 100);
+    // Claim the batch synchronously so parallel invocations don't double-process,
+    // then do all the slow per-prospect work (RocketReach + forensic-scan-all) in the background.
     const { data: prospects, error: prospErr } = await supabase
       .from("drip_prospects")
       .select("*")
       .eq("status", "imported")
-      .limit(Math.min(batchSize, 100));
+      .limit(cappedBatch);
 
     if (prospErr || !prospects || prospects.length === 0) {
       return new Response(JSON.stringify({ message: "No imported prospects to process", processed: 0, queued: 0, skipped_no_url: 0 }), {
@@ -176,92 +179,106 @@ serve(async (req) => {
       });
     }
 
-    let queued = 0;
-    let skippedNoUrl = 0;
-    let failed = 0;
+    // Flip them to 'processing' immediately so re-runs won't grab the same rows.
+    const ids = prospects.map((p) => p.id);
+    await supabase.from("drip_prospects").update({ status: "processing" }).in("id", ids);
 
-    const chunkSize = Math.min(concurrency, 5);
-    for (let c = 0; c < prospects.length; c += chunkSize) {
-      const chunk = prospects.slice(c, c + chunkSize);
-      const results = await Promise.allSettled(
-        chunk.map(async (prospect) => {
-          const email: string = prospect.email;
-          const scraped = prospect.scraped_data || {};
-          const contactName: string | null = scraped.name || scraped.contact_name || null;
+    const work = (async () => {
+      let queued = 0;
+      let skippedNoUrl = 0;
+      let failed = 0;
 
-          // 1. Resolve URL.
-          const emailDomain = domainFromEmail(email);
-          let url = normalizeUrl(prospect.website_url) || (emailDomain ? `https://${emailDomain}` : null);
-          let companyName: string | null = prospect.business_name || null;
+      const chunkSize = Math.min(concurrency, 5);
+      for (let c = 0; c < prospects.length; c += chunkSize) {
+        const chunk = prospects.slice(c, c + chunkSize);
+        const results = await Promise.allSettled(
+          chunk.map(async (prospect) => {
+            const email: string = prospect.email;
+            const scraped = prospect.scraped_data || {};
+            const contactName: string | null = scraped.name || scraped.contact_name || null;
 
-          if (!url) {
-            const rr = await rocketreachLookupUrl(RR_KEY, email, contactName, companyName, emailDomain);
-            url = rr.url;
-            if (rr.company) companyName = rr.company;
-          }
+            // 1. Resolve URL.
+            const emailDomain = domainFromEmail(email);
+            let url = normalizeUrl(prospect.website_url) || (emailDomain ? `https://${emailDomain}` : null);
+            let companyName: string | null = prospect.business_name || null;
 
-          if (!url) {
-            // No company URL → do NOT email.
-            skippedNoUrl++;
+            if (!url) {
+              const rr = await rocketreachLookupUrl(RR_KEY, email, contactName, companyName, emailDomain);
+              url = rr.url;
+              if (rr.company) companyName = rr.company;
+            }
+
+            if (!url) {
+              skippedNoUrl++;
+              await supabase.from("drip_prospects").update({
+                status: "skipped",
+                scraped_data: { ...scraped, skip_reason: "no_company_url", skipped_at: new Date().toISOString() },
+              }).eq("id", prospect.id);
+              return;
+            }
+
+            // 2. Kick off Golden Report scan.
+            const scanId = await kickOffGoldenScan(SUPABASE_URL, SERVICE_KEY, url, companyName);
+            if (!scanId) {
+              failed++;
+              await supabase.from("drip_prospects").update({
+                status: "imported", // put back so it can be retried
+                scraped_data: { ...scraped, scan_error: "forensic_scan_all_failed", audit_url: url },
+              }).eq("id", prospect.id);
+              return;
+            }
+
+            const reportUrl = `${SITE_BASE}/golden-report?scan=${scanId}`;
+
+            const { error: insErr } = await supabase.from("drip_emails").insert({
+              prospect_id: prospect.id,
+              sequence_id: sequenceId,
+              step_index: 0,
+              scheduled_for: new Date().toISOString(),
+              status: "pending",
+              subject: SUBJECT,
+              body_html: buildBody(reportUrl, companyName),
+            });
+            if (insErr) throw insErr;
+
             await supabase.from("drip_prospects").update({
-              status: "skipped",
-              scraped_data: { ...scraped, skip_reason: "no_company_url", skipped_at: new Date().toISOString() },
+              status: "active",
+              website_url: prospect.website_url || url,
+              business_name: prospect.business_name || companyName,
+              scraped_data: {
+                ...scraped,
+                golden_scan_id: scanId,
+                golden_report_url: reportUrl,
+                audit_url: url,
+                queued_at: new Date().toISOString(),
+              },
             }).eq("id", prospect.id);
-            return;
-          }
 
-          // 2. Kick off Golden Report scan.
-          const scanId = await kickOffGoldenScan(SUPABASE_URL, SERVICE_KEY, url, companyName);
-          if (!scanId) {
-            failed++;
-            await supabase.from("drip_prospects").update({
-              scraped_data: { ...scraped, scan_error: "forensic_scan_all_failed", audit_url: url },
-            }).eq("id", prospect.id);
-            return;
-          }
+            queued++;
+          })
+        );
 
-          const reportUrl = `${SITE_BASE}/golden-report?scan=${scanId}`;
+        for (const r of results) if (r.status === "rejected") failed++;
+      }
+      console.log(`generate-drip-batch done: queued=${queued} skipped=${skippedNoUrl} failed=${failed}`);
+    })();
 
-          // 3. Queue exactly ONE email, scheduled now.
-          const { error: insErr } = await supabase.from("drip_emails").insert({
-            prospect_id: prospect.id,
-            sequence_id: sequenceId,
-            step_index: 0,
-            scheduled_for: new Date().toISOString(),
-            status: "pending",
-            subject: SUBJECT,
-            body_html: buildBody(reportUrl, companyName),
-          });
-          if (insErr) throw insErr;
-
-          await supabase.from("drip_prospects").update({
-            status: "active",
-            website_url: prospect.website_url || url,
-            business_name: prospect.business_name || companyName,
-            scraped_data: {
-              ...scraped,
-              golden_scan_id: scanId,
-              golden_report_url: reportUrl,
-              audit_url: url,
-              queued_at: new Date().toISOString(),
-            },
-          }).eq("id", prospect.id);
-
-          queued++;
-        })
-      );
-
-      for (const r of results) if (r.status === "rejected") failed++;
+    // Fire-and-forget so gateway doesn't time out (Golden scans can take 90s+ each).
+    // @ts-ignore EdgeRuntime is available in supabase edge runtime
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(work);
+    } else {
+      work.catch((e) => console.error("background work error", e));
     }
 
     return new Response(
       JSON.stringify({
-        message: `Queued ${queued} Golden Report emails. Skipped ${skippedNoUrl} (no company URL). ${failed} failed.`,
-        queued,
-        skipped_no_url: skippedNoUrl,
-        failed,
+        message: `Started background processing for ${prospects.length} prospects. Check drip_prospects for results.`,
+        started: prospects.length,
+        async: true,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
     console.error("generate-drip-batch error:", e);
