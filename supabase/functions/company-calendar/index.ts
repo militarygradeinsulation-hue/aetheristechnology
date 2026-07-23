@@ -158,9 +158,86 @@ Return ONLY the JSON object. No prose.`;
       return json({ ok: true, tasks });
     }
 
+    // ============== REP MEETING: reps schedule meetings that land on company calendar ==============
+    // Any rep or partner can create; entry is tagged with created_by=rep:<CODE>.
+    // After insert, notify every active rep so it lights up on all portals.
+    if (action === "rep_meeting_create") {
+      const repCode = portalClaims?.code || null;
+      if (!repCode && !isAdmin) return json({ error: "Portal login required" }, 403);
+      const date = String(body.date || "").slice(0, 10);
+      const title = String(body.title || "").trim().slice(0, 200);
+      if (!date || !title) return json({ error: "Missing date or title" }, 400);
+      const dueTime = body.due_time ? String(body.due_time).slice(0, 8) : null;
+      const notes = String(body.notes || "").slice(0, 5000);
+      const leadId = body.lead_id ? String(body.lead_id).slice(0, 64) : null;
+      const leadLabel = body.lead_label ? String(body.lead_label).slice(0, 200) : null;
+
+      // Look up rep display info
+      let repName = "Rep";
+      if (repCode) {
+        const { data: rc } = await supabase.from("rep_codes").select("rep_name").eq("code", repCode).maybeSingle();
+        if (rc?.rep_name) repName = rc.rep_name;
+      }
+
+      const bodyLines: string[] = [];
+      if (leadLabel) bodyLines.push(`Lead: ${leadLabel}`);
+      bodyLines.push(`Owner: ${repName}${repCode ? ` (${repCode})` : ""}`);
+      if (notes) bodyLines.push("", notes);
+
+      const payload = {
+        date,
+        kind: "meeting",
+        title,
+        body: bodyLines.join("\n"),
+        attachments: [],
+        ai_plan: { meta: { source: "rep_meeting", lead_id: leadId, lead_label: leadLabel, rep_code: repCode, rep_name: repName, notes } },
+        pinned: false,
+        color: "cat:client_event",
+        owner_role: "team",
+        owner_name: repName,
+        status: "todo",
+        due_time: dueTime,
+        created_by: repCode ? `rep:${repCode}` : "admin:meeting",
+      };
+
+      const { data: inserted, error: insErr } = await supabase.from("company_calendar").insert(payload).select().maybeSingle();
+      if (insErr) throw insErr;
+
+      // Broadcast: one shared_notification per active rep code
+      try {
+        const { data: reps } = await supabase.from("rep_codes").select("code").eq("is_active", true);
+        const dateLabel = new Date(date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+        const when = dueTime ? `${dateLabel} · ${dueTime.slice(0, 5)}` : dateLabel;
+        const notifTitle = `📅 ${repName} scheduled: ${title}`;
+        const notifBody = [when, leadLabel ? `Lead: ${leadLabel}` : null, notes ? notes.slice(0, 240) : null].filter(Boolean).join(" · ");
+        const rows = (reps || [])
+          .filter(r => r.code && r.code !== repCode)
+          .map(r => ({ recipient: r.code, kind: "team_meeting", title: notifTitle, body: notifBody }));
+        if (rows.length) await supabase.from("shared_notifications").insert(rows);
+      } catch (e) {
+        console.warn("rep_meeting notify failed", e);
+      }
+
+      return json({ ok: true, entry: inserted });
+    }
+
+    if (action === "rep_meeting_delete") {
+      const repCode = portalClaims?.code || null;
+      const id = String(body.id || "");
+      if (!id) return json({ error: "Missing id" }, 400);
+      const { data: existing } = await supabase.from("company_calendar").select("created_by").eq("id", id).maybeSingle();
+      if (!existing) return json({ ok: true });
+      const mine = repCode && existing.created_by === `rep:${repCode}`;
+      if (!isAdmin && !mine) return json({ error: "Forbidden" }, 403);
+      const { error } = await supabase.from("company_calendar").delete().eq("id", id);
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
     // ============== MUTATIONS (admin + partner) ==============
     const canMutate = isAdmin || portalClaims?.role === "partner";
     if (!canMutate) return json({ error: "Admin or partner only" }, 403);
+
 
     if (action === "create" || action === "update") {
       const id = body.id ? String(body.id) : null;
