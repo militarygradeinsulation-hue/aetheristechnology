@@ -4,6 +4,7 @@
 // as `proposed_action` payloads for the frontend to confirm before execution.
 
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -1048,30 +1049,23 @@ Deno.serve(async (req) => {
     let assistantToolCalls: any[] | null = null;
 
     for (let hop = 0; hop < 5; hop++) {
-      const aiRes = await fetch(AI_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
+      let routed;
+      try {
+        routed = await routedChatCompletion({
+          tier: "heavy",
+          lovableModelOverride: MODEL,
           messages,
           tools,
           tool_choice: "auto",
-        }),
-      });
-
-      if (aiRes.status === 429) return json({ error: "Rate limit hit. Wait a few seconds and try again." }, 429);
-      if (aiRes.status === 402) return json({ error: "AI credits exhausted. Add credits in Workspace → Usage." }, 402);
-      if (!aiRes.ok) {
-        const t = await aiRes.text();
-        console.error("[assistant-chat] AI error", aiRes.status, t);
+        });
+      } catch (e: any) {
+        if (e?.status === 429) return json({ error: "Rate limit hit. Wait a few seconds and try again." }, 429);
+        if (e?.status === 402) return json({ error: "AI credits exhausted. Add credits in Workspace → Usage." }, 402);
+        console.error("[assistant-chat] AI error", e?.message);
         return json({ error: "AI gateway error" }, 500);
       }
 
-      const data = await aiRes.json();
-      const choice = data.choices?.[0]?.message;
+      const choice = routed.message;
       if (!choice) return json({ error: "No response from model" }, 500);
 
       assistantText = choice.content || "";

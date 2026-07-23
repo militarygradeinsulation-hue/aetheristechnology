@@ -4,7 +4,7 @@
 //
 // Tier -> model mapping (per Joseph, per plan):
 //   "bulk"  -> claude-haiku-4-5-20251001   (Lovable fallback: google/gemini-2.5-flash)
-//   "heavy" -> grok-4.3                    (Lovable fallback: openai/gpt-5.5)
+//   "heavy" -> grok-4.3                    (Lovable fallback: openai/gpt-5.5 / gemini-2.5-pro)
 //
 // Env vars:
 //   ABACUS_ROUTELLM_API_KEY  (required for savings; missing key -> straight to Lovable)
@@ -13,15 +13,20 @@
 
 export type AiTier = "bulk" | "heavy";
 
-type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
+type ChatMessage = { role: string; content: any; tool_calls?: any; tool_call_id?: string; name?: string };
 
 export interface RoutedChatOptions {
-  tier?: AiTier;                    // default "bulk"
+  tier?: AiTier;
   messages: ChatMessage[];
   temperature?: number;
   max_tokens?: number;
-  response_format?: unknown;        // e.g. { type: "json_object" }
-  timeoutMs?: number;               // default 60_000
+  response_format?: unknown;
+  tools?: unknown;
+  tool_choice?: unknown;
+  timeoutMs?: number;
+  // Override the Lovable fallback model (e.g. "google/gemini-2.5-pro" for
+  // assistant-chat which was previously on Pro).
+  lovableModelOverride?: string;
 }
 
 const ABACUS_URL = "https://routellm.abacus.ai/v1/chat/completions";
@@ -34,9 +39,22 @@ const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
 
 export interface RoutedChatResult {
   content: string;
+  message: any;                       // full assistant message (includes tool_calls if any)
   provider: "abacus" | "lovable";
   model: string;
   raw: any;
+}
+
+function buildBody(model: string, opts: RoutedChatOptions) {
+  return {
+    model,
+    messages: opts.messages,
+    ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
+    ...(opts.max_tokens !== undefined ? { max_tokens: opts.max_tokens } : {}),
+    ...(opts.response_format ? { response_format: opts.response_format } : {}),
+    ...(opts.tools ? { tools: opts.tools } : {}),
+    ...(opts.tool_choice ? { tool_choice: opts.tool_choice } : {}),
+  };
 }
 
 async function callProvider(
@@ -55,17 +73,18 @@ async function callProvider(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        messages: opts.messages,
-        ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
-        ...(opts.max_tokens !== undefined ? { max_tokens: opts.max_tokens } : {}),
-        ...(opts.response_format ? { response_format: opts.response_format } : {}),
-      }),
+      body: JSON.stringify(buildBody(model, opts)),
     });
   } finally {
     clearTimeout(t);
   }
+}
+
+function extractMessage(j: any) {
+  const message = j?.choices?.[0]?.message;
+  const content = typeof message?.content === "string" ? message.content : "";
+  const hasToolCalls = Array.isArray(message?.tool_calls) && message.tool_calls.length > 0;
+  return { message, content, ok: !!message && (content.length > 0 || hasToolCalls) };
 }
 
 export async function routedChatCompletion(
@@ -73,21 +92,21 @@ export async function routedChatCompletion(
 ): Promise<RoutedChatResult> {
   const tier: AiTier = opts.tier ?? "bulk";
   const mapping = MODEL_MAP[tier];
+  const lovableModel = opts.lovableModelOverride || mapping.lovable;
   const abacusKey = Deno.env.get("ABACUS_ROUTELLM_API_KEY");
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const disabled = Deno.env.get("AI_ROUTER_DISABLE") === "1";
 
-  // Try Abacus first when available
   if (!disabled && abacusKey) {
     try {
       const r = await callProvider(ABACUS_URL, abacusKey, mapping.abacus, opts);
       if (r.ok) {
         const j = await r.json();
-        const content = j?.choices?.[0]?.message?.content ?? "";
-        if (content) {
-          return { content, provider: "abacus", model: mapping.abacus, raw: j };
+        const { message, content, ok } = extractMessage(j);
+        if (ok) {
+          return { content, message, provider: "abacus", model: mapping.abacus, raw: j };
         }
-        console.warn("[ai-router] Abacus returned empty content, falling back to Lovable");
+        console.warn("[ai-router] Abacus returned unusable response, falling back to Lovable");
       } else {
         console.warn(`[ai-router] Abacus ${r.status}, falling back to Lovable`);
       }
@@ -96,9 +115,8 @@ export async function routedChatCompletion(
     }
   }
 
-  // Fallback: Lovable AI Gateway
   if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
-  const r = await callProvider(LOVABLE_URL, lovableKey, mapping.lovable, opts);
+  const r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts);
   if (!r.ok) {
     const t = await r.text().catch(() => "");
     const err = new Error(`Lovable AI ${r.status}: ${t.slice(0, 200)}`);
@@ -106,6 +124,6 @@ export async function routedChatCompletion(
     throw err;
   }
   const j = await r.json();
-  const content = j?.choices?.[0]?.message?.content ?? "";
-  return { content, provider: "lovable", model: mapping.lovable, raw: j };
+  const { message, content } = extractMessage(j);
+  return { content, message, provider: "lovable", model: lovableModel, raw: j };
 }

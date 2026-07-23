@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -311,42 +312,33 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
     const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
 
     for (let round = 0; round < 4; round++) {
-      const aiBody: Record<string, unknown> = {
-        model: "google/gemini-2.5-flash",
-        messages: convo,
-        tools,
-        tool_choice: "auto",
-      };
-
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(aiBody),
-      });
-
-      if (!aiRes.ok) {
-        if (aiRes.status === 429) {
+      let routed;
+      try {
+        routed = await routedChatCompletion({
+          tier: "bulk",
+          messages: convo,
+          tools,
+          tool_choice: "auto",
+        });
+      } catch (e: any) {
+        const status = e?.status;
+        if (status === 429) {
           return new Response(JSON.stringify({ error: "Rate limited, try again shortly." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (aiRes.status === 402) {
+        if (status === 402) {
           return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
             status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        const t = await aiRes.text();
-        console.error("rep-assistant AI gateway error:", aiRes.status, t);
+        console.error("rep-assistant AI error:", e?.message);
         return new Response(JSON.stringify({ error: "AI gateway error" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const data = await aiRes.json();
-      const msg = data.choices?.[0]?.message;
+      const msg = routed.message;
       if (!msg) {
         return new Response(JSON.stringify({ error: "Empty AI response" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },

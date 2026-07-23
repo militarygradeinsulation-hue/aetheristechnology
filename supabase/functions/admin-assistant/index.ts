@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 import { AETHERIS_KNOWLEDGE } from "../_shared/aetheris-knowledge.ts";
 import { buildLiveTraffic } from "../_shared/live-traffic.ts";
 import {
@@ -462,37 +463,33 @@ serve(async (req) => {
 
     // Tool-call loop (max 5 rounds to avoid runaway).
     for (let round = 0; round < 5; round++) {
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+      let routed;
+      try {
+        routed = await routedChatCompletion({
+          tier: "bulk",
           messages: convo,
           tools: TOOLS,
           tool_choice: "auto",
-        }),
-      });
-      if (!aiRes.ok) {
-        if (aiRes.status === 429) {
+        });
+      } catch (e: any) {
+        const status = e?.status;
+        if (status === 429) {
           return new Response(JSON.stringify({ error: "Rate limited, try again shortly." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        if (aiRes.status === 402) {
+        if (status === 402) {
           return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
             status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        const t = await aiRes.text();
-        console.error("AI gateway error:", aiRes.status, t);
+        console.error("admin-assistant AI error:", e?.message);
         return new Response(JSON.stringify({ error: "AI gateway error" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const data = await aiRes.json();
-      const choice = data.choices?.[0];
-      const msg = choice?.message;
+      const msg = routed.message;
       if (!msg) {
         return new Response(JSON.stringify({ error: "Empty AI response" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
