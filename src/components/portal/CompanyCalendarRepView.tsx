@@ -197,11 +197,20 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
         <EntryDialog
           entry={selectedEntry}
           isAdmin={isAdmin}
+          myRepPrefix={myRepPrefix}
           onClose={() => setSelectedEntry(null)}
           onSaved={(e) => { setSelectedEntry(e); void refresh(false); }}
           onDeleted={() => { setSelectedEntry(null); void refresh(true); }}
         />
       )}
+
+      {meetingOpen && (
+        <ScheduleMeetingDialog
+          onClose={() => setMeetingOpen(false)}
+          onCreated={() => { setMeetingOpen(false); void refresh(true); }}
+        />
+      )}
+
     </div>
   );
 };
