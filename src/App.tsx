@@ -41,6 +41,7 @@ import NewsPage from "./pages/NewsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 
 // Lazy: everything else (~1.5MB → split into per-route chunks)
+const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 const WhyUsPage = lazy(() => import("./pages/WhyUsPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
@@ -233,7 +234,7 @@ const App = () => (
                       ))}
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
-                      <Route path="/leak-audit" element={<Navigate to="/diagnostic" replace />} />
+                      <Route path="/leak-audit" element={<LeakAuditPage />} />
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />

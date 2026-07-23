@@ -45,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
 
   const navItems: NavItem[] = [
     { label: 'Home', href: '/home', blood: true },
+    { label: 'Leak Audit', href: '/leak-audit', kind: 'case' },
     { label: 'Aetheris Universe', href: '/aetheris-universe', accent: true },
     { label: 'Case Studies', href: '/case-studies' },
     { label: 'Industries', href: '/industries' },
