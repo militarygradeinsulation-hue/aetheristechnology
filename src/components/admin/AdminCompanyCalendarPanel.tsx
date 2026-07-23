@@ -183,10 +183,11 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
     setSaving(true);
     try {
       const { category, due_time, owner_role, owner_name, ...rest } = openDraft;
+      const ownerRole = normalizeOwnerRole(owner_role);
       const saved = await upsertCompanyEntry({
         ...(rest as Partial<CompanyCalendarEntry>),
-        owner_role,
-        owner_name: owner_name || OWNER_META[owner_role].short,
+        owner_role: ownerRole,
+        owner_name: owner_name || OWNER_META[ownerRole].short,
         due_time: due_time ? due_time : null,
         color: categoryToColorToken(category),
       });
@@ -498,7 +499,7 @@ export const AdminCompanyCalendarPanel: React.FC = () => {
               <CardContent className="space-y-2">
                 {list.map(e => {
                   const meta = entryDisplay(e);
-                  const roleKey = (OWNER_META[(e.owner_role as OwnerRole)] ? e.owner_role : "team") as OwnerRole;
+                  const roleKey = normalizeOwnerRole(e.owner_role);
                   const owner = OWNER_META[roleKey];
                   const OwnerIcon = ROLE_ICONS[roleKey];
                   return (
