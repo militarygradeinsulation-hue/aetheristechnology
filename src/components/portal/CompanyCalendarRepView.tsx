@@ -252,17 +252,17 @@ export const CompanyCalendarRepView: React.FC<{ isAdmin?: boolean }> = ({ isAdmi
           <Loader2 className="w-6 h-6 animate-spin text-amber mx-auto" />
         </div>
       ) : view === "list" ? (
-        <ListView entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
+        <ListView entries={filteredEntries} todayStr={todayStr} onPick={setSelectedEntry} />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
           <div>
             {view === "week" ? (
-              <WeekView entries={entries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
+              <WeekView entries={filteredEntries} weekStart={startOfWeek(anchor)} todayStr={todayStr} onPick={setSelectedEntry} />
             ) : (
-              <MonthView entries={entries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
+              <MonthView entries={filteredEntries} anchor={anchor} todayStr={todayStr} onPick={setSelectedEntry} />
             )}
           </div>
-          <UpcomingSidebar entries={entries} todayStr={todayStr} onPick={setSelectedEntry} />
+          <UpcomingSidebar entries={filteredEntries} todayStr={todayStr} onPick={setSelectedEntry} />
         </div>
       )}
 
