@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
