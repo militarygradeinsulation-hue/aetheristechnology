@@ -698,8 +698,10 @@ Return JSON:
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
-  const findingsStr = JSON.stringify(findings).slice(0, 28_000);
+  const cleaned = sanitizeFindingsForSynth(findings);
+  const findingsStr = JSON.stringify(cleaned).slice(0, 28_000);
   const fb = fallbackReport(findings, target, company);
+
   // Run summary + 14 per-chapter calls in parallel so one failure doesn't poison the whole report.
   const [summaryResult, ...chapterResults] = await Promise.allSettled([
     synthesizeSummary(findingsStr, target, company),
