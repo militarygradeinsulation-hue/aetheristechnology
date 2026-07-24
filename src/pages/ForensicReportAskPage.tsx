@@ -21,13 +21,6 @@ export default function ForensicReportAskPage() {
   useEffect(() => { if (scanId) trackGoldenReportEvent(scanId, "page_view"); }, [scanId]);
 
 
-export default function ForensicReportAskPage() {
-  const { scanId } = useParams<{ scanId: string }>();
-  const [meta, setMeta] = useState<{ company_name: string | null; target_url: string } | null>(null);
-  const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
