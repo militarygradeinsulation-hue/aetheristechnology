@@ -10,8 +10,9 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase,
 } from 'lucide-react';
+
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,9 @@ import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 import { EngagementBoard } from '@/components/portal/EngagementBoard';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { GoldenSlowDownNudge } from '@/components/portal/GoldenSlowDownNudge';
+import RepCRMPanel from '@/components/portal/RepCRMPanel';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
+
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
