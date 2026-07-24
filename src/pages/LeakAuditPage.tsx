@@ -363,86 +363,85 @@ const LeakAuditPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto -mx-2 md:-mx-8 lg:-mx-16">
+      <div className="flex flex-col gap-2.5 max-w-7xl mx-auto -mx-2 md:-mx-8 lg:-mx-16">
         {LEAK_AUDIT_TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`glass rounded-lg p-5 flex flex-col md:flex-row gap-5 relative border ${
+            className={`glass rounded-md px-4 py-3 grid grid-cols-12 gap-4 items-center relative border ${
               tier.highlight
-                ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
+                ? 'border-amber shadow-[0_0_20px_-10px_hsl(var(--amber)/0.6)]'
                 : tier.flagship
                   ? 'border-crimson/50'
                   : 'border-border/60'
             }`}
           >
             {tier.badge && (
-              <div className={`absolute -top-2 left-5 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
+              <div className={`absolute -top-2 left-4 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
                 {tier.badge}
               </div>
             )}
 
-            {/* LEFT: price + CTA */}
-            <div className="md:w-44 md:shrink-0 md:border-r md:border-border/40 md:pr-5 flex flex-col">
-              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+            {/* Price block */}
+            <div className="col-span-12 md:col-span-2 flex md:flex-col md:items-start items-baseline gap-2 md:gap-0.5 md:border-r md:border-border/40 md:pr-3">
+              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                 {tier.name}
               </div>
-              <div className="flex items-baseline gap-1.5 mb-1">
-                <div className={`font-forensic text-3xl font-bold ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
+              <div className="flex items-baseline gap-1">
+                <div className={`font-forensic text-2xl font-bold leading-none ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
                   {tier.price}
                 </div>
                 {tier.cadence.startsWith('/month') && (
-                  <span className="text-xs text-muted-foreground">/mo</span>
+                  <span className="text-[10px] text-muted-foreground">/mo</span>
                 )}
               </div>
-              <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
+              <div className="font-case text-[9px] uppercase tracking-wider text-muted-foreground">
                 {tier.cadence.replace(/^\/month · /, '')}
-              </div>
-              <div className="mt-auto">
-                {tier.free ? (
-                  <Button variant="outline" size="sm" className="w-full" onClick={scrollToAuditStart}>
-                    {context === 'result' ? 'Run Again' : tier.cta}
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => openTierCheckout(tier)}
-                    className={`w-full ${tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}`}
-                    variant={tier.highlight ? 'default' : 'outline'}
-                  >
-                    <CreditCard className="w-3.5 h-3.5 mr-1.5" />
-                    {tier.cta}
-                  </Button>
-                )}
               </div>
             </div>
 
-            {/* RIGHT: content */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground/90 mb-3 leading-snug">{tier.blurb}</p>
-
-              <div className="rounded-md border border-amber/25 bg-amber/5 p-2.5 mb-3">
-                <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you actually get</div>
-                <p className="text-xs text-foreground/85 leading-snug">{tier.outcome}</p>
-              </div>
-
-              <div className="mb-3">
-                <span className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mr-1.5">Best for:</span>
-                <span className="text-xs text-muted-foreground italic">{tier.bestFor}</span>
-              </div>
-
-              <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">Included</div>
-              <ul className="grid sm:grid-cols-2 gap-x-3 gap-y-1">
-                {tier.includes.map((item) => (
-                  <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
+            {/* Copy block */}
+            <div className="col-span-12 md:col-span-7 min-w-0">
+              <p className="text-[13px] text-foreground/90 leading-snug mb-1.5">{tier.blurb}</p>
+              <p className="text-[11px] text-foreground/75 leading-snug mb-2">
+                <span className="font-case text-[9px] uppercase tracking-widest text-amber mr-1.5">Get:</span>
+                {tier.outcome}
+              </p>
+              <ul className="flex flex-wrap gap-x-3 gap-y-0.5">
+                {tier.includes.slice(0, 6).map((item) => (
+                  <li key={item} className="text-[11px] text-foreground/75 flex gap-1">
                     <span className="text-amber shrink-0">›</span>
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
+              <div className="mt-1.5">
+                <span className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mr-1.5">Best for:</span>
+                <span className="text-[11px] text-muted-foreground italic">{tier.bestFor}</span>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="col-span-12 md:col-span-3 flex md:justify-end">
+              {tier.free ? (
+                <Button variant="outline" size="sm" className="w-full md:w-auto" onClick={scrollToAuditStart}>
+                  {context === 'result' ? 'Run Again' : tier.cta}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => openTierCheckout(tier)}
+                  className={`w-full md:w-auto ${tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}`}
+                  variant={tier.highlight ? 'default' : 'outline'}
+                >
+                  <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                  {tier.cta}
+                </Button>
+              )}
             </div>
           </div>
         ))}
       </div>
+
 
 
       <p className="text-center text-xs text-muted-foreground italic pt-2">
