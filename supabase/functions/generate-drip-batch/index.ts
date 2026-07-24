@@ -251,7 +251,7 @@ serve(async (req) => {
               scheduled_for: new Date().toISOString(),
               status: "pending",
               subject: SUBJECT,
-              body_html: buildBody(reportUrl, companyName),
+              body_html: buildBody(reportUrl, companyName, scanId, email),
             });
             if (insErr) throw insErr;
 
