@@ -107,7 +107,21 @@ const CAT_DIAGNOSIS: Record<string, { strong: string; weak: string; leaks: strin
   },
 };
 
-const LEAK_AUDIT_TIERS = [
+type LeakAuditTier = {
+  name: string;
+  price: string;
+  cadence: string;
+  blurb: string;
+  includes: string[];
+  cta: string;
+  highlight: boolean;
+  free?: boolean;
+  badge?: string;
+  flagship?: boolean;
+  priceId?: string;
+};
+
+const LEAK_AUDIT_TIERS: LeakAuditTier[] = [
   {
     name: 'Free Self-Scan',
     price: '$0',
@@ -161,7 +175,7 @@ const LEAK_AUDIT_TIERS = [
     flagship: true,
     priceId: 'leak_21_day_diagnostic_onetime',
   },
-] as const;
+];
 
 type Step = 'intake' | 'questions' | 'gate' | 'result';
 
