@@ -243,61 +243,14 @@ serve(async (req) => {
     if (action === "push_to_company") {
       const id = String(body.id || "");
       if (!id) return json({ error: "id required" }, 400);
-      const { data: existing } = await admin.from("rep_calendar_events").select("*").eq("id", id).maybeSingle();
+      const { data: existing } = await admin.from("rep_calendar_events").select("rep_code, company_event_id").eq("id", id).maybeSingle();
       if (!existing) return json({ error: "not found" }, 404);
       if (!isAdmin && existing.rep_code !== repCode) return json({ error: "Forbidden" }, 403);
       if (existing.company_event_id) {
         return json({ ok: true, already: true, company_event_id: existing.company_event_id });
       }
-
-      const { data: repRow } = await admin.from("rep_codes").select("rep_name, role").eq("code", existing.rep_code).maybeSingle();
-      const repName = repRow?.rep_name || existing.rep_code;
-      const startDate = new Date(existing.start_at);
-      const dateStr = `${startDate.getUTCFullYear()}-${String(startDate.getUTCMonth() + 1).padStart(2, "0")}-${String(startDate.getUTCDate()).padStart(2, "0")}`;
-      const dueTime = existing.all_day ? null : startDate.toISOString().slice(11, 19);
-
-      const kindMap: Record<string, string> = {
-        meeting: "meeting", call: "meeting", event: "meeting", follow_up: "follow_up",
-        reminder: "reminder", task: "task", note: "note",
-      };
-      const companyKind = kindMap[existing.kind as string] || "meeting";
-
-      const bodyLines = [
-        existing.body || "",
-        existing.rep_notes ? `\nRep notes: ${existing.rep_notes}` : "",
-        `\nPushed from ${repName}'s portal calendar${existing.all_day ? "" : ` · ${startDate.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}`,
-      ].join("").trim();
-
-      const payload = {
-        date: dateStr,
-        due_time: dueTime,
-        kind: companyKind,
-        title: existing.title,
-        body: bodyLines,
-        color: "cat:rep_calendar",
-        owner_role: repRow?.role || "rep",
-        owner_name: repName,
-        status: existing.completed ? "done" : "pending",
-        created_by: `rep:${existing.rep_code}`,
-      };
-
-      const { data: companyRow, error: insErr } = await admin.from("company_calendar")
-        .insert(payload).select().maybeSingle();
-      if (insErr) throw insErr;
-
-      await admin.from("rep_calendar_events")
-        .update({ company_event_id: companyRow!.id })
-        .eq("id", id);
-
-      // Notify the team
-      await admin.from("shared_notifications").insert({
-        recipient: "team",
-        kind: "calendar_push",
-        title: `${repName} pushed a date to the company calendar`,
-        body: `${existing.title} · ${dateStr}${dueTime ? ` ${dueTime.slice(0, 5)}` : ""}`,
-      }).select().maybeSingle().then(() => {}, () => {});
-
-      return json({ ok: true, company_event_id: companyRow!.id });
+      const companyId = await pushRepEventToCompany(admin, id);
+      return json({ ok: true, company_event_id: companyId });
     }
 
     // ===== UNPUSH FROM COMPANY CALENDAR =====
