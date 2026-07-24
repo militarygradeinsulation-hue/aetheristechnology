@@ -367,7 +367,7 @@ const LeakAuditPage = () => {
         {LEAK_AUDIT_TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`glass rounded-md px-4 py-3 grid grid-cols-12 gap-4 items-center relative border ${
+            className={`glass rounded-md px-4 pt-4 pb-3 grid grid-cols-12 gap-4 items-center relative border ${
               tier.highlight
                 ? 'border-amber shadow-[0_0_20px_-10px_hsl(var(--amber)/0.6)]'
                 : tier.flagship
@@ -375,16 +375,17 @@ const LeakAuditPage = () => {
                   : 'border-border/60'
             }`}
           >
-            {tier.badge && (
-              <div className={`absolute -top-2 left-4 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
-                {tier.badge}
-              </div>
-            )}
-
             {/* Price block */}
             <div className="col-span-12 md:col-span-2 flex md:flex-col md:items-start items-baseline gap-2 md:gap-0.5 md:border-r md:border-border/40 md:pr-3">
-              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                {tier.name}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {tier.name}
+                </div>
+                {tier.badge && (
+                  <span className={`font-case text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
+                    {tier.badge}
+                  </span>
+                )}
               </div>
               <div className="flex items-baseline gap-1">
                 <div className={`font-forensic text-2xl font-bold leading-none ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
@@ -398,6 +399,7 @@ const LeakAuditPage = () => {
                 {tier.cadence.replace(/^\/month · /, '')}
               </div>
             </div>
+
 
             {/* Copy block */}
             <div className="col-span-12 md:col-span-7 min-w-0">
