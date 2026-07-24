@@ -2619,6 +2619,63 @@ export type Database = {
         }
         Relationships: []
       }
+      golden_report_events: {
+        Row: {
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string
+          event_type: string
+          id: string
+          ip: string | null
+          is_internal: boolean
+          metadata: Json
+          recipient_email: string | null
+          referrer: string | null
+          region: string | null
+          rep_code: string | null
+          scan_id: string | null
+          target_url: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          ip?: string | null
+          is_internal?: boolean
+          metadata?: Json
+          recipient_email?: string | null
+          referrer?: string | null
+          region?: string | null
+          rep_code?: string | null
+          scan_id?: string | null
+          target_url?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip?: string | null
+          is_internal?: boolean
+          metadata?: Json
+          recipient_email?: string | null
+          referrer?: string | null
+          region?: string | null
+          rep_code?: string | null
+          scan_id?: string | null
+          target_url?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       hire_playbook_entries: {
         Row: {
           body: string
