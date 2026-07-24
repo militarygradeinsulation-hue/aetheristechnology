@@ -10,8 +10,9 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase,
 } from 'lucide-react';
+
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,9 @@ import { RepLeaderboard } from '@/components/portal/RepLeaderboard';
 import { EngagementBoard } from '@/components/portal/EngagementBoard';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { GoldenSlowDownNudge } from '@/components/portal/GoldenSlowDownNudge';
+import RepCRMPanel from '@/components/portal/RepCRMPanel';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
+
 
 
 const STYLE_KEY = 'aetheris.portalStyle';
@@ -292,6 +295,7 @@ const NewPortalPage: React.FC = () => {
             const allTabs: Array<[string, string, any, boolean]> = [
               ['start', 'Start', LayoutGrid, true],
               ['leads', 'Leads', Users, true],
+              ['crm', 'CRM', Briefcase, true],
               ['calendar', 'Calendar', CalendarDays, true],
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
@@ -303,8 +307,9 @@ const NewPortalPage: React.FC = () => {
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9', 10: 'md:grid-cols-10',
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9', 10: 'md:grid-cols-10', 11: 'md:grid-cols-11',
             };
+
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
             return (
               <TabsList className={`w-full grid grid-cols-3 ${gridCols} bg-black/50 border border-amber-400/25 backdrop-blur-sm h-auto p-1 gap-1`}>
@@ -387,7 +392,26 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
+          {/* CRM — team-shared pipeline, quotes, activity, live Stripe catalog */}
+          <TabsContent value="crm" className="mt-8">
+            <ToolCard
+              eyebrow="// Sales OS //"
+              title="Rep CRM"
+              summary="Team-shared pipeline, quotes and activity feed. Product catalog is pulled live from Stripe so prices and product names always match the website."
+              howTo={[
+                'Click "Import leads" to pull every lead already on your rep code into the pipeline.',
+                'Drag cards through the stages: new → contacted → quoted → won / lost. Stage changes auto-log to the activity feed.',
+                'Open any lead to build a quote — pick products from the live catalog, set quantity/discount, then email a branded quote link to the customer.',
+                'When the customer opens or accepts the quote, it logs back onto the lead automatically.',
+              ]}
+              defaultOpen
+            >
+              <RepCRMPanel repCode={profile!.code} />
+            </ToolCard>
+          </TabsContent>
+
           {/* CALENDAR — available to every rep + partner */}
+
           <TabsContent value="calendar" className="mt-8">
             <ToolCard
               eyebrow="// Schedule //"

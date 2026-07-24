@@ -4763,6 +4763,212 @@ export type Database = {
           },
         ]
       }
+      rep_crm_activity: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          lead_id: string | null
+          metadata: Json
+          occurred_at: string
+          quote_id: string | null
+          rep_code: string | null
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          lead_id?: string | null
+          metadata?: Json
+          occurred_at?: string
+          quote_id?: string | null
+          rep_code?: string | null
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          metadata?: Json
+          occurred_at?: string
+          quote_id?: string | null
+          rep_code?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_crm_activity_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rep_crm_activity_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "rep_crm_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rep_crm_leads: {
+        Row: {
+          company: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          next_action: string | null
+          next_action_at: string | null
+          notes: string | null
+          owner_name: string | null
+          rep_code: string
+          source: string | null
+          source_id: string | null
+          stage: string
+          updated_at: string
+          value_cents: number | null
+          website: string | null
+        }
+        Insert: {
+          company?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          next_action_at?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          rep_code: string
+          source?: string | null
+          source_id?: string | null
+          stage?: string
+          updated_at?: string
+          value_cents?: number | null
+          website?: string | null
+        }
+        Update: {
+          company?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          next_action?: string | null
+          next_action_at?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          rep_code?: string
+          source?: string | null
+          source_id?: string | null
+          stage?: string
+          updated_at?: string
+          value_cents?: number | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      rep_crm_quotes: {
+        Row: {
+          accepted_at: string | null
+          access_token: string
+          created_at: string
+          currency: string
+          customer_company: string | null
+          customer_email: string | null
+          customer_name: string | null
+          discount_cents: number
+          expires_at: string | null
+          id: string
+          items: Json
+          lead_id: string | null
+          metadata: Json
+          notes: string | null
+          pdf_url: string | null
+          quote_number: string
+          rep_code: string
+          rep_name: string | null
+          sent_at: string | null
+          status: string
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          access_token?: string
+          created_at?: string
+          currency?: string
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          discount_cents?: number
+          expires_at?: string | null
+          id?: string
+          items?: Json
+          lead_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          pdf_url?: string | null
+          quote_number: string
+          rep_code: string
+          rep_name?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          access_token?: string
+          created_at?: string
+          currency?: string
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          discount_cents?: number
+          expires_at?: string | null
+          id?: string
+          items?: Json
+          lead_id?: string | null
+          metadata?: Json
+          notes?: string | null
+          pdf_url?: string | null
+          quote_number?: string
+          rep_code?: string
+          rep_name?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_crm_quotes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "rep_crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rep_daily_checklist: {
         Row: {
           admin_notified_at: string | null
