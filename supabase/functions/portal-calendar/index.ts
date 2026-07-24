@@ -108,7 +108,19 @@ serve(async (req) => {
       };
       const { data, error } = await admin.from("rep_calendar_events").insert(insert).select("*").single();
       if (error) throw error;
-      return json({ event: data });
+
+      // Auto-push every rep-created schedule item (except pure notes) to the company calendar
+      // so the whole team sees it. Reps can still un-push manually if needed.
+      let autoPushed = data;
+      if (data && data.kind !== "note") {
+        try {
+          const pushed = await pushRepEventToCompany(admin, data.id);
+          if (pushed) autoPushed = { ...data, company_event_id: pushed };
+        } catch (e) {
+          console.error("auto-push failed", e);
+        }
+      }
+      return json({ event: autoPushed });
     }
 
     // ===== UPDATE =====
