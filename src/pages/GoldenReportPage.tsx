@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -7,12 +7,19 @@ import { SEOHead } from "@/components/SEOHead";
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
 import { ToolEmailGate } from "@/components/ToolEmailGate";
 import { ScrollText } from "lucide-react";
+import { trackGoldenReportEvent } from "@/lib/goldenReportTracking";
 
 const GoldenReportPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   // If the URL carries ?scan=<id>, we came from a shared Golden Report link.
   // Skip the email gate so recipients see their case file immediately.
-  const hasSharedScan = typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("scan");
+  const sharedScanId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("scan") : null;
+  const hasSharedScan = !!sharedScanId;
+
+  useEffect(() => {
+    if (sharedScanId) trackGoldenReportEvent(sharedScanId, "page_view");
+  }, [sharedScanId]);
+
 
   return (
     <div className="relative min-h-screen">

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, Send } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
+import { trackGoldenReportEvent } from "@/lib/goldenReportTracking";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -16,6 +17,10 @@ export default function ForensicReportAskPage() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { if (scanId) trackGoldenReportEvent(scanId, "page_view"); }, [scanId]);
+
+
 
   useEffect(() => {
     (async () => {

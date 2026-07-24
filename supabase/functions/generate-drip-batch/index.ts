@@ -26,15 +26,29 @@ const FREE_EMAIL_DOMAINS = new Set([
 
 const SUBJECT = "I find where you're losing customers and money";
 
-function buildBody(reportUrl: string, businessName: string | null): string {
+const TRACK_BASE = "https://ihdjpxhcaiaixmqxyqoe.supabase.co/functions/v1/golden-report-track";
+
+function trackedLink(scanId: string, reportUrl: string, email: string): string {
+  const params = new URLSearchParams({ scan: scanId, evt: "click", to: reportUrl, e: email });
+  return `${TRACK_BASE}?${params.toString()}`;
+}
+
+function openPixel(scanId: string, email: string): string {
+  const params = new URLSearchParams({ scan: scanId, evt: "open", e: email });
+  return `<img src="${TRACK_BASE}?${params.toString()}" width="1" height="1" alt="" style="display:none;border:0;width:1px;height:1px" />`;
+}
+
+function buildBody(reportUrl: string, businessName: string | null, scanId: string, recipientEmail: string): string {
   const who = businessName ? ` for ${escapeHtml(businessName)}` : "";
+  const tracked = trackedLink(scanId, reportUrl, recipientEmail);
   return `<p>I find where you are losing customers and money.</p>
-<p>Here's yours${who}: <a href="${reportUrl}">${reportUrl}</a></p>
+<p>Here's yours${who}: <a href="${tracked}">${reportUrl}</a></p>
 <p>I'll answer your questions on it too. No cost, fees, or strings.</p>
 <p>Joseph<br>
 ~ AI Architect, MS, BA, IBM<br>
 <a href="https://aetheris.technology/">Aetheris.Technology</a><br>
-<a href="https://www.linkedin.com/in/thejosephtoney">linkedin.com/in/thejosephtoney</a></p>`;
+<a href="https://www.linkedin.com/in/thejosephtoney">linkedin.com/in/thejosephtoney</a></p>
+${openPixel(scanId, recipientEmail)}`;
 }
 
 function escapeHtml(s: string): string {
@@ -237,7 +251,7 @@ serve(async (req) => {
               scheduled_for: new Date().toISOString(),
               status: "pending",
               subject: SUBJECT,
-              body_html: buildBody(reportUrl, companyName),
+              body_html: buildBody(reportUrl, companyName, scanId, email),
             });
             if (insErr) throw insErr;
 

@@ -20,6 +20,7 @@ import { template as careersTestAccess } from './careers-test-access.tsx'
 import { template as dailyTouchpoints } from './daily-touchpoints.tsx'
 import { template as universeAccessCode } from './universe-access-code.tsx'
 import { template as repQuote } from './rep-quote.tsx'
+import { template as goldenReportOpened } from './golden-report-opened.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'rep-welcome': repWelcome,
@@ -33,5 +34,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'daily-touchpoints': dailyTouchpoints,
   'universe-access-code': universeAccessCode,
   'rep-quote': repQuote,
+  'golden-report-opened': goldenReportOpened,
 }
 
