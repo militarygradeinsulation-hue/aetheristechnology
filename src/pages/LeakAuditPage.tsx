@@ -363,11 +363,11 @@ const LeakAuditPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto -mx-2 md:-mx-8 lg:-mx-16">
         {LEAK_AUDIT_TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`glass rounded-lg p-5 flex flex-col relative border ${
+            className={`glass rounded-lg p-5 flex flex-col md:flex-row gap-5 relative border ${
               tier.highlight
                 ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
                 : tier.flagship
@@ -376,64 +376,74 @@ const LeakAuditPage = () => {
             }`}
           >
             {tier.badge && (
-              <div className={`absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
+              <div className={`absolute -top-2 left-5 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
                 {tier.badge}
               </div>
             )}
-            <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-              {tier.name}
-            </div>
-            <div className="flex items-baseline gap-1.5 mb-1">
-              <div className={`font-forensic text-3xl font-bold ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
-                {tier.price}
+
+            {/* LEFT: price + CTA */}
+            <div className="md:w-44 md:shrink-0 md:border-r md:border-border/40 md:pr-5 flex flex-col">
+              <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                {tier.name}
               </div>
-              {tier.cadence.startsWith('/month') && (
-                <span className="text-xs text-muted-foreground">/mo</span>
-              )}
-            </div>
-            <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              {tier.cadence.replace(/^\/month · /, '')}
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <div className={`font-forensic text-3xl font-bold ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
+                  {tier.price}
+                </div>
+                {tier.cadence.startsWith('/month') && (
+                  <span className="text-xs text-muted-foreground">/mo</span>
+                )}
+              </div>
+              <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
+                {tier.cadence.replace(/^\/month · /, '')}
+              </div>
+              <div className="mt-auto">
+                {tier.free ? (
+                  <Button variant="outline" size="sm" className="w-full" onClick={scrollToAuditStart}>
+                    {context === 'result' ? 'Run Again' : tier.cta}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => openTierCheckout(tier)}
+                    className={`w-full ${tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}`}
+                    variant={tier.highlight ? 'default' : 'outline'}
+                  >
+                    <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                    {tier.cta}
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <p className="text-sm text-foreground/90 mb-3 leading-snug">{tier.blurb}</p>
+            {/* RIGHT: content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-foreground/90 mb-3 leading-snug">{tier.blurb}</p>
 
-            <div className="rounded-md border border-amber/25 bg-amber/5 p-2.5 mb-3">
-              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you actually get</div>
-              <p className="text-xs text-foreground/85 leading-snug">{tier.outcome}</p>
+              <div className="rounded-md border border-amber/25 bg-amber/5 p-2.5 mb-3">
+                <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you actually get</div>
+                <p className="text-xs text-foreground/85 leading-snug">{tier.outcome}</p>
+              </div>
+
+              <div className="mb-3">
+                <span className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mr-1.5">Best for:</span>
+                <span className="text-xs text-muted-foreground italic">{tier.bestFor}</span>
+              </div>
+
+              <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">Included</div>
+              <ul className="grid sm:grid-cols-2 gap-x-3 gap-y-1">
+                {tier.includes.map((item) => (
+                  <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
+                    <span className="text-amber shrink-0">›</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            <div className="mb-3">
-              <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Best for</div>
-              <p className="text-xs text-muted-foreground italic leading-snug">{tier.bestFor}</p>
-            </div>
-
-            <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">Included</div>
-            <ul className="space-y-1.5 mb-4 flex-1">
-              {tier.includes.map((item) => (
-                <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
-                  <span className="text-amber shrink-0">›</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            {tier.free ? (
-              <Button variant="outline" size="sm" onClick={scrollToAuditStart}>
-                {context === 'result' ? 'Run Again' : tier.cta}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => openTierCheckout(tier)}
-                className={tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}
-                variant={tier.highlight ? 'default' : 'outline'}
-              >
-                <CreditCard className="w-3.5 h-3.5 mr-1.5" />
-                {tier.cta}
-              </Button>
-            )}
           </div>
         ))}
       </div>
+
 
       <p className="text-center text-xs text-muted-foreground italic pt-2">
         Every paid tier credits toward the next. The 21-Day Diagnostic is the gate to the $15K/mo Active Case Retainer.
