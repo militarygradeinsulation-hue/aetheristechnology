@@ -307,9 +307,14 @@ export function ForensicScanAllPanel() {
               <div className="flex gap-2 shrink-0">
                 <Button
                   size="sm"
-                  onClick={() => downloadForensicGoldenPdf({
-                    report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                  })}
+                  onClick={() => {
+                    import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
+                      trackGoldenReportEvent(row.id, "pdf_download"),
+                    );
+                    downloadForensicGoldenPdf({
+                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
+                    });
+                  }}
                   className="bg-amber-500 text-black hover:bg-amber-400"
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Download PDF
