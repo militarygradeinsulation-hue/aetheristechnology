@@ -9,7 +9,7 @@ import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
@@ -107,6 +107,76 @@ const CAT_DIAGNOSIS: Record<string, { strong: string; weak: string; leaks: strin
   },
 };
 
+type LeakAuditTier = {
+  name: string;
+  price: string;
+  cadence: string;
+  blurb: string;
+  includes: string[];
+  cta: string;
+  highlight: boolean;
+  free?: boolean;
+  badge?: string;
+  flagship?: boolean;
+  priceId?: string;
+};
+
+const LEAK_AUDIT_TIERS: LeakAuditTier[] = [
+  {
+    name: 'Free Self-Scan',
+    price: '$0',
+    cadence: '~6 min · self-serve',
+    blurb: 'The 14-question audit. Directional PDF, no operator time.',
+    includes: ['14-question forensic quiz', 'Estimated annual leak $', 'Case-file PDF download'],
+    cta: 'Start Free Audit',
+    highlight: false,
+    free: true,
+  },
+  {
+    name: 'Signal Pack',
+    price: '$2,500',
+    cadence: 'one-time · ~6 hrs operator',
+    blurb: 'Operator-led confirmation of what the self-scan flagged.',
+    includes: ['Website Report', 'Brand Contradiction Finder', 'Friction Vocabulary Audit', 'Leak Findings memo', '30-min walkthrough'],
+    cta: 'Buy Signal Pack',
+    highlight: false,
+    priceId: 'leak_signal_pack_onetime',
+  },
+  {
+    name: 'Revenue Pack',
+    price: '$5,000',
+    cadence: 'one-time · ~14 hrs',
+    blurb: 'Most operators pick this. Fix-it-yourself system in a box.',
+    includes: ['Everything in Signal Pack', 'Sales Script Pack', 'Follow-Up Plan', 'Strategic Question Engine', '30-Day Content Calendar', 'Two 45-min sessions'],
+    cta: 'Buy Revenue Pack',
+    highlight: true,
+    badge: 'Most Picked',
+    priceId: 'leak_revenue_pack_onetime',
+  },
+  {
+    name: 'Operator Suite',
+    price: '$10,000',
+    cadence: 'one-time · ~30 hrs / 3 wks',
+    blurb: 'Full playbook + tech suite. Credits 1:1 toward the Retainer.',
+    includes: ['Everything in Revenue Pack', 'Strategy Blueprint', 'Social Content Pack', 'Digital Snapshot', 'Lead-Nurture Automation', 'Tech Suite access'],
+    cta: 'Buy Operator Suite',
+    highlight: false,
+    priceId: 'leak_operator_suite_onetime',
+  },
+  {
+    name: '21-Day Diagnostic',
+    price: '$18,500',
+    cadence: 'flagship · 21 days',
+    blurb: 'Operator inside your business for 21 days. Full quantified leak ledger.',
+    includes: ['Everything above', 'Quantified leak ledger ($ per leak)', 'Implementation plan handoff', 'Required before Active Case ($15K/mo)', 'Fit call required'],
+    cta: 'Buy 21-Day Diagnostic',
+    highlight: false,
+    badge: 'Flagship',
+    flagship: true,
+    priceId: 'leak_21_day_diagnostic_onetime',
+  },
+];
+
 type Step = 'intake' | 'questions' | 'gate' | 'result';
 
 const LeakAuditPage = () => {
@@ -119,7 +189,7 @@ const LeakAuditPage = () => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qIndex, setQIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutTier, setCheckoutTier] = useState<{ name: string; priceId: string } | null>(null);
 
   const currentQ = QUESTIONS[qIndex];
   const totalQs = QUESTIONS.length;
@@ -176,6 +246,110 @@ const LeakAuditPage = () => {
     }
     setStep('questions');
   };
+
+  const scrollToAuditStart = () => {
+    document.getElementById('leak-audit-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const openTierCheckout = (tier: { name: string; priceId?: string }) => {
+    if (!tier.priceId) return;
+    setCheckoutTier({ name: tier.name, priceId: tier.priceId });
+    setTimeout(() => document.getElementById('leak-audit-checkout')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  };
+
+  const pricingLadder = (context: 'intro' | 'result') => (
+    <div className="space-y-4">
+      <div className="text-center space-y-2">
+        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+          Actual Leak Audit Offers
+        </div>
+        <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground">
+          Pick the depth. Buy the package. Run the recovery.
+        </h2>
+        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+          Every paid tier applies 1:1 toward the next. Start free, or buy the operator-led package now.
+        </p>
+      </div>
+
+      {checkoutTier && (
+        <div id="leak-audit-checkout" className="glass rounded-lg border border-amber/40 p-5 md:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber">Secure Checkout</div>
+              <h3 className="font-forensic text-2xl font-bold text-foreground">{checkoutTier.name}</h3>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setCheckoutTier(null)}>
+              Close
+            </Button>
+          </div>
+          <StripeEmbeddedCheckout
+            priceId={checkoutTier.priceId}
+            customerEmail={email || undefined}
+            returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
+            metadata={{ source: 'leak_audit', package: checkoutTier.name, company: company || '' }}
+          />
+        </div>
+      )}
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
+        {LEAK_AUDIT_TIERS.map((tier) => (
+          <div
+            key={tier.name}
+            className={`glass rounded-lg p-4 flex flex-col relative border ${
+              tier.highlight
+                ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
+                : tier.flagship
+                  ? 'border-crimson/50'
+                  : 'border-border/60'
+            }`}
+          >
+            {tier.badge && (
+              <div className={`absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
+                {tier.badge}
+              </div>
+            )}
+            <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+              {tier.name}
+            </div>
+            <div className={`font-forensic text-3xl font-bold mb-1 ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
+              {tier.price}
+            </div>
+            <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+              {tier.cadence}
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">{tier.blurb}</p>
+            <ul className="space-y-1.5 mb-4 flex-1">
+              {tier.includes.map((item) => (
+                <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
+                  <span className="text-amber shrink-0">›</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            {tier.free ? (
+              <Button variant="outline" size="sm" onClick={scrollToAuditStart}>
+                {context === 'result' ? 'Run Again' : tier.cta}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => openTierCheckout(tier)}
+                className={tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}
+                variant={tier.highlight ? 'default' : 'outline'}
+              >
+                <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                {tier.cta}
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p className="text-center text-xs text-muted-foreground italic pt-2">
+        Paid packages are operator-led. The 21-Day Diagnostic is the gate to the $15K/mo Active Case.
+      </p>
+    </div>
+  );
 
   const handleSubmitGate = async () => {
     if (!email || !email.includes('@')) {
@@ -265,7 +439,9 @@ const LeakAuditPage = () => {
                   </p>
                 </div>
 
-                <div className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5">
+                {pricingLadder('intro')}
+
+                <div id="leak-audit-start" className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5 scroll-mt-28">
                   <div>
                     <Label className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                       Annual Revenue Band
@@ -513,14 +689,14 @@ const LeakAuditPage = () => {
                     investigation: 14 days inside your operation, every leak named, every dollar quantified.
                     <strong className="text-foreground"> Applied toward engagement if you proceed.</strong>
                   </p>
-                  {!showCheckout ? (
+                  {!checkoutTier ? (
                     <>
                       <Button
                         size="lg"
-                        onClick={() => setShowCheckout(true)}
+                        onClick={() => openTierCheckout({ name: 'Signal Pack', priceId: 'leak_signal_pack_onetime' })}
                         className="bg-amber text-primary-foreground hover:bg-amber/90"
                       >
-                        Pay $2,500 & Book the Forensic Diagnostic
+                        Pay $2,500 & Book the Signal Pack
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Button>
                       <div className="pt-2">
@@ -536,14 +712,14 @@ const LeakAuditPage = () => {
                   ) : (
                     <div className="pt-4 text-left">
                       <StripeEmbeddedCheckout
-                        priceId="forensic_diagnostic_onetime"
+                        priceId={checkoutTier.priceId}
                         customerEmail={email || undefined}
                         returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
-                        metadata={{ source: 'leak_audit', company: company || '' }}
+                        metadata={{ source: 'leak_audit', package: checkoutTier.name, company: company || '' }}
                       />
                       <div className="text-center pt-3">
                         <button
-                          onClick={() => setShowCheckout(false)}
+                          onClick={() => setCheckoutTier(null)}
                           className="text-xs text-muted-foreground hover:text-amber underline"
                         >
                           Cancel
@@ -554,132 +730,7 @@ const LeakAuditPage = () => {
                 </div>
 
                 {/* Full pricing ladder — Ways to run the audit */}
-                <div className="space-y-4">
-                  <div className="text-center space-y-2">
-                    <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                      All 5 Ways to Run the Audit
-                    </div>
-                    <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground">
-                      From free self-scan to operator inside your business
-                    </h3>
-                    <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-                      Every tier applies 1:1 toward the next. Nothing is wasted — pay for the depth you need today.
-                    </p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
-                    {[
-                      {
-                        name: 'Free Self-Scan',
-                        price: '$0',
-                        cadence: '~6 min · self-serve',
-                        blurb: 'The 14-question audit you just ran. Directional PDF, no operator time.',
-                        includes: ['14-question forensic quiz', 'Estimated annual leak $', 'Case-file PDF to your inbox'],
-                        cta: 'You did this',
-                        highlight: false,
-                        done: true,
-                      },
-                      {
-                        name: 'Signal Pack',
-                        price: '$2,500',
-                        cadence: 'one-time · ~6 hrs operator',
-                        blurb: 'Operator-led confirmation of what the self-scan flagged.',
-                        includes: ['Website Report', 'Brand Contradiction Finder', 'Friction Vocabulary Audit', 'Leak Findings memo', '30-min walkthrough'],
-                        cta: 'Book Signal Pack',
-                        highlight: false,
-                      },
-                      {
-                        name: 'Revenue Pack',
-                        price: '$5,000',
-                        cadence: 'one-time · ~14 hrs',
-                        blurb: 'Most operators pick this. Fix-it-yourself system in a box.',
-                        includes: ['Everything in Signal Pack', 'Sales Script Pack', 'Follow-Up Plan', 'Strategic Question Engine', '30-Day Content Calendar', 'Two 45-min sessions'],
-                        cta: 'Book Revenue Pack',
-                        highlight: true,
-                        badge: 'Most Picked',
-                      },
-                      {
-                        name: 'Operator Suite',
-                        price: '$10,000',
-                        cadence: 'one-time · ~30 hrs / 3 wks',
-                        blurb: 'Full playbook + tech suite. Credits 1:1 toward the Retainer.',
-                        includes: ['Everything in Revenue Pack', 'Strategy Blueprint', 'Social Content Pack', 'Digital Snapshot', 'Lead-Nurture Automation', 'Tech Suite access'],
-                        cta: 'Book Operator Suite',
-                        highlight: false,
-                      },
-                      {
-                        name: '21-Day Diagnostic',
-                        price: '$18,500',
-                        cadence: 'flagship · 21 days',
-                        blurb: 'Operator inside your business for 21 days. Full quantified leak ledger.',
-                        includes: ['Everything above', 'Quantified leak ledger ($ per leak)', 'Implementation plan handoff', 'Required before Active Case ($15K/mo)', 'Fit call required'],
-                        cta: 'Request Fit Call',
-                        highlight: false,
-                        flagship: true,
-                      },
-                    ].map((tier) => (
-                      <div
-                        key={tier.name}
-                        className={`glass rounded-lg p-4 flex flex-col relative border ${
-                          tier.highlight
-                            ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
-                            : tier.flagship
-                              ? 'border-crimson/50'
-                              : 'border-border/60'
-                        }`}
-                      >
-                        {tier.badge && (
-                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest bg-amber text-primary-foreground px-2 py-0.5 rounded-sm">
-                            {tier.badge}
-                          </div>
-                        )}
-                        {tier.flagship && (
-                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest bg-crimson text-white px-2 py-0.5 rounded-sm">
-                            Flagship
-                          </div>
-                        )}
-                        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-                          {tier.name}
-                        </div>
-                        <div className={`font-forensic text-3xl font-bold mb-1 ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
-                          {tier.price}
-                        </div>
-                        <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-                          {tier.cadence}
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-3">{tier.blurb}</p>
-                        <ul className="space-y-1.5 mb-4 flex-1">
-                          {tier.includes.map((item) => (
-                            <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
-                              <span className="text-amber shrink-0">›</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        {tier.done ? (
-                          <div className="font-case text-[10px] uppercase tracking-widest text-amber text-center py-2 border border-amber/30 rounded-sm">
-                            ✓ Complete
-                          </div>
-                        ) : (
-                          <a
-                            href="/book"
-                            className={`font-case text-[10px] uppercase tracking-widest text-center py-2 rounded-sm transition-colors ${
-                              tier.highlight
-                                ? 'bg-amber text-primary-foreground hover:bg-amber/90'
-                                : 'border border-border hover:border-amber hover:text-amber'
-                            }`}
-                          >
-                            {tier.cta} →
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="text-center text-xs text-muted-foreground italic pt-2">
-                    Every tier applied 1:1 toward the next. The 21-Day Diagnostic is the only gate to the $15K/mo Active Case.
-                  </p>
-                </div>
+                {pricingLadder('result')}
 
               </div>
             )}
