@@ -313,11 +313,14 @@ function LeadDetailDialog({
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('rep_crm_leads').update(fields).eq('id', lead.id);
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'update_lead', rep_code: repCode, lead_id: lead.id, fields },
+    });
     setSaving(false);
     if (error) toast.error('Save failed');
     else toast.success('Saved');
   };
+
 
   const addNote = async () => {
     if (!note.trim()) return;
@@ -393,11 +396,14 @@ function NewLeadDialog({ repCode, onClose, onSaved }: { repCode: string; onClose
   const [saving, setSaving] = useState(false);
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('rep_crm_leads').insert({ ...f, rep_code: repCode, stage: 'new', source: 'manual' });
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'new_lead', rep_code: repCode, fields: f },
+    });
     setSaving(false);
     if (error) toast.error('Save failed');
     else { toast.success('Lead added'); onSaved(); }
   };
+
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
