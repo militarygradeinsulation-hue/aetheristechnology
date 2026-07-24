@@ -363,11 +363,11 @@ const LeakAuditPage = () => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {LEAK_AUDIT_TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`glass rounded-lg p-4 flex flex-col relative border ${
+            className={`glass rounded-lg p-5 flex flex-col relative border ${
               tier.highlight
                 ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
                 : tier.flagship
@@ -376,20 +376,38 @@ const LeakAuditPage = () => {
             }`}
           >
             {tier.badge && (
-              <div className={`absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
+              <div className={`absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
                 {tier.badge}
               </div>
             )}
             <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
               {tier.name}
             </div>
-            <div className={`font-forensic text-3xl font-bold mb-1 ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
-              {tier.price}
+            <div className="flex items-baseline gap-1.5 mb-1">
+              <div className={`font-forensic text-3xl font-bold ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
+                {tier.price}
+              </div>
+              {tier.cadence.startsWith('/month') && (
+                <span className="text-xs text-muted-foreground">/mo</span>
+              )}
             </div>
             <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-              {tier.cadence}
+              {tier.cadence.replace(/^\/month · /, '')}
             </div>
-            <p className="text-xs text-muted-foreground mb-3">{tier.blurb}</p>
+
+            <p className="text-sm text-foreground/90 mb-3 leading-snug">{tier.blurb}</p>
+
+            <div className="rounded-md border border-amber/25 bg-amber/5 p-2.5 mb-3">
+              <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">What you actually get</div>
+              <p className="text-xs text-foreground/85 leading-snug">{tier.outcome}</p>
+            </div>
+
+            <div className="mb-3">
+              <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Best for</div>
+              <p className="text-xs text-muted-foreground italic leading-snug">{tier.bestFor}</p>
+            </div>
+
+            <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1.5">Included</div>
             <ul className="space-y-1.5 mb-4 flex-1">
               {tier.includes.map((item) => (
                 <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
@@ -418,8 +436,9 @@ const LeakAuditPage = () => {
       </div>
 
       <p className="text-center text-xs text-muted-foreground italic pt-2">
-        Paid packages are operator-led. The 21-Day Diagnostic is the gate to the $15K/mo Active Case.
+        Every paid tier credits toward the next. The 21-Day Diagnostic is the gate to the $15K/mo Active Case Retainer.
       </p>
+
     </div>
   );
 
