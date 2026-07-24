@@ -1,33 +1,45 @@
-## What's actually happening
+## Goal
+Notify you (Joseph) whenever someone opens or interacts with a Golden Report, filtering out reps/internal users as best we can.
 
-The Golden Report at `/golden-report` and the one launched from the Aetheris Universe tile (`/try-tool/golden-report`) are the **same component** (`ForensicScanAllPanel` → `forensic-scan-all` edge function). There isn't a second, more reliable version to swap in.
+## Tracked events
+All four signals you selected, logged to one table `golden_report_events`:
+1. **`scan_completed`** — a new Golden Report was generated (from `forensic-scan-all`).
+2. **`page_view`** — someone loads `/golden-report?scan=…` or `/report/:scanId/ask` (fired from `GoldenReportPage` + `ForensicReportAskPage` on mount).
+3. **`email_open`** — 1×1 tracking pixel `GET /functions/v1/golden-report-track?scan=…&evt=open&t=…` injected into drip email HTML (`generate-drip-batch`).
+4. **`link_click`** — email report link goes through `…/golden-report-track?scan=…&evt=click&t=…` which 302-redirects to the real report URL.
+5. **`pdf_download`** — fired when the "Download PDF" button in `ForensicScanAllPanel` is clicked.
 
-The screenshot you shared shows the report **did finish** — all 14 chapters rendered. The problem is Chapter 1 says "site inaccessible" because **Firecrawl was blocked by hallmarkhomes.com's bot protection**, so downstream chapters had nothing real to analyze and fell back to boilerplate.
+Each row stores: `scan_id`, `company_name`, `event_type`, `recipient_email` (if known from scan/drip), `ip`, `country/region/city` (from Cloudflare `cf-ipcountry` / IP geo), `user_agent`, `referrer`, `is_internal` (bool), `rep_code` (if identified), `created_at`.
 
-Root cause: single-attempt Firecrawl scrape with no fallback fetch path.
+## Rep / internal filter (best-effort)
+`is_internal = true` when any of:
+- Request carries a valid rep code cookie/param, OR
+- `recipient_email` matches a row in `rep_codes.rep_email` / `rep_mailboxes.address` / admin emails, OR
+- IP is in a small `internal_ips` allowlist stored in `admin_kv` (you can add your home/office IP), OR
+- User-Agent matches a known scanner bot list.
+All notifications and the admin feed **exclude `is_internal = true` by default**, with a toggle to show them.
 
-## Fix
+## Notification delivery (all three)
+- **Email to you** — `send-transactional-email` with new `golden-report-opened` template. Rate-limited: max 1 email per (scan_id, event_type) per hour; a nightly digest rolls up anything suppressed.
+- **Admin dashboard feed** — new `AdminGoldenOpensPanel.tsx` in `/admin` showing a live list (company, event, when, city/country, open count, recipient, rep-filter toggle) with 15s polling + Realtime subscription.
+- **Browser push** — while `/admin` is open, use the browser Notifications API to pop a toast when a new external open arrives via the Supabase Realtime channel on `golden_report_events`.
 
-Make the site-fetch step resilient so bot-blocked / slow sites still yield real content:
+## Backend pieces
+- Migration: `golden_report_events` table (+ GRANTs, RLS admin-only, Realtime publication add), plus `internal_ips` seed in `admin_kv`.
+- New edge function `golden-report-track` (public, `verify_jwt = false`) — accepts `evt=open` (returns 1×1 gif), `evt=click` (302), `evt=view`, `evt=download`; writes the event row, does rep/internal detection, invokes email notifier when non-internal.
+- `forensic-scan-all` — emit `scan_completed` event on success.
+- `generate-drip-batch` — wrap report link with tracker and inject open-pixel.
 
-1. **`supabase/functions/scan-website/index.ts`** (and the shared scraper used by `forensic-scan-all`):
-   - Firecrawl attempt #1: current call.
-   - On timeout / non-200 / empty markdown → Firecrawl attempt #2 with `waitFor: 3000`, `onlyMainContent: false`, and a US location hint (defeats most bot walls).
-   - On second failure → plain `fetch()` with a real browser UA, strip tags to markdown-ish text. Better than nothing.
-   - Only mark the site "inaccessible" if all three paths fail.
-
-2. **`forensic-scan-all/index.ts`**:
-   - When the site fetch does fail entirely, pass a clear flag to synthesis so Chapter 1 says "Bot protection detected — manual review recommended" instead of the current alarming "automated analysis is impossible" wording, and let the other 13 chapters proceed using brand contradictions / friction / SEO signals that don't require the scrape.
-
-3. Keep the 100s synthesis watchdog and pre-synth fallback save from the last turn — those are already correct.
-
-## Technical detail
-
-- Firecrawl v2 `scrape` with `waitFor` + `location: { country: "US" }` bypasses ~70% of bot walls the current single call trips on.
-- Direct `fetch` fallback uses UA `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ...` and a 12s timeout.
-- No schema changes, no new secrets, no UI changes.
+## Frontend pieces
+- `GoldenReportPage` + `ForensicReportAskPage`: `useEffect` beacon → `golden-report-track?evt=view`.
+- `ForensicScanAllPanel` PDF button: beacon → `evt=download`.
+- New `src/components/admin/AdminGoldenOpensPanel.tsx` mounted in `AdminDashboard`.
 
 ## Out of scope
+- Deanonymizing anonymous email opens beyond IP geo (Gmail image proxy will show as US-based Google IPs — labeled clearly in the UI).
+- Deep bot-open filtering beyond a UA blocklist.
 
-- No changes to the Universe tile, the `/golden-report` page, or the panel UI.
-- No pricing / gating changes.
+## Technical notes
+- Tracking pixel returns cached 1×1 gif with `Cache-Control: no-store` so Gmail proxy re-fetches per open.
+- Event dedupe key: `hash(scan_id + evt + ip + ua + 10-min bucket)` to prevent double-count from prefetchers, but `open_count` on the UI shows raw count too.
+- Email notifications go through the existing app-email queue; template `golden-report-opened` shows company, event, location, total opens so far, and a deep link to the admin panel.
