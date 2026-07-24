@@ -34,5 +34,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'daily-touchpoints': dailyTouchpoints,
   'universe-access-code': universeAccessCode,
   'rep-quote': repQuote,
+  'golden-report-opened': goldenReportOpened,
 }
 
