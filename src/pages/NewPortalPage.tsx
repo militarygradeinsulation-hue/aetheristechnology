@@ -392,7 +392,26 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
+          {/* CRM — team-shared pipeline, quotes, activity, live Stripe catalog */}
+          <TabsContent value="crm" className="mt-8">
+            <ToolCard
+              eyebrow="// Sales OS //"
+              title="Rep CRM"
+              summary="Team-shared pipeline, quotes and activity feed. Product catalog is pulled live from Stripe so prices and product names always match the website."
+              howTo={[
+                'Click "Import leads" to pull every lead already on your rep code into the pipeline.',
+                'Drag cards through the stages: new → contacted → quoted → won / lost. Stage changes auto-log to the activity feed.',
+                'Open any lead to build a quote — pick products from the live catalog, set quantity/discount, then email a branded quote link to the customer.',
+                'When the customer opens or accepts the quote, it logs back onto the lead automatically.',
+              ]}
+              defaultOpen
+            >
+              <RepCRMPanel repCode={profile!.code} />
+            </ToolCard>
+          </TabsContent>
+
           {/* CALENDAR — available to every rep + partner */}
+
           <TabsContent value="calendar" className="mt-8">
             <ToolCard
               eyebrow="// Schedule //"
