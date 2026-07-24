@@ -16,38 +16,23 @@ export default function QuoteViewPage() {
   useEffect(() => {
     if (!token) return;
     (async () => {
-      const { data } = await supabase.from('rep_crm_quotes').select('*').eq('access_token', token).maybeSingle();
-      setQ(data);
+      const { data, error } = await supabase.functions.invoke('quote-view', {
+        body: { action: 'view', token },
+      });
+      if (!error) setQ(data?.quote || null);
       setLoading(false);
-      if (data && !data.viewed_at) {
-        await supabase.from('rep_crm_quotes').update({ viewed_at: new Date().toISOString(), status: data.status === 'sent' ? 'viewed' : data.status }).eq('id', data.id);
-        if (data.lead_id) {
-          await supabase.from('rep_crm_activity').insert({
-            lead_id: data.lead_id, quote_id: data.id, rep_code: data.rep_code,
-            kind: 'quote_viewed', title: `Customer opened quote ${data.quote_number}`,
-          });
-        }
-      }
     })();
   }, [token]);
 
   const respond = async (accept: boolean) => {
     setActing(true);
-    const patch = accept
-      ? { status: 'accepted', accepted_at: new Date().toISOString() }
-      : { status: 'declined' };
-    await supabase.from('rep_crm_quotes').update(patch).eq('id', q.id);
-    if (q.lead_id) {
-      await supabase.from('rep_crm_activity').insert({
-        lead_id: q.lead_id, quote_id: q.id, rep_code: q.rep_code,
-        kind: accept ? 'quote_accepted' : 'note',
-        title: accept ? `Customer ACCEPTED quote ${q.quote_number}` : `Customer declined quote ${q.quote_number}`,
-      });
-      if (accept) await supabase.from('rep_crm_leads').update({ stage: 'won' }).eq('id', q.lead_id);
-    }
-    toast.success(accept ? 'Quote accepted — the team will reach out.' : 'Response recorded.');
-    setQ({ ...q, ...patch });
+    const { data, error } = await supabase.functions.invoke('quote-view', {
+      body: { action: 'respond', token, accept },
+    });
     setActing(false);
+    if (error) return toast.error('Could not record your response.');
+    setQ(data?.quote || q);
+    toast.success(accept ? 'Quote accepted — the team will reach out.' : 'Response recorded.');
   };
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
