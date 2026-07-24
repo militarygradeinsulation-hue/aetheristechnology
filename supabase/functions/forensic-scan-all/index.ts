@@ -880,6 +880,19 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       completed_at: nowIso(),
     }).eq("id", id);
 
+    // Log 'scan_completed' event for the Golden Report activity feed.
+    try {
+      await sb.functions.invoke("golden-report-track", {
+        body: {
+          scan_id: id,
+          event_type: "scan_completed",
+          recipient_email: null,
+        },
+      });
+    } catch (e) {
+      console.error("golden-report-track (scan_completed) failed:", (e as Error).message);
+    }
+
     // Auto-issue Aetheris Universe access code to the requester (best-effort).
     try {
       const { data: row } = await sb.from("forensic_scans")
