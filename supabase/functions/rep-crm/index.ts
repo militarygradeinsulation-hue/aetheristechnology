@@ -249,6 +249,20 @@ async function getLeadActivity(leadId: string) {
   return merged;
 }
 
+const LEAD_FIELDS = new Set([
+  'company', 'contact_name', 'contact_email', 'contact_phone',
+  'website', 'stage', 'source', 'value_cents', 'next_action', 'notes',
+]);
+
+function sanitizeLeadPatch(input: any): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (!input || typeof input !== 'object') return out;
+  for (const k of Object.keys(input)) {
+    if (LEAD_FIELDS.has(k)) out[k] = input[k];
+  }
+  return out;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
@@ -259,6 +273,36 @@ Deno.serve(async (req) => {
     const rep = await validateRep(code);
     if (!rep) return fail('Invalid rep code', 401);
 
+    if (action === 'list') {
+      const [{ data: leads }, { data: quotes }] = await Promise.all([
+        supabase.from('rep_crm_leads').select('*').order('created_at', { ascending: false }).limit(500),
+        supabase.from('rep_crm_quotes').select('*').order('created_at', { ascending: false }).limit(200),
+      ]);
+      return ok({ leads: leads || [], quotes: quotes || [] });
+    }
+    if (action === 'update_lead') {
+      const patch = sanitizeLeadPatch(body.fields);
+      if (!body.lead_id) return fail('lead_id required');
+      const { error } = await supabase.from('rep_crm_leads').update(patch).eq('id', body.lead_id);
+      if (error) throw error;
+      return ok({ ok: true });
+    }
+    if (action === 'delete_lead') {
+      if (!body.lead_id) return fail('lead_id required');
+      const { error } = await supabase.from('rep_crm_leads').delete().eq('id', body.lead_id);
+      if (error) throw error;
+      return ok({ ok: true });
+    }
+    if (action === 'new_lead') {
+      const patch = sanitizeLeadPatch(body.fields);
+      const { data, error } = await supabase
+        .from('rep_crm_leads')
+        .insert({ ...patch, rep_code: rep.code, owner_name: rep.rep_name, stage: 'new', source: 'manual' })
+        .select('*')
+        .single();
+      if (error) throw error;
+      return ok({ lead: data });
+    }
     if (action === 'import_leads') {
       const res = await importLeads(rep as any);
       return ok(res);
@@ -291,3 +335,4 @@ Deno.serve(async (req) => {
     return fail((e as Error).message || 'error', 500);
   }
 });
+

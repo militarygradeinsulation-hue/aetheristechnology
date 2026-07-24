@@ -67,27 +67,23 @@ export default function RepCRMPanel({ repCode }: { repCode: string }) {
 
   const load = async () => {
     setLoading(true);
-    const [l, q, c] = await Promise.all([
-      supabase.from('rep_crm_leads').select('*').order('created_at', { ascending: false }).limit(500),
-      supabase.from('rep_crm_quotes').select('*').order('created_at', { ascending: false }).limit(200),
+    const [listRes, catRes] = await Promise.all([
+      supabase.functions.invoke('rep-crm', { body: { action: 'list', rep_code: repCode } }),
       supabase.functions.invoke('stripe-catalog'),
     ]);
-    if (!l.error) setLeads((l.data as Lead[]) || []);
-    if (!q.error) setQuotes((q.data as Quote[]) || []);
-    if (!c.error && c.data?.catalog) setCatalog(c.data.catalog);
+    if (!listRes.error && listRes.data) {
+      setLeads((listRes.data.leads as Lead[]) || []);
+      setQuotes((listRes.data.quotes as Quote[]) || []);
+    }
+    if (!catRes.error && catRes.data?.catalog) setCatalog(catRes.data.catalog);
     setLoading(false);
   };
 
   useEffect(() => {
     load();
-    const ch = supabase
-      .channel('rep-crm-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rep_crm_leads' }, load)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rep_crm_quotes' }, load)
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
+    // Poll for shared-team updates every 30s (RLS is server-side only, no realtime).
+    const t = setInterval(load, 30_000);
+    return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,17 +99,22 @@ export default function RepCRMPanel({ repCode }: { repCode: string }) {
   };
 
   const updateLeadStage = async (lead: Lead, stage: Stage) => {
-    const { error } = await supabase.from('rep_crm_leads').update({ stage }).eq('id', lead.id);
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'update_lead', rep_code: repCode, lead_id: lead.id, fields: { stage } },
+    });
     if (error) toast.error('Could not update stage');
-    else toast.success(`Moved to ${stage}`);
+    else { toast.success(`Moved to ${stage}`); load(); }
   };
 
   const deleteLead = async (lead: Lead) => {
     if (!confirm(`Delete ${lead.company || lead.contact_name || 'this lead'}?`)) return;
-    const { error } = await supabase.from('rep_crm_leads').delete().eq('id', lead.id);
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'delete_lead', rep_code: repCode, lead_id: lead.id },
+    });
     if (error) toast.error('Delete failed');
-    else toast.success('Deleted');
+    else { toast.success('Deleted'); load(); }
   };
+
 
   const grouped = useMemo(() => {
     const g: Record<Stage, Lead[]> = { new: [], contacted: [], quoted: [], won: [], lost: [] };
@@ -312,11 +313,14 @@ function LeadDetailDialog({
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('rep_crm_leads').update(fields).eq('id', lead.id);
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'update_lead', rep_code: repCode, lead_id: lead.id, fields },
+    });
     setSaving(false);
     if (error) toast.error('Save failed');
     else toast.success('Saved');
   };
+
 
   const addNote = async () => {
     if (!note.trim()) return;
@@ -392,11 +396,14 @@ function NewLeadDialog({ repCode, onClose, onSaved }: { repCode: string; onClose
   const [saving, setSaving] = useState(false);
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('rep_crm_leads').insert({ ...f, rep_code: repCode, stage: 'new', source: 'manual' });
+    const { error } = await supabase.functions.invoke('rep-crm', {
+      body: { action: 'new_lead', rep_code: repCode, fields: f },
+    });
     setSaving(false);
     if (error) toast.error('Save failed');
     else { toast.success('Lead added'); onSaved(); }
   };
+
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
