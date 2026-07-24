@@ -514,9 +514,9 @@ const LeakAuditPage = () => {
                       videoSrc={leakAuditIntro}
                       posterSrc={architectLogo}
                       alt="The Architect — watch the Leak Audit intro"
-                      circle
-                      className="w-64 h-64 md:w-80 md:h-80"
+                      className="w-full max-w-2xl aspect-video rounded-xl overflow-hidden border border-amber/30 shadow-[0_0_40px_-12px_hsl(var(--amber)/0.5)]"
                     />
+
                   </div>
                   <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-3 px-3 py-1 border border-amber/30 rounded-sm">
                     Free Self-Audit · ~6 minutes
