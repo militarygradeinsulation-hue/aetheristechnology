@@ -552,6 +552,135 @@ const LeakAuditPage = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Full pricing ladder — Ways to run the audit */}
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                      All 5 Ways to Run the Audit
+                    </div>
+                    <h3 className="font-forensic text-2xl md:text-4xl font-bold text-foreground">
+                      From free self-scan to operator inside your business
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+                      Every tier applies 1:1 toward the next. Nothing is wasted — pay for the depth you need today.
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {[
+                      {
+                        name: 'Free Self-Scan',
+                        price: '$0',
+                        cadence: '~6 min · self-serve',
+                        blurb: 'The 14-question audit you just ran. Directional PDF, no operator time.',
+                        includes: ['14-question forensic quiz', 'Estimated annual leak $', 'Case-file PDF to your inbox'],
+                        cta: 'You did this',
+                        highlight: false,
+                        done: true,
+                      },
+                      {
+                        name: 'Signal Pack',
+                        price: '$2,500',
+                        cadence: 'one-time · ~6 hrs operator',
+                        blurb: 'Operator-led confirmation of what the self-scan flagged.',
+                        includes: ['Website Report', 'Brand Contradiction Finder', 'Friction Vocabulary Audit', 'Leak Findings memo', '30-min walkthrough'],
+                        cta: 'Book Signal Pack',
+                        highlight: false,
+                      },
+                      {
+                        name: 'Revenue Pack',
+                        price: '$5,000',
+                        cadence: 'one-time · ~14 hrs',
+                        blurb: 'Most operators pick this. Fix-it-yourself system in a box.',
+                        includes: ['Everything in Signal Pack', 'Sales Script Pack', 'Follow-Up Plan', 'Strategic Question Engine', '30-Day Content Calendar', 'Two 45-min sessions'],
+                        cta: 'Book Revenue Pack',
+                        highlight: true,
+                        badge: 'Most Picked',
+                      },
+                      {
+                        name: 'Operator Suite',
+                        price: '$10,000',
+                        cadence: 'one-time · ~30 hrs / 3 wks',
+                        blurb: 'Full playbook + tech suite. Credits 1:1 toward the Retainer.',
+                        includes: ['Everything in Revenue Pack', 'Strategy Blueprint', 'Social Content Pack', 'Digital Snapshot', 'Lead-Nurture Automation', 'Tech Suite access'],
+                        cta: 'Book Operator Suite',
+                        highlight: false,
+                      },
+                      {
+                        name: '21-Day Diagnostic',
+                        price: '$18,500',
+                        cadence: 'flagship · 21 days',
+                        blurb: 'Operator inside your business for 21 days. Full quantified leak ledger.',
+                        includes: ['Everything above', 'Quantified leak ledger ($ per leak)', 'Implementation plan handoff', 'Required before Active Case ($15K/mo)', 'Fit call required'],
+                        cta: 'Request Fit Call',
+                        highlight: false,
+                        flagship: true,
+                      },
+                    ].map((tier) => (
+                      <div
+                        key={tier.name}
+                        className={`glass rounded-lg p-4 flex flex-col relative border ${
+                          tier.highlight
+                            ? 'border-amber shadow-[0_0_24px_-8px_hsl(var(--amber)/0.6)]'
+                            : tier.flagship
+                              ? 'border-crimson/50'
+                              : 'border-border/60'
+                        }`}
+                      >
+                        {tier.badge && (
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest bg-amber text-primary-foreground px-2 py-0.5 rounded-sm">
+                            {tier.badge}
+                          </div>
+                        )}
+                        {tier.flagship && (
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 font-case text-[9px] uppercase tracking-widest bg-crimson text-white px-2 py-0.5 rounded-sm">
+                            Flagship
+                          </div>
+                        )}
+                        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                          {tier.name}
+                        </div>
+                        <div className={`font-forensic text-3xl font-bold mb-1 ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
+                          {tier.price}
+                        </div>
+                        <div className="font-case text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+                          {tier.cadence}
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">{tier.blurb}</p>
+                        <ul className="space-y-1.5 mb-4 flex-1">
+                          {tier.includes.map((item) => (
+                            <li key={item} className="text-xs text-foreground/80 flex gap-1.5">
+                              <span className="text-amber shrink-0">›</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {tier.done ? (
+                          <div className="font-case text-[10px] uppercase tracking-widest text-amber text-center py-2 border border-amber/30 rounded-sm">
+                            ✓ Complete
+                          </div>
+                        ) : (
+                          <a
+                            href="/book"
+                            className={`font-case text-[10px] uppercase tracking-widest text-center py-2 rounded-sm transition-colors ${
+                              tier.highlight
+                                ? 'bg-amber text-primary-foreground hover:bg-amber/90'
+                                : 'border border-border hover:border-amber hover:text-amber'
+                            }`}
+                          >
+                            {tier.cta} →
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-center text-xs text-muted-foreground italic pt-2">
+                    Every tier applied 1:1 toward the next. The 21-Day Diagnostic is the only gate to the $15K/mo Active Case.
+                  </p>
+                </div>
+
               </div>
             )}
           </div>
