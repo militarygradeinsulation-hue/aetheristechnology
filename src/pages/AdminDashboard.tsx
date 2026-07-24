@@ -1246,7 +1246,10 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         </div>
         {activeTool === 'golden' && (
           <Suspense fallback={<PanelFallback />}>
-            <ForensicScanAllPanel />
+            <div className="space-y-6">
+              <AdminGoldenOpensPanel />
+              <ForensicScanAllPanel />
+            </div>
           </Suspense>
         )}
         {activeTool === 'reciprocation' && (
