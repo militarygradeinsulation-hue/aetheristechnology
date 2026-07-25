@@ -953,7 +953,7 @@ const AetherisUniversePage: React.FC = () => {
                 color={categoryColor[tool.category] || '#d9a93a'}
                 registerAnimator={registerAnimator}
                 unregisterAnimator={unregisterAnimator}
-                onOpen={setSelected}
+                onOpen={(t) => { trackUniverseTool(t.id, t.name, 'universe_tool_open'); setSelected(t); }}
                 onDragDown={onNodeDown}
                 onDragMove={onNodeMove}
                 onDragUp={onNodeUp}
