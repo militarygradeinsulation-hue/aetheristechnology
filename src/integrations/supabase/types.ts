@@ -219,6 +219,45 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_generated_components: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          prompt: string
+          style_preset: string
+          tsx_code: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          prompt: string
+          style_preset?: string
+          tsx_code: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          prompt?: string
+          style_preset?: string
+          tsx_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_image_studio: {
         Row: {
           created_at: string
