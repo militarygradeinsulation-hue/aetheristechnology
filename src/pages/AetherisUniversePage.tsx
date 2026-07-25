@@ -1093,7 +1093,7 @@ const AetherisUniversePage: React.FC = () => {
             {tools.map((tool) => (
               <button
                 key={tool.id}
-                onClick={() => setSelected(tool)}
+                onClick={() => { trackUniverseTool(tool.id, tool.name, 'universe_tool_open'); setSelected(tool); }}
                 className="text-left forensic-tile rounded-md border border-amber/25 hover:border-amber/70 transition-colors p-4 flex gap-4 items-center"
               >
                 <div className="w-20 h-20 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
@@ -1151,7 +1151,7 @@ const AetherisUniversePage: React.FC = () => {
                 <p className="text-sm text-foreground/80 mb-5">{selected.tagline}</p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setSelected(null); navigate(selected.route); }}
+                    onClick={() => { trackUniverseTool(selected.id, selected.name, 'universe_tool_launch'); setSelected(null); navigate(selected.route); }}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 bg-amber text-background hover:bg-amber/90 font-bold py-2 rounded-sm text-sm"
                   >
                     Open {selected.name} <ArrowRight className="w-4 h-4" />
