@@ -586,11 +586,13 @@ const AdminDashboard: React.FC = () => {
           <TabsList>
             <TabsTrigger value="video"><Film className="w-4 h-4 mr-1.5" />Video Studio</TabsTrigger>
             <TabsTrigger value="image"><ImageIcon className="w-4 h-4 mr-1.5" />Image Studio</TabsTrigger>
+            <TabsTrigger value="components"><Sparkles className="w-4 h-4 mr-1.5" />Component Studio</TabsTrigger>
             <TabsTrigger value="linkedin"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Publisher</TabsTrigger>
             <TabsTrigger value="linkedin_comments"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Comments</TabsTrigger>
           </TabsList>
           <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
           <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
+          <TabsContent value="components" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminComponentStudioPanel /></Suspense></TabsContent>
           <TabsContent value="linkedin" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInPublisher /></Suspense></TabsContent>
           <TabsContent value="linkedin_comments" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInComments /></Suspense></TabsContent>
         </Tabs>
