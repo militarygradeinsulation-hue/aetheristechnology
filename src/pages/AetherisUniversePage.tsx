@@ -12,6 +12,7 @@ import { readAccess } from '@/components/TechSolutionsAccessBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { trackUniverseTool } from '@/lib/universeTracking';
 
 // Pull every tool asset json in one glob
 const assetModules = import.meta.glob('/src/assets/tools/*.asset.json', {
@@ -313,6 +314,9 @@ const UniverseAccessGate: React.FC<{ unlocked: boolean; onUnlocked: () => void }
 
   // Only a Universe-specific unlock opens the page. General Tech Solutions,
   // purchased tool, or email/free-run unlocks do not bypass this gate.
+  // Universe is open — gate disabled so anyone can try the tools.
+  return null;
+  // eslint-disable-next-line no-unreachable
   if (unlocked || access.unlocked) return null;
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -949,7 +953,7 @@ const AetherisUniversePage: React.FC = () => {
                 color={categoryColor[tool.category] || '#d9a93a'}
                 registerAnimator={registerAnimator}
                 unregisterAnimator={unregisterAnimator}
-                onOpen={setSelected}
+                onOpen={(t) => { trackUniverseTool(t.id, t.name, 'universe_tool_open'); setSelected(t); }}
                 onDragDown={onNodeDown}
                 onDragMove={onNodeMove}
                 onDragUp={onNodeUp}
@@ -1089,7 +1093,7 @@ const AetherisUniversePage: React.FC = () => {
             {tools.map((tool) => (
               <button
                 key={tool.id}
-                onClick={() => setSelected(tool)}
+                onClick={() => { trackUniverseTool(tool.id, tool.name, 'universe_tool_open'); setSelected(tool); }}
                 className="text-left forensic-tile rounded-md border border-amber/25 hover:border-amber/70 transition-colors p-4 flex gap-4 items-center"
               >
                 <div className="w-20 h-20 rounded-sm bg-black/50 overflow-hidden flex-shrink-0">
@@ -1147,7 +1151,7 @@ const AetherisUniversePage: React.FC = () => {
                 <p className="text-sm text-foreground/80 mb-5">{selected.tagline}</p>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setSelected(null); navigate(selected.route); }}
+                    onClick={() => { trackUniverseTool(selected.id, selected.name, 'universe_tool_launch'); setSelected(null); navigate(selected.route); }}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 bg-amber text-background hover:bg-amber/90 font-bold py-2 rounded-sm text-sm"
                   >
                     Open {selected.name} <ArrowRight className="w-4 h-4" />

@@ -67,6 +67,7 @@ const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard')
 const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
 const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
 const AdminGoldenOpensPanel = lazy(() => import('@/components/admin/AdminGoldenOpensPanel'));
+const AdminUniverseAnalyticsPanel = lazy(() => import('@/components/admin/AdminUniverseAnalyticsPanel'));
 const AdminChaosScanTool = lazy(() => import('@/components/admin/ChaosScanTool'));
 const AdminHeadToHeadTool = lazy(() => import('@/components/admin/HeadToHeadTool'));
 const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
@@ -1249,6 +1250,7 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <Suspense fallback={<PanelFallback />}>
             <div className="space-y-6">
               <AdminGoldenOpensPanel />
+              <AdminUniverseAnalyticsPanel />
               <ForensicScanAllPanel />
             </div>
           </Suspense>
