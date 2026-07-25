@@ -12,6 +12,7 @@ import { readAccess } from '@/components/TechSolutionsAccessBar';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { trackUniverseTool } from '@/lib/universeTracking';
 
 // Pull every tool asset json in one glob
 const assetModules = import.meta.glob('/src/assets/tools/*.asset.json', {
@@ -313,6 +314,9 @@ const UniverseAccessGate: React.FC<{ unlocked: boolean; onUnlocked: () => void }
 
   // Only a Universe-specific unlock opens the page. General Tech Solutions,
   // purchased tool, or email/free-run unlocks do not bypass this gate.
+  // Universe is open — gate disabled so anyone can try the tools.
+  return null;
+  // eslint-disable-next-line no-unreachable
   if (unlocked || access.unlocked) return null;
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
