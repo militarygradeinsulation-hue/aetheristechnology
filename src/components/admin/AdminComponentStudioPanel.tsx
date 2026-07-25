@@ -123,6 +123,11 @@ export default function AdminComponentStudioPanel() {
       body: JSON.stringify({ ...payload, pin }),
     });
     const j = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      localStorage.removeItem(PIN_KEY);
+      setPin('');
+      throw new Error('Invalid PIN — please re-enter');
+    }
     if (!res.ok || !j.ok) throw new Error(j?.error || `HTTP ${res.status}`);
     return j;
   };
