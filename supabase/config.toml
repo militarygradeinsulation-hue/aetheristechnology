@@ -180,6 +180,9 @@ verify_jwt = false
 [functions.instagram-post]
 verify_jwt = false
 
+[functions.social-post-requests]
+verify_jwt = false
+
 [functions.seed-demo-data]
 verify_jwt = false
 
