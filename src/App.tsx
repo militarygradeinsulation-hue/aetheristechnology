@@ -61,6 +61,7 @@ const HeadToHeadPage = lazy(() => import("./pages/HeadToHeadPage"));
 const ReciprocationPage = lazy(() => import("./pages/ReciprocationPage"));
 const GoldenReportPage = lazy(() => import("./pages/GoldenReportPage"));
 const GoldenLanderPage = lazy(() => import("./pages/GoldenLanderPage"));
+const GoldenReportEmbedPage = lazy(() => import("./pages/GoldenReportEmbedPage"));
 const TechSolutionsPage = lazy(() => import("./pages/TechSolutionsPage"));
 const ToolInfoPage = lazy(() => import("./pages/ToolInfoPage"));
 const DiagnosticQuizPage = lazy(() => import("./pages/DiagnosticQuizPage"));
@@ -200,6 +201,7 @@ const App = () => (
                       <Route path="/reciprocation" element={<ReciprocationPage />} />
                       <Route path="/gift" element={<Navigate to="/reciprocation" replace />} />
                       <Route path="/golden-report" element={<GoldenReportPage />} />
+                      <Route path="/golden-report/run" element={<GoldenReportEmbedPage />} />
                       <Route path="/golden" element={<GoldenLanderPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
