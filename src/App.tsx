@@ -53,6 +53,8 @@ const QuoteViewPage = lazy(() => import("./pages/QuoteViewPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const XOAuthCallbackPage = lazy(() => import("./pages/XOAuthCallbackPage"));
+const FacebookOAuthCallbackPage = lazy(() => import("./pages/FacebookOAuthCallbackPage"));
 const PersonalEnginePage = lazy(() => import("./pages/PersonalEnginePage"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
 const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
@@ -148,6 +150,8 @@ const App = () => (
             {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/x-callback" element={<XOAuthCallbackPage />} />
+            <Route path="/admin/facebook-callback" element={<FacebookOAuthCallbackPage />} />
             <Route path="/engine" element={<PersonalEnginePage />} />
             <Route
               path="/admin"
