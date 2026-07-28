@@ -51,14 +51,17 @@ const GoldenReportEmbedPage: React.FC = () => {
         const scanId = data?.scan_id;
         if (!scanId) throw new Error("No scan id returned");
         try { sessionStorage.setItem(SCAN_STORAGE_KEY, scanId); } catch { /* ignore */ }
-        // Rewrite URL so ForensicScanAllPanel picks up ?scan= and polls it.
+        // Rewrite the URL so a refresh / share keeps the scan, and hand the id
+        // straight to the panel (it cannot observe history.replaceState).
         const next = new URL(window.location.href);
         next.searchParams.set("scan", scanId);
         next.searchParams.delete("url");
         next.searchParams.delete("document");
         window.history.replaceState({}, "", next.toString());
+        setActiveScanId(scanId);
         trackGoldenReportEvent(scanId, "page_view");
         setStatus("ready");
+
       } catch (e) {
         setErrorMsg((e as Error)?.message || "Failed to start scan");
         setStatus("error");
