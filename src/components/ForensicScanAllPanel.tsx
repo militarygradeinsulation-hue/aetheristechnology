@@ -332,9 +332,6 @@ export function ForensicScanAllPanel() {
             </div>
           </div>
 
-          <div className="px-5 pt-5">
-            <GoldenLeakageBanner leaks={report.top_leaks} />
-          </div>
 
 
           {(report as { synth_fallback?: { degraded?: boolean; chapters_fallback?: unknown[]; chapters_total?: number } }).synth_fallback?.degraded && (
