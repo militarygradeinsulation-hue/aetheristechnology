@@ -27,8 +27,10 @@ const GoldenReportEmbedPage: React.FC = () => {
   const embed = params.get("embed") === "1";
 
   const [status, setStatus] = useState<"idle" | "starting" | "ready" | "error">(existingScan ? "ready" : "idle");
+  const [activeScanId, setActiveScanId] = useState<string | null>(existingScan);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const startedRef = useRef(false);
+
 
   useEffect(() => {
     if (startedRef.current) return;
