@@ -4,6 +4,7 @@
 // state, no secrets echoed back. Output is comprehensive — same engine we
 // use internally, just without the persistent memory + client context.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { isUnlimitedRep } from "../_shared/unlimited-reps.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -256,11 +257,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
-  if (rateLimited(ip)) return json({ error: "Rate limit: 20 runs per hour. Buy a tool for unlimited." }, 429);
-
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+
+  // Unlimited operators (admins + Dean Young) bypass the public IP throttle.
+  const unlimited = isUnlimitedRep(body?.repCode);
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
+  if (!unlimited && rateLimited(ip)) {
+    return json({ error: "Rate limit: 20 runs per hour. Buy a tool for unlimited." }, 429);
+  }
 
   const toolId  = String(body?.toolId  || "").trim();
   const url     = String(body?.url     || "").trim().slice(0, 500);
