@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
         schedule_days: (report.deliverables as { schedule?: { days?: unknown[] } } | null)?.schedule?.days?.length || 0,
         leakage: leak ? `${leak.rangeLabelAscii} / year` : null,
         issues: audit.issues.slice(0, 10),
+        report: body.include_report ? report : undefined,
       };
     });
 
