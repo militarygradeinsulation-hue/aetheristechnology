@@ -17,6 +17,7 @@
 
 import jsPDF from "jspdf";
 import { GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
+import { detectGenericReport } from "@/lib/goldenGenericDetector";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
 import {
   buildGoldenReportModel,
@@ -357,7 +358,17 @@ export function generateForensicGoldenPdf(opts: {
 }): jsPDF {
   const { report, company, url, scanId } = opts;
 
-  // ── HARD GATE ── a report that failed the consistency compiler is never exported.
+  // ── HARD GATE ── generic/template reports are never exported, even if they
+  // predate the compiler: an unsupported dollar headline must not leave the app.
+  if (
+    (report as { report_state?: string } | null)?.report_state === "regeneration_required" ||
+    detectGenericReport(report as never).regeneration_required
+  ) {
+    throw new Error(
+      `Golden Report ${scanId} is generic/template and cannot be exported. Re-run the scan to produce an evidence-backed report.`,
+    );
+  }
+  // A report that failed the consistency compiler is never exported.
   if (report?.compiler?.state && report.compiler.state !== "compiled") {
     const first = report.compiler.violations?.[0];
     throw new Error(

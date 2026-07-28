@@ -322,7 +322,7 @@ export function ForensicScanAllPanel() {
                   title={
                     isDeliverable(report)
                       ? "Download the compiled report"
-                      : "Blocked: this report failed the consistency gate. Re-run the compiler before sending it out."
+                      : "Blocked: this report is not evidence-backed. Re-run the scan before sending it out."
                   }
                   onClick={() => {
                     if (!isDeliverable(report)) return;
@@ -344,8 +344,8 @@ export function ForensicScanAllPanel() {
             </div>
             {!isDeliverable(report) && (
               <p className="mt-3 text-xs text-red-400">
-                This report did not pass the consistency gate, so downloads are blocked. The listed violations must be
-                resolved by recompiling the scan.
+                This report is not backed by company-specific evidence, so downloads are blocked. Re-run the scan to
+                generate a supported forensic result.
               </p>
             )}
           </div>

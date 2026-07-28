@@ -21,9 +21,17 @@ import {
   type GoldenReportLike,
   type PricedLeak,
 } from "./golden-leakage.ts";
+import {
+  detectGenericReport,
+  GENERIC_DETECTOR_VERSION,
+  REGENERATION_REQUIRED_MESSAGE,
+  type GenericVerdict,
+  type GoldenReportState,
+} from "./golden-generic-detector.ts";
 
-export const COMPILER_VERSION = 1;
+export const COMPILER_VERSION = 2;
 export const PRICING_MODEL_VERSION = 1;
+
 
 /** Hard caps so a ledger can never bloat a report row. */
 const MAX_CLAIMS = 160;
@@ -96,16 +104,28 @@ export type CompiledRootCause = {
 
 export type CompiledPricedLeak = {
   root_cause_id: string;
+  /** Stable deduplication key — one root cause is priced at most once. */
+  dedupe_key: string;
   name: string;
   chapter_slug: string;
   annual_low: number;
   annual_high: number;
   currency: "USD";
   pricing_model_version: number;
+  /** How the dollar range was derived. */
+  calculation_method: string;
   assumptions: string;
+  /** Verbatim observed evidence this price is derived from. */
+  observed_evidence: string;
+  /** Page / tool the evidence came from. */
+  source_url: string;
+  source_kind: string;
+  /** verified | inferred | unverified | contradicted */
+  evidence_class: string;
   confidence: number;
   evidence_ids: string[];
 };
+
 
 export type ReportConsistency = {
   detected_findings: number;
@@ -148,7 +168,15 @@ export type CompilerViolationCode =
   | "truncated_source_used_as_fact"
   | "currency_inconsistent"
   | "invalid_range"
-  | "no_canonical_total";
+  | "no_canonical_total"
+  // generic / template detector
+  | "boilerplate_phrase"
+  | "generic_priced_leak"
+  | "generic_report_total"
+  | "benchmark_math_total"
+  | "leak_missing_evidence_link"
+  | "insufficient_company_evidence"
+  | "fully_generic_flagged";
 
 export type CompilerViolation = {
   code: CompilerViolationCode;
@@ -168,7 +196,7 @@ export type SiteType =
 
 export type CompiledGoldenReport = {
   ok: boolean;
-  state: "compiled" | "needs_review";
+  state: GoldenReportState;
   report: GoldenReportLike & Record<string, unknown>;
   leakage: GoldenLeakage | null;
   evidence_ledger: EvidenceClaim[];
@@ -178,9 +206,12 @@ export type CompiledGoldenReport = {
   consistency: ReportConsistency;
   violations: CompilerViolation[];
   repairs: string[];
+  /** Deterministic generic/template verdict for this report. */
+  generic: GenericVerdict;
   /** Prose the deterministic repair pass could not fix; a cheap repair call may. */
   repairable_prose: boolean;
 };
+
 
 // ───────────────────── source inventory + suitability ─────────────────────
 
@@ -731,7 +762,13 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   }
 
   // ── 3. price each unique root cause at most once ──────────────────────
+  // Runs BEFORE pricing so a category-default leak never reaches the total.
+  const genericPre = detectGenericReport(report);
+  const genericLeakNames = new Set(genericPre.generic_leak_names.map((n) => n.toLowerCase()));
+
   const priced_leaks: CompiledPricedLeak[] = [];
+  /** Category floors kept for display OUTSIDE the forensic total. */
+  const benchmark_leaks: Array<Record<string, unknown>> = [];
   const pricedKeys = new Set<string>();
   const duplicatePricing: CompilerViolation[] = [];
 
@@ -742,6 +779,24 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     const single = computeGoldenLeakage([leak]);
     const chapterSlug = String(leak.chapter_slug || "").toLowerCase();
     const rc = ensureRootCause(key, label || name, chapterSlug, []);
+
+    // Category default / template leak: it is a benchmark, never a forensic
+    // finding, so it is excluded from priced_leaks and from overall_leakage.
+    if (genericLeakNames.has(name.toLowerCase())) {
+      rc.priced = false;
+      rc.not_priced_reason =
+        "Category benchmark, not an observed finding for this company; excluded from the forensic total.";
+      benchmark_leaks.push({
+        name: name || label,
+        chapter_slug: chapterSlug,
+        annual_low: single ? Math.round(single.low) : null,
+        annual_high: single ? Math.round(single.high) : null,
+        currency: "USD",
+        label: "Category benchmark — not measured for this company",
+        excluded_from_total: true,
+      });
+      continue;
+    }
 
     if (!single) {
       rc.priced = false;
@@ -764,15 +819,26 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     rc.priced = true;
     delete rc.not_priced_reason;
     if (!rc.evidence_ids.includes(claim.claim_id)) rc.evidence_ids.push(claim.claim_id);
+    const observed = scrubValue(
+      (leak as Record<string, unknown>).observed_evidence ?? leak.summary ?? "",
+      MAX_TEXT,
+    );
     priced_leaks.push({
       root_cause_id: rc.root_cause_id,
+      dedupe_key: key,
       name: name || label,
       chapter_slug: chapterSlug,
       annual_low: Math.round(single.low),
       annual_high: Math.round(single.high),
       currency: "USD",
       pricing_model_version: PRICING_MODEL_VERSION,
+      calculation_method:
+        `Annualized from the observed gap severity for root cause ${rc.root_cause_id} (pricing model v${PRICING_MODEL_VERSION}).`,
       assumptions: scrubValue(leak.summary ?? "Annualized from the observed gap severity.", 240),
+      observed_evidence: observed,
+      source_url: claim.source_url || baseUrl,
+      source_kind: claim.source_kind,
+      evidence_class: claim.status,
       confidence: claim.confidence,
       evidence_ids: rc.evidence_ids.slice(0, 8),
     });
@@ -791,9 +857,22 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     dollars_low: p.annual_low,
     dollars_high: p.annual_high,
   }));
+  // When every leak was a category benchmark there is nothing evidence-linked
+  // left to sum. Falling back to the stored report here would re-admit exactly
+  // the generic total we just removed, so it is not allowed.
   const leakage = canonicalLeaks.length
     ? computeGoldenLeakage(canonicalLeaks)
-    : computeGoldenLeakage(report);
+    : benchmark_leaks.length
+      ? null
+      : computeGoldenLeakage(report);
+
+  if (benchmark_leaks.length) {
+    report.benchmark_leaks = benchmark_leaks;
+    // The template rows must not survive as if they were findings.
+    report.top_leaks = ((report.top_leaks || []) as PricedLeak[]).filter(
+      (l) => !genericLeakNames.has(String(l?.name ?? "").toLowerCase()),
+    );
+  }
 
   if (leakage) {
     report.overall_leakage = {
@@ -804,7 +883,12 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       priced_leak_count: canonicalLeaks.length || leakage.count,
       calculation_version: leakage.calculation_version,
     };
+  } else {
+    // No evidence-linked priced leak survived: the red box must disappear
+    // rather than show a benchmark sum.
+    delete (report as Record<string, unknown>).overall_leakage;
   }
+
 
   const verifiedCount = findings.filter((f) => f.status === "verified").length;
   const contradictedCount = findings.filter((f) => f.status === "contradicted").length;
@@ -973,17 +1057,46 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   // validated output is still fatal (see validateCompiledReport).
   for (const d of duplicatePricing) repairs.push(`${d.location}: ${d.detail}`);
 
+  // ── 7. generic / template gate ────────────────────────────────────────
+  // Re-run against the REPAIRED report so prose fixes and benchmark removal are
+  // reflected. A report that is still generic can never be presented as a
+  // company-specific forensic result.
+  const generic = detectGenericReport(report);
+  for (const gv of generic.violations) {
+    violations.push({ code: gv.code as CompilerViolationCode, location: gv.location, detail: gv.detail, excerpt: gv.excerpt });
+  }
+  if (generic.regeneration_required && report.overall_leakage) {
+    delete (report as Record<string, unknown>).overall_leakage;
+    repairs.push("overall_leakage: removed unsupported total from a generic/template report");
+  }
+
   const blocking = violations;
   const ok = blocking.length === 0;
+  const state: GoldenReportState = ok
+    ? "compiled"
+    : generic.regeneration_required
+      ? "regeneration_required"
+      : "needs_review";
 
   report.report_consistency = consistency;
   report.evidence_ledger = ledger;
   report.compiled_findings = findings;
   report.root_causes = Array.from(rootCauses.values());
   report.priced_leaks = priced_leaks;
+  report.report_state = state;
+  report.generic_check = {
+    detector_version: GENERIC_DETECTOR_VERSION,
+    generic: generic.generic,
+    regeneration_required: generic.regeneration_required,
+    specificity: generic.specificity,
+    generic_leak_names: generic.generic_leak_names,
+    violations: generic.violations.slice(0, 20),
+  };
+  if (state === "regeneration_required") report.regeneration_message = REGENERATION_REQUIRED_MESSAGE;
+  else delete (report as Record<string, unknown>).regeneration_message;
   report.compiler = {
     version: COMPILER_VERSION,
-    state: ok ? "compiled" : "needs_review",
+    state,
     compiled_at: observedAt,
     violations: violations.slice(0, 40),
     repairs: repairs.slice(0, 60),
@@ -991,9 +1104,9 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
 
   return {
     ok,
-    state: ok ? "compiled" : "needs_review",
+    state,
     report,
-    leakage,
+    leakage: state === "regeneration_required" ? null : leakage,
     evidence_ledger: ledger,
     findings,
     root_causes: Array.from(rootCauses.values()),
@@ -1001,11 +1114,13 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     consistency,
     violations,
     repairs,
-    repairable_prose: !ok && blocking.every((v) =>
+    generic,
+    repairable_prose: !ok && !generic.regeneration_required && blocking.every((v) =>
       ["total_mismatch", "count_mismatch", "unsupported_negative_claim", "unsupported_quantified_claim", "recommendation_not_applicable"].includes(v.code)
     ),
   };
 }
+
 
 // ───────────────────── the gate ─────────────────────
 
@@ -1158,6 +1273,8 @@ export function validateCompiledReport(args: {
 
 /** Convenience: is this stored report safe to expose / turn into a PDF? */
 export function isReportPublishable(report: unknown): boolean {
-  const c = (report as { compiler?: { state?: string } })?.compiler;
-  return c?.state === "compiled";
+  const r = report as { compiler?: { state?: string }; report_state?: string } | null;
+  if (!r) return false;
+  if (r.report_state && r.report_state !== "compiled") return false;
+  return r.compiler?.state === "compiled";
 }
