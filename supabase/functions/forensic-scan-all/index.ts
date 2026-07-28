@@ -954,6 +954,7 @@ import {
   leakageInvariantError,
   LEAKAGE_CALCULATION_VERSION,
 } from "../_shared/golden-leakage.ts";
+import { compileGoldenReport } from "../_shared/golden-compiler.ts";
 
 
 
@@ -1119,13 +1120,54 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
 
 
-    // Canonical annual revenue loss, persisted so every surface (site, portal,
-    // both PDFs) reads the exact same validated numbers. Existing legitimate
-    // values on re-runs are preserved unless a newer calculation resolves.
+    // ─────────── REPORT COMPILER GATE ───────────
+    // One pass builds the evidence ledger, deduplicates root causes, prices each
+    // unique root cause exactly once, injects the canonical numbers into prose,
+    // and validates the whole document. Nothing downstream may recompute totals
+    // or counts — every surface reads report.report_consistency / overall_leakage.
+    let compilerState: "compiled" | "needs_review" = "needs_review";
     try {
-      const overall = computeOverallLeakage(report || {});
-      if (overall) report.overall_leakage = overall;
-      console.log(`scan ${id}: overall_leakage`, JSON.stringify(overall));
+      let compiled = compileGoldenReport({ report, rawFindings: findings, url, company });
+      // Second deterministic pass: repairs made in pass 1 (canonical totals and
+      // counts) can unlock violations that were only reachable after rewriting.
+      if (!compiled.ok) {
+        compiled = compileGoldenReport({ report: compiled.report, rawFindings: findings, url, company });
+      }
+      report = compiled.report;
+      compilerState = compiled.state;
+      console.log(JSON.stringify({
+        event: "golden_compiler",
+        scan_id: id,
+        target_url: url,
+        state: compiled.state,
+        detected_findings: compiled.consistency.detected_findings,
+        unique_root_causes: compiled.consistency.unique_root_causes,
+        uniquely_priced_leaks: compiled.consistency.uniquely_priced_leaks,
+        canonical_range: compiled.consistency.canonical_range_ascii,
+        evidence_quality: compiled.consistency.evidence_quality,
+        repairs: compiled.repairs.length,
+        violations: compiled.violations.slice(0, 10),
+      }));
+      await stage(
+        "compile",
+        compiled.ok ? "done" : "degraded",
+        compiled.ok
+          ? { repairs: compiled.repairs.length, priced_leaks: compiled.consistency.uniquely_priced_leaks }
+          : { violations: compiled.violations.slice(0, 6) },
+      );
+    } catch (e) {
+      console.error("golden compiler failed:", e instanceof Error ? e.message : String(e));
+      await stage("compile", "degraded", "compiler threw");
+    }
+
+    // Canonical annual revenue loss invariant (compiler already persisted the
+    // total from uniquely priced leaks; this is the loud last-line check).
+    try {
+      if (!report?.overall_leakage) {
+        const overall = computeOverallLeakage(report || {});
+        if (overall) report.overall_leakage = overall;
+      }
+      console.log(`scan ${id}: overall_leakage`, JSON.stringify(report?.overall_leakage ?? null));
       const invariant = leakageInvariantError(report || {});
       if (invariant) {
         // Loud structured failure: never let the red box disappear silently.
@@ -1148,6 +1190,10 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       status: "completed",
       completed_at: nowIso(),
     }).eq("id", id);
+    if (compilerState !== "compiled") {
+      console.error(`scan ${id}: report is needs_review — downloads and delivery are gated until it compiles clean`);
+    }
+
 
 
     // Log 'scan_completed' event for the Golden Report activity feed.
