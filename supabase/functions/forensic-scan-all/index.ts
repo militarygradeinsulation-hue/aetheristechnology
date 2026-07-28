@@ -952,7 +952,8 @@ function dedupeTopLeaks(
 // ("$25,000", " $-500,000 ", "12k"). Returns null when nothing is priced, so
 // downstream surfaces show "could not be calculated" instead of a fake total.
 const LEAKAGE_CALCULATION_VERSION = 2;
-const MAX_SANE_LEAK = 1_000_000_000;
+const MAX_SANE_LEAK = 50_000_000;
+const MAX_SANE_CHAPTER_LEAK = 10_000_000;
 
 function parseMoneyValue(v: unknown): number | null {
   let n: number | null = null;
@@ -1017,10 +1018,13 @@ function computeOverallLeakage(report: {
     if (slug && priced.has(slug)) continue;
     const text = String(ch?.what_its_costing || "");
     if (!text) continue;
+    // Only annual figures; quarterly and speculative TAM numbers are skipped.
+    if (!/\b(annual|annually|per year|a year|\/\s?yr|yearly)\b/i.test(text)) continue;
+    const capOk = (v: unknown) => { const n = parseMoneyValue(v); return n != null && n <= MAX_SANE_CHAPTER_LEAK; };
     const range = text.match(/\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)\s*(?:-|–|—|to)\s*\$?\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/);
-    if (range) { derived.push({ chapter_slug: slug, dollars_low: range[1], dollars_high: range[2] }); continue; }
+    if (range && capOk(range[1]) && capOk(range[2])) { derived.push({ chapter_slug: slug, dollars_low: range[1], dollars_high: range[2] }); continue; }
     const single = text.match(/\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/);
-    if (single) derived.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
+    if (single && capOk(single[1])) derived.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
   }
   const fromChapters = sum(derived);
   if (fromChapters) {
