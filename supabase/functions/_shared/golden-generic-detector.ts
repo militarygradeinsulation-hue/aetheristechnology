@@ -218,10 +218,26 @@ export function checkLeakContract(leak: Record<string, unknown>): LeakContractRe
   const issues: LeakContractIssue[] = [];
   const name = String(leak?.name ?? leak?.chapter_slug ?? "unnamed");
 
-  if (!nonEmpty(leak.root_cause_id) && !nonEmpty(leak.finding_id) && !nonEmpty(leak.dedupe_key)) {
+  // root_cause_id / dedupe_key are assigned by the compiler. A pre-compile leak
+  // is still traceable when it names the chapter it came from AND points at a
+  // source or a quoted observation, so that path counts as an identifier.
+  const hasTraceableOrigin =
+    nonEmpty(leak.chapter_slug) && (nonEmpty(leak.source_url) || nonEmpty(leak.evidence_quote));
+  if (
+    !nonEmpty(leak.root_cause_id) &&
+    !nonEmpty(leak.finding_id) &&
+    !nonEmpty(leak.dedupe_key) &&
+    !hasTraceableOrigin
+  ) {
     issues.push("missing_identifier");
   }
-  if (!hasIds(leak.evidence_ids) && !nonEmpty(leak.observed_evidence) && !nonEmpty(leak.evidence)) {
+  if (
+    !hasIds(leak.evidence_ids) &&
+    !nonEmpty(leak.observed_evidence) &&
+    !nonEmpty(leak.evidence_quote) &&
+    !hasIds(leak.evidence) &&
+    !nonEmpty(leak.evidence)
+  ) {
     issues.push("missing_evidence");
   }
   if (!nonEmpty(leak.source_url) && !nonEmpty(leak.source_id) && !nonEmpty(leak.source_kind)) {
@@ -232,7 +248,9 @@ export function checkLeakContract(leak: Record<string, unknown>): LeakContractRe
   }
   if (!nonEmpty(leak.calculation_method) && !nonEmpty(leak.assumptions)) issues.push("missing_method");
   if (!nonEmpty(leak.evidence_class) && typeof leak.confidence !== "number") issues.push("missing_confidence");
-  if (!nonEmpty(leak.dedupe_key) && !nonEmpty(leak.root_cause_id)) issues.push("missing_dedupe_key");
+  if (!nonEmpty(leak.dedupe_key) && !nonEmpty(leak.root_cause_id) && !hasTraceableOrigin) {
+    issues.push("missing_dedupe_key");
+  }
 
   const title = normalizeTitle(name);
   const isGenericTitle = GENERIC_LEAK_TITLES.some((g) => title === g || title.includes(g) || g.includes(title) && title.length > 8);
@@ -292,6 +310,34 @@ function reportProse(report: GoldenReportLike & Record<string, unknown>): Array<
     }
   }
   return out;
+}
+
+/**
+ * Company-specific evidence is not only in prose: priced leaks and the evidence
+ * ledger carry source URLs, quotes and calculation methods. Specificity is
+ * measured across ALL of it, otherwise a well-structured report scores zero.
+ */
+function reportEvidenceText(report: GoldenReportLike & Record<string, unknown>): string {
+  const parts: string[] = [];
+  const push = (v: unknown) => {
+    if (typeof v === "string" && v.trim()) parts.push(v);
+  };
+  const leaks = [
+    ...((report.priced_leaks as Record<string, unknown>[]) || []),
+    ...((report.top_leaks as unknown as Record<string, unknown>[]) || []),
+  ];
+  for (const leak of leaks) {
+    if (!leak || typeof leak !== "object") continue;
+    for (const f of ["source_url", "evidence_quote", "observed_evidence", "calculation_method", "assumptions", "summary"]) {
+      push(leak[f]);
+    }
+    if (Array.isArray(leak.evidence)) leak.evidence.forEach(push);
+  }
+  for (const e of (report.evidence_ledger as Record<string, unknown>[]) || []) {
+    if (!e || typeof e !== "object") continue;
+    for (const f of ["source_url", "url", "quote", "excerpt", "observation"]) push(e[f]);
+  }
+  return parts.join("\n");
 }
 
 /**
@@ -387,7 +433,7 @@ export function detectGenericReport(
   }
 
   // e. company specificity
-  const specificity = measureSpecificity(allText);
+  const specificity = measureSpecificity(`${allText}\n${reportEvidenceText(report)}`);
   if (specificity.score < MIN_SPECIFICITY_SCORE) {
     violations.push({
       code: "insufficient_company_evidence",
