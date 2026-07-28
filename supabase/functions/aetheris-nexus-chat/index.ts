@@ -220,27 +220,58 @@ Deno.serve(async (req) => {
           const isFinalRound = round === maxRounds - 1;
           const includeTools = useTools && !isFinalRound;
           // Use streaming on every call so the user sees tokens immediately.
-          const res = await fetch(AI_URL, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model,
-              messages,
-              ...(includeTools ? { tools: enabledTools } : {}),
-              stream: true,
-            }),
-          });
+          // Nexus must never hard-fail on a single model: walk a fallback chain
+          // (requested model -> flash -> lite -> gpt-5-mini) whenever the
+          // gateway answers with an error (rate limit, overload, bad model).
+          const modelChain = [...new Set([
+            model,
+            "google/gemini-2.5-flash",
+            "google/gemini-2.5-flash-lite",
+            "openai/gpt-5-mini",
+          ])];
 
+          let res: Response | null = null;
+          let lastErr = "";
+          for (const m of modelChain) {
+            try {
+              const attempt = await fetch(AI_URL, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: m,
+                  messages,
+                  ...(includeTools ? { tools: enabledTools } : {}),
+                  stream: true,
+                }),
+              });
+              if (attempt.ok && attempt.body) { res = attempt; break; }
+              lastErr = `Gateway ${attempt.status}: ${(await attempt.text().catch(() => "")).slice(0, 200)}`;
+              console.warn(`[nexus] model ${m} failed — ${lastErr}`);
+            } catch (e) {
+              lastErr = String(e);
+              console.warn(`[nexus] model ${m} threw — ${lastErr}`);
+            }
+          }
 
-          if (!res.ok || !res.body) {
-            const txt = await res.text().catch(() => "");
-            send({ type: "error", error: `Gateway ${res.status}: ${txt}` });
+          if (!res || !res.body) {
+            if (!useTools || round === 0) {
+              // Absolute last resort: never leave the user with a dead chat.
+              send({ type: "message_start" });
+              send({
+                type: "delta",
+                text: "Nexus is temporarily rate-limited upstream. Re-send your message in a few seconds — nothing was lost.",
+              });
+              send({ type: "done" });
+            } else {
+              send({ type: "error", error: lastErr || "Gateway unavailable" });
+            }
             controller.close();
             return;
           }
+
 
           // Parse SSE deltas, accumulating tool calls and streaming text.
           const reader = res.body.getReader();
