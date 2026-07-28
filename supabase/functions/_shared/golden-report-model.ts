@@ -217,6 +217,16 @@ function evidenceSection(report: Record<string, unknown>): Section | null {
   ];
   blocks.push({ kind: "table", columns: ["Claim grade", "Count", "Share of claims"], widths: [70, 40, 60], rows });
   if (has(c.canonical_counts_sentence)) blocks.push({ kind: "paragraph", text: str(c.canonical_counts_sentence) });
+  if (c.detected_findings != null) blocks.push({ kind: "kv", label: "Detected findings", value: String(c.detected_findings) });
+  if (c.uniquely_priced_leaks != null) blocks.push({ kind: "kv", label: "Uniquely priced leaks", value: String(c.uniquely_priced_leaks) });
+  if (c.unique_root_causes != null) blocks.push({ kind: "kv", label: "Unique root causes", value: String(c.unique_root_causes) });
+  if (has(c.site_type)) blocks.push({ kind: "kv", label: "Site type", value: str(c.site_type) });
+  // Any consistency field added later is exported instead of silently dropped.
+  for (const [k, v] of Object.entries(c as Record<string, unknown>)) {
+    if (["evidence_quality", "canonical_counts_sentence", "detected_findings", "uniquely_priced_leaks", "unique_root_causes", "site_type"].includes(k)) continue;
+    if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
+    else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+  }
   if (compiler?.violations?.length) {
     blocks.push({
       kind: "mono",
