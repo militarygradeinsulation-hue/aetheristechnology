@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
       scanned: 0,
       compiled: 0,
       needs_review: 0,
+      regeneration_required: 0,
       updated: 0,
       repairs: 0,
       duplicate_pricing_removed: 0,
@@ -90,7 +91,16 @@ Deno.serve(async (req) => {
         stats.total_mismatches_fixed += compiled.repairs.filter((r) => /stale total/i.test(r)).length;
         stats.count_mismatches_fixed += compiled.repairs.filter((r) => /canonicalized count/i.test(r)).length;
         if (compiled.ok) stats.compiled += 1;
-        else {
+        else if (compiled.state === "regeneration_required") {
+          stats.regeneration_required += 1;
+          if (stats.still_violating.length < 25) {
+            stats.still_violating.push({
+              id: row.id,
+              url: row.target_url,
+              violations: compiled.violations.slice(0, 5),
+            });
+          }
+        } else {
           stats.needs_review += 1;
           if (stats.still_violating.length < 25) {
             stats.still_violating.push({
@@ -115,6 +125,8 @@ Deno.serve(async (req) => {
             id: row.id,
             url: row.target_url,
             state: compiled.state,
+            generic: compiled.generic.generic,
+            specificity: compiled.generic.specificity.score,
             canonical_range: compiled.consistency.canonical_range_ascii,
             detected_findings: compiled.consistency.detected_findings,
             uniquely_priced_leaks: compiled.consistency.uniquely_priced_leaks,
