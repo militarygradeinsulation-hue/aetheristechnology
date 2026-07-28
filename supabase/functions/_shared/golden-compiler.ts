@@ -305,7 +305,9 @@ export const SOURCE_SUITABILITY: Record<ClaimCategory, SourceKind[]> = {
   seo: ["raw_html", "rendered_dom", "structured_api"],
   // Public sites cannot evidence owner/decision-maker/capacity facts.
   owner_capacity: ["database", "user_input"],
-  other: ["raw_html", "rendered_dom", "structured_api", "browser_test"],
+  // Uncategorized statements have no matching verification method, so they are
+  // never auto-verified; inferred is the best available grade.
+  other: [],
 };
 
 /** Grades one observation against the sources that actually landed. */
@@ -531,6 +533,20 @@ const COUNT_RE =
 
 const MONEY_RANGE_RE =
   /\$\s?[\d,]+(?:\.\d+)?\s*[kKmM]?\s*(?:-|–|—|to)\s*\$?\s?[\d,]+(?:\.\d+)?\s*[kKmM]?/g;
+
+/** Periodized figures are annualized before comparison to the canonical total. */
+const PERIOD_RE = /^[\s,]*(?:\/|per\s+|a\s+|each\s+)?(month|mo|quarter|qtr|week|wk|day|year|yr|annually|monthly|quarterly|weekly|daily|yearly)\b/i;
+const PERIOD_FACTOR: Record<string, number> = {
+  month: 12, mo: 12, monthly: 12,
+  quarter: 4, qtr: 4, quarterly: 4,
+  week: 52, wk: 52, weekly: 52,
+  day: 365, daily: 365,
+  year: 1, yr: 1, yearly: 1, annually: 1,
+};
+function periodFactor(after: string): number {
+  const m = after.match(PERIOD_RE);
+  return m ? (PERIOD_FACTOR[m[1].toLowerCase()] ?? 1) : 1;
+}
 
 const NON_USD_RE = /(€|£|¥|₹|\b(?:EUR|GBP|JPY|CAD|AUD|INR)\b)/g;
 
@@ -850,9 +866,10 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const lo = parseMoney(m.split(/-|–|—|to/)[0]);
           const hi = parseMoney(m.split(/-|–|—|to/).slice(1).join(" "));
           if (lo == null || hi == null) return m;
-          if (Math.round(lo) === Math.round(leakage.low) && Math.round(hi) === Math.round(leakage.high)) return m;
-          repairs.push(`${where}: replaced stale total ${m.trim()} with canonical ${leakage.rangeLabelAscii}`);
-          return leakage.rangeLabelAscii;
+          const f = periodFactor(out.slice(offset + m.length, offset + m.length + 24));
+          if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) return m;
+          repairs.push(`${where}: replaced stale total ${m.trim()} with canonical annual ${leakage.rangeLabelAscii}`);
+          return f === 1 ? leakage.rangeLabelAscii : `${leakage.rangeLabelAscii} per year, or`;
         });
       }
 
@@ -1018,10 +1035,16 @@ export function validateCompiledReport(args: {
     v.push({ code: "no_canonical_total", location: "overall_leakage", detail: "Priced leaks exist but no canonical total resolved." });
   }
 
-  const sections: Array<[string, string]> = [
-    ["executive_summary", String(report.executive_summary || "")],
-    ...chapters.map((ch) => [`chapter:${String(ch.slug ?? "?")}`, chapterText(ch)] as [string, string]),
-  ];
+  // Validated at the SAME granularity the repair pass writes at (one field at a
+  // time), so a claim is never judged against a wider context window than the
+  // one used to decide whether to rewrite it.
+  const sections: Array<[string, string]> = [["executive_summary", String(report.executive_summary || "")]];
+  for (const ch of chapters) {
+    for (const field of ["verdict", "what_we_found", "why_its_leaking", "what_its_costing"]) {
+      const val = (ch as Record<string, unknown>)[field];
+      if (typeof val === "string" && val.trim()) sections.push([`chapter:${String(ch.slug ?? "?")}.${field}`, val]);
+    }
+  }
 
   const verifiedCategories = new Set(ledger.filter((c) => c.status === "verified").map((c) => c.category));
   const contradictedCategories = new Set(ledger.filter((c) => c.status === "contradicted").map((c) => c.category));
@@ -1044,7 +1067,8 @@ export function validateCompiledReport(args: {
         const lo = parseMoney(parts[0]);
         const hi = parseMoney(parts.slice(1).join(" "));
         if (lo == null || hi == null) continue;
-        if (Math.round(lo) !== Math.round(leakage.low) || Math.round(hi) !== Math.round(leakage.high)) {
+        const f = periodFactor(text.slice(m.index + m[0].length, m.index + m[0].length + 24));
+        if (Math.round(lo * f) !== Math.round(leakage.low) || Math.round(hi * f) !== Math.round(leakage.high)) {
           v.push({ code: "total_mismatch", location: where, detail: `Stated total ${m[0].trim()} differs from canonical ${leakage.rangeLabelAscii}.`, excerpt: window.slice(0, 200) });
         }
       }
