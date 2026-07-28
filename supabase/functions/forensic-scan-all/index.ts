@@ -947,18 +947,39 @@ function dedupeTopLeaks(
 }
 
 // ───────────── canonical annual revenue loss (persisted with the report) ─────────────
-// Derived ONLY from real scan evidence. Accepts the money strings the model
-// sometimes emits ("$25,000", "12k"). Returns null when nothing is priced, so
+// Mirrors src/lib/goldenLeakage.ts (the shared client resolver). Derived ONLY
+// from real scan evidence. Accepts the money strings the model sometimes emits
+// ("$25,000", " $-500,000 ", "12k"). Returns null when nothing is priced, so
 // downstream surfaces show "could not be calculated" instead of a fake total.
+const LEAKAGE_CALCULATION_VERSION = 2;
+const MAX_SANE_LEAK = 1_000_000_000;
+
 function parseMoneyValue(v: unknown): number | null {
-  if (typeof v === "number") return Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
-  if (typeof v !== "string") return null;
-  const m = v.trim().match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
-  if (!m) return null;
-  const n = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
-  if (!Number.isFinite(n) || n === 0) return null;
-  const unit = (m[1] || "").toLowerCase();
-  return Math.abs(n) * (unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1);
+  let n: number | null = null;
+  if (typeof v === "number") {
+    n = Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
+  } else if (typeof v === "string") {
+    const m = v.trim().match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
+    if (!m) return null;
+    const raw = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
+    if (!Number.isFinite(raw) || raw === 0) return null;
+    const unit = (m[1] || "").toLowerCase();
+    n = Math.abs(raw) * (unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1);
+  }
+  if (n == null || !Number.isFinite(n) || n <= 0 || n > MAX_SANE_LEAK) return null;
+  return n;
+}
+
+const LEAK_LOW_FIELDS = ["dollars_low", "annual_low", "low", "cost_low"];
+const LEAK_HIGH_FIELDS = ["dollars_high", "annual_high", "high", "cost_high"];
+const LEAK_SINGLE_FIELDS = ["dollars", "annual_cost", "estimated_annual_loss"];
+
+function pickLeakValue(leak: Record<string, unknown>, fields: string[]): number | null {
+  for (const f of fields) {
+    const v = parseMoneyValue(leak?.[f]);
+    if (v != null) return v;
+  }
+  return null;
 }
 
 function computeOverallLeakage(report: {
@@ -969,21 +990,22 @@ function computeOverallLeakage(report: {
     let low = 0, high = 0, count = 0;
     const seen = new Set<string>();
     for (const leak of leaks || []) {
+      if (!leak || typeof leak !== "object") continue;
       const key = String(leak?.name || leak?.chapter_slug || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
       if (key && seen.has(key)) continue;
-      const l = parseMoneyValue(leak?.dollars_low);
-      const h = parseMoneyValue(leak?.dollars_high);
+      const l = pickLeakValue(leak, LEAK_LOW_FIELDS) ?? pickLeakValue(leak, LEAK_SINGLE_FIELDS);
+      const h = pickLeakValue(leak, LEAK_HIGH_FIELDS) ?? pickLeakValue(leak, LEAK_SINGLE_FIELDS);
       if (l == null && h == null) continue;
       const lo = l ?? (h as number), hi = h ?? (l as number);
       low += Math.min(lo, hi); high += Math.max(lo, hi); count += 1;
       if (key) seen.add(key);
     }
-    return count && high > 0 ? { low: low > 0 ? low : high, high, count } : null;
+    return count && Number.isFinite(high) && high > 0 ? { low: low > 0 ? low : high, high, count } : null;
   };
 
   const fromLeaks = sum(report.top_leaks || []);
   if (fromLeaks) {
-    return { annual_low: Math.round(fromLeaks.low), annual_high: Math.round(fromLeaks.high), currency: "USD", source: "top_leaks", priced_leak_count: fromLeaks.count };
+    return { annual_low: Math.round(fromLeaks.low), annual_high: Math.round(fromLeaks.high), currency: "USD", source: "top_leaks", priced_leak_count: fromLeaks.count, calculation_version: LEAKAGE_CALCULATION_VERSION };
   }
 
   // Legacy/partial: pull ranges out of chapter costing prose, skipping chapters
@@ -1002,7 +1024,28 @@ function computeOverallLeakage(report: {
   }
   const fromChapters = sum(derived);
   if (fromChapters) {
-    return { annual_low: Math.round(fromChapters.low), annual_high: Math.round(fromChapters.high), currency: "USD", source: "chapters", priced_leak_count: fromChapters.count };
+    return { annual_low: Math.round(fromChapters.low), annual_high: Math.round(fromChapters.high), currency: "USD", source: "chapters", priced_leak_count: fromChapters.count, calculation_version: LEAKAGE_CALCULATION_VERSION };
+  }
+  return null;
+}
+
+/**
+ * Completion invariant: a report that carries any parseable priced evidence MUST
+ * resolve to a canonical overall_leakage. Returns an error string when the
+ * invariant is violated so completion can log it loudly instead of silently
+ * hiding the red box.
+ */
+function leakageInvariantError(report: {
+  top_leaks?: Array<Record<string, unknown>>;
+  chapters?: Array<Record<string, unknown>>;
+  overall_leakage?: unknown;
+}): string | null {
+  const anyPriced = (report.top_leaks || []).some((l) =>
+    [...LEAK_LOW_FIELDS, ...LEAK_HIGH_FIELDS, ...LEAK_SINGLE_FIELDS].some((f) => parseMoneyValue(l?.[f]) != null),
+  );
+  const anyChapterPriced = (report.chapters || []).some((c) => /\$\s?[\d,]/.test(String(c?.what_its_costing || "")));
+  if ((anyPriced || anyChapterPriced) && !report.overall_leakage) {
+    return `priced evidence present (top_leaks=${anyPriced}, chapters=${anyChapterPriced}) but overall_leakage could not be resolved`;
   }
   return null;
 }
