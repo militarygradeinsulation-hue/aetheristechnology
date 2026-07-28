@@ -1005,6 +1005,7 @@ function computeOverallLeakage(report: {
     return { annual_low: Math.round(fromChapters.low), annual_high: Math.round(fromChapters.high), currency: "USD", source: "chapters", priced_leak_count: fromChapters.count };
   }
   return null;
+}
 
 
 
