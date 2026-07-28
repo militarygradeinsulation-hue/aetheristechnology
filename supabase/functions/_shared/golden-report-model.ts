@@ -534,6 +534,18 @@ export function buildGoldenReportModel(opts: {
     pushIf(sections as never, imagerySection(d) as never);
     pushIf(sections as never, postsSection(d) as never);
     pushIf(sections as never, scheduleSection(d) as never);
+    const extra: Block[] = [];
+    emitUnknown(extra, d, ["brand", "imagery", "posts", "schedule"]);
+    if (extra.length) {
+      sections.push({
+        id: "growth-assets-extra",
+        title: "Growth Assets - Additional Detail",
+        kicker: "GROWTH ASSETS",
+        newPage: true,
+        indexed: true,
+        blocks: extra,
+      });
+    }
   }
 
   const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
