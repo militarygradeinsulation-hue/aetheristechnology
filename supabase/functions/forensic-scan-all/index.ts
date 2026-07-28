@@ -1215,11 +1215,24 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
 
     // Canonical annual revenue loss, persisted so every surface (site, portal,
-    // both PDFs) reads the exact same validated numbers.
+    // both PDFs) reads the exact same validated numbers. Existing legitimate
+    // values on re-runs are preserved unless a newer calculation resolves.
     try {
       const overall = computeOverallLeakage(report || {});
       if (overall) report.overall_leakage = overall;
       console.log(`scan ${id}: overall_leakage`, JSON.stringify(overall));
+      const invariant = leakageInvariantError(report || {});
+      if (invariant) {
+        // Loud structured failure: never let the red box disappear silently.
+        console.error(JSON.stringify({
+          event: "leakage_invariant_violation",
+          scan_id: id,
+          target_url: url,
+          detail: invariant,
+          top_leaks_sample: (report?.top_leaks || []).slice(0, 3),
+        }));
+        await stage("synthesis", "degraded", "annual revenue loss could not be resolved from priced evidence");
+      }
     } catch (e) {
       console.error("overall_leakage compute failed:", e instanceof Error ? e.message : String(e));
     }
