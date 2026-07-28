@@ -215,6 +215,19 @@ describe("unsupported claims", () => {
     expect(v.some((x) => x.code === "unsupported_quantified_claim")).toBe(true);
   });
 
+  it("annualizes a monthly total before comparing it to the canonical range", () => {
+    const out = compileGoldenReport({
+      report: {
+        top_leaks: [leak("Schema markup missing", 12000, 24000, "seo")],
+        chapters: [{ slug: "seo", what_its_costing: "Total annual revenue loss is $1,000 - $2,000 per month." }],
+      },
+      rawFindings: htmlFindings,
+    });
+    const ch = (out.report.chapters as Array<Record<string, string>>)[0];
+    expect(ch.what_its_costing).toContain("$1,000 - $2,000 per month");
+    expect(out.ok).toBe(true);
+  });
+
   it("accepts a disclosed modelling assumption", () => {
     const out = compileGoldenReport({
       report: {
