@@ -1057,17 +1057,46 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   // validated output is still fatal (see validateCompiledReport).
   for (const d of duplicatePricing) repairs.push(`${d.location}: ${d.detail}`);
 
+  // ── 7. generic / template gate ────────────────────────────────────────
+  // Re-run against the REPAIRED report so prose fixes and benchmark removal are
+  // reflected. A report that is still generic can never be presented as a
+  // company-specific forensic result.
+  const generic = detectGenericReport(report);
+  for (const gv of generic.violations) {
+    violations.push({ code: gv.code as CompilerViolationCode, location: gv.location, detail: gv.detail, excerpt: gv.excerpt });
+  }
+  if (generic.regeneration_required && report.overall_leakage) {
+    delete (report as Record<string, unknown>).overall_leakage;
+    repairs.push("overall_leakage: removed unsupported total from a generic/template report");
+  }
+
   const blocking = violations;
   const ok = blocking.length === 0;
+  const state: GoldenReportState = ok
+    ? "compiled"
+    : generic.regeneration_required
+      ? "regeneration_required"
+      : "needs_review";
 
   report.report_consistency = consistency;
   report.evidence_ledger = ledger;
   report.compiled_findings = findings;
   report.root_causes = Array.from(rootCauses.values());
   report.priced_leaks = priced_leaks;
+  report.report_state = state;
+  report.generic_check = {
+    detector_version: GENERIC_DETECTOR_VERSION,
+    generic: generic.generic,
+    regeneration_required: generic.regeneration_required,
+    specificity: generic.specificity,
+    generic_leak_names: generic.generic_leak_names,
+    violations: generic.violations.slice(0, 20),
+  };
+  if (state === "regeneration_required") report.regeneration_message = REGENERATION_REQUIRED_MESSAGE;
+  else delete (report as Record<string, unknown>).regeneration_message;
   report.compiler = {
     version: COMPILER_VERSION,
-    state: ok ? "compiled" : "needs_review",
+    state,
     compiled_at: observedAt,
     violations: violations.slice(0, 40),
     repairs: repairs.slice(0, 60),
@@ -1075,9 +1104,9 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
 
   return {
     ok,
-    state: ok ? "compiled" : "needs_review",
+    state,
     report,
-    leakage,
+    leakage: state === "regeneration_required" ? null : leakage,
     evidence_ledger: ledger,
     findings,
     root_causes: Array.from(rootCauses.values()),
@@ -1085,11 +1114,13 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     consistency,
     violations,
     repairs,
-    repairable_prose: !ok && blocking.every((v) =>
+    generic,
+    repairable_prose: !ok && !generic.regeneration_required && blocking.every((v) =>
       ["total_mismatch", "count_mismatch", "unsupported_negative_claim", "unsupported_quantified_claim", "recommendation_not_applicable"].includes(v.code)
     ),
   };
 }
+
 
 // ───────────────────── the gate ─────────────────────
 
