@@ -5,6 +5,10 @@ import {
   type GoldenReportLike,
   type PricedLeak,
 } from "@/lib/goldenLeakage";
+import {
+  detectGenericReport,
+  REGENERATION_REQUIRED_MESSAGE,
+} from "@/lib/goldenGenericDetector";
 
 /**
  * The red "Total Estimated Annual Revenue Loss" box shown on the main website,
@@ -23,6 +27,24 @@ export function GoldenLeakageBanner({
   leaks?: PricedLeak[] | null;
   className?: string;
 }) {
+  // A generic/template report has no measured evidence, so the red box must not
+  // render at all — a boilerplate total is worse than no total.
+  const generic = report ? detectGenericReport(report as never) : null;
+  const blocked =
+    (report as { report_state?: string } | null)?.report_state === "regeneration_required" ||
+    !!generic?.regeneration_required;
+
+  if (blocked) {
+    return (
+      <div className={`rounded-lg border border-border/60 bg-muted/20 p-4 ${className}`}>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+          {GOLDEN_LEAKAGE_LABEL}
+        </div>
+        <p className="text-xs text-muted-foreground">{REGENERATION_REQUIRED_MESSAGE}</p>
+      </div>
+    );
+  }
+
   const total = computeGoldenLeakage(report ?? leaks ?? null);
 
   if (!total) {

@@ -1,9 +1,10 @@
 import { AlertTriangle, CheckCircle2, HelpCircle, ShieldAlert } from "lucide-react";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
+import { detectGenericReport } from "@/lib/goldenGenericDetector";
 
 export type CompilerMeta = {
   version?: number;
-  state?: "compiled" | "needs_review";
+  state?: "compiled" | "needs_review" | "regeneration_required";
   compiled_at?: string;
   violations?: CompilerViolation[];
   repairs?: string[];
