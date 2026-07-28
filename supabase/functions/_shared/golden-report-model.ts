@@ -348,15 +348,17 @@ function postsSection(d: GoldenDeliverables): Section | null {
     if (has(p.body)) blocks.push(...paragraphs(str(p.body)));
     if (has(p.cta)) blocks.push({ kind: "kv", label: "CTA", value: str(p.cta) });
     if (has(p.visual)) blocks.push({ kind: "kv", label: "Visual", value: str(p.visual) });
+    emitUnknown(blocks, p, ["platform", "hook", "body", "cta", "visual"]);
   });
   return { id: "posts", title: `Ready To Publish Posts (${posts.length})`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
 function scheduleSection(d: GoldenDeliverables): Section | null {
-  const days = d.schedule?.days || [];
-  if (!days.length && !has(d.schedule?.overview)) return null;
+  const sched = d.schedule;
+  const days = sched?.days || [];
+  if (!sched) return null;
   const blocks: Block[] = [];
-  if (has(d.schedule?.overview)) blocks.push(...paragraphs(str(d.schedule?.overview)));
+  if (has(sched.overview)) blocks.push(...paragraphs(str(sched.overview)));
   if (days.length) {
     blocks.push({
       kind: "table",
@@ -371,7 +373,18 @@ function scheduleSection(d: GoldenDeliverables): Section | null {
         str(r.visual),
       ]),
     });
+    // Any extra field saved on a day is exported below the table.
+    days.forEach((r, i) => {
+      const extra: Block[] = [];
+      emitUnknown(extra, r, ["day", "platform", "time", "purpose", "topic", "visual"]);
+      if (extra.length) {
+        blocks.push({ kind: "subheading", text: `Day ${str(r.day ?? i + 1)} detail` });
+        blocks.push(...extra);
+      }
+    });
   }
+  emitUnknown(blocks, sched, ["overview", "days"]);
+  if (!blocks.length) return null;
   return { id: "schedule", title: `Content Schedule (${days.length} days)`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
