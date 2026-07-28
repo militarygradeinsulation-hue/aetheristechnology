@@ -1,19 +1,40 @@
-import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type PricedLeak } from "@/lib/goldenLeakage";
+import {
+  computeGoldenLeakage,
+  GOLDEN_LEAKAGE_LABEL,
+  GOLDEN_LEAKAGE_EMPTY_MESSAGE,
+  type GoldenReportLike,
+  type PricedLeak,
+} from "@/lib/goldenLeakage";
 
 /**
- * The red "Total Estimated Annual Leakage" bubble shown on the main website,
- * in the portal report view, and mirrored on the PDF cover. Renders nothing
- * when the scan returned no priced leaks (never $0 / NaN / fake estimates).
+ * The red "Total Estimated Annual Revenue Loss" box shown on the main website,
+ * in the portal report view, and mirrored on the PDF cover. Pass the whole
+ * report so the canonical `overall_leakage` total is preferred; falls back to
+ * top_leaks / chapter ranges for legacy scans. When a scan carries no valid
+ * monetary evidence we show a muted note instead of a fabricated number.
  */
 export function GoldenLeakageBanner({
+  report,
   leaks,
   className = "",
 }: {
-  leaks: PricedLeak[] | null | undefined;
+  report?: GoldenReportLike | null;
+  /** Legacy prop: bare priced-leak array. */
+  leaks?: PricedLeak[] | null;
   className?: string;
 }) {
-  const total = computeGoldenLeakage(leaks);
-  if (!total) return null;
+  const total = computeGoldenLeakage(report ?? leaks ?? null);
+
+  if (!total) {
+    return (
+      <div className={`rounded-lg border border-border/60 bg-muted/20 p-4 ${className}`}>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+          {GOLDEN_LEAKAGE_LABEL}
+        </div>
+        <p className="text-xs text-muted-foreground">{GOLDEN_LEAKAGE_EMPTY_MESSAGE}</p>
+      </div>
+    );
+  }
 
   return (
     <div
