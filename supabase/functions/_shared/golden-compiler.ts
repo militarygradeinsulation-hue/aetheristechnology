@@ -762,7 +762,13 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   }
 
   // ── 3. price each unique root cause at most once ──────────────────────
+  // Runs BEFORE pricing so a category-default leak never reaches the total.
+  const genericPre = detectGenericReport(report);
+  const genericLeakNames = new Set(genericPre.generic_leak_names.map((n) => n.toLowerCase()));
+
   const priced_leaks: CompiledPricedLeak[] = [];
+  /** Category floors kept for display OUTSIDE the forensic total. */
+  const benchmark_leaks: Array<Record<string, unknown>> = [];
   const pricedKeys = new Set<string>();
   const duplicatePricing: CompilerViolation[] = [];
 
@@ -773,6 +779,24 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     const single = computeGoldenLeakage([leak]);
     const chapterSlug = String(leak.chapter_slug || "").toLowerCase();
     const rc = ensureRootCause(key, label || name, chapterSlug, []);
+
+    // Category default / template leak: it is a benchmark, never a forensic
+    // finding, so it is excluded from priced_leaks and from overall_leakage.
+    if (genericLeakNames.has(name.toLowerCase())) {
+      rc.priced = false;
+      rc.not_priced_reason =
+        "Category benchmark, not an observed finding for this company; excluded from the forensic total.";
+      benchmark_leaks.push({
+        name: name || label,
+        chapter_slug: chapterSlug,
+        annual_low: single ? Math.round(single.low) : null,
+        annual_high: single ? Math.round(single.high) : null,
+        currency: "USD",
+        label: "Category benchmark — not measured for this company",
+        excluded_from_total: true,
+      });
+      continue;
+    }
 
     if (!single) {
       rc.priced = false;
@@ -795,15 +819,26 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     rc.priced = true;
     delete rc.not_priced_reason;
     if (!rc.evidence_ids.includes(claim.claim_id)) rc.evidence_ids.push(claim.claim_id);
+    const observed = scrubValue(
+      (leak as Record<string, unknown>).observed_evidence ?? leak.summary ?? "",
+      MAX_TEXT,
+    );
     priced_leaks.push({
       root_cause_id: rc.root_cause_id,
+      dedupe_key: key,
       name: name || label,
       chapter_slug: chapterSlug,
       annual_low: Math.round(single.low),
       annual_high: Math.round(single.high),
       currency: "USD",
       pricing_model_version: PRICING_MODEL_VERSION,
+      calculation_method:
+        `Annualized from the observed gap severity for root cause ${rc.root_cause_id} (pricing model v${PRICING_MODEL_VERSION}).`,
       assumptions: scrubValue(leak.summary ?? "Annualized from the observed gap severity.", 240),
+      observed_evidence: observed,
+      source_url: claim.source_url || baseUrl,
+      source_kind: claim.source_kind,
+      evidence_class: claim.status,
       confidence: claim.confidence,
       evidence_ids: rc.evidence_ids.slice(0, 8),
     });
@@ -822,9 +857,22 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     dollars_low: p.annual_low,
     dollars_high: p.annual_high,
   }));
+  // When every leak was a category benchmark there is nothing evidence-linked
+  // left to sum. Falling back to the stored report here would re-admit exactly
+  // the generic total we just removed, so it is not allowed.
   const leakage = canonicalLeaks.length
     ? computeGoldenLeakage(canonicalLeaks)
-    : computeGoldenLeakage(report);
+    : benchmark_leaks.length
+      ? null
+      : computeGoldenLeakage(report);
+
+  if (benchmark_leaks.length) {
+    report.benchmark_leaks = benchmark_leaks;
+    // The template rows must not survive as if they were findings.
+    report.top_leaks = ((report.top_leaks || []) as PricedLeak[]).filter(
+      (l) => !genericLeakNames.has(String(l?.name ?? "").toLowerCase()),
+    );
+  }
 
   if (leakage) {
     report.overall_leakage = {
@@ -835,7 +883,12 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       priced_leak_count: canonicalLeaks.length || leakage.count,
       calculation_version: leakage.calculation_version,
     };
+  } else {
+    // No evidence-linked priced leak survived: the red box must disappear
+    // rather than show a benchmark sum.
+    delete (report as Record<string, unknown>).overall_leakage;
   }
+
 
   const verifiedCount = findings.filter((f) => f.status === "verified").length;
   const contradictedCount = findings.filter((f) => f.status === "contradicted").length;
