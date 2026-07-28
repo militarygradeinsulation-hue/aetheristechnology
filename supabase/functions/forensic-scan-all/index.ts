@@ -669,7 +669,7 @@ Requirements:
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 24_000);
+  return await aiJson(prompt, 2200, 55_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -683,7 +683,18 @@ Return JSON:
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 24_000);
+  return await aiJson(prompt, 3500, 60_000);
+}
+
+// Run tasks in bounded waves so one gateway is never hit with 15 large
+// simultaneous prompts (which is what produced timeouts + empty responses).
+async function inWaves<T>(tasks: Array<() => Promise<T>>, size: number): Promise<PromiseSettledResult<T>[]> {
+  const out: PromiseSettledResult<T>[] = [];
+  for (let i = 0; i < tasks.length; i += size) {
+    const slice = tasks.slice(i, i + size);
+    out.push(...(await Promise.allSettled(slice.map((fn) => fn()))));
+  }
+  return out;
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
@@ -691,29 +702,45 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   const findingsStr = JSON.stringify(cleaned).slice(0, 28_000);
   const fb = fallbackReport(findings, target, company);
 
-  // Run summary + 14 per-chapter calls in parallel so one failure doesn't poison the whole report.
-  const [summaryResult, ...chapterResults] = await Promise.allSettled([
-    synthesizeSummary(findingsStr, target, company),
-    ...CHAPTERS.map((c) => synthesizeOneChapter(c, findingsStr, target, company)),
-  ]);
+  const [summaryResult, ...chapterResults] = await inWaves<any>(
+    [
+      () => synthesizeSummary(findingsStr, target, company),
+      ...CHAPTERS.map((c) => () => synthesizeOneChapter(c, findingsStr, target, company)),
+    ],
+    5,
+  );
 
+  const fallbackChapters: Array<{ slug: string; reason: string }> = [];
   const chapters = CHAPTERS.map((c, i) => {
     const r = chapterResults[i];
     if (r.status === "fulfilled" && r.value && (r.value.what_we_found || r.value.verdict)) {
       return { no: c.no, slug: c.slug, title: c.title, ...r.value };
     }
-    console.error(`chapter ${c.slug} synth failed:`, r.status === "rejected" ? r.reason : "empty result");
+    const reason = r.status === "rejected" ? String((r as PromiseRejectedResult).reason).slice(0, 200) : "empty result";
+    console.error(`chapter ${c.slug} synth failed:`, reason);
+    fallbackChapters.push({ slug: c.slug, reason });
     return fb.chapters.find((x) => x.slug === c.slug);
   });
 
-  const summary = summaryResult.status === "fulfilled" ? summaryResult.value : {};
+  const summary = summaryResult.status === "fulfilled" ? (summaryResult.value || {}) : {};
+  const summaryFailed = !summary.executive_summary;
   const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
     executive_summary: summary.executive_summary || fb.executive_summary,
     top_leaks: dedupeTopLeaks(rawLeaks),
     chapters,
+    synth_fallback: {
+      degraded: summaryFailed || fallbackChapters.length > 0,
+      summary_fallback: summaryFailed,
+      summary_reason: summaryResult.status === "rejected"
+        ? String((summaryResult as PromiseRejectedResult).reason).slice(0, 200)
+        : (summaryFailed ? "empty result" : null),
+      chapters_fallback: fallbackChapters,
+      chapters_total: CHAPTERS.length,
+    },
   };
 }
+
 
 // Strip patterns that historically caused false positives before findings reach the AI.
 // - Webflow / Framer / Wix dual success/failure DOM: both messages live in raw HTML,
