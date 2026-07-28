@@ -498,6 +498,13 @@ export function softenNegativeProse(text: string): string {
   return out;
 }
 
+/** Disclosed modelling assumptions are legitimate; unlabelled promises are not. */
+const ASSUMPTION_CONTEXT_RE =
+  /\b(?:assum\w+|baseline|industry[-\s]average|benchmark\w*|conservativ\w+|estimat\w+|typical|illustrative|modell?ed|using|at an?|hypothetical)\b/i;
+
+/** Marker the repair pass appends so a claim reads as a model, not a promise. */
+export const ILLUSTRATIVE_MARKER = " (illustrative assumption, not a measured result)";
+
 /** Quantified performance/ROI promises that need measured evidence. */
 export const UNSUPPORTED_QUANTIFIED_RE =
   /\b(?:\d{1,3}(?:\.\d+)?\s?%\s?(?:lift|increase|improvement|more|higher|better|conversion|uplift)|\d+(?:\.\d+)?x\s?(?:more|higher|return|roi|conversion)|roi of \d|payback in \d|within \d+ (?:hours?|minutes?) response)/gi;
@@ -513,7 +520,7 @@ const TOTAL_CONTEXT_RE =
 
 /** Subset language that proves a range is NOT the report total. */
 const SUBSET_SCOPE_RE =
-  /\b(?:combined \w+|these|this (?:chapter|section|gap|leak|issue|single)|each|per (?:leak|chapter|page))\b/i;
+  /\b(?:combined \w+|these|this (?:chapter|section|gap|leak|issue|single)|each|alone|another|per (?:leak|chapter|page))\b/i;
 
 /** Wording that already limits an absence statement to what was actually crawled. */
 export const SCOPE_QUALIFIER_RE =
@@ -880,6 +887,16 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
         repairs.push(`${where}: softened unverified absolute negatives and stated crawl scope`);
       }
 
+      // Quantified promises: keep the number, remove the promise. A figure the
+      // scan never measured is labelled as an assumption rather than deleted.
+      out = out.replace(new RegExp(UNSUPPORTED_QUANTIFIED_RE.source, "gi"), (m, offset: number) => {
+        const before = out.slice(Math.max(0, offset - 70), offset);
+        const after = out.slice(offset + m.length, offset + m.length + 70);
+        if (ASSUMPTION_CONTEXT_RE.test(before) || after.startsWith(ILLUSTRATIVE_MARKER)) return m;
+        repairs.push(`${where}: labelled unmeasured figure "${m.trim()}" as an assumption`);
+        return `${m}${ILLUSTRATIVE_MARKER}`;
+      });
+
       // Currency lock: USD only, everywhere.
       if (NON_USD_RE.test(out)) {
         out = out.replace(/€|£|¥|₹/g, "$").replace(/\b(?:EUR|GBP|JPY|CAD|AUD|INR)\b/g, "USD");
@@ -1070,6 +1087,9 @@ export function validateCompiledReport(args: {
     const qre = new RegExp(UNSUPPORTED_QUANTIFIED_RE.source, "gi");
     let qm: RegExpExecArray | null;
     while ((qm = qre.exec(text))) {
+      const before = text.slice(Math.max(0, qm.index - 70), qm.index);
+      const after = text.slice(qm.index + qm[0].length, qm.index + qm[0].length + 70);
+      if (ASSUMPTION_CONTEXT_RE.test(before) || after.startsWith(ILLUSTRATIVE_MARKER)) continue;
       v.push({ code: "unsupported_quantified_claim", location: where, detail: `Quantified promise "${qm[0].trim()}" has no measured evidence.`, excerpt: qm[0] });
     }
 
