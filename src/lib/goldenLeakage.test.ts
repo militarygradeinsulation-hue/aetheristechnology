@@ -32,8 +32,8 @@ describe("parseMoney", () => {
     expect(parseMoney("$4,500/yr")).toBe(4500);
   });
 
-  it("rejects zero, NaN, Infinity, junk and absurd magnitudes", () => {
-    for (const v of [0, "0", "$0", NaN, Infinity, -Infinity, null, undefined, "", "n/a", "TBD", {}, 1e12]) {
+  it("rejects zero, NaN, Infinity, junk and absurd/placeholder magnitudes", () => {
+    for (const v of [0, "0", "$0", NaN, Infinity, -Infinity, null, undefined, "", "n/a", "TBD", {}, 1e12, 999999999]) {
       expect(parseMoney(v as unknown)).toBeNull();
     }
   });
@@ -97,6 +97,8 @@ describe("resolution order", () => {
       chapters: [
         { slug: "cta", what_its_costing: "Roughly $4,500 - $8,200 a year in lost pipeline." },
         { slug: "proof", what_its_costing: "About $2,000 annually." },
+        { slug: "tam", what_its_costing: "A speculative $33,460,000 annual TAM exposure." },
+        { slug: "quarterly", what_its_costing: "$48,000 per quarter of delayed pipeline." },
       ],
     })!;
     expect([r.low, r.high, r.count, r.source]).toEqual([6500, 10200, 2, "chapters"]);
@@ -105,7 +107,7 @@ describe("resolution order", () => {
   it("3b. never double counts a chapter already priced in top_leaks", () => {
     const r = computeGoldenLeakage({
       top_leaks: [{ name: "seo", chapter_slug: "seo", dollars_low: 1000, dollars_high: 2000 }],
-      chapters: [{ slug: "seo", what_its_costing: "$1,000 - $2,000" }],
+      chapters: [{ slug: "seo", what_its_costing: "$1,000 - $2,000 annually" }],
     })!;
     expect([r.low, r.high, r.count]).toEqual([1000, 2000, 1]);
   });
@@ -176,7 +178,7 @@ describe("hasPricedEvidence (completion invariant input)", () => {
     const reports: GoldenReportLike[] = [
       { top_leaks: [{ dollars_low: 1000, dollars_high: 2300 }] },
       { top_leaks: [{ dollars_low: "150,000", dollars_high: "300,000" }] },
-      { chapters: [{ slug: "cta", what_its_costing: "$4,500 - $8,200" }] },
+      { chapters: [{ slug: "cta", what_its_costing: "$4,500 - $8,200 annually" }] },
     ];
     for (const rep of reports) {
       expect(hasPricedEvidence(rep)).toBe(true);
@@ -191,7 +193,7 @@ describe("UI and PDF consumers get identical numbers", () => {
   const fixtures: GoldenReportLike[] = [
     { overall_leakage: { annual_low: 4100, annual_high: 8900, priced_leak_count: 5, source: "top_leaks", currency: "USD" } },
     { top_leaks: [{ name: "a", dollars_low: "150,000", dollars_high: "300,000" }] },
-    { chapters: [{ slug: "cta", what_its_costing: "$4,500 - $8,200" }] },
+    { chapters: [{ slug: "cta", what_its_costing: "$4,500 - $8,200 annually" }] },
   ];
 
   it("produces the same low/high for every fixture", () => {
@@ -207,6 +209,30 @@ describe("UI and PDF consumers get identical numbers", () => {
   it("no-evidence fixture hides the box on both surfaces", () => {
     const empty: GoldenReportLike = { top_leaks: [], chapters: [] };
     expect(computeGoldenLeakage(empty)).toBeNull();
+  });
+});
+
+describe("chapter prose guards", () => {
+  it("ignores quarterly and speculative TAM figures", () => {
+    const r = computeGoldenLeakage({
+      chapters: [
+        { slug: "a", what_its_costing: "Exposure of $180,000-$420,000 per year." },
+        { slug: "tam", what_its_costing: "An undetected drop equals $27,860,000 annual recurring revenue at risk." },
+        { slug: "q", what_its_costing: "$48,000 per quarter in delayed pipeline." },
+      ],
+    })!;
+    expect([r.low, r.high, r.count, r.source]).toEqual([180000, 420000, 1, "chapters"]);
+  });
+
+  it("rejects placeholder 999,999,999 leak values as no evidence", () => {
+    expect(
+      computeGoldenLeakage({
+        top_leaks: [
+          { name: "a", dollars_low: 0, dollars_high: 999999999 },
+          { name: "b", dollars_low: 0, dollars_high: 999999999 },
+        ],
+      }),
+    ).toBeNull();
   });
 });
 
