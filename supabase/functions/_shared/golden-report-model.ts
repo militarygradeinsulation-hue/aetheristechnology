@@ -429,7 +429,7 @@ const CLAIMED_KEYS = new Set([
   "top_leaks",
   "chapters",
   "deliverables",
-  "report_state",
+  
   "generated_at",
 ]);
 
