@@ -189,7 +189,7 @@ export function generateForensicGoldenPdf(opts: {
   doc.text(`Scan ID: ${scanId}`, M, cy + 24);
 
   // ── Total leakage headline (same source of truth as the website/portal) ──
-  const totalLeakage = computeGoldenLeakage(report.top_leaks);
+  const totalLeakage = computeGoldenLeakage(report);
   if (totalLeakage) {
     const boxY = cy + 36;
     doc.setFillColor(40, 15, 15);
