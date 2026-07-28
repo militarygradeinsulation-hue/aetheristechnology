@@ -100,7 +100,7 @@ const GoldenReportEmbedPage: React.FC = () => {
           </div>
         )}
 
-        <ForensicScanAllPanel />
+        <ForensicScanAllPanel initialScanId={activeScanId} />
       </div>
     </div>
   );
