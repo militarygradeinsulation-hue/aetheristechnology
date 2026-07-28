@@ -6,6 +6,8 @@
 // so jsPDF outline + internal link annotations work for the TOC.
 
 import jsPDF from "jspdf";
+import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL } from "@/lib/goldenLeakage";
+
 
 export interface Chapter {
   no: number;
@@ -181,36 +183,25 @@ export function generateForensicGoldenPdf(opts: {
   doc.text(`Generated: ${(opts.generatedAt || new Date()).toLocaleString("en-US")}`, M, cy + 18);
   doc.text(`Scan ID: ${scanId}`, M, cy + 24);
 
-  // ── Total leakage headline (drives the reader to keep going) ──
-  const pricedLeaks = (report.top_leaks || []).filter((l) => l.dollars_low != null && l.dollars_high != null);
-  if (pricedLeaks.length) {
-    const low = pricedLeaks.reduce((s, l) => s + (l.dollars_low || 0), 0);
-    const high = pricedLeaks.reduce((s, l) => s + (l.dollars_high || 0), 0);
+  // ── Total leakage headline (same source of truth as the website/portal) ──
+  const totalLeakage = computeGoldenLeakage(report.top_leaks);
+  if (totalLeakage) {
     const boxY = cy + 36;
     doc.setFillColor(40, 15, 15);
-    doc.rect(M, boxY, CW, 30, "F");
+    doc.rect(M, boxY, CW, 34, "F");
     doc.setDrawColor(...CRIMSON);
     doc.setLineWidth(0.6);
-    doc.rect(M, boxY, CW, 30);
+    doc.rect(M, boxY, CW, 34);
     doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...CRIMSON);
-    doc.text("TOTAL ESTIMATED ANNUAL LEAKAGE", M + 4, boxY + 7);
+    doc.text(GOLDEN_LEAKAGE_LABEL.toUpperCase(), M + 4, boxY + 7);
     doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...CRIMSON);
-    doc.text(`$${low.toLocaleString()} - $${high.toLocaleString()} / year`, M + 4, boxY + 20);
+    doc.text(`${totalLeakage.rangeLabelAscii} / year`, M + 4, boxY + 20);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text(`Sum of the top ${pricedLeaks.length} priced leaks documented in this report.`, M + 4, boxY + 27);
+    const capLines = wrap(doc, totalLeakage.caption, CW - 8).slice(0, 2);
+    let capY = boxY + 26;
+    for (const l of capLines) { doc.text(l, M + 4, capY); capY += 4; }
   }
 
-  doc.setFontSize(8);
-  doc.setTextColor(...AMBER);
-  doc.text("This is a Smart PDF. Search it, or scan the link below to ask it questions.", M, PAGE_H - 50);
-  doc.textWithLink(`→  ${askUrl}`, M, PAGE_H - 44, { url: askUrl });
-  footer(doc, page.n, askUrl);
-
-  // Executive summary page also shows the total
-  const showTotalOnExec = pricedLeaks.length > 0;
-  const execLow = pricedLeaks.reduce((s, l) => s + (l.dollars_low || 0), 0);
-  const execHigh = pricedLeaks.reduce((s, l) => s + (l.dollars_high || 0), 0);
-  void showTotalOnExec; void execLow; void execHigh;
 
   // ───────── EXECUTIVE SUMMARY ─────────
   doc.addPage(); page.n++; bg(doc); footer(doc, page.n, askUrl);

@@ -9,6 +9,8 @@ import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationK
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
+import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
+
 
 type Row = {
   id: string;
@@ -326,29 +328,10 @@ export function ForensicScanAllPanel() {
             </div>
           </div>
 
-          {(() => {
-            const leaks = report.top_leaks || [];
-            const priced = leaks.filter((l) => l.dollars_low != null && l.dollars_high != null);
-            if (!priced.length) return null;
-            const low = priced.reduce((s, l) => s + (l.dollars_low || 0), 0);
-            const high = priced.reduce((s, l) => s + (l.dollars_high || 0), 0);
-            return (
-              <div className="px-5 pt-5">
-                <div className="rounded-lg border border-red-500/40 bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent p-5">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-red-400 mb-1">
-                    Total Estimated Annual Leakage
-                  </div>
-                  <div className="font-serif text-3xl md:text-4xl font-bold text-red-400 leading-tight">
-                    ${low.toLocaleString()} – ${high.toLocaleString()}
-                    <span className="ml-2 text-xs font-mono text-muted-foreground align-middle">/ year</span>
-                  </div>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Sum of the top {priced.length} priced leaks below. Every dollar is a system your business is bleeding right now. Keep reading — each chapter shows exactly where and how to stop it.
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
+          <div className="px-5 pt-5">
+            <GoldenLeakageBanner leaks={report.top_leaks} />
+          </div>
+
 
           {(report as { synth_fallback?: { degraded?: boolean; chapters_fallback?: unknown[]; chapters_total?: number } }).synth_fallback?.degraded && (
             <div className="px-5 pt-5">
