@@ -413,6 +413,43 @@ const CLAIMED_KEYS = new Set([
   "generated_at",
 ]);
 
+/** Recursively renders any saved value into blocks, losing nothing. */
+function emitValue(blocks: Block[], label: string, v: unknown) {
+  if (v == null) return;
+  if (Array.isArray(v)) {
+    if (!v.length) return;
+    if (v.every((x) => typeof x !== "object" || x === null)) {
+      pushIf(blocks, bullets(label, v.map(str)));
+    } else {
+      blocks.push({ kind: "subheading", text: label });
+      v.forEach((x, i) => emitValue(blocks, `${label} ${i + 1}`, x));
+    }
+    return;
+  }
+  if (typeof v === "object") {
+    const entries = Object.entries(v as Record<string, unknown>).filter(([, x]) => x != null);
+    if (!entries.length) return;
+    blocks.push({ kind: "subheading", text: label });
+    for (const [k, x] of entries) emitValue(blocks, labelize(k), x);
+    return;
+  }
+  if (!has(v)) return;
+  blocks.push({ kind: "kv", label, value: str(v) });
+}
+
+/**
+ * Renders every key of `obj` that the caller did not already handle. This is
+ * what makes new Golden Report fields flow into the export automatically.
+ */
+function emitUnknown(blocks: Block[], obj: unknown, known: string[]) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return;
+  const skip = new Set(known);
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (skip.has(k) || NON_DISPLAY_KEYS.has(k) || k === "slug" || k === "generated_at") continue;
+    emitValue(blocks, labelize(k), v);
+  }
+}
+
 /**
  * Renders every saved top-level field that no dedicated section claims.
  * This is the safety net that makes future Golden Report schema additions flow
@@ -420,32 +457,7 @@ const CLAIMED_KEYS = new Set([
  */
 function extrasSection(report: Record<string, unknown>): Section | null {
   const blocks: Block[] = [];
-  const emit = (label: string, v: unknown) => {
-    if (v == null) return;
-    if (Array.isArray(v)) {
-      if (!v.length) return;
-      if (v.every((x) => typeof x !== "object" || x === null)) {
-        pushIf(blocks, bullets(label, v.map(str)));
-      } else {
-        blocks.push({ kind: "subheading", text: label });
-        v.forEach((x, i) => emit(`${label} ${i + 1}`, x));
-      }
-      return;
-    }
-    if (typeof v === "object") {
-      const entries = Object.entries(v as Record<string, unknown>).filter(([, x]) => x != null);
-      if (!entries.length) return;
-      blocks.push({ kind: "subheading", text: label });
-      for (const [k, x] of entries) emit(labelize(k), x);
-      return;
-    }
-    if (!has(v)) return;
-    blocks.push({ kind: "kv", label, value: str(v) });
-  };
-  for (const [k, v] of Object.entries(report)) {
-    if (CLAIMED_KEYS.has(k) || NON_DISPLAY_KEYS.has(k)) continue;
-    emit(labelize(k), v);
-  }
+  emitUnknown(blocks, report, [...CLAIMED_KEYS]);
   return blocks.length
     ? { id: "additional-report-data", title: "Additional Report Data", newPage: true, indexed: true, blocks }
     : null;
