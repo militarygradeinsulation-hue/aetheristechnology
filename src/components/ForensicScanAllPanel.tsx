@@ -98,6 +98,13 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   const pollRef = useRef<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
 
+  // A parent (e.g. the embeddable /golden-report/run page) can start a scan
+  // asynchronously and hand us the id after mount — adopt it when it arrives.
+  useEffect(() => {
+    if (initialScanId) setScanId((cur) => (cur === initialScanId ? cur : initialScanId));
+  }, [initialScanId]);
+
+
   const isAdmin = !!getAdminToken();
   const headers: Record<string, string> = isAdmin
     ? { "x-admin-token": getAdminToken() || "" }
