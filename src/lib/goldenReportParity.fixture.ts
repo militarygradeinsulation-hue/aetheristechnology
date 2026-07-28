@@ -78,7 +78,7 @@ export const QA_FULL_REPORT = {
       })),
     },
   },
-  chapters: Array.from({ length: 14 }, (_, i) => chapter(i + 1)),
+  chapters: Array.from({ length: 14 }, (_, i) => QA_CHAPTER(i + 1)),
   report_consistency: {
     canonical_counts_sentence: "This report documents 18 findings and 5 uniquely priced leaks.",
     evidence_quality: {
