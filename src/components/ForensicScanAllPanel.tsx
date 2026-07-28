@@ -350,7 +350,24 @@ export function ForensicScanAllPanel() {
             );
           })()}
 
+          {(report as { synth_fallback?: { degraded?: boolean; chapters_fallback?: unknown[]; chapters_total?: number } }).synth_fallback?.degraded && (
+            <div className="px-5 pt-5">
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400 mb-1">
+                  Degraded — AI synthesis unavailable
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {(report as { synth_fallback?: { chapters_fallback?: unknown[]; chapters_total?: number } }).synth_fallback?.chapters_fallback?.length ?? 0}
+                  {" of "}
+                  {(report as { synth_fallback?: { chapters_total?: number } }).synth_fallback?.chapters_total ?? 14}
+                  {" chapters fell back to template benchmark text instead of scan evidence. Re-run this scan before sending it to a client."}
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="p-5 space-y-6">
+
             <section>
               <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500 mb-2">Executive Summary</div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{report.executive_summary}</div>
