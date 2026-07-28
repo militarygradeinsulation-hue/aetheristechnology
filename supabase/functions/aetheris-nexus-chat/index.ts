@@ -156,10 +156,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
-  const { userId } = await optionalAuth(req);
-  if (!userId) return json({ error: "Unauthorized" }, 401);
+  // Auth is intentionally optional (verify_jwt = false). We resolve the user id
+  // when a JWT is present for attribution, but anonymous visitors and portal
+  // reps without a Supabase session must never be blocked.
+  await optionalAuth(req).catch(() => ({ userId: null }));
 
   if (!LOVABLE_API_KEY) return json({ error: "Missing LOVABLE_API_KEY" }, 500);
+
 
   let body: { messages?: any[]; model?: string; useSearch?: boolean };
   try {
