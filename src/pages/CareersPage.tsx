@@ -271,11 +271,11 @@ const CareersPage = () => {
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">// how to succeed — 5 steps</div>
                 <div className="grid md:grid-cols-5 gap-3">
                   {[
-                    { n: '01', t: 'Pay $500', d: 'One-time yearly fee. License ID + personalized certificate issued the same minute.' },
+                    { n: '01', t: 'Apply & get reviewed', d: 'No upfront fee. Submit the Strategic Scout application — approved scouts get a Connector ID + personalized certificate the same week.' },
                     { n: '02', t: 'Get your tracked link', d: 'A unique Connector URL + short code goes to every Aetheris product page. Every click is stamped to you for 60 days.' },
                     { n: '03', t: 'Market on your channels', d: 'LinkedIn, email, referrals, in-person. Use our creative pack (screenshots, one-pagers, demo video links). No cold-call quota, no script gate.' },
                     { n: '04', t: 'We deliver', d: 'When they buy, our team builds, ships, and supports. You never touch delivery, diagnosis, or operations.' },
-                    { n: '05', t: 'Get paid monthly', d: '40% of collected revenue, paid on the 5th of the following month via ACH or Stripe payout. Full ledger visible in your portal.' },
+                    { n: '05', t: 'Get paid monthly', d: '15% on the paid diagnostic, then 10% of collected Active Case revenue for 12 months, plus 10% on the first implementation. Paid on the 5th via ACH or Stripe. Full ledger visible in your portal.' },
                   ].map(({ n, t, d }) => (
                     <div key={n} className="rounded-xl border border-amber/20 bg-background/40 p-4">
                       <div className="font-mono text-[10px] text-amber/70 mb-1">{n}</div>
