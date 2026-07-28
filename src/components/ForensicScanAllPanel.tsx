@@ -10,6 +10,7 @@ import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
 import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
+import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenceQuality";
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 
 
@@ -299,8 +300,9 @@ export function ForensicScanAllPanel() {
 
       {report && row && (
         <Card className="p-0 bg-card border-border overflow-hidden">
-          <div className="p-5 pb-0">
+          <div className="p-5 pb-0 space-y-4">
             <GoldenLeakageBanner report={report} />
+            <GoldenEvidenceQuality report={report} />
           </div>
           <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/5 to-transparent">
             <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -316,7 +318,14 @@ export function ForensicScanAllPanel() {
               <div className="flex gap-2 shrink-0">
                 <Button
                   size="sm"
+                  disabled={!isDeliverable(report)}
+                  title={
+                    isDeliverable(report)
+                      ? "Download the compiled report"
+                      : "Blocked: this report failed the consistency gate. Re-run the compiler before sending it out."
+                  }
                   onClick={() => {
+                    if (!isDeliverable(report)) return;
                     import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
                       trackGoldenReportEvent(row.id, "pdf_download"),
                     );
@@ -333,7 +342,14 @@ export function ForensicScanAllPanel() {
                 </Button>
               </div>
             </div>
+            {!isDeliverable(report) && (
+              <p className="mt-3 text-xs text-red-400">
+                This report did not pass the consistency gate, so downloads are blocked. The listed violations must be
+                resolved by recompiling the scan.
+              </p>
+            )}
           </div>
+
 
 
 

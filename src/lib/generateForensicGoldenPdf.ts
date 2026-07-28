@@ -7,9 +7,10 @@
 
 import jsPDF from "jspdf";
 import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
+import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
 
 
-export interface Chapter {
+export type Chapter = {
   no: number;
   slug: string;
   title: string;
@@ -20,7 +21,7 @@ export interface Chapter {
   what_to_do?: { this_week?: string[]; this_month?: string[]; this_quarter?: string[] };
   evidence?: { label: string; value: string }[];
 }
-export interface ForensicReport {
+export type ForensicReport = {
   executive_summary?: string;
   /** Canonical annual revenue loss persisted at scan completion. */
   overall_leakage?: OverallLeakage | null;
@@ -28,6 +29,9 @@ export interface ForensicReport {
   chapters?: Chapter[];
   /** Growth assets generated alongside the report. Rendered on-screen only; PDF logic unchanged. */
   deliverables?: import("@/components/GoldenGrowthAssets").GoldenDeliverables | null;
+  /** Canonical counts + evidence quality written by the report compiler. */
+  report_consistency?: ReportConsistency | null;
+  compiler?: { state?: "compiled" | "needs_review"; violations?: CompilerViolation[]; repairs?: string[] } | null;
 }
 
 
@@ -142,6 +146,17 @@ export function generateForensicGoldenPdf(opts: {
   generatedAt?: Date;
 }): jsPDF {
   const { report, company, url, scanId } = opts;
+  // ── HARD GATE ──
+  // A report that failed the consistency compiler is never turned into a
+  // client-facing PDF. Legacy reports (compiled before the compiler existed)
+  // carry no state and are allowed through unchanged.
+  if (report?.compiler?.state && report.compiler.state !== "compiled") {
+    const first = report.compiler.violations?.[0];
+    throw new Error(
+      `Golden Report ${scanId} failed the consistency gate and cannot be exported` +
+        (first ? `: ${first.code} at ${first.location} — ${first.detail}` : "."),
+    );
+  }
   const askUrl = `https://aetheris.technology/report/${scanId}/ask`;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const page = { n: 1 };
@@ -205,6 +220,27 @@ export function generateForensicGoldenPdf(opts: {
     const capLines = wrap(doc, totalLeakage.caption, CW - 8).slice(0, 2);
     let capY = boxY + 26;
     for (const l of capLines) { doc.text(l, M + 4, capY); capY += 4; }
+  }
+
+  // ── Canonical counts + evidence quality (read, never recomputed) ──
+  const consistency = report.report_consistency;
+  if (consistency) {
+    const qy = cy + (totalLeakage ? 78 : 44);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...AMBER);
+    doc.text("EVIDENCE QUALITY", M, qy);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...BODY);
+    const q = consistency.evidence_quality;
+    const lines = [
+      consistency.canonical_counts_sentence,
+      `Verified ${q.verified} (${q.verified_pct}%) · Inferred ${q.inferred} (${q.inferred_pct}%) · ` +
+        `Unverified ${q.unverified} (${q.unverified_pct}%) · Contradicted ${q.contradicted} (${q.contradicted_pct}%).`,
+      "Statements not marked verified are labelled inferred or unverified. A signal missing from a partial crawl is not treated as proof of absence.",
+    ];
+    let ly = qy + 6;
+    for (const line of lines) {
+      for (const l of wrap(doc, line, CW)) { doc.text(l, M, ly); ly += 4.5; }
+      ly += 1;
+    }
   }
 
 
