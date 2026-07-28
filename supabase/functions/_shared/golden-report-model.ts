@@ -307,6 +307,10 @@ function brandSection(d: GoldenDeliverables): Section | null {
       if (has(c.fix)) blocks.push({ kind: "paragraph", text: `Fix: ${str(c.fix)}` });
     }
   }
+  emitUnknown(blocks, b, [
+    "positioning", "target_audience", "voice", "messaging_pillars", "value_proposition",
+    "differentiators", "color_guidance", "typography_guidance", "corrections",
+  ]);
   return blocks.length ? { id: "brand", title: "Brand Blueprint", kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks } : null;
 }
 
