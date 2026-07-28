@@ -285,7 +285,7 @@ describe("production data shapes (company-agnostic)", () => {
       expect(r.currency).toBe("USD");
       expect(r.source).toBe("top_leaks");
       expect(r.count).toBe(2);
-      expect(r.calculationVersion).toBe(LEAKAGE_CALCULATION_VERSION);
+      expect(r.calculation_version).toBe(LEAKAGE_CALCULATION_VERSION);
       expect(r.displayValue).toMatch(/^\$[\d,]+ – \$[\d,]+ \/ year$/);
     }
     expect([a.low, a.high]).toEqual([15000, 30000]);
