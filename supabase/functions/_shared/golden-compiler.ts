@@ -104,16 +104,28 @@ export type CompiledRootCause = {
 
 export type CompiledPricedLeak = {
   root_cause_id: string;
+  /** Stable deduplication key — one root cause is priced at most once. */
+  dedupe_key: string;
   name: string;
   chapter_slug: string;
   annual_low: number;
   annual_high: number;
   currency: "USD";
   pricing_model_version: number;
+  /** How the dollar range was derived. */
+  calculation_method: string;
   assumptions: string;
+  /** Verbatim observed evidence this price is derived from. */
+  observed_evidence: string;
+  /** Page / tool the evidence came from. */
+  source_url: string;
+  source_kind: string;
+  /** verified | inferred | unverified | contradicted */
+  evidence_class: string;
   confidence: number;
   evidence_ids: string[];
 };
+
 
 export type ReportConsistency = {
   detected_findings: number;
