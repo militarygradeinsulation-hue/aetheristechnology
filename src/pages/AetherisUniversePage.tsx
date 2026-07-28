@@ -885,14 +885,9 @@ const AetherisUniversePage: React.FC = () => {
         <Navbar onContactClick={() => {}} />
       </div>
 
-      {/* Frosted-glass access gate — Golden Report code, rep code, or employee code only */}
-      <UniverseAccessGate unlocked={universeUnlocked} onUnlocked={() => setUniverseUnlocked(true)} />
+      {/* Universe is open to everyone — no access gate, no blur. */}
 
-
-      <main
-        className={`relative z-10 transition duration-500 ${universeUnlocked ? '' : 'pointer-events-none select-none blur-md opacity-70'}`}
-        aria-hidden={!universeUnlocked}
-      >
+      <main className="relative z-10 transition duration-500">
         <header className="pt-28 md:pt-32 pb-4 px-4 max-w-6xl mx-auto text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-amber mb-3 inline-flex items-center gap-2">
             <Sparkles className="w-3 h-3" /> Aetheris Universe · v1
