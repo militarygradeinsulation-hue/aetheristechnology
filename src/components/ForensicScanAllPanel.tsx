@@ -36,6 +36,8 @@ const STAGES: { key: string; label: string }[] = [
   { key: "friction",      label: "Brand contradictions + friction audit" },
   { key: "crm",           label: "CRM / pipeline forensics" },
   { key: "synth",         label: "Synthesizing 14-chapter report" },
+  { key: "assets",        label: "Building growth assets (brand, imagery, posts, schedule)" },
+
 ];
 
 const BRAND_KIT_STAGES: { key: string; label: string }[] = [
