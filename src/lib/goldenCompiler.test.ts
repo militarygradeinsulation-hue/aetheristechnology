@@ -31,11 +31,12 @@ const leak = (name: string, low: number, high: number, slug = "seo") => ({
   dollars_low: low,
   dollars_high: high,
   source_url: `https://www.example.com/${slug}`,
-  evidence_quote: `Observed on the ${slug} page: "${name}"`,
-  observed_evidence: `Crawled ${slug} page shows ${name}`,
-  calculation_method: "Measured page count x observed conversion delta",
+  evidence_quote: `Crawl of https://www.example.com/${slug}/services found "${name}" on 12 of 34 indexed pages.`,
+  observed_evidence: `https://www.example.com/${slug}/contact returned 3 forms and "${name}" on 12 pages.`,
+  calculation_method: "12 affected pages x 34 monthly sessions x observed 2% conversion delta",
   evidence_class: "verified",
   confidence: 0.8,
+
 });
 
 
