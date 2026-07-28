@@ -34,7 +34,7 @@ const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
   bulk:  { abacus: "claude-haiku-4-5-20251001", lovable: "google/gemini-2.5-flash" },
-  heavy: { abacus: "grok-4.3",                  lovable: "openai/gpt-5.5" },
+  heavy: { abacus: "grok-4.3",                  lovable: "google/gemini-2.5-pro" },
 };
 
 export interface RoutedChatResult {
@@ -45,12 +45,21 @@ export interface RoutedChatResult {
   raw: any;
 }
 
+// Newer OpenAI models reject `max_tokens` (must use `max_completion_tokens`)
+// and reject non-default `temperature`. Detect them and adapt the body.
+function isOpenAiNewGen(model: string) {
+  return /^openai\//i.test(model) || /^(gpt-5|o[134])/i.test(model);
+}
+
 function buildBody(model: string, opts: RoutedChatOptions) {
+  const newGen = isOpenAiNewGen(model);
   return {
     model,
     messages: opts.messages,
-    ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
-    ...(opts.max_tokens !== undefined ? { max_tokens: opts.max_tokens } : {}),
+    ...(opts.temperature !== undefined && !newGen ? { temperature: opts.temperature } : {}),
+    ...(opts.max_tokens !== undefined
+      ? (newGen ? { max_completion_tokens: opts.max_tokens } : { max_tokens: opts.max_tokens })
+      : {}),
     ...(opts.response_format ? { response_format: opts.response_format } : {}),
     ...(opts.tools ? { tools: opts.tools } : {}),
     ...(opts.tool_choice ? { tool_choice: opts.tool_choice } : {}),
@@ -62,6 +71,7 @@ async function callProvider(
   key: string,
   model: string,
   opts: RoutedChatOptions,
+  bodyOverride?: Record<string, unknown>,
 ): Promise<Response> {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), opts.timeoutMs ?? 60_000);
@@ -73,12 +83,39 @@ async function callProvider(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildBody(model, opts)),
+      body: JSON.stringify(bodyOverride ?? buildBody(model, opts)),
     });
   } finally {
     clearTimeout(t);
   }
 }
+
+// Rewrites a body after a 400 that names an unsupported parameter, so a single
+// picky model can never blank out an entire report.
+function adaptBodyForError(body: Record<string, any>, errText: string): Record<string, any> | null {
+  const next = { ...body };
+  let changed = false;
+  if (/max_tokens.*not supported|use ['"]?max_completion_tokens/i.test(errText) && "max_tokens" in next) {
+    next.max_completion_tokens = next.max_tokens;
+    delete next.max_tokens;
+    changed = true;
+  }
+  if (/max_completion_tokens.*not supported|unsupported parameter: ['"]?max_completion_tokens/i.test(errText) && "max_completion_tokens" in next) {
+    next.max_tokens = next.max_completion_tokens;
+    delete next.max_completion_tokens;
+    changed = true;
+  }
+  if (/temperature/i.test(errText) && "temperature" in next) {
+    delete next.temperature;
+    changed = true;
+  }
+  if (/response_format/i.test(errText) && "response_format" in next) {
+    delete next.response_format;
+    changed = true;
+  }
+  return changed ? next : null;
+}
+
 
 function extractMessage(j: any) {
   const message = j?.choices?.[0]?.message;
