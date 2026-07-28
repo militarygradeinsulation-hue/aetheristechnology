@@ -1169,6 +1169,17 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }
 
 
+
+    // Canonical annual revenue loss, persisted so every surface (site, portal,
+    // both PDFs) reads the exact same validated numbers.
+    try {
+      const overall = computeOverallLeakage(report || {});
+      if (overall) report.overall_leakage = overall;
+      console.log(`scan ${id}: overall_leakage`, JSON.stringify(overall));
+    } catch (e) {
+      console.error("overall_leakage compute failed:", e instanceof Error ? e.message : String(e));
+    }
+
     await sb.from("forensic_scans").update({
       raw_findings: findings,
       report,
