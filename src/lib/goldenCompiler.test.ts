@@ -113,12 +113,25 @@ describe("canonical totals", () => {
     const out = compileGoldenReport({
       report: {
         top_leaks: [leak("Schema markup missing", 1000, 2000, "seo")],
-        chapters: [{ slug: "seo", what_its_costing: "Combined annual leakage of $9,000 - $12,000 per year." }],
+        chapters: [{ slug: "seo", what_its_costing: "Total annual revenue loss across the report is $9,000 - $12,000." }],
       },
       rawFindings: htmlFindings,
     });
     const ch = (out.report.chapters as Array<Record<string, string>>)[0];
     expect(ch.what_its_costing).toContain("$1,000 - $2,000");
+  });
+
+  it("leaves a chapter subtotal alone instead of overwriting it with the report total", () => {
+    const out = compileGoldenReport({
+      report: {
+        top_leaks: [leak("Schema markup missing", 7200, 15100, "seo")],
+        chapters: [{ slug: "seo", what_its_costing: "The combined SEO gaps are priced at $3,000 - $6,300 per year." }],
+      },
+      rawFindings: htmlFindings,
+    });
+    const ch = (out.report.chapters as Array<Record<string, string>>)[0];
+    expect(ch.what_its_costing).toContain("$3,000 - $6,300");
+    expect(out.ok).toBe(true);
   });
 
   it("leaves a per-leak figure that is not a total alone", () => {
