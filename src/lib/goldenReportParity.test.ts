@@ -12,15 +12,20 @@ const chapter = (no: number) => ({
   slug: `chapter-${no}`,
   title: `Chapter ${no} Title`,
   verdict: `Verdict for chapter ${no}`,
-  what_we_found: `Found ${no}: paragraph one.\n\nFound ${no}: paragraph two with a very long sentence that must wrap across several lines in the PDF without ever being truncated or replaced by an ellipsis.`,
-  why_its_leaking: `Leaking because of reason ${no}.`,
+  what_we_found: `Found ${no}: the page https://www.odoo.com/page/section-${no} shows the headline "Build What Matters ${no}" with no meta description and a Lighthouse score of ${40 + no}/100.\n\nFound ${no}: paragraph two with a very long sentence that must wrap across several lines in the PDF without ever being truncated or replaced by an ellipsis.`,
+  why_its_leaking: `Leaking because the canonical tag on https://www.odoo.com/page/section-${no} points elsewhere and the CTA button reads "Contact us ${no}".`,
   what_its_costing: `$1,000 - $2,000 per year for chapter ${no}.`,
   what_to_do: {
     this_week: [`Week action ${no}`],
     this_month: [`Month action ${no}`],
     this_quarter: [`Quarter action ${no}`],
   },
-  evidence: [{ label: `Evidence label ${no}`, value: `Evidence value ${no}` }],
+  evidence: [
+    { label: `Source URL ${no}`, value: `https://www.odoo.com/page/section-${no}` },
+    { label: `Observed copy ${no}`, value: `"Build What Matters ${no}"` },
+    { label: `Method ${no}`, value: `Measured LCP 3.${no}s on the crawled page` },
+  ],
+
 });
 
 const fullReport = {
