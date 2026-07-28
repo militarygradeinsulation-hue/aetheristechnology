@@ -384,7 +384,22 @@ export function generateForensicGoldenPdf(opts: {
     scanId,
     generatedAt: opts.generatedAt,
   });
+  // Drift alarm: if a saved report field the website can render is not present
+  // in the export model, surface it loudly in dev instead of losing it silently.
+  try {
+    if (typeof import.meta !== "undefined" && (import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
+      const parity = auditGoldenReportParity(report, model);
+      if (!parity.ok) {
+        console.warn(
+          `[golden-pdf] parity drift on ${scanId}: ${parity.issues.length} saved field(s) missing from the export`,
+          parity.issues.slice(0, 10),
+        );
+      }
+    }
+  } catch { /* diagnostics only */ }
+
   const askUrl = model.meta.askUrl;
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const cur: Cursor = { y: M + 6, page: 1 };
 
