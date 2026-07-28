@@ -168,7 +168,15 @@ export type CompilerViolationCode =
   | "truncated_source_used_as_fact"
   | "currency_inconsistent"
   | "invalid_range"
-  | "no_canonical_total";
+  | "no_canonical_total"
+  // generic / template detector
+  | "boilerplate_phrase"
+  | "generic_priced_leak"
+  | "generic_report_total"
+  | "benchmark_math_total"
+  | "leak_missing_evidence_link"
+  | "insufficient_company_evidence"
+  | "fully_generic_flagged";
 
 export type CompilerViolation = {
   code: CompilerViolationCode;
@@ -188,7 +196,7 @@ export type SiteType =
 
 export type CompiledGoldenReport = {
   ok: boolean;
-  state: "compiled" | "needs_review";
+  state: GoldenReportState;
   report: GoldenReportLike & Record<string, unknown>;
   leakage: GoldenLeakage | null;
   evidence_ledger: EvidenceClaim[];
@@ -198,9 +206,12 @@ export type CompiledGoldenReport = {
   consistency: ReportConsistency;
   violations: CompilerViolation[];
   repairs: string[];
+  /** Deterministic generic/template verdict for this report. */
+  generic: GenericVerdict;
   /** Prose the deterministic repair pass could not fix; a cheap repair call may. */
   repairable_prose: boolean;
 };
+
 
 // ───────────────────── source inventory + suitability ─────────────────────
 
