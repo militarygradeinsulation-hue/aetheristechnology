@@ -1,45 +1,43 @@
-## Goal
-Notify you (Joseph) whenever someone opens or interacts with a Golden Report, filtering out reps/internal users as best we can.
+## Diagnosis (verified, not guessed)
 
-## Tracked events
-All four signals you selected, logged to one table `golden_report_events`:
-1. **`scan_completed`** — a new Golden Report was generated (from `forensic-scan-all`).
-2. **`page_view`** — someone loads `/golden-report?scan=…` or `/report/:scanId/ask` (fired from `GoldenReportPage` + `ForensicReportAskPage` on mount).
-3. **`email_open`** — 1×1 tracking pixel `GET /functions/v1/golden-report-track?scan=…&evt=open&t=…` injected into drip email HTML (`generate-drip-batch`).
-4. **`link_click`** — email report link goes through `…/golden-report-track?scan=…&evt=click&t=…` which 302-redirects to the real report URL.
-5. **`pdf_download`** — fired when the "Download PDF" button in `ForensicScanAllPanel` is clicked.
+The scan is collecting real evidence. It's the AI writing layer that is failing, so every chapter falls back to canned text.
 
-Each row stores: `scan_id`, `company_name`, `event_type`, `recipient_email` (if known from scan/drip), `ip`, `country/region/city` (from Cloudflare `cf-ipcountry` / IP geo), `user_agent`, `referrer`, `is_internal` (bool), `rep_code` (if identified), `created_at`.
+Verified facts:
 
-## Rep / internal filter (best-effort)
-`is_internal = true` when any of:
-- Request carries a valid rep code cookie/param, OR
-- `recipient_email` matches a row in `rep_codes.rep_email` / `rep_mailboxes.address` / admin emails, OR
-- IP is in a small `internal_ips` allowlist stored in `admin_kv` (you can add your home/office IP), OR
-- User-Agent matches a known scanner bot list.
-All notifications and the admin feed **exclude `is_internal = true` by default**, with a toggle to show them.
+1. **Evidence exists.** `forensic_scans` rows for `www.odoo.com` (latest 2026-07-28 13:24Z) have `raw_findings` of ~46 KB — the crawler, friction audit, and companion audits all worked.
+2. **Every report since 2026-07-27 16:35Z starts with** `"Odoo was scanned across every forensic tool in the Aetheris stack…"` — that string only exists in `fallbackReport()` in `supabase/functions/forensic-scan-all/index.ts` (line ~534). Same for "standard SMB leak math", "public profile", "Ranges shown are floors". The last genuinely AI-written report is Khan Pediatrics on 2026-07-24 — i.e. before the RouteLLM migration.
+3. **Abacus is dead.** Live call to `https://routellm.abacus.ai/v1/chat/completions` with `grok-4.3` returns HTTP 400: `{"success": false, "error": "You have no remaining credits to use the LLM apis."}`. Function logs match: ~15 consecutive `[ai-router] Abacus 400, falling back to Lovable` per scan. The migration is not misparsing anything — the provider is simply out of credits, so 100% of traffic hits the fallback.
+4. **The Lovable fallback then fails too.** Logs for the 13:24Z Odoo scan show all 14 chapters failing, in two flavors:
+   - `AbortError: The signal has been aborted` at `_shared/ai-router.ts:56` — the per-call timeout firing.
+   - `chapter <slug> synth failed: empty result` — a 200 response with empty `message.content`.
+5. **Why:** `heavy` tier now maps to `google/gemini-2.5-pro`. A trivial 2,200-token JSON call to that model measured **16 seconds**. `synthesizeOneChapter` sends ~28 KB of findings and calls `aiJson(prompt, 2200, 24_000)` — a **24-second** budget — and fires **15 of them in parallel** against one gateway. Pro is a reasoning model: thinking tokens are billed against `max_tokens`, so long prompts either exceed 24s (AbortError) or return `finish_reason: length` with empty content (empty result). Either way `synthesizeReport` swaps in `fb.chapters`, and the summary swaps in `fb.executive_summary`.
 
-## Notification delivery (all three)
-- **Email to you** — `send-transactional-email` with new `golden-report-opened` template. Rate-limited: max 1 email per (scan_id, event_type) per hour; a nightly digest rolls up anything suppressed.
-- **Admin dashboard feed** — new `AdminGoldenOpensPanel.tsx` in `/admin` showing a live list (company, event, when, city/country, open count, recipient, rep-filter toggle) with 15s polling + Realtime subscription.
-- **Browser push** — while `/admin` is open, use the browser Notifications API to pop a toast when a new external open arrives via the Supabase Realtime channel on `golden_report_events`.
+**Root cause:** two independent regressions stacking — Abacus RouteLLM has zero credits so it never serves a request, and the Lovable fallback model/timeout pairing (`gemini-2.5-pro` @ 24s, 2,200 max_tokens, 15-way parallel) cannot complete a chapter. The fallback report is doing exactly what it was designed to do; it's just doing it every single time.
 
-## Backend pieces
-- Migration: `golden_report_events` table (+ GRANTs, RLS admin-only, Realtime publication add), plus `internal_ips` seed in `admin_kv`.
-- New edge function `golden-report-track` (public, `verify_jwt = false`) — accepts `evt=open` (returns 1×1 gif), `evt=click` (302), `evt=view`, `evt=download`; writes the event row, does rep/internal detection, invokes email notifier when non-internal.
-- `forensic-scan-all` — emit `scan_completed` event on success.
-- `generate-drip-batch` — wrap report link with tracker and inject open-pixel.
+Not the cause: input data (46 KB of real findings), JSON parsing (`aiJson` has a regex salvage path), the sanitizer, the PDF renderer, or schema/tool calls (none are used here).
 
-## Frontend pieces
-- `GoldenReportPage` + `ForensicReportAskPage`: `useEffect` beacon → `golden-report-track?evt=view`.
-- `ForensicScanAllPanel` PDF button: beacon → `evt=download`.
-- New `src/components/admin/AdminGoldenOpensPanel.tsx` mounted in `AdminDashboard`.
+## Fix plan
 
-## Out of scope
-- Deanonymizing anonymous email opens beyond IP geo (Gmail image proxy will show as US-based Google IPs — labeled clearly in the UI).
-- Deep bot-open filtering beyond a UA blocklist.
+**A. Make the router honest about a dead provider — `supabase/functions/_shared/ai-router.ts`**
+- Detect the "no remaining credits" 400 (and any Abacus 4xx auth/billing error) and set a module-level circuit breaker so the remaining 14 calls of a scan skip Abacus entirely instead of each burning a round trip.
+- Change the `heavy` Lovable fallback from `google/gemini-2.5-pro` to `google/gemini-2.5-flash` (fast, non-reasoning-heavy, reliably returns content), keeping Pro available via `lovableModelOverride` for callers that want it.
+- Treat a 200-with-empty-content from Lovable as a failure and retry once with a larger token budget, so "empty result" can't silently become boilerplate.
+
+**B. Give chapter synthesis room to finish — `supabase/functions/forensic-scan-all/index.ts`**
+- Raise the per-chapter timeout from 24s to ~55s and the summary to ~60s (the outer watchdog already covers the total).
+- Stagger the 15 parallel calls into 2–3 waves so one gateway isn't hit with 15 simultaneous large-prompt requests.
+- Add one retry per chapter on abort/empty before falling back.
+
+**C. Make fallback visible instead of silent**
+- Record a `synth_fallback` flag plus the failure reason per chapter into `stage_status`, and surface a small "degraded — AI synthesis unavailable" marker in the admin scan view. A report that is 100% template should never look identical to a real one again.
+
+**D. Decide the Abacus question (needs your input)**
+- Either top up the Abacus RouteLLM account, or set `AI_ROUTER_DISABLE=1` so every function goes straight to Lovable without the wasted round trip. Fixes A–C work either way; this only affects cost.
+
+**E. Verify**
+- Re-run a scan against `odoo.com`, then confirm in the DB that `report->>'executive_summary'` no longer begins with "…was scanned across every forensic tool" and that chapter text quotes real findings, plus check the function logs are clean of AbortError/empty-result.
 
 ## Technical notes
-- Tracking pixel returns cached 1×1 gif with `Cache-Control: no-store` so Gmail proxy re-fetches per open.
-- Event dedupe key: `hash(scan_id + evt + ip + ua + 10-min bucket)` to prevent double-count from prefetchers, but `open_count` on the UI shows raw count too.
-- Email notifications go through the existing app-email queue; template `golden-report-opened` shows company, event, location, total opens so far, and a deep link to the admin panel.
+- Affected: `supabase/functions/_shared/ai-router.ts` (`MODEL_MAP`, `routedChatCompletion`, `extractMessage`), `supabase/functions/forensic-scan-all/index.ts` (`aiJson`, `synthesizeOneChapter`, `synthesizeSummary`, `synthesizeReport`).
+- Other functions on the shared router (`admin-assistant`, `assistant-chat`, `rep-assistant`, `diagnose-whats-wrong`, `generate-system-deliverable`, `handle-drip-replies`, `generate-sales-scripts`) are silently paying the same Abacus-400 penalty and will benefit from A; they need redeploying alongside.
+- No database migration required.

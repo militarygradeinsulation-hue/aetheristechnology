@@ -622,11 +622,17 @@ async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _mod
       return m ? JSON.parse(m[0]) : {};
     }
   };
-  // Fail fast — the caller (synthesizeReport) runs 15 calls in parallel and is
-  // itself wrapped in a hard watchdog. A slow single call must not stall the
-  // whole Golden Report; the deterministic fallback fills any missing chapter.
-  return await doCall(timeoutMs);
+  // One retry on abort / empty before the caller falls back to template text.
+  try {
+    const first = await doCall(timeoutMs);
+    if (first && Object.keys(first).length) return first;
+    throw new Error("empty json");
+  } catch (e) {
+    console.warn("aiJson attempt 1 failed, retrying:", e instanceof Error ? e.message : String(e));
+    return await doCall(timeoutMs);
+  }
 }
+
 
 
 const CHAPTER_SHAPE = `{
@@ -663,7 +669,7 @@ Requirements:
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 24_000);
+  return await aiJson(prompt, 2200, 55_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -677,7 +683,18 @@ Return JSON:
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
 }`;
-  return await aiJson(prompt, 3500, 24_000);
+  return await aiJson(prompt, 3500, 60_000);
+}
+
+// Run tasks in bounded waves so one gateway is never hit with 15 large
+// simultaneous prompts (which is what produced timeouts + empty responses).
+async function inWaves<T>(tasks: Array<() => Promise<T>>, size: number): Promise<PromiseSettledResult<T>[]> {
+  const out: PromiseSettledResult<T>[] = [];
+  for (let i = 0; i < tasks.length; i += size) {
+    const slice = tasks.slice(i, i + size);
+    out.push(...(await Promise.allSettled(slice.map((fn) => fn()))));
+  }
+  return out;
 }
 
 async function synthesizeReport(findings: Record<string, unknown>, target: string, company: string) {
@@ -685,29 +702,45 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   const findingsStr = JSON.stringify(cleaned).slice(0, 28_000);
   const fb = fallbackReport(findings, target, company);
 
-  // Run summary + 14 per-chapter calls in parallel so one failure doesn't poison the whole report.
-  const [summaryResult, ...chapterResults] = await Promise.allSettled([
-    synthesizeSummary(findingsStr, target, company),
-    ...CHAPTERS.map((c) => synthesizeOneChapter(c, findingsStr, target, company)),
-  ]);
+  const [summaryResult, ...chapterResults] = await inWaves<any>(
+    [
+      () => synthesizeSummary(findingsStr, target, company),
+      ...CHAPTERS.map((c) => () => synthesizeOneChapter(c, findingsStr, target, company)),
+    ],
+    5,
+  );
 
+  const fallbackChapters: Array<{ slug: string; reason: string }> = [];
   const chapters = CHAPTERS.map((c, i) => {
     const r = chapterResults[i];
     if (r.status === "fulfilled" && r.value && (r.value.what_we_found || r.value.verdict)) {
       return { no: c.no, slug: c.slug, title: c.title, ...r.value };
     }
-    console.error(`chapter ${c.slug} synth failed:`, r.status === "rejected" ? r.reason : "empty result");
+    const reason = r.status === "rejected" ? String((r as PromiseRejectedResult).reason).slice(0, 200) : "empty result";
+    console.error(`chapter ${c.slug} synth failed:`, reason);
+    fallbackChapters.push({ slug: c.slug, reason });
     return fb.chapters.find((x) => x.slug === c.slug);
   });
 
-  const summary = summaryResult.status === "fulfilled" ? summaryResult.value : {};
+  const summary = summaryResult.status === "fulfilled" ? (summaryResult.value || {}) : {};
+  const summaryFailed = !summary.executive_summary;
   const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
     executive_summary: summary.executive_summary || fb.executive_summary,
     top_leaks: dedupeTopLeaks(rawLeaks),
     chapters,
+    synth_fallback: {
+      degraded: summaryFailed || fallbackChapters.length > 0,
+      summary_fallback: summaryFailed,
+      summary_reason: summaryResult.status === "rejected"
+        ? String((summaryResult as PromiseRejectedResult).reason).slice(0, 200)
+        : (summaryFailed ? "empty result" : null),
+      chapters_fallback: fallbackChapters,
+      chapters_total: CHAPTERS.length,
+    },
   };
 }
+
 
 // Strip patterns that historically caused false positives before findings reach the AI.
 // - Webflow / Framer / Wix dual success/failure DOM: both messages live in raw HTML,
@@ -847,14 +880,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       updated_at: nowIso(),
     }).eq("id", id);
 
-    await stage("synth", "running", { cap_seconds: 30, mode: "per-chapter-parallel" });
-    let report = fbEarly;
+    await stage("synth", "running", { cap_seconds: 150, mode: "per-chapter-waves" });
+    let report: any = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 30s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 150s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
-      // from being stuck in "running" forever if Gemini stalls.
+      // from being stuck in "running" forever if the model stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30_000));
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 150_000));
       const result = await Promise.race([synth, watchdog]);
       if (result) {
         report = result;
@@ -864,13 +897,31 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           if (!report.executive_summary) report.executive_summary = fbEarly.executive_summary;
           if (!report.top_leaks?.length) report.top_leaks = fbEarly.top_leaks;
         }
+        if (report.synth_fallback?.degraded) {
+          findings.synthesis_degraded = report.synth_fallback;
+        }
       } else {
         findings.synthesis_error = "AI synthesis exceeded scan window; fallback report shipped.";
+        report.synth_fallback = {
+          degraded: true,
+          summary_fallback: true,
+          summary_reason: "watchdog timeout",
+          chapters_fallback: CHAPTERS.map((c) => ({ slug: c.slug, reason: "watchdog timeout" })),
+          chapters_total: CHAPTERS.length,
+        };
       }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
+      report.synth_fallback = {
+        degraded: true,
+        summary_fallback: true,
+        summary_reason: findings.synthesis_error,
+        chapters_fallback: CHAPTERS.map((c) => ({ slug: c.slug, reason: "synthesis threw" })),
+        chapters_total: CHAPTERS.length,
+      };
     }
-    await stage("synth", "done");
+    await stage("synth", report?.synth_fallback?.degraded ? "degraded" : "done", report?.synth_fallback ?? null);
+
 
 
     await sb.from("forensic_scans").update({
