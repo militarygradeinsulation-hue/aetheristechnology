@@ -87,7 +87,7 @@ describe("compiler gate", () => {
       company: "Example Co",
     });
     const total = computeGoldenLeakage(compiled.report as never);
-    expect(total?.rangeLabel).not.toContain("450,000");
+    expect(total).toBeNull();
   });
 
   it("keeps a specific report publishable with its measured total", () => {
