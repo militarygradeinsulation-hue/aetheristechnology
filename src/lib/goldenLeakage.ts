@@ -74,8 +74,11 @@ export const GOLDEN_LEAKAGE_LABEL = "TOTAL ESTIMATED ANNUAL REVENUE LOSS";
 export const GOLDEN_LEAKAGE_EMPTY_MESSAGE =
   "Annual revenue loss could not be calculated from this scan.";
 
-// Money magnitudes outside this window are data artifacts, not evidence.
-const MAX_SANE = 1_000_000_000;
+// Money magnitudes outside this window are data artifacts (placeholder values
+// like 999,999,999 or speculative TAM math), not evidence for one leak.
+const MAX_SANE = 50_000_000;
+/** Chapter prose mixes annual, quarterly and speculative TAM figures — cap tighter. */
+const MAX_SANE_CHAPTER = 10_000_000;
 
 /**
  * Accepts a real number, or a money string the model sometimes emits:
