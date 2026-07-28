@@ -128,8 +128,25 @@ function block(label: string, body?: unknown): Block[] {
 
 // ───────────────────────── sections ─────────────────────────
 
-function leakageSection(leakage: GoldenLeakage | null): Section | null {
-  if (!leakage) return null;
+function leakageSection(leakage: GoldenLeakage | null): Section {
+  if (!leakage) {
+    // Never fabricate a fallback range. The reader is told plainly that the
+    // scan produced no priced evidence.
+    return {
+      id: "leakage",
+      title: GOLDEN_LEAKAGE_LABEL,
+      newPage: false,
+      indexed: false,
+      blocks: [
+        { kind: "callout", tone: "amber", label: GOLDEN_LEAKAGE_LABEL, text: "Not calculated" },
+        {
+          kind: "paragraph",
+          text:
+            "This scan produced no priced leak evidence, so no annual revenue loss figure is calculated for this report. Re-run the scan to price the findings.",
+        },
+      ],
+    };
+  }
   return {
     id: "leakage",
     title: GOLDEN_LEAKAGE_LABEL,
@@ -144,6 +161,31 @@ function leakageSection(leakage: GoldenLeakage | null): Section | null {
     ],
   };
 }
+
+/** Degradation warning the website shows above the report body. */
+function degradedSection(report: Record<string, unknown>): Section | null {
+  const sf = report.synth_fallback as
+    | { degraded?: boolean; chapters_fallback?: unknown[]; chapters_total?: number }
+    | undefined;
+  if (!sf || typeof sf !== "object" || !sf.degraded) return null;
+  const fell = Array.isArray(sf.chapters_fallback) ? sf.chapters_fallback.length : 0;
+  const total = Number(sf.chapters_total) || 14;
+  return {
+    id: "degraded",
+    title: "Degraded - AI synthesis unavailable",
+    newPage: false,
+    indexed: false,
+    blocks: [
+      {
+        kind: "callout",
+        tone: "amber",
+        label: "Degraded - AI synthesis unavailable",
+        text: `${fell} of ${total} chapters fell back to template benchmark text instead of scan evidence. Re-run this scan before sending it to a client.`,
+      },
+    ],
+  };
+}
+
 
 type ConsistencyLike = {
   evidence_quality?: Record<string, number>;
