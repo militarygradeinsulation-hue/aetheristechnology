@@ -153,14 +153,26 @@ export async function routedChatCompletion(
   }
 
   if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
-  const r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts);
+  let body = buildBody(lovableModel, opts);
+  let r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, body);
   if (!r.ok) {
     const t = await r.text().catch(() => "");
-    const err = new Error(`Lovable AI ${r.status}: ${t.slice(0, 200)}`);
-    (err as any).status = r.status;
-    throw err;
+    // One adaptive retry for picky-parameter 400s (max_tokens / temperature / response_format).
+    const retryBody = r.status === 400 ? adaptBodyForError(body, t) : null;
+    if (retryBody) {
+      console.warn(`[ai-router] Lovable 400 on parameters, retrying with adapted body`);
+      body = retryBody as any;
+      r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, body);
+    }
+    if (!r.ok) {
+      const t2 = retryBody ? await r.text().catch(() => "") : t;
+      const err = new Error(`Lovable AI ${r.status}: ${t2.slice(0, 200)}`);
+      (err as any).status = r.status;
+      throw err;
+    }
   }
   const j = await r.json();
   const { message, content } = extractMessage(j);
   return { content, message, provider: "lovable", model: lovableModel, raw: j };
 }
+
