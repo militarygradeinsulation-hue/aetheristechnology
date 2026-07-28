@@ -6,7 +6,7 @@
 // so jsPDF outline + internal link annotations work for the TOC.
 
 import jsPDF from "jspdf";
-import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL } from "@/lib/goldenLeakage";
+import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
 
 
 export interface Chapter {
