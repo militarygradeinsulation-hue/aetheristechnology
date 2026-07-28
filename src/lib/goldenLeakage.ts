@@ -155,28 +155,40 @@ export function hasPricedEvidence(report: GoldenReportLike | null | undefined): 
   return !!sumLeaks(report.top_leaks) || !!sumLeaks(leaksFromChapters(report));
 }
 
-/** Pull "$4,500 - $8,200" / "$4,500 to $8,200" / "$4,500" out of chapter prose. */
+/**
+ * Pull "$4,500 - $8,200" / "$4,500 to $8,200" / "$4,500" out of chapter prose.
+ * Only the first figure per chapter is used, and only when the chapter states an
+ * annual amount, so quarterly and speculative market-size numbers in the same
+ * paragraph are never summed into the yearly total.
+ */
 function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   const priced = new Set(
     (report.top_leaks || [])
       .map((l) => String(l?.chapter_slug || "").toLowerCase())
       .filter(Boolean),
   );
+  const withinChapterCap = (v: unknown) => {
+    const n = parseMoney(v);
+    return n != null && n <= MAX_SANE_CHAPTER;
+  };
   const out: PricedLeak[] = [];
   for (const ch of report.chapters || []) {
     const slug = String(ch?.slug || "").toLowerCase();
     if (slug && priced.has(slug)) continue;
     const text = String(ch?.what_its_costing || "");
     if (!text) continue;
+    if (!/\b(annual|annually|per year|a year|\/\s?yr|yearly)\b/i.test(text)) continue;
     const range = text.match(
       /\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)\s*(?:-|–|—|to)\s*\$?\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/,
     );
-    if (range) {
+    if (range && withinChapterCap(range[1]) && withinChapterCap(range[2])) {
       out.push({ chapter_slug: slug, dollars_low: range[1], dollars_high: range[2] });
       continue;
     }
     const single = text.match(/\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/);
-    if (single) out.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
+    if (single && withinChapterCap(single[1])) {
+      out.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
+    }
   }
   return out;
 }
