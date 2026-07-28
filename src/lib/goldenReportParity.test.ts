@@ -122,13 +122,54 @@ describe("golden report view model", () => {
     expect(modelText(model)).not.toMatch(/\$75,000|\$450,000/);
   });
 
-  it("omits the leakage headline entirely when there is no priced evidence", () => {
+  it("says 'Not calculated' instead of inventing a range when there is no priced evidence", () => {
     const noEvidence = { ...fullReport, overall_leakage: null, top_leaks: [], chapters: [{ no: 1, slug: "a", title: "A", what_its_costing: "Not quantified." }] };
     const model = build(noEvidence);
     expect(model.leakage).toBeNull();
-    expect(model.sections.find((s) => s.id === "leakage")).toBeUndefined();
-    expect(modelText(model)).not.toMatch(/TOTAL ESTIMATED ANNUAL REVENUE LOSS/);
+    const leak = model.sections.find((s) => s.id === "leakage");
+    expect(leak).toBeDefined();
+    expect(modelText(model)).toContain("Not calculated");
+    expect(modelText(model)).not.toMatch(/\$75,000|\$450,000/);
   });
+
+  it("exports report_consistency detail and future consistency fields", () => {
+    const model = build({
+      ...fullReport,
+      report_consistency: {
+        ...fullReport.report_consistency,
+        detected_findings: 18,
+        uniquely_priced_leaks: 5,
+        unique_root_causes: 4,
+        site_type: "b2b_saas",
+        future_added_field: "FUTURE-CONSISTENCY-VALUE",
+      },
+    });
+    const text = modelText(model);
+    expect(text).toContain("b2b_saas");
+    expect(text).toContain("FUTURE-CONSISTENCY-VALUE");
+  });
+
+  it("routes unknown future top-level fields into the export automatically", () => {
+    const model = build({ ...fullReport, brand_new_section: { headline: "FUTURE-TOP-LEVEL-VALUE", items: ["future item one"] } });
+    const text = modelText(model);
+    expect(text).toContain("FUTURE-TOP-LEVEL-VALUE");
+    expect(text).toContain("future item one");
+    const audit = auditGoldenReportParity({ ...fullReport, brand_new_section: { headline: "FUTURE-TOP-LEVEL-VALUE", items: ["future item one"] } }, model);
+    expect(audit.ok).toBe(true);
+  });
+
+  it("surfaces the degraded-synthesis warning the website shows", () => {
+    const model = build({ ...fullReport, synth_fallback: { degraded: true, chapters_fallback: [1, 2], chapters_total: 14 } });
+    expect(modelText(model)).toMatch(/2 of 14 chapters fell back/);
+  });
+
+  it("renders every evidence item of every finding without capping arrays", () => {
+    const many = { ...chapter(1), evidence: Array.from({ length: 25 }, (_, i) => ({ label: `E${i}`, value: `EVIDENCE-VALUE-${i}` })) };
+    const model = build({ ...fullReport, chapters: [many] });
+    const text = modelText(model);
+    for (let i = 0; i < 25; i++) expect(text).toContain(`EVIDENCE-VALUE-${i}`);
+  });
+
 
   it("keeps long prose intact — no truncation or ellipsis injection", () => {
     const long = "A ".repeat(4000) + "END-OF-LONG-CHAPTER";
