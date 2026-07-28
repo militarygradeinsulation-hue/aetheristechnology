@@ -1133,7 +1133,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     // unique root cause exactly once, injects the canonical numbers into prose,
     // and validates the whole document. Nothing downstream may recompute totals
     // or counts — every surface reads report.report_consistency / overall_leakage.
-    let compilerState: "compiled" | "needs_review" = "needs_review";
+    let compilerState: "compiled" | "needs_review" | "regeneration_required" = "needs_review";
     try {
       let compiled = compileGoldenReport({ report, rawFindings: findings, url, company });
       // Second deterministic pass: repairs made in pass 1 (canonical totals and
@@ -1153,6 +1153,8 @@ async function runScan(id: string, url: string, company: string, accountId: stri
         uniquely_priced_leaks: compiled.consistency.uniquely_priced_leaks,
         canonical_range: compiled.consistency.canonical_range_ascii,
         evidence_quality: compiled.consistency.evidence_quality,
+        generic: compiled.generic.generic,
+        specificity: compiled.generic.specificity.score,
         repairs: compiled.repairs.length,
         violations: compiled.violations.slice(0, 10),
       }));
@@ -1170,26 +1172,55 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
     // Canonical annual revenue loss invariant (compiler already persisted the
     // total from uniquely priced leaks; this is the loud last-line check).
+    // Skipped entirely for regeneration_required reports: there, the ABSENCE of
+    // a total is the correct outcome, not a failure to recover from.
     try {
-      if (!report?.overall_leakage) {
-        const overall = computeOverallLeakage(report || {});
-        if (overall) report.overall_leakage = overall;
-      }
-      console.log(`scan ${id}: overall_leakage`, JSON.stringify(report?.overall_leakage ?? null));
-      const invariant = leakageInvariantError(report || {});
-      if (invariant) {
-        // Loud structured failure: never let the red box disappear silently.
-        console.error(JSON.stringify({
-          event: "leakage_invariant_violation",
-          scan_id: id,
-          target_url: url,
-          detail: invariant,
-          top_leaks_sample: (report?.top_leaks || []).slice(0, 3),
-        }));
-        await stage("synthesis", "degraded", "annual revenue loss could not be resolved from priced evidence");
+      if (compilerState !== "regeneration_required") {
+        if (!report?.overall_leakage) {
+          const overall = computeOverallLeakage(report || {});
+          if (overall) report.overall_leakage = overall;
+        }
+        console.log(`scan ${id}: overall_leakage`, JSON.stringify(report?.overall_leakage ?? null));
+        const invariant = leakageInvariantError(report || {});
+        if (invariant) {
+          // Loud structured failure: never let the red box disappear silently.
+          console.error(JSON.stringify({
+            event: "leakage_invariant_violation",
+            scan_id: id,
+            target_url: url,
+            detail: invariant,
+            top_leaks_sample: (report?.top_leaks || []).slice(0, 3),
+          }));
+          await stage("synthesis", "degraded", "annual revenue loss could not be resolved from priced evidence");
+        }
       }
     } catch (e) {
       console.error("overall_leakage compute failed:", e instanceof Error ? e.message : String(e));
+    }
+
+    // ─────────── LIFECYCLE GATE ───────────
+    // A generic/template attempt must never replace a previously valid report.
+    // If one exists we keep it and record the failed attempt alongside it.
+    if (compilerState === "regeneration_required") {
+      const { data: prior } = await sb
+        .from("forensic_scans")
+        .select("report")
+        .eq("id", id)
+        .maybeSingle();
+      const priorReport = prior?.report as Record<string, unknown> | null;
+      const priorWasValid =
+        !!priorReport &&
+        (priorReport as { compiler?: { state?: string } }).compiler?.state === "compiled" &&
+        priorReport.report_state !== "regeneration_required";
+      if (priorWasValid) {
+        console.error(`scan ${id}: generic synthesis rejected — prior compiled report preserved`);
+        (priorReport as Record<string, unknown>).last_rejected_attempt = {
+          at: nowIso(),
+          reason: "generic/template synthesis",
+          violations: (report?.compiler?.violations || []).slice(0, 6),
+        };
+        report = priorReport;
+      }
     }
 
     await sb.from("forensic_scans").update({
@@ -1199,8 +1230,9 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       completed_at: nowIso(),
     }).eq("id", id);
     if (compilerState !== "compiled") {
-      console.error(`scan ${id}: report is needs_review — downloads and delivery are gated until it compiles clean`);
+      console.error(`scan ${id}: report is ${compilerState} — downloads and delivery are gated until it compiles clean`);
     }
+
 
 
 
