@@ -946,6 +946,67 @@ function dedupeTopLeaks(
     .map((leak, i) => ({ ...leak, rank: i + 1 }));
 }
 
+// ───────────── canonical annual revenue loss (persisted with the report) ─────────────
+// Derived ONLY from real scan evidence. Accepts the money strings the model
+// sometimes emits ("$25,000", "12k"). Returns null when nothing is priced, so
+// downstream surfaces show "could not be calculated" instead of a fake total.
+function parseMoneyValue(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
+  if (typeof v !== "string") return null;
+  const m = v.trim().match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
+  if (!m) return null;
+  const n = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
+  if (!Number.isFinite(n) || n === 0) return null;
+  const unit = (m[1] || "").toLowerCase();
+  return Math.abs(n) * (unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1);
+}
+
+function computeOverallLeakage(report: {
+  top_leaks?: Array<Record<string, unknown>>;
+  chapters?: Array<Record<string, unknown>>;
+}) {
+  const sum = (leaks: Array<Record<string, unknown>>) => {
+    let low = 0, high = 0, count = 0;
+    const seen = new Set<string>();
+    for (const leak of leaks || []) {
+      const key = String(leak?.name || leak?.chapter_slug || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      if (key && seen.has(key)) continue;
+      const l = parseMoneyValue(leak?.dollars_low);
+      const h = parseMoneyValue(leak?.dollars_high);
+      if (l == null && h == null) continue;
+      const lo = l ?? (h as number), hi = h ?? (l as number);
+      low += Math.min(lo, hi); high += Math.max(lo, hi); count += 1;
+      if (key) seen.add(key);
+    }
+    return count && high > 0 ? { low: low > 0 ? low : high, high, count } : null;
+  };
+
+  const fromLeaks = sum(report.top_leaks || []);
+  if (fromLeaks) {
+    return { annual_low: Math.round(fromLeaks.low), annual_high: Math.round(fromLeaks.high), currency: "USD", source: "top_leaks", priced_leak_count: fromLeaks.count };
+  }
+
+  // Legacy/partial: pull ranges out of chapter costing prose, skipping chapters
+  // already represented in top_leaks so nothing is double-counted.
+  const priced = new Set((report.top_leaks || []).map((l) => String(l?.chapter_slug || "").toLowerCase()).filter(Boolean));
+  const derived: Array<Record<string, unknown>> = [];
+  for (const ch of report.chapters || []) {
+    const slug = String(ch?.slug || "").toLowerCase();
+    if (slug && priced.has(slug)) continue;
+    const text = String(ch?.what_its_costing || "");
+    if (!text) continue;
+    const range = text.match(/\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)\s*(?:-|–|—|to)\s*\$?\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/);
+    if (range) { derived.push({ chapter_slug: slug, dollars_low: range[1], dollars_high: range[2] }); continue; }
+    const single = text.match(/\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/);
+    if (single) derived.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
+  }
+  const fromChapters = sum(derived);
+  if (fromChapters) {
+    return { annual_low: Math.round(fromChapters.low), annual_high: Math.round(fromChapters.high), currency: "USD", source: "chapters", priced_leak_count: fromChapters.count };
+  }
+  return null;
+}
+
 
 
 
@@ -1108,6 +1169,17 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("assets", "degraded", "growth assets threw");
     }
 
+
+
+    // Canonical annual revenue loss, persisted so every surface (site, portal,
+    // both PDFs) reads the exact same validated numbers.
+    try {
+      const overall = computeOverallLeakage(report || {});
+      if (overall) report.overall_leakage = overall;
+      console.log(`scan ${id}: overall_leakage`, JSON.stringify(overall));
+    } catch (e) {
+      console.error("overall_leakage compute failed:", e instanceof Error ? e.message : String(e));
+    }
 
     await sb.from("forensic_scans").update({
       raw_findings: findings,

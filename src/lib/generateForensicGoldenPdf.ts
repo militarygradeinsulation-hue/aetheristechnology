@@ -6,7 +6,7 @@
 // so jsPDF outline + internal link annotations work for the TOC.
 
 import jsPDF from "jspdf";
-import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL } from "@/lib/goldenLeakage";
+import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
 
 
 export interface Chapter {
@@ -22,7 +22,9 @@ export interface Chapter {
 }
 export interface ForensicReport {
   executive_summary?: string;
-  top_leaks?: { rank: number; name: string; dollars_low?: number; dollars_high?: number; chapter_slug?: string; summary?: string }[];
+  /** Canonical annual revenue loss persisted at scan completion. */
+  overall_leakage?: OverallLeakage | null;
+  top_leaks?: { rank: number; name: string; dollars_low?: number | string; dollars_high?: number | string; chapter_slug?: string; summary?: string }[];
   chapters?: Chapter[];
   /** Growth assets generated alongside the report. Rendered on-screen only; PDF logic unchanged. */
   deliverables?: import("@/components/GoldenGrowthAssets").GoldenDeliverables | null;
@@ -187,7 +189,7 @@ export function generateForensicGoldenPdf(opts: {
   doc.text(`Scan ID: ${scanId}`, M, cy + 24);
 
   // ── Total leakage headline (same source of truth as the website/portal) ──
-  const totalLeakage = computeGoldenLeakage(report.top_leaks);
+  const totalLeakage = computeGoldenLeakage(report);
   if (totalLeakage) {
     const boxY = cy + 36;
     doc.setFillColor(40, 15, 15);
