@@ -22,7 +22,9 @@ export interface Chapter {
 }
 export interface ForensicReport {
   executive_summary?: string;
-  top_leaks?: { rank: number; name: string; dollars_low?: number; dollars_high?: number; chapter_slug?: string; summary?: string }[];
+  /** Canonical annual revenue loss persisted at scan completion. */
+  overall_leakage?: OverallLeakage | null;
+  top_leaks?: { rank: number; name: string; dollars_low?: number | string; dollars_high?: number | string; chapter_slug?: string; summary?: string }[];
   chapters?: Chapter[];
   /** Growth assets generated alongside the report. Rendered on-screen only; PDF logic unchanged. */
   deliverables?: import("@/components/GoldenGrowthAssets").GoldenDeliverables | null;
