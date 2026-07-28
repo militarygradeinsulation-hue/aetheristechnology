@@ -299,6 +299,9 @@ export function ForensicScanAllPanel() {
 
       {report && row && (
         <Card className="p-0 bg-card border-border overflow-hidden">
+          <div className="p-5 pb-0">
+            <GoldenLeakageBanner report={report} />
+          </div>
           <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/5 to-transparent">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="min-w-0">
