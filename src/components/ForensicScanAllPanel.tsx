@@ -10,6 +10,8 @@ import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
 import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
+import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
+
 
 
 type Row = {
@@ -34,6 +36,8 @@ const STAGES: { key: string; label: string }[] = [
   { key: "friction",      label: "Brand contradictions + friction audit" },
   { key: "crm",           label: "CRM / pipeline forensics" },
   { key: "synth",         label: "Synthesizing 14-chapter report" },
+  { key: "assets",        label: "Building growth assets (brand, imagery, posts, schedule)" },
+
 ];
 
 const BRAND_KIT_STAGES: { key: string; label: string }[] = [
@@ -376,6 +380,13 @@ export function ForensicScanAllPanel() {
                 </div>
               </section>
             )}
+
+            <GoldenGrowthAssets
+              deliverables={report.deliverables}
+              company={row.company_name || row.target_url}
+            />
+
+
 
             <section>
               <div className="flex items-center justify-between mb-2">
