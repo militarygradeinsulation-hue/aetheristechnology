@@ -105,7 +105,7 @@ describe("missing counts", () => {
 
 describe("website and PDF parity", () => {
   it("PDF section renders the same title, lead and metric values", () => {
-    const model = buildGoldenReportModel(QA_FULL_REPORT as never, QA_META);
+    const model = buildGoldenReportModel({ report: QA_FULL_REPORT as never, ...QA_META });
     const section = model.sections.find((s) => s.id === "evidence-quality")!;
     const confidence = buildEvidenceConfidence(QA_FULL_REPORT)!;
     expect(section.title).toBe(EVIDENCE_CONFIDENCE_TITLE);
