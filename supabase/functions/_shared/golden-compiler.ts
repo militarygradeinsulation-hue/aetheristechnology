@@ -21,9 +21,17 @@ import {
   type GoldenReportLike,
   type PricedLeak,
 } from "./golden-leakage.ts";
+import {
+  detectGenericReport,
+  GENERIC_DETECTOR_VERSION,
+  REGENERATION_REQUIRED_MESSAGE,
+  type GenericVerdict,
+  type GoldenReportState,
+} from "./golden-generic-detector.ts";
 
-export const COMPILER_VERSION = 1;
+export const COMPILER_VERSION = 2;
 export const PRICING_MODEL_VERSION = 1;
+
 
 /** Hard caps so a ledger can never bloat a report row. */
 const MAX_CLAIMS = 160;
