@@ -880,14 +880,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       updated_at: nowIso(),
     }).eq("id", id);
 
-    await stage("synth", "running", { cap_seconds: 30, mode: "per-chapter-parallel" });
-    let report = fbEarly;
+    await stage("synth", "running", { cap_seconds: 150, mode: "per-chapter-waves" });
+    let report: any = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 30s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 150s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
-      // from being stuck in "running" forever if Gemini stalls.
+      // from being stuck in "running" forever if the model stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 30_000));
+      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 150_000));
       const result = await Promise.race([synth, watchdog]);
       if (result) {
         report = result;
@@ -897,13 +897,31 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           if (!report.executive_summary) report.executive_summary = fbEarly.executive_summary;
           if (!report.top_leaks?.length) report.top_leaks = fbEarly.top_leaks;
         }
+        if (report.synth_fallback?.degraded) {
+          findings.synthesis_degraded = report.synth_fallback;
+        }
       } else {
         findings.synthesis_error = "AI synthesis exceeded scan window; fallback report shipped.";
+        report.synth_fallback = {
+          degraded: true,
+          summary_fallback: true,
+          summary_reason: "watchdog timeout",
+          chapters_fallback: CHAPTERS.map((c) => ({ slug: c.slug, reason: "watchdog timeout" })),
+          chapters_total: CHAPTERS.length,
+        };
       }
     } catch (e) {
       findings.synthesis_error = e instanceof Error ? e.message : String(e);
+      report.synth_fallback = {
+        degraded: true,
+        summary_fallback: true,
+        summary_reason: findings.synthesis_error,
+        chapters_fallback: CHAPTERS.map((c) => ({ slug: c.slug, reason: "synthesis threw" })),
+        chapters_total: CHAPTERS.length,
+      };
     }
-    await stage("synth", "done");
+    await stage("synth", report?.synth_fallback?.degraded ? "degraded" : "done", report?.synth_fallback ?? null);
+
 
 
     await sb.from("forensic_scans").update({
