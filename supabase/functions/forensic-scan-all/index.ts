@@ -711,7 +711,7 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   );
 
   const fallbackChapters: Array<{ slug: string; reason: string }> = [];
-  const chapters = CHAPTERS.map((c, i) => {
+  const chapters: any[] = CHAPTERS.map((c, i) => {
     const r = chapterResults[i];
     if (r.status === "fulfilled" && r.value && (r.value.what_we_found || r.value.verdict)) {
       return { no: c.no, slug: c.slug, title: c.title, ...r.value };
@@ -719,11 +719,42 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
     const reason = r.status === "rejected" ? String((r as PromiseRejectedResult).reason).slice(0, 200) : "empty result";
     console.error(`chapter ${c.slug} synth failed:`, reason);
     fallbackChapters.push({ slug: c.slug, reason });
-    return fb.chapters.find((x) => x.slug === c.slug);
+    return null;
   });
 
-  const summary = summaryResult.status === "fulfilled" ? (summaryResult.value || {}) : {};
+  let summary = summaryResult.status === "fulfilled" ? (summaryResult.value || {}) : {};
+
+  // Rescue pass: anything that failed gets one more real attempt (small waves,
+  // fresh calls) BEFORE we are ever willing to ship template prose.
+  const rescueIdx = chapters.map((c, i) => (c ? -1 : i)).filter((i) => i >= 0);
+  if (rescueIdx.length || !summary.executive_summary) {
+    const rescueTasks: Array<() => Promise<any>> = [];
+    if (!summary.executive_summary) rescueTasks.push(() => synthesizeSummary(findingsStr, target, company));
+    rescueIdx.forEach((i) => rescueTasks.push(() => synthesizeOneChapter(CHAPTERS[i], findingsStr, target, company)));
+    const rescued = await inWaves<any>(rescueTasks, 3);
+    let cursor = 0;
+    if (!summary.executive_summary) {
+      const r = rescued[cursor++];
+      if (r?.status === "fulfilled" && r.value?.executive_summary) summary = r.value;
+    }
+    rescueIdx.forEach((i) => {
+      const r = rescued[cursor++];
+      if (r?.status === "fulfilled" && r.value && (r.value.what_we_found || r.value.verdict)) {
+        const c = CHAPTERS[i];
+        chapters[i] = { no: c.no, slug: c.slug, title: c.title, ...r.value };
+        const at = fallbackChapters.findIndex((f) => f.slug === c.slug);
+        if (at >= 0) fallbackChapters.splice(at, 1);
+      }
+    });
+  }
+
+  // Only now may template text stand in for a chapter we genuinely could not write.
+  CHAPTERS.forEach((c, i) => {
+    if (!chapters[i]) chapters[i] = fb.chapters.find((x) => x.slug === c.slug);
+  });
+
   const summaryFailed = !summary.executive_summary;
+
   const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
     executive_summary: summary.executive_summary || fb.executive_summary,
@@ -922,7 +953,13 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }
     await stage("synth", report?.synth_fallback?.degraded ? "degraded" : "done", report?.synth_fallback ?? null);
 
-
+    // A report where EVERY chapter and the summary are template text is not a
+    // real report. Flag it explicitly so nothing downstream can present it as one.
+    const sf = report?.synth_fallback;
+    if (sf?.degraded && sf.summary_fallback && (sf.chapters_fallback?.length ?? 0) >= CHAPTERS.length) {
+      report.fully_generic = true;
+      console.error(`scan ${id}: fully generic report — no AI chapter survived`);
+    }
 
     await sb.from("forensic_scans").update({
       raw_findings: findings,
@@ -930,6 +967,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       status: "completed",
       completed_at: nowIso(),
     }).eq("id", id);
+
 
     // Log 'scan_completed' event for the Golden Report activity feed.
     try {
