@@ -9,6 +9,8 @@ import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationK
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
+import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
+
 
 type Row = {
   id: string;
