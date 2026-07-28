@@ -686,6 +686,133 @@ Return JSON:
   return await aiJson(prompt, 3500, 60_000);
 }
 
+// ─────────────────────── growth deliverables synthesis ───────────────────────
+// Four practical website deliverables generated from the SAME cleaned findings
+// used by the evidence-based report: brand, imagery, posts, schedule.
+// Bounded: one wave, one attempt each, hard per-call timeout. Never blocks the
+// report — a failure simply leaves that section absent.
+
+const DELIVERABLE_VOICE = `
+DELIVERABLE RULES:
+- Everything must be specific to this company and grounded in the scan findings. No generic agency filler, no invented statistics, awards, client names, or claims.
+- Never use dashes as punctuation in public-facing copy. No em-dashes, no en-dashes, no hyphen used as a pause. Write shorter sentences instead.
+- USD only for any money value.
+- No emoji spam. No "in today's fast-paced world". No rhetorical questions.
+- Return ONLY valid JSON in the exact shape requested.`;
+
+async function deliverableCall(prompt: string, maxTokens: number) {
+  const res = await routedChatCompletion({
+    tier: "bulk",
+    messages: [
+      { role: "system", content: SYSTEM_VOICE + "\n" + DELIVERABLE_VOICE },
+      { role: "user", content: prompt },
+    ],
+    response_format: { type: "json_object" },
+    max_tokens: maxTokens,
+    temperature: 0.5,
+    timeoutMs: 45_000,
+  });
+  const raw = res.content || "{}";
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const m = raw.match(/\{[\s\S]*\}/);
+    return m ? JSON.parse(m[0]) : {};
+  }
+}
+
+async function synthesizeDeliverables(
+  findingsStr: string,
+  target: string,
+  company: string,
+  topLeaks: Array<Record<string, unknown>>,
+) {
+  const name = company || target;
+  const ctx = `COMPANY: ${name}
+WEBSITE: ${target}
+TOP LEAKS FOUND: ${JSON.stringify((topLeaks || []).slice(0, 5))}
+
+SCAN FINDINGS (the only source of truth about this company):
+${findingsStr.slice(0, 14_000)}`;
+
+  const brandPrompt = `${ctx}
+
+Write a concise BRAND BLUEPRINT for ${name}, corrected against what the scan actually found.
+Return JSON:
+{
+ "positioning": "<2-3 sentences>",
+ "target_audience": "<2-3 sentences naming who actually buys>",
+ "voice": { "summary": "<1-2 sentences>", "do": ["<3-5 items>"], "dont": ["<3-5 items>"] },
+ "messaging_pillars": [ { "title": "<short>", "detail": "<1-2 sentences>" } ],
+ "value_proposition": "<one sentence a buyer would repeat>",
+ "differentiators": ["<3-5 specific to this company>"],
+ "color_guidance": { "summary": "<1-2 sentences>", "palette": [ { "role": "<primary|accent|surface|text>", "hex": "#RRGGBB", "use": "<where to use it>" } ] },
+ "typography_guidance": { "headline": "<font family recommendation>", "body": "<font family recommendation>", "notes": "<1-2 sentences>" },
+ "corrections": [ { "issue": "<what the scan found>", "fix": "<what to change>" } ]
+}
+Include 3-5 messaging_pillars and 3-6 corrections. Every correction must reference a real finding.`;
+
+  const imageryPrompt = `${ctx}
+
+Write an IMAGERY DIRECTION BOARD for ${name}.
+Return JSON:
+{
+ "visual_style": "<2-3 sentences>",
+ "subjects": ["<4-6 concrete subjects to photograph or render>"],
+ "composition": "<2-3 sentences>",
+ "lighting": "<1-2 sentences>",
+ "color_treatment": "<1-2 sentences referencing real hex values>",
+ "show": ["<4-6 items>"],
+ "avoid": ["<4-6 items>"],
+ "prompts": [ { "title": "<short label>", "prompt": "<a complete ready to paste image generation prompt, 40-80 words, naming the company context, subject, composition, lighting, palette and mood>" } ]
+}
+Include 4 to 6 prompts. Each prompt must be usable as-is with no placeholders.`;
+
+  const postsPrompt = `${ctx}
+
+Write 12 READY TO PUBLISH social posts for ${name}. Each is customized to this company and its real findings. No invented claims, no fabricated numbers, no client names.
+Return JSON:
+{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<60-140 words, plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence describing the suggested visual>" } ] }
+Exactly 12 posts. Mix the platforms. Never use dashes as punctuation.`;
+
+  const schedulePrompt = `${ctx}
+
+Build a practical 30 DAY PUBLISHING SCHEDULE for ${name} that assigns the kind of posts and supporting content generated for this company.
+Return JSON:
+{ "overview": "<2-3 sentences on cadence and goal>",
+  "days": [ { "day": <1-30>, "platform": "<channel>", "time": "<e.g. 8:30 AM ET>", "purpose": "<authority|proof|offer|education|reactivation>", "topic": "<specific to this company>", "visual": "<short visual direction>" } ] }
+Exactly 30 day entries, day 1 through 30, no gaps. Vary platform and purpose sensibly.`;
+
+  const specs: Array<[string, string, number]> = [
+    ["brand", brandPrompt, 2200],
+    ["imagery", imageryPrompt, 2200],
+    ["posts", postsPrompt, 3600],
+    ["schedule", schedulePrompt, 3600],
+  ];
+
+  const results = await Promise.allSettled(specs.map(([, p, t]) => deliverableCall(p, t)));
+  const out: Record<string, unknown> = {};
+  results.forEach((r, i) => {
+    const key = specs[i][0];
+    if (r.status !== "fulfilled" || !r.value || !Object.keys(r.value).length) {
+      console.error(`deliverable ${key} failed:`, r.status === "rejected" ? String(r.reason).slice(0, 160) : "empty");
+      return;
+    }
+    if (key === "posts") {
+      const posts = Array.isArray(r.value.posts) ? r.value.posts : [];
+      if (posts.length) out.posts = posts;
+    } else if (key === "schedule") {
+      const days = Array.isArray(r.value.days) ? r.value.days : [];
+      if (days.length) out.schedule = { overview: r.value.overview || "", days };
+    } else {
+      out[key] = r.value;
+    }
+  });
+  if (!Object.keys(out).length) return null;
+  return { ...out, generated_at: new Date().toISOString() };
+}
+
+
 // Run tasks in bounded waves so one gateway is never hit with 15 large
 // simultaneous prompts (which is what produced timeouts + empty responses).
 async function inWaves<T>(tasks: Array<() => Promise<T>>, size: number): Promise<PromiseSettledResult<T>[]> {
