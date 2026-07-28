@@ -72,10 +72,12 @@ async function fetchScanRow(id: string): Promise<Row | null> {
   }
 }
 
-export function ForensicScanAllPanel() {
+export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
   const [url, setUrl] = useState("");
   const [company, setCompany] = useState("");
   const [scanId, setScanId] = useState<string | null>(() => {
+    if (initialScanId) return initialScanId;
+
     // Prefer ?scan=<id> in the URL so shareable Golden Report links open the
     // matching case file directly. Fall back to sessionStorage.
     try {
