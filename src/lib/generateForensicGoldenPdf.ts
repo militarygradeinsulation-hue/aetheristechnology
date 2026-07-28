@@ -24,7 +24,10 @@ export interface ForensicReport {
   executive_summary?: string;
   top_leaks?: { rank: number; name: string; dollars_low?: number; dollars_high?: number; chapter_slug?: string; summary?: string }[];
   chapters?: Chapter[];
+  /** Growth assets generated alongside the report. Rendered on-screen only; PDF logic unchanged. */
+  deliverables?: import("@/components/GoldenGrowthAssets").GoldenDeliverables | null;
 }
+
 
 const BG: [number, number, number] = [15, 15, 20];
 const PAPER: [number, number, number] = [236, 232, 222];
