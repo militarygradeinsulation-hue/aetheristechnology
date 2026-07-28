@@ -1,28 +1,47 @@
-// Single source of truth for the Golden Report "Total Estimated Annual Revenue
-// Loss" figure. Used by the main website, the portal report view, and the
-// generated PDF so all surfaces always show the exact same numbers/wording.
+// SINGLE SOURCE OF TRUTH for the Golden Report "Total Estimated Annual Revenue
+// Loss" figure. Every surface must call `computeGoldenLeakage` from this file:
+//   - main website report view      (ForensicScanAllPanel -> GoldenLeakageBanner)
+//   - portal / history report view  (same shared panel)
+//   - pre-download summary          (same shared banner, above the PDF button)
+//   - main website PDF              (generateForensicGoldenPdf)
+//   - portal PDF                    (same generator)
+// Do NOT add inline leakage math anywhere else.
 //
 // Resolution order (first valid wins, never double-counted):
 //   1. report.overall_leakage  — canonical object persisted at scan completion
 //   2. report.top_leaks        — priced leaks (numbers OR money strings)
 //   3. report.chapters         — dollar ranges parsed out of chapter costing text,
 //                                skipping chapters already priced in top_leaks
-// Returns null when a scan carries no real monetary evidence. Callers must show
-// a muted "could not be calculated" note rather than $0 / NaN / a fake estimate.
+// Returns null only when a scan carries no real monetary evidence. Callers must
+// show a muted "could not be calculated" note rather than $0 / NaN / a fake total.
+
+/** Bump when the math or field resolution changes. Persisted with the report. */
+export const LEAKAGE_CALCULATION_VERSION = 2;
 
 export type PricedLeak = {
   name?: string | null;
   chapter_slug?: string | null;
   dollars_low?: number | string | null;
   dollars_high?: number | string | null;
+  // legacy / alternate field names seen in older scan payloads
+  annual_low?: number | string | null;
+  annual_high?: number | string | null;
+  low?: number | string | null;
+  high?: number | string | null;
+  cost_low?: number | string | null;
+  cost_high?: number | string | null;
+  dollars?: number | string | null;
+  annual_cost?: number | string | null;
+  estimated_annual_loss?: number | string | null;
 };
 
 export type OverallLeakage = {
-  annual_low: number;
-  annual_high: number;
-  currency: string;
-  source: string;
-  priced_leak_count: number;
+  annual_low: number | string;
+  annual_high: number | string;
+  currency?: string;
+  source?: string;
+  priced_leak_count?: number;
+  calculation_version?: number;
 };
 
 export type GoldenReportLike = {
@@ -38,39 +57,68 @@ export type GoldenLeakage = {
   low: number;
   high: number;
   count: number;
-  /** Where the numbers came from: overall_leakage | top_leaks | chapters */
+  /** overall_leakage | top_leaks | chapters */
   source: string;
   currency: string;
+  calculation_version: number;
   /** Formatted "$1,000 – $2,000" (en-dash) for UI. */
   rangeLabel: string;
   /** Formatted "$1,000 - $2,000" (ASCII) for PDF fonts. */
   rangeLabelAscii: string;
+  /** Exactly what the UI prints next to the label. */
+  displayValue: string;
   caption: string;
 };
 
-export const GOLDEN_LEAKAGE_LABEL = "Total Estimated Annual Revenue Loss";
+export const GOLDEN_LEAKAGE_LABEL = "TOTAL ESTIMATED ANNUAL REVENUE LOSS";
 export const GOLDEN_LEAKAGE_EMPTY_MESSAGE =
   "Annual revenue loss could not be calculated from this scan.";
 
+// Money magnitudes outside this window are data artifacts, not evidence.
+const MAX_SANE = 1_000_000_000;
+
 /**
  * Accepts a real number, or a money string the model sometimes emits:
- * "25,000", "$25,000", "$-500,000", "12k", "1.2M". Returns a positive finite
- * magnitude, or null when there is no usable number.
+ * "25,000", "$25,000", " $-500,000 ", "USD 12k", "1.2M", "$4,500/yr".
+ * Rejects zero, NaN, Infinity, and absurd magnitudes. Returns a positive
+ * finite magnitude, or null when there is no usable number.
  */
 export function parseMoney(v: unknown): number | null {
+  let n: number | null = null;
   if (typeof v === "number") {
-    return Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
+    n = Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
+  } else if (typeof v === "string") {
+    const s = v.trim();
+    if (!s) return null;
+    const m = s.match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
+    if (!m) return null;
+    const raw = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
+    if (!Number.isFinite(raw) || raw === 0) return null;
+    const unit = (m[1] || "").toLowerCase();
+    const mult = unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1;
+    n = Math.abs(raw) * mult;
   }
-  if (typeof v !== "string") return null;
-  const s = v.trim();
-  if (!s) return null;
-  const m = s.match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
-  if (!m) return null;
-  const n = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
-  if (!Number.isFinite(n) || n === 0) return null;
-  const unit = (m[1] || "").toLowerCase();
-  const mult = unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1;
-  return Math.abs(n) * mult;
+  if (n == null || !Number.isFinite(n) || n <= 0 || n > MAX_SANE) return null;
+  return n;
+}
+
+const LOW_FIELDS = ["dollars_low", "annual_low", "low", "cost_low"] as const;
+const HIGH_FIELDS = ["dollars_high", "annual_high", "high", "cost_high"] as const;
+const SINGLE_FIELDS = ["dollars", "annual_cost", "estimated_annual_loss"] as const;
+
+function pick(leak: PricedLeak, fields: readonly string[]): number | null {
+  for (const f of fields) {
+    const v = parseMoney((leak as Record<string, unknown>)[f]);
+    if (v != null) return v;
+  }
+  return null;
+}
+
+function leakKey(leak: PricedLeak): string {
+  return String(leak?.name || leak?.chapter_slug || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function sumLeaks(leaks: PricedLeak[] | null | undefined) {
@@ -80,23 +128,28 @@ function sumLeaks(leaks: PricedLeak[] | null | undefined) {
   let count = 0;
   const seen = new Set<string>();
   for (const leak of leaks) {
-    const key = String(leak?.name || leak?.chapter_slug || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, " ")
-      .trim();
-    if (key && seen.has(key)) continue;
-    const l = parseMoney(leak?.dollars_low);
-    const h = parseMoney(leak?.dollars_high);
+    if (!leak || typeof leak !== "object") continue;
+    const key = leakKey(leak);
+    if (key && seen.has(key)) continue; // dedupe before summing
+    const l = pick(leak, LOW_FIELDS) ?? pick(leak, SINGLE_FIELDS);
+    const h = pick(leak, HIGH_FIELDS) ?? pick(leak, SINGLE_FIELDS);
     if (l == null && h == null) continue;
-    const lo = l ?? (h as number);
-    const hi = h ?? (l as number);
-    low += Math.min(lo, hi);
-    high += Math.max(lo, hi);
+    const a = l ?? (h as number);
+    const b = h ?? (l as number);
+    // reversed ranges are normalized rather than rejected outright
+    low += Math.min(a, b);
+    high += Math.max(a, b);
     count += 1;
     if (key) seen.add(key);
   }
-  if (!count || high <= 0) return null;
+  if (!count || !Number.isFinite(high) || high <= 0) return null;
   return { low: low > 0 ? low : high, high, count };
+}
+
+/** True when the report carries at least one parseable priced leak. */
+export function hasPricedEvidence(report: GoldenReportLike | null | undefined): boolean {
+  if (!report) return false;
+  return !!sumLeaks(report.top_leaks) || !!sumLeaks(leaksFromChapters(report));
 }
 
 /** Pull "$4,500 - $8,200" / "$4,500 to $8,200" / "$4,500" out of chapter prose. */
@@ -127,22 +180,32 @@ function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
 
 const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
 
-function build(low: number, high: number, count: number, source: string, currency = "USD"): GoldenLeakage {
+function build(
+  low: number,
+  high: number,
+  count: number,
+  source: string,
+  currency = "USD",
+  version = LEAKAGE_CALCULATION_VERSION,
+): GoldenLeakage {
+  const rangeLabel = `${fmt(low)} – ${fmt(high)}`;
   return {
     low,
     high,
     count,
     source,
     currency,
-    rangeLabel: `${fmt(low)} – ${fmt(high)}`,
+    calculation_version: version,
+    rangeLabel,
     rangeLabelAscii: `${fmt(low)} - ${fmt(high)}`,
+    displayValue: `${rangeLabel} / year`,
     caption: `Sum of the ${count} priced leak${count === 1 ? "" : "s"} documented in this report. Every dollar is a system your business is bleeding right now. Keep reading — each chapter shows exactly where and how to stop it.`,
   };
 }
 
 /**
- * Accepts either a full report object (preferred) or a bare top_leaks array
- * (legacy callers). Returns null when no valid monetary evidence exists.
+ * The ONLY allowed leakage calculation path. Accepts a full report object
+ * (preferred) or a bare top_leaks array (legacy callers).
  */
 export function computeGoldenLeakage(
   input: GoldenReportLike | PricedLeak[] | null | undefined,
@@ -156,21 +219,28 @@ export function computeGoldenLeakage(
 
   const report = input;
 
-  // 1. canonical persisted total
+  // 1. canonical persisted total (preserved as-is for older reports)
   const ol = report.overall_leakage;
-  if (ol) {
+  if (ol && typeof ol === "object") {
     const lo = parseMoney(ol.annual_low);
     const hi = parseMoney(ol.annual_high);
     if (lo != null || hi != null) {
-      const low = Math.min(lo ?? (hi as number), hi ?? (lo as number));
-      const high = Math.max(lo ?? (hi as number), hi ?? (lo as number));
+      const a = lo ?? (hi as number);
+      const b = hi ?? (lo as number);
+      const low = Math.min(a, b);
+      const high = Math.max(a, b);
       if (high > 0) {
+        const count =
+          Number(ol.priced_leak_count) > 0
+            ? Number(ol.priced_leak_count)
+            : report.top_leaks?.length || 1;
         return build(
           low > 0 ? low : high,
           high,
-          Number(ol.priced_leak_count) > 0 ? Number(ol.priced_leak_count) : (report.top_leaks?.length || 1),
+          count,
           ol.source || "overall_leakage",
           ol.currency || "USD",
+          Number(ol.calculation_version) > 0 ? Number(ol.calculation_version) : 1,
         );
       }
     }
