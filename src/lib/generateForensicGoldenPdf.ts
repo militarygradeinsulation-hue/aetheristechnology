@@ -1,14 +1,30 @@
-// Forensic Golden Standard PDF.
-// Text-layer PDF (fully searchable / Ctrl+F friendly), clickable index,
-// footer with "Ask this report" link, watermark "Aetheris AI Studio".
+// Forensic Golden Standard PDF — COMPLETE, FAITHFUL EXPORT.
 //
-// Pages auto-flow; each chapter starts on a fresh page with anchored title
-// so jsPDF outline + internal link annotations work for the TOC.
+// The PDF is a rendering of the shared Golden Report view model
+// (src/lib/goldenReportModel.ts), which is built from the SAME saved report the
+// website and portal display. Nothing is re-summarized, shortened, truncated or
+// invented here: this file only knows how to draw blocks on paper.
+//
+// Guarantees:
+//  • No hardcoded leak headline. The red box is drawn only when
+//    computeGoldenLeakage(report) returns evidence, and it is omitted otherwise.
+//  • Every section of the on-screen report (executive summary, top leaks, all
+//    chapters in full, Brand / Imagery / Posts / 30-day Schedule) is exported.
+//  • Text auto-flows across pages; nothing is clipped or cut with an ellipsis.
+//
+// Theme (black / gold / blue / red), cover, index, smart-PDF ask link and
+// watermark are unchanged.
 
 import jsPDF from "jspdf";
-import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
+import { GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
-
+import {
+  buildGoldenReportModel,
+  auditGoldenReportParity,
+  type Block,
+  type GoldenReportModel,
+  type Section,
+} from "@/lib/goldenReportModel";
 
 export type Chapter = {
   no: number;
@@ -20,20 +36,20 @@ export type Chapter = {
   what_its_costing?: string;
   what_to_do?: { this_week?: string[]; this_month?: string[]; this_quarter?: string[] };
   evidence?: { label: string; value: string }[];
-}
+};
+
 export type ForensicReport = {
   executive_summary?: string;
   /** Canonical annual revenue loss persisted at scan completion. */
   overall_leakage?: OverallLeakage | null;
   top_leaks?: { rank: number; name: string; dollars_low?: number | string; dollars_high?: number | string; chapter_slug?: string; summary?: string }[];
   chapters?: Chapter[];
-  /** Growth assets generated alongside the report. Rendered on-screen only; PDF logic unchanged. */
+  /** Growth assets generated alongside the report. Exported in full. */
   deliverables?: import("@/components/GoldenGrowthAssets").GoldenDeliverables | null;
   /** Canonical counts + evidence quality written by the report compiler. */
   report_consistency?: ReportConsistency | null;
   compiler?: { state?: "compiled" | "needs_review"; violations?: CompilerViolation[]; repairs?: string[] } | null;
-}
-
+};
 
 const BG: [number, number, number] = [15, 15, 20];
 const PAPER: [number, number, number] = [236, 232, 222];
@@ -41,22 +57,21 @@ const BODY: [number, number, number] = [205, 200, 188];
 const MUTED: [number, number, number] = [150, 145, 135];
 const AMBER: [number, number, number] = [217, 158, 46];
 const CRIMSON: [number, number, number] = [220, 70, 70];
+const BLUE: [number, number, number] = [96, 150, 220];
 
 const PAGE_W = 210;
 const PAGE_H = 297;
 const M = 20;
 const CW = PAGE_W - M * 2;
+const BOTTOM = PAGE_H - 20;
 
 /**
- * jsPDF built-in fonts (helvetica/times/courier) only support WinAnsi encoding.
- * Any character outside that range renders as garbage boxes/symbols (e.g. ><#%^).
- * We aggressively map smart-punctuation, dashes, arrows, bullets, and other
- * common unicode into ASCII equivalents, then strip everything else.
+ * jsPDF built-in fonts only support WinAnsi. Map smart punctuation to ASCII and
+ * strip the rest so nothing renders as garbage boxes.
  */
 function sanitize(input: unknown): string {
   if (input == null) return "";
   let s = String(input);
-  // Normalize compatibility forms (e.g., ligatures)
   try { s = s.normalize("NFKC"); } catch { /* noop */ }
   const map: Record<string, string> = {
     "\u00A0": " ", "\u2007": " ", "\u2009": " ", "\u200A": " ", "\u200B": "",
@@ -71,7 +86,6 @@ function sanitize(input: unknown): string {
     "\u2043": "-",
   };
   s = s.replace(/[\u00A0\u2007\u2009\u200A\u200B\u2013\u2014\u2212\u2010\u2011\u2018\u2019\u201A\u201B\u2032\u201C\u201D\u201E\u2033\u2026\u00B7\u2022\u25CF\u25AA\u25A0\u2192\u2190\u2194\u21D2\u21D0\u2713\u2714\u2717\u2718\u26A0\u00A9\u00AE\u2122\u00D7\u00F7\u2043]/g, (c) => map[c] ?? c);
-  // Strip anything outside printable WinAnsi (basic Latin + Latin-1 supplement + a few)
   s = s.replace(/[^\x09\x0A\x0D\x20-\x7E\xA1-\xFF]/g, "");
   return s;
 }
@@ -93,50 +107,236 @@ function footer(doc: jsPDF, page: number, askUrl: string) {
   doc.setFont("helvetica", "normal");
   doc.text("AETHERIS · BUSINESS FORENSICS · USD", M, PAGE_H - 9);
   doc.text(`Page ${page}`, PAGE_W / 2, PAGE_H - 9, { align: "center" });
-  // Smart-PDF "Ask this report" link
   doc.setTextColor(...AMBER);
-  const askText = "ASK THIS REPORT →";
-  doc.textWithLink(askText, PAGE_W - M, PAGE_H - 9, { url: askUrl, align: "right" });
-  // Watermark
+  doc.textWithLink("ASK THIS REPORT →", PAGE_W - M, PAGE_H - 9, { url: askUrl, align: "right" });
   doc.setTextColor(70, 60, 40);
   doc.setFontSize(6);
   doc.text("Aetheris AI Studio", PAGE_W - M, PAGE_H - 4, { align: "right" });
 }
 
-function ensureSpace(doc: jsPDF, y: number, need: number, page: { n: number }, askUrl: string): number {
-  if (y + need > PAGE_H - 20) {
-    doc.addPage();
-    page.n++;
-    bg(doc);
-    footer(doc, page.n, askUrl);
-    return M + 6;
-  }
-  return y;
+type Cursor = { y: number; page: number };
+
+function newPage(doc: jsPDF, cur: Cursor, askUrl: string) {
+  doc.addPage();
+  cur.page++;
+  bg(doc);
+  footer(doc, cur.page, askUrl);
+  cur.y = M + 6;
+}
+
+/** Guarantees `need` mm of room; adds a page when the block would clip. */
+function room(doc: jsPDF, cur: Cursor, need: number, askUrl: string) {
+  if (cur.y + need > BOTTOM) newPage(doc, cur, askUrl);
 }
 
 function wrap(doc: jsPDF, text: string, w: number): string[] {
   return doc.splitTextToSize(sanitize(text), w) as string[];
 }
 
-function renderMarkdown(doc: jsPDF, md: string, x: number, y: number, page: { n: number }, askUrl: string): number {
-  const lines = (md || "").split(/\n+/);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(...BODY);
-  for (const line of lines) {
-    if (!line.trim()) { y += 3; continue; }
-    let txt = line.replace(/^[#*\-•]\s*/, "• ").replace(/\*\*(.+?)\*\*/g, "$1");
-    txt = txt.replace(/[—–]/g, "-");
-    const wrapped = wrap(doc, txt, CW);
-    for (const w of wrapped) {
-      y = ensureSpace(doc, y, 5, page, askUrl);
-      doc.text(w, x, y);
-      y += 5;
+/** Writes wrapped text line-by-line, breaking pages as needed. Never truncates. */
+function flow(doc: jsPDF, cur: Cursor, text: string, opts: { x?: number; w?: number; lh?: number; askUrl: string }) {
+  const x = opts.x ?? M;
+  const w = opts.w ?? CW;
+  const lh = opts.lh ?? 5;
+  for (const raw of sanitize(text).split("\n")) {
+    const lines = raw.trim() ? wrap(doc, raw, w) : [""];
+    for (const l of lines) {
+      room(doc, cur, lh, opts.askUrl);
+      if (l) doc.text(l, x, cur.y);
+      cur.y += lh;
     }
-    y += 1;
   }
-  return y + 2;
 }
+
+// ───────────────────────── block renderers ─────────────────────────
+
+function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
+  switch (b.kind) {
+    case "subheading": {
+      room(doc, cur, 12, askUrl);
+      cur.y += 3;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10.5);
+      doc.setTextColor(...AMBER);
+      flow(doc, cur, b.text.toUpperCase(), { lh: 5.5, askUrl });
+      cur.y += 1;
+      break;
+    }
+    case "paragraph": {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...BODY);
+      flow(doc, cur, b.text.replace(/^[#*\-]\s*/gm, "- ").replace(/\*\*(.+?)\*\*/g, "$1"), { lh: 5, askUrl });
+      cur.y += 2.5;
+      break;
+    }
+    case "kv": {
+      room(doc, cur, 6, askUrl);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...PAPER);
+      const label = `${sanitize(b.label)}: `;
+      const lw = doc.getTextWidth(label);
+      doc.text(label, M, cur.y);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...BODY);
+      const lines = wrap(doc, b.value, CW - lw);
+      doc.text(lines[0] ?? "", M + lw, cur.y);
+      cur.y += 5;
+      for (const l of lines.slice(1)) {
+        room(doc, cur, 5, askUrl);
+        doc.text(l, M + 4, cur.y);
+        cur.y += 5;
+      }
+      cur.y += 1.5;
+      break;
+    }
+    case "bullets": {
+      if (b.label) {
+        room(doc, cur, 8, askUrl);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...PAPER);
+        doc.text(sanitize(b.label), M, cur.y);
+        cur.y += 5;
+      }
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...BODY);
+      for (const item of b.items) {
+        const lines = wrap(doc, item, CW - 6);
+        lines.forEach((l, i) => {
+          room(doc, cur, 5, askUrl);
+          if (i === 0) {
+            doc.setTextColor(...AMBER);
+            doc.text("-", M + 1, cur.y);
+            doc.setTextColor(...BODY);
+          }
+          doc.text(l, M + 6, cur.y);
+          cur.y += 5;
+        });
+      }
+      cur.y += 2.5;
+      break;
+    }
+    case "mono": {
+      if (b.label) {
+        room(doc, cur, 8, askUrl);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10.5);
+        doc.setTextColor(...AMBER);
+        doc.text(sanitize(b.label).toUpperCase(), M, cur.y);
+        cur.y += 6;
+      }
+      doc.setFont("courier", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...BODY);
+      for (const line of b.lines) flow(doc, cur, line, { lh: 4.6, askUrl });
+      cur.y += 2.5;
+      break;
+    }
+    case "callout": {
+      const tone = b.tone === "red" ? CRIMSON : b.tone === "blue" ? BLUE : AMBER;
+      const fill: [number, number, number] = b.tone === "red" ? [40, 15, 15] : b.tone === "blue" ? [14, 22, 34] : [34, 26, 10];
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      const lines = wrap(doc, b.text, CW - 10);
+      const h = 6 + (b.label ? 5 : 0) + lines.length * 5;
+      room(doc, cur, h + 4, askUrl);
+      doc.setFillColor(...fill);
+      doc.rect(M, cur.y - 4, CW, h, "F");
+      doc.setDrawColor(...tone);
+      doc.setLineWidth(0.5);
+      doc.line(M, cur.y - 4, M, cur.y - 4 + h);
+      let ty = cur.y + 1;
+      if (b.label) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...tone);
+        doc.text(sanitize(b.label).toUpperCase(), M + 5, ty);
+        ty += 5;
+      }
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...PAPER);
+      for (const l of lines) { doc.text(l, M + 5, ty); ty += 5; }
+      cur.y = cur.y - 4 + h + 6;
+      break;
+    }
+    case "table": {
+      if (b.label) {
+        room(doc, cur, 8, askUrl);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10.5);
+        doc.setTextColor(...AMBER);
+        doc.text(sanitize(b.label).toUpperCase(), M, cur.y);
+        cur.y += 6;
+      }
+      const total = b.widths.reduce((a, c) => a + c, 0) || 1;
+      const cols = b.widths.map((w) => (w / total) * CW);
+      const header = () => {
+        room(doc, cur, 9, askUrl);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...AMBER);
+        let x = M;
+        b.columns.forEach((c, i) => { doc.text(sanitize(c).toUpperCase(), x, cur.y); x += cols[i]; });
+        cur.y += 2;
+        doc.setDrawColor(60, 55, 45);
+        doc.setLineWidth(0.2);
+        doc.line(M, cur.y, PAGE_W - M, cur.y);
+        cur.y += 4;
+      };
+      header();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      for (const row of b.rows) {
+        const cells = row.map((c, i) => wrap(doc, c, cols[i] - 3));
+        const h = Math.max(...cells.map((c) => c.length)) * 4.4 + 2;
+        if (cur.y + h > BOTTOM) { newPage(doc, cur, askUrl); header(); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); }
+        doc.setTextColor(...BODY);
+        let x = M;
+        cells.forEach((lines, i) => {
+          let yy = cur.y;
+          for (const l of lines) { doc.text(l, x, yy); yy += 4.4; }
+          x += cols[i];
+        });
+        cur.y += h;
+      }
+      cur.y += 3;
+      break;
+    }
+  }
+}
+
+function drawSection(doc: jsPDF, cur: Cursor, s: Section, askUrl: string) {
+  if (s.newPage) newPage(doc, cur, askUrl);
+  else room(doc, cur, 24, askUrl);
+
+  if (s.kicker) {
+    doc.setFont("times", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(...AMBER);
+    doc.text(sanitize(s.kicker), M, cur.y);
+    cur.y += 8;
+  }
+  doc.setFont("times", "bold");
+  doc.setFontSize(s.newPage ? 22 : 16);
+  doc.setTextColor(...PAPER);
+  for (const l of wrap(doc, s.title, CW)) {
+    room(doc, cur, 10, askUrl);
+    doc.text(l, M, cur.y);
+    cur.y += s.newPage ? 9 : 7;
+  }
+  doc.setDrawColor(...AMBER);
+  doc.setLineWidth(0.4);
+  doc.line(M, cur.y - 3, M + 20, cur.y - 3);
+  cur.y += 6;
+
+  for (const b of s.blocks) drawBlock(doc, cur, b, askUrl);
+}
+
+// ───────────────────────── entry point ─────────────────────────
 
 export function generateForensicGoldenPdf(opts: {
   report: ForensicReport;
@@ -146,10 +346,8 @@ export function generateForensicGoldenPdf(opts: {
   generatedAt?: Date;
 }): jsPDF {
   const { report, company, url, scanId } = opts;
-  // ── HARD GATE ──
-  // A report that failed the consistency compiler is never turned into a
-  // client-facing PDF. Legacy reports (compiled before the compiler existed)
-  // carry no state and are allowed through unchanged.
+
+  // ── HARD GATE ── a report that failed the consistency compiler is never exported.
   if (report?.compiler?.state && report.compiler.state !== "compiled") {
     const first = report.compiler.violations?.[0];
     throw new Error(
@@ -157,12 +355,19 @@ export function generateForensicGoldenPdf(opts: {
         (first ? `: ${first.code} at ${first.location} — ${first.detail}` : "."),
     );
   }
-  const askUrl = `https://aetheris.technology/report/${scanId}/ask`;
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const page = { n: 1 };
 
-  // Monkey-patch text writers so every string flowing to the PDF is WinAnsi-safe.
-  // jsPDF's built-in fonts render non-WinAnsi glyphs as garbage (><#%^ etc.).
+  const model = buildGoldenReportModel({
+    report: report as unknown as Record<string, unknown>,
+    company,
+    url,
+    scanId,
+    generatedAt: opts.generatedAt,
+  });
+  const askUrl = model.meta.askUrl;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const cur: Cursor = { y: M + 6, page: 1 };
+
+  // WinAnsi-safe text writers.
   const _text = doc.text.bind(doc);
   (doc as unknown as { text: typeof doc.text }).text = ((t: unknown, ...rest: unknown[]) => {
     const clean = Array.isArray(t) ? t.map(sanitize) : sanitize(t);
@@ -188,24 +393,22 @@ export function generateForensicGoldenPdf(opts: {
   doc.setFont("times", "bold");
   doc.setTextColor(...PAPER);
   doc.setFontSize(34);
-  const titleLines = wrap(doc, "Forensic Audit Report", CW);
   let cy = 80;
-  for (const l of titleLines) { doc.text(l, M, cy); cy += 14; }
+  for (const l of wrap(doc, "Forensic Audit Report", CW)) { doc.text(l, M, cy); cy += 14; }
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(13);
   doc.setTextColor(...PAPER);
-  doc.text(company || url, M, cy + 4);
+  doc.text(model.meta.company, M, cy + 4);
 
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
   doc.text(`Target: ${url}`, M, cy + 12);
-  doc.text(`Generated: ${(opts.generatedAt || new Date()).toLocaleString("en-US")}`, M, cy + 18);
+  doc.text(`Generated: ${model.meta.generatedAt.toLocaleString("en-US")}`, M, cy + 18);
   doc.text(`Scan ID: ${scanId}`, M, cy + 24);
 
-  // ── Total leakage headline (same source of truth as the website/portal) ──
-  const totalLeakage = computeGoldenLeakage(report);
-  if (totalLeakage) {
+  // Red leakage box — drawn ONLY from the canonical resolver, omitted with no evidence.
+  if (model.leakage) {
     const boxY = cy + 36;
     doc.setFillColor(40, 15, 15);
     doc.rect(M, boxY, CW, 34, "F");
@@ -215,161 +418,72 @@ export function generateForensicGoldenPdf(opts: {
     doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...CRIMSON);
     doc.text(GOLDEN_LEAKAGE_LABEL.toUpperCase(), M + 4, boxY + 7);
     doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...CRIMSON);
-    doc.text(`${totalLeakage.rangeLabelAscii} / year`, M + 4, boxY + 20);
+    doc.text(`${model.leakage.rangeLabelAscii} / year`, M + 4, boxY + 20);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    const capLines = wrap(doc, totalLeakage.caption, CW - 8).slice(0, 2);
     let capY = boxY + 26;
-    for (const l of capLines) { doc.text(l, M + 4, capY); capY += 4; }
+    for (const l of wrap(doc, model.leakage.caption, CW - 8).slice(0, 2)) { doc.text(l, M + 4, capY); capY += 4; }
   }
 
-  // ── Canonical counts + evidence quality (read, never recomputed) ──
-  const consistency = report.report_consistency;
-  if (consistency) {
-    const qy = cy + (totalLeakage ? 78 : 44);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...AMBER);
-    doc.text("EVIDENCE QUALITY", M, qy);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...BODY);
-    const q = consistency.evidence_quality;
-    const lines = [
-      consistency.canonical_counts_sentence,
-      `Verified ${q.verified} (${q.verified_pct}%) · Inferred ${q.inferred} (${q.inferred_pct}%) · ` +
-        `Unverified ${q.unverified} (${q.unverified_pct}%) · Contradicted ${q.contradicted} (${q.contradicted_pct}%).`,
-      "Statements not marked verified are labelled inferred or unverified. A signal missing from a partial crawl is not treated as proof of absence.",
-    ];
-    let ly = qy + 6;
-    for (const line of lines) {
-      for (const l of wrap(doc, line, CW)) { doc.text(l, M, ly); ly += 4.5; }
-      ly += 1;
-    }
-  }
-
-
-  // ───────── EXECUTIVE SUMMARY ─────────
-  doc.addPage(); page.n++; bg(doc); footer(doc, page.n, askUrl);
-  doc.setFont("times", "bold"); doc.setFontSize(24); doc.setTextColor(...PAPER);
-  doc.text("Executive Summary", M, 32);
-  doc.setDrawColor(...AMBER); doc.setLineWidth(0.4); doc.line(M, 36, M + 40, 36);
-  let y = 48;
-  y = renderMarkdown(doc, report.executive_summary || "(No summary returned.)", M, y, page, askUrl);
-
-  // ───────── INDEX (clickable) ─────────
-  doc.addPage(); page.n++; bg(doc); footer(doc, page.n, askUrl);
+  // ───────── INDEX (clickable, back-filled with real page numbers) ─────────
+  newPage(doc, cur, askUrl);
+  const indexPage = cur.page;
   doc.setFont("times", "bold"); doc.setFontSize(24); doc.setTextColor(...PAPER);
   doc.text("Index", M, 32);
   doc.setDrawColor(...AMBER); doc.line(M, 36, M + 18, 36);
-  y = 50;
+  cur.y = 50;
 
-  // Collect chapter page numbers as we render them; for now we render index AFTER
-  // chapters and back-fill via a 2nd page. Simpler: render placeholder list now
-  // with internal links to named destinations; jsPDF outline tree owns navigation.
-  const chapters = report.chapters || [];
-  const indexY: { ch: Chapter; lineY: number }[] = [];
-  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(...BODY);
-  for (const ch of chapters) {
-    y = ensureSpace(doc, y, 7, page, askUrl);
-    indexY.push({ ch, lineY: y });
+  const indexed = model.sections.filter((s) => s.indexed);
+  const indexRows: { id: string; lineY: number; page: number }[] = [];
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+  indexed.forEach((s, i) => {
+    room(doc, cur, 7, askUrl);
+    indexRows.push({ id: s.id, lineY: cur.y, page: cur.page });
     doc.setTextColor(...AMBER);
-    doc.text(String(ch.no).padStart(2, "0"), M, y);
+    doc.text(String(i + 1).padStart(2, "0"), M, cur.y);
     doc.setTextColor(...BODY);
-    doc.text(ch.title, M + 12, y);
-    y += 7;
-  }
-  y = ensureSpace(doc, y, 14, page, askUrl);
-  doc.setFontSize(9); doc.setTextColor(...MUTED);
-  doc.text("Tap a chapter name in this index after the PDF is downloaded to jump.", M, y + 6);
+    for (const l of wrap(doc, s.title, CW - 30)) { doc.text(l, M + 12, cur.y); cur.y += 6; }
+    cur.y += 1;
+  });
 
-  // ───────── CHAPTERS ─────────
-  const chapterPages: Record<number, number> = {};
-  for (const ch of chapters) {
-    doc.addPage(); page.n++; bg(doc); footer(doc, page.n, askUrl);
-    chapterPages[ch.no] = page.n;
-
-    // Chapter header
-    doc.setFont("times", "italic"); doc.setFontSize(10); doc.setTextColor(...AMBER);
-    doc.text(`CHAPTER ${String(ch.no).padStart(2, "0")}`, M, 30);
-    doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...PAPER);
-    const tLines = wrap(doc, ch.title, CW);
-    let yy = 40;
-    for (const l of tLines) { doc.text(l, M, yy); yy += 9; }
-    doc.setDrawColor(...AMBER); doc.line(M, yy, M + 20, yy);
-    yy += 8;
-
-    if (ch.verdict) {
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...CRIMSON);
-      for (const l of wrap(doc, `Verdict: ${ch.verdict}`, CW)) {
-        yy = ensureSpace(doc, yy, 6, page, askUrl); doc.text(l, M, yy); yy += 6;
-      }
-      yy += 2;
-    }
-
-    const section = (label: string, content: string | undefined) => {
-      if (!content) return;
-      yy = ensureSpace(doc, yy, 10, page, askUrl);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...AMBER);
-      doc.text(label.toUpperCase(), M, yy); yy += 6;
-      yy = renderMarkdown(doc, content, M, yy, page, askUrl);
-    };
-
-    section("What we found", ch.what_we_found);
-    section("Why it's leaking", ch.why_its_leaking);
-    section("What it's costing (USD)", ch.what_its_costing);
-
-    if (ch.what_to_do) {
-      yy = ensureSpace(doc, yy, 12, page, askUrl);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...AMBER);
-      doc.text("WHAT TO DO", M, yy); yy += 6;
-      const groups: [string, string[] | undefined][] = [
-        ["This week", ch.what_to_do.this_week],
-        ["This month", ch.what_to_do.this_month],
-        ["This quarter", ch.what_to_do.this_quarter],
-      ];
-      for (const [g, items] of groups) {
-        if (!items?.length) continue;
-        yy = ensureSpace(doc, yy, 8, page, askUrl);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...PAPER);
-        doc.text(g, M, yy); yy += 5;
-        doc.setFont("helvetica", "normal"); doc.setTextColor(...BODY);
-        for (const it of items) {
-          for (const l of wrap(doc, `• ${it}`, CW - 4)) {
-            yy = ensureSpace(doc, yy, 5, page, askUrl);
-            doc.text(l, M + 4, yy); yy += 5;
-          }
-        }
-        yy += 2;
-      }
-    }
-
-    if (ch.evidence?.length) {
-      yy = ensureSpace(doc, yy, 12, page, askUrl);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...AMBER);
-      doc.text("EVIDENCE", M, yy); yy += 6;
-      doc.setFont("courier", "normal"); doc.setFontSize(9); doc.setTextColor(...BODY);
-      for (const e of ch.evidence) {
-        const line = `${e.label}: ${e.value}`;
-        for (const l of wrap(doc, line, CW)) {
-          yy = ensureSpace(doc, yy, 5, page, askUrl);
-          doc.text(l, M, yy); yy += 5;
-        }
-      }
-    }
+  // ───────── BODY ─────────
+  // The cover already carries case metadata + the leakage headline.
+  const skip = new Set(["case-metadata", "leakage"]);
+  const sectionPages: Record<string, number> = {};
+  for (const s of model.sections) {
+    if (skip.has(s.id)) continue;
+    drawSection(doc, cur, s, askUrl);
+    if (sectionPages[s.id] == null) sectionPages[s.id] = cur.page;
   }
 
-  // ───────── back-fill index with page numbers + internal links ─────────
-  // jsPDF doesn't easily let us redraw page 3, but we can add the destination
-  // links onto the original Y positions using doc.link()
-  // The index page is page 3.
-  doc.setPage(3);
-  for (const { ch, lineY } of indexY) {
-    const targetPage = chapterPages[ch.no];
-    if (!targetPage) continue;
-    // page number tab
+  // Back-fill index page numbers + internal links.
+  for (const row of indexRows) {
+    const target = sectionPages[row.id];
+    if (!target) continue;
+    doc.setPage(row.page);
     doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...MUTED);
-    doc.text(String(targetPage).padStart(3, " "), PAGE_W - M, lineY, { align: "right" });
-    // clickable rect across the row
-    doc.link(M, lineY - 5, CW, 7, { pageNumber: targetPage });
+    doc.text(String(target).padStart(3, " "), PAGE_W - M, row.lineY, { align: "right" });
+    doc.link(M, row.lineY - 5, CW, 7, { pageNumber: target });
   }
+  doc.setPage(indexPage);
+  doc.setPage(doc.getNumberOfPages());
 
   return doc;
+}
+
+/** Model + parity audit for the given scan, for tests and diagnostics. */
+export function auditGoldenPdfParity(opts: {
+  report: ForensicReport;
+  company: string;
+  url: string;
+  scanId: string;
+}) {
+  const model: GoldenReportModel = buildGoldenReportModel({
+    report: opts.report as unknown as Record<string, unknown>,
+    company: opts.company,
+    url: opts.url,
+    scanId: opts.scanId,
+  });
+  return { model, audit: auditGoldenReportParity(opts.report, model) };
 }
 
 export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]) {
