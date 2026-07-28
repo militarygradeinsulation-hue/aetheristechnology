@@ -332,6 +332,9 @@ function imagerySection(d: GoldenDeliverables): Section | null {
       if (has(p.prompt)) blocks.push({ kind: "mono", lines: [str(p.prompt)] });
     });
   }
+  emitUnknown(blocks, im, [
+    "visual_style", "subjects", "composition", "lighting", "color_treatment", "show", "avoid", "prompts",
+  ]);
   return blocks.length ? { id: "imagery", title: "Imagery Direction", kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks } : null;
 }
 
