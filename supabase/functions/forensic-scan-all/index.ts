@@ -513,35 +513,43 @@ function fallbackReport(findings: Record<string, unknown>, target: string, compa
   const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
   const chapters = CHAPTERS.map((chapter) => {
     const [lo, hi] = COST_RANGES[chapter.slug] || [0, 0];
+    // Explicitly labelled as a benchmark. It is NOT a measured result for this
+    // company and must never be summed into the forensic total.
     const costLine = hi > 0
-      ? `Conservative annualised exposure for this chapter sits in the ${fmt(lo)}–${fmt(hi)} range for a business at ${name}'s public profile. The range tightens once CRM, pipeline, and close-rate data are connected — usually downward on clean sites, upward on bleed-heavy ones.`
+      ? `Category benchmark only: businesses of this type typically carry ${fmt(lo)}-${fmt(hi)} of annual exposure in this area. This figure was not measured on this website and is excluded from the total estimated annual revenue loss.`
       : `No direct dollar exposure for this chapter — this is a plan / appendix section.`;
     return {
       ...chapter,
-      verdict: `${name} shows visible leak signals in this area that warrant operator review.`,
-      what_we_found: `The forensic pass across ${name} consolidated findings from the site scan, friction audit, and brand contradiction pass. Anything incomplete is preserved in the appendix rather than dropped.`,
-      why_its_leaking: "The pattern is not one isolated issue. Site friction, messaging gaps, trust signals, and disconnected follow-up paths compound. Each one is survivable, together they bleed pipeline.",
+      verdict: `Synthesis did not complete for this chapter. No verdict has been established for ${name}.`,
+      what_we_found: `Raw tool output for ${name} is preserved in the appendix. No synthesized findings are available for this chapter in this pass.`,
+      why_its_leaking: "Not established in this pass.",
       what_its_costing: costLine,
       what_to_do: {
-        this_week: ["Verify the primary conversion path and response-time promise.", "Repair any missing contact, CTA, proof, or trust signal flagged in the scan."],
-        this_month: ["Connect pipeline data so website leaks can be tied to real lost revenue."],
-        this_quarter: ["Run the operator-led Leak Audit to price exposure and sequence fixes."],
+        this_week: ["Re-run the scan so this chapter can be synthesized from live evidence."],
+        this_month: [],
+        this_quarter: [],
       },
       evidence,
     };
   });
   return {
-    executive_summary: `${name} was scanned across every forensic tool in the Aetheris stack. Every chapter that follows is populated with conservative annualised exposure ranges grounded in standard SMB leak math for a business at ${name}'s public profile.\n\nRanges shown are floors. They sharpen — usually downward on clean sites, upward on bleed-heavy ones — once CRM, pipeline, and close-rate data are wired in. Treat the ranges as the operator's opening position, not the final number.`,
-    top_leaks: [
-      { rank: 1, name: "Pipeline & follow-up bleed",     dollars_low: 24_000, dollars_high: 180_000, chapter_slug: "pipeline-forensics",   summary: "Stalled deals, slow follow-up, and dead-lead reactivation gaps." },
-      { rank: 2, name: "Site conversion friction",       dollars_low: 18_000, dollars_high:  72_000, chapter_slug: "site-autopsy",         summary: "Unverified conversion path, missing trust / contact signals." },
-      { rank: 3, name: "Lead hygiene & workflow gaps",   dollars_low: 12_000, dollars_high:  90_000, chapter_slug: "lead-hygiene",         summary: "Missing contact info, owner overload, no workflow on high-intent leads." },
-      { rank: 4, name: "Competitive & SEO position",     dollars_low: 12_000, dollars_high:  60_000, chapter_slug: "competitive",          summary: "Search and competitor gaps costing inbound demand." },
-      { rank: 5, name: "Brand voice contradictions",     dollars_low:  9_000, dollars_high:  48_000, chapter_slug: "brand-contradictions", summary: "Mixed messages between promise, proof, and price." },
+    // Placeholder state, not a forensic result. The compiler's generic detector
+    // marks any report still carrying this as regeneration_required.
+    executive_summary: `A forensic synthesis for ${name} is not available from this pass. No company-specific findings were produced, so no dollar exposure is being reported. Re-run the scan to generate a supported forensic result.`,
+    synthesis_incomplete: true,
+    top_leaks: [],
+    // Category floors are retained for context ONLY, outside the forensic total.
+    benchmark_leaks: [
+      { rank: 1, name: "Pipeline & follow-up bleed",     annual_low: 24_000, annual_high: 180_000, chapter_slug: "pipeline-forensics",   excluded_from_total: true, label: "Category benchmark — not measured for this company" },
+      { rank: 2, name: "Site conversion friction",       annual_low: 18_000, annual_high:  72_000, chapter_slug: "site-autopsy",         excluded_from_total: true, label: "Category benchmark — not measured for this company" },
+      { rank: 3, name: "Lead hygiene & workflow gaps",   annual_low: 12_000, annual_high:  90_000, chapter_slug: "lead-hygiene",         excluded_from_total: true, label: "Category benchmark — not measured for this company" },
+      { rank: 4, name: "Competitive & SEO position",     annual_low: 12_000, annual_high:  60_000, chapter_slug: "competitive",          excluded_from_total: true, label: "Category benchmark — not measured for this company" },
+      { rank: 5, name: "Brand voice contradictions",     annual_low:  9_000, annual_high:  48_000, chapter_slug: "brand-contradictions", excluded_from_total: true, label: "Category benchmark — not measured for this company" },
     ],
     chapters,
   };
 }
+
 
 
 async function runCrmDetectors(accountId: string) {
