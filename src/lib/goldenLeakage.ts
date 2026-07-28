@@ -51,6 +51,8 @@ export type GoldenReportLike = {
     slug?: string;
     what_its_costing?: string | null;
   }> | null;
+  /** Reports carry many other fields (company, url, assets…); none affect the math. */
+  [key: string]: unknown;
 };
 
 export type GoldenLeakage = {
