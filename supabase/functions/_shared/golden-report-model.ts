@@ -14,6 +14,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "./golden-leakage.ts";
+import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
+
 
 
 export type GoldenDeliverables = {
