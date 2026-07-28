@@ -875,8 +875,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const f = periodFactor(period || "");
           const annual = `${leakage.rangeLabelAscii} per year`;
           if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) {
-            // Numbers already reconcile; only normalize a missing/limping label.
-            return period ? m : m;
+            return m; // numbers already reconcile for the stated period
           }
           repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual}`);
           return annual;
