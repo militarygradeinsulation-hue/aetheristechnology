@@ -907,7 +907,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
     // Attach the Golden Report to the matching CRM company (upsert by website host).
     try {
-      const host = new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
+      const host = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.replace(/^www\./i, "").toLowerCase();
       if (host) {
         const { data: match } = await sb
           .from("crm_companies")
