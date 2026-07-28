@@ -23,12 +23,21 @@ const truncatedFindings = {
   firecrawl_scrape: { data: { markdown: "partial page".padEnd(200, " "), truncated: true } },
 };
 
+// Every priced leak must satisfy the evidence data contract, so the shared
+// fixture carries a source, an observation, a method and a confidence grade.
 const leak = (name: string, low: number, high: number, slug = "seo") => ({
   name,
   chapter_slug: slug,
   dollars_low: low,
   dollars_high: high,
+  source_url: `https://www.example.com/${slug}`,
+  evidence_quote: `Observed on the ${slug} page: "${name}"`,
+  observed_evidence: `Crawled ${slug} page shows ${name}`,
+  calculation_method: "Measured page count x observed conversion delta",
+  evidence_class: "verified",
+  confidence: 0.8,
 });
+
 
 describe("source suitability", () => {
   it("treats markdown as unsuitable to verify schema absence", () => {
