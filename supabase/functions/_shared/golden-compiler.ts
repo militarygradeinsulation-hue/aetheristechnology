@@ -258,13 +258,18 @@ export function buildSourceInventory(rawFindings: unknown): SourceInventory {
         inv.markdown.notes.push(`${here}=true`);
       }
       if (k === "error" && str) {
-        // Which tool failed is recorded; a failed tool can never verify a fact.
-        const kind: SourceKind = /scan[-_]?website|audit|lighthouse/i.test(path)
+        // A failure only disqualifies the source kind that failed. An unrelated
+        // tool timing out must not downgrade an otherwise good crawl.
+        const kind: SourceKind | null = /scan[-_]?website|audit|lighthouse|pagespeed/i.test(path)
           ? "structured_api"
-          : "markdown";
-        inv[kind].failed = true;
-        inv[kind].notes.push(`${here}: ${str.slice(0, 120)}`);
-        if (/timed? ?out|did not finish|timeout|abort/i.test(str)) inv[kind].truncated = true;
+          : /firecrawl|crawl|scrape|fetch|markdown/i.test(path)
+            ? "markdown"
+            : null;
+        if (kind) {
+          inv[kind].failed = true;
+          inv[kind].notes.push(`${here}: ${str.slice(0, 120)}`);
+          if (/timed? ?out|did not finish|timeout|abort/i.test(str)) inv[kind].truncated = true;
+        }
       }
       if (/^(gaps|issues|scores?|score|metrics)$/i.test(k) && v && !inv.structured_api.failed) {
         inv.structured_api.available = true;
@@ -515,15 +520,13 @@ const NON_USD_RE = /(€|£|¥|₹|\b(?:EUR|GBP|JPY|CAD|AUD|INR)\b)/g;
 
 // ───────────────────── ledger + root cause construction ─────────────────────
 
+/**
+ * Prose we authored, and therefore lint. Quoted `evidence` values are raw
+ * observations copied from the target (a euro price on the target site is a
+ * fact about them, not a currency error in our report), so they are excluded.
+ */
 function chapterText(ch: Record<string, unknown>): string {
-  return [
-    ch?.verdict,
-    ch?.what_we_found,
-    ch?.why_its_leaking,
-    ch?.what_its_costing,
-    JSON.stringify(ch?.what_to_do ?? ""),
-    JSON.stringify(ch?.evidence ?? ""),
-  ]
+  return [ch?.verdict, ch?.what_we_found, ch?.why_its_leaking, ch?.what_its_costing]
     .map((v) => (typeof v === "string" ? v : ""))
     .join("\n");
 }
