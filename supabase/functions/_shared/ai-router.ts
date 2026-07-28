@@ -34,8 +34,23 @@ const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
   bulk:  { abacus: "claude-haiku-4-5-20251001", lovable: "google/gemini-2.5-flash" },
-  heavy: { abacus: "grok-4.3",                  lovable: "google/gemini-2.5-pro" },
+  // Heavy used to fall back to gemini-2.5-pro. Pro is a reasoning model: it
+  // burns thinking tokens against max_tokens and routinely takes 20s+, which
+  // blanked out whole Golden Reports. Flash returns real content in time.
+  heavy: { abacus: "grok-4.3",                  lovable: "google/gemini-2.5-flash" },
 };
+
+// Circuit breaker: once Abacus answers with a billing/auth failure, stop
+// hammering it for the rest of this isolate. A single Golden Report fires 15
+// calls; without this every one of them wastes a round trip.
+let abacusDisabledUntil = 0;
+const ABACUS_COOLDOWN_MS = 10 * 60_000;
+
+function tripAbacus(reason: string) {
+  abacusDisabledUntil = Date.now() + ABACUS_COOLDOWN_MS;
+  console.warn(`[ai-router] Abacus disabled for 10m: ${reason}`);
+}
+
 
 export interface RoutedChatResult {
   content: string;
