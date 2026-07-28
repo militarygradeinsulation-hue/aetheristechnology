@@ -215,6 +215,31 @@ describe("unsupported claims", () => {
     expect(v.some((x) => x.code === "unsupported_quantified_claim")).toBe(true);
   });
 
+  it("accepts a disclosed modelling assumption", () => {
+    const out = compileGoldenReport({
+      report: {
+        top_leaks: [leak("Schema markup missing", 100, 200, "seo")],
+        chapters: [{ slug: "seo", what_its_costing: "Assuming a 2% conversion rate, the gap costs $100 - $200." }],
+      },
+      rawFindings: htmlFindings,
+    });
+    expect(out.violations.some((v) => v.code === "unsupported_quantified_claim")).toBe(false);
+    expect(out.ok).toBe(true);
+  });
+
+  it("labels an unmeasured promise as an assumption instead of asserting it", () => {
+    const out = compileGoldenReport({
+      report: {
+        top_leaks: [leak("Schema markup missing", 100, 200, "seo")],
+        chapters: [{ slug: "seo", what_its_costing: "This delivers 10X ROI." }],
+      },
+      rawFindings: htmlFindings,
+    });
+    const ch = (out.report.chapters as Array<Record<string, string>>)[0];
+    expect(ch.what_its_costing).toContain("illustrative assumption");
+    expect(out.ok).toBe(true);
+  });
+
   it("softenNegativeProse produces limited wording", () => {
     expect(softenNegativeProse("The company has no phone")).toMatch(/detected on the pages successfully crawled/i);
   });
