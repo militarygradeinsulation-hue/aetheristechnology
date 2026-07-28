@@ -858,18 +858,28 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       let out = text;
 
       if (leakage) {
-        out = out.replace(MONEY_RANGE_RE, (m, offset: number) => {
+        // The period phrase is consumed together with the range so a total can
+        // never keep a stale "per month" label after being rewritten to the
+        // canonical ANNUAL figure.
+        const totalRe = new RegExp(
+          `(${MONEY_RANGE_RE.source})([\\s,]*(?:\\/|per\\s+|a\\s+|each\\s+)?(?:month|mo|quarter|qtr|week|wk|day|year|yr|annually|monthly|quarterly|weekly|daily|yearly)\\b)?`,
+          "g",
+        );
+        out = out.replace(totalRe, (m, range: string, period: string | undefined, offset: number) => {
           const window = out.slice(Math.max(0, offset - 140), offset + m.length + 60);
           const before = out.slice(Math.max(0, offset - 80), offset);
           if (!TOTAL_CONTEXT_RE.test(window) || SUBSET_SCOPE_RE.test(before)) return m;
-          if (m.replace(/\s+/g, "") === leakage.rangeLabelAscii.replace(/\s+/g, "")) return m;
-          const lo = parseMoney(m.split(/-|–|—|to/)[0]);
-          const hi = parseMoney(m.split(/-|–|—|to/).slice(1).join(" "));
+          const lo = parseMoney(range.split(/-|–|—|to/)[0]);
+          const hi = parseMoney(range.split(/-|–|—|to/).slice(1).join(" "));
           if (lo == null || hi == null) return m;
-          const f = periodFactor(out.slice(offset + m.length, offset + m.length + 24));
-          if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) return m;
-          repairs.push(`${where}: replaced stale total ${m.trim()} with canonical annual ${leakage.rangeLabelAscii}`);
-          return f === 1 ? leakage.rangeLabelAscii : `${leakage.rangeLabelAscii} per year, or`;
+          const f = periodFactor(period || "");
+          const annual = `${leakage.rangeLabelAscii} per year`;
+          if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) {
+            // Numbers already reconcile; only normalize a missing/limping label.
+            return period ? m : m;
+          }
+          repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual}`);
+          return annual;
         });
       }
 
