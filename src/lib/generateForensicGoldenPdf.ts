@@ -428,22 +428,33 @@ export function generateForensicGoldenPdf(opts: {
   doc.text(`Generated: ${model.meta.generatedAt.toLocaleString("en-US")}`, M, cy + 18);
   doc.text(`Scan ID: ${scanId}`, M, cy + 24);
 
-  // Red leakage box — drawn ONLY from the canonical resolver, omitted with no evidence.
-  if (model.leakage) {
+  // Red leakage box — drawn ONLY from the canonical resolver. With no evidence
+  // the box says "Not calculated"; a generic fallback range is never invented.
+  {
     const boxY = cy + 36;
-    doc.setFillColor(40, 15, 15);
-    doc.rect(M, boxY, CW, 34, "F");
-    doc.setDrawColor(...CRIMSON);
+    const tone = model.leakage ? CRIMSON : AMBER;
+    const headline = model.leakage ? `${model.leakage.rangeLabelAscii} / year` : "Not calculated";
+    const caption = model.leakage
+      ? model.leakage.caption
+      : "This scan produced no priced leak evidence, so no annual revenue loss figure is calculated for this report.";
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    const capLines = wrap(doc, caption, CW - 8);
+    const boxH = 24 + capLines.length * 4;
+    doc.setFillColor(...(model.leakage ? [40, 15, 15] : [34, 26, 10]) as [number, number, number]);
+    doc.rect(M, boxY, CW, boxH, "F");
+    doc.setDrawColor(...tone);
     doc.setLineWidth(0.6);
-    doc.rect(M, boxY, CW, 34);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...CRIMSON);
+    doc.rect(M, boxY, CW, boxH);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...tone);
     doc.text(GOLDEN_LEAKAGE_LABEL.toUpperCase(), M + 4, boxY + 7);
-    doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...CRIMSON);
-    doc.text(`${model.leakage.rangeLabelAscii} / year`, M + 4, boxY + 20);
+    doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...tone);
+    doc.text(headline, M + 4, boxY + 20);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
     let capY = boxY + 26;
-    for (const l of wrap(doc, model.leakage.caption, CW - 8).slice(0, 2)) { doc.text(l, M + 4, capY); capY += 4; }
+    for (const l of capLines) { doc.text(l, M + 4, capY); capY += 4; }
   }
+
 
   // ───────── INDEX (clickable, back-filled with real page numbers) ─────────
   newPage(doc, cur, askUrl);
