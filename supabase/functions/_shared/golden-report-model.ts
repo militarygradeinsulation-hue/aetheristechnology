@@ -128,8 +128,25 @@ function block(label: string, body?: unknown): Block[] {
 
 // ───────────────────────── sections ─────────────────────────
 
-function leakageSection(leakage: GoldenLeakage | null): Section | null {
-  if (!leakage) return null;
+function leakageSection(leakage: GoldenLeakage | null): Section {
+  if (!leakage) {
+    // Never fabricate a fallback range. The reader is told plainly that the
+    // scan produced no priced evidence.
+    return {
+      id: "leakage",
+      title: GOLDEN_LEAKAGE_LABEL,
+      newPage: false,
+      indexed: false,
+      blocks: [
+        { kind: "callout", tone: "amber", label: GOLDEN_LEAKAGE_LABEL, text: "Not calculated" },
+        {
+          kind: "paragraph",
+          text:
+            "This scan produced no priced leak evidence, so no annual revenue loss figure is calculated for this report. Re-run the scan to price the findings.",
+        },
+      ],
+    };
+  }
   return {
     id: "leakage",
     title: GOLDEN_LEAKAGE_LABEL,
@@ -144,6 +161,31 @@ function leakageSection(leakage: GoldenLeakage | null): Section | null {
     ],
   };
 }
+
+/** Degradation warning the website shows above the report body. */
+function degradedSection(report: Record<string, unknown>): Section | null {
+  const sf = report.synth_fallback as
+    | { degraded?: boolean; chapters_fallback?: unknown[]; chapters_total?: number }
+    | undefined;
+  if (!sf || typeof sf !== "object" || !sf.degraded) return null;
+  const fell = Array.isArray(sf.chapters_fallback) ? sf.chapters_fallback.length : 0;
+  const total = Number(sf.chapters_total) || 14;
+  return {
+    id: "degraded",
+    title: "Degraded - AI synthesis unavailable",
+    newPage: false,
+    indexed: false,
+    blocks: [
+      {
+        kind: "callout",
+        tone: "amber",
+        label: "Degraded - AI synthesis unavailable",
+        text: `${fell} of ${total} chapters fell back to template benchmark text instead of scan evidence. Re-run this scan before sending it to a client.`,
+      },
+    ],
+  };
+}
+
 
 type ConsistencyLike = {
   evidence_quality?: Record<string, number>;
@@ -175,6 +217,16 @@ function evidenceSection(report: Record<string, unknown>): Section | null {
   ];
   blocks.push({ kind: "table", columns: ["Claim grade", "Count", "Share of claims"], widths: [70, 40, 60], rows });
   if (has(c.canonical_counts_sentence)) blocks.push({ kind: "paragraph", text: str(c.canonical_counts_sentence) });
+  if (c.detected_findings != null) blocks.push({ kind: "kv", label: "Detected findings", value: String(c.detected_findings) });
+  if (c.uniquely_priced_leaks != null) blocks.push({ kind: "kv", label: "Uniquely priced leaks", value: String(c.uniquely_priced_leaks) });
+  if (c.unique_root_causes != null) blocks.push({ kind: "kv", label: "Unique root causes", value: String(c.unique_root_causes) });
+  if (has(c.site_type)) blocks.push({ kind: "kv", label: "Site type", value: str(c.site_type) });
+  // Any consistency field added later is exported instead of silently dropped.
+  for (const [k, v] of Object.entries(c as Record<string, unknown>)) {
+    if (["evidence_quality", "canonical_counts_sentence", "detected_findings", "uniquely_priced_leaks", "unique_root_causes", "site_type"].includes(k)) continue;
+    if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
+    else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+  }
   if (compiler?.violations?.length) {
     blocks.push({
       kind: "mono",
@@ -255,6 +307,10 @@ function brandSection(d: GoldenDeliverables): Section | null {
       if (has(c.fix)) blocks.push({ kind: "paragraph", text: `Fix: ${str(c.fix)}` });
     }
   }
+  emitUnknown(blocks, b, [
+    "positioning", "target_audience", "voice", "messaging_pillars", "value_proposition",
+    "differentiators", "color_guidance", "typography_guidance", "corrections",
+  ]);
   return blocks.length ? { id: "brand", title: "Brand Blueprint", kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks } : null;
 }
 
@@ -276,6 +332,9 @@ function imagerySection(d: GoldenDeliverables): Section | null {
       if (has(p.prompt)) blocks.push({ kind: "mono", lines: [str(p.prompt)] });
     });
   }
+  emitUnknown(blocks, im, [
+    "visual_style", "subjects", "composition", "lighting", "color_treatment", "show", "avoid", "prompts",
+  ]);
   return blocks.length ? { id: "imagery", title: "Imagery Direction", kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks } : null;
 }
 
@@ -289,15 +348,17 @@ function postsSection(d: GoldenDeliverables): Section | null {
     if (has(p.body)) blocks.push(...paragraphs(str(p.body)));
     if (has(p.cta)) blocks.push({ kind: "kv", label: "CTA", value: str(p.cta) });
     if (has(p.visual)) blocks.push({ kind: "kv", label: "Visual", value: str(p.visual) });
+    emitUnknown(blocks, p, ["platform", "hook", "body", "cta", "visual"]);
   });
   return { id: "posts", title: `Ready To Publish Posts (${posts.length})`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
 function scheduleSection(d: GoldenDeliverables): Section | null {
-  const days = d.schedule?.days || [];
-  if (!days.length && !has(d.schedule?.overview)) return null;
+  const sched = d.schedule;
+  const days = sched?.days || [];
+  if (!sched) return null;
   const blocks: Block[] = [];
-  if (has(d.schedule?.overview)) blocks.push(...paragraphs(str(d.schedule?.overview)));
+  if (has(sched.overview)) blocks.push(...paragraphs(str(sched.overview)));
   if (days.length) {
     blocks.push({
       kind: "table",
@@ -312,7 +373,18 @@ function scheduleSection(d: GoldenDeliverables): Section | null {
         str(r.visual),
       ]),
     });
+    // Any extra field saved on a day is exported below the table.
+    days.forEach((r, i) => {
+      const extra: Block[] = [];
+      emitUnknown(extra, r, ["day", "platform", "time", "purpose", "topic", "visual"]);
+      if (extra.length) {
+        blocks.push({ kind: "subheading", text: `Day ${str(r.day ?? i + 1)} detail` });
+        blocks.push(...extra);
+      }
+    });
   }
+  emitUnknown(blocks, sched, ["overview", "days"]);
+  if (!blocks.length) return null;
   return { id: "schedule", title: `Content Schedule (${days.length} days)`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
@@ -351,6 +423,66 @@ function chapterSection(ch: Record<string, unknown>, idx: number): Section {
     blocks,
   };
 }
+/** Top-level report keys already owned by a dedicated section above. */
+const CLAIMED_KEYS = new Set([
+  "executive_summary",
+  "top_leaks",
+  "chapters",
+  "deliverables",
+  
+  "generated_at",
+]);
+
+/** Recursively renders any saved value into blocks, losing nothing. */
+function emitValue(blocks: Block[], label: string, v: unknown) {
+  if (v == null) return;
+  if (Array.isArray(v)) {
+    if (!v.length) return;
+    if (v.every((x) => typeof x !== "object" || x === null)) {
+      pushIf(blocks, bullets(label, v.map(str)));
+    } else {
+      blocks.push({ kind: "subheading", text: label });
+      v.forEach((x, i) => emitValue(blocks, `${label} ${i + 1}`, x));
+    }
+    return;
+  }
+  if (typeof v === "object") {
+    const entries = Object.entries(v as Record<string, unknown>).filter(([, x]) => x != null);
+    if (!entries.length) return;
+    blocks.push({ kind: "subheading", text: label });
+    for (const [k, x] of entries) emitValue(blocks, labelize(k), x);
+    return;
+  }
+  if (!has(v)) return;
+  blocks.push({ kind: "kv", label, value: str(v) });
+}
+
+/**
+ * Renders every key of `obj` that the caller did not already handle. This is
+ * what makes new Golden Report fields flow into the export automatically.
+ */
+function emitUnknown(blocks: Block[], obj: unknown, known: string[]) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return;
+  const skip = new Set(known);
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    if (skip.has(k) || NON_DISPLAY_KEYS.has(k) || k === "slug" || k === "generated_at") continue;
+    emitValue(blocks, labelize(k), v);
+  }
+}
+
+/**
+ * Renders every saved top-level field that no dedicated section claims.
+ * This is the safety net that makes future Golden Report schema additions flow
+ * into the PDF automatically instead of disappearing.
+ */
+function extrasSection(report: Record<string, unknown>): Section | null {
+  const blocks: Block[] = [];
+  emitUnknown(blocks, report, [...CLAIMED_KEYS]);
+  return blocks.length
+    ? { id: "additional-report-data", title: "Additional Report Data", newPage: true, indexed: true, blocks }
+    : null;
+}
+
 
 /**
  * Build the one view model both the on-screen report and the PDF read from.
@@ -380,7 +512,8 @@ export function buildGoldenReportModel(opts: {
     ],
   });
 
-  pushIf(sections as never, leakageSection(leakage) as never);
+  pushIf(sections as never, degradedSection(report) as never);
+  sections.push(leakageSection(leakage));
   pushIf(sections as never, evidenceSection(report) as never);
 
   if (has(report.executive_summary)) {
@@ -401,10 +534,28 @@ export function buildGoldenReportModel(opts: {
     pushIf(sections as never, imagerySection(d) as never);
     pushIf(sections as never, postsSection(d) as never);
     pushIf(sections as never, scheduleSection(d) as never);
+    const extra: Block[] = [];
+    emitUnknown(extra, d, ["brand", "imagery", "posts", "schedule"]);
+    if (extra.length) {
+      sections.push({
+        id: "growth-assets-extra",
+        title: "Growth Assets - Additional Detail",
+        kicker: "GROWTH ASSETS",
+        newPage: true,
+        indexed: true,
+        blocks: extra,
+      });
+    }
   }
 
   const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
   chapters.forEach((ch, i) => sections.push(chapterSection(ch, i)));
+
+  // ── FUTURE-PROOF CATCH-ALL ──
+  // Any saved top-level field that no section above claims is rendered here, so
+  // a new Golden Report field can never be silently dropped from the export.
+  pushIf(sections as never, extrasSection(report) as never);
+
 
   return {
     meta: {
