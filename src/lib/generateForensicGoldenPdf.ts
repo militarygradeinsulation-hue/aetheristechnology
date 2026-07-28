@@ -117,10 +117,20 @@ function footer(doc: jsPDF, page: number, askUrl: string) {
 type Cursor = { y: number; page: number };
 
 function newPage(doc: jsPDF, cur: Cursor, askUrl: string) {
+  // Preserve the caller's text style: footer() repaints color/font/size and a
+  // continued paragraph must keep rendering in its own style on the new page.
+  const style = {
+    color: (doc as unknown as { getTextColor: () => string }).getTextColor(),
+    font: doc.getFont(),
+    size: doc.getFontSize(),
+  };
   doc.addPage();
   cur.page++;
   bg(doc);
   footer(doc, cur.page, askUrl);
+  doc.setFont(style.font.fontName, style.font.fontStyle);
+  doc.setFontSize(style.size);
+  doc.setTextColor(style.color);
   cur.y = M + 6;
 }
 
