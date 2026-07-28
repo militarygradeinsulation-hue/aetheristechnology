@@ -449,7 +449,7 @@ export function collectDisplayedLeaves(report: unknown, base = ""): Array<[strin
       for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
         if (!path && NON_DISPLAY_KEYS.has(k)) continue;
         // `slug` is an internal identifier, never shown to the reader.
-        if (k === "slug") continue;
+        if (k === "slug" || k === "generated_at") continue;
         walk(v, path ? `${path}.${k}` : k);
       }
     }
