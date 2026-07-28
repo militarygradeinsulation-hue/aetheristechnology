@@ -149,7 +149,7 @@ export async function routedChatCompletion(
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const disabled = Deno.env.get("AI_ROUTER_DISABLE") === "1";
 
-  if (!disabled && abacusKey) {
+  if (!disabled && abacusKey && Date.now() >= abacusDisabledUntil) {
     try {
       const r = await callProvider(ABACUS_URL, abacusKey, mapping.abacus, opts);
       if (r.ok) {
@@ -160,7 +160,13 @@ export async function routedChatCompletion(
         }
         console.warn("[ai-router] Abacus returned unusable response, falling back to Lovable");
       } else {
-        console.warn(`[ai-router] Abacus ${r.status}, falling back to Lovable`);
+        const t = await r.text().catch(() => "");
+        // Billing / auth failures are not transient: trip the breaker.
+        if (r.status === 401 || r.status === 403 || r.status === 429 || /no remaining credits|quota|invalid api key|unauthor/i.test(t)) {
+          tripAbacus(`${r.status} ${t.slice(0, 120)}`);
+        } else {
+          console.warn(`[ai-router] Abacus ${r.status}, falling back to Lovable`);
+        }
       }
     } catch (e) {
       console.warn(`[ai-router] Abacus error, falling back to Lovable:`, (e as Error).message);
@@ -168,26 +174,50 @@ export async function routedChatCompletion(
   }
 
   if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
-  let body = buildBody(lovableModel, opts);
-  let r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, body);
-  if (!r.ok) {
-    const t = await r.text().catch(() => "");
-    // One adaptive retry for picky-parameter 400s (max_tokens / temperature / response_format).
-    const retryBody = r.status === 400 ? adaptBodyForError(body, t) : null;
-    if (retryBody) {
-      console.warn(`[ai-router] Lovable 400 on parameters, retrying with adapted body`);
-      body = retryBody as any;
-      r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, body);
-    }
+
+  const callLovable = async (body: Record<string, any>) => {
+    let b = body;
+    let r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, b);
     if (!r.ok) {
-      const t2 = retryBody ? await r.text().catch(() => "") : t;
-      const err = new Error(`Lovable AI ${r.status}: ${t2.slice(0, 200)}`);
-      (err as any).status = r.status;
-      throw err;
+      const t = await r.text().catch(() => "");
+      // One adaptive retry for picky-parameter 400s (max_tokens / temperature / response_format).
+      const retryBody = r.status === 400 ? adaptBodyForError(b, t) : null;
+      if (retryBody) {
+        console.warn(`[ai-router] Lovable 400 on parameters, retrying with adapted body`);
+        b = retryBody as any;
+        r = await callProvider(LOVABLE_URL, lovableKey, lovableModel, opts, b);
+      }
+      if (!r.ok) {
+        const t2 = retryBody ? await r.text().catch(() => "") : t;
+        const err = new Error(`Lovable AI ${r.status}: ${t2.slice(0, 200)}`);
+        (err as any).status = r.status;
+        throw err;
+      }
+    }
+    return { json: await r.json(), body: b };
+  };
+
+  let { json: j, body } = await callLovable(buildBody(lovableModel, opts));
+  let { message, content } = extractMessage(j);
+
+  // A 200 with empty content (reasoning model exhausting max_tokens, or a
+  // truncated JSON response) must not silently become a fallback report.
+  const emptyish = !content && !(Array.isArray(message?.tool_calls) && message.tool_calls.length);
+  if (emptyish) {
+    const bumped: Record<string, any> = { ...body };
+    if ("max_tokens" in bumped) bumped.max_tokens = Math.max(Number(bumped.max_tokens) * 2, 4000);
+    if ("max_completion_tokens" in bumped) bumped.max_completion_tokens = Math.max(Number(bumped.max_completion_tokens) * 2, 4000);
+    console.warn("[ai-router] Lovable returned empty content, retrying with a larger token budget");
+    const retry = await callLovable(bumped);
+    const ex = extractMessage(retry.json);
+    if (ex.content || (Array.isArray(ex.message?.tool_calls) && ex.message.tool_calls.length)) {
+      j = retry.json; message = ex.message; content = ex.content;
+    } else {
+      throw new Error(`Lovable AI returned empty content from ${lovableModel}`);
     }
   }
-  const j = await r.json();
-  const { message, content } = extractMessage(j);
+
   return { content, message, provider: "lovable", model: lovableModel, raw: j };
 }
+
 
