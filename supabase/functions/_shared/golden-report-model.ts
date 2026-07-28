@@ -182,7 +182,7 @@ function evidenceSection(report: Record<string, unknown>): Section | null {
       lines: compiler.violations.map((v) => `${str(v.code)} · ${str(v.location)}: ${str(v.detail)}`),
     });
   }
-  return { id: "evidence-quality", title: "Evidence Quality", newPage: false, indexed: true, blocks };
+  return { id: "evidence-quality", title: "Evidence Quality", newPage: true, indexed: true, blocks };
 }
 
 function topLeaksSection(report: Record<string, unknown>): Section | null {

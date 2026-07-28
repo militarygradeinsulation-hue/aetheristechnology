@@ -175,8 +175,8 @@ function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9.5);
       doc.setTextColor(...PAPER);
-      const label = `${sanitize(b.label)}: `;
-      const lw = doc.getTextWidth(label);
+      const label = `${sanitize(b.label)}:`;
+      const lw = doc.getTextWidth(label) + 1.6;
       doc.text(label, M, cur.y);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(...BODY);
