@@ -56,10 +56,14 @@ serve(async (req) => {
           const { data: repEvents } = await supabase
             .from("rep_calendar_events")
             .select("id, rep_code, kind, title, body, start_at, end_at, all_day, lead_id, completed, rep_notes, admin_notes, created_by, created_at, updated_at")
+            // Events already pushed into company_calendar are returned by the
+            // query above — merging them here too would duplicate every meeting.
+            .is("company_event_id", null)
             .gte("start_at", fromIso)
             .lte("start_at", toIso)
             .order("start_at", { ascending: true })
             .limit(2000);
+
 
           const codes = Array.from(new Set((repEvents || []).map((e: any) => e.rep_code).filter(Boolean)));
           const nameByCode: Record<string, string> = {};

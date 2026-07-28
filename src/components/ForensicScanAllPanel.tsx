@@ -72,10 +72,12 @@ async function fetchScanRow(id: string): Promise<Row | null> {
   }
 }
 
-export function ForensicScanAllPanel() {
+export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
   const [url, setUrl] = useState("");
   const [company, setCompany] = useState("");
   const [scanId, setScanId] = useState<string | null>(() => {
+    if (initialScanId) return initialScanId;
+
     // Prefer ?scan=<id> in the URL so shareable Golden Report links open the
     // matching case file directly. Fall back to sessionStorage.
     try {
@@ -95,6 +97,13 @@ export function ForensicScanAllPanel() {
   const [elapsedSec, setElapsedSec] = useState(0);
   const pollRef = useRef<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
+
+  // A parent (e.g. the embeddable /golden-report/run page) can start a scan
+  // asynchronously and hand us the id after mount — adopt it when it arrives.
+  useEffect(() => {
+    if (initialScanId) setScanId((cur) => (cur === initialScanId ? cur : initialScanId));
+  }, [initialScanId]);
+
 
   const isAdmin = !!getAdminToken();
   const headers: Record<string, string> = isAdmin
