@@ -1088,6 +1088,27 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error(`scan ${id}: fully generic report — no AI chapter survived`);
     }
 
+    // Growth assets: brand / imagery / posts / schedule, built from the same
+    // cleaned findings. Hard-bounded so it can never re-open the timeout hole.
+    await stage("assets", "running", { cap_seconds: 90 });
+    try {
+      const cleanedStr = JSON.stringify(sanitizeFindingsForSynth(findings)).slice(0, 28_000);
+      const assets = await Promise.race([
+        synthesizeDeliverables(cleanedStr, url, company, report?.top_leaks || []),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 90_000)),
+      ]);
+      if (assets) {
+        report.deliverables = assets;
+        await stage("assets", "done", { sections: Object.keys(assets) });
+      } else {
+        await stage("assets", "degraded", "growth assets unavailable this pass");
+      }
+    } catch (e) {
+      console.error("growth assets failed:", e instanceof Error ? e.message : String(e));
+      await stage("assets", "degraded", "growth assets threw");
+    }
+
+
     await sb.from("forensic_scans").update({
       raw_findings: findings,
       report,
