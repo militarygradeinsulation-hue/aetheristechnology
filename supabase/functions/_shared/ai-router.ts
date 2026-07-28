@@ -43,13 +43,45 @@ const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
 // Circuit breaker: once Abacus answers with a billing/auth failure, stop
 // hammering it for the rest of this isolate. A single Golden Report fires 15
 // calls; without this every one of them wastes a round trip.
-let abacusDisabledUntil = 0;
-const ABACUS_COOLDOWN_MS = 10 * 60_000;
+// State lives on globalThis so every module instance in the isolate shares one
+// breaker (each edge function imports this file independently).
+const BREAKER_KEY = "__aetherisAbacusBreaker";
+type BreakerState = { until: number; strikes: number; reason: string };
+const breaker: BreakerState =
+  ((globalThis as any)[BREAKER_KEY] ??= { until: 0, strikes: 0, reason: "" });
 
-function tripAbacus(reason: string) {
-  abacusDisabledUntil = Date.now() + ABACUS_COOLDOWN_MS;
-  console.warn(`[ai-router] Abacus disabled for 10m: ${reason}`);
+const ABACUS_COOLDOWN_MS = 10 * 60_000;      // transient/unknown failures
+const ABACUS_CREDIT_COOLDOWN_MS = 60 * 60_000; // out of credits / bad key
+const ABACUS_STRIKE_LIMIT = 2;               // 2 soft failures => stop trying
+
+function tripAbacus(reason: string, ms = ABACUS_COOLDOWN_MS) {
+  breaker.until = Date.now() + ms;
+  breaker.strikes = 0;
+  breaker.reason = reason;
+  console.warn(`[ai-router] Abacus disabled for ${Math.round(ms / 60000)}m: ${reason}`);
 }
+
+// Soft failures (timeouts, 5xx, unusable payloads) shouldn't burn every call in
+// a 15-request scan: after ABACUS_STRIKE_LIMIT of them, trip the breaker too.
+function strikeAbacus(reason: string) {
+  breaker.strikes += 1;
+  if (breaker.strikes >= ABACUS_STRIKE_LIMIT) {
+    tripAbacus(`${ABACUS_STRIKE_LIMIT} consecutive failures (${reason})`);
+  } else {
+    console.warn(`[ai-router] Abacus failure ${breaker.strikes}/${ABACUS_STRIKE_LIMIT}: ${reason}`);
+  }
+}
+
+// Abacus reports exhausted credits both as HTTP status codes and as text in an
+// otherwise-200 payload, so match on both.
+const CREDIT_ERROR_RE =
+  /no remaining credits|insufficient (credits|balance|funds|quota)|out of credits|credit limit|quota (exceeded|exhausted)|billing|payment required|invalid api key|unauthor|forbidden/i;
+
+function isCreditFailure(status: number, text: string) {
+  return status === 401 || status === 402 || status === 403 || status === 429 ||
+    CREDIT_ERROR_RE.test(text);
+}
+
 
 
 export interface RoutedChatResult {
