@@ -262,6 +262,7 @@ describe("production data shapes (company-agnostic)", () => {
 
   it("two unrelated companies get identical behavior with different values", () => {
     const companyA = {
+      // identity fields live alongside the data and must never affect the math
       company: "Alpha Manufacturing",
       target_url: "https://alpha-manufacturing.example",
       top_leaks: [
@@ -277,8 +278,8 @@ describe("production data shapes (company-agnostic)", () => {
         { name: "Unattributed spend", dollars_low: "250k", dollars_high: "400k" },
       ],
     };
-    const a = computeGoldenLeakage(companyA)!;
-    const b = computeGoldenLeakage(companyB)!;
+    const a = computeGoldenLeakage(companyA as GoldenReportLike)!;
+    const b = computeGoldenLeakage(companyB as GoldenReportLike)!;
 
     // Same contract, same label, same format — different, correct numbers.
     for (const r of [a, b]) {
@@ -293,7 +294,7 @@ describe("production data shapes (company-agnostic)", () => {
     expect(a.displayValue).not.toBe(b.displayValue);
 
     // Swapping identity fields changes nothing.
-    const aRenamed = computeGoldenLeakage({ ...companyA, company: "Zeta Co", target_url: "https://zeta.example" })!;
+    const aRenamed = computeGoldenLeakage({ ...companyA, company: "Zeta Co", target_url: "https://zeta.example" } as GoldenReportLike)!;
     expect(aRenamed.displayValue).toBe(a.displayValue);
   });
 });
