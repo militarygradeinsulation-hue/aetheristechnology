@@ -622,11 +622,17 @@ async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _mod
       return m ? JSON.parse(m[0]) : {};
     }
   };
-  // Fail fast — the caller (synthesizeReport) runs 15 calls in parallel and is
-  // itself wrapped in a hard watchdog. A slow single call must not stall the
-  // whole Golden Report; the deterministic fallback fills any missing chapter.
-  return await doCall(timeoutMs);
+  // One retry on abort / empty before the caller falls back to template text.
+  try {
+    const first = await doCall(timeoutMs);
+    if (first && Object.keys(first).length) return first;
+    throw new Error("empty json");
+  } catch (e) {
+    console.warn("aiJson attempt 1 failed, retrying:", e instanceof Error ? e.message : String(e));
+    return await doCall(timeoutMs);
+  }
 }
+
 
 
 const CHAPTER_SHAPE = `{
