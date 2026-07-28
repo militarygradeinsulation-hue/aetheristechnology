@@ -20,12 +20,25 @@ export function readConsistency(report: unknown): ReportConsistency | null {
   return c && typeof c === "object" ? c : null;
 }
 
-/** True when the report passed the compiler gate, or predates the compiler. */
+/**
+ * True when the report may be downloaded / sent out.
+ *
+ * Blocked when the compiler gate failed, when the report was marked
+ * regeneration_required, or — for legacy rows that predate the compiler — when
+ * the deterministic generic/template detector says it is boilerplate. A legacy
+ * report that is genuinely specific is still allowed through.
+ */
 export function isDeliverable(report: unknown): boolean {
+  const r = report as Record<string, unknown> | null;
+  if (r?.report_state === "regeneration_required") return false;
   const meta = readCompilerMeta(report);
-  if (!meta?.state) return true; // legacy report, never compiled — not blocked
+  if (!meta?.state) {
+    // Never compiled: fall back to the live generic check instead of trusting it.
+    return !detectGenericReport(r as never).regeneration_required;
+  }
   return meta.state === "compiled";
 }
+
 
 /**
  * Evidence quality summary. Every number here is READ from the compiled report;
