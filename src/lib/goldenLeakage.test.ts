@@ -236,15 +236,17 @@ describe("chapter prose guards", () => {
   });
 });
 
-describe("real production fixtures", () => {
-  it("Odoo scan 7d4630c0 resolves to $4,100 – $8,900", () => {
+// These fixtures are shaped from real production rows, but nothing in the
+// resolver is company-, account- or scan-specific: only the data shape matters.
+describe("production data shapes (company-agnostic)", () => {
+  it("canonical overall_leakage shape resolves to its stored range", () => {
     const r = computeGoldenLeakage({
       overall_leakage: { annual_low: 4100, annual_high: 8900, currency: "USD", source: "top_leaks", priced_leak_count: 5, calculation_version: LEAKAGE_CALCULATION_VERSION },
     })!;
     expect(r.displayValue).toBe("$4,100 – $8,900 / year");
   });
 
-  it("Teresa Gallego / portebrown scan 1f2b0618 resolves to $415,000 – $830,000 from string leaks", () => {
+  it("comma-formatted string top_leaks shape sums to the correct range", () => {
     const r = computeGoldenLeakage({
       top_leaks: [
         { name: "Outdated Site Architecture & Performance", dollars_low: "150,000", dollars_high: "300,000" },
@@ -256,5 +258,42 @@ describe("real production fixtures", () => {
     })!;
     expect([r.low, r.high, r.count]).toEqual([415000, 830000, 5]);
     expect(r.displayValue).toBe("$415,000 – $830,000 / year");
+  });
+
+  it("two unrelated companies get identical behavior with different values", () => {
+    const companyA = {
+      company: "Alpha Manufacturing",
+      target_url: "https://alpha-manufacturing.example",
+      top_leaks: [
+        { name: "Checkout friction", dollars_low: 12000, dollars_high: 24000 },
+        { name: "Dead SEO pages", dollars_low: 3000, dollars_high: 6000 },
+      ],
+    };
+    const companyB = {
+      company: "Beta Legal Group",
+      target_url: "https://beta-legal.example",
+      top_leaks: [
+        { name: "Intake drop-off", dollars_low: "1,250,000", dollars_high: "$2.5M" },
+        { name: "Unattributed spend", dollars_low: "250k", dollars_high: "400k" },
+      ],
+    };
+    const a = computeGoldenLeakage(companyA)!;
+    const b = computeGoldenLeakage(companyB)!;
+
+    // Same contract, same label, same format — different, correct numbers.
+    for (const r of [a, b]) {
+      expect(r.currency).toBe("USD");
+      expect(r.source).toBe("top_leaks");
+      expect(r.count).toBe(2);
+      expect(r.calculationVersion).toBe(LEAKAGE_CALCULATION_VERSION);
+      expect(r.displayValue).toMatch(/^\$[\d,]+ – \$[\d,]+ \/ year$/);
+    }
+    expect([a.low, a.high]).toEqual([15000, 30000]);
+    expect([b.low, b.high]).toEqual([1500000, 2900000]);
+    expect(a.displayValue).not.toBe(b.displayValue);
+
+    // Swapping identity fields changes nothing.
+    const aRenamed = computeGoldenLeakage({ ...companyA, company: "Zeta Co", target_url: "https://zeta.example" })!;
+    expect(aRenamed.displayValue).toBe(a.displayValue);
   });
 });
