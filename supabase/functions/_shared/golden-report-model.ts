@@ -403,6 +403,54 @@ function chapterSection(ch: Record<string, unknown>, idx: number): Section {
     blocks,
   };
 }
+/** Top-level report keys already owned by a dedicated section above. */
+const CLAIMED_KEYS = new Set([
+  "executive_summary",
+  "top_leaks",
+  "chapters",
+  "deliverables",
+  "report_state",
+  "generated_at",
+]);
+
+/**
+ * Renders every saved top-level field that no dedicated section claims.
+ * This is the safety net that makes future Golden Report schema additions flow
+ * into the PDF automatically instead of disappearing.
+ */
+function extrasSection(report: Record<string, unknown>): Section | null {
+  const blocks: Block[] = [];
+  const emit = (label: string, v: unknown) => {
+    if (v == null) return;
+    if (Array.isArray(v)) {
+      if (!v.length) return;
+      if (v.every((x) => typeof x !== "object" || x === null)) {
+        pushIf(blocks, bullets(label, v.map(str)));
+      } else {
+        blocks.push({ kind: "subheading", text: label });
+        v.forEach((x, i) => emit(`${label} ${i + 1}`, x));
+      }
+      return;
+    }
+    if (typeof v === "object") {
+      const entries = Object.entries(v as Record<string, unknown>).filter(([, x]) => x != null);
+      if (!entries.length) return;
+      blocks.push({ kind: "subheading", text: label });
+      for (const [k, x] of entries) emit(labelize(k), x);
+      return;
+    }
+    if (!has(v)) return;
+    blocks.push({ kind: "kv", label, value: str(v) });
+  };
+  for (const [k, v] of Object.entries(report)) {
+    if (CLAIMED_KEYS.has(k) || NON_DISPLAY_KEYS.has(k)) continue;
+    emit(labelize(k), v);
+  }
+  return blocks.length
+    ? { id: "additional-report-data", title: "Additional Report Data", newPage: true, indexed: true, blocks }
+    : null;
+}
+
 
 /**
  * Build the one view model both the on-screen report and the PDF read from.
