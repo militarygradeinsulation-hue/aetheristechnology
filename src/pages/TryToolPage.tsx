@@ -20,6 +20,7 @@ import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SignalStrip, markdownVisualComponents } from "@/components/VisualReport";
 import { SpeakButton } from "@/components/SpeakButton";
+import { getPortalProfile } from "@/lib/portalAuth";
 
 /**
  * Public sandbox runner for any Chaos Ecosystem tool.
@@ -275,7 +276,7 @@ export default function TryToolPage() {
     setOutput("");
     try {
       const { data, error } = await supabase.functions.invoke("try-tool-sandbox", {
-        body: { toolId, url: cleanUrl, context: cleanCtx },
+        body: { toolId, url: cleanUrl, context: cleanCtx, repCode: getPortalProfile()?.code || null },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
