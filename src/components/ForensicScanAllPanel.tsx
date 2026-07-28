@@ -377,6 +377,13 @@ export function ForensicScanAllPanel() {
               </section>
             )}
 
+            <GoldenGrowthAssets
+              deliverables={report.deliverables}
+              company={row.company_name || row.target_url}
+            />
+
+
+
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500">Chapters · {chapters.length}</div>
