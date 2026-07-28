@@ -14,6 +14,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "./golden-leakage.ts";
+import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
+
 
 
 export type GoldenDeliverables = {
@@ -199,23 +201,32 @@ type ConsistencyLike = {
 function evidenceSection(report: Record<string, unknown>): Section | null {
   const c = report.report_consistency as ConsistencyLike | undefined;
   if (!c || typeof c !== "object") return null;
-  const q = c.evidence_quality || {};
+  const confidence = buildEvidenceConfidence(report);
+  if (!confidence) return null;
   const compiler = report.compiler as { state?: string; violations?: { code?: string; location?: string; detail?: string }[] } | undefined;
   const blocks: Block[] = [];
-  if (compiler?.state) {
+
+  if (confidence.lead) blocks.push({ kind: "paragraph", text: confidence.lead });
+  if (confidence.metrics.length) {
     blocks.push({
-      kind: "kv",
-      label: "Compiler state",
-      value: compiler.state === "compiled" ? "Compiled - consistency checks passed" : "Needs review - checks failed",
+      kind: "table",
+      columns: ["Measure", "Count"],
+      widths: [120, 50],
+      rows: confidence.metrics.map((m) => [m.label, String(m.value)]),
     });
   }
-  const rows: string[][] = [
-    ["Verified", String(q.verified ?? 0), `${q.verified_pct ?? 0}%`],
-    ["Inferred", String(q.inferred ?? 0), `${q.inferred_pct ?? 0}%`],
-    ["Unverified", String(q.unverified ?? 0), `${q.unverified_pct ?? 0}%`],
-    ["Contradicted", String(q.contradicted ?? 0), `${q.contradicted_pct ?? 0}%`],
-  ];
-  blocks.push({ kind: "table", columns: ["Claim grade", "Count", "Share of claims"], widths: [70, 40, 60], rows });
+  blocks.push({ kind: "paragraph", text: confidence.explanation });
+
+  // Methodology notes appendix: detailed grades kept for transparency.
+  blocks.push({ kind: "paragraph", text: `Methodology notes. ${confidence.methodologyNote}` });
+  if (confidence.methodologyRows.length) {
+    blocks.push({
+      kind: "table",
+      columns: ["Evidence basis", "Claims"],
+      widths: [120, 50],
+      rows: confidence.methodologyRows.map((r) => [r.label, String(r.value)]),
+    });
+  }
   if (has(c.canonical_counts_sentence)) blocks.push({ kind: "paragraph", text: str(c.canonical_counts_sentence) });
   if (c.detected_findings != null) blocks.push({ kind: "kv", label: "Detected findings", value: String(c.detected_findings) });
   if (c.uniquely_priced_leaks != null) blocks.push({ kind: "kv", label: "Uniquely priced leaks", value: String(c.uniquely_priced_leaks) });
@@ -234,8 +245,9 @@ function evidenceSection(report: Record<string, unknown>): Section | null {
       lines: compiler.violations.map((v) => `${str(v.code)} · ${str(v.location)}: ${str(v.detail)}`),
     });
   }
-  return { id: "evidence-quality", title: "Evidence Quality", newPage: true, indexed: true, blocks };
+  return { id: "evidence-quality", title: EVIDENCE_CONFIDENCE_TITLE, newPage: true, indexed: true, blocks };
 }
+
 
 function topLeaksSection(report: Record<string, unknown>): Section | null {
   const leaks = Array.isArray(report.top_leaks) ? (report.top_leaks as Record<string, unknown>[]) : [];

@@ -1,6 +1,7 @@
-import { AlertTriangle, CheckCircle2, HelpCircle, ShieldAlert } from "lucide-react";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
 import { detectGenericReport } from "@/lib/goldenGenericDetector";
+import { buildEvidenceConfidence } from "@/lib/goldenEvidenceConfidence";
+
 
 export type CompilerMeta = {
   version?: number;
@@ -42,63 +43,69 @@ export function isDeliverable(report: unknown): boolean {
 
 
 /**
- * Evidence quality summary. Every number here is READ from the compiled report;
- * this component never recalculates totals, counts or statuses.
+ * Client-facing Evidence Confidence summary. Every number here is READ from the
+ * compiled report through the shared formatter, so website, portal and PDF
+ * wording cannot drift apart. Nothing is recalculated.
  */
 export function GoldenEvidenceQuality({ report, className = "" }: { report: unknown; className?: string }) {
-  const consistency = readConsistency(report);
+  const model = buildEvidenceConfidence(report);
   const meta = readCompilerMeta(report);
-  if (!consistency) return null;
-
-  const q = consistency.evidence_quality;
-  const rows = [
-    { label: "Verified", value: q.verified, pct: q.verified_pct, icon: CheckCircle2, tone: "text-emerald-400" },
-    { label: "Inferred", value: q.inferred, pct: q.inferred_pct, icon: HelpCircle, tone: "text-amber-400" },
-    { label: "Unverified", value: q.unverified, pct: q.unverified_pct, icon: AlertTriangle, tone: "text-muted-foreground" },
-    { label: "Contradicted", value: q.contradicted, pct: q.contradicted_pct, icon: ShieldAlert, tone: "text-red-400" },
-  ];
+  if (!model) return null;
 
   return (
-    <div className={`rounded-lg border border-border/60 bg-muted/10 p-4 ${className}`}>
-      <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Evidence Quality
-        </div>
-        <div
-          className={`font-mono text-[10px] uppercase tracking-widest ${
-            meta?.state === "compiled" ? "text-emerald-400" : "text-red-400"
-          }`}
-        >
-          {meta?.state === "compiled" ? "Compiled · consistency checks passed" : "Needs review · checks failed"}
-        </div>
+    <div className={`rounded-lg border border-amber-500/30 bg-black/40 p-5 ${className}`}>
+      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber-500 mb-3">
+        {model.title}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {rows.map((r) => (
-          <div key={r.label} className="rounded-md border border-border/50 bg-background/40 px-3 py-2">
-            <div className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider ${r.tone}`}>
-              <r.icon className="w-3 h-3" /> {r.label}
+      {model.lead && <p className="text-sm leading-relaxed text-foreground/90">{model.lead}</p>}
+
+      {!!model.metrics.length && (
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {model.metrics.map((m) => (
+            <div key={m.key} className="rounded-md border border-amber-500/20 bg-background/40 px-3 py-3">
+              <div className="text-2xl font-semibold text-amber-400 tabular-nums">{m.value}</div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                {m.label}
+              </div>
             </div>
-            <div className="mt-1 text-lg font-semibold">{r.value}</div>
-            <div className="text-[10px] font-mono text-muted-foreground">{r.pct}% of claims</div>
-          </div>
-        ))}
-      </div>
-
-      <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
-        {consistency.canonical_counts_sentence} Anything not marked verified is labelled inferred or unverified in the
-        report body, and absence of a signal in a partial crawl is never written as proof of absence.
-      </p>
-
-      {!!meta?.violations?.length && (
-        <ul className="mt-3 space-y-1">
-          {meta.violations.slice(0, 6).map((v, i) => (
-            <li key={i} className="text-[11px] font-mono text-red-400/90">
-              {v.code} · {v.location}: {v.detail}
-            </li>
           ))}
-        </ul>
+        </div>
       )}
+
+      <p className="mt-4 text-xs text-muted-foreground leading-relaxed">{model.explanation}</p>
+
+      <details className="mt-4 group">
+        <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-amber-500">
+          Methodology notes
+        </summary>
+        <div className="mt-3 space-y-3">
+          <p className="text-xs text-muted-foreground leading-relaxed">{model.methodologyNote}</p>
+          {!!model.methodologyRows.length && (
+            <ul className="grid grid-cols-2 gap-2">
+              {model.methodologyRows.map((r) => (
+                <li
+                  key={r.label}
+                  className="flex items-center justify-between gap-2 rounded border border-border/50 bg-background/40 px-3 py-2 text-xs"
+                >
+                  <span className="text-muted-foreground">{r.label}</span>
+                  <span className="font-semibold tabular-nums">{r.value}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {!!meta?.violations?.length && (
+            <ul className="space-y-1">
+              {meta.violations.slice(0, 6).map((v, i) => (
+                <li key={i} className="text-[11px] font-mono text-red-400/90">
+                  {v.code} · {v.location}: {v.detail}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </details>
     </div>
   );
 }
+
