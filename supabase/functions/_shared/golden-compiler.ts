@@ -502,9 +502,18 @@ export function softenNegativeProse(text: string): string {
 export const UNSUPPORTED_QUANTIFIED_RE =
   /\b(?:\d{1,3}(?:\.\d+)?\s?%\s?(?:lift|increase|improvement|more|higher|better|conversion|uplift)|\d+(?:\.\d+)?x\s?(?:more|higher|return|roi|conversion)|roi of \d|payback in \d|within \d+ (?:hours?|minutes?) response)/gi;
 
-/** Phrases that make a total/exposure sentence, used to find stale numbers. */
+/**
+ * A money range is only treated as THE report total when the surrounding text
+ * claims report-wide scope. Chapter subtotals ("the combined SEO gaps are
+ * priced at ...") are left exactly as written — rewriting them to the whole
+ * report total would itself be an accuracy defect.
+ */
 const TOTAL_CONTEXT_RE =
-  /\b(total|combined|aggregate|overall|annual (?:revenue )?(?:exposure|loss|leakage)|revenue (?:exposure|loss|at risk)|exposure is|leaking|bleeding|adds up to|sums? to)\b/i;
+  /\b(?:total (?:annual |estimated |combined )*(?:revenue )?(?:loss|exposure|leakage)|annual revenue (?:loss|exposure)|total estimated annual revenue loss|overall (?:annual )?(?:exposure|leakage|loss)|report[-\s]wide|across (?:the )?(?:report|site|business|company|organization|entire funnel|all chapters)|adds up to|sums? to|in total)\b/i;
+
+/** Subset language that proves a range is NOT the report total. */
+const SUBSET_SCOPE_RE =
+  /\b(?:combined \w+|these|this (?:chapter|section|gap|leak|issue|single)|each|per (?:leak|chapter|page))\b/i;
 
 /** Wording that already limits an absence statement to what was actually crawled. */
 export const SCOPE_QUALIFIER_RE =
@@ -828,7 +837,8 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       if (leakage) {
         out = out.replace(MONEY_RANGE_RE, (m, offset: number) => {
           const window = out.slice(Math.max(0, offset - 140), offset + m.length + 60);
-          if (!TOTAL_CONTEXT_RE.test(window)) return m;
+          const before = out.slice(Math.max(0, offset - 80), offset);
+          if (!TOTAL_CONTEXT_RE.test(window) || SUBSET_SCOPE_RE.test(before)) return m;
           if (m.replace(/\s+/g, "") === leakage.rangeLabelAscii.replace(/\s+/g, "")) return m;
           const lo = parseMoney(m.split(/-|–|—|to/)[0]);
           const hi = parseMoney(m.split(/-|–|—|to/).slice(1).join(" "));
@@ -1011,7 +1021,8 @@ export function validateCompiledReport(args: {
       const re = new RegExp(MONEY_RANGE_RE.source, "g");
       while ((m = re.exec(text))) {
         const window = text.slice(Math.max(0, m.index - 140), m.index + m[0].length + 60);
-        if (!TOTAL_CONTEXT_RE.test(window)) continue;
+        const beforeCtx = text.slice(Math.max(0, m.index - 80), m.index);
+        if (!TOTAL_CONTEXT_RE.test(window) || SUBSET_SCOPE_RE.test(beforeCtx)) continue;
         const parts = m[0].split(/-|–|—|to/);
         const lo = parseMoney(parts[0]);
         const hi = parseMoney(parts.slice(1).join(" "));
