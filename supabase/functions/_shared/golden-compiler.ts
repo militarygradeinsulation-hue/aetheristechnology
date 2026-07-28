@@ -1273,6 +1273,8 @@ export function validateCompiledReport(args: {
 
 /** Convenience: is this stored report safe to expose / turn into a PDF? */
 export function isReportPublishable(report: unknown): boolean {
-  const c = (report as { compiler?: { state?: string } })?.compiler;
-  return c?.state === "compiled";
+  const r = report as { compiler?: { state?: string }; report_state?: string } | null;
+  if (!r) return false;
+  if (r.report_state && r.report_state !== "compiled") return false;
+  return r.compiler?.state === "compiled";
 }
