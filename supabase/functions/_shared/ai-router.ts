@@ -181,29 +181,39 @@ export async function routedChatCompletion(
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");
   const disabled = Deno.env.get("AI_ROUTER_DISABLE") === "1";
 
-  if (!disabled && abacusKey && Date.now() >= abacusDisabledUntil) {
+  if (!disabled && abacusKey && Date.now() >= breaker.until) {
     try {
       const r = await callProvider(ABACUS_URL, abacusKey, mapping.abacus, opts);
       if (r.ok) {
-        const j = await r.json();
-        const { message, content, ok } = extractMessage(j);
+        const raw = await r.text();
+        let j: any = null;
+        try { j = JSON.parse(raw); } catch { /* non-JSON 200 */ }
+        const { message, content, ok } = j ? extractMessage(j) : { message: null, content: "", ok: false };
         if (ok) {
+          breaker.strikes = 0;
           return { content, message, provider: "abacus", model: mapping.abacus, raw: j };
         }
-        console.warn("[ai-router] Abacus returned unusable response, falling back to Lovable");
+        // A 200 can still carry "no remaining credits" in an error field.
+        const errText = j?.error?.message || j?.error || j?.message || raw;
+        if (isCreditFailure(200, String(errText))) {
+          tripAbacus(`credits unavailable: ${String(errText).slice(0, 120)}`, ABACUS_CREDIT_COOLDOWN_MS);
+        } else {
+          strikeAbacus("unusable response");
+        }
       } else {
         const t = await r.text().catch(() => "");
-        // Billing / auth failures are not transient: trip the breaker.
-        if (r.status === 401 || r.status === 403 || r.status === 429 || /no remaining credits|quota|invalid api key|unauthor/i.test(t)) {
-          tripAbacus(`${r.status} ${t.slice(0, 120)}`);
+        // Billing / auth failures are not transient: trip the breaker immediately.
+        if (isCreditFailure(r.status, t)) {
+          tripAbacus(`${r.status} ${t.slice(0, 120)}`, ABACUS_CREDIT_COOLDOWN_MS);
         } else {
-          console.warn(`[ai-router] Abacus ${r.status}, falling back to Lovable`);
+          strikeAbacus(`HTTP ${r.status}`);
         }
       }
     } catch (e) {
-      console.warn(`[ai-router] Abacus error, falling back to Lovable:`, (e as Error).message);
+      strikeAbacus((e as Error).message);
     }
   }
+
 
   if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
 
