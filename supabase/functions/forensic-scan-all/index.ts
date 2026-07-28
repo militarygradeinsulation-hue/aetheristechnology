@@ -953,7 +953,13 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }
     await stage("synth", report?.synth_fallback?.degraded ? "degraded" : "done", report?.synth_fallback ?? null);
 
-
+    // A report where EVERY chapter and the summary are template text is not a
+    // real report. Flag it explicitly so nothing downstream can present it as one.
+    const sf = report?.synth_fallback;
+    if (sf?.degraded && sf.summary_fallback && (sf.chapters_fallback?.length ?? 0) >= CHAPTERS.length) {
+      report.fully_generic = true;
+      console.error(`scan ${id}: fully generic report — no AI chapter survived`);
+    }
 
     await sb.from("forensic_scans").update({
       raw_findings: findings,
@@ -961,6 +967,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       status: "completed",
       completed_at: nowIso(),
     }).eq("id", id);
+
 
     // Log 'scan_completed' event for the Golden Report activity feed.
     try {
