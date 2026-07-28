@@ -432,7 +432,8 @@ export function buildGoldenReportModel(opts: {
     ],
   });
 
-  pushIf(sections as never, leakageSection(leakage) as never);
+  pushIf(sections as never, degradedSection(report) as never);
+  sections.push(leakageSection(leakage));
   pushIf(sections as never, evidenceSection(report) as never);
 
   if (has(report.executive_summary)) {
@@ -457,6 +458,12 @@ export function buildGoldenReportModel(opts: {
 
   const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
   chapters.forEach((ch, i) => sections.push(chapterSection(ch, i)));
+
+  // ── FUTURE-PROOF CATCH-ALL ──
+  // Any saved top-level field that no section above claims is rendered here, so
+  // a new Golden Report field can never be silently dropped from the export.
+  pushIf(sections as never, extrasSection(report) as never);
+
 
   return {
     meta: {
