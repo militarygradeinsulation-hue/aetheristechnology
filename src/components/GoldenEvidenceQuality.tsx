@@ -1,6 +1,7 @@
-import { AlertTriangle, CheckCircle2, HelpCircle, ShieldAlert } from "lucide-react";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
 import { detectGenericReport } from "@/lib/goldenGenericDetector";
+import { buildEvidenceConfidence } from "@/lib/goldenEvidenceConfidence";
+
 
 export type CompilerMeta = {
   version?: number;
