@@ -18,6 +18,9 @@ import {
   type Brand,
 } from "../_shared/brand-prompts.ts";
 import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
+import { verifyAdminToken } from "../_shared/admin-token.ts";
+import { verifyPortalToken } from "../_shared/portal-token.ts";
+import { classifyReportSource, type ReportSource } from "../_shared/golden-report-source.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -1317,8 +1320,75 @@ Deno.serve(async (req) => {
     if (!url) return new Response(JSON.stringify({ error: "url required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const company = String(body.company || "").trim();
     const accountId = body.account_id ? String(body.account_id) : null;
-    const repCode = body.rep_code ? String(body.rep_code) : null;
-    const requesterKind = req.headers.get("x-admin-token") ? "admin" : (req.headers.get("x-portal-token") ? "rep" : "anon");
+
+    // ───────── trustworthy origin resolution (server context only) ─────────
+    // Client-supplied identity/source fields are deliberately ignored whenever
+    // an authenticated server context exists.
+    const adminTokenHeader = req.headers.get("x-admin-token");
+    const portalTokenHeader = req.headers.get("x-portal-token");
+    const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() || "";
+    // Service-role callers are internal automation (drip batches, cron, agents).
+    const serviceRoleCaller = !!bearer && bearer === SUPABASE_SERVICE_ROLE_KEY;
+    const adminAuthenticated = adminTokenHeader
+      ? await verifyAdminToken(adminTokenHeader, SUPABASE_SERVICE_ROLE_KEY).catch(() => false)
+      : false;
+    const portalClaims = portalTokenHeader
+      ? await verifyPortalToken(portalTokenHeader, SUPABASE_SERVICE_ROLE_KEY).catch(() => null)
+      : null;
+
+    const reportSource: ReportSource = classifyReportSource({
+      adminAuthenticated: adminAuthenticated || (serviceRoleCaller && !portalClaims),
+      portalRole: portalClaims?.role ?? null,
+    });
+
+    let creatorUserId: string | null = null;
+    let creatorName: string | null = null;
+    let creatorEmail: string | null = null;
+    let creatorProfileId: string | null = null;
+    let portalSource: string | null = null;
+    // rep_code is only trusted from a verified portal token; anonymous callers
+    // cannot label their scan as a rep's.
+    let repCode: string | null = null;
+
+    if (portalClaims) {
+      repCode = portalClaims.code;
+      portalSource = portalClaims.role === "partner" ? "partner_portal" : "rep_portal";
+      const { data: rep } = await sb
+        .from("rep_codes")
+        .select("id, code, rep_name, rep_email")
+        .eq("code", portalClaims.code)
+        .maybeSingle();
+      creatorName = rep?.rep_name ?? null;
+      creatorEmail = rep?.rep_email ?? null;
+      creatorProfileId = rep?.id ?? portalClaims.code;
+    } else if (adminAuthenticated) {
+      portalSource = "admin";
+      creatorName = "Aetheris Admin";
+    } else if (serviceRoleCaller) {
+      portalSource = "internal_automation";
+      creatorName = "Aetheris internal automation";
+    }
+
+
+    // Supabase-authenticated user (when a real user JWT is present).
+    try {
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+      if (bearer && bearer !== anonKey && !serviceRoleCaller) {
+        const { data: u } = await sb.auth.getUser(bearer);
+        if (u?.user?.id) {
+          creatorUserId = u.user.id;
+          creatorEmail = creatorEmail || u.user.email || null;
+          creatorName = creatorName ||
+            (u.user.user_metadata?.full_name as string | undefined) ||
+            (u.user.user_metadata?.name as string | undefined) || null;
+        }
+      }
+    } catch { /* anonymous — fine */ }
+
+    const requesterKind = adminAuthenticated || serviceRoleCaller
+      ? "admin"
+      : (portalClaims ? portalClaims.role : "anon");
+
 
     const { data: row, error } = await sb.from("forensic_scans").insert({
       target_url: url,
@@ -1326,10 +1396,20 @@ Deno.serve(async (req) => {
       hubspot_account_id: accountId,
       rep_code: repCode,
       requester_kind: requesterKind,
+      report_source: reportSource,
+      creator_user_id: creatorUserId,
+      creator_name: creatorName,
+      creator_email: creatorEmail,
+      creator_profile_id: creatorProfileId,
+      portal_source: portalSource,
+      lead_name: body.lead_name ? String(body.lead_name).slice(0, 200) : null,
+      lead_email: body.lead_email ? String(body.lead_email).slice(0, 255).toLowerCase() : null,
+      lead_phone: body.lead_phone ? String(body.lead_phone).slice(0, 40) : null,
       status: "queued",
       stage_status: { queued: { state: "done", at: new Date().toISOString() } },
     }).select("id").single();
     if (error) throw error;
+
 
     // @ts-expect-error EdgeRuntime is Deno Edge global
     EdgeRuntime.waitUntil(runScan(row.id, url, company, accountId));

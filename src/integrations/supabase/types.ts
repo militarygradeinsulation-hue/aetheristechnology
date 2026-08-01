@@ -2569,14 +2569,24 @@ export type Database = {
           company_name: string | null
           completed_at: string | null
           created_at: string
+          creator_email: string | null
+          creator_name: string | null
+          creator_profile_id: string | null
+          creator_user_id: string | null
           error_message: string | null
           hubspot_account_id: string | null
           id: string
+          lead_email: string | null
+          lead_name: string | null
+          lead_phone: string | null
+          portal_source: string | null
           raw_findings: Json
           rep_code: string | null
           report: Json | null
+          report_source: string
           requested_by: string | null
           requester_kind: string
+          source_notified_at: string | null
           stage_status: Json
           status: string
           target_url: string
@@ -2588,14 +2598,24 @@ export type Database = {
           company_name?: string | null
           completed_at?: string | null
           created_at?: string
+          creator_email?: string | null
+          creator_name?: string | null
+          creator_profile_id?: string | null
+          creator_user_id?: string | null
           error_message?: string | null
           hubspot_account_id?: string | null
           id?: string
+          lead_email?: string | null
+          lead_name?: string | null
+          lead_phone?: string | null
+          portal_source?: string | null
           raw_findings?: Json
           rep_code?: string | null
           report?: Json | null
+          report_source?: string
           requested_by?: string | null
           requester_kind?: string
+          source_notified_at?: string | null
           stage_status?: Json
           status?: string
           target_url: string
@@ -2607,14 +2627,24 @@ export type Database = {
           company_name?: string | null
           completed_at?: string | null
           created_at?: string
+          creator_email?: string | null
+          creator_name?: string | null
+          creator_profile_id?: string | null
+          creator_user_id?: string | null
           error_message?: string | null
           hubspot_account_id?: string | null
           id?: string
+          lead_email?: string | null
+          lead_name?: string | null
+          lead_phone?: string | null
+          portal_source?: string | null
           raw_findings?: Json
           rep_code?: string | null
           report?: Json | null
+          report_source?: string
           requested_by?: string | null
           requester_kind?: string
+          source_notified_at?: string | null
           stage_status?: Json
           status?: string
           target_url?: string

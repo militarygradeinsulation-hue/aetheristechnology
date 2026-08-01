@@ -9,6 +9,13 @@
 // Also invoked internally to log 'scan_completed' events (POST + service key).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import {
+  reportSourceMeta,
+  buildNotificationSubject,
+  buildSourceBlock,
+  scanDisplayName,
+  formatDetroit,
+} from '../_shared/golden-report-source.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -75,9 +82,65 @@ async function geoLookup(ip: string | null, cfCountry: string | null) {
   return out
 }
 
+/**
+ * Claims the one-and-only "new report" notification for a scan.
+ * Uses a conditional UPDATE on source_notified_at so retries, regeneration,
+ * recompiles and backfills can never produce a second email.
+ */
+async function claimNewReportNotification(scanId: string) {
+  const { data, error } = await sb
+    .from('forensic_scans')
+    .update({ source_notified_at: new Date().toISOString() })
+    .eq('id', scanId)
+    .is('source_notified_at', null)
+    .select('id, report_source, company_name, target_url, rep_code, creator_user_id, creator_name, creator_email, creator_profile_id, portal_source, lead_name, lead_email, lead_phone, created_at')
+    .maybeSingle()
+  if (error) { console.error('claim notify failed:', error.message); return null }
+  return data
+}
+
 async function maybeNotify(ev: any) {
-  if (ev.is_internal) return
   try {
+    const { data: kv } = await sb.from('admin_kv').select('value').eq('key', 'golden_report_notify_email').maybeSingle()
+    const to = (kv?.value as any)?.email || 'joseph@aetheris.technology'
+    const reportUrl = ev.scan_id ? `https://aetheris.technology/golden-report?scan=${ev.scan_id}` : null
+    const adminUrl = 'https://aetheris.technology/admin'
+
+    // ── New report created: exactly one categorised notification, ever. ──
+    if (ev.event_type === 'scan_completed') {
+      if (!ev.scan_id) return
+      const scan = await claimNewReportNotification(ev.scan_id)
+      if (!scan) return // already notified (retry / regenerate / backfill)
+
+      const meta = reportSourceMeta(scan.report_source)
+      await sb.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'golden-report-opened',
+          recipientEmail: to,
+          idempotencyKey: `golden-new-report-${ev.scan_id}`,
+          templateData: {
+            subjectOverride: buildNotificationSubject(scan),
+            company: scanDisplayName(scan),
+            eventLabel: meta.isLiveLead ? 'submitted a new report from the public website' : 'generated a new report',
+            sourceTag: meta.subjectTag,
+            sourceLabel: meta.label,
+            isLiveLead: meta.isLiveLead,
+            sourceRows: buildSourceBlock(scan, { reportUrl, adminUrl }),
+            location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
+            recipient: scan.creator_email || scan.lead_email || 'anonymous',
+            openCount: 1,
+            when: formatDetroit(scan.created_at),
+            adminUrl,
+            reportUrl,
+          },
+        },
+      })
+      return
+    }
+
+    // ── Engagement events keep the existing behaviour. ──
+    if (ev.is_internal) return
+
     // Rate limit: 1 notification per (scan_id, event_type) per hour.
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const { count } = await sb
@@ -96,11 +159,7 @@ async function maybeNotify(ev: any) {
       .eq('scan_id', ev.scan_id)
       .eq('is_internal', false)
 
-    const { data: kv } = await sb.from('admin_kv').select('value').eq('key', 'golden_report_notify_email').maybeSingle()
-    const to = (kv?.value as any)?.email || 'joseph@aetheris.technology'
-
     const eventLabel = ({
-      scan_completed: 'generated a fresh report',
       page_view: 'viewed their report page',
       email_open: 'opened the report email',
       link_click: 'clicked the report link',
@@ -108,7 +167,6 @@ async function maybeNotify(ev: any) {
     } as Record<string, string>)[ev.event_type] || 'engaged with their report'
 
     const location = [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown'
-    const reportUrl = ev.scan_id ? `https://aetheris.technology/golden-report?scan=${ev.scan_id}` : null
 
     await sb.functions.invoke('send-transactional-email', {
       body: {
@@ -121,8 +179,8 @@ async function maybeNotify(ev: any) {
           location,
           recipient: ev.recipient_email || 'anonymous',
           openCount: total ?? 1,
-          when: new Date(ev.created_at).toLocaleString('en-US', { timeZone: 'America/Indiana/Indianapolis' }),
-          adminUrl: 'https://aetheris.technology/admin',
+          when: formatDetroit(ev.created_at),
+          adminUrl,
           reportUrl,
         },
       },
@@ -130,6 +188,7 @@ async function maybeNotify(ev: any) {
   } catch (e) {
     console.error('notify failed:', (e as Error).message)
   }
+
 }
 
 async function logEvent(input: {
