@@ -1336,79 +1336,52 @@ Deno.serve(async (req) => {
       ? await verifyPortalToken(portalTokenHeader, SUPABASE_SERVICE_ROLE_KEY).catch(() => null)
       : null;
 
-    const reportSource: ReportSource = classifyReportSource({
-      adminAuthenticated: adminAuthenticated || (serviceRoleCaller && !portalClaims),
-      portalRole: portalClaims?.role ?? null,
-    });
-
-    let creatorUserId: string | null = null;
-    let creatorName: string | null = null;
-    let creatorEmail: string | null = null;
-    let creatorProfileId: string | null = null;
-    let portalSource: string | null = null;
-    // rep_code is only trusted from a verified portal token; anonymous callers
-    // cannot label their scan as a rep's.
-    let repCode: string | null = null;
-
+    let repProfile: { id?: string | null; rep_name?: string | null; rep_email?: string | null } | null = null;
     if (portalClaims) {
-      repCode = portalClaims.code;
-      portalSource = portalClaims.role === "partner" ? "partner_portal" : "rep_portal";
       const { data: rep } = await sb
         .from("rep_codes")
         .select("id, code, rep_name, rep_email")
         .eq("code", portalClaims.code)
         .maybeSingle();
-      creatorName = rep?.rep_name ?? null;
-      creatorEmail = rep?.rep_email ?? null;
-      creatorProfileId = rep?.id ?? portalClaims.code;
-    } else if (adminAuthenticated) {
-      portalSource = "admin";
-      creatorName = "Aetheris Admin";
-    } else if (serviceRoleCaller) {
-      portalSource = "internal_automation";
-      creatorName = "Aetheris internal automation";
+      repProfile = rep ?? null;
     }
 
-
     // Supabase-authenticated user (when a real user JWT is present).
+    let authUser: { id?: string | null; email?: string | null; name?: string | null } | null = null;
     try {
       const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
       if (bearer && bearer !== anonKey && !serviceRoleCaller) {
         const { data: u } = await sb.auth.getUser(bearer);
         if (u?.user?.id) {
-          creatorUserId = u.user.id;
-          creatorEmail = creatorEmail || u.user.email || null;
-          creatorName = creatorName ||
-            (u.user.user_metadata?.full_name as string | undefined) ||
-            (u.user.user_metadata?.name as string | undefined) || null;
+          authUser = {
+            id: u.user.id,
+            email: u.user.email ?? null,
+            name: (u.user.user_metadata?.full_name as string | undefined) ||
+              (u.user.user_metadata?.name as string | undefined) || null,
+          };
         }
       }
     } catch { /* anonymous — fine */ }
 
-    const requesterKind = adminAuthenticated || serviceRoleCaller
-      ? "admin"
-      : (portalClaims ? portalClaims.role : "anon");
-
+    const origin = resolveScanOrigin({
+      adminAuthenticated,
+      serviceRoleCaller,
+      portalClaims: portalClaims ? { code: portalClaims.code, role: portalClaims.role } : null,
+      repProfile,
+      authUser,
+      body,
+    });
 
     const { data: row, error } = await sb.from("forensic_scans").insert({
       target_url: url,
       company_name: company || null,
       hubspot_account_id: accountId,
-      rep_code: repCode,
-      requester_kind: requesterKind,
-      report_source: reportSource,
-      creator_user_id: creatorUserId,
-      creator_name: creatorName,
-      creator_email: creatorEmail,
-      creator_profile_id: creatorProfileId,
-      portal_source: portalSource,
-      lead_name: body.lead_name ? String(body.lead_name).slice(0, 200) : null,
-      lead_email: body.lead_email ? String(body.lead_email).slice(0, 255).toLowerCase() : null,
-      lead_phone: body.lead_phone ? String(body.lead_phone).slice(0, 40) : null,
       status: "queued",
       stage_status: { queued: { state: "done", at: new Date().toISOString() } },
+      ...origin,
     }).select("id").single();
     if (error) throw error;
+
 
 
     // @ts-expect-error EdgeRuntime is Deno Edge global
