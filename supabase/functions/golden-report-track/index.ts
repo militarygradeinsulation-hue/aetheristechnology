@@ -10,14 +10,11 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import {
-  reportSourceMeta,
-  buildNotificationSubject,
-  buildSourceBlock,
-  scanDisplayName,
   formatDetroit,
   claimNewReportNotification,
   buildNewReportEmail,
 } from '../_shared/golden-report-source.ts'
+
 
 
 const corsHeaders = {
