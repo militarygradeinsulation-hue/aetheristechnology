@@ -15,7 +15,10 @@ import {
   buildSourceBlock,
   scanDisplayName,
   formatDetroit,
+  claimNewReportNotification,
+  buildNewReportEmail,
 } from '../_shared/golden-report-source.ts'
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
