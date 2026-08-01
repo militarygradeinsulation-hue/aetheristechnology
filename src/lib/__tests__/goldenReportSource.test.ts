@@ -12,7 +12,7 @@ import {
 } from "@/lib/goldenReportSource";
 
 // ─────────────────────────── mocked email transport ───────────────────────────
-const sendEmail = vi.fn(async () => ({ ok: true }));
+const sendEmail = vi.fn(async (_payload: any) => ({ ok: true }));
 
 /**
  * Fake `forensic_scans` table reproducing PostgREST semantics for the
