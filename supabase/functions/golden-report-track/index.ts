@@ -9,8 +9,10 @@
 // Also invoked internally to log 'scan_completed' events (POST + service key).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { verifyAdminToken } from '../_shared/admin-token.ts'
 import {
   formatDetroit,
+  NOTIFY_SELECT,
   claimNewReportNotification,
   buildNewReportEmail,
 } from '../_shared/golden-report-source.ts'
@@ -19,7 +21,7 @@ import {
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-token, x-rep-code',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
@@ -257,6 +259,20 @@ Deno.serve(async (req) => {
 
     // POST
     const body = await req.json().catch(() => ({} as any))
+
+    // Admin-only: resolve persisted origin metadata for a set of scans.
+    // Creator/rep identity is returned ONLY to a verified admin token.
+    if (body.action === 'sources') {
+      const ok = await verifyAdminToken(req.headers.get('x-admin-token'), SERVICE_KEY).catch(() => false)
+      if (!ok) {
+        return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      const ids = Array.isArray(body.scan_ids) ? body.scan_ids.filter((x: unknown) => typeof x === 'string').slice(0, 300) : []
+      if (!ids.length) return new Response(JSON.stringify({ scans: [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      const { data } = await sb.from('forensic_scans').select(NOTIFY_SELECT).in('id', ids)
+      return new Response(JSON.stringify({ scans: data || [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const scan_id = body.scan_id || null
     const event_type = String(body.event_type || 'page_view')
     if (!['scan_completed', 'page_view', 'email_open', 'link_click', 'pdf_download'].includes(event_type)) {
