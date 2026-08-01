@@ -82,23 +82,6 @@ async function geoLookup(ip: string | null, cfCountry: string | null) {
   return out
 }
 
-/**
- * Claims the one-and-only "new report" notification for a scan.
- * Uses a conditional UPDATE on source_notified_at so retries, regeneration,
- * recompiles and backfills can never produce a second email.
- */
-async function claimNewReportNotification(scanId: string) {
-  const { data, error } = await sb
-    .from('forensic_scans')
-    .update({ source_notified_at: new Date().toISOString() })
-    .eq('id', scanId)
-    .is('source_notified_at', null)
-    .select('id, report_source, company_name, target_url, rep_code, creator_user_id, creator_name, creator_email, creator_profile_id, portal_source, lead_name, lead_email, lead_phone, created_at')
-    .maybeSingle()
-  if (error) { console.error('claim notify failed:', error.message); return null }
-  return data
-}
-
 async function maybeNotify(ev: any) {
   try {
     const { data: kv } = await sb.from('admin_kv').select('value').eq('key', 'golden_report_notify_email').maybeSingle()
@@ -109,34 +92,22 @@ async function maybeNotify(ev: any) {
     // ── New report created: exactly one categorised notification, ever. ──
     if (ev.event_type === 'scan_completed') {
       if (!ev.scan_id) return
-      const scan = await claimNewReportNotification(ev.scan_id)
-      if (!scan) return // already notified (retry / regenerate / backfill)
+      // Conditional claim on source_notified_at — retries, reopens, downloads,
+      // regeneration and backfills can never produce a second email.
+      const scan = await claimNewReportNotification(sb as any, ev.scan_id)
+      if (!scan) return
 
-      const meta = reportSourceMeta(scan.report_source)
       await sb.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'golden-report-opened',
-          recipientEmail: to,
-          idempotencyKey: `golden-new-report-${ev.scan_id}`,
-          templateData: {
-            subjectOverride: buildNotificationSubject(scan),
-            company: scanDisplayName(scan),
-            eventLabel: meta.isLiveLead ? 'submitted a new report from the public website' : 'generated a new report',
-            sourceTag: meta.subjectTag,
-            sourceLabel: meta.label,
-            isLiveLead: meta.isLiveLead,
-            sourceRows: buildSourceBlock(scan, { reportUrl, adminUrl }),
-            location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
-            recipient: scan.creator_email || scan.lead_email || 'anonymous',
-            openCount: 1,
-            when: formatDetroit(scan.created_at),
-            adminUrl,
-            reportUrl,
-          },
-        },
+        body: buildNewReportEmail(scan, {
+          to,
+          reportUrl,
+          adminUrl,
+          location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
+        }),
       })
       return
     }
+
 
     // ── Engagement events keep the existing behaviour. ──
     if (ev.is_internal) return
