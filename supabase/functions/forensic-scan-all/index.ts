@@ -1312,7 +1312,15 @@ Deno.serve(async (req) => {
       if (!id) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       const { data, error } = await sb.from("forensic_scans").select("*").eq("id", id).single();
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      return new Response(JSON.stringify(data), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      // Origin/creator identity is admin-only — never expose it on public reads.
+      const adminOk = await verifyAdminToken(req.headers.get("x-admin-token"), SUPABASE_SERVICE_ROLE_KEY).catch(() => false);
+      const payload: Record<string, unknown> = { ...(data as Record<string, unknown>) };
+      if (!adminOk) {
+        for (const k of ["creator_user_id", "creator_name", "creator_email", "creator_profile_id", "portal_source", "lead_name", "lead_email", "lead_phone", "source_notified_at"]) {
+          delete payload[k];
+        }
+      }
+      return new Response(JSON.stringify(payload), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const body = await req.json().catch(() => ({}));
