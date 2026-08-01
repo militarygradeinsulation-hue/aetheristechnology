@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
 import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenceQuality";
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
+import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 
 
 
@@ -28,6 +29,10 @@ type Row = {
   created_at?: string;
   updated_at?: string;
   completed_at?: string | null;
+  report_source?: string | null;
+  creator_name?: string | null;
+  creator_email?: string | null;
+  rep_code?: string | null;
 };
 
 const STAGES: { key: string; label: string }[] = [
@@ -58,11 +63,13 @@ const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(s
 
 async function fetchScanRow(id: string): Promise<Row | null> {
   try {
+    const adminToken = getAdminToken();
     const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
       method: "GET",
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        ...(adminToken ? { "x-admin-token": adminToken } : {}),
       },
     });
     if (!r.ok) return null;
@@ -320,6 +327,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                   Case File · Forensic Golden Report
                 </div>
                 <h4 className="font-serif text-xl font-bold truncate">{row.company_name || row.target_url}</h4>
+                {isAdmin && (
+                  <div className="flex items-center gap-2 flex-wrap mt-1">
+                    <GoldenSourceBadge source={row.report_source} />
+                    <GoldenSourceIdentity scan={row} admin />
+                  </div>
+                )}
                 <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">
                   {row.target_url}
                 </a>

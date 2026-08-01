@@ -9,17 +9,19 @@
 // Also invoked internally to log 'scan_completed' events (POST + service key).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { verifyAdminToken } from '../_shared/admin-token.ts'
 import {
-  reportSourceMeta,
-  buildNotificationSubject,
-  buildSourceBlock,
-  scanDisplayName,
   formatDetroit,
+  NOTIFY_SELECT,
+  claimNewReportNotification,
+  buildNewReportEmail,
 } from '../_shared/golden-report-source.ts'
+
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-token, x-rep-code',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
@@ -82,23 +84,6 @@ async function geoLookup(ip: string | null, cfCountry: string | null) {
   return out
 }
 
-/**
- * Claims the one-and-only "new report" notification for a scan.
- * Uses a conditional UPDATE on source_notified_at so retries, regeneration,
- * recompiles and backfills can never produce a second email.
- */
-async function claimNewReportNotification(scanId: string) {
-  const { data, error } = await sb
-    .from('forensic_scans')
-    .update({ source_notified_at: new Date().toISOString() })
-    .eq('id', scanId)
-    .is('source_notified_at', null)
-    .select('id, report_source, company_name, target_url, rep_code, creator_user_id, creator_name, creator_email, creator_profile_id, portal_source, lead_name, lead_email, lead_phone, created_at')
-    .maybeSingle()
-  if (error) { console.error('claim notify failed:', error.message); return null }
-  return data
-}
-
 async function maybeNotify(ev: any) {
   try {
     const { data: kv } = await sb.from('admin_kv').select('value').eq('key', 'golden_report_notify_email').maybeSingle()
@@ -109,34 +94,22 @@ async function maybeNotify(ev: any) {
     // ── New report created: exactly one categorised notification, ever. ──
     if (ev.event_type === 'scan_completed') {
       if (!ev.scan_id) return
-      const scan = await claimNewReportNotification(ev.scan_id)
-      if (!scan) return // already notified (retry / regenerate / backfill)
+      // Conditional claim on source_notified_at — retries, reopens, downloads,
+      // regeneration and backfills can never produce a second email.
+      const scan = await claimNewReportNotification(sb as any, ev.scan_id)
+      if (!scan) return
 
-      const meta = reportSourceMeta(scan.report_source)
       await sb.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'golden-report-opened',
-          recipientEmail: to,
-          idempotencyKey: `golden-new-report-${ev.scan_id}`,
-          templateData: {
-            subjectOverride: buildNotificationSubject(scan),
-            company: scanDisplayName(scan),
-            eventLabel: meta.isLiveLead ? 'submitted a new report from the public website' : 'generated a new report',
-            sourceTag: meta.subjectTag,
-            sourceLabel: meta.label,
-            isLiveLead: meta.isLiveLead,
-            sourceRows: buildSourceBlock(scan, { reportUrl, adminUrl }),
-            location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
-            recipient: scan.creator_email || scan.lead_email || 'anonymous',
-            openCount: 1,
-            when: formatDetroit(scan.created_at),
-            adminUrl,
-            reportUrl,
-          },
-        },
+        body: buildNewReportEmail(scan, {
+          to,
+          reportUrl,
+          adminUrl,
+          location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
+        }),
       })
       return
     }
+
 
     // ── Engagement events keep the existing behaviour. ──
     if (ev.is_internal) return
@@ -286,6 +259,20 @@ Deno.serve(async (req) => {
 
     // POST
     const body = await req.json().catch(() => ({} as any))
+
+    // Admin-only: resolve persisted origin metadata for a set of scans.
+    // Creator/rep identity is returned ONLY to a verified admin token.
+    if (body.action === 'sources') {
+      const ok = await verifyAdminToken(req.headers.get('x-admin-token'), SERVICE_KEY).catch(() => false)
+      if (!ok) {
+        return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      const ids = Array.isArray(body.scan_ids) ? body.scan_ids.filter((x: unknown) => typeof x === 'string').slice(0, 300) : []
+      if (!ids.length) return new Response(JSON.stringify({ scans: [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      const { data } = await sb.from('forensic_scans').select(NOTIFY_SELECT).in('id', ids)
+      return new Response(JSON.stringify({ scans: data || [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const scan_id = body.scan_id || null
     const event_type = String(body.event_type || 'page_view')
     if (!['scan_completed', 'page_view', 'email_open', 'link_click', 'pdf_download'].includes(event_type)) {

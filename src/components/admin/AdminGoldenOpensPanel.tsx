@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Radio, MapPin, Building2, User, Clock } from "lucide-react";
+import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
+import { getAdminToken } from "@/lib/adminAuth";
+import type { ScanSourceRecord } from "@/lib/goldenReportSource";
 
 type Event = {
   id: string;
@@ -51,6 +54,24 @@ export default function AdminGoldenOpensPanel() {
   const [loading, setLoading] = useState(true);
   const [showInternal, setShowInternal] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
+  const [sources, setSources] = useState<Record<string, ScanSourceRecord>>({});
+
+  // Origin metadata (incl. creator identity) is admin-gated server-side.
+  async function loadSources(ids: string[]) {
+    const token = getAdminToken();
+    if (!token || !ids.length) return;
+    try {
+      const { data } = await supabase.functions.invoke("golden-report-track", {
+        body: { action: "sources", scan_ids: ids },
+        headers: { "x-admin-token": token },
+      });
+      const map: Record<string, ScanSourceRecord> = {};
+      for (const s of ((data as any)?.scans || []) as ScanSourceRecord[]) {
+        if (s?.id) map[String(s.id)] = s;
+      }
+      setSources((prev) => ({ ...prev, ...map }));
+    } catch { /* badge simply stays hidden */ }
+  }
 
   async function load() {
     setLoading(true);
@@ -59,8 +80,10 @@ export default function AdminGoldenOpensPanel() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
-    setEvents((data as any) || []);
+    const rows = ((data as any) || []) as Event[];
+    setEvents(rows);
     setLoading(false);
+    void loadSources([...new Set(rows.map((r) => r.scan_id).filter(Boolean) as string[])]);
   }
 
   useEffect(() => {
@@ -149,6 +172,9 @@ export default function AdminGoldenOpensPanel() {
                       <Badge variant="outline" className={COLORS[e.event_type]}>{LABELS[e.event_type]}</Badge>
                       {e.is_internal && <Badge variant="outline" className="text-xs">internal{e.rep_code ? ` · ${e.rep_code}` : ""}</Badge>}
                       {total > 1 && <span className="text-xs text-amber-400">{total}× opens</span>}
+                      {e.scan_id && sources[e.scan_id] && (
+                        <GoldenSourceBadge source={sources[e.scan_id].report_source} />
+                      )}
                     </div>
                     <div className="mt-1 flex items-center gap-2 text-sm">
                       <Building2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -158,6 +184,9 @@ export default function AdminGoldenOpensPanel() {
                       <span className="flex items-center gap-1"><User className="w-3 h-3" />{e.recipient_email || "anonymous"}</span>
                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{loc}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{timeAgo(e.created_at)}</span>
+                      {e.scan_id && sources[e.scan_id] && (
+                        <GoldenSourceIdentity scan={sources[e.scan_id]} admin />
+                      )}
                     </div>
                   </div>
                   {e.scan_id && (
