@@ -20,7 +20,7 @@ import {
 import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
 import { verifyPortalToken } from "../_shared/portal-token.ts";
-import { classifyReportSource, type ReportSource } from "../_shared/golden-report-source.ts";
+import { resolveScanOrigin } from "../_shared/golden-report-source.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
