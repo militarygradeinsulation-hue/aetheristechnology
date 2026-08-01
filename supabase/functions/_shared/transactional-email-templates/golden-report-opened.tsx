@@ -111,8 +111,6 @@ const sourceTitle = { fontFamily: 'JetBrains Mono, monospace', fontSize: '11px',
 const h1 = { fontSize: '22px', fontWeight: 'bold', color: '#0a0a0a', margin: '0 0 20px', lineHeight: '1.3' }
 const card = { backgroundColor: '#0a0a0a', borderRadius: '8px', padding: '20px 22px', margin: '0 0 20px' }
 const rowText = { margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5' }
-
-const rowText = { margin: '0 0 8px', fontSize: '14px', lineHeight: '1.5' }
 const rowLabel = { color: '#9ca3af', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', textTransform: 'uppercase' as const, letterSpacing: '1px' }
 const rowValue = { color: '#f59e0b', fontWeight: 600 as const }
 const rowLabelDark = { ...rowLabel, color: '#92400e' }
