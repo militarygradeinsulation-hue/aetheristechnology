@@ -18,10 +18,11 @@ interface StudioImage {
 }
 
 const MODELS = [
-  { key: 'google/gemini-3.1-flash-image-preview', label: 'Nano Banana 2 (fast, high quality)' },
-  { key: 'google/gemini-2.5-flash-image', label: 'Nano Banana (standard)' },
-  { key: 'google/gemini-3-pro-image-preview', label: 'Gemini 3 Pro (best, slower)' },
+  { key: 'de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3', label: 'Phoenix 1.0 (best all-around)' },
+  { key: '6b645e3a-d64f-4341-a6d8-7a3690fbf042', label: 'Phoenix 0.9 (alternate look)' },
+  { key: 'b24e16ff-06e3-43eb-8d33-4416c2d75876', label: 'Lightning XL (fast)' },
 ];
+
 
 export const AdminImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
