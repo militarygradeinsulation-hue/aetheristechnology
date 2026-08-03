@@ -34,7 +34,7 @@ const PROMPT_STARTERS: { label: string; prompt: string; infographic?: boolean }[
 export const RepImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState(MODELS[0].key);
-  const [provider, setProvider] = useState<'flux' | 'leonardo'>('flux');
+  const [provider, setProvider] = useState<'flux' | 'leonardo' | 'openai'>('flux');
 
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
