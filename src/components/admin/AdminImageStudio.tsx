@@ -253,7 +253,7 @@ WATERMARK: "aetheris.technology"`;
     try {
       const { data, error } = await invoke({
         action: editTarget ? 'edit' : 'generate',
-        prompt, model,
+        prompt, model, provider,
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         cartoon_style: !!opts.cartoon,
