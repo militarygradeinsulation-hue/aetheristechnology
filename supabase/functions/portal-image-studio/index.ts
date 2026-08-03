@@ -78,7 +78,11 @@ serve(async (req) => {
         action === "edit" ? "image_edit" : "image_generate",
       );
       if (!quota.ok) return json({ error: quota.error, limit: quota.limit, used: quota.used }, 429);
-      const model = (body.model as string) || LEONARDO_PHOENIX_MODEL_ID;
+      // Leonardo only accepts its own UUID model ids. Any other value (e.g. a
+      // legacy gateway model slug like "google/gemini-...") falls back to Phoenix.
+      const requestedModel = (body.model as string) || "";
+      const isLeonardoModelId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedModel);
+      const model = isLeonardoModelId ? requestedModel : LEONARDO_PHOENIX_MODEL_ID;
       const sourceImageUrl = body.source_image_url as string | undefined;
       const aetherisStyle = !!body.aetheris_style;
       const infographic = !!body.infographic;
