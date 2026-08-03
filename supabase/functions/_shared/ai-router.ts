@@ -95,7 +95,7 @@ function isCreditFailure(status: number, text: string) {
 export interface RoutedChatResult {
   content: string;
   message: any;                       // full assistant message (includes tool_calls if any)
-  provider: "abacus" | "lovable";
+  provider: "abacus" | "openai" | "lovable";
   model: string;
   raw: any;
 }
