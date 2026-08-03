@@ -18,9 +18,10 @@ interface StudioImage {
 }
 
 const MODELS = [
-  { key: 'google/gemini-3.1-flash-image-preview', label: 'Fast (high quality)' },
-  { key: 'google/gemini-2.5-flash-image', label: 'Standard' },
-  { key: 'google/gemini-3-pro-image-preview', label: 'Best (slower)' },
+  { key: 'de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3', label: 'Best all-around' },
+  { key: '6b645e3a-d64f-4341-a6d8-7a3690fbf042', label: 'Alternate look' },
+  { key: 'b24e16ff-06e3-43eb-8d33-4416c2d75876', label: 'Fast' },
+
 ];
 
 const PROMPT_STARTERS: { label: string; prompt: string; infographic?: boolean }[] = [
