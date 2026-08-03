@@ -27,6 +27,8 @@ const MODELS = [
 export const AdminImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState(MODELS[0].key);
+  const [provider, setProvider] = useState<'flux' | 'leonardo'>('flux');
+
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
