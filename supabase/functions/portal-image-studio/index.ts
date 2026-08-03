@@ -67,7 +67,7 @@ serve(async (req) => {
     if (action === "generate" || action === "edit") {
       const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
       if (!LEONARDO_API_KEY) return json({ error: "Leonardo AI not configured" }, 500);
-      const { generateImage, LEONARDO_PHOENIX_MODEL_ID } = await import("../_shared/leonardo.ts");
+      const { generateImage, LEONARDO_PHOENIX_MODEL_ID, LEONARDO_ILLUSTRATION_MODEL_ID } = await import("../_shared/leonardo.ts");
 
       const rawPrompt = (body.prompt as string || "").trim();
       if (!rawPrompt) return json({ error: "prompt required" }, 400);
@@ -92,7 +92,8 @@ serve(async (req) => {
 
       const INFOGRAPHIC_SUFFIX = `\n\n--- INFOGRAPHIC LAYOUT ---\nDesign as a single-image infographic suitable for sharing with a business prospect:\n- Clear visual hierarchy with a bold headline at the top\n- 3-5 numbered or icon-led data points / steps stacked vertically\n- Stats or numbers rendered LARGE and legible (no fake/garbled text)\n- Use minimal, crisp typography — every word must be readable, no lorem-ipsum\n- Square or 4:5 portrait composition, social-share friendly\nTopic to visualize:`;
 
-      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
+      const CARTOON_PROMPT = (subject: string) => `Editorial op-ed newspaper cartoon, hand-inked single-panel political-cartoon illustration in the style of a New Yorker / Wall Street Journal editorial cartoonist. Subject: ${subject}. Bold confident black pen-and-ink linework with slightly imperfect human-drawn contours, cross-hatching and stippling for all shading (absolutely no gradients, no airbrush), cream/off-white newsprint paper background with visible paper tooth, charcoal-black ink, one warm amber-gold spot color (#E8A33D) for emphasis, tiny sparing crimson (#C8102E) only for an alert or leak signal. Satirical, slightly exaggerated character proportions. Clear single visual metaphor, generous negative space, witty and sharp. Small amber monospace watermark "Aetheris AI Studio" in the bottom-right corner.`;
+      const CARTOON_NEGATIVE = "3d render, photorealistic, photograph, cgi, pixar, disney, anime, manga, chibi, cute, glossy, neon, digital painting, airbrush, smooth gradients, plastic, blurry, watermark clutter, extra limbs, deformed hands, gibberish text, speech bubbles";
 
       let finalPrompt = rawPrompt;
       if (aetherisStyle) {
@@ -100,7 +101,7 @@ serve(async (req) => {
       } else if (infographic) {
         finalPrompt = `${INFOGRAPHIC_SUFFIX} ${rawPrompt}`;
       } else if (cartoon) {
-        finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
+        finalPrompt = CARTOON_PROMPT(rawPrompt);
       }
       if (action === "edit" && sourceImageUrl) {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
@@ -111,7 +112,9 @@ serve(async (req) => {
         gen = await generateImage({
           prompt: finalPrompt.slice(0, 1450),
           apiKey: LEONARDO_API_KEY,
-          modelId: model,
+          modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
+          presetStyle: cartoon ? "ILLUSTRATION" : undefined,
+          negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
           width: infographic ? 832 : 1024,
           height: infographic ? 1216 : 1024,
         });

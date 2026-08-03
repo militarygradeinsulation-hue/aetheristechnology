@@ -75,7 +75,7 @@ serve(async (req) => {
     if (action === "generate" || action === "edit") {
       const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
       if (!LEONARDO_API_KEY) return json({ error: "LEONARDO_API_KEY not configured" }, 500);
-      const { generateImage, LEONARDO_PHOENIX_MODEL_ID } = await import("../_shared/leonardo.ts");
+      const { generateImage, LEONARDO_PHOENIX_MODEL_ID, LEONARDO_ILLUSTRATION_MODEL_ID } = await import("../_shared/leonardo.ts");
 
       const rawPrompt = (body.prompt as string || "").trim();
       if (!rawPrompt) return json({ error: "prompt required" }, 400);
@@ -90,11 +90,12 @@ serve(async (req) => {
 
       const AETHERIS_STYLE_SUFFIX = `\n\n--- AETHERIS BRAND STYLE ---\nRender in the Aetheris Technology forensic brand style:\n- Dark charcoal background (near-black, hsl 220 15% 8%) with subtle noise/grain\n- Primary accent: warm amber/gold (#E8A33D / hsl 38 78% 57%) used for highlights, edges, signal\n- Crimson (#C8102E) reserved ONLY for "leak" / damage / alert signal — sparingly\n- Forensic case-file aesthetic: redaction bars, blueprint lines, manila-folder edges, dossier feel\n- Editorial / investigative tone — never corporate-glossy, never AI-guru gradient, never neon\n- High contrast, cinematic shadows, hard amber rim-light\n- Typography (if any): serif (Fraunces) or monospace (JetBrains Mono) only\n- Bottom-right watermark text: "Aetheris AI Studio" small, amber, monospace, low opacity\nKeep composition clean and intentional. Subject:`;
 
-      const CARTOON_SUFFIX = `\n\n--- EDITORIAL CARTOON STYLE ---\nRender as a hand-drawn editorial / op-ed style cartoon illustration:\n- Bold ink linework with confident black outlines, slightly imperfect (human-drawn feel)\n- Limited muted palette: cream/off-white paper background, charcoal black ink, ONE warm amber/gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for alert/leak signal\n- Cross-hatching and stippling for shading instead of gradients\n- Slightly exaggerated, satirical character proportions — New Yorker / Wall Street Journal op-ed vibe\n- Single-panel composition with clear visual metaphor for the business idea\n- Optional small caption or label in handwritten serif (NO long blocks of text, NO speech bubbles unless requested)\n- Bottom-right watermark "Aetheris AI Studio" small, amber, low opacity\n- NEVER cute/Pixar/anime/Disney — this is editorial newspaper cartoon, witty and sharp\nSubject:`;
+      const CARTOON_PROMPT = (subject: string) => `Editorial op-ed newspaper cartoon, hand-inked single-panel political-cartoon illustration in the style of a New Yorker / Wall Street Journal editorial cartoonist. Subject: ${subject}. Bold confident black pen-and-ink linework with slightly imperfect human-drawn contours, cross-hatching and stippling for all shading (absolutely no gradients, no airbrush), cream/off-white newsprint paper background with visible paper tooth, charcoal-black ink, one warm amber-gold spot color (#E8A33D) for emphasis, tiny sparing crimson (#C8102E) only for an alert or leak signal. Satirical, slightly exaggerated character proportions. Clear single visual metaphor, generous negative space, witty and sharp. Small amber monospace watermark "Aetheris AI Studio" in the bottom-right corner.`;
+      const CARTOON_NEGATIVE = "3d render, photorealistic, photograph, cgi, pixar, disney, anime, manga, chibi, cute, glossy, neon, digital painting, airbrush, smooth gradients, plastic, blurry, watermark clutter, extra limbs, deformed hands, gibberish text, speech bubbles";
 
       let finalPrompt = rawPrompt;
       if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
-      else if (cartoon) finalPrompt = `${CARTOON_SUFFIX} ${rawPrompt}`;
+      else if (cartoon) finalPrompt = CARTOON_PROMPT(rawPrompt);
       if (action === "edit" && sourceImageUrl) {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
@@ -104,7 +105,9 @@ serve(async (req) => {
         gen = await generateImage({
           prompt: finalPrompt.slice(0, 1450),
           apiKey: LEONARDO_API_KEY,
-          modelId: model,
+          modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
+          presetStyle: cartoon ? "ILLUSTRATION" : undefined,
+          negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
           width: 1024,
           height: 1024,
         });
