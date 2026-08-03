@@ -109,55 +109,76 @@ serve(async (req) => {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
 
-      // Provider selection: explicit "flux" | "leonardo", else FLUX for the
-      // editorial cartoon look when a Hugging Face token is available.
+      // Provider chain: cheapest-first (FLUX/Hugging Face -> Leonardo -> OpenAI).
+      // An explicitly requested provider is tried first; the rest run as
+      // automatic fallbacks so an exhausted quota never blocks a generation.
+      const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
       const requestedProvider = (body.provider as string) || "";
-      const useFlux = HF_TOKEN
-        ? requestedProvider === "flux" || (requestedProvider !== "leonardo" && cartoon)
-        : false;
+      const order = [
+        ...(requestedProvider ? [requestedProvider] : []),
+        ...["flux", "leonardo", "openai"].filter((p) => p !== requestedProvider),
+      ];
+      const imgWidth = infographic ? 832 : 1024;
+      const imgHeight = infographic ? 1216 : 1024;
 
       let gen: any;
-      let providerUsed = "leonardo";
+      let providerUsed = "";
       let modelLabel = "";
+      const failures: string[] = [];
 
-      if (useFlux) {
+      for (const provider of order) {
+        if (gen) break;
         try {
-          const hf = await import("../_shared/hf-image.ts");
-          const out = await hf.generateImage({
-            prompt: finalPrompt,
-            apiKey: HF_TOKEN!,
-            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-            width: infographic ? 832 : 1024,
-            height: infographic ? 1216 : 1024,
-          });
-          gen = { ...out, generationId: null };
-          providerUsed = out.provider;
-          modelLabel = `hf:${out.modelId}`;
-        } catch (err) {
-          console.error("FLUX generation failed, falling back to Leonardo", err);
-          if (!LEONARDO_API_KEY) {
-            return json({ error: err instanceof Error ? err.message : "FLUX error" }, 502);
+          if (provider === "flux") {
+            if (!HF_TOKEN) continue;
+            const hf = await import("../_shared/hf-image.ts");
+            const out = await hf.generateImage({
+              prompt: finalPrompt,
+              apiKey: HF_TOKEN,
+              negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+              width: imgWidth,
+              height: imgHeight,
+            });
+            gen = { ...out, generationId: null };
+            providerUsed = out.provider;
+            modelLabel = `hf:${out.modelId}`;
+          } else if (provider === "leonardo") {
+            if (!LEONARDO_API_KEY) continue;
+            gen = await generateImage({
+              prompt: finalPrompt.slice(0, 1450),
+              apiKey: LEONARDO_API_KEY,
+              modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
+              presetStyle: cartoon ? "ILLUSTRATION" : undefined,
+              negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+              width: imgWidth,
+              height: imgHeight,
+            });
+            providerUsed = "leonardo";
+            modelLabel = `leonardo:${gen.modelId}`;
+          } else if (provider === "openai") {
+            if (!OPENAI_API_KEY) continue;
+            const oa = await import("../_shared/openai-image.ts");
+            const out = await oa.generateImage({
+              prompt: finalPrompt,
+              apiKey: OPENAI_API_KEY,
+              width: imgWidth,
+              height: imgHeight,
+            });
+            gen = { ...out, generationId: null };
+            providerUsed = "openai";
+            modelLabel = `openai:${out.modelId}`;
           }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error(`[portal-image-studio] ${provider} failed: ${msg}`);
+          failures.push(`${provider}: ${msg.slice(0, 160)}`);
         }
       }
 
       if (!gen) {
-        try {
-          gen = await generateImage({
-            prompt: finalPrompt.slice(0, 1450),
-            apiKey: LEONARDO_API_KEY!,
-            modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
-            presetStyle: cartoon ? "ILLUSTRATION" : undefined,
-            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-            width: infographic ? 832 : 1024,
-            height: infographic ? 1216 : 1024,
-          });
-          providerUsed = "leonardo";
-          modelLabel = `leonardo:${gen.modelId}`;
-        } catch (err) {
-          return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
-        }
+        return json({ error: `All image providers failed — ${failures.join(" | ") || "none configured"}` }, 502);
       }
+
 
       const path = `${PREFIX}/${repCode}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${gen.ext}`;
       const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, gen.bytes, {
