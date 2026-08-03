@@ -30,15 +30,17 @@ export interface RoutedChatOptions {
 }
 
 const ABACUS_URL = "https://routellm.abacus.ai/v1/chat/completions";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
-  bulk:  { abacus: "claude-haiku-4-5-20251001", lovable: "google/gemini-2.5-flash" },
+const MODEL_MAP: Record<AiTier, { abacus: string; openai: string; lovable: string }> = {
+  bulk:  { abacus: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini", lovable: "google/gemini-2.5-flash" },
   // Heavy used to fall back to gemini-2.5-pro. Pro is a reasoning model: it
   // burns thinking tokens against max_tokens and routinely takes 20s+, which
   // blanked out whole Golden Reports. Flash returns real content in time.
-  heavy: { abacus: "grok-4.3",                  lovable: "google/gemini-2.5-flash" },
+  heavy: { abacus: "grok-4.3",                  openai: "gpt-4o",      lovable: "google/gemini-2.5-flash" },
 };
+
 
 // Circuit breaker: once Abacus answers with a billing/auth failure, stop
 // hammering it for the rest of this isolate. A single Golden Report fires 15
