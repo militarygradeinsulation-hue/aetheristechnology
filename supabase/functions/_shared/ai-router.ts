@@ -222,8 +222,55 @@ export async function routedChatCompletion(
     }
   }
 
+  // Stage 2: OpenAI. Cheaper per call than the Lovable gateway credits, so it
+  // runs before the gateway and after Abacus. Same breaker discipline.
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!disabled && openaiKey && Date.now() >= openaiBreaker.until) {
+    try {
+      let body: Record<string, any> = buildBody(mapping.openai, opts);
+      let r = await callProvider(OPENAI_URL, openaiKey, mapping.openai, opts, body);
+      if (r.status === 400) {
+        const t = await r.text().catch(() => "");
+        const adapted = adaptBodyForError(body, t);
+        if (adapted) {
+          body = adapted;
+          r = await callProvider(OPENAI_URL, openaiKey, mapping.openai, opts, body);
+        } else {
+          openaiBreaker.strikes = 0;
+          console.warn(`[ai-router] OpenAI 400: ${t.slice(0, 160)}`);
+        }
+      }
+      if (r.ok) {
+        const j = await r.json();
+        const { message, content, ok } = extractMessage(j);
+        if (ok) {
+          openaiBreaker.strikes = 0;
+          return { content, message, provider: "openai", model: mapping.openai, raw: j };
+        }
+        console.warn("[ai-router] OpenAI returned unusable content, falling through");
+      } else {
+        const t = await r.text().catch(() => "");
+        if (isCreditFailure(r.status, t)) {
+          openaiBreaker.until = Date.now() + ABACUS_CREDIT_COOLDOWN_MS;
+          openaiBreaker.reason = `${r.status} ${t.slice(0, 120)}`;
+          console.warn(`[ai-router] OpenAI disabled 60m: ${openaiBreaker.reason}`);
+        } else {
+          openaiBreaker.strikes += 1;
+          if (openaiBreaker.strikes >= ABACUS_STRIKE_LIMIT) {
+            openaiBreaker.until = Date.now() + ABACUS_COOLDOWN_MS;
+            openaiBreaker.strikes = 0;
+            openaiBreaker.reason = `HTTP ${r.status}`;
+          }
+        }
+      }
+    } catch (e) {
+      openaiBreaker.strikes += 1;
+      console.warn(`[ai-router] OpenAI failure: ${(e as Error).message}`);
+    }
+  }
 
-  if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
+  if (!lovableKey) throw new Error("No AI provider configured (ABACUS_ROUTELLM_API_KEY / OPENAI_API_KEY / LOVABLE_API_KEY)");
+
 
   const callLovable = async (body: Record<string, any>) => {
     let b = body;
