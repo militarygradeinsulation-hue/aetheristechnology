@@ -52,6 +52,12 @@ type BreakerState = { until: number; strikes: number; reason: string };
 const breaker: BreakerState =
   ((globalThis as any)[BREAKER_KEY] ??= { until: 0, strikes: 0, reason: "" });
 
+// Second-stage provider (OpenAI) gets its own breaker so an exhausted quota or
+// a bad key stops burning round trips for the rest of the isolate.
+const openaiBreaker: BreakerState =
+  ((globalThis as any)["__aetherisOpenAiBreaker"] ??= { until: 0, strikes: 0, reason: "" });
+
+
 const ABACUS_COOLDOWN_MS = 10 * 60_000;      // transient/unknown failures
 const ABACUS_CREDIT_COOLDOWN_MS = 60 * 60_000; // out of credits / bad key
 const ABACUS_STRIKE_LIMIT = 2;               // 2 soft failures => stop trying
