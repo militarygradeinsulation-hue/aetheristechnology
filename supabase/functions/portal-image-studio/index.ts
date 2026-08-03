@@ -67,7 +67,10 @@ serve(async (req) => {
     if (action === "generate" || action === "edit") {
       const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
       const HF_TOKEN = Deno.env.get("HF_TOKEN");
-      if (!LEONARDO_API_KEY && !HF_TOKEN) return json({ error: "No image provider configured" }, 500);
+      if (!LEONARDO_API_KEY && !HF_TOKEN && !Deno.env.get("OPENAI_API_KEY")) {
+        return json({ error: "No image provider configured" }, 500);
+      }
+
 
       const { generateImage, LEONARDO_PHOENIX_MODEL_ID, LEONARDO_ILLUSTRATION_MODEL_ID } = await import("../_shared/leonardo.ts");
 
