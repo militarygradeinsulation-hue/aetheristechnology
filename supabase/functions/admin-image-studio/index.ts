@@ -160,11 +160,11 @@ serve(async (req) => {
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const { data: row, error: insErr } = await supabase.from("admin_image_studio").insert({
-        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: modelLabel,
         source: action === "edit" ? "edited" : "generated",
         metadata: {
-          provider: "leonardo",
-          generation_id: gen.generationId,
+          provider: providerUsed,
+          generation_id: gen.generationId ?? null,
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           cartoon_style: cartoon,
@@ -176,11 +176,12 @@ serve(async (req) => {
       if (body.share_to_reps) {
         await supabase.from("rep_image_studio").insert({
           rep_code: "SHARED",
-          prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+          prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: modelLabel,
           source: action === "edit" ? "edited" : "generated",
-          metadata: { shared_from_admin: true, is_banner: !!body.is_banner, provider: "leonardo" },
+          metadata: { shared_from_admin: true, is_banner: !!body.is_banner, provider: providerUsed },
         });
       }
+
 
       return json({ image: row });
     }
