@@ -12,6 +12,10 @@
 // Phoenix 1.0 — Leonardo's flagship, best all-around quality.
 export const LEONARDO_PHOENIX_MODEL_ID = "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3";
 
+// Leonardo Diffusion XL — far better at hand-drawn / ink editorial illustration
+// than Phoenix, which skews photographic. Used for the Editorial Cartoon style.
+export const LEONARDO_ILLUSTRATION_MODEL_ID = "1e60896f-3c26-4296-8ecc-53e2afecc132";
+
 const BASE = "https://cloud.leonardo.ai/api/rest/v1";
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 180_000; // 3 min
@@ -25,6 +29,9 @@ interface GenerateImageOpts {
   height?: number;
   modelId?: string;
   numImages?: number;
+  presetStyle?: string;
+  negativePrompt?: string;
+  alchemy?: boolean;
 }
 
 export async function generateImage(opts: GenerateImageOpts): Promise<{
@@ -52,9 +59,11 @@ export async function generateImage(opts: GenerateImageOpts): Promise<{
       width,
       height,
       num_images: opts.numImages || 1,
-      alchemy: true,
+      alchemy: opts.alchemy !== false,
       photoReal: false,
       public: false,
+      ...(opts.presetStyle ? { presetStyle: opts.presetStyle } : {}),
+      ...(opts.negativePrompt ? { negative_prompt: opts.negativePrompt.slice(0, 400) } : {}),
     }),
   });
 
