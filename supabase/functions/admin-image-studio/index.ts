@@ -74,7 +74,8 @@ serve(async (req) => {
 
     if (action === "generate" || action === "edit") {
       const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
-      if (!LEONARDO_API_KEY) return json({ error: "LEONARDO_API_KEY not configured" }, 500);
+      const HF_TOKEN = Deno.env.get("HF_TOKEN");
+      if (!LEONARDO_API_KEY && !HF_TOKEN) return json({ error: "No image provider configured" }, 500);
       const { generateImage, LEONARDO_PHOENIX_MODEL_ID, LEONARDO_ILLUSTRATION_MODEL_ID } = await import("../_shared/leonardo.ts");
 
       const rawPrompt = (body.prompt as string || "").trim();
@@ -100,20 +101,56 @@ serve(async (req) => {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
 
-      let gen;
-      try {
-        gen = await generateImage({
-          prompt: finalPrompt.slice(0, 1450),
-          apiKey: LEONARDO_API_KEY,
-          modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
-          presetStyle: cartoon ? "ILLUSTRATION" : undefined,
-          negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-          width: 1024,
-          height: 1024,
-        });
-      } catch (err) {
-        return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
+      // Provider selection: explicit "flux" | "leonardo", else FLUX for the
+      // editorial cartoon look when a Hugging Face token is available.
+      const requestedProvider = (body.provider as string) || "";
+      const useFlux = HF_TOKEN
+        ? requestedProvider === "flux" || (requestedProvider !== "leonardo" && cartoon)
+        : false;
+
+      let gen: any;
+      let providerUsed = "leonardo";
+      let modelLabel = "";
+
+      if (useFlux) {
+        try {
+          const hf = await import("../_shared/hf-image.ts");
+          const out = await hf.generateImage({
+            prompt: finalPrompt,
+            apiKey: HF_TOKEN!,
+            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+            width: 1024,
+            height: 1024,
+          });
+          gen = { ...out, generationId: null };
+          providerUsed = out.provider;
+          modelLabel = `hf:${out.modelId}`;
+        } catch (err) {
+          console.error("FLUX generation failed, falling back to Leonardo", err);
+          if (!LEONARDO_API_KEY) {
+            return json({ error: err instanceof Error ? err.message : "FLUX error" }, 502);
+          }
+        }
       }
+
+      if (!gen) {
+        try {
+          gen = await generateImage({
+            prompt: finalPrompt.slice(0, 1450),
+            apiKey: LEONARDO_API_KEY!,
+            modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
+            presetStyle: cartoon ? "ILLUSTRATION" : undefined,
+            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+            width: 1024,
+            height: 1024,
+          });
+          providerUsed = "leonardo";
+          modelLabel = `leonardo:${gen.modelId}`;
+        } catch (err) {
+          return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
+        }
+      }
+
 
       const path = `${STUDIO_PREFIX}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${gen.ext}`;
       const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, gen.bytes, {
@@ -123,11 +160,11 @@ serve(async (req) => {
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const { data: row, error: insErr } = await supabase.from("admin_image_studio").insert({
-        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: modelLabel,
         source: action === "edit" ? "edited" : "generated",
         metadata: {
-          provider: "leonardo",
-          generation_id: gen.generationId,
+          provider: providerUsed,
+          generation_id: gen.generationId ?? null,
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           cartoon_style: cartoon,
@@ -139,11 +176,12 @@ serve(async (req) => {
       if (body.share_to_reps) {
         await supabase.from("rep_image_studio").insert({
           rep_code: "SHARED",
-          prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+          prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: modelLabel,
           source: action === "edit" ? "edited" : "generated",
-          metadata: { shared_from_admin: true, is_banner: !!body.is_banner, provider: "leonardo" },
+          metadata: { shared_from_admin: true, is_banner: !!body.is_banner, provider: providerUsed },
         });
       }
+
 
       return json({ image: row });
     }

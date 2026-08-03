@@ -66,7 +66,9 @@ serve(async (req) => {
 
     if (action === "generate" || action === "edit") {
       const LEONARDO_API_KEY = Deno.env.get("LEONARDO_API_KEY");
-      if (!LEONARDO_API_KEY) return json({ error: "Leonardo AI not configured" }, 500);
+      const HF_TOKEN = Deno.env.get("HF_TOKEN");
+      if (!LEONARDO_API_KEY && !HF_TOKEN) return json({ error: "No image provider configured" }, 500);
+
       const { generateImage, LEONARDO_PHOENIX_MODEL_ID, LEONARDO_ILLUSTRATION_MODEL_ID } = await import("../_shared/leonardo.ts");
 
       const rawPrompt = (body.prompt as string || "").trim();
@@ -107,19 +109,54 @@ serve(async (req) => {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
 
-      let gen;
-      try {
-        gen = await generateImage({
-          prompt: finalPrompt.slice(0, 1450),
-          apiKey: LEONARDO_API_KEY,
-          modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
-          presetStyle: cartoon ? "ILLUSTRATION" : undefined,
-          negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-          width: infographic ? 832 : 1024,
-          height: infographic ? 1216 : 1024,
-        });
-      } catch (err) {
-        return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
+      // Provider selection: explicit "flux" | "leonardo", else FLUX for the
+      // editorial cartoon look when a Hugging Face token is available.
+      const requestedProvider = (body.provider as string) || "";
+      const useFlux = HF_TOKEN
+        ? requestedProvider === "flux" || (requestedProvider !== "leonardo" && cartoon)
+        : false;
+
+      let gen: any;
+      let providerUsed = "leonardo";
+      let modelLabel = "";
+
+      if (useFlux) {
+        try {
+          const hf = await import("../_shared/hf-image.ts");
+          const out = await hf.generateImage({
+            prompt: finalPrompt,
+            apiKey: HF_TOKEN!,
+            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+            width: infographic ? 832 : 1024,
+            height: infographic ? 1216 : 1024,
+          });
+          gen = { ...out, generationId: null };
+          providerUsed = out.provider;
+          modelLabel = `hf:${out.modelId}`;
+        } catch (err) {
+          console.error("FLUX generation failed, falling back to Leonardo", err);
+          if (!LEONARDO_API_KEY) {
+            return json({ error: err instanceof Error ? err.message : "FLUX error" }, 502);
+          }
+        }
+      }
+
+      if (!gen) {
+        try {
+          gen = await generateImage({
+            prompt: finalPrompt.slice(0, 1450),
+            apiKey: LEONARDO_API_KEY!,
+            modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
+            presetStyle: cartoon ? "ILLUSTRATION" : undefined,
+            negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
+            width: infographic ? 832 : 1024,
+            height: infographic ? 1216 : 1024,
+          });
+          providerUsed = "leonardo";
+          modelLabel = `leonardo:${gen.modelId}`;
+        } catch (err) {
+          return json({ error: err instanceof Error ? err.message : "Leonardo error" }, 502);
+        }
       }
 
       const path = `${PREFIX}/${repCode}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${gen.ext}`;
@@ -131,11 +168,11 @@ serve(async (req) => {
 
       const { data: row, error: insErr } = await supabase.from("rep_image_studio").insert({
         rep_code: repCode,
-        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: `leonardo:${gen.modelId}`,
+        prompt: rawPrompt, url: pub.publicUrl, storage_path: path, model: modelLabel,
         source: action === "edit" ? "edited" : "generated",
         metadata: {
-          provider: "leonardo",
-          generation_id: gen.generationId,
+          provider: providerUsed,
+          generation_id: gen.generationId ?? null,
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           infographic,
@@ -143,6 +180,7 @@ serve(async (req) => {
         },
       }).select().single();
       if (insErr) throw insErr;
+
       return json({ image: row });
     }
 

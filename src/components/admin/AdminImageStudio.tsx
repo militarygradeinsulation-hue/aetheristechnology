@@ -27,6 +27,8 @@ const MODELS = [
 export const AdminImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState(MODELS[0].key);
+  const [provider, setProvider] = useState<'flux' | 'leonardo'>('flux');
+
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
   const [editTarget, setEditTarget] = useState<StudioImage | null>(null);
@@ -251,7 +253,7 @@ WATERMARK: "aetheris.technology"`;
     try {
       const { data, error } = await invoke({
         action: editTarget ? 'edit' : 'generate',
-        prompt, model,
+        prompt, model, provider,
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         cartoon_style: !!opts.cartoon,
@@ -351,12 +353,23 @@ WATERMARK: "aetheris.technology"`;
 
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <select
-            value={model}
-            onChange={e => setModel(e.target.value)}
+            value={provider}
+            onChange={e => setProvider(e.target.value as 'flux' | 'leonardo')}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
-            {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+            <option value="flux">FLUX.1-dev (illustration / editorial)</option>
+            <option value="leonardo">Leonardo (photoreal)</option>
           </select>
+          {provider === 'leonardo' && (
+            <select
+              value={model}
+              onChange={e => setModel(e.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {MODELS.map(m => <option key={m.key} value={m.key}>{m.label}</option>)}
+            </select>
+          )}
+
           <div className="flex flex-wrap gap-2 flex-1">
             <Button onClick={() => generate()} disabled={busy || !prompt.trim()} className="flex-1 min-w-[120px]">
               {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
