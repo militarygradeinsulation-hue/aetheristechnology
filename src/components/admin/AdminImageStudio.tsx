@@ -354,11 +354,13 @@ WATERMARK: "aetheris.technology"`;
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <select
             value={provider}
-            onChange={e => setProvider(e.target.value as 'flux' | 'leonardo')}
+            onChange={e => setProvider(e.target.value as 'flux' | 'leonardo' | 'openai')}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="flux">FLUX.1-dev (illustration / editorial)</option>
             <option value="leonardo">Leonardo (photoreal)</option>
+            <option value="openai">OpenAI gpt-image-1 (text &amp; detail)</option>
+
           </select>
           {provider === 'leonardo' && (
             <select
