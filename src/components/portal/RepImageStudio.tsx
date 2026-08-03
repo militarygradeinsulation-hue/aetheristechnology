@@ -34,7 +34,7 @@ const PROMPT_STARTERS: { label: string; prompt: string; infographic?: boolean }[
 export const RepImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [model, setModel] = useState(MODELS[0].key);
-  const [provider, setProvider] = useState<'flux' | 'leonardo'>('flux');
+  const [provider, setProvider] = useState<'flux' | 'leonardo' | 'openai'>('flux');
 
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<StudioImage[]>([]);
@@ -213,11 +213,13 @@ export const RepImageStudio: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <select
             value={provider}
-            onChange={e => setProvider(e.target.value as 'flux' | 'leonardo')}
+            onChange={e => setProvider(e.target.value as 'flux' | 'leonardo' | 'openai')}
             className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="flux">FLUX (illustration engine)</option>
             <option value="leonardo">Leonardo (photo engine)</option>
+            <option value="openai">OpenAI (text &amp; detail)</option>
+
           </select>
           {provider === 'leonardo' && (
             <select

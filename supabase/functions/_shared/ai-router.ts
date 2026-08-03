@@ -30,15 +30,17 @@ export interface RoutedChatOptions {
 }
 
 const ABACUS_URL = "https://routellm.abacus.ai/v1/chat/completions";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const LOVABLE_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-const MODEL_MAP: Record<AiTier, { abacus: string; lovable: string }> = {
-  bulk:  { abacus: "claude-haiku-4-5-20251001", lovable: "google/gemini-2.5-flash" },
+const MODEL_MAP: Record<AiTier, { abacus: string; openai: string; lovable: string }> = {
+  bulk:  { abacus: "claude-haiku-4-5-20251001", openai: "gpt-4o-mini", lovable: "google/gemini-2.5-flash" },
   // Heavy used to fall back to gemini-2.5-pro. Pro is a reasoning model: it
   // burns thinking tokens against max_tokens and routinely takes 20s+, which
   // blanked out whole Golden Reports. Flash returns real content in time.
-  heavy: { abacus: "grok-4.3",                  lovable: "google/gemini-2.5-flash" },
+  heavy: { abacus: "grok-4.3",                  openai: "gpt-4o",      lovable: "google/gemini-2.5-flash" },
 };
+
 
 // Circuit breaker: once Abacus answers with a billing/auth failure, stop
 // hammering it for the rest of this isolate. A single Golden Report fires 15
@@ -49,6 +51,12 @@ const BREAKER_KEY = "__aetherisAbacusBreaker";
 type BreakerState = { until: number; strikes: number; reason: string };
 const breaker: BreakerState =
   ((globalThis as any)[BREAKER_KEY] ??= { until: 0, strikes: 0, reason: "" });
+
+// Second-stage provider (OpenAI) gets its own breaker so an exhausted quota or
+// a bad key stops burning round trips for the rest of the isolate.
+const openaiBreaker: BreakerState =
+  ((globalThis as any)["__aetherisOpenAiBreaker"] ??= { until: 0, strikes: 0, reason: "" });
+
 
 const ABACUS_COOLDOWN_MS = 10 * 60_000;      // transient/unknown failures
 const ABACUS_CREDIT_COOLDOWN_MS = 60 * 60_000; // out of credits / bad key
@@ -87,7 +95,7 @@ function isCreditFailure(status: number, text: string) {
 export interface RoutedChatResult {
   content: string;
   message: any;                       // full assistant message (includes tool_calls if any)
-  provider: "abacus" | "lovable";
+  provider: "abacus" | "openai" | "lovable";
   model: string;
   raw: any;
 }
@@ -214,8 +222,55 @@ export async function routedChatCompletion(
     }
   }
 
+  // Stage 2: OpenAI. Cheaper per call than the Lovable gateway credits, so it
+  // runs before the gateway and after Abacus. Same breaker discipline.
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!disabled && openaiKey && Date.now() >= openaiBreaker.until) {
+    try {
+      let body: Record<string, any> = buildBody(mapping.openai, opts);
+      let r = await callProvider(OPENAI_URL, openaiKey, mapping.openai, opts, body);
+      if (r.status === 400) {
+        const t = await r.text().catch(() => "");
+        const adapted = adaptBodyForError(body, t);
+        if (adapted) {
+          body = adapted;
+          r = await callProvider(OPENAI_URL, openaiKey, mapping.openai, opts, body);
+        } else {
+          openaiBreaker.strikes = 0;
+          console.warn(`[ai-router] OpenAI 400: ${t.slice(0, 160)}`);
+        }
+      }
+      if (r.ok) {
+        const j = await r.json();
+        const { message, content, ok } = extractMessage(j);
+        if (ok) {
+          openaiBreaker.strikes = 0;
+          return { content, message, provider: "openai", model: mapping.openai, raw: j };
+        }
+        console.warn("[ai-router] OpenAI returned unusable content, falling through");
+      } else {
+        const t = await r.text().catch(() => "");
+        if (isCreditFailure(r.status, t)) {
+          openaiBreaker.until = Date.now() + ABACUS_CREDIT_COOLDOWN_MS;
+          openaiBreaker.reason = `${r.status} ${t.slice(0, 120)}`;
+          console.warn(`[ai-router] OpenAI disabled 60m: ${openaiBreaker.reason}`);
+        } else {
+          openaiBreaker.strikes += 1;
+          if (openaiBreaker.strikes >= ABACUS_STRIKE_LIMIT) {
+            openaiBreaker.until = Date.now() + ABACUS_COOLDOWN_MS;
+            openaiBreaker.strikes = 0;
+            openaiBreaker.reason = `HTTP ${r.status}`;
+          }
+        }
+      }
+    } catch (e) {
+      openaiBreaker.strikes += 1;
+      console.warn(`[ai-router] OpenAI failure: ${(e as Error).message}`);
+    }
+  }
 
-  if (!lovableKey) throw new Error("Neither ABACUS_ROUTELLM_API_KEY nor LOVABLE_API_KEY configured");
+  if (!lovableKey) throw new Error("No AI provider configured (ABACUS_ROUTELLM_API_KEY / OPENAI_API_KEY / LOVABLE_API_KEY)");
+
 
   const callLovable = async (body: Record<string, any>) => {
     let b = body;
