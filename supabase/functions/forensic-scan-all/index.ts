@@ -664,6 +664,13 @@ Requirements:
 - "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
 - "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
 - "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
+${chapter.slug === "brand-contradictions" ? `
+BRAND VOICE CHAPTER — mandatory:
+- The findings object contains "brand_contradictions" with a contradictions array, quotes, severities and fixes. Use it. Name each real contradiction, quote both conflicting strings, and say what the buyer concludes.
+- If that array has items, this chapter MUST NOT say "no signal detected". Write every item found.
+- Only if the array is genuinely empty or errored: read the crawled page copy in the findings yourself and name the voice conflicts you can see (audience mismatch, promise without proof, inconsistent contact details, inconsistent service lists, stale years, tone swings). Say plainly which tool failed.
+- For construction, contracting, manufacturing and trades companies, call out residential vs commercial audience mismatch, license/insurance/bonding claims with no numbers, safety or certification claims with no proof, service-area sprawl versus "local" claims, and capacity or crew-size claims that conflict with the project scale being advertised.
+` : ""}
 
 COSTING RULES — this is the part that has been failing, follow it exactly:
 - BANNED: any generic or round-number template range. Never write "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other stock band. If your range looks like a price list, it is wrong.
