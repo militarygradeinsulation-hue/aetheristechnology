@@ -673,13 +673,14 @@ BRAND VOICE CHAPTER — mandatory:
 ` : ""}
 
 COSTING RULES — this is the part that has been failing, follow it exactly:
+- EVERY chapter numbered 1 through 12 MUST return a real integer "annual_low" and "annual_high". Returning null for a costing chapter is a failure. Leaving the dollars out of "what_its_costing" is a failure.
 - BANNED: any generic or round-number template range. Never write "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other stock band. If your range looks like a price list, it is wrong.
 - Every dollar figure must be DERIVED, in the chapter, from counts and values that appear in THIS company's findings: number of pages, number of forms, number of stalled deals, response lag in hours, traffic figures, service lines, locations, headcount, quoted prices found on the site, average job value stated on the site.
 - Write the arithmetic in "what_its_costing" in plain sentences, and repeat the same inputs in "cost_basis". The low and high must come from that math, not from intuition, and must be odd/uneven numbers reflecting the calculation.
-- If a needed input is not present in the findings, state which input is missing, make ONE clearly-labelled conservative assumption using a number that IS in the findings, and derive from that.
-- If nothing in the findings supports a dollar figure for this chapter, set "annual_low" and "annual_high" to null, set "cost_basis" to null, and say plainly in "what_its_costing" that this chapter carries no measurable dollar exposure in this pass. Do NOT invent a range to fill the field.
+- If a needed input is missing from the findings, do NOT skip the number. Make ONE clearly-labelled conservative assumption ("assuming a $6,400 average job value, which the site does not state"), anchor it to any count that IS in the findings, and derive the range from that. Say in one clause which input was assumed.
 - Chapters 13 and 14 (plan, appendix) always use null for annual_low, annual_high and cost_basis.
-- Never re-price a leak already priced in another chapter. Reference it instead and use null.
+- Never repeat another chapter's exact range. Each chapter's figures must be its own arithmetic on its own topic.
+
 
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
