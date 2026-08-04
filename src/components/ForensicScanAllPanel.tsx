@@ -103,6 +103,8 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  const [fixOpen, setFixOpen] = useState(false);
+  const [fixSeed, setFixSeed] = useState<string | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const pollRef = useRef<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
@@ -577,6 +579,15 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
             </section>
           </div>
         </Card>
+      )}
+      {fixOpen && row && report && (
+        <GoldenFixPanel
+          scanId={row.id}
+          report={report}
+          company={row.company_name || row.target_url}
+          seed={fixSeed}
+          onClose={() => setFixOpen(false)}
+        />
       )}
     </div>
   );
