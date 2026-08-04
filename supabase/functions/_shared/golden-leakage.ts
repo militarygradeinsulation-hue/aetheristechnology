@@ -72,7 +72,14 @@ export type OverallLeakage = {
 export type GoldenReportLike = {
   overall_leakage?: OverallLeakage | null;
   top_leaks?: PricedLeak[] | null;
-  chapters?: Array<{ slug?: string; what_its_costing?: string | null }> | null;
+  chapters?: Array<{
+    slug?: string;
+    what_its_costing?: string | null;
+    /** Structured per-chapter annual cost emitted by the synthesizer. */
+    annual_low?: number | string | null;
+    annual_high?: number | string | null;
+    cost_basis?: string | null;
+  }> | null;
   [k: string]: unknown;
 };
 
