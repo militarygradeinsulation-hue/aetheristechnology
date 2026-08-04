@@ -664,6 +664,13 @@ Requirements:
 - "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
 - "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
 - "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
+${chapter.slug === "brand-contradictions" ? `
+BRAND VOICE CHAPTER — mandatory:
+- The findings object contains "brand_contradictions" with a contradictions array, quotes, severities and fixes. Use it. Name each real contradiction, quote both conflicting strings, and say what the buyer concludes.
+- If that array has items, this chapter MUST NOT say "no signal detected". Write every item found.
+- Only if the array is genuinely empty or errored: read the crawled page copy in the findings yourself and name the voice conflicts you can see (audience mismatch, promise without proof, inconsistent contact details, inconsistent service lists, stale years, tone swings). Say plainly which tool failed.
+- For construction, contracting, manufacturing and trades companies, call out residential vs commercial audience mismatch, license/insurance/bonding claims with no numbers, safety or certification claims with no proof, service-area sprawl versus "local" claims, and capacity or crew-size claims that conflict with the project scale being advertised.
+` : ""}
 
 COSTING RULES — this is the part that has been failing, follow it exactly:
 - BANNED: any generic or round-number template range. Never write "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other stock band. If your range looks like a price list, it is wrong.
@@ -697,6 +704,71 @@ COSTING RULES:
 - Only include a leak in top_leaks when you can show that math. 3 well-supported leaks beat 5 invented ones.`;
   return await aiJson(prompt, 3500, 60_000);
 }
+
+// ───────── Brand voice & copy contradictions, computed in-process ─────────
+// The standalone generate-brand-contradictions function re-scrapes the site and
+// routinely exceeds the 12s budget this pipeline gives it, which is why chapter 4
+// came back empty on nearly every scan. We already hold the crawled page text, so
+// analyze it here with a real timeout and only fall back to the remote function.
+async function analyzeBrandContradictions(
+  url: string,
+  company: string,
+  siteText: string,
+): Promise<Record<string, unknown>> {
+  const text = (siteText || "").slice(0, 18_000);
+  if (text.trim().length < 200) {
+    return { error: "insufficient crawled copy to analyze brand voice", pages_analyzed: 0 };
+  }
+  const prompt = `Analyze the brand voice and copy of **${company || url}** (${url}) for CONTRADICTIONS: places where the copy says or signals one thing in one place and something conflicting in another.
+
+CRAWLED WEBSITE COPY (multiple pages, separated by page headers):
+${text}
+
+WHAT COUNTS AS A CONTRADICTION (find these, be thorough — most sites have 4 to 8):
+- Positioning conflict: premium/specialist language on one page, cheap/generalist "we do everything" language on another.
+- Audience conflict: copy written for homeowners on one page and for commercial buyers or GCs on another.
+- Promise vs proof: guarantees, response times, availability or capability claims with no supporting evidence, licensing, credentials or numbers anywhere on the site.
+- Offer conflict: differing service lists, differing pricing or quoting language, differing service areas across pages.
+- Contact conflict: different phone numbers, emails, addresses, hours or CTAs across pages.
+- Tone conflict: formal corporate boilerplate next to casual or hype copy.
+- Identity conflict: different company name spellings, taglines, or descriptions of what the company does.
+- Staleness conflict: outdated years, "new" claims about old things, dead references.
+
+RULES:
+- IDENTICAL repeated strings across pages are consistency, NOT contradictions. Never flag those.
+- Quote the actual conflicting copy in each item. No quote, no finding.
+- If the site is construction, contracting, manufacturing or trades, look specifically for: residential vs commercial mismatch, service-area sprawl vs "local" claims, license/insurance/bonding claims without numbers, safety or certification claims with no proof, "free estimates" vs quoting friction, and crew-size or capacity claims that conflict with project scale claims.
+- Every dollar figure in USD.
+
+Return JSON:
+{
+  "businessName": "<detected>",
+  "contradictionScore": <0-100, 100 = perfectly aligned>,
+  "overallAssessment": "<2-3 blunt sentences>",
+  "contradictions": [
+    { "layer": "<message_vs_visual|tone_vs_audience|offer_vs_pricing|promise_vs_process|emotion_vs_trust>",
+      "title": "<short name>",
+      "quote_a": "<exact copy from the site>",
+      "quote_b": "<the conflicting copy, or the absence being contradicted>",
+      "description": "<plain English>",
+      "buyerPerception": "<what the buyer concludes>",
+      "severity": "<critical|high|moderate>",
+      "recommendedFix": "<specific fix>" }
+  ],
+  "hiddenStrengths": ["<things done right>"],
+  "priorityFixes": ["<top 3 in order>"]
+}`;
+  try {
+    const out = await aiJson(prompt, 2200, 45_000, undefined, "bulk");
+    if (out && Array.isArray(out.contradictions) && out.contradictions.length) {
+      return { ...out, _via: "in_process_crawl_analysis", pages_analyzed: (text.match(/## Crawled page/g) || []).length || 1 };
+    }
+    return { ...(out || {}), _via: "in_process_crawl_analysis", note: "no contradictions returned" };
+  } catch (e) {
+    return { error: String(e instanceof Error ? e.message : e).slice(0, 200) };
+  }
+}
+
 
 // ─────────────────────── growth deliverables synthesis ───────────────────────
 // Four practical website deliverables generated from the SAME cleaned findings
@@ -1020,24 +1092,45 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     })();
 
     const frictionTask = (async () => {
-      const [frictionAudit, brandContradictions] = await Promise.all([
-        invokeFn("generate-friction-audit", {
-          url,
-          desiredTone: ["direct", "credible", "trustworthy"],
-          industry: company || "business services",
-          targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 12_000),
-        invokeFn("generate-brand-contradictions", {
+      const frictionPromise = invokeFn("generate-friction-audit", {
+        url,
+        desiredTone: ["direct", "credible", "trustworthy"],
+        industry: company || "business services",
+        targetCustomer: "business owner or decision-maker evaluating the company online",
+      }, 12_000);
+
+      // Contradictions need the crawled copy, so wait for the crawl instead of
+      // re-scraping inside a 12s remote call (that path always timed out).
+      const contradictionsPromise = (async () => {
+        try { await siteTask; } catch { /* crawl failures handled below */ }
+        const scrape = (findings.firecrawl_scrape as Record<string, any>) || {};
+        const siteText: string =
+          scrape?.data?.markdown || scrape?.markdown || scrape?.data?.summary || "";
+        if (siteText && siteText.trim().length >= 200) {
+          return await analyzeBrandContradictions(url, company, siteText);
+        }
+        // No usable crawl text: last resort, let the standalone function try its own scrape.
+        return await invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 12_000),
+        }, 30_000);
+      })();
+
+      const [frictionAudit, brandContradictions] = await Promise.all([
+        frictionPromise,
+        contradictionsPromise,
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 12 });
+      await stage("friction", "done", {
+        contradictions: Array.isArray((brandContradictions as any)?.contradictions)
+          ? (brandContradictions as any).contradictions.length
+          : 0,
+      });
     })();
+
 
 
     await Promise.all([siteTask, websiteTask, frictionTask]);
