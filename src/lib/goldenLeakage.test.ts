@@ -48,7 +48,7 @@ describe("resolution order", () => {
         currency: "USD",
         source: "top_leaks",
         priced_leak_count: 5,
-        calculation_version: 2,
+        calculation_version: LEAKAGE_CALCULATION_VERSION,
       },
       top_leaks: [{ dollars_low: 1, dollars_high: 2 }],
     };
@@ -67,7 +67,7 @@ describe("resolution order", () => {
         { name: "b", dollars_low: 3100, dollars_high: 6600 },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([4100, 8900, 2, "top_leaks"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([4100, 8900, 2, "top_leaks+chapters"]);
   });
 
   it("2b. formatted string top_leaks", () => {
@@ -101,7 +101,7 @@ describe("resolution order", () => {
         { slug: "quarterly", what_its_costing: "$48,000 per quarter of delayed pipeline." },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([6500, 10200, 2, "chapters"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([6500, 10200, 2, "top_leaks+chapters"]);
   });
 
   it("3b. never double counts a chapter already priced in top_leaks", () => {
@@ -221,7 +221,7 @@ describe("chapter prose guards", () => {
         { slug: "q", what_its_costing: "$48,000 per quarter in delayed pipeline." },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([180000, 420000, 1, "chapters"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([180000, 420000, 1, "top_leaks+chapters"]);
   });
 
   it("rejects placeholder 999,999,999 leak values as no evidence", () => {
@@ -284,7 +284,7 @@ describe("production data shapes (company-agnostic)", () => {
     // Same contract, same label, same format — different, correct numbers.
     for (const r of [a, b]) {
       expect(r.currency).toBe("USD");
-      expect(r.source).toBe("top_leaks");
+      expect(r.source).toBe("top_leaks+chapters");
       expect(r.count).toBe(2);
       expect(r.calculation_version).toBe(LEAKAGE_CALCULATION_VERSION);
       expect(r.displayValue).toMatch(/^\$[\d,]+ – \$[\d,]+ \/ year$/);

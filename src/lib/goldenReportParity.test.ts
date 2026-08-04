@@ -36,7 +36,9 @@ describe("golden report view model", () => {
 
   it("uses the canonical leakage resolver and never a hardcoded range", () => {
     const model = build(fullReport);
-    expect(model.leakage?.rangeLabelAscii).toBe("$4,100 - $8,900");
+    // The fixture carries a stale (older-version) persisted total, so the
+    // resolver must recompute it from every priced leak AND priced chapter.
+    expect(model.leakage?.rangeLabelAscii).toBe("$15,900 - $32,000");
     expect(modelText(model)).not.toMatch(/\$75,000|\$450,000/);
   });
 

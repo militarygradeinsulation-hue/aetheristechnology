@@ -16,6 +16,7 @@
 
 import {
   computeGoldenLeakage,
+  leaksFromChapters,
   parseMoney,
   type GoldenLeakage,
   type GoldenReportLike,
@@ -850,18 +851,34 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     }
   }
 
-  // ── 4. canonical totals, computed from unique priced leaks only ───────
+  // ── 4. canonical total = everything the reader can see, counted once ──
+  // Unique priced leaks PLUS every chapter that carries its own annual figure
+  // and is not already represented by a priced leak or a category benchmark.
   const canonicalLeaks: PricedLeak[] = priced_leaks.map((p) => ({
     name: p.root_cause_id,
     chapter_slug: p.chapter_slug,
     dollars_low: p.annual_low,
     dollars_high: p.annual_high,
   }));
-  // When every leak was a category benchmark there is nothing evidence-linked
-  // left to sum. Falling back to the stored report here would re-admit exactly
-  // the generic total we just removed, so it is not allowed.
-  const leakage = canonicalLeaks.length
-    ? computeGoldenLeakage(canonicalLeaks)
+  const coveredSlugs = new Set<string>(
+    [
+      ...priced_leaks.map((p) => String(p.chapter_slug || "").toLowerCase()),
+      ...benchmark_leaks.map((b) => String(b.chapter_slug || "").toLowerCase()),
+    ].filter(Boolean),
+  );
+  // leaksFromChapters() skips any chapter whose slug appears in top_leaks, so
+  // hand it the covered slugs to get exactly the chapters not yet counted.
+  const chapterLeaks = leaksFromChapters({
+    chapters: report.chapters,
+    top_leaks: [...coveredSlugs].map((slug) => ({ chapter_slug: slug })),
+  } as GoldenReportLike);
+
+  const summable = [...canonicalLeaks, ...chapterLeaks];
+  // When every leak was a category benchmark and no chapter carries a figure
+  // there is nothing evidence-linked left to sum. Falling back to the stored
+  // report would re-admit exactly the generic total we just removed.
+  const leakage = summable.length
+    ? computeGoldenLeakage(summable)
     : benchmark_leaks.length
       ? null
       : computeGoldenLeakage(report);
@@ -879,8 +896,8 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       annual_low: Math.round(leakage.low),
       annual_high: Math.round(leakage.high),
       currency: "USD",
-      source: canonicalLeaks.length ? "priced_leaks" : leakage.source,
-      priced_leak_count: canonicalLeaks.length || leakage.count,
+      source: summable.length ? "priced_leaks+chapters" : leakage.source,
+      priced_leak_count: summable.length || leakage.count,
       calculation_version: leakage.calculation_version,
     };
   } else {
@@ -888,6 +905,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     // rather than show a benchmark sum.
     delete (report as Record<string, unknown>).overall_leakage;
   }
+
 
 
   const verifiedCount = findings.filter((f) => f.status === "verified").length;
