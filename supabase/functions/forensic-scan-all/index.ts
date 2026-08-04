@@ -1409,6 +1409,23 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error(`scan ${id}: report is ${compilerState} — downloads and delivery are gated until it compiles clean`);
     }
 
+    // Growth assets: message, hero imagery, per-platform posts and the 30-day
+    // schedule. Runs after the report is persisted so it can never delay or
+    // fail the Golden Report itself.
+    try {
+      if (parsedBrand) {
+        const kit = await generateBrandKit(id, parsedBrand);
+        await sb.from("forensic_scans").update({
+          brand_kit: { ...kit, mode: "full_kit" },
+          updated_at: nowIso(),
+        }).eq("id", id);
+      }
+    } catch (kitErr) {
+      console.error("brand kit generation failed:", (kitErr as Error).message);
+    }
+
+
+
 
 
 
