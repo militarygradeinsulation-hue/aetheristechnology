@@ -13,6 +13,8 @@ import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
 import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenceQuality";
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
+import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
+import { Wrench } from "lucide-react";
 
 
 
@@ -359,8 +361,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Download PDF
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => window.open(`/report/${row.id}/ask`, "_blank")}>
-                  <MessageSquare className="w-4 h-4 mr-1" /> Ask this report
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setFixSeed(null); setFixOpen(true); }}
+                >
+                  <Wrench className="w-4 h-4 mr-1" /> Fix this for me
                 </Button>
               </div>
             </div>
@@ -491,6 +497,17 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                           <span className="font-serif font-semibold truncate">{c.title}</span>
                         </button>
                         <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFixSeed(chapterFixPrompt(c, row.company_name || row.target_url));
+                              setFixOpen(true);
+                            }}
+                            title="Fix this chapter now"
+                            className="flex items-center gap-1 px-2 py-1 rounded border border-amber-500/40 text-[10px] font-mono uppercase tracking-wider text-amber-500 hover:bg-amber-500/10 transition-colors"
+                          >
+                            <Wrench className="w-3 h-3" /> Fix this now
+                          </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); downloadChapter(); }}
                             title="Download this chapter"
