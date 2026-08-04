@@ -496,33 +496,18 @@ function fallbackReport(findings: Record<string, unknown>, target: string, compa
     { label: "Friction audit", value: JSON.stringify(friction).slice(0, 240) },
     { label: "Brand contradictions", value: JSON.stringify(brand).slice(0, 240) },
   ];
-  // Conservative SMB leak ranges per category (USD/yr) used when AI synth fails.
-  const COST_RANGES: Record<string, [number, number]> = {
-    "site-autopsy":         [18_000,  72_000],
-    "seo-discoverability":  [12_000,  60_000],
-    "tech-performance":     [ 6_000,  36_000],
-    "brand-contradictions": [ 9_000,  48_000],
-    "friction-vocabulary":  [ 6_000,  30_000],
-    "competitive":          [12_000,  60_000],
-    "authority-backlinks":  [ 6_000,  24_000],
-    "pipeline-forensics":   [24_000, 180_000],
-    "lead-hygiene":         [12_000,  90_000],
-    "lead-intelligence":    [ 9_000,  60_000],
-    "owner-capacity":       [12_000,  60_000],
-    "top-10-leaks":         [60_000, 360_000],
-    "remediation-plan":     [     0,       0],
-    "appendix":             [     0,       0],
-  };
-  const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
   const chapters = CHAPTERS.map((chapter) => {
-    const [lo, hi] = COST_RANGES[chapter.slug] || [0, 0];
-    // Explicitly labelled as a benchmark. It is NOT a measured result for this
-    // company and must never be summed into the forensic total.
-    const costLine = hi > 0
-      ? `Category benchmark only: businesses of this type typically carry ${fmt(lo)}-${fmt(hi)} of annual exposure in this area. This figure was not measured on this website and is excluded from the total estimated annual revenue loss.`
-      : `No direct dollar exposure for this chapter — this is a plan / appendix section.`;
+    // No dollar figures at all in the fallback. A benchmark band printed here
+    // reads as a measured result and now also feeds the report total, so the
+    // fallback stays explicitly unpriced.
+    const costLine =
+      `No measurable dollar exposure was produced for this chapter in this pass. Nothing here has been priced for ${name}. Re-run the scan to get a measured figure.`;
     return {
       ...chapter,
+      annual_low: null,
+      annual_high: null,
+      cost_basis: null,
+      excluded_from_total: true,
       verdict: `Synthesis did not complete for this chapter. No verdict has been established for ${name}.`,
       what_we_found: `Raw tool output for ${name} is preserved in the appendix. No synthesized findings are available for this chapter in this pass.`,
       why_its_leaking: "Not established in this pass.",
