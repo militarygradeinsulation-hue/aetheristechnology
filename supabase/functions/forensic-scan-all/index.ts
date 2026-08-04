@@ -1085,24 +1085,45 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     })();
 
     const frictionTask = (async () => {
-      const [frictionAudit, brandContradictions] = await Promise.all([
-        invokeFn("generate-friction-audit", {
-          url,
-          desiredTone: ["direct", "credible", "trustworthy"],
-          industry: company || "business services",
-          targetCustomer: "business owner or decision-maker evaluating the company online",
-        }, 12_000),
-        invokeFn("generate-brand-contradictions", {
+      const frictionPromise = invokeFn("generate-friction-audit", {
+        url,
+        desiredTone: ["direct", "credible", "trustworthy"],
+        industry: company || "business services",
+        targetCustomer: "business owner or decision-maker evaluating the company online",
+      }, 12_000);
+
+      // Contradictions need the crawled copy, so wait for the crawl instead of
+      // re-scraping inside a 12s remote call (that path always timed out).
+      const contradictionsPromise = (async () => {
+        try { await siteTask; } catch { /* crawl failures handled below */ }
+        const scrape = (findings.firecrawl_scrape as Record<string, any>) || {};
+        const siteText: string =
+          scrape?.data?.markdown || scrape?.markdown || scrape?.data?.summary || "";
+        if (siteText && siteText.trim().length >= 200) {
+          return await analyzeBrandContradictions(url, company, siteText);
+        }
+        // No usable crawl text: last resort, let the standalone function try its own scrape.
+        return await invokeFn("generate-brand-contradictions", {
           url,
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 12_000),
+        }, 30_000);
+      })();
+
+      const [frictionAudit, brandContradictions] = await Promise.all([
+        frictionPromise,
+        contradictionsPromise,
       ]);
       findings.friction_audit = frictionAudit;
       findings.brand_contradictions = brandContradictions;
-      await stage("friction", "done", { cap_seconds: 12 });
+      await stage("friction", "done", {
+        contradictions: Array.isArray((brandContradictions as any)?.contradictions)
+          ? (brandContradictions as any).contradictions.length
+          : 0,
+      });
     })();
+
 
 
     await Promise.all([siteTask, websiteTask, frictionTask]);
