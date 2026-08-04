@@ -496,33 +496,18 @@ function fallbackReport(findings: Record<string, unknown>, target: string, compa
     { label: "Friction audit", value: JSON.stringify(friction).slice(0, 240) },
     { label: "Brand contradictions", value: JSON.stringify(brand).slice(0, 240) },
   ];
-  // Conservative SMB leak ranges per category (USD/yr) used when AI synth fails.
-  const COST_RANGES: Record<string, [number, number]> = {
-    "site-autopsy":         [18_000,  72_000],
-    "seo-discoverability":  [12_000,  60_000],
-    "tech-performance":     [ 6_000,  36_000],
-    "brand-contradictions": [ 9_000,  48_000],
-    "friction-vocabulary":  [ 6_000,  30_000],
-    "competitive":          [12_000,  60_000],
-    "authority-backlinks":  [ 6_000,  24_000],
-    "pipeline-forensics":   [24_000, 180_000],
-    "lead-hygiene":         [12_000,  90_000],
-    "lead-intelligence":    [ 9_000,  60_000],
-    "owner-capacity":       [12_000,  60_000],
-    "top-10-leaks":         [60_000, 360_000],
-    "remediation-plan":     [     0,       0],
-    "appendix":             [     0,       0],
-  };
-  const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
   const chapters = CHAPTERS.map((chapter) => {
-    const [lo, hi] = COST_RANGES[chapter.slug] || [0, 0];
-    // Explicitly labelled as a benchmark. It is NOT a measured result for this
-    // company and must never be summed into the forensic total.
-    const costLine = hi > 0
-      ? `Category benchmark only: businesses of this type typically carry ${fmt(lo)}-${fmt(hi)} of annual exposure in this area. This figure was not measured on this website and is excluded from the total estimated annual revenue loss.`
-      : `No direct dollar exposure for this chapter — this is a plan / appendix section.`;
+    // No dollar figures at all in the fallback. A benchmark band printed here
+    // reads as a measured result and now also feeds the report total, so the
+    // fallback stays explicitly unpriced.
+    const costLine =
+      `No measurable dollar exposure was produced for this chapter in this pass. Nothing here has been priced for ${name}. Re-run the scan to get a measured figure.`;
     return {
       ...chapter,
+      annual_low: null,
+      annual_high: null,
+      cost_basis: null,
+      excluded_from_total: true,
       verdict: `Synthesis did not complete for this chapter. No verdict has been established for ${name}.`,
       what_we_found: `Raw tool output for ${name} is preserved in the appendix. No synthesized findings are available for this chapter in this pass.`,
       why_its_leaking: "Not established in this pass.",
@@ -651,7 +636,10 @@ const CHAPTER_SHAPE = `{
   "verdict": "<one blunt sentence>",
   "what_we_found": "<1-2 short markdown paragraphs>",
   "why_its_leaking": "<1-2 short paragraphs>",
-  "what_its_costing": "<1 paragraph, USD only>",
+  "what_its_costing": "<1 paragraph, USD only, showing the arithmetic>",
+  "annual_low": <int or null>,
+  "annual_high": <int or null>,
+  "cost_basis": "<the exact inputs and multiplication used, e.g. '38 service pages x 12 monthly visits x 2% close x $4,200 job value'. null when no dollar figure is claimed>",
   "what_to_do": { "this_week": ["<action>"], "this_month": ["<action>"], "this_quarter": ["<action>"] },
   "evidence": [{ "label": "<short>", "value": "<datum>" }]
 }`;
@@ -674,13 +662,21 @@ ${chapter.no}. ${chapter.title}  [slug: ${chapter.slug}]
 Requirements:
 - Every section must be SPECIFIC to this chapter's topic. Do not reuse generic "leaks are interconnected" prose across chapters.
 - "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
-- "what_its_costing": give a USD range grounded in the specific leak type for this chapter, not a template.
 - "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
 - "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
 
+COSTING RULES — this is the part that has been failing, follow it exactly:
+- BANNED: any generic or round-number template range. Never write "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other stock band. If your range looks like a price list, it is wrong.
+- Every dollar figure must be DERIVED, in the chapter, from counts and values that appear in THIS company's findings: number of pages, number of forms, number of stalled deals, response lag in hours, traffic figures, service lines, locations, headcount, quoted prices found on the site, average job value stated on the site.
+- Write the arithmetic in "what_its_costing" in plain sentences, and repeat the same inputs in "cost_basis". The low and high must come from that math, not from intuition, and must be odd/uneven numbers reflecting the calculation.
+- If a needed input is not present in the findings, state which input is missing, make ONE clearly-labelled conservative assumption using a number that IS in the findings, and derive from that.
+- If nothing in the findings supports a dollar figure for this chapter, set "annual_low" and "annual_high" to null, set "cost_basis" to null, and say plainly in "what_its_costing" that this chapter carries no measurable dollar exposure in this pass. Do NOT invent a range to fill the field.
+- Chapters 13 and 14 (plan, appendix) always use null for annual_low, annual_high and cost_basis.
+- Never re-price a leak already priced in another chapter. Reference it instead and use null.
+
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 55_000);
+  return await aiJson(prompt, 2400, 55_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
@@ -692,8 +688,13 @@ ${findingsStr}
 Return JSON:
 {
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
-  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
-}`;
+  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "basis": "<the counts and values from THIS company's findings that produce the range>", "summary": "<one specific line grounded in findings>" } ]
+}
+
+COSTING RULES:
+- BANNED: stock bands like "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other round template range. Ranges must be derived numbers, not price-list numbers.
+- Every dollars_low / dollars_high must come from arithmetic on real inputs found in the scan (page counts, form counts, response lag, stalled deals, traffic, service lines, prices quoted on the site) and that arithmetic goes in "basis".
+- Only include a leak in top_leaks when you can show that math. 3 well-supported leaks beat 5 invented ones.`;
   return await aiJson(prompt, 3500, 60_000);
 }
 

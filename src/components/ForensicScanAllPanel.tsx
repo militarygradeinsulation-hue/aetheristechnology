@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, ScanLine, FileDown, MessageSquare, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Loader2, ScanLine, FileDown, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { downloadForensicGoldenPdf, type ForensicReport, type Chapter } from "@/lib/generateForensicGoldenPdf";
 import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationKit";
 import { getAdminToken } from "@/lib/adminAuth";
@@ -13,6 +13,8 @@ import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
 import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenceQuality";
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
+import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
+import { Wrench } from "lucide-react";
 
 
 
@@ -101,6 +103,8 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  const [fixOpen, setFixOpen] = useState(false);
+  const [fixSeed, setFixSeed] = useState<string | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const pollRef = useRef<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
@@ -186,6 +190,15 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
 
   const stageState = (key: string) => row?.stage_status?.[key]?.state || (scanId ? "pending" : "");
   const report = row?.report || null;
+  // The live advisor appears with the finished report so the user can ask about
+  // it right there instead of hunting for a chat page.
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
+      autoOpened.current = true;
+      setFixOpen(true);
+    }
+  }, [report]);
   const chapters: Chapter[] = report?.chapters || [];
   const completedStages = STAGES.filter((s) => ["done", "skipped"].includes(stageState(s.key))).length;
   const activeStage = STAGES.find((s) => stageState(s.key) === "running") || null;
@@ -359,8 +372,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Download PDF
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => window.open(`/report/${row.id}/ask`, "_blank")}>
-                  <MessageSquare className="w-4 h-4 mr-1" /> Ask this report
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setFixSeed(null); setFixOpen(true); }}
+                >
+                  <Wrench className="w-4 h-4 mr-1" /> Fix this for me
                 </Button>
               </div>
             </div>
@@ -492,6 +509,17 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                         </button>
                         <div className="flex items-center gap-1 shrink-0 ml-2">
                           <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFixSeed(chapterFixPrompt(c, row.company_name || row.target_url));
+                              setFixOpen(true);
+                            }}
+                            title="Fix this chapter now"
+                            className="flex items-center gap-1 px-2 py-1 rounded border border-amber-500/40 text-[10px] font-mono uppercase tracking-wider text-amber-500 hover:bg-amber-500/10 transition-colors"
+                          >
+                            <Wrench className="w-3 h-3" /> Fix this now
+                          </button>
+                          <button
                             onClick={(e) => { e.stopPropagation(); downloadChapter(); }}
                             title="Download this chapter"
                             className="p-1.5 rounded hover:bg-amber-500/10 text-muted-foreground hover:text-amber-500 transition-colors"
@@ -560,6 +588,15 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
             </section>
           </div>
         </Card>
+      )}
+      {fixOpen && row && report && (
+        <GoldenFixPanel
+          scanId={row.id}
+          report={report}
+          company={row.company_name || row.target_url}
+          seed={fixSeed}
+          onClose={() => setFixOpen(false)}
+        />
       )}
     </div>
   );

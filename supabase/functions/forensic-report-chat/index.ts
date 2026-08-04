@@ -1,8 +1,12 @@
-// Smart-PDF chat — answers questions about a specific forensic_scans row.
-// POST /forensic-report-chat { scan_id, question, history? }
+// Golden Report advisor — "Fix this for me".
+// POST /forensic-report-chat { scan_id, question, history?, mode? }
 //   → { answer, citations: [{ chapter_no, slug, title }] }
+//
+// The report is the evidence base, not the ceiling: the operator gives real
+// consultative strategy for the company, grounded in the scan.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +14,6 @@ const corsHeaders = {
 };
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 interface Chapter { no: number; slug: string; title: string; verdict?: string;
   what_we_found?: string; why_its_leaking?: string; what_its_costing?: string;
@@ -42,19 +45,37 @@ Deno.serve(async (req) => {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const report = row.report as { executive_summary?: string; top_leaks?: unknown; chapters?: Chapter[] };
+    const report = row.report as {
+      executive_summary?: string;
+      top_leaks?: unknown;
+      overall_leakage?: unknown;
+      deliverables?: unknown;
+      chapters?: Chapter[];
+    };
+    const company = row.company_name || row.target_url;
     const context = [
-      `# Forensic Report — ${row.company_name || row.target_url}`,
+      `# Forensic Report — ${company}`,
+      `Website: ${row.target_url}`,
+      `## Total annual leakage\n${JSON.stringify(report.overall_leakage || {})}`,
       `## Executive Summary\n${report.executive_summary || ""}`,
       `## Top Leaks\n${JSON.stringify(report.top_leaks || [])}`,
       ...((report.chapters || []).map(chapterToContext)),
-    ].join("\n\n").slice(0, 180_000);
+    ].join("\n\n").slice(0, 160_000);
 
     const messages = [
       { role: "system", content:
-`You are the Aetheris Operator answering questions about THIS forensic report ONLY.
-Use only the report content. If a question is outside the report, say so.
-Cite chapters as [Ch <no> — <title>]. USD only. Blunt, operator voice. No em-dashes.
+`You are the Aetheris Operator advising ${company} live, on screen, while they read their forensic report.
+
+WHAT YOU ARE: a revenue-leak operator giving real consulting. The report is your evidence base, NOT your ceiling. You are expected to go beyond it with practical strategy, sequencing, tooling, staffing, pricing, outreach and process advice that fits this specific company.
+
+HOW YOU ANSWER:
+- Lead with the answer. No preamble, no restating the question.
+- Be concrete: exact steps, who does it, what tool or vendor, how long it takes, rough cost, and how they will know it worked.
+- When you use a report finding, cite it as [Ch <no> — <title>]. When you go beyond the report, say plainly that it is your recommendation rather than a scan finding.
+- Never invent scan data, numbers, client names or results that are not in the report. Judgement and strategy are yours to give; facts about this company are not.
+- If the report has no signal on something, say so and give the best operator play anyway.
+- USD only, every amount as $X,XXX. Blunt operator voice, short sentences, no em-dashes, no rhetorical questions, no corporate filler.
+- Keep answers tight: under 400 words unless they ask for a full plan, then use numbered steps.
 
 REPORT:
 ${context}` },
@@ -62,16 +83,15 @@ ${context}` },
       { role: "user", content: question },
     ];
 
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages, temperature: 0.3 }),
+    const res = await routedChatCompletion({
+      tier: "heavy",
+      messages,
+      temperature: 0.4,
+      max_tokens: 1800,
+      timeoutMs: 55_000,
     });
-    if (r.status === 429) return new Response(JSON.stringify({ error: "Rate limited, try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (r.status === 402) return new Response(JSON.stringify({ error: "Workspace AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!r.ok) throw new Error(await r.text());
-    const j = await r.json();
-    const answer = j.choices?.[0]?.message?.content || "";
+    const answer = res.content || "";
+    if (!answer.trim()) throw new Error("No answer produced. Try again.");
     const cites: { chapter_no: number; slug: string; title: string }[] = [];
     for (const c of report.chapters || []) {
       const re = new RegExp(`Ch\\s*${c.no}\\b`, "i");

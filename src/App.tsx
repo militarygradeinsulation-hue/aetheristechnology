@@ -35,7 +35,6 @@ import BookRedirect from "./pages/BookRedirect";
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
 import DiagnosticPage from "./pages/DiagnosticPage";
-import IndustriesPage from "./pages/IndustriesPage";
 import MethodologyPage from "./pages/MethodologyPage";
 import NewsPage from "./pages/NewsPage";
 import ResourcesPage from "./pages/ResourcesPage";
@@ -233,7 +232,7 @@ const App = () => (
                       <Route path="/reset-password" element={<ResetPasswordPage />} />
                       <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
                       <Route path="/my-subscription" element={<MySubscriptionPage />} />
-                      <Route path="/industries" element={<IndustriesPage />} />
+                      <Route path="/industries" element={<Navigate to="/careers" replace />} />
                       <Route path="/case-studies" element={<CaseStudiesPage />} />
                       {Object.keys(VERTICAL_BY_SLUG).map((slug) => (
                         <Route key={slug} path={`/${slug}`} element={<VerticalLandingPage />} />

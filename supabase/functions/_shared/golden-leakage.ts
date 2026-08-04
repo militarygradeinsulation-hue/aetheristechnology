@@ -26,7 +26,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Bump when the math or field resolution changes. Persisted with the report. */
-export const LEAKAGE_CALCULATION_VERSION = 2;
+export const LEAKAGE_CALCULATION_VERSION = 3;
 
 /** Values above this are placeholders/data artifacts, not evidence for one leak. */
 export const MAX_SANE_LEAK = 50_000_000;
@@ -72,7 +72,15 @@ export type OverallLeakage = {
 export type GoldenReportLike = {
   overall_leakage?: OverallLeakage | null;
   top_leaks?: PricedLeak[] | null;
-  chapters?: Array<{ slug?: string; what_its_costing?: string | null }> | null;
+  chapters?: Array<{
+    slug?: string;
+    what_its_costing?: string | null;
+    /** Structured per-chapter annual cost emitted by the synthesizer. */
+    annual_low?: number | string | null;
+    annual_high?: number | string | null;
+    cost_basis?: string | null;
+    excluded_from_total?: boolean | null;
+  }> | null;
   [k: string]: unknown;
 };
 
@@ -184,6 +192,19 @@ export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   for (const ch of report.chapters || []) {
     const slug = String(ch?.slug || "").toLowerCase();
     if (slug && priced.has(slug)) continue;
+    if ((ch as { excluded_from_total?: boolean })?.excluded_from_total) continue;
+    // 1. structured per-chapter figures (synthesizer emits these now)
+    const sLow = parseMoney(ch?.annual_low);
+    const sHigh = parseMoney(ch?.annual_high);
+    if ((sLow != null && sLow <= MAX_SANE_CHAPTER_LEAK) || (sHigh != null && sHigh <= MAX_SANE_CHAPTER_LEAK)) {
+      const a = sLow ?? (sHigh as number);
+      const b = sHigh ?? (sLow as number);
+      if (a <= MAX_SANE_CHAPTER_LEAK && b <= MAX_SANE_CHAPTER_LEAK) {
+        out.push({ chapter_slug: slug, dollars_low: Math.min(a, b), dollars_high: Math.max(a, b) });
+        continue;
+      }
+    }
+    // 2. legacy: parse the costing prose
     const text = String(ch?.what_its_costing || "");
     if (!text || !ANNUAL_WORDS.test(text)) continue;
     const range = text.match(RANGE_RE);
@@ -199,10 +220,20 @@ export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   return out;
 }
 
+/**
+ * Every uniquely priced leak in the report: the executive top leaks PLUS every
+ * chapter that carries its own annual figure and is not already represented in
+ * top_leaks. This union is what the red total box sums.
+ */
+export function allPricedLeaks(report: GoldenReportLike): PricedLeak[] {
+  const tops = Array.isArray(report.top_leaks) ? report.top_leaks : [];
+  return [...tops, ...leaksFromChapters(report)];
+}
+
 /** True when the report carries evidence this resolver considers valid. */
 export function hasPricedEvidence(report: GoldenReportLike | null | undefined): boolean {
   if (!report) return false;
-  return !!sumLeaks(report.top_leaks) || !!sumLeaks(leaksFromChapters(report));
+  return !!sumLeaks(allPricedLeaks(report));
 }
 
 const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -250,9 +281,10 @@ export function computeGoldenLeakage(
 
   const report = input;
 
-  // 1. canonical persisted total (preserved as-is for older reports)
+  // 1. canonical persisted total — only trusted when it was written by the
+  //    current math. Older versions summed top_leaks only, so they are recomputed.
   const ol = report.overall_leakage;
-  if (ol && typeof ol === "object") {
+  if (ol && typeof ol === "object" && Number(ol.calculation_version) >= LEAKAGE_CALCULATION_VERSION) {
     const lo = parseMoney(ol.annual_low);
     const hi = parseMoney(ol.annual_high);
     if (lo != null || hi != null) {
@@ -271,19 +303,38 @@ export function computeGoldenLeakage(
           count,
           ol.source || "overall_leakage",
           ol.currency || "USD",
-          Number(ol.calculation_version) > 0 ? Number(ol.calculation_version) : 1,
+          Number(ol.calculation_version),
         );
       }
     }
   }
 
-  // 2. priced top_leaks
-  const fromLeaks = sumLeaks(report.top_leaks);
-  if (fromLeaks) return build(fromLeaks.low, fromLeaks.high, fromLeaks.count, "top_leaks");
+  // 2. everything priced in the report: top leaks + per-chapter annual figures
+  const combined = sumLeaks(allPricedLeaks(report));
+  if (combined) return build(combined.low, combined.high, combined.count, "top_leaks+chapters");
 
-  // 3. chapter dollar ranges (legacy scans)
-  const fromChapters = sumLeaks(leaksFromChapters(report));
-  if (fromChapters) return build(fromChapters.low, fromChapters.high, fromChapters.count, "chapters");
+  // 3. legacy persisted total from an older calculation version
+  const legacy = report.overall_leakage;
+  if (legacy && typeof legacy === "object") {
+    const lo = parseMoney(legacy.annual_low);
+    const hi = parseMoney(legacy.annual_high);
+    if (lo != null || hi != null) {
+      const a = lo ?? (hi as number);
+      const b = hi ?? (lo as number);
+      const high = Math.max(a, b);
+      const low = Math.min(a, b);
+      if (high > 0) {
+        return build(
+          low > 0 ? low : high,
+          high,
+          Number(legacy.priced_leak_count) > 0 ? Number(legacy.priced_leak_count) : 1,
+          legacy.source || "overall_leakage",
+          legacy.currency || "USD",
+          Number(legacy.calculation_version) > 0 ? Number(legacy.calculation_version) : 1,
+        );
+      }
+    }
+  }
 
   return null;
 }
@@ -299,13 +350,8 @@ export type CanonicalOverallLeakage = {
 
 /** Returns the canonical persistable object, or null when there is no evidence. */
 export function computeOverallLeakage(report: GoldenReportLike): CanonicalOverallLeakage | null {
-  const fromLeaks = sumLeaks(report.top_leaks);
-  const chosen = fromLeaks
-    ? { ...fromLeaks, source: "top_leaks" }
-    : (() => {
-        const c = sumLeaks(leaksFromChapters(report));
-        return c ? { ...c, source: "chapters" } : null;
-      })();
+  const combined = sumLeaks(allPricedLeaks(report));
+  const chosen = combined ? { ...combined, source: "top_leaks+chapters" } : null;
   if (!chosen) return null;
   return {
     annual_low: Math.round(chosen.low),

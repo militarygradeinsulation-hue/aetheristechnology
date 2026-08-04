@@ -152,7 +152,7 @@ Out of scope (politely decline or refer):
     },
     resources: [
       { label: "Brand Strategy (ICP section)", url: "/portal?tab=documents" },
-      { label: "Industries page", url: "/industries" },
+      { label: "Connector industries (Careers)", url: "/careers" },
     ],
     sessions: [
       s("w1d3-s1", "Morning · ICP Drill", 75, "Build a target list filter you can reuse forever.", [

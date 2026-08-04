@@ -115,7 +115,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
       connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Fee credits 1:1 to the fix"] },
     { id: "impl",     label: "Implementation",    sublabel: "$15K / mo",  icon: Wrench,     onClick: onBookAudit,
       connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
-    { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/industries"),
+    { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/careers"),
       connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
     { id: "field",    label: "Blog",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog"),
       connections: ["Weekly operator dispatches", "Real leaks, real fixes", "No fluff"] },

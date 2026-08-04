@@ -25,7 +25,7 @@ const VerticalLandingPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const vertical = slug ? VERTICAL_BY_SLUG[slug] : undefined;
-  if (!vertical) return <Navigate to="/industries" replace />;
+  if (!vertical) return <Navigate to="/careers" replace />;
 
   const path = `/${vertical.slug}`;
 
@@ -63,7 +63,7 @@ const VerticalLandingPage: React.FC = () => {
         keywords={vertical.keywords}
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'Industries', path: '/industries' },
+          { name: 'Careers', path: '/careers' },
           { name: vertical.industry, path },
         ]}
         faqs={vertical.faqs}
