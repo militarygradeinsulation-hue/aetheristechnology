@@ -1,8 +1,12 @@
-// Smart-PDF chat — answers questions about a specific forensic_scans row.
-// POST /forensic-report-chat { scan_id, question, history? }
+// Golden Report advisor — "Fix this for me".
+// POST /forensic-report-chat { scan_id, question, history?, mode? }
 //   → { answer, citations: [{ chapter_no, slug, title }] }
+//
+// The report is the evidence base, not the ceiling: the operator gives real
+// consultative strategy for the company, grounded in the scan.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +14,6 @@ const corsHeaders = {
 };
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
 interface Chapter { no: number; slug: string; title: string; verdict?: string;
   what_we_found?: string; why_its_leaking?: string; what_its_costing?: string;
