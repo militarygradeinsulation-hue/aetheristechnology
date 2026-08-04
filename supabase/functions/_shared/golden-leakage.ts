@@ -348,13 +348,8 @@ export type CanonicalOverallLeakage = {
 
 /** Returns the canonical persistable object, or null when there is no evidence. */
 export function computeOverallLeakage(report: GoldenReportLike): CanonicalOverallLeakage | null {
-  const fromLeaks = sumLeaks(report.top_leaks);
-  const chosen = fromLeaks
-    ? { ...fromLeaks, source: "top_leaks" }
-    : (() => {
-        const c = sumLeaks(leaksFromChapters(report));
-        return c ? { ...c, source: "chapters" } : null;
-      })();
+  const combined = sumLeaks(allPricedLeaks(report));
+  const chosen = combined ? { ...combined, source: "top_leaks+chapters" } : null;
   if (!chosen) return null;
   return {
     annual_low: Math.round(chosen.low),
