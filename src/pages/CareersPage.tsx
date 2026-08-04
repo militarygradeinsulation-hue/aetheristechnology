@@ -13,6 +13,7 @@ import {
 import operatorCertification from '@/assets/operator-certification.jpg.asset.json';
 import { ApplicantPressure } from '@/components/careers/ApplicantPressure';
 import resellerLicense from '@/assets/reseller-license-cert.png.asset.json';
+import { CONNECTOR_INDUSTRIES } from '@/lib/connectorIndustries';
 
 const trackCareersCta = (cta: string) => {
   try {
@@ -310,6 +311,34 @@ const CareersPage = () => {
                   </ul>
                 </div>
               </div>
+
+              {/* CONNECTOR INDUSTRY REACH — collapsed by default */}
+              <details className="rounded-xl border border-amber/25 bg-amber/5 p-5">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span>
+                    <span className="block font-display font-semibold text-foreground">Industries our Connectors already have relationships in</span>
+                    <span className="block text-xs text-muted-foreground mt-1">
+                      {CONNECTOR_INDUSTRIES.length} verticals. Click to open.
+                    </span>
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber shrink-0">View list</span>
+                </summary>
+                <p className="text-sm text-muted-foreground mt-4">
+                  These are the industries our licensed Connectors, the people authorized to sell and introduce us, already
+                  have connections in. We will work a warm introduction in any of them. That said, Aetheris focuses on
+                  <span className="text-amber font-semibold"> manufacturing and construction companies</span>. That is where our
+                  leak work hits hardest and where we want most of your introductions.
+                </p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+                  {CONNECTOR_INDUSTRIES.map((i) => (
+                    <div key={i.industry} className="rounded-lg border border-border/60 bg-background/40 p-3">
+                      <div className="font-display text-sm font-semibold text-foreground">{i.industry}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{i.primaryLeak}</div>
+                      <div className="font-mono text-[10px] text-crimson mt-1.5">{i.typicalLoss}</div>
+                    </div>
+                  ))}
+                </div>
+              </details>
 
               {/* CTA */}
               <div className="text-center space-y-3 pt-2">
