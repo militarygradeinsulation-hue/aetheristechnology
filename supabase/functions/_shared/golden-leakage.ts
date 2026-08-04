@@ -26,7 +26,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Bump when the math or field resolution changes. Persisted with the report. */
-export const LEAKAGE_CALCULATION_VERSION = 2;
+export const LEAKAGE_CALCULATION_VERSION = 3;
 
 /** Values above this are placeholders/data artifacts, not evidence for one leak. */
 export const MAX_SANE_LEAK = 50_000_000;
