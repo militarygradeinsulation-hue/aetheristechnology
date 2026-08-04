@@ -279,9 +279,10 @@ export function computeGoldenLeakage(
 
   const report = input;
 
-  // 1. canonical persisted total (preserved as-is for older reports)
+  // 1. canonical persisted total — only trusted when it was written by the
+  //    current math. Older versions summed top_leaks only, so they are recomputed.
   const ol = report.overall_leakage;
-  if (ol && typeof ol === "object") {
+  if (ol && typeof ol === "object" && Number(ol.calculation_version) >= LEAKAGE_CALCULATION_VERSION) {
     const lo = parseMoney(ol.annual_low);
     const hi = parseMoney(ol.annual_high);
     if (lo != null || hi != null) {
@@ -300,19 +301,38 @@ export function computeGoldenLeakage(
           count,
           ol.source || "overall_leakage",
           ol.currency || "USD",
-          Number(ol.calculation_version) > 0 ? Number(ol.calculation_version) : 1,
+          Number(ol.calculation_version),
         );
       }
     }
   }
 
-  // 2. priced top_leaks
-  const fromLeaks = sumLeaks(report.top_leaks);
-  if (fromLeaks) return build(fromLeaks.low, fromLeaks.high, fromLeaks.count, "top_leaks");
+  // 2. everything priced in the report: top leaks + per-chapter annual figures
+  const combined = sumLeaks(allPricedLeaks(report));
+  if (combined) return build(combined.low, combined.high, combined.count, "top_leaks+chapters");
 
-  // 3. chapter dollar ranges (legacy scans)
-  const fromChapters = sumLeaks(leaksFromChapters(report));
-  if (fromChapters) return build(fromChapters.low, fromChapters.high, fromChapters.count, "chapters");
+  // 3. legacy persisted total from an older calculation version
+  const legacy = report.overall_leakage;
+  if (legacy && typeof legacy === "object") {
+    const lo = parseMoney(legacy.annual_low);
+    const hi = parseMoney(legacy.annual_high);
+    if (lo != null || hi != null) {
+      const a = lo ?? (hi as number);
+      const b = hi ?? (lo as number);
+      const high = Math.max(a, b);
+      const low = Math.min(a, b);
+      if (high > 0) {
+        return build(
+          low > 0 ? low : high,
+          high,
+          Number(legacy.priced_leak_count) > 0 ? Number(legacy.priced_leak_count) : 1,
+          legacy.source || "overall_leakage",
+          legacy.currency || "USD",
+          Number(legacy.calculation_version) > 0 ? Number(legacy.calculation_version) : 1,
+        );
+      }
+    }
+  }
 
   return null;
 }
