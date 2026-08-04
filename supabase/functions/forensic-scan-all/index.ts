@@ -651,7 +651,10 @@ const CHAPTER_SHAPE = `{
   "verdict": "<one blunt sentence>",
   "what_we_found": "<1-2 short markdown paragraphs>",
   "why_its_leaking": "<1-2 short paragraphs>",
-  "what_its_costing": "<1 paragraph, USD only>",
+  "what_its_costing": "<1 paragraph, USD only, showing the arithmetic>",
+  "annual_low": <int or null>,
+  "annual_high": <int or null>,
+  "cost_basis": "<the exact inputs and multiplication used, e.g. '38 service pages x 12 monthly visits x 2% close x $4,200 job value'. null when no dollar figure is claimed>",
   "what_to_do": { "this_week": ["<action>"], "this_month": ["<action>"], "this_quarter": ["<action>"] },
   "evidence": [{ "label": "<short>", "value": "<datum>" }]
 }`;
@@ -674,13 +677,21 @@ ${chapter.no}. ${chapter.title}  [slug: ${chapter.slug}]
 Requirements:
 - Every section must be SPECIFIC to this chapter's topic. Do not reuse generic "leaks are interconnected" prose across chapters.
 - "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
-- "what_its_costing": give a USD range grounded in the specific leak type for this chapter, not a template.
 - "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
 - "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
 
+COSTING RULES — this is the part that has been failing, follow it exactly:
+- BANNED: any generic or round-number template range. Never write "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other stock band. If your range looks like a price list, it is wrong.
+- Every dollar figure must be DERIVED, in the chapter, from counts and values that appear in THIS company's findings: number of pages, number of forms, number of stalled deals, response lag in hours, traffic figures, service lines, locations, headcount, quoted prices found on the site, average job value stated on the site.
+- Write the arithmetic in "what_its_costing" in plain sentences, and repeat the same inputs in "cost_basis". The low and high must come from that math, not from intuition, and must be odd/uneven numbers reflecting the calculation.
+- If a needed input is not present in the findings, state which input is missing, make ONE clearly-labelled conservative assumption using a number that IS in the findings, and derive from that.
+- If nothing in the findings supports a dollar figure for this chapter, set "annual_low" and "annual_high" to null, set "cost_basis" to null, and say plainly in "what_its_costing" that this chapter carries no measurable dollar exposure in this pass. Do NOT invent a range to fill the field.
+- Chapters 13 and 14 (plan, appendix) always use null for annual_low, annual_high and cost_basis.
+- Never re-price a leak already priced in another chapter. Reference it instead and use null.
+
 Return JSON shaped EXACTLY:
 ${CHAPTER_SHAPE}`;
-  return await aiJson(prompt, 2200, 55_000);
+  return await aiJson(prompt, 2400, 55_000);
 }
 
 async function synthesizeSummary(findingsStr: string, target: string, company: string) {
