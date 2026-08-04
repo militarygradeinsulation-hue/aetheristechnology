@@ -965,7 +965,13 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
     if (!chapters[i]) chapters[i] = fb.chapters.find((x) => x.slug === c.slug);
   });
 
-  const summaryFailed = !summary.executive_summary;
+  // Safety net: the model sometimes returns null costs for costing chapters,
+  // which wiped every dollar figure out of the report. Any synthesized chapter
+  // 1-12 without figures gets a derived, clearly-labelled modeled range so the
+  // report always prices its leaks.
+  applyDerivedChapterCosts(chapters, findings, company || target);
+
+
 
   const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
