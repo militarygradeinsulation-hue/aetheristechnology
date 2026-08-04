@@ -971,7 +971,7 @@ async function synthesizeReport(findings: Record<string, unknown>, target: strin
   // report always prices its leaks.
   applyDerivedChapterCosts(chapters, findings, company || target);
 
-
+  const summaryFailed = !summary.executive_summary;
 
   const rawLeaks = Array.isArray(summary.top_leaks) && summary.top_leaks.length ? summary.top_leaks : fb.top_leaks;
   return {
