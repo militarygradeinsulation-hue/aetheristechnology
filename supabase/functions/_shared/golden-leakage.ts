@@ -26,7 +26,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Bump when the math or field resolution changes. Persisted with the report. */
-export const LEAKAGE_CALCULATION_VERSION = 3;
+export const LEAKAGE_CALCULATION_VERSION = 4;
 
 /** Values above this are placeholders/data artifacts, not evidence for one leak. */
 export const MAX_SANE_LEAK = 50_000_000;
@@ -364,6 +364,24 @@ export function computeOverallLeakage(report: GoldenReportLike): CanonicalOveral
 }
 
 /**
+ * Consistency guard: the banner total must sum everything the reader can see.
+ * Returns an error string when the persisted total is materially smaller than
+ * the sum of the uniquely priced leaks + chapter figures in the same report.
+ */
+export function chapterSumMismatch(report: GoldenReportLike): string | null {
+  const combined = sumLeaks(allPricedLeaks(report));
+  const ol = report.overall_leakage;
+  if (!combined || !ol) return null;
+  const shown = parseMoney(ol.annual_high);
+  if (shown == null) return null;
+  // 5% tolerance for rounding / dedupe differences.
+  if (shown < combined.high * 0.95) {
+    return `overall_leakage high ${Math.round(shown)} is below the combined priced evidence ${Math.round(combined.high)}`;
+  }
+  return null;
+}
+
+/**
  * Completion invariant: a report carrying valid priced evidence MUST resolve to
  * a canonical overall_leakage. Returns an error string when violated so
  * completion/backfill can fail loudly instead of silently hiding the red box.
@@ -372,5 +390,5 @@ export function leakageInvariantError(report: GoldenReportLike): string | null {
   if (hasPricedEvidence(report) && !report.overall_leakage) {
     return "priced evidence present but overall_leakage could not be resolved";
   }
-  return null;
+  return chapterSumMismatch(report);
 }

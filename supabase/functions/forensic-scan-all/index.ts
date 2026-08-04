@@ -953,11 +953,35 @@ function applyDerivedChapterCosts(
     const w = CHAPTER_COST_WEIGHTS[ch.slug];
     if (!w || !w[1]) continue;
     if (ch.excluded_from_total) continue; // unsynthesized template chapter stays unpriced
+    // Plausibility band for THIS company: the synthesizer sometimes returns
+    // market-size style figures (tens of millions) that are neither credible
+    // nor summable. Clamp every chapter into the modeled band so the chapter
+    // figures and the total always stay in the same universe.
+    const floor = Math.max(500, Math.round(w[0] * scale * 0.25));
+    const ceiling = Math.max(floor * 2, Math.round(w[1] * scale * 4));
+    const clamp = (n: number) => Math.min(ceiling, Math.max(floor, Math.round(n)));
+
     const hasLow = Number(ch.annual_low) > 0;
     const hasHigh = Number(ch.annual_high) > 0;
     if (hasLow || hasHigh) {
       if (!hasLow) ch.annual_low = Math.round(Number(ch.annual_high) * 0.42);
       if (!hasHigh) ch.annual_high = Math.round(Number(ch.annual_low) * 2.3);
+      const lo = clamp(Number(ch.annual_low));
+      const hi = clamp(Number(ch.annual_high));
+      const clamped = lo !== Math.round(Number(ch.annual_low)) || hi !== Math.round(Number(ch.annual_high));
+      ch.annual_low = Math.min(lo, hi);
+      ch.annual_high = Math.max(lo, hi);
+      if (clamped) {
+        ch.cost_basis =
+          `Bounded to this company's evidence volume (${Math.round(scale)} weighted signals collected in this scan).`;
+        // The prose money figure must not contradict the clamped range.
+        ch.what_its_costing = String(ch.what_its_costing || "").replace(
+          /\$\s?[\d,]+(?:\.\d+)?\s*[kKmM]?(\s*(?:-|–|—|to)\s*\$?\s?[\d,]+(?:\.\d+)?\s*[kKmM]?)?/g,
+          "",
+        ).replace(/\s{2,}/g, " ").trim();
+        const money = `$${ch.annual_low.toLocaleString("en-US")} to $${ch.annual_high.toLocaleString("en-US")} per year`;
+        ch.what_its_costing = `${ch.what_its_costing ? ch.what_its_costing.replace(/\s*$/, " ") : ""}Modeled exposure for this leak is ${money}, derived from the signals this scan collected for the company.`.trim();
+      }
       used.add(`${ch.annual_low}:${ch.annual_high}`);
       continue;
     }
@@ -1357,7 +1381,17 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           if (overall) report.overall_leakage = overall;
         }
         console.log(`scan ${id}: overall_leakage`, JSON.stringify(report?.overall_leakage ?? null));
-        const invariant = leakageInvariantError(report || {});
+        let invariant = leakageInvariantError(report || {});
+        if (invariant && report) {
+          // Repair before failing: the total must equal the combined evidence
+          // the reader sees (priced leaks + every priced chapter).
+          const recomputed = computeOverallLeakage(report);
+          if (recomputed) {
+            report.overall_leakage = recomputed;
+            invariant = leakageInvariantError(report);
+            console.log(`scan ${id}: overall_leakage repaired`, JSON.stringify(recomputed));
+          }
+        }
         if (invariant) {
           // Loud structured failure: never let the red box disappear silently.
           console.error(JSON.stringify({
