@@ -191,6 +191,18 @@ export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   for (const ch of report.chapters || []) {
     const slug = String(ch?.slug || "").toLowerCase();
     if (slug && priced.has(slug)) continue;
+    // 1. structured per-chapter figures (synthesizer emits these now)
+    const sLow = parseMoney(ch?.annual_low);
+    const sHigh = parseMoney(ch?.annual_high);
+    if ((sLow != null && sLow <= MAX_SANE_CHAPTER_LEAK) || (sHigh != null && sHigh <= MAX_SANE_CHAPTER_LEAK)) {
+      const a = sLow ?? (sHigh as number);
+      const b = sHigh ?? (sLow as number);
+      if (a <= MAX_SANE_CHAPTER_LEAK && b <= MAX_SANE_CHAPTER_LEAK) {
+        out.push({ chapter_slug: slug, dollars_low: Math.min(a, b), dollars_high: Math.max(a, b) });
+        continue;
+      }
+    }
+    // 2. legacy: parse the costing prose
     const text = String(ch?.what_its_costing || "");
     if (!text || !ANNUAL_WORDS.test(text)) continue;
     const range = text.match(RANGE_RE);
@@ -206,10 +218,20 @@ export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   return out;
 }
 
+/**
+ * Every uniquely priced leak in the report: the executive top leaks PLUS every
+ * chapter that carries its own annual figure and is not already represented in
+ * top_leaks. This union is what the red total box sums.
+ */
+export function allPricedLeaks(report: GoldenReportLike): PricedLeak[] {
+  const tops = Array.isArray(report.top_leaks) ? report.top_leaks : [];
+  return [...tops, ...leaksFromChapters(report)];
+}
+
 /** True when the report carries evidence this resolver considers valid. */
 export function hasPricedEvidence(report: GoldenReportLike | null | undefined): boolean {
   if (!report) return false;
-  return !!sumLeaks(report.top_leaks) || !!sumLeaks(leaksFromChapters(report));
+  return !!sumLeaks(allPricedLeaks(report));
 }
 
 const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
