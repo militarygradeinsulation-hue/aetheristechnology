@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, ScanLine, FileDown, MessageSquare, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Loader2, ScanLine, FileDown, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { downloadForensicGoldenPdf, type ForensicReport, type Chapter } from "@/lib/generateForensicGoldenPdf";
 import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationKit";
 import { getAdminToken } from "@/lib/adminAuth";
@@ -190,6 +190,15 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
 
   const stageState = (key: string) => row?.stage_status?.[key]?.state || (scanId ? "pending" : "");
   const report = row?.report || null;
+  // The live advisor appears with the finished report so the user can ask about
+  // it right there instead of hunting for a chat page.
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
+      autoOpened.current = true;
+      setFixOpen(true);
+    }
+  }, [report]);
   const chapters: Chapter[] = report?.chapters || [];
   const completedStages = STAGES.filter((s) => ["done", "skipped"].includes(stageState(s.key))).length;
   const activeStage = STAGES.find((s) => stageState(s.key) === "running") || null;
