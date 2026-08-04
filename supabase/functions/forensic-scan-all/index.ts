@@ -1140,6 +1140,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     // Brand kit runs in parallel with the rest of the forensic pipeline —
     // starts as soon as the Firecrawl branding data lands.
     await setBrandKitStage(id, "brand_scan", "running");
+    let parsedBrand: Brand | null = null;
     const brandKitTask = (async () => {
       try {
         const [scrape, map] = await Promise.all([firecrawlScrape(url), firecrawlMap(url)]);
@@ -1148,9 +1149,12 @@ async function runScan(id: string, url: string, company: string, accountId: stri
         await stage("site", "done", { mode: "parallel", cap: "fast" });
 
         const brand = parseFirecrawlBranding(scrape, url);
+        parsedBrand = brand;
         await setBrandKitStage(id, "brand_scan", "done", { colors: brand.colors.length, fonts: brand.fonts.length });
         // Brand assets are optional extras. Keep this fast path crawler-only so
-        // Golden Report cannot be held open by image/social AI.
+        // Golden Report cannot be held open by image/social AI. The full kit
+        // (message, imagery, social posts, 30-day schedule) is generated right
+        // after the report is saved, so the report never waits on it.
         await sb.from("forensic_scans").update({
           brand_kit: { brand, generated_at: nowIso(), mode: "crawler_fast_path" },
           updated_at: nowIso(),
