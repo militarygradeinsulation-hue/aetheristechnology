@@ -688,8 +688,13 @@ ${findingsStr}
 Return JSON:
 {
   "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
-  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "summary": "<one specific line grounded in findings>" } ]
-}`;
+  "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "basis": "<the counts and values from THIS company's findings that produce the range>", "summary": "<one specific line grounded in findings>" } ]
+}
+
+COSTING RULES:
+- BANNED: stock bands like "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other round template range. Ranges must be derived numbers, not price-list numbers.
+- Every dollars_low / dollars_high must come from arithmetic on real inputs found in the scan (page counts, form counts, response lag, stalled deals, traffic, service lines, prices quoted on the site) and that arithmetic goes in "basis".
+- Only include a leak in top_leaks when you can show that math. 3 well-supported leaks beat 5 invented ones.`;
   return await aiJson(prompt, 3500, 60_000);
 }
 

@@ -79,6 +79,7 @@ export type GoldenReportLike = {
     annual_low?: number | string | null;
     annual_high?: number | string | null;
     cost_basis?: string | null;
+    excluded_from_total?: boolean | null;
   }> | null;
   [k: string]: unknown;
 };
@@ -191,6 +192,7 @@ export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
   for (const ch of report.chapters || []) {
     const slug = String(ch?.slug || "").toLowerCase();
     if (slug && priced.has(slug)) continue;
+    if ((ch as { excluded_from_total?: boolean })?.excluded_from_total) continue;
     // 1. structured per-chapter figures (synthesizer emits these now)
     const sLow = parseMoney(ch?.annual_low);
     const sHigh = parseMoney(ch?.annual_high);
