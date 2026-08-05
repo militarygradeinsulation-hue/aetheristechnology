@@ -950,11 +950,11 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       ledger.filter((c) => c.status === "verified").map((c) => c.category),
     );
 
-    const fixText = (text: string, where: string): string => {
+    const fixText = (text: string, where: string, scope: MoneyScope | null): string => {
       if (!text) return text;
       let out = text;
 
-      if (leakage) {
+      if (scope) {
         // The period phrase is consumed together with the range so a total can
         // never keep a stale "per month" label after being rewritten to the
         // canonical ANNUAL figure.
@@ -970,14 +970,15 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const hi = parseMoney(range.split(/-|–|—|to/).slice(1).join(" "));
           if (lo == null || hi == null) return m;
           const f = periodFactor(period || "");
-          const annual = `${leakage.rangeLabelAscii} per year`;
-          if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) {
+          const annual = `${scope.label} per year`;
+          if (Math.round(lo * f) === Math.round(scope.low) && Math.round(hi * f) === Math.round(scope.high)) {
             return m; // numbers already reconcile for the stated period
           }
-          repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual}`);
+          repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual} (scope: ${scope.kind})`);
           return annual;
         });
       }
+
 
       out = out.replace(COUNT_RE, (m, n: string, noun: string) => {
         const num = Number(n);
