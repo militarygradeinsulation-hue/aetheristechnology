@@ -17,7 +17,7 @@
 import {
   buildFinancialLedger,
   computeGoldenLeakage,
-  formatLeakageRange,
+  formatUsdRangeAscii,
   parseMoney,
   type GoldenLeakage,
   type GoldenReportLike,
@@ -977,7 +977,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       kind: "chapter",
       low: alloc.annual_low,
       high: alloc.annual_high,
-      label: formatLeakageRange(alloc.annual_low, alloc.annual_high),
+      label: formatUsdRangeAscii(alloc.annual_low, alloc.annual_high),
     };
   };
 
@@ -1233,7 +1233,7 @@ export function validateCompiledReport(args: {
     }
     const alloc = ledgerChapters.find((c) => c.chapter === sl);
     if (!alloc || !(alloc.annual_high > 0)) return null;
-    return { kind: "chapter", low: alloc.annual_low, high: alloc.annual_high, label: formatLeakageRange(alloc.annual_low, alloc.annual_high) };
+    return { kind: "chapter", low: alloc.annual_low, high: alloc.annual_high, label: formatUsdRangeAscii(alloc.annual_low, alloc.annual_high) };
   };
 
   // Each section carries the ONE scope whose canonical value it may state.
