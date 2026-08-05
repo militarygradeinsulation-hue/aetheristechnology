@@ -4,6 +4,7 @@
 // Tools: web_search (DuckDuckGo), scan_company (forensic-scan-all), consult_company
 
 import { INFLUENCE_BLUEPRINT_COMPACT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
+import { sanitizedGoldenReport } from "../_shared/golden-money-sanitizer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,7 +142,10 @@ async function scanCompany(url: string, company?: string, adminToken?: string) {
       });
       const row = await pollRes.json();
       if (row?.status === "completed" && row?.report) {
-        return { scan_id: scanId, report: row.report, summary: row.report?.executive_summary || null };
+        // Never hand the model a raw stored report: legacy rows carry stale
+        // pre-ledger amounts. Only the sanitized canonical model is exposed.
+        const safe = sanitizedGoldenReport(row.report as never) as Record<string, unknown> | null;
+        return { scan_id: scanId, report: safe, summary: (safe?.executive_summary as string) || null };
       }
       if (row?.status === "failed") return { error: "Scan failed", scan_id: scanId };
     }
@@ -180,6 +184,11 @@ Deno.serve(async (req) => {
   // Build message list with system prompt
   const messages: any[] = [
     { role: "system", content: SYSTEM_PROMPT },
+    {
+      role: "system",
+      content:
+        "GOLDEN REPORT MONEY LOCK. Any scan report you are shown has already been rendered from the canonical Financial Leak Ledger. You may quote a dollar figure ONLY if it appears verbatim in that sanitized report, and only in the same scope it appears in (a chapter figure stays in that chapter, the report total stays a report total). You must never add, sum, average, extrapolate, annualize, discount or otherwise derive a new dollar amount, and never invent one. If a number is not in the report, say it is not modeled. USD only.",
+    },
     ...incoming,
   ];
 

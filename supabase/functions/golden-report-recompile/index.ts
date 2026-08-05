@@ -33,6 +33,10 @@ Deno.serve(async (req) => {
     const dryRun = body?.dry_run !== false;
     const scanId = String(body?.scan_id || "").trim();
     const limit = Math.min(Number(body?.limit) || 1000, 5000);
+    // Backfilling 700+ stored reports exceeds one worker's compute budget, so
+    // the caller walks the archive in windows. Ordering is stable (created_at
+    // desc) so offsets are meaningful across calls.
+    const offset = Math.max(0, Number(body?.offset) || 0);
 
     const stats = {
       dry_run: dryRun,
@@ -56,7 +60,7 @@ Deno.serve(async (req) => {
         .select("id, target_url, company_name, report, raw_findings")
         .eq("status", "completed")
         .order("created_at", { ascending: false })
-        .range(from, from + pageSize - 1);
+        .range(offset + from, offset + from + pageSize - 1);
       if (scanId) q = sb
         .from("forensic_scans")
         .select("id, target_url, company_name, report, raw_findings")

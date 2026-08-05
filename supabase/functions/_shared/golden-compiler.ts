@@ -17,6 +17,7 @@
 import {
   buildFinancialLedger,
   computeGoldenLeakage,
+  formatUsdRangeAscii,
   parseMoney,
   type GoldenLeakage,
   type GoldenReportLike,
@@ -29,7 +30,19 @@ import {
   type GenericVerdict,
   type GoldenReportState,
 } from "./golden-generic-detector.ts";
-import { sanitizeGoldenReportFinancials } from "./golden-money-sanitizer.ts";
+import { sanitizeGoldenReportFinancials, isRollupChapter } from "./golden-money-sanitizer.ts";
+
+/**
+ * The ONLY canonical money a given prose field is allowed to render.
+ * Field-scoped and chapter-scoped by construction: "the value exists somewhere
+ * in the ledger" is never sufficient.
+ */
+export type MoneyScope = {
+  kind: "report" | "chapter";
+  low: number;
+  high: number;
+  label: string;
+};
 
 export const COMPILER_VERSION = 2;
 export const PRICING_MODEL_VERSION = 1;
@@ -944,17 +957,41 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   };
 
   // ── 5. deterministic prose repair ─────────────────────────────────────
+  //
+  // MONEY SCOPE. Prose repair may only ever substitute the canonical value that
+  // belongs to the field it is repairing. Report-level prose gets the headline
+  // range; a priceable chapter gets ITS OWN reconciled allocation and nothing
+  // else. A value that is canonical for another chapter — or for the report as
+  // a whole — is invalid inside a priceable chapter, which is precisely how
+  // chapters previously ended up restating the whole report's total.
+  const reportScope: MoneyScope | null = leakage
+    ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii }
+    : null;
+  const chapterScope = (slug: string): MoneyScope | null => {
+    const s = String(slug || "").toLowerCase();
+    // Roll-up chapters exist to restate the canonical headline.
+    if (isRollupChapter(s)) return reportScope;
+    const alloc = financialLedger.chapters.find((c) => c.chapter === s);
+    if (!alloc || !(alloc.annual_high > 0)) return null;
+    return {
+      kind: "chapter",
+      low: alloc.annual_low,
+      high: alloc.annual_high,
+      label: formatUsdRangeAscii(alloc.annual_low, alloc.annual_high),
+    };
+  };
+
   const repairs: string[] = [];
   if (repair) {
     const verifiedCategories = new Set(
       ledger.filter((c) => c.status === "verified").map((c) => c.category),
     );
 
-    const fixText = (text: string, where: string): string => {
+    const fixText = (text: string, where: string, scope: MoneyScope | null): string => {
       if (!text) return text;
       let out = text;
 
-      if (leakage) {
+      if (scope) {
         // The period phrase is consumed together with the range so a total can
         // never keep a stale "per month" label after being rewritten to the
         // canonical ANNUAL figure.
@@ -970,14 +1007,15 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const hi = parseMoney(range.split(/-|–|—|to/).slice(1).join(" "));
           if (lo == null || hi == null) return m;
           const f = periodFactor(period || "");
-          const annual = `${leakage.rangeLabelAscii} per year`;
-          if (Math.round(lo * f) === Math.round(leakage.low) && Math.round(hi * f) === Math.round(leakage.high)) {
+          const annual = `${scope.label} per year`;
+          if (Math.round(lo * f) === Math.round(scope.low) && Math.round(hi * f) === Math.round(scope.high)) {
             return m; // numbers already reconcile for the stated period
           }
-          repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual}`);
+          repairs.push(`${where}: replaced stale total ${range.trim()}${period ? period.trim() : ""} with canonical ${annual} (scope: ${scope.kind})`);
           return annual;
         });
       }
+
 
       out = out.replace(COUNT_RE, (m, n: string, noun: string) => {
         const num = Number(n);
@@ -1028,12 +1066,14 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       return out;
     };
 
-    report.executive_summary = fixText(String(report.executive_summary || ""), "executive_summary");
+    // Report-level prose is the only place the report-wide headline is legal.
+    report.executive_summary = fixText(String(report.executive_summary || ""), "executive_summary", reportScope);
 
     for (const ch of chapters) {
+      const scope = chapterScope(String(ch.slug ?? ""));
       for (const field of ["verdict", "what_we_found", "why_its_leaking", "what_its_costing"]) {
         if (typeof ch[field] === "string") {
-          ch[field] = fixText(ch[field] as string, `chapter:${String(ch.slug)}.${field}`);
+          ch[field] = fixText(ch[field] as string, `chapter:${String(ch.slug)}.${field}`, scope);
         }
       }
       const wtd = ch.what_to_do as Record<string, unknown> | undefined;
@@ -1042,7 +1082,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const list = wtd[horizon];
           if (!Array.isArray(list)) continue;
           const kept = list
-            .map((it) => (typeof it === "string" ? fixText(it, `chapter:${String(ch.slug)}.${horizon}`) : it))
+            .map((it) => (typeof it === "string" ? fixText(it, `chapter:${String(ch.slug)}.${horizon}`, scope) : it))
             .filter((it) => {
               if (typeof it !== "string") return true;
               if (isRecommendationApplicable(it, siteType)) return true;
@@ -1185,11 +1225,29 @@ export function validateCompiledReport(args: {
   // Validated at the SAME granularity the repair pass writes at (one field at a
   // time), so a claim is never judged against a wider context window than the
   // one used to decide whether to rewrite it.
-  const sections: Array<[string, string]> = [["executive_summary", String(report.executive_summary || "")]];
+  const ledgerChapters = (report.financial_ledger as { chapters?: Array<{ chapter: string; annual_low: number; annual_high: number }> } | undefined)?.chapters || [];
+  const scopeFor = (slug: string): MoneyScope | null => {
+    const sl = String(slug || "").toLowerCase();
+    if (isRollupChapter(sl)) {
+      return leakage ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii } : null;
+    }
+    const alloc = ledgerChapters.find((c) => c.chapter === sl);
+    if (!alloc || !(alloc.annual_high > 0)) return null;
+    return { kind: "chapter", low: alloc.annual_low, high: alloc.annual_high, label: formatUsdRangeAscii(alloc.annual_low, alloc.annual_high) };
+  };
+
+  // Each section carries the ONE scope whose canonical value it may state.
+  const reportSectionScope: MoneyScope | null = leakage
+    ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii }
+    : null;
+  const sections: Array<[string, string, MoneyScope | null]> = [
+    ["executive_summary", String(report.executive_summary || ""), reportSectionScope],
+  ];
   for (const ch of chapters) {
+    const sc = scopeFor(String(ch.slug ?? ""));
     for (const field of ["verdict", "what_we_found", "why_its_leaking", "what_its_costing"]) {
       const val = (ch as Record<string, unknown>)[field];
-      if (typeof val === "string" && val.trim()) sections.push([`chapter:${String(ch.slug ?? "?")}.${field}`, val]);
+      if (typeof val === "string" && val.trim()) sections.push([`chapter:${String(ch.slug ?? "?")}.${field}`, val, sc]);
     }
   }
 
@@ -1199,11 +1257,11 @@ export function validateCompiledReport(args: {
     ledger.filter((c) => c.status === "unverified").map((c) => c.category),
   );
 
-  for (const [where, text] of sections) {
+  for (const [where, text, scope] of sections) {
     if (!text) continue;
 
-    // totals
-    if (leakage) {
+    // totals — judged against THIS field's scope, never the whole ledger
+    if (scope) {
       let m: RegExpExecArray | null;
       const re = new RegExp(MONEY_RANGE_RE.source, "g");
       while ((m = re.exec(text))) {
@@ -1215,8 +1273,8 @@ export function validateCompiledReport(args: {
         const hi = parseMoney(parts.slice(1).join(" "));
         if (lo == null || hi == null) continue;
         const f = periodFactor(text.slice(m.index + m[0].length, m.index + m[0].length + 24));
-        if (Math.round(lo * f) !== Math.round(leakage.low) || Math.round(hi * f) !== Math.round(leakage.high)) {
-          v.push({ code: "total_mismatch", location: where, detail: `Stated total ${m[0].trim()} differs from canonical ${leakage.rangeLabelAscii}.`, excerpt: window.slice(0, 200) });
+        if (Math.round(lo * f) !== Math.round(scope.low) || Math.round(hi * f) !== Math.round(scope.high)) {
+          v.push({ code: "total_mismatch", location: where, detail: `Stated total ${m[0].trim()} differs from the canonical ${scope.kind} value ${scope.label}.`, excerpt: window.slice(0, 200) });
         }
       }
     }

@@ -251,16 +251,24 @@ export function ledgerAllowedValues(ledger: FinancialLedger): Set<number> {
   return out;
 }
 
-/** Canonical amounts allowed inside one chapter's prose. */
+/**
+ * Canonical amounts allowed inside ONE chapter's prose.
+ *
+ * SCOPED BY DESIGN: a priceable chapter may render only its own reconciled
+ * allocation and the leaks assigned to it. The report-wide total is NOT
+ * allowed there — a value that is canonical elsewhere in the ledger is still
+ * wrong in the wrong chapter, and permitting the overall total is exactly how
+ * chapters ended up claiming the whole report's number as their own.
+ *
+ * Only an explicit non-priceable roll-up chapter, whose job is to restate the
+ * canonical headline, may cite the overall total and the Top 10 figures.
+ */
 export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set<number> {
   const s = String(slug || "").toLowerCase();
   const out = new Set<number>();
   const add = (n?: number | null) => {
     if (typeof n === "number" && Number.isFinite(n) && n > 0) out.add(roundKey(n));
   };
-  // The report-wide total may always be cited; it is canonical everywhere.
-  add(ledger.overall?.annual_low);
-  add(ledger.overall?.annual_high);
   const alloc = ledger.chapters.find((c) => c.chapter === s);
   add(alloc?.annual_low);
   add(alloc?.annual_high);
@@ -271,6 +279,8 @@ export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set
   }
   // Roll-up chapters render the canonical global view, so they may cite it.
   if (NON_PRICEABLE_CHAPTER_SLUGS.has(s)) {
+    add(ledger.overall?.annual_low);
+    add(ledger.overall?.annual_high);
     add(ledger.top10.subtotal_low);
     add(ledger.top10.subtotal_high);
     add(ledger.top10.remainder_low);
@@ -281,6 +291,11 @@ export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set
     }
   }
   return out;
+}
+
+/** True when this chapter is allowed to restate the report-wide headline. */
+export function isRollupChapter(slug: string): boolean {
+  return NON_PRICEABLE_CHAPTER_SLUGS.has(String(slug || "").toLowerCase());
 }
 
 /** Structured money keys that must never survive un-reconciled on an object. */
@@ -410,8 +425,11 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
     if (before !== after) structuralRewrites.push(`chapter:${slug}: ${before} -> ${after} (ledger)`);
 
     const allowed = chapterAllowedValues(ledger, slug);
+    const rollup = isRollupChapter(slug);
     const chapterLabel = alloc ? formatUsdRange(alloc.annual_low, alloc.annual_high) : null;
-    const place = { chapter: chapterLabel, report: totalLabel, leak: chapterLabel };
+    // A priceable chapter never renders the report-wide total, so a stray
+    // {{REPORT_ANNUAL_TOTAL}} token there resolves to neutral wording.
+    const place = { chapter: chapterLabel, report: rollup ? totalLabel : null, leak: chapterLabel };
     for (const key of PROSE_KEYS_CHAPTER) {
       if (typeof ch[key] !== "string") continue;
       const r = sanitizeLeakProse(renderLeakPlaceholders(ch[key] as string, place), { allowed, where: `chapter:${slug}.${key}` });
@@ -501,4 +519,39 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
 /** Convenience for render paths that only need the cleaned report. */
 export function sanitizedGoldenReport<T extends LedgerReportLike | null | undefined>(report: T): T {
   return sanitizeGoldenReportFinancials(report).report;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHAT OUTPUT GUARD
+//
+// A chat model may QUOTE canonical ledger values. It must never compute, add,
+// extrapolate or invent money. Validating only the prompt is not enough: the
+// answer itself is client-visible output, so it goes through the same
+// deterministic gate as report prose.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const CHAT_MONEY_REDACTION =
+  "the canonical figure shown in the report";
+
+export type ChatGuardResult = { text: string; removed: string[] };
+
+/**
+ * Redacts any leak/exposure dollar amount in an assistant answer that is not a
+ * canonical value from THIS report's ledger. Source-evidence amounts the model
+ * is quoting back (average job value, list price, salary) survive, exactly as
+ * they do in report prose, because the same anchor rules apply.
+ */
+export function guardChatMoney(
+  answer: string,
+  report: LedgerReportLike | null | undefined,
+): ChatGuardResult {
+  const text = String(answer ?? "");
+  if (!text.trim()) return { text, removed: [] };
+  const ledger = resolveFinancialLedger(report as never);
+  const allowed = ledgerAllowedValues(ledger);
+  const r = sanitizeLeakProse(text, { allowed, where: "chat_answer" });
+  return {
+    text: r.text.split(NEUTRAL_LEAK_SENTENCE).join(CHAT_MONEY_REDACTION + "."),
+    removed: r.removed,
+  };
 }
