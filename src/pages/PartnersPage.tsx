@@ -38,7 +38,7 @@ const HOW: { n: string; title: string; body: string }[] = [
   {
     n: '03',
     title: 'You earn a 15% referral fee',
-    body: 'A 15% referral fee applies to engagements that originate from your tracked introductions.',
+    body: 'You earn a 15% referral fee when your tracked introduction becomes a paying client.',
   },
 ];
 
