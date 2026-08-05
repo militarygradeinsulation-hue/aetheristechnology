@@ -172,7 +172,10 @@ function leakageSection(leakage: GoldenLeakage | null, needsRegen = false): Sect
     indexed: false,
     blocks: [
       { kind: "callout", tone: "red", label: GOLDEN_LEAKAGE_LABEL, text: `${leakage.rangeLabelAscii} / year` },
+      { kind: "kv", label: "Money category", value: MONEY_CATEGORY_LABEL.annual_revenue_loss },
+      { kind: "paragraph", text: MONEY_TAXONOMY_LEGEND },
       { kind: "paragraph", text: leakage.caption },
+
       { kind: "kv", label: "Priced leaks counted", value: String(leakage.count) },
       { kind: "kv", label: "Source", value: leakage.source },
       { kind: "kv", label: "Currency", value: leakage.currency },
