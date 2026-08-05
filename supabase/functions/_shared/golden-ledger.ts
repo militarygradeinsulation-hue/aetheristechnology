@@ -628,3 +628,16 @@ export function needsFinancialRegeneration(report: LedgerReportLike | null | und
   const prose = chapters.map((c) => String(c?.what_its_costing || "")).join(" ");
   return /\$\s?\d/.test(prose);
 }
+
+/** Honest note for older reports whose narrative text predates the ledger. */
+export const LEGACY_PROSE_NOTE =
+  "Narrative figures in the summary and chapters below were written before the current financial model. The totals and per-chapter allocations shown are the canonical numbers.";
+
+/** True when the stored report was priced by an older financial model. */
+export function hasLegacyFinancialProse(report: LedgerReportLike | null | undefined): boolean {
+  const saved = report?.financial_ledger as { model_version?: number } | undefined;
+  if (saved && Number(saved.model_version) === FINANCIAL_MODEL_VERSION) return false;
+  const overall = (report as { overall_leakage?: { calculation_version?: number } } | null | undefined)?.overall_leakage;
+  if (!overall) return false;
+  return Number(overall.calculation_version) !== FINANCIAL_MODEL_VERSION;
+}

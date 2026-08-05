@@ -17,6 +17,8 @@ import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "
 import {
   resolveFinancialLedger,
   needsFinancialRegeneration,
+  hasLegacyFinancialProse,
+  LEGACY_PROSE_NOTE,
   REGENERATION_LABEL,
   chapterAllocation,
   crossReferencedIn,
@@ -636,6 +638,15 @@ export function buildGoldenReportModel(opts: {
 
   pushIf(sections as never, degradedSection(report) as never);
   sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
+  if (hasLegacyFinancialProse(report as never)) {
+    sections.push({
+      id: "legacy-financial-note",
+      title: "About the figures in this report",
+      newPage: false,
+      indexed: false,
+      blocks: [{ kind: "paragraph", text: LEGACY_PROSE_NOTE }],
+    });
+  }
   pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
