@@ -695,7 +695,18 @@ export function buildGoldenReportModel(opts: {
     });
   }
 
-  pushIf(sections as never, topLeaksSection(ledger) as never);
+  // Chapter numbers let cross-reference labels name an exact chapter instead of
+  // a slug, so "Already included in Chapter 4" is literally true in the export.
+  const chapterList = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
+  const chapterNoBySlug = new Map<string, number>();
+  chapterList.forEach((ch, i) => {
+    const s = String(ch?.slug || "").toLowerCase();
+    if (s) chapterNoBySlug.set(s, Number(ch?.no) || i + 1);
+  });
+  const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
+
+  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+
 
   const d = (report.deliverables || null) as GoldenDeliverables | null;
   if (d) {
