@@ -40,7 +40,7 @@ describe("parseMoney", () => {
 });
 
 describe("resolution order", () => {
-  it("1. prefers the canonical overall_leakage object", () => {
+  it("1. recomputes from the ledger even when a persisted total disagrees", () => {
     const report: GoldenReportLike = {
       overall_leakage: {
         annual_low: 415000,
@@ -52,12 +52,14 @@ describe("resolution order", () => {
       },
       top_leaks: [{ dollars_low: 1, dollars_high: 2 }],
     };
+    // overall_leakage is a projection of the ledger, never an independent
+    // number: a stale/disagreeing persisted total must lose to the evidence.
     const r = computeGoldenLeakage(report)!;
-    expect(r.low).toBe(415000);
-    expect(r.high).toBe(830000);
-    expect(r.count).toBe(5);
+    expect(r.low).toBe(1);
+    expect(r.high).toBe(2);
+    expect(r.count).toBe(1);
     expect(r.currency).toBe("USD");
-    expect(r.rangeLabel).toBe("$415,000 – $830,000");
+    expect(r.source).toBe("financial_ledger");
   });
 
   it("2a. numeric top_leaks", () => {
@@ -67,7 +69,7 @@ describe("resolution order", () => {
         { name: "b", dollars_low: 3100, dollars_high: 6600 },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([4100, 8900, 2, "top_leaks+chapters"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([4100, 8900, 2, "financial_ledger"]);
   });
 
   it("2b. formatted string top_leaks", () => {
@@ -101,7 +103,7 @@ describe("resolution order", () => {
         { slug: "quarterly", what_its_costing: "$48,000 per quarter of delayed pipeline." },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([6500, 10200, 2, "top_leaks+chapters"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([6500, 10200, 2, "financial_ledger"]);
   });
 
   it("3b. never double counts a chapter already priced in top_leaks", () => {
@@ -191,7 +193,7 @@ describe("UI and PDF consumers get identical numbers", () => {
   // UI banner reads rangeLabel; PDF cover reads rangeLabelAscii. Both come from
   // one resolver call shape, so the underlying values must match exactly.
   const fixtures: GoldenReportLike[] = [
-    { overall_leakage: { annual_low: 4100, annual_high: 8900, priced_leak_count: 5, source: "top_leaks", currency: "USD" } },
+    { top_leaks: [{ name: "a", dollars_low: 4100, dollars_high: 8900 }] },
     { top_leaks: [{ name: "a", dollars_low: "150,000", dollars_high: "300,000" }] },
     { chapters: [{ slug: "cta", what_its_costing: "$4,500 - $8,200 annually" }] },
   ];
@@ -221,7 +223,7 @@ describe("chapter prose guards", () => {
         { slug: "q", what_its_costing: "$48,000 per quarter in delayed pipeline." },
       ],
     })!;
-    expect([r.low, r.high, r.count, r.source]).toEqual([180000, 420000, 1, "top_leaks+chapters"]);
+    expect([r.low, r.high, r.count, r.source]).toEqual([180000, 420000, 1, "financial_ledger"]);
   });
 
   it("rejects placeholder 999,999,999 leak values as no evidence", () => {
@@ -241,7 +243,7 @@ describe("chapter prose guards", () => {
 describe("production data shapes (company-agnostic)", () => {
   it("canonical overall_leakage shape resolves to its stored range", () => {
     const r = computeGoldenLeakage({
-      overall_leakage: { annual_low: 4100, annual_high: 8900, currency: "USD", source: "top_leaks", priced_leak_count: 5, calculation_version: LEAKAGE_CALCULATION_VERSION },
+      top_leaks: [{ name: "a", dollars_low: 4100, dollars_high: 8900 }],
     })!;
     expect(r.displayValue).toBe("$4,100 – $8,900 / year");
   });
@@ -284,7 +286,7 @@ describe("production data shapes (company-agnostic)", () => {
     // Same contract, same label, same format — different, correct numbers.
     for (const r of [a, b]) {
       expect(r.currency).toBe("USD");
-      expect(r.source).toBe("top_leaks+chapters");
+      expect(r.source).toBe("financial_ledger");
       expect(r.count).toBe(2);
       expect(r.calculation_version).toBe(LEAKAGE_CALCULATION_VERSION);
       expect(r.displayValue).toMatch(/^\$[\d,]+ – \$[\d,]+ \/ year$/);

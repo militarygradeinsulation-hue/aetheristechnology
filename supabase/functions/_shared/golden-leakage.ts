@@ -1,53 +1,83 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// CANONICAL Golden Report leakage resolver — the ONLY total-calculation path.
+// Golden Report leakage resolver — a thin, display-oriented façade over the
+// ONE canonical financial model in ./golden-ledger.ts.
 //
-// This single file is consumed by BOTH runtimes:
+// This file performs NO arithmetic of its own. It formats what the Financial
+// Leak Ledger computed, so the website, portal, pre-download summary, main PDF,
+// portal PDF, report history, reopened reports and email previews all print the
+// same integers.
+//
+// Consumed by BOTH runtimes:
 //   • Deno edge functions  → import "../_shared/golden-leakage.ts"
 //   • Browser / Vite app   → src/lib/goldenLeakage.ts re-exports this file
-//
-// Surfaces that must use it (never inline math):
-//   - main website report view      (ForensicScanAllPanel -> GoldenLeakageBanner)
-//   - portal / history report view  (same shared panel)
-//   - pre-download summary          (same shared banner, above the PDF button)
-//   - main website PDF              (generateForensicGoldenPdf)
-//   - portal PDF                    (same generator)
-//   - scan completion + backfill    (forensic-scan-all, golden-* backfills)
-//
-// Resolution order (first valid wins, never double-counted):
-//   1. report.overall_leakage  — canonical object persisted at scan completion
-//   2. report.top_leaks        — priced leaks (numbers OR money strings)
-//   3. report.chapters         — annual dollar ranges parsed out of chapter
-//                                costing prose, skipping chapters already priced
-// Returns null only when a scan carries no real monetary evidence. Callers must
-// show a muted "could not be calculated" note rather than $0 / NaN / a fake total.
-//
-// Universal by construction: it reads ONLY the report data shape. There is no
-// company, url, account, rep or scan-id branch anywhere in this file.
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Bump when the math or field resolution changes. Persisted with the report. */
-export const LEAKAGE_CALCULATION_VERSION = 4;
+import {
+  buildFinancialLedger,
+  resolveFinancialLedger,
+  FINANCIAL_MODEL_VERSION,
+  formatUsd,
+  formatUsdRange,
+  formatUsdRangeAscii,
+  parseMoney as parseMoneyImpl,
+  MAX_SANE_LEAK as MAX_SANE_LEAK_IMPL,
+  MAX_SANE_CHAPTER_LEAK as MAX_SANE_CHAPTER_LEAK_IMPL,
+  LEAK_LOW_FIELDS as LOW_FIELDS,
+  LEAK_HIGH_FIELDS as HIGH_FIELDS,
+  LEAK_SINGLE_FIELDS as SINGLE_FIELDS,
+  isPriceableChapter,
+  rangeFromProse,
+  chapterAllocation,
+  crossReferencedIn,
+  fingerprintOf,
+  resolveChapterSlug,
+  NON_PRICEABLE_CHAPTER_SLUGS,
+  MAX_PLAUSIBLE_REPORT_TOTAL,
+  type FinancialLedger,
+  type LedgerEntry,
+  type ChapterAllocation,
+  type TopLeakView,
+  type FinancialReconciliation,
+} from "./golden-ledger.ts";
 
-/** Values above this are placeholders/data artifacts, not evidence for one leak. */
-export const MAX_SANE_LEAK = 50_000_000;
-/** Chapter prose mixes annual, quarterly and speculative TAM figures — cap tighter. */
-export const MAX_SANE_CHAPTER_LEAK = 10_000_000;
+export {
+  buildFinancialLedger,
+  resolveFinancialLedger,
+  chapterAllocation,
+  crossReferencedIn,
+  fingerprintOf,
+  resolveChapterSlug,
+  isPriceableChapter,
+  rangeFromProse,
+  formatUsd,
+  formatUsdRange,
+  formatUsdRangeAscii,
+  FINANCIAL_MODEL_VERSION,
+  NON_PRICEABLE_CHAPTER_SLUGS,
+  MAX_PLAUSIBLE_REPORT_TOTAL,
+};
+export type {
+  FinancialLedger,
+  LedgerEntry,
+  ChapterAllocation,
+  TopLeakView,
+  FinancialReconciliation,
+};
 
-export const LEAK_LOW_FIELDS = ["dollars_low", "annual_low", "low", "cost_low"] as const;
-export const LEAK_HIGH_FIELDS = ["dollars_high", "annual_high", "high", "cost_high"] as const;
-export const LEAK_SINGLE_FIELDS = ["dollars", "annual_cost", "estimated_annual_loss"] as const;
+/** Kept in lock-step with the financial model version. */
+export const LEAKAGE_CALCULATION_VERSION = FINANCIAL_MODEL_VERSION;
 
-const ANNUAL_WORDS = /\b(annual|annually|per year|a year|\/\s?yr|yearly)\b/i;
-const RANGE_RE =
-  /\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)\s*(?:-|–|—|to)\s*\$?\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/;
-const SINGLE_RE = /\$\s?([\d,]+(?:\.\d+)?\s*[kKmM]?)/;
+export const MAX_SANE_LEAK = MAX_SANE_LEAK_IMPL;
+export const MAX_SANE_CHAPTER_LEAK = MAX_SANE_CHAPTER_LEAK_IMPL;
+export const LEAK_LOW_FIELDS = LOW_FIELDS;
+export const LEAK_HIGH_FIELDS = HIGH_FIELDS;
+export const LEAK_SINGLE_FIELDS = SINGLE_FIELDS;
 
 export type PricedLeak = {
   name?: string | null;
   chapter_slug?: string | null;
   dollars_low?: number | string | null;
   dollars_high?: number | string | null;
-  // legacy / alternate field names seen in older scan payloads
   annual_low?: number | string | null;
   annual_high?: number | string | null;
   low?: number | string | null;
@@ -74,13 +104,14 @@ export type GoldenReportLike = {
   top_leaks?: PricedLeak[] | null;
   chapters?: Array<{
     slug?: string;
+    title?: string;
     what_its_costing?: string | null;
-    /** Structured per-chapter annual cost emitted by the synthesizer. */
     annual_low?: number | string | null;
     annual_high?: number | string | null;
     cost_basis?: string | null;
     excluded_from_total?: boolean | null;
   }> | null;
+  financial_ledger?: FinancialLedger | null;
   [k: string]: unknown;
 };
 
@@ -91,7 +122,6 @@ export type GoldenLeakage = {
   low: number;
   high: number;
   count: number;
-  /** overall_leakage | top_leaks | chapters */
   source: string;
   currency: string;
   calculation_version: number;
@@ -99,7 +129,6 @@ export type GoldenLeakage = {
   rangeLabel: string;
   /** Formatted "$1,000 - $2,000" (ASCII) for PDF fonts. */
   rangeLabelAscii: string;
-  /** Exactly what the UI prints next to the label. */
   displayValue: string;
   caption: string;
 };
@@ -107,139 +136,15 @@ export type GoldenLeakage = {
 export const GOLDEN_LEAKAGE_LABEL = "TOTAL ESTIMATED ANNUAL REVENUE LOSS";
 export const GOLDEN_LEAKAGE_EMPTY_MESSAGE =
   "Annual revenue loss could not be calculated from this scan.";
+export const GOLDEN_LEAKAGE_LEGACY_MESSAGE =
+  "Financial model requires report regeneration.";
 
-/**
- * Accepts a real number, or a money string the model sometimes emits:
- * "25,000", "$25,000", " $-500,000 ", "USD 12k", "1.2M", "$4,500/yr".
- * Rejects zero, NaN, Infinity, and absurd magnitudes.
- */
-export function parseMoney(v: unknown): number | null {
-  let n: number | null = null;
-  if (typeof v === "number") {
-    n = Number.isFinite(v) && v !== 0 ? Math.abs(v) : null;
-  } else if (typeof v === "string") {
-    const s = v.trim();
-    if (!s) return null;
-    const m = s.match(/-?\d[\d,\s]*(?:\.\d+)?\s*(k|m)?/i);
-    if (!m) return null;
-    const raw = Number(m[0].replace(/[,\s]/g, "").replace(/[km]$/i, ""));
-    if (!Number.isFinite(raw) || raw === 0) return null;
-    const unit = (m[1] || "").toLowerCase();
-    n = Math.abs(raw) * (unit === "k" ? 1_000 : unit === "m" ? 1_000_000 : 1);
-  }
-  if (n == null || !Number.isFinite(n) || n <= 0 || n > MAX_SANE_LEAK) return null;
-  return n;
-}
-
+export const parseMoney = parseMoneyImpl;
 /** Backend alias kept for existing edge-function imports. */
-export const parseMoneyValue = parseMoney;
-
-function pick(leak: PricedLeak, fields: readonly string[]): number | null {
-  for (const f of fields) {
-    const v = parseMoney((leak as Record<string, unknown>)[f]);
-    if (v != null) return v;
-  }
-  return null;
-}
-
-function leakKey(leak: PricedLeak): string {
-  return String(leak?.name || leak?.chapter_slug || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function sumLeaks(leaks: PricedLeak[] | null | undefined) {
-  if (!Array.isArray(leaks) || !leaks.length) return null;
-  let low = 0;
-  let high = 0;
-  let count = 0;
-  const seen = new Set<string>();
-  for (const leak of leaks) {
-    if (!leak || typeof leak !== "object") continue;
-    const key = leakKey(leak);
-    if (key && seen.has(key)) continue; // dedupe before summing
-    const l = pick(leak, LEAK_LOW_FIELDS) ?? pick(leak, LEAK_SINGLE_FIELDS);
-    const h = pick(leak, LEAK_HIGH_FIELDS) ?? pick(leak, LEAK_SINGLE_FIELDS);
-    if (l == null && h == null) continue;
-    const a = l ?? (h as number);
-    const b = h ?? (l as number);
-    // reversed ranges are normalized rather than rejected outright
-    low += Math.min(a, b);
-    high += Math.max(a, b);
-    count += 1;
-    if (key) seen.add(key);
-  }
-  if (!count || !Number.isFinite(high) || high <= 0) return null;
-  return { low: low > 0 ? low : high, high, count };
-}
-
-/**
- * Pull "$4,500 - $8,200" / "$4,500 to $8,200" / "$4,500" out of chapter prose.
- * Only the first figure per chapter is used, and only when the chapter states an
- * annual amount, so quarterly and speculative market-size numbers in the same
- * paragraph are never summed into the yearly total.
- */
-export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
-  const priced = new Set(
-    (report.top_leaks || []).map((l) => String(l?.chapter_slug || "").toLowerCase()).filter(Boolean),
-  );
-  const capOk = (v: unknown) => {
-    const n = parseMoney(v);
-    return n != null && n <= MAX_SANE_CHAPTER_LEAK;
-  };
-  const out: PricedLeak[] = [];
-  for (const ch of report.chapters || []) {
-    const slug = String(ch?.slug || "").toLowerCase();
-    if (slug && priced.has(slug)) continue;
-    if ((ch as { excluded_from_total?: boolean })?.excluded_from_total) continue;
-    // 1. structured per-chapter figures (synthesizer emits these now)
-    const sLow = parseMoney(ch?.annual_low);
-    const sHigh = parseMoney(ch?.annual_high);
-    if ((sLow != null && sLow <= MAX_SANE_CHAPTER_LEAK) || (sHigh != null && sHigh <= MAX_SANE_CHAPTER_LEAK)) {
-      const a = sLow ?? (sHigh as number);
-      const b = sHigh ?? (sLow as number);
-      if (a <= MAX_SANE_CHAPTER_LEAK && b <= MAX_SANE_CHAPTER_LEAK) {
-        out.push({ chapter_slug: slug, dollars_low: Math.min(a, b), dollars_high: Math.max(a, b) });
-        continue;
-      }
-    }
-    // 2. legacy: parse the costing prose
-    const text = String(ch?.what_its_costing || "");
-    if (!text || !ANNUAL_WORDS.test(text)) continue;
-    const range = text.match(RANGE_RE);
-    if (range && capOk(range[1]) && capOk(range[2])) {
-      out.push({ chapter_slug: slug, dollars_low: range[1], dollars_high: range[2] });
-      continue;
-    }
-    const single = text.match(SINGLE_RE);
-    if (single && capOk(single[1])) {
-      out.push({ chapter_slug: slug, dollars_low: single[1], dollars_high: single[1] });
-    }
-  }
-  return out;
-}
-
-/**
- * Every uniquely priced leak in the report: the executive top leaks PLUS every
- * chapter that carries its own annual figure and is not already represented in
- * top_leaks. This union is what the red total box sums.
- */
-export function allPricedLeaks(report: GoldenReportLike): PricedLeak[] {
-  const tops = Array.isArray(report.top_leaks) ? report.top_leaks : [];
-  return [...tops, ...leaksFromChapters(report)];
-}
-
-/** True when the report carries evidence this resolver considers valid. */
-export function hasPricedEvidence(report: GoldenReportLike | null | undefined): boolean {
-  if (!report) return false;
-  return !!sumLeaks(allPricedLeaks(report));
-}
-
-const fmt = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+export const parseMoneyValue = parseMoneyImpl;
 
 export function formatLeakageRange(low: number, high: number): string {
-  return `${fmt(low)} – ${fmt(high)}`;
+  return formatUsdRange(low, high);
 }
 
 function build(
@@ -250,7 +155,7 @@ function build(
   currency = "USD",
   version = LEAKAGE_CALCULATION_VERSION,
 ): GoldenLeakage {
-  const rangeLabel = `${fmt(low)} – ${fmt(high)}`;
+  const rangeLabel = formatUsdRange(low, high);
   return {
     low,
     high,
@@ -259,14 +164,44 @@ function build(
     currency,
     calculation_version: version,
     rangeLabel,
-    rangeLabelAscii: `${fmt(low)} - ${fmt(high)}`,
+    rangeLabelAscii: formatUsdRangeAscii(low, high),
     displayValue: `${rangeLabel} / year`,
     caption: `Sum of the ${count} uniquely priced leak${count === 1 ? "" : "s"} documented in this report. Every dollar is a system your business is bleeding right now. Keep reading — each chapter shows exactly where and how to stop it.`,
   };
 }
 
 /**
- * The ONLY allowed leakage calculation path. Accepts a full report object
+ * Every uniquely priced (active) ledger entry, exposed in the legacy
+ * PricedLeak shape for callers that still iterate leaks.
+ */
+export function allPricedLeaks(report: GoldenReportLike): PricedLeak[] {
+  return resolveFinancialLedger(report as never).active.map((e) => ({
+    name: e.title,
+    chapter_slug: e.primary_chapter,
+    dollars_low: e.annual_low,
+    dollars_high: e.annual_high,
+  }));
+}
+
+/** Legacy helper: chapters that carry their own priced allocation. */
+export function leaksFromChapters(report: GoldenReportLike): PricedLeak[] {
+  return buildFinancialLedger(report as never)
+    .entries.filter((e) => e.origin === "chapter" && e.status === "active")
+    .map((e) => ({
+      chapter_slug: e.primary_chapter,
+      dollars_low: e.annual_low,
+      dollars_high: e.annual_high,
+    }));
+}
+
+/** True when the report carries evidence the canonical model considers valid. */
+export function hasPricedEvidence(report: GoldenReportLike | null | undefined): boolean {
+  if (!report) return false;
+  return !!buildFinancialLedger(report as never).overall;
+}
+
+/**
+ * The ONLY allowed leakage display path. Accepts a full report object
  * (preferred) or a bare top_leaks array (legacy callers).
  */
 export function computeGoldenLeakage(
@@ -275,45 +210,26 @@ export function computeGoldenLeakage(
   if (!input) return null;
 
   if (Array.isArray(input)) {
-    const s = sumLeaks(input);
-    return s ? build(s.low, s.high, s.count, "top_leaks") : null;
+    const ledger = buildFinancialLedger({ top_leaks: input as never });
+    return ledger.overall
+      ? build(ledger.overall.annual_low, ledger.overall.annual_high, ledger.active.length, "ledger")
+      : null;
   }
 
   const report = input;
-
-  // 1. canonical persisted total — only trusted when it was written by the
-  //    current math. Older versions summed top_leaks only, so they are recomputed.
-  const ol = report.overall_leakage;
-  if (ol && typeof ol === "object" && Number(ol.calculation_version) >= LEAKAGE_CALCULATION_VERSION) {
-    const lo = parseMoney(ol.annual_low);
-    const hi = parseMoney(ol.annual_high);
-    if (lo != null || hi != null) {
-      const a = lo ?? (hi as number);
-      const b = hi ?? (lo as number);
-      const low = Math.min(a, b);
-      const high = Math.max(a, b);
-      if (high > 0) {
-        const count =
-          Number(ol.priced_leak_count) > 0
-            ? Number(ol.priced_leak_count)
-            : report.top_leaks?.length || 1;
-        return build(
-          low > 0 ? low : high,
-          high,
-          count,
-          ol.source || "overall_leakage",
-          ol.currency || "USD",
-          Number(ol.calculation_version),
-        );
-      }
-    }
+  const ledger = resolveFinancialLedger(report as never);
+  if (ledger.overall) {
+    return build(
+      ledger.overall.annual_low,
+      ledger.overall.annual_high,
+      ledger.active.length,
+      "financial_ledger",
+      ledger.currency,
+      ledger.model_version,
+    );
   }
 
-  // 2. everything priced in the report: top leaks + per-chapter annual figures
-  const combined = sumLeaks(allPricedLeaks(report));
-  if (combined) return build(combined.low, combined.high, combined.count, "top_leaks+chapters");
-
-  // 3. legacy persisted total from an older calculation version
+  // Legacy reports that stored only a total and no reconstructable evidence.
   const legacy = report.overall_leakage;
   if (legacy && typeof legacy === "object") {
     const lo = parseMoney(legacy.annual_low);
@@ -321,14 +237,14 @@ export function computeGoldenLeakage(
     if (lo != null || hi != null) {
       const a = lo ?? (hi as number);
       const b = hi ?? (lo as number);
-      const high = Math.max(a, b);
       const low = Math.min(a, b);
+      const high = Math.max(a, b);
       if (high > 0) {
         return build(
           low > 0 ? low : high,
           high,
           Number(legacy.priced_leak_count) > 0 ? Number(legacy.priced_leak_count) : 1,
-          legacy.source || "overall_leakage",
+          "legacy_persisted_total",
           legacy.currency || "USD",
           Number(legacy.calculation_version) > 0 ? Number(legacy.calculation_version) : 1,
         );
@@ -348,47 +264,48 @@ export type CanonicalOverallLeakage = {
   calculation_version: number;
 };
 
-/** Returns the canonical persistable object, or null when there is no evidence. */
+/**
+ * The persistable summary of the ledger. `overall_leakage` is NEVER
+ * independently generated — it is a projection of the ledger.
+ */
 export function computeOverallLeakage(report: GoldenReportLike): CanonicalOverallLeakage | null {
-  const combined = sumLeaks(allPricedLeaks(report));
-  const chosen = combined ? { ...combined, source: "top_leaks+chapters" } : null;
-  if (!chosen) return null;
+  const ledger = buildFinancialLedger(report as never);
+  if (!ledger.overall) return null;
   return {
-    annual_low: Math.round(chosen.low),
-    annual_high: Math.round(chosen.high),
+    annual_low: ledger.overall.annual_low,
+    annual_high: ledger.overall.annual_high,
     currency: "USD",
-    source: chosen.source,
-    priced_leak_count: chosen.count,
+    source: "financial_ledger",
+    priced_leak_count: ledger.active.length,
     calculation_version: LEAKAGE_CALCULATION_VERSION,
   };
 }
 
-/**
- * Consistency guard: the banner total must sum everything the reader can see.
- * Returns an error string when the persisted total is materially smaller than
- * the sum of the uniquely priced leaks + chapter figures in the same report.
- */
+/** Consistency guard: the persisted total must equal the ledger exactly. */
 export function chapterSumMismatch(report: GoldenReportLike): string | null {
-  const combined = sumLeaks(allPricedLeaks(report));
+  const ledger = buildFinancialLedger(report as never);
   const ol = report.overall_leakage;
-  if (!combined || !ol) return null;
-  const shown = parseMoney(ol.annual_high);
-  if (shown == null) return null;
-  // 5% tolerance for rounding / dedupe differences.
-  if (shown < combined.high * 0.95) {
-    return `overall_leakage high ${Math.round(shown)} is below the combined priced evidence ${Math.round(combined.high)}`;
+  if (!ledger.overall || !ol) return null;
+  const lo = parseMoney(ol.annual_low);
+  const hi = parseMoney(ol.annual_high);
+  if (hi == null) return null;
+  if (Math.round(hi) !== ledger.overall.annual_high || (lo != null && Math.round(lo) !== ledger.overall.annual_low)) {
+    return `overall_leakage ${lo ?? "?"}/${hi} does not equal the financial ledger ${ledger.overall.annual_low}/${ledger.overall.annual_high}`;
   }
   return null;
 }
 
 /**
- * Completion invariant: a report carrying valid priced evidence MUST resolve to
- * a canonical overall_leakage. Returns an error string when violated so
- * completion/backfill can fail loudly instead of silently hiding the red box.
+ * Completion invariant. A report may not publish contradictory numbers:
+ * evidence must resolve, the persisted total must equal the ledger, and every
+ * ledger invariant (chapter allocation equality, Top 10 rules, dedupe) holds.
  */
 export function leakageInvariantError(report: GoldenReportLike): string | null {
-  if (hasPricedEvidence(report) && !report.overall_leakage) {
+  const ledger = buildFinancialLedger(report as never);
+  if (ledger.overall && !report.overall_leakage) {
     return "priced evidence present but overall_leakage could not be resolved";
   }
+  const hard = ledger.reconciliation.violations.filter((v) => v.code !== "scale_warning");
+  if (hard.length) return hard.map((v) => `${v.code}: ${v.detail}`).join("; ");
   return chapterSumMismatch(report);
 }
