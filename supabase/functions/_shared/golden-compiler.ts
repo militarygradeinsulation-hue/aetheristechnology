@@ -944,6 +944,30 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
   };
 
   // ── 5. deterministic prose repair ─────────────────────────────────────
+  //
+  // MONEY SCOPE. Prose repair may only ever substitute the canonical value that
+  // belongs to the field it is repairing. Report-level prose gets the headline
+  // range; a priceable chapter gets ITS OWN reconciled allocation and nothing
+  // else. A value that is canonical for another chapter — or for the report as
+  // a whole — is invalid inside a priceable chapter, which is precisely how
+  // chapters previously ended up restating the whole report's total.
+  const reportScope: MoneyScope | null = leakage
+    ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii }
+    : null;
+  const chapterScope = (slug: string): MoneyScope | null => {
+    const s = String(slug || "").toLowerCase();
+    // Roll-up chapters exist to restate the canonical headline.
+    if (isRollupChapter(s)) return reportScope;
+    const alloc = financialLedger.chapters.find((c) => c.chapter === s);
+    if (!alloc || !(alloc.annual_high > 0)) return null;
+    return {
+      kind: "chapter",
+      low: alloc.annual_low,
+      high: alloc.annual_high,
+      label: formatLeakageRange(alloc.annual_low, alloc.annual_high),
+    };
+  };
+
   const repairs: string[] = [];
   if (repair) {
     const verifiedCategories = new Set(
