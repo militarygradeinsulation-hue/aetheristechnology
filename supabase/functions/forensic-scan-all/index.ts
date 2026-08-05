@@ -679,7 +679,7 @@ COSTING RULES — this is the part that has been failing, follow it exactly:
 - Every dollar figure must be DERIVED, in the chapter, from counts and values that appear in THIS company's findings: number of pages, number of forms, number of stalled deals, response lag in hours, traffic figures, service lines, locations, headcount, quoted prices found on the site, average job value stated on the site.
 - Write the arithmetic in "what_its_costing" in plain sentences, and repeat the same inputs in "cost_basis". The low and high must come from that math, not from intuition, and must be odd/uneven numbers reflecting the calculation.
 - If a needed input is missing from the findings, do NOT skip the number. Make ONE clearly-labelled conservative assumption ("assuming a $6,400 average job value, which the site does not state"), anchor it to any count that IS in the findings, and derive the range from that. Say in one clause which input was assumed.
-- PROSE MONEY LOCK: the ONLY place you write a leak total is the structured "annual_low"/"annual_high" integers. In "what_its_costing", "verdict", "what_we_found", "why_its_leaking", "cost_basis" and "what_to_do", refer to the total with the token {{CHAPTER_ANNUAL_RANGE}} (or {{REPORT_ANNUAL_TOTAL}} for the whole report). The server renders those tokens from the canonical ledger. Dollar amounts for INPUTS you observed or assumed (average job value, quoted price, salary, contract value) are allowed and encouraged.
+- PROSE MONEY LOCK: the ONLY place you write a leak total is the structured "annual_low"/"annual_high" integers. In "what_its_costing", "verdict", "what_we_found", "why_its_leaking", "cost_basis" and "what_to_do", refer to THIS CHAPTER'S total with the token {{CHAPTER_ANNUAL_RANGE}} only. You are never given, and must never state, the report-wide total inside a chapter. The server renders those tokens from the canonical ledger. Dollar amounts for INPUTS you observed or assumed (average job value, quoted price, salary, contract value) are allowed and encouraged.
 - Chapters 13 and 14 (plan, appendix) always use null for annual_low, annual_high and cost_basis.
 - Never repeat another chapter's exact range. Each chapter's figures must be its own arithmetic on its own topic.
 
@@ -697,7 +697,7 @@ ${findingsStr}
 
 Return JSON:
 {
-  "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler. Never type an annual leak total: use the token {{REPORT_ANNUAL_TOTAL}}.>",
+  "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler. Never type an annual leak total: use the token {{REPORT_ANNUAL_TOTAL}}. This is the ONLY field where the report-wide token is legal.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "basis": "<the counts and values from THIS company's findings that produce the range>", "summary": "<one specific line grounded in findings>" } ]
 }
 
