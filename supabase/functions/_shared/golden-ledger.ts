@@ -612,3 +612,19 @@ export function crossReferencedIn(ledger: FinancialLedger, slug: string | null |
   const s = String(slug || "").toLowerCase();
   return ledger.entries.filter((e) => e.status === "included_in_chapter" && e.primary_chapter === s);
 }
+
+/** Shown when a stored report carries money-shaped prose the ledger cannot verify. */
+export const REGENERATION_LABEL = "Financial model requires report regeneration.";
+
+/**
+ * Legacy safety: a report that displays dollar prose but produces no ledger
+ * entries cannot be reconciled from stored evidence. We never manufacture the
+ * missing data — the reader is told the report must be regenerated.
+ */
+export function needsFinancialRegeneration(report: LedgerReportLike | null | undefined): boolean {
+  const ledger = resolveFinancialLedger(report);
+  if (ledger.overall) return false;
+  const chapters = Array.isArray(report?.chapters) ? (report!.chapters as ChapterLike[]) : [];
+  const prose = chapters.map((c) => String(c?.what_its_costing || "")).join(" ");
+  return /\$\s?\d/.test(prose);
+}

@@ -16,6 +16,8 @@
 import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "./golden-leakage.ts";
 import {
   resolveFinancialLedger,
+  needsFinancialRegeneration,
+  REGENERATION_LABEL,
   chapterAllocation,
   crossReferencedIn,
   formatUsdRangeAscii,
@@ -138,7 +140,7 @@ function block(label: string, body?: unknown): Block[] {
 
 // ───────────────────────── sections ─────────────────────────
 
-function leakageSection(leakage: GoldenLeakage | null): Section {
+function leakageSection(leakage: GoldenLeakage | null, needsRegen = false): Section {
   if (!leakage) {
     // Never fabricate a fallback range. The reader is told plainly that the
     // scan produced no priced evidence.
@@ -148,7 +150,12 @@ function leakageSection(leakage: GoldenLeakage | null): Section {
       newPage: false,
       indexed: false,
       blocks: [
-        { kind: "callout", tone: "amber", label: GOLDEN_LEAKAGE_LABEL, text: "Not calculated" },
+        {
+          kind: "callout",
+          tone: "amber",
+          label: GOLDEN_LEAKAGE_LABEL,
+          text: needsRegen ? REGENERATION_LABEL : "Not calculated",
+        },
         {
           kind: "paragraph",
           text:
@@ -628,7 +635,7 @@ export function buildGoldenReportModel(opts: {
   });
 
   pushIf(sections as never, degradedSection(report) as never);
-  sections.push(leakageSection(leakage));
+  sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
   pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
