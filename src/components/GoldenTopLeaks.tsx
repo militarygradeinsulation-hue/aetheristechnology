@@ -1,7 +1,7 @@
 import {
   resolveFinancialLedger,
   formatUsdRange,
-  type GoldenReportLike,
+  type LedgerReportLike,
 } from "@/lib/goldenLedger";
 
 /**
@@ -12,7 +12,7 @@ import {
  * own, which is what keeps the cover total, the chapters and this list from
  * ever disagreeing again.
  */
-export function GoldenTopLeaks({ report }: { report: GoldenReportLike | null | undefined }) {
+export function GoldenTopLeaks({ report }: { report: LedgerReportLike | null | undefined }) {
   const ledger = resolveFinancialLedger(report ?? null);
   if (!ledger.overall || !ledger.top10.entries.length) return null;
 
