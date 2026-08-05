@@ -527,28 +527,32 @@ function chapterSection(ch: Record<string, unknown>, idx: number, ledger: Financ
       blocks.push({
         kind: "kv",
         label: "Top 10 subtotal",
-        value: formatUsdRangeAscii(ledger.top10.subtotal_low, ledger.top10.subtotal_high),
+        value: tagMoney(formatUsdRangeAscii(ledger.top10.subtotal_low, ledger.top10.subtotal_high), "annual_revenue_loss"),
       });
       blocks.push({
         kind: "kv",
         label: "Report total",
-        value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
+        value: tagMoney(formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high), "annual_revenue_loss"),
       });
     }
   } else {
     blocks.push({
       kind: "kv",
       label: "Chapter annual allocation",
-      value: alloc ? formatUsdRangeAscii(alloc.annual_low, alloc.annual_high) : "Not priced",
+      value: alloc
+        ? tagMoney(formatUsdRangeAscii(alloc.annual_low, alloc.annual_high), "annual_revenue_loss")
+        : "Not priced",
     });
+    if (alloc) blocks.push({ kind: "kv", label: "Category", value: CHAPTER_ALLOCATION_NOTE });
     for (const x of crossReferencedIn(ledger, slug)) {
       blocks.push({
         kind: "kv",
         label: `Cross-referenced · ${x.title}`,
-        value: `Included in the ${slug} chapter total`,
+        value: crossReferenceNote(no),
       });
     }
   }
+
   if (has(ch.verdict)) blocks.push({ kind: "callout", tone: "red", label: "Verdict", text: str(ch.verdict) });
   blocks.push(...block("What we found", ch.what_we_found));
   blocks.push(...block("Why it's leaking", ch.why_its_leaking));
