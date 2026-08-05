@@ -271,6 +271,13 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
       const n = MONEY_CATEGORY_NOTE.source_evidence;
       if (!out.includes(n)) notes.push(n);
     }
+    // Leak money stays unlabelled inline (the amounts read as prose), but the
+    // sentence still states the category so nothing is left ambiguous.
+    if (cats.has("annual_revenue_loss")) {
+      const n = `${MONEY_CATEGORY_LABEL.annual_revenue_loss}. ${MONEY_CATEGORY_NOTE.annual_revenue_loss}`;
+      if (!out.includes(MONEY_CATEGORY_NOTE.annual_revenue_loss)) notes.push(n);
+    }
+
     if (!notes.length) return out + trailing;
     const punctuated = /[.!?]$/.test(out.trim()) ? out : `${out}.`;
     return `${punctuated} ${notes.join(" ")}${trailing || " "}`;
