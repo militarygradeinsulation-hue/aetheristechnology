@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { ArrowRight, Mail, Phone, Globe, Plug } from 'lucide-react';
 import {
   CONTACT_EMAIL,
