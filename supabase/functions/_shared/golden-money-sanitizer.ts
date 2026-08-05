@@ -251,16 +251,24 @@ export function ledgerAllowedValues(ledger: FinancialLedger): Set<number> {
   return out;
 }
 
-/** Canonical amounts allowed inside one chapter's prose. */
+/**
+ * Canonical amounts allowed inside ONE chapter's prose.
+ *
+ * SCOPED BY DESIGN: a priceable chapter may render only its own reconciled
+ * allocation and the leaks assigned to it. The report-wide total is NOT
+ * allowed there — a value that is canonical elsewhere in the ledger is still
+ * wrong in the wrong chapter, and permitting the overall total is exactly how
+ * chapters ended up claiming the whole report's number as their own.
+ *
+ * Only an explicit non-priceable roll-up chapter, whose job is to restate the
+ * canonical headline, may cite the overall total and the Top 10 figures.
+ */
 export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set<number> {
   const s = String(slug || "").toLowerCase();
   const out = new Set<number>();
   const add = (n?: number | null) => {
     if (typeof n === "number" && Number.isFinite(n) && n > 0) out.add(roundKey(n));
   };
-  // The report-wide total may always be cited; it is canonical everywhere.
-  add(ledger.overall?.annual_low);
-  add(ledger.overall?.annual_high);
   const alloc = ledger.chapters.find((c) => c.chapter === s);
   add(alloc?.annual_low);
   add(alloc?.annual_high);
@@ -271,6 +279,8 @@ export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set
   }
   // Roll-up chapters render the canonical global view, so they may cite it.
   if (NON_PRICEABLE_CHAPTER_SLUGS.has(s)) {
+    add(ledger.overall?.annual_low);
+    add(ledger.overall?.annual_high);
     add(ledger.top10.subtotal_low);
     add(ledger.top10.subtotal_high);
     add(ledger.top10.remainder_low);
@@ -281,6 +291,11 @@ export function chapterAllowedValues(ledger: FinancialLedger, slug: string): Set
     }
   }
   return out;
+}
+
+/** True when this chapter is allowed to restate the report-wide headline. */
+export function isRollupChapter(slug: string): boolean {
+  return NON_PRICEABLE_CHAPTER_SLUGS.has(String(slug || "").toLowerCase());
 }
 
 /** Structured money keys that must never survive un-reconciled on an object. */
