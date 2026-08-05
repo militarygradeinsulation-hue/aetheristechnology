@@ -106,8 +106,124 @@ const SectionHeading: React.FC<{ eyebrow: string; title: string; sub?: string }>
   </div>
 );
 
+type AuditTier = {
+  name: string;
+  price: string;
+  cadence: string;
+  blurb: string;
+  includes: string[];
+  cta: string;
+  highlight?: boolean;
+  badge?: string;
+  priceId?: string;
+  href?: string;
+};
+
+const AUDIT_TIERS: AuditTier[] = [
+  {
+    name: 'Free Self-Scan',
+    price: '$0',
+    cadence: 'about 6 min',
+    blurb: 'A 14 question self assessment that returns a directional PDF and a modeled range.',
+    includes: [
+      '14 question forensic self scan',
+      'Directional annual exposure range',
+      'Shareable case file PDF',
+      'No call required',
+    ],
+    cta: 'Start Free Self-Scan',
+    href: '/leak-audit/self-scan',
+  },
+  {
+    name: 'Signal Pack',
+    price: '$2,500',
+    cadence: 'one time',
+    blurb: 'An operator confirms in writing where the friction is and why buyers stall.',
+    includes: [
+      'Full website forensic report',
+      'Brand contradiction findings',
+      'Friction vocabulary audit',
+      'Leak findings memo',
+      '30 minute live walkthrough',
+      'Credits in full toward any larger tier',
+    ],
+    cta: 'Buy Signal Pack',
+    priceId: 'leak_signal_pack_onetime',
+  },
+  {
+    name: 'Revenue Pack',
+    price: '$5,000',
+    cadence: 'one time',
+    blurb: 'The Signal Pack plus the sales and content system your team runs on Monday.',
+    includes: [
+      'Everything in Signal Pack',
+      'Sales script pack, discovery to close',
+      'Follow up sequence plan',
+      'Strategic question engine',
+      '30 day content calendar',
+      'Two 45 minute working sessions',
+    ],
+    cta: 'Buy Revenue Pack',
+    highlight: true,
+    badge: 'Most picked',
+    priceId: 'leak_revenue_pack_onetime',
+  },
+  {
+    name: 'Operator Suite',
+    price: '$10,000',
+    cadence: 'one time, about 3 weeks',
+    blurb: 'The full recovery system installed across strategy, content, nurture and tooling.',
+    includes: [
+      'Everything in Revenue Pack',
+      '12 month strategy blueprint priced by leak',
+      'Social content pack',
+      'Digital snapshot of every buyer touchpoint',
+      'Lead nurture automation installed',
+      'Aetheris Tech Suite access',
+      'Credits 1:1 toward the Active Case',
+    ],
+    cta: 'Buy Operator Suite',
+    priceId: 'leak_operator_suite_onetime',
+  },
+  {
+    name: '21-Day Diagnostic',
+    price: '$18,500',
+    cadence: 'flagship, 21 days',
+    blurb: 'An operator inside the business for 21 days producing a fully quantified Leak Register.',
+    includes: [
+      'Everything above',
+      'Quantified leak register, ranked by exposure',
+      'Implementation plan handoff',
+      '21 days inside ops, sales and marketing',
+      'Fit call required',
+      'Prerequisite for the Active Case',
+    ],
+    cta: 'Buy 21-Day Diagnostic',
+    badge: 'Flagship',
+    priceId: 'leak_21_day_diagnostic_onetime',
+  },
+  {
+    name: 'Active Case Retainer',
+    price: '$15,000',
+    cadence: 'per month',
+    blurb: 'Aetheris runs the recovery plan month over month until the identified leaks are closed.',
+    includes: [
+      'Weekly execution sprints',
+      'Monthly recovery ledger, recovered versus remaining',
+      'Direct operator access',
+      'Priority builds in the Aetheris Tech Suite',
+      'Pause or cancel any month',
+      'Requires a completed 21-Day Diagnostic',
+    ],
+    cta: 'Start Active Case',
+    badge: 'Retainer',
+    priceId: 'leak_active_case_retainer_monthly',
+  },
+];
+
 const RevenueLeakAuditPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [checkoutTier, setCheckoutTier] = useState<{ name: string; priceId: string } | null>(null);
 
   const primaryCta = (
     <Button
