@@ -15,7 +15,7 @@ import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
 import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
-import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
+import { hasLegacyFinancialProse, LEGACY_PROSE_NOTE, chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
 import { Wrench } from "lucide-react";
 
 
@@ -381,6 +381,9 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
         <Card className="p-0 bg-card border-border overflow-hidden">
           <div className="p-5 pb-0 space-y-4">
             <GoldenLeakageBanner report={report} />
+            {hasLegacyFinancialProse(report as never) && (
+              <p className="mt-2 text-xs text-muted-foreground">{LEGACY_PROSE_NOTE}</p>
+            )}
             <GoldenEvidenceQuality report={report} />
           </div>
           <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/5 to-transparent">
