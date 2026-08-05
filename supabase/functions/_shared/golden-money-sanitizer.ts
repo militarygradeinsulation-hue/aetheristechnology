@@ -33,6 +33,12 @@ import {
   type FinancialLedger,
   type LedgerReportLike,
 } from "./golden-ledger.ts";
+import {
+  annotateMoneyProse,
+  tagMoney,
+  MONEY_CATEGORY_NOTE,
+} from "./golden-money-taxonomy.ts";
+
 
 /** Rendered in place of a leak sentence whose amount the ledger cannot back. */
 export const NEUTRAL_LEAK_SENTENCE = "See the canonical financial allocation shown above.";
