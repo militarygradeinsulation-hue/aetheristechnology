@@ -9,6 +9,7 @@ import {
   detectGenericReport,
   REGENERATION_REQUIRED_MESSAGE,
 } from "@/lib/goldenGenericDetector";
+import { GoldenMoneyCategoryChip, GoldenMoneyLegend } from "@/components/GoldenMoneyCategory";
 
 /**
  * The red "Total Estimated Annual Revenue Loss" box shown on the main website,
@@ -69,7 +70,9 @@ export function GoldenLeakageBanner({
         {total.rangeLabel}
         <span className="ml-2 text-xs font-mono text-muted-foreground align-middle">/ year</span>
       </div>
+      <GoldenMoneyCategoryChip category="annual_revenue_loss" className="mt-2 block" />
       <p className="mt-2 text-xs text-muted-foreground">{total.caption}</p>
+      <GoldenMoneyLegend className="mt-2" />
     </div>
   );
 }

@@ -25,6 +25,16 @@ import {
   type FinancialLedger,
 } from "./golden-ledger.ts";
 import { sanitizeGoldenReportFinancials, FINANCIAL_METHODOLOGY_NOTE } from "./golden-money-sanitizer.ts";
+import {
+  MONEY_CATEGORY_LABEL,
+  MONEY_CATEGORY_NOTE,
+  MONEY_TAXONOMY_LEGEND,
+  CHAPTER_ALLOCATION_NOTE,
+  crossReferenceNote,
+  topTenSumNote,
+  tagMoney,
+} from "./golden-money-taxonomy.ts";
+
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
 
 
@@ -172,7 +182,10 @@ function leakageSection(leakage: GoldenLeakage | null, needsRegen = false): Sect
     indexed: false,
     blocks: [
       { kind: "callout", tone: "red", label: GOLDEN_LEAKAGE_LABEL, text: `${leakage.rangeLabelAscii} / year` },
+      { kind: "kv", label: "Money category", value: MONEY_CATEGORY_LABEL.annual_revenue_loss },
+      { kind: "paragraph", text: MONEY_TAXONOMY_LEGEND },
       { kind: "paragraph", text: leakage.caption },
+
       { kind: "kv", label: "Priced leaks counted", value: String(leakage.count) },
       { kind: "kv", label: "Source", value: leakage.source },
       { kind: "kv", label: "Currency", value: leakage.currency },
@@ -295,26 +308,46 @@ function reconciliationSection(ledger: FinancialLedger): Section | null {
   };
 }
 
-function topLeaksSection(ledger: FinancialLedger): Section | null {
+function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => string | number): Section | null {
   if (!ledger.active.length || !ledger.overall) return null;
   const t = ledger.top10;
+  const subtotal = formatUsdRangeAscii(t.subtotal_low, t.subtotal_high);
+  const remainder = formatUsdRangeAscii(t.remainder_low, t.remainder_high);
+  const total = formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high);
   const blocks: Block[] = [
     { kind: "kv", label: "Scope", value: t.label },
+    { kind: "kv", label: "Money category", value: MONEY_CATEGORY_LABEL.annual_revenue_loss },
   ];
   for (const e of t.entries) {
     blocks.push({ kind: "subheading", text: `#${e.rank} · ${e.title}` });
-    blocks.push({ kind: "kv", label: "Annual cost", value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+    blocks.push({
+      kind: "kv",
+      label: "Annual cost",
+      value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+    });
     blocks.push({ kind: "kv", label: "Allocated to chapter", value: e.primary_chapter });
     if (e.pricing_basis) blocks.push({ kind: "kv", label: "Pricing basis", value: e.pricing_basis });
   }
-  blocks.push({ kind: "kv", label: "Top 10 subtotal", value: formatUsdRangeAscii(t.subtotal_low, t.subtotal_high) });
+  blocks.push({
+    kind: "kv",
+    label: "Top 10 subtotal",
+    value: tagMoney(subtotal, "annual_revenue_loss"),
+  });
   if (t.remaining_count > 0) {
     blocks.push({ kind: "kv", label: "Remaining priced leaks", value: String(t.remaining_count) });
-    blocks.push({ kind: "kv", label: "Remainder subtotal", value: formatUsdRangeAscii(t.remainder_low, t.remainder_high) });
+    blocks.push({
+      kind: "kv",
+      label: "Remainder subtotal",
+      value: tagMoney(remainder, "annual_revenue_loss"),
+    });
     // The remainder is itemised so no priced leak is ever hidden from the reader.
     blocks.push({ kind: "subheading", text: `Remaining ${t.remaining_count} priced leaks` });
     for (const e of t.remainder) {
-      blocks.push({ kind: "kv", label: e.title, value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+      blocks.push({
+        kind: "kv",
+        label: e.title,
+        value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+      });
       blocks.push({ kind: "kv", label: `${e.title} · chapter`, value: e.primary_chapter });
       if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
     }
@@ -322,15 +355,18 @@ function topLeaksSection(ledger: FinancialLedger): Section | null {
   blocks.push({
     kind: "kv",
     label: "Report total",
-    value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
+    value: tagMoney(total, "annual_revenue_loss"),
   });
+  // Exact sum relationship, spelled out so the three figures can never read as
+  // three competing totals.
+  blocks.push({ kind: "paragraph", text: topTenSumNote(subtotal, t.remaining_count, remainder, total) });
   // Leaks that are real findings but whose money is already carried by their
   // chapter. Shown for completeness, never added to a total a second time.
   const absorbed = ledger.entries.filter((e) => e.status === "included_in_chapter" || e.status === "duplicate");
   if (absorbed.length) {
     blocks.push({ kind: "subheading", text: "Also identified (already counted in a chapter total)" });
     for (const e of absorbed) {
-      blocks.push({ kind: "kv", label: e.title, value: `Included in the ${e.primary_chapter} chapter total` });
+      blocks.push({ kind: "kv", label: e.title, value: crossReferenceNote(chapterRef(e.primary_chapter)) });
       if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
       for (const x of e.cross_referenced_chapters) {
         blocks.push({ kind: "kv", label: `${e.title} · also discussed in`, value: x });
@@ -339,6 +375,7 @@ function topLeaksSection(ledger: FinancialLedger): Section | null {
   }
   return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
 }
+
 
 function labelize(k: string): string {
   return k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -490,28 +527,32 @@ function chapterSection(ch: Record<string, unknown>, idx: number, ledger: Financ
       blocks.push({
         kind: "kv",
         label: "Top 10 subtotal",
-        value: formatUsdRangeAscii(ledger.top10.subtotal_low, ledger.top10.subtotal_high),
+        value: tagMoney(formatUsdRangeAscii(ledger.top10.subtotal_low, ledger.top10.subtotal_high), "annual_revenue_loss"),
       });
       blocks.push({
         kind: "kv",
         label: "Report total",
-        value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
+        value: tagMoney(formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high), "annual_revenue_loss"),
       });
     }
   } else {
     blocks.push({
       kind: "kv",
       label: "Chapter annual allocation",
-      value: alloc ? formatUsdRangeAscii(alloc.annual_low, alloc.annual_high) : "Not priced",
+      value: alloc
+        ? tagMoney(formatUsdRangeAscii(alloc.annual_low, alloc.annual_high), "annual_revenue_loss")
+        : "Not priced",
     });
+    if (alloc) blocks.push({ kind: "kv", label: "Category", value: CHAPTER_ALLOCATION_NOTE });
     for (const x of crossReferencedIn(ledger, slug)) {
       blocks.push({
         kind: "kv",
         label: `Cross-referenced · ${x.title}`,
-        value: `Included in the ${slug} chapter total`,
+        value: crossReferenceNote(no),
       });
     }
   }
+
   if (has(ch.verdict)) blocks.push({ kind: "callout", tone: "red", label: "Verdict", text: str(ch.verdict) });
   blocks.push(...block("What we found", ch.what_we_found));
   blocks.push(...block("Why it's leaking", ch.why_its_leaking));
@@ -654,7 +695,18 @@ export function buildGoldenReportModel(opts: {
     });
   }
 
-  pushIf(sections as never, topLeaksSection(ledger) as never);
+  // Chapter numbers let cross-reference labels name an exact chapter instead of
+  // a slug, so "Already included in Chapter 4" is literally true in the export.
+  const chapterList = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
+  const chapterNoBySlug = new Map<string, number>();
+  chapterList.forEach((ch, i) => {
+    const s = String(ch?.slug || "").toLowerCase();
+    if (s) chapterNoBySlug.set(s, Number(ch?.no) || i + 1);
+  });
+  const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
+
+  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+
 
   const d = (report.deliverables || null) as GoldenDeliverables | null;
   if (d) {
