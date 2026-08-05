@@ -160,6 +160,8 @@ export type FinancialLedger = {
     subtotal_low: number;
     subtotal_high: number;
     remaining_count: number;
+    /** Rank 11+ entries, itemised so no priced leak is ever hidden. */
+    remainder: TopLeakView[];
     remainder_low: number;
     remainder_high: number;
     priced_count: number;
@@ -494,6 +496,16 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
     subtotal_low: topSum.low,
     subtotal_high: topSum.high,
     remaining_count: rest.length,
+    remainder: rest.map((e, i) => ({
+      rank: 11 + i,
+      leak_id: e.leak_id,
+      title: e.title,
+      annual_low: e.annual_low,
+      annual_high: e.annual_high,
+      primary_chapter: e.primary_chapter,
+      pricing_basis: e.pricing_basis,
+      range_label: formatUsdRange(e.annual_low, e.annual_high),
+    })),
     remainder_low: restSum.low,
     remainder_high: restSum.high,
     priced_count: active.length,
