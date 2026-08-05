@@ -6,7 +6,7 @@
 // consultative strategy for the company, grounded in the scan.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { sanitizedGoldenReport } from "../_shared/golden-money-sanitizer.ts";
+import { sanitizedGoldenReport, guardChatMoney } from "../_shared/golden-money-sanitizer.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
@@ -93,8 +93,11 @@ ${context}` },
       max_tokens: 1800,
       timeoutMs: 55_000,
     });
-    const answer = res.content || "";
-    if (!answer.trim()) throw new Error("No answer produced. Try again.");
+    const raw = res.content || "";
+    if (!raw.trim()) throw new Error("No answer produced. Try again.");
+    // Validate the OUTPUT, not just the input: the model may quote canonical
+    // scoped values but must never compute, add, extrapolate or invent money.
+    const answer = guardChatMoney(raw, report as never).text;
     const cites: { chapter_no: number; slug: string; title: string }[] = [];
     for (const c of report.chapters || []) {
       const re = new RegExp(`Ch\\s*${c.no}\\b`, "i");
