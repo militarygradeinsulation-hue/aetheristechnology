@@ -6,6 +6,7 @@
 // consultative strategy for the company, grounded in the scan.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { sanitizedGoldenReport } from "../_shared/golden-money-sanitizer.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
 
 const corsHeaders = {
@@ -45,7 +46,9 @@ Deno.serve(async (req) => {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const report = row.report as {
+    // Never let the advisor quote a stale leak amount: it reads the same
+    // ledger-sanitized report the client sees on screen.
+    const report = sanitizedGoldenReport(row.report as never) as {
       executive_summary?: string;
       top_leaks?: unknown;
       overall_leakage?: unknown;
