@@ -140,7 +140,10 @@ describe("canonical totals", () => {
       rawFindings: htmlFindings,
     });
     const ch = (out.report.chapters as Array<Record<string, string>>)[0];
-    expect(ch.what_its_costing).toContain("$3,000 - $6,300");
+    // Model v5: a chapter subtotal the ledger does not back is no longer
+    // allowed to render, even though it is not the report total.
+    expect(ch.what_its_costing).not.toContain("$3,000 - $6,300");
+    expect(ch.what_its_costing).toContain("canonical financial allocation");
     expect(out.ok).toBe(true);
   });
 
@@ -234,7 +237,10 @@ describe("unsupported claims", () => {
       rawFindings: htmlFindings,
     });
     const ch = (out.report.chapters as Array<Record<string, string>>)[0];
-    expect(ch.what_its_costing).toContain("$1,000 - $2,000 per month");
+    // The monthly figure annualizes outside the canonical range, so it is
+    // replaced rather than merely flagged.
+    expect(ch.what_its_costing).not.toContain("$1,000 - $2,000 per month");
+    expect(ch.what_its_costing).toContain("canonical financial allocation");
     expect(out.ok).toBe(true);
   });
 

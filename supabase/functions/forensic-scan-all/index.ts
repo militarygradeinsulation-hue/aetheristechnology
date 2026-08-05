@@ -637,7 +637,7 @@ const CHAPTER_SHAPE = `{
   "verdict": "<one blunt sentence>",
   "what_we_found": "<1-2 short markdown paragraphs>",
   "why_its_leaking": "<1-2 short paragraphs>",
-  "what_its_costing": "<1 paragraph, USD only, showing the arithmetic>",
+  "what_its_costing": "<1 paragraph, USD only. State the arithmetic INPUTS (counts, average job value, close rate). Write the resulting annual range ONLY as the literal token {{CHAPTER_ANNUAL_RANGE}} — never type the total yourself.>",
   "annual_low": <int or null>,
   "annual_high": <int or null>,
   "cost_basis": "<the exact inputs and multiplication used, e.g. '38 service pages x 12 monthly visits x 2% close x $4,200 job value'. null when no dollar figure is claimed>",
@@ -679,6 +679,7 @@ COSTING RULES — this is the part that has been failing, follow it exactly:
 - Every dollar figure must be DERIVED, in the chapter, from counts and values that appear in THIS company's findings: number of pages, number of forms, number of stalled deals, response lag in hours, traffic figures, service lines, locations, headcount, quoted prices found on the site, average job value stated on the site.
 - Write the arithmetic in "what_its_costing" in plain sentences, and repeat the same inputs in "cost_basis". The low and high must come from that math, not from intuition, and must be odd/uneven numbers reflecting the calculation.
 - If a needed input is missing from the findings, do NOT skip the number. Make ONE clearly-labelled conservative assumption ("assuming a $6,400 average job value, which the site does not state"), anchor it to any count that IS in the findings, and derive the range from that. Say in one clause which input was assumed.
+- PROSE MONEY LOCK: the ONLY place you write a leak total is the structured "annual_low"/"annual_high" integers. In "what_its_costing", "verdict", "what_we_found", "why_its_leaking", "cost_basis" and "what_to_do", refer to the total with the token {{CHAPTER_ANNUAL_RANGE}} (or {{REPORT_ANNUAL_TOTAL}} for the whole report). The server renders those tokens from the canonical ledger. Dollar amounts for INPUTS you observed or assumed (average job value, quoted price, salary, contract value) are allowed and encouraged.
 - Chapters 13 and 14 (plan, appendix) always use null for annual_low, annual_high and cost_basis.
 - Never repeat another chapter's exact range. Each chapter's figures must be its own arithmetic on its own topic.
 
@@ -696,14 +697,15 @@ ${findingsStr}
 
 Return JSON:
 {
-  "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler.>",
+  "executive_summary": "<4-6 paragraphs, markdown, operator voice. Cite specific findings — friction score, missing elements, timed-out tools, etc. No generic filler. Never type an annual leak total: use the token {{REPORT_ANNUAL_TOTAL}}.>",
   "top_leaks": [ { "rank": <int>, "name": "<short>", "dollars_low": <int>, "dollars_high": <int>, "chapter_slug": "<slug>", "basis": "<the counts and values from THIS company's findings that produce the range>", "summary": "<one specific line grounded in findings>" } ]
 }
 
 COSTING RULES:
 - BANNED: stock bands like "$7,000 to $15,000", "$5,000 to $10,000", "$10,000 to $25,000" or any other round template range. Ranges must be derived numbers, not price-list numbers.
 - Every dollars_low / dollars_high must come from arithmetic on real inputs found in the scan (page counts, form counts, response lag, stalled deals, traffic, service lines, prices quoted on the site) and that arithmetic goes in "basis".
-- Only include a leak in top_leaks when you can show that math. 3 well-supported leaks beat 5 invented ones.`;
+- Only include a leak in top_leaks when you can show that math. 3 well-supported leaks beat 5 invented ones.
+- PROSE MONEY LOCK: write leak totals ONLY in the structured dollars_low / dollars_high integers. In "executive_summary", "basis" and "summary", refer to a leak's annual amount as {{LEAK_ANNUAL_RANGE}} and the report-wide total as {{REPORT_ANNUAL_TOTAL}}; the server renders those tokens from the canonical ledger. Input values you observed or assumed (average order value, quoted price, salary) may be written as normal dollar amounts.`;
   return await aiJson(prompt, 3500, 60_000);
 }
 
@@ -979,8 +981,8 @@ function applyDerivedChapterCosts(
           /\$\s?[\d,]+(?:\.\d+)?\s*[kKmM]?(\s*(?:-|–|—|to)\s*\$?\s?[\d,]+(?:\.\d+)?\s*[kKmM]?)?/g,
           "",
         ).replace(/\s{2,}/g, " ").trim();
-        const money = `$${ch.annual_low.toLocaleString("en-US")} to $${ch.annual_high.toLocaleString("en-US")} per year`;
-        ch.what_its_costing = `${ch.what_its_costing ? ch.what_its_costing.replace(/\s*$/, " ") : ""}Modeled exposure for this leak is ${money}, derived from the signals this scan collected for the company.`.trim();
+        // Placeholder, not a literal: the ledger renders the canonical range.
+        ch.what_its_costing = `${ch.what_its_costing ? ch.what_its_costing.replace(/\s*$/, " ") : ""}Modeled exposure for this leak is {{CHAPTER_ANNUAL_RANGE}}, derived from the signals this scan collected for the company.`.trim();
       }
       used.add(`${ch.annual_low}:${ch.annual_high}`);
       continue;
@@ -993,11 +995,10 @@ function applyDerivedChapterCosts(
     ch.annual_high = high;
     ch.cost_basis = ch.cost_basis ||
       `Modeled exposure: ${Math.round(scale)} weighted site/pipeline signals for this company applied to the ${ch.title || ch.slug} leak class.`;
-    const money = `$${low.toLocaleString("en-US")} to $${high.toLocaleString("en-US")} per year`;
     const prose = String(ch.what_its_costing || "");
     ch.what_its_costing = /\$\s?\d/.test(prose)
       ? prose
-      : `${prose ? prose.replace(/\s*$/, " ") : ""}Modeled exposure for this leak is ${money}, derived from the signal volume this scan actually collected for the company rather than a category benchmark.`.trim();
+      : `${prose ? prose.replace(/\s*$/, " ") : ""}Modeled exposure for this leak is {{CHAPTER_ANNUAL_RANGE}}, derived from the signal volume this scan actually collected for the company rather than a category benchmark.`.trim();
   }
 }
 

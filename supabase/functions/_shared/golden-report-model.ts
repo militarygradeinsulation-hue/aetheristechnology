@@ -17,8 +17,6 @@ import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "
 import {
   resolveFinancialLedger,
   needsFinancialRegeneration,
-  hasLegacyFinancialProse,
-  LEGACY_PROSE_NOTE,
   REGENERATION_LABEL,
   chapterAllocation,
   crossReferencedIn,
@@ -26,6 +24,7 @@ import {
   NON_PRICEABLE_CHAPTER_SLUGS,
   type FinancialLedger,
 } from "./golden-ledger.ts";
+import { sanitizeGoldenReportFinancials, FINANCIAL_METHODOLOGY_NOTE } from "./golden-money-sanitizer.ts";
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
 
 
@@ -281,6 +280,7 @@ function reconciliationSection(ledger: FinancialLedger): Section | null {
     newPage: false,
     indexed: false,
     blocks: [
+      { kind: "paragraph", text: FINANCIAL_METHODOLOGY_NOTE },
       { kind: "kv", label: "Model version", value: String(r.model_version) },
       { kind: "kv", label: "Priced leaks", value: String(r.priced_count) },
       { kind: "kv", label: "Unpriced findings", value: String(r.unpriced_count) },
@@ -617,10 +617,13 @@ export function buildGoldenReportModel(opts: {
   scanId: string;
   generatedAt?: Date;
 }): GoldenReportModel {
-  const report = (opts.report || {}) as Record<string, unknown>;
   // ONE financial source for every surface: the persisted ledger when present,
-  // otherwise rebuilt deterministically from the same stored evidence.
-  const ledger = resolveFinancialLedger(report as never);
+  // otherwise rebuilt deterministically from the same stored evidence. The
+  // report is sanitized FIRST, so no structured field or prose sentence can
+  // carry a leak amount the ledger does not back.
+  const sanitized = sanitizeGoldenReportFinancials((opts.report || {}) as Record<string, unknown>);
+  const report = sanitized.report as Record<string, unknown>;
+  const ledger = sanitized.ledger;
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
 
@@ -638,15 +641,6 @@ export function buildGoldenReportModel(opts: {
 
   pushIf(sections as never, degradedSection(report) as never);
   sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
-  if (hasLegacyFinancialProse(report as never)) {
-    sections.push({
-      id: "legacy-financial-note",
-      title: "About the figures in this report",
-      newPage: false,
-      indexed: false,
-      blocks: [{ kind: "paragraph", text: LEGACY_PROSE_NOTE }],
-    });
-  }
   pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
@@ -787,7 +781,9 @@ export function auditGoldenReportParity(
   model: GoldenReportModel,
 ): ParityResult {
   const haystack = norm(modelText(model));
-  const leaves = collectDisplayedLeaves(report);
+  // Parity is measured against the SANITIZED report — that is what every
+  // surface renders. A stale prose amount is removed by design, not "missing".
+  const leaves = collectDisplayedLeaves(sanitizeGoldenReportFinancials(report as never).report);
   const issues: ParityIssue[] = [];
   for (const [path, value] of leaves) {
     const needle = norm(value);

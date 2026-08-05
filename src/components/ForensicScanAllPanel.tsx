@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,9 @@ import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
 import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
-import { hasLegacyFinancialProse, LEGACY_PROSE_NOTE, chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
+import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
 import { Wrench } from "lucide-react";
+import { sanitizedGoldenReport } from "@/lib/goldenMoneySanitizer";
 
 
 
@@ -239,7 +240,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
 
 
   const stageState = (key: string) => row?.stage_status?.[key]?.state || (scanId ? "pending" : "");
-  const report = row?.report || null;
+  // Render-time financial gate: structured fields and prose are reconciled to
+  // the canonical ledger before ANYTHING (screen, PDF, advisor) sees them.
+  const report = useMemo(
+    () => (row?.report ? (sanitizedGoldenReport(row.report as never) as ForensicReport) : null),
+    [row?.report],
+  );
   // The live advisor appears with the finished report so the user can ask about
   // it right there instead of hunting for a chat page.
   const autoOpened = useRef(false);
@@ -381,9 +387,6 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
         <Card className="p-0 bg-card border-border overflow-hidden">
           <div className="p-5 pb-0 space-y-4">
             <GoldenLeakageBanner report={report} />
-            {hasLegacyFinancialProse(report as never) && (
-              <p className="mt-2 text-xs text-muted-foreground">{LEGACY_PROSE_NOTE}</p>
-            )}
             <GoldenEvidenceQuality report={report} />
           </div>
           <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/5 to-transparent">

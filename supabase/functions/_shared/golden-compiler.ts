@@ -29,6 +29,7 @@ import {
   type GenericVerdict,
   type GoldenReportState,
 } from "./golden-generic-detector.ts";
+import { sanitizeGoldenReportFinancials } from "./golden-money-sanitizer.ts";
 
 export const COMPILER_VERSION = 2;
 export const PRICING_MODEL_VERSION = 1;
@@ -1052,6 +1053,16 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
         }
       }
     }
+  }
+
+  // ── 5b. render-time financial gate, applied at WRITE time ─────────────
+  // Structured money fields are rewritten to the ledger and any leak amount in
+  // prose that the ledger cannot back is replaced with neutral text, so no
+  // freeform annual figure is ever persisted with the report.
+  {
+    const gate = sanitizeGoldenReportFinancials(report as never);
+    Object.assign(report, gate.report as Record<string, unknown>);
+    repairs.push(...gate.structuralRewrites, ...gate.removals);
   }
 
   // ── 6. validation gate ────────────────────────────────────────────────

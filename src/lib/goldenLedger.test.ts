@@ -10,7 +10,6 @@ import {
   formatUsdRange,
   formatUsdRangeAscii,
   FINANCIAL_MODEL_VERSION,
-  REGENERATION_LABEL,
   type LedgerReportLike,
 } from "@/lib/goldenLedger";
 import { computeGoldenLeakage } from "@/lib/goldenLeakage";
@@ -226,13 +225,15 @@ describe("legacy shapes and parity", () => {
     expect(l.overall).toEqual({ annual_low: 8_000, annual_high: 12_000 });
   });
 
-  it("labels an unreconcilable legacy report for regeneration", () => {
+  it("strips an unreconcilable legacy prose amount instead of labelling it", () => {
     const legacy = {
       chapters: [ch("top-10-leaks", { what_its_costing: "Costing about $250,000 a year." })],
     } as never;
     expect(needsFinancialRegeneration(legacy)).toBe(true);
     const model = buildGoldenReportModel({ report: legacy, ...meta });
-    expect(modelText(model)).toContain(REGENERATION_LABEL);
+    // Model v5: the competing number must not render at all.
+    expect(modelText(model)).not.toContain("$250,000");
+    expect(modelText(model)).toContain("Not calculated");
   });
 
   it("the leakage resolver and the ledger always agree", () => {
