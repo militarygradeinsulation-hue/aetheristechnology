@@ -56,7 +56,7 @@ const PartnersPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Aetheris Partner Program | Revenue Leak Audits for Your Clients"
-        description="Consultants, fractional executives and service providers can introduce Aetheris through a tracked partner relationship. Aetheris performs the Revenue Leak Audit and pays a 15% referral fee."
+        description="Consultants, fractional executives and service providers can introduce Aetheris through a tracked partner relationship. Aetheris performs the Revenue Leak Audit and pays a 15% referral fee when your introduction becomes a paying client."
         path="/partners"
         keywords="aetheris partner program, referral partner, consultant referral, revenue leak audit partner"
         breadcrumbs={[
