@@ -520,3 +520,38 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
 export function sanitizedGoldenReport<T extends LedgerReportLike | null | undefined>(report: T): T {
   return sanitizeGoldenReportFinancials(report).report;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHAT OUTPUT GUARD
+//
+// A chat model may QUOTE canonical ledger values. It must never compute, add,
+// extrapolate or invent money. Validating only the prompt is not enough: the
+// answer itself is client-visible output, so it goes through the same
+// deterministic gate as report prose.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const CHAT_MONEY_REDACTION =
+  "the canonical figure shown in the report";
+
+export type ChatGuardResult = { text: string; removed: string[] };
+
+/**
+ * Redacts any leak/exposure dollar amount in an assistant answer that is not a
+ * canonical value from THIS report's ledger. Source-evidence amounts the model
+ * is quoting back (average job value, list price, salary) survive, exactly as
+ * they do in report prose, because the same anchor rules apply.
+ */
+export function guardChatMoney(
+  answer: string,
+  report: LedgerReportLike | null | undefined,
+): ChatGuardResult {
+  const text = String(answer ?? "");
+  if (!text.trim()) return { text, removed: [] };
+  const ledger = resolveFinancialLedger(report as never);
+  const allowed = ledgerAllowedValues(ledger);
+  const r = sanitizeLeakProse(text, { allowed, where: "chat_answer" });
+  return {
+    text: r.text.split(NEUTRAL_LEAK_SENTENCE).join(CHAT_MONEY_REDACTION + "."),
+    removed: r.removed,
+  };
+}
