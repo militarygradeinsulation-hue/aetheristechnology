@@ -279,3 +279,12 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
   const text2 = kept.join("").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+\n/g, "\n").trim();
   return { text: text2, omitted };
 }
+
+/** Reader-facing key to the four categories, printed once per report. */
+export const MONEY_TAXONOMY_LEGEND = [
+  "How to read the money in this report.",
+  `${MONEY_CATEGORY_LABEL.annual_revenue_loss}: ${MONEY_CATEGORY_NOTE.annual_revenue_loss}`,
+  `${MONEY_CATEGORY_LABEL.source_evidence}: ${MONEY_CATEGORY_NOTE.source_evidence}`,
+  `${MONEY_CATEGORY_LABEL.implementation_investment}: ${MONEY_CATEGORY_NOTE.implementation_investment}`,
+  `${MONEY_CATEGORY_LABEL.recovery_scenario}: ${MONEY_CATEGORY_NOTE.recovery_scenario}`,
+].join(" ");
