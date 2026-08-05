@@ -418,9 +418,18 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
       // Evidence values are source observations, not modeled leaks: only a
       // sentence that explicitly states an annual leak is redacted.
       if (typeof e?.value !== "string") continue;
-      const r = sanitizeLeakProse(renderLeakPlaceholders(e.value as string, place), { allowed, where: `chapter:${slug}.evidence` });
-      e.value = r.text;
-      removals.push(...r.removed);
+      const value = renderLeakPlaceholders(e.value as string, place);
+      // The label carries the claim ("annual leak estimate"), so judge the pair
+      // together: a bare "$17,200 - $36,500" value reads as neutral on its own.
+      const label = typeof e.label === "string" ? (e.label as string) : "";
+      const paired = label ? `${label}: ${value}` : value;
+      const r = sanitizeLeakProse(paired, { allowed, where: `chapter:${slug}.evidence` });
+      if (r.removed.length) {
+        e.value = NEUTRAL_LEAK_SENTENCE;
+        removals.push(...r.removed);
+      } else {
+        e.value = value;
+      }
     }
   }
 
