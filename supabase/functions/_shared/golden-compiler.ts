@@ -17,6 +17,7 @@
 import {
   buildFinancialLedger,
   computeGoldenLeakage,
+  formatLeakageRange,
   parseMoney,
   type GoldenLeakage,
   type GoldenReportLike,
@@ -29,7 +30,19 @@ import {
   type GenericVerdict,
   type GoldenReportState,
 } from "./golden-generic-detector.ts";
-import { sanitizeGoldenReportFinancials } from "./golden-money-sanitizer.ts";
+import { sanitizeGoldenReportFinancials, isRollupChapter } from "./golden-money-sanitizer.ts";
+
+/**
+ * The ONLY canonical money a given prose field is allowed to render.
+ * Field-scoped and chapter-scoped by construction: "the value exists somewhere
+ * in the ledger" is never sufficient.
+ */
+export type MoneyScope = {
+  kind: "report" | "chapter";
+  low: number;
+  high: number;
+  label: string;
+};
 
 export const COMPILER_VERSION = 2;
 export const PRICING_MODEL_VERSION = 1;
