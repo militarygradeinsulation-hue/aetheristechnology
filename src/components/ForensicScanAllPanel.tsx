@@ -16,6 +16,7 @@ import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSour
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
 import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
 import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
+import { CHAPTER_ALLOCATION_NOTE, crossReferenceNote } from "@/lib/goldenMoneyTaxonomy";
 import { Wrench } from "lucide-react";
 import { sanitizedGoldenReport } from "@/lib/goldenMoneySanitizer";
 
@@ -92,10 +93,12 @@ async function fetchScanRow(id: string): Promise<Row | null> {
 function ChapterFinancials({
   report,
   slug,
+  chapterNo,
   costing,
 }: {
   report: unknown;
   slug?: string | null;
+  chapterNo?: number | string | null;
   costing?: string | null;
 }) {
   const ledger = resolveFinancialLedger(report as never);
@@ -115,13 +118,18 @@ function ChapterFinancials({
             : "."}
         </p>
       ) : (
-        <div className="font-mono text-sm text-red-400 mb-1">
-          {alloc ? `${formatUsdRange(alloc.annual_low, alloc.annual_high)} / year` : "Not priced"}
-        </div>
+        <>
+          <div className="font-mono text-sm text-red-400 mb-1">
+            {alloc ? `${formatUsdRange(alloc.annual_low, alloc.annual_high)} / year` : "Not priced"}
+          </div>
+          {alloc && (
+            <p className="text-[10px] text-muted-foreground mb-1">{CHAPTER_ALLOCATION_NOTE}</p>
+          )}
+        </>
       )}
       {crossRefs.map((x) => (
         <div key={x.leak_id} className="text-xs text-muted-foreground">
-          {x.title} — included in this chapter's total
+          {x.title} — {crossReferenceNote(chapterNo ?? slug ?? "")}
         </div>
       ))}
       {costing && (
@@ -585,7 +593,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                               <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{c.why_its_leaking}</div>
                             </div>
                           )}
-                          <ChapterFinancials report={report as never} slug={c.slug} costing={c.what_its_costing} />
+                          <ChapterFinancials report={report as never} slug={c.slug} chapterNo={c.no} costing={c.what_its_costing} />
                           {c.what_to_do && (
                             <div>
                               <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">WHAT TO DO</div>
