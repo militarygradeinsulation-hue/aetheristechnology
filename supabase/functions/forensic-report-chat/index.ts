@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const { data: row, error } = await sb.from("forensic_scans").select("report,target_url,company_name").eq("id", scan_id).single();
+    const { data: row, error } = await sb.from("forensic_scans").select("report,target_url,company_name,report_state").eq("id", scan_id).single();
     if (error || !row?.report) {
       return new Response(JSON.stringify({ error: "Report not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -56,10 +56,17 @@ Deno.serve(async (req) => {
       chapters?: Chapter[];
     };
     const company = row.company_name || row.target_url;
+    // A report whose financials failed the compiler has no publishable money.
+    // The advisor still gives strategy, but it is forbidden to state any leak
+    // figure for it, and the client is told why rather than being shown a
+    // number nobody can stand behind.
+    const unpublishable = row.report_state === "regeneration_required";
     const context = [
       `# Forensic Report — ${company}`,
       `Website: ${row.target_url}`,
-      `## Total annual leakage\n${JSON.stringify(report.overall_leakage || {})}`,
+      unpublishable
+        ? "## Total annual leakage\nNOT AVAILABLE. This scan's financial model did not pass validation and is queued for regeneration. State no dollar figures for this report."
+        : `## Total annual leakage\n${JSON.stringify(report.overall_leakage || {})}`,
       `## Executive Summary\n${report.executive_summary || ""}`,
       `## Top Leaks\n${JSON.stringify(report.top_leaks || [])}`,
       ...((report.chapters || []).map(chapterToContext)),
@@ -77,7 +84,7 @@ HOW YOU ANSWER:
 - When you use a report finding, cite it as [Ch <no> — <title>]. When you go beyond the report, say plainly that it is your recommendation rather than a scan finding.
 - Never invent scan data, numbers, client names or results that are not in the report. Judgement and strategy are yours to give; facts about this company are not.
 - If the report has no signal on something, say so and give the best operator play anyway.
-- USD only, every amount as $X,XXX. Blunt operator voice, short sentences, no em-dashes, no rhetorical questions, no corporate filler.
+${unpublishable ? "- FINANCIALS WITHHELD: this scan's pricing did not pass validation. Do not state, estimate or imply ANY dollar figure for this company. Say the financial model is being regenerated and give the non-financial operator advice instead.\n" : ""}- USD only, every amount as $X,XXX. Quote only figures present in the report above, in the same scope they appear in. Never add, sum, average, annualize or otherwise derive a new dollar amount. Blunt operator voice, short sentences, no em-dashes, no rhetorical questions, no corporate filler.
 - Keep answers tight: under 400 words unless they ask for a full plan, then use numbered steps.
 
 REPORT:
