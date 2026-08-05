@@ -1225,11 +1225,29 @@ export function validateCompiledReport(args: {
   // Validated at the SAME granularity the repair pass writes at (one field at a
   // time), so a claim is never judged against a wider context window than the
   // one used to decide whether to rewrite it.
-  const sections: Array<[string, string]> = [["executive_summary", String(report.executive_summary || "")]];
+  const ledgerChapters = (report.financial_ledger as { chapters?: Array<{ chapter: string; annual_low: number; annual_high: number }> } | undefined)?.chapters || [];
+  const scopeFor = (slug: string): MoneyScope | null => {
+    const sl = String(slug || "").toLowerCase();
+    if (isRollupChapter(sl)) {
+      return leakage ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii } : null;
+    }
+    const alloc = ledgerChapters.find((c) => c.chapter === sl);
+    if (!alloc || !(alloc.annual_high > 0)) return null;
+    return { kind: "chapter", low: alloc.annual_low, high: alloc.annual_high, label: formatLeakageRange(alloc.annual_low, alloc.annual_high) };
+  };
+
+  // Each section carries the ONE scope whose canonical value it may state.
+  const reportSectionScope: MoneyScope | null = leakage
+    ? { kind: "report", low: leakage.low, high: leakage.high, label: leakage.rangeLabelAscii }
+    : null;
+  const sections: Array<[string, string, MoneyScope | null]> = [
+    ["executive_summary", String(report.executive_summary || ""), reportSectionScope],
+  ];
   for (const ch of chapters) {
+    const sc = scopeFor(String(ch.slug ?? ""));
     for (const field of ["verdict", "what_we_found", "why_its_leaking", "what_its_costing"]) {
       const val = (ch as Record<string, unknown>)[field];
-      if (typeof val === "string" && val.trim()) sections.push([`chapter:${String(ch.slug ?? "?")}.${field}`, val]);
+      if (typeof val === "string" && val.trim()) sections.push([`chapter:${String(ch.slug ?? "?")}.${field}`, val, sc]);
     }
   }
 
@@ -1239,11 +1257,11 @@ export function validateCompiledReport(args: {
     ledger.filter((c) => c.status === "unverified").map((c) => c.category),
   );
 
-  for (const [where, text] of sections) {
+  for (const [where, text, scope] of sections) {
     if (!text) continue;
 
-    // totals
-    if (leakage) {
+    // totals — judged against THIS field's scope, never the whole ledger
+    if (scope) {
       let m: RegExpExecArray | null;
       const re = new RegExp(MONEY_RANGE_RE.source, "g");
       while ((m = re.exec(text))) {
@@ -1255,8 +1273,8 @@ export function validateCompiledReport(args: {
         const hi = parseMoney(parts.slice(1).join(" "));
         if (lo == null || hi == null) continue;
         const f = periodFactor(text.slice(m.index + m[0].length, m.index + m[0].length + 24));
-        if (Math.round(lo * f) !== Math.round(leakage.low) || Math.round(hi * f) !== Math.round(leakage.high)) {
-          v.push({ code: "total_mismatch", location: where, detail: `Stated total ${m[0].trim()} differs from canonical ${leakage.rangeLabelAscii}.`, excerpt: window.slice(0, 200) });
+        if (Math.round(lo * f) !== Math.round(scope.low) || Math.round(hi * f) !== Math.round(scope.high)) {
+          v.push({ code: "total_mismatch", location: where, detail: `Stated total ${m[0].trim()} differs from the canonical ${scope.kind} value ${scope.label}.`, excerpt: window.slice(0, 200) });
         }
       }
     }
