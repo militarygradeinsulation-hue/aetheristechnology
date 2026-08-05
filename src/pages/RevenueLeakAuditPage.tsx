@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { ArrowRight, Mail, Phone, Globe, Plug } from 'lucide-react';
 import {
   CONTACT_EMAIL,
@@ -106,8 +107,124 @@ const SectionHeading: React.FC<{ eyebrow: string; title: string; sub?: string }>
   </div>
 );
 
+type AuditTier = {
+  name: string;
+  price: string;
+  cadence: string;
+  blurb: string;
+  includes: string[];
+  cta: string;
+  highlight?: boolean;
+  badge?: string;
+  priceId?: string;
+  href?: string;
+};
+
+const AUDIT_TIERS: AuditTier[] = [
+  {
+    name: 'Free Self-Scan',
+    price: '$0',
+    cadence: 'about 6 min',
+    blurb: 'A 14 question self assessment that returns a directional PDF and a modeled range.',
+    includes: [
+      '14 question forensic self scan',
+      'Directional annual exposure range',
+      'Shareable case file PDF',
+      'No call required',
+    ],
+    cta: 'Start Free Self-Scan',
+    href: '/leak-audit/self-scan',
+  },
+  {
+    name: 'Signal Pack',
+    price: '$2,500',
+    cadence: 'one time',
+    blurb: 'An operator confirms in writing where the friction is and why buyers stall.',
+    includes: [
+      'Full website forensic report',
+      'Brand contradiction findings',
+      'Friction vocabulary audit',
+      'Leak findings memo',
+      '30 minute live walkthrough',
+      'Credits in full toward any larger tier',
+    ],
+    cta: 'Buy Signal Pack',
+    priceId: 'leak_signal_pack_onetime',
+  },
+  {
+    name: 'Revenue Pack',
+    price: '$5,000',
+    cadence: 'one time',
+    blurb: 'The Signal Pack plus the sales and content system your team runs on Monday.',
+    includes: [
+      'Everything in Signal Pack',
+      'Sales script pack, discovery to close',
+      'Follow up sequence plan',
+      'Strategic question engine',
+      '30 day content calendar',
+      'Two 45 minute working sessions',
+    ],
+    cta: 'Buy Revenue Pack',
+    highlight: true,
+    badge: 'Most picked',
+    priceId: 'leak_revenue_pack_onetime',
+  },
+  {
+    name: 'Operator Suite',
+    price: '$10,000',
+    cadence: 'one time, about 3 weeks',
+    blurb: 'The full recovery system installed across strategy, content, nurture and tooling.',
+    includes: [
+      'Everything in Revenue Pack',
+      '12 month strategy blueprint priced by leak',
+      'Social content pack',
+      'Digital snapshot of every buyer touchpoint',
+      'Lead nurture automation installed',
+      'Aetheris Tech Suite access',
+      'Credits 1:1 toward the Active Case',
+    ],
+    cta: 'Buy Operator Suite',
+    priceId: 'leak_operator_suite_onetime',
+  },
+  {
+    name: '21-Day Diagnostic',
+    price: '$18,500',
+    cadence: 'flagship, 21 days',
+    blurb: 'An operator inside the business for 21 days producing a fully quantified Leak Register.',
+    includes: [
+      'Everything above',
+      'Quantified leak register, ranked by exposure',
+      'Implementation plan handoff',
+      '21 days inside ops, sales and marketing',
+      'Fit call required',
+      'Prerequisite for the Active Case',
+    ],
+    cta: 'Buy 21-Day Diagnostic',
+    badge: 'Flagship',
+    priceId: 'leak_21_day_diagnostic_onetime',
+  },
+  {
+    name: 'Active Case Retainer',
+    price: '$15,000',
+    cadence: 'per month',
+    blurb: 'Aetheris runs the recovery plan month over month until the identified leaks are closed.',
+    includes: [
+      'Weekly execution sprints',
+      'Monthly recovery ledger, recovered versus remaining',
+      'Direct operator access',
+      'Priority builds in the Aetheris Tech Suite',
+      'Pause or cancel any month',
+      'Requires a completed 21-Day Diagnostic',
+    ],
+    cta: 'Start Active Case',
+    badge: 'Retainer',
+    priceId: 'leak_active_case_retainer_monthly',
+  },
+];
+
 const RevenueLeakAuditPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [checkoutTier, setCheckoutTier] = useState<{ name: string; priceId: string } | null>(null);
 
   const primaryCta = (
     <Button
@@ -331,6 +448,89 @@ const RevenueLeakAuditPage: React.FC = () => {
                 </Link>{' '}
                 takes about six minutes.
               </p>
+            </section>
+
+            {/* 6b. PRICING */}
+            <section aria-labelledby="rla-pricing">
+              <div id="rla-pricing">
+                <SectionHeading
+                  eyebrow="Pricing"
+                  title="Pick the level of evidence you need."
+                  sub="Every paid tier credits toward the next. Buy directly below, no call required."
+                />
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {AUDIT_TIERS.map((tier) => (
+                  <div
+                    key={tier.name}
+                    className={`glass rounded-lg border p-6 flex flex-col ${
+                      tier.highlight ? 'border-amber/60' : 'border-border/60'
+                    }`}
+                  >
+                    {tier.badge && (
+                      <div className="font-case text-[10px] uppercase tracking-[0.25em] text-amber mb-3">
+                        {tier.badge}
+                      </div>
+                    )}
+                    <h3 className="font-forensic text-xl font-bold text-foreground">{tier.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="font-forensic text-3xl font-bold text-amber">{tier.price}</span>
+                      <span className="font-case text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {tier.cadence}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{tier.blurb}</p>
+                    <ul className="mt-4 space-y-2 flex-1">
+                      {tier.includes.map((item) => (
+                        <li key={item} className="text-sm text-foreground/90 leading-relaxed flex gap-2">
+                          <span className="text-amber shrink-0" aria-hidden>
+                            &rsaquo;
+                          </span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-6">
+                      {tier.priceId ? (
+                        <Button
+                          onClick={() => setCheckoutTier({ name: tier.name, priceId: tier.priceId as string })}
+                          className="w-full bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        >
+                          {tier.cta}
+                        </Button>
+                      ) : (
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="w-full focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        >
+                          <Link to={tier.href as string}>{tier.cta}</Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {checkoutTier && (
+                <div className="mt-8 glass rounded-lg border border-amber/40 p-6 max-w-3xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-forensic text-xl font-bold text-foreground">{checkoutTier.name}</h3>
+                    <button
+                      onClick={() => setCheckoutTier(null)}
+                      className="text-xs text-muted-foreground hover:text-amber underline focus-visible:ring-2 focus-visible:ring-amber rounded-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <StripeEmbeddedCheckout
+                    priceId={checkoutTier.priceId}
+                    returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
+                    metadata={{ source: 'revenue_leak_audit', package: checkoutTier.name }}
+                  />
+                </div>
+              )}
             </section>
 
             {/* 7. FINAL CTA */}
