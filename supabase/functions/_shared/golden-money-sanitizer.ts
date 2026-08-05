@@ -306,6 +306,8 @@ export type SanitizeReportResult<T> = {
   ledger: FinancialLedger;
   removals: string[];
   structuralRewrites: string[];
+  /** Amounts dropped because no money category could be resolved for them. */
+  omissions: string[];
 };
 
 function stripMoneyKeys(obj: Record<string, unknown>, keep: string[] = []) {
@@ -317,21 +319,24 @@ function stripMoneyKeys(obj: Record<string, unknown>, keep: string[] = []) {
 
 /**
  * THE render-time gate. Returns a deep clone of the report in which every
- * structured financial field is ledger-derived and every leak claim in prose
- * is either a canonical ledger amount or neutral text.
+ * structured financial field is ledger-derived, every leak claim in prose is
+ * either a canonical ledger amount or neutral text, and every surviving dollar
+ * value carries or inherits an explicit money category.
  */
 export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null | undefined>(
   report: T,
 ): SanitizeReportResult<T> {
   const ledger = resolveFinancialLedger(report as never);
   if (!report || typeof report !== "object") {
-    return { report, ledger, removals: [], structuralRewrites: [] };
+    return { report, ledger, removals: [], structuralRewrites: [], omissions: [] };
   }
 
   const clone = JSON.parse(JSON.stringify(report)) as Record<string, unknown>;
   const removals: string[] = [];
   const structuralRewrites: string[] = [];
+  const omissions: string[] = [];
   const globalAllowed = ledgerAllowedValues(ledger);
+
   const totalLabel = ledger.overall
     ? formatUsdRange(ledger.overall.annual_low, ledger.overall.annual_high)
     : null;
