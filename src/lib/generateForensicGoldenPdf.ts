@@ -17,6 +17,8 @@
 
 import jsPDF from "jspdf";
 import { GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
+import { MONEY_CATEGORY_LABEL, MONEY_TAXONOMY_LEGEND } from "@/lib/goldenMoneyTaxonomy";
+
 import { detectGenericReport } from "@/lib/goldenGenericDetector";
 import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler";
 import {
