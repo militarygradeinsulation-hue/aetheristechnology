@@ -83,6 +83,54 @@ async function fetchScanRow(id: string): Promise<Row | null> {
   }
 }
 
+/**
+ * A chapter's money, straight from the ledger. The chapter's own prose is kept
+ * as explanation, but the allocation of record is the ledger figure so the
+ * chapter can never disagree with the cover total or the Top 10.
+ */
+function ChapterFinancials({
+  report,
+  slug,
+  costing,
+}: {
+  report: unknown;
+  slug?: string | null;
+  costing?: string | null;
+}) {
+  const ledger = resolveFinancialLedger(report as never);
+  const key = String(slug || "").toLowerCase();
+  const rollup = NON_PRICEABLE_CHAPTER_SLUGS.has(key);
+  const alloc = rollup ? null : chapterAllocation(ledger, key);
+  const crossRefs = rollup ? [] : crossReferencedIn(ledger, key);
+
+  return (
+    <div>
+      <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">COST (USD)</div>
+      {rollup ? (
+        <p className="text-xs text-muted-foreground">
+          This chapter summarises leaks priced in other chapters. It carries no separate total
+          {ledger.overall
+            ? ` — the report total is ${formatUsdRange(ledger.overall.annual_low, ledger.overall.annual_high)} per year.`
+            : "."}
+        </p>
+      ) : (
+        <div className="font-mono text-sm text-red-400 mb-1">
+          {alloc ? `${formatUsdRange(alloc.annual_low, alloc.annual_high)} / year` : "Not priced"}
+        </div>
+      )}
+      {crossRefs.map((x) => (
+        <div key={x.leak_id} className="text-xs text-muted-foreground">
+          {x.title} — included in this chapter's total
+        </div>
+      ))}
+      {costing && (
+        <div className="whitespace-pre-wrap leading-relaxed text-foreground/90 mt-1">{costing}</div>
+      )}
+    </div>
+  );
+}
+
+
 export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
   const [url, setUrl] = useState("");
   const [company, setCompany] = useState("");
