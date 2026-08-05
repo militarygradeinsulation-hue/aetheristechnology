@@ -415,26 +415,9 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
               <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{report.executive_summary}</div>
             </section>
 
-            {!!(report.top_leaks?.length) && (
-              <section>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500 mb-2">Top Leaks</div>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  {report.top_leaks!.map((l) => (
-                    <div key={l.rank} className="border border-border rounded p-3 bg-muted/20">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="font-mono text-xs text-amber-500">#{l.rank}</span>
-                        {l.dollars_low != null && l.dollars_high != null && (
-                          <span className="text-xs font-mono text-red-400">
-                            ${l.dollars_low.toLocaleString()}-${l.dollars_high.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm font-semibold mt-1">{l.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Canonical Top 10 — reads the Financial Leak Ledger, never its own math. */}
+            <GoldenTopLeaks report={report as never} />
+
 
             <GoldenGrowthAssets
               deliverables={report.deliverables}
