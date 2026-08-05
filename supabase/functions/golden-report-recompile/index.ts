@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
         .select("id, target_url, company_name, report, raw_findings")
         .eq("status", "completed")
         .order("created_at", { ascending: false })
-        .range(from, from + pageSize - 1);
+        .range(offset + from, offset + from + pageSize - 1);
       if (scanId) q = sb
         .from("forensic_scans")
         .select("id, target_url, company_name, report, raw_findings")
