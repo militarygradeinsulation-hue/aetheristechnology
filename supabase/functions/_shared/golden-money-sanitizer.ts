@@ -478,13 +478,19 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
     clone.recommendations = recs.map((item, i) => {
       if (typeof item !== "string") return item;
       const r = sanitizeLeakProse(renderLeakPlaceholders(item, { report: totalLabel }), { allowed: globalAllowed, where: `recommendations[${i}]` });
+      const t = annotateMoneyProse(r.text, {
+        defaultCategory: "implementation_investment",
+        where: `recommendations[${i}]`,
+      });
       removals.push(...r.removed);
-      return r.text;
+      omissions.push(...t.omitted);
+      return t.text;
     });
   }
 
-  return { report: clone as T, ledger, removals, structuralRewrites };
+  return { report: clone as T, ledger, removals, structuralRewrites, omissions };
 }
+
 
 /** Convenience for render paths that only need the cleaned report. */
 export function sanitizedGoldenReport<T extends LedgerReportLike | null | undefined>(report: T): T {
