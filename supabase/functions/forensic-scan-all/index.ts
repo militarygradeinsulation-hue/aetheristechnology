@@ -1132,11 +1132,8 @@ function dedupeTopLeaks(
 // ───────────── canonical annual revenue loss (persisted with the report) ─────────────
 // Single shared backend implementation — mirrors src/lib/goldenLeakage.ts.
 // Purely data-shape driven: no company/account/scan-specific branches.
-import {
-  computeOverallLeakage,
-  leakageInvariantError,
-  LEAKAGE_CALCULATION_VERSION,
-} from "../_shared/golden-leakage.ts";
+import { LEAKAGE_CALCULATION_VERSION } from "../_shared/golden-leakage.ts";
+import { resolveFinancialLedger } from "../_shared/golden-ledger.ts";
 import { compileGoldenReport } from "../_shared/golden-compiler.ts";
 
 
