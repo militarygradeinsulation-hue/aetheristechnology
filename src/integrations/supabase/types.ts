@@ -2574,6 +2574,7 @@ export type Database = {
           creator_profile_id: string | null
           creator_user_id: string | null
           error_message: string | null
+          financial_model_version: number | null
           hubspot_account_id: string | null
           id: string
           lead_email: string | null
@@ -2584,6 +2585,7 @@ export type Database = {
           rep_code: string | null
           report: Json | null
           report_source: string
+          report_state: string | null
           requested_by: string | null
           requester_kind: string
           source_notified_at: string | null
@@ -2603,6 +2605,7 @@ export type Database = {
           creator_profile_id?: string | null
           creator_user_id?: string | null
           error_message?: string | null
+          financial_model_version?: number | null
           hubspot_account_id?: string | null
           id?: string
           lead_email?: string | null
@@ -2613,6 +2616,7 @@ export type Database = {
           rep_code?: string | null
           report?: Json | null
           report_source?: string
+          report_state?: string | null
           requested_by?: string | null
           requester_kind?: string
           source_notified_at?: string | null
@@ -2632,6 +2636,7 @@ export type Database = {
           creator_profile_id?: string | null
           creator_user_id?: string | null
           error_message?: string | null
+          financial_model_version?: number | null
           hubspot_account_id?: string | null
           id?: string
           lead_email?: string | null
@@ -2642,6 +2647,7 @@ export type Database = {
           rep_code?: string | null
           report?: Json | null
           report_source?: string
+          report_state?: string | null
           requested_by?: string | null
           requester_kind?: string
           source_notified_at?: string | null
