@@ -307,7 +307,14 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
     return `${punctuated} ${notes.join(" ")}${trailing || " "}`;
   });
 
-  const text2 = kept.join("").replace(/[ \t]{2,}/g, " ").replace(/[ \t]+\n/g, "\n").trim();
+  const escaped = fallback.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const text2 = kept
+    .join("")
+    // Several redactions in a row must not stutter the same fallback sentence.
+    .replace(new RegExp(`(?:${escaped}\\s*){2,}`, "g"), `${fallback} `)
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
   return { text: text2, omitted };
 }
 
