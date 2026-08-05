@@ -425,8 +425,11 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
     if (before !== after) structuralRewrites.push(`chapter:${slug}: ${before} -> ${after} (ledger)`);
 
     const allowed = chapterAllowedValues(ledger, slug);
+    const rollup = isRollupChapter(slug);
     const chapterLabel = alloc ? formatUsdRange(alloc.annual_low, alloc.annual_high) : null;
-    const place = { chapter: chapterLabel, report: totalLabel, leak: chapterLabel };
+    // A priceable chapter never renders the report-wide total, so a stray
+    // {{REPORT_ANNUAL_TOTAL}} token there resolves to neutral wording.
+    const place = { chapter: chapterLabel, report: rollup ? totalLabel : null, leak: chapterLabel };
     for (const key of PROSE_KEYS_CHAPTER) {
       if (typeof ch[key] !== "string") continue;
       const r = sanitizeLeakProse(renderLeakPlaceholders(ch[key] as string, place), { allowed, where: `chapter:${slug}.${key}` });
