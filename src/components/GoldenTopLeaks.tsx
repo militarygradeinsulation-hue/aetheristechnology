@@ -3,6 +3,8 @@ import {
   formatUsdRange,
   type LedgerReportLike,
 } from "@/lib/goldenLedger";
+import { crossReferenceNote, topTenSumNote } from "@/lib/goldenMoneyTaxonomy";
+import { GoldenMoneyCategoryChip } from "@/components/GoldenMoneyCategory";
 
 /**
  * The canonical global "Top 10 Active Leaks" view.
@@ -31,6 +33,8 @@ export function GoldenTopLeaks({ report }: { report: LedgerReportLike | null | u
           {t.label}
         </div>
       </div>
+
+      <GoldenMoneyCategoryChip category="annual_revenue_loss" className="mb-2 block" withNote />
 
       <div className="grid sm:grid-cols-2 gap-2">
         {t.entries.map((e) => (
@@ -71,6 +75,15 @@ export function GoldenTopLeaks({ report }: { report: LedgerReportLike | null | u
         </div>
       </div>
 
+      <p className="mt-2 text-[10px] text-muted-foreground leading-relaxed">
+        {topTenSumNote(
+          formatUsdRange(t.subtotal_low, t.subtotal_high),
+          t.remaining_count,
+          formatUsdRange(t.remainder_low, t.remainder_high),
+          formatUsdRange(ledger.overall.annual_low, ledger.overall.annual_high),
+        )}
+      </p>
+
       {t.remaining_count > 0 && (
         <details className="mt-2">
           <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
@@ -98,7 +111,7 @@ export function GoldenTopLeaks({ report }: { report: LedgerReportLike | null | u
           <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
             {absorbed.map((e) => (
               <li key={e.leak_id}>
-                {e.title} — included in the {e.primary_chapter} chapter total
+                {e.title} — {crossReferenceNote(e.primary_chapter)}
               </li>
             ))}
           </ul>
