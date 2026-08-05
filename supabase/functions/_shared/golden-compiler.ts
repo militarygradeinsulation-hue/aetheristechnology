@@ -1029,12 +1029,14 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
       return out;
     };
 
-    report.executive_summary = fixText(String(report.executive_summary || ""), "executive_summary");
+    // Report-level prose is the only place the report-wide headline is legal.
+    report.executive_summary = fixText(String(report.executive_summary || ""), "executive_summary", reportScope);
 
     for (const ch of chapters) {
+      const scope = chapterScope(String(ch.slug ?? ""));
       for (const field of ["verdict", "what_we_found", "why_its_leaking", "what_its_costing"]) {
         if (typeof ch[field] === "string") {
-          ch[field] = fixText(ch[field] as string, `chapter:${String(ch.slug)}.${field}`);
+          ch[field] = fixText(ch[field] as string, `chapter:${String(ch.slug)}.${field}`, scope);
         }
       }
       const wtd = ch.what_to_do as Record<string, unknown> | undefined;
@@ -1043,7 +1045,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
           const list = wtd[horizon];
           if (!Array.isArray(list)) continue;
           const kept = list
-            .map((it) => (typeof it === "string" ? fixText(it, `chapter:${String(ch.slug)}.${horizon}`) : it))
+            .map((it) => (typeof it === "string" ? fixText(it, `chapter:${String(ch.slug)}.${horizon}`, scope) : it))
             .filter((it) => {
               if (typeof it !== "string") return true;
               if (isRecommendationApplicable(it, siteType)) return true;
