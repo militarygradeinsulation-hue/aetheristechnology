@@ -1132,11 +1132,8 @@ function dedupeTopLeaks(
 // ───────────── canonical annual revenue loss (persisted with the report) ─────────────
 // Single shared backend implementation — mirrors src/lib/goldenLeakage.ts.
 // Purely data-shape driven: no company/account/scan-specific branches.
-import {
-  computeOverallLeakage,
-  leakageInvariantError,
-  LEAKAGE_CALCULATION_VERSION,
-} from "../_shared/golden-leakage.ts";
+import { LEAKAGE_CALCULATION_VERSION } from "../_shared/golden-leakage.ts";
+import { resolveFinancialLedger } from "../_shared/golden-ledger.ts";
 import { compileGoldenReport } from "../_shared/golden-compiler.ts";
 
 
@@ -1370,43 +1367,48 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       await stage("compile", "degraded", "compiler threw");
     }
 
-    // Canonical annual revenue loss invariant (compiler already persisted the
-    // total from uniquely priced leaks; this is the loud last-line check).
+    // Canonical financial invariant. The compiler already built and persisted
+    // the Financial Leak Ledger; this is the loud last-line check that the
+    // cover total, the chapter allocations and the Top 10 all agree.
     // Skipped entirely for regeneration_required reports: there, the ABSENCE of
     // a total is the correct outcome, not a failure to recover from.
     try {
-      if (compilerState !== "regeneration_required") {
-        if (!report?.overall_leakage) {
-          const overall = computeOverallLeakage(report || {});
-          if (overall) report.overall_leakage = overall;
+      if (compilerState !== "regeneration_required" && report) {
+        const ledger = resolveFinancialLedger(report as never);
+        if (ledger.overall) {
+          report.financial_ledger = ledger;
+          report.overall_leakage = {
+            annual_low: ledger.overall.annual_low,
+            annual_high: ledger.overall.annual_high,
+            currency: "USD",
+            source: "financial_ledger",
+            priced_leak_count: ledger.active.length,
+            calculation_version: ledger.model_version,
+          };
         }
-        console.log(`scan ${id}: overall_leakage`, JSON.stringify(report?.overall_leakage ?? null));
-        let invariant = leakageInvariantError(report || {});
-        if (invariant && report) {
-          // Repair before failing: the total must equal the combined evidence
-          // the reader sees (priced leaks + every priced chapter).
-          const recomputed = computeOverallLeakage(report);
-          if (recomputed) {
-            report.overall_leakage = recomputed;
-            invariant = leakageInvariantError(report);
-            console.log(`scan ${id}: overall_leakage repaired`, JSON.stringify(recomputed));
-          }
-        }
-        if (invariant) {
-          // Loud structured failure: never let the red box disappear silently.
+        report.financial_reconciliation = ledger.reconciliation;
+        console.log(`scan ${id}: financial_reconciliation`, JSON.stringify(ledger.reconciliation));
+
+        if (ledger.reconciliation.invariant_status === "failed") {
+          // Loud structured failure: never silently publish contradictory money.
           console.error(JSON.stringify({
-            event: "leakage_invariant_violation",
+            event: "financial_reconciliation_violation",
             scan_id: id,
             target_url: url,
-            detail: invariant,
-            top_leaks_sample: (report?.top_leaks || []).slice(0, 3),
+            violations: ledger.reconciliation.violations,
+            ledger_total: [ledger.reconciliation.ledger_total_low, ledger.reconciliation.ledger_total_high],
+            chapter_total: [ledger.reconciliation.chapter_total_low, ledger.reconciliation.chapter_total_high],
+            top10_subtotal: [ledger.reconciliation.top10_subtotal_low, ledger.reconciliation.top10_subtotal_high],
           }));
+          await stage("synthesis", "degraded", "financial reconciliation failed — figures could not be made consistent");
+        } else if (!ledger.overall) {
           await stage("synthesis", "degraded", "annual revenue loss could not be resolved from priced evidence");
         }
       }
     } catch (e) {
-      console.error("overall_leakage compute failed:", e instanceof Error ? e.message : String(e));
+      console.error("financial ledger compute failed:", e instanceof Error ? e.message : String(e));
     }
+
 
     // ─────────── LIFECYCLE GATE ───────────
     // A generic/template attempt must never replace a previously valid report.

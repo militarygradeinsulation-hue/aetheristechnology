@@ -14,6 +14,8 @@ import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenc
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
+import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
+import { hasLegacyFinancialProse, LEGACY_PROSE_NOTE, chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
 import { Wrench } from "lucide-react";
 
 
@@ -80,6 +82,54 @@ async function fetchScanRow(id: string): Promise<Row | null> {
     return null;
   }
 }
+
+/**
+ * A chapter's money, straight from the ledger. The chapter's own prose is kept
+ * as explanation, but the allocation of record is the ledger figure so the
+ * chapter can never disagree with the cover total or the Top 10.
+ */
+function ChapterFinancials({
+  report,
+  slug,
+  costing,
+}: {
+  report: unknown;
+  slug?: string | null;
+  costing?: string | null;
+}) {
+  const ledger = resolveFinancialLedger(report as never);
+  const key = String(slug || "").toLowerCase();
+  const rollup = NON_PRICEABLE_CHAPTER_SLUGS.has(key);
+  const alloc = rollup ? null : chapterAllocation(ledger, key);
+  const crossRefs = rollup ? [] : crossReferencedIn(ledger, key);
+
+  return (
+    <div>
+      <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">COST (USD)</div>
+      {rollup ? (
+        <p className="text-xs text-muted-foreground">
+          This chapter summarises leaks priced in other chapters. It carries no separate total
+          {ledger.overall
+            ? ` — the report total is ${formatUsdRange(ledger.overall.annual_low, ledger.overall.annual_high)} per year.`
+            : "."}
+        </p>
+      ) : (
+        <div className="font-mono text-sm text-red-400 mb-1">
+          {alloc ? `${formatUsdRange(alloc.annual_low, alloc.annual_high)} / year` : "Not priced"}
+        </div>
+      )}
+      {crossRefs.map((x) => (
+        <div key={x.leak_id} className="text-xs text-muted-foreground">
+          {x.title} — included in this chapter's total
+        </div>
+      ))}
+      {costing && (
+        <div className="whitespace-pre-wrap leading-relaxed text-foreground/90 mt-1">{costing}</div>
+      )}
+    </div>
+  );
+}
+
 
 export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
   const [url, setUrl] = useState("");
@@ -331,6 +381,9 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
         <Card className="p-0 bg-card border-border overflow-hidden">
           <div className="p-5 pb-0 space-y-4">
             <GoldenLeakageBanner report={report} />
+            {hasLegacyFinancialProse(report as never) && (
+              <p className="mt-2 text-xs text-muted-foreground">{LEGACY_PROSE_NOTE}</p>
+            )}
             <GoldenEvidenceQuality report={report} />
           </div>
           <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/5 to-transparent">
@@ -415,26 +468,9 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
               <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">{report.executive_summary}</div>
             </section>
 
-            {!!(report.top_leaks?.length) && (
-              <section>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500 mb-2">Top Leaks</div>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  {report.top_leaks!.map((l) => (
-                    <div key={l.rank} className="border border-border rounded p-3 bg-muted/20">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="font-mono text-xs text-amber-500">#{l.rank}</span>
-                        {l.dollars_low != null && l.dollars_high != null && (
-                          <span className="text-xs font-mono text-red-400">
-                            ${l.dollars_low.toLocaleString()}-${l.dollars_high.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm font-semibold mt-1">{l.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Canonical Top 10 — reads the Financial Leak Ledger, never its own math. */}
+            <GoldenTopLeaks report={report as never} />
+
 
             <GoldenGrowthAssets
               deliverables={report.deliverables}
@@ -546,12 +582,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                               <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{c.why_its_leaking}</div>
                             </div>
                           )}
-                          {c.what_its_costing && (
-                            <div>
-                              <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">COST (USD)</div>
-                              <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{c.what_its_costing}</div>
-                            </div>
-                          )}
+                          <ChapterFinancials report={report as never} slug={c.slug} costing={c.what_its_costing} />
                           {c.what_to_do && (
                             <div>
                               <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">WHAT TO DO</div>

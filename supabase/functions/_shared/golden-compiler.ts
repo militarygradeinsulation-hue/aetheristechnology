@@ -15,8 +15,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import {
+  buildFinancialLedger,
   computeGoldenLeakage,
-  leaksFromChapters,
   parseMoney,
   type GoldenLeakage,
   type GoldenReportLike,
@@ -851,37 +851,16 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     }
   }
 
-  // ── 4. canonical total = everything the reader can see, counted once ──
-  // Unique priced leaks PLUS every chapter that carries its own annual figure
-  // and is not already represented by a priced leak or a category benchmark.
+  // ── 4. canonical total = the Financial Leak Ledger (the ONLY money path) ──
+  // Evidence-validated priced leaks replace the raw synthesis pricing, then the
+  // ledger allocates every entry to exactly one chapter and sums it once.
   const canonicalLeaks: PricedLeak[] = priced_leaks.map((p) => ({
     name: p.root_cause_id,
     chapter_slug: p.chapter_slug,
     dollars_low: p.annual_low,
     dollars_high: p.annual_high,
+    basis: (p as { pricing_basis?: string }).pricing_basis,
   }));
-  const coveredSlugs = new Set<string>(
-    [
-      ...priced_leaks.map((p) => String(p.chapter_slug || "").toLowerCase()),
-      ...benchmark_leaks.map((b) => String(b.chapter_slug || "").toLowerCase()),
-    ].filter(Boolean),
-  );
-  // leaksFromChapters() skips any chapter whose slug appears in top_leaks, so
-  // hand it the covered slugs to get exactly the chapters not yet counted.
-  const chapterLeaks = leaksFromChapters({
-    chapters: report.chapters,
-    top_leaks: [...coveredSlugs].map((slug) => ({ chapter_slug: slug })),
-  } as GoldenReportLike);
-
-  const summable = [...canonicalLeaks, ...chapterLeaks];
-  // When every leak was a category benchmark and no chapter carries a figure
-  // there is nothing evidence-linked left to sum. Falling back to the stored
-  // report would re-admit exactly the generic total we just removed.
-  const leakage = summable.length
-    ? computeGoldenLeakage(summable)
-    : benchmark_leaks.length
-      ? null
-      : computeGoldenLeakage(report);
 
   if (benchmark_leaks.length) {
     report.benchmark_leaks = benchmark_leaks;
@@ -891,20 +870,35 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     );
   }
 
-  if (leakage) {
+  // Downstream prose repair rewrites stale totals to THIS value only.
+  const financialLedger = buildFinancialLedger({
+    chapters: report.chapters,
+    top_leaks: canonicalLeaks,
+  } as never);
+
+  const leakage: GoldenLeakage | null = financialLedger.overall
+    ? computeGoldenLeakage({ financial_ledger: financialLedger } as never)
+    : null;
+
+  if (financialLedger.overall) {
+    report.financial_ledger = financialLedger as never;
+    report.financial_reconciliation = financialLedger.reconciliation as never;
     report.overall_leakage = {
-      annual_low: Math.round(leakage.low),
-      annual_high: Math.round(leakage.high),
+      annual_low: financialLedger.overall.annual_low,
+      annual_high: financialLedger.overall.annual_high,
       currency: "USD",
-      source: summable.length ? "priced_leaks+chapters" : leakage.source,
-      priced_leak_count: summable.length || leakage.count,
-      calculation_version: leakage.calculation_version,
+      source: "financial_ledger",
+      priced_leak_count: financialLedger.active.length,
+      calculation_version: financialLedger.model_version,
     };
   } else {
     // No evidence-linked priced leak survived: the red box must disappear
     // rather than show a benchmark sum.
     delete (report as Record<string, unknown>).overall_leakage;
+    delete (report as Record<string, unknown>).financial_ledger;
+    report.financial_reconciliation = financialLedger.reconciliation as never;
   }
+
 
 
 

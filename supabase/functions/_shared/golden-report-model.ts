@@ -14,6 +14,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { computeGoldenLeakage, GOLDEN_LEAKAGE_LABEL, type GoldenLeakage } from "./golden-leakage.ts";
+import {
+  resolveFinancialLedger,
+  needsFinancialRegeneration,
+  hasLegacyFinancialProse,
+  LEGACY_PROSE_NOTE,
+  REGENERATION_LABEL,
+  chapterAllocation,
+  crossReferencedIn,
+  formatUsdRangeAscii,
+  NON_PRICEABLE_CHAPTER_SLUGS,
+  type FinancialLedger,
+} from "./golden-ledger.ts";
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
 
 
@@ -130,7 +142,7 @@ function block(label: string, body?: unknown): Block[] {
 
 // ───────────────────────── sections ─────────────────────────
 
-function leakageSection(leakage: GoldenLeakage | null): Section {
+function leakageSection(leakage: GoldenLeakage | null, needsRegen = false): Section {
   if (!leakage) {
     // Never fabricate a fallback range. The reader is told plainly that the
     // scan produced no priced evidence.
@@ -140,7 +152,12 @@ function leakageSection(leakage: GoldenLeakage | null): Section {
       newPage: false,
       indexed: false,
       blocks: [
-        { kind: "callout", tone: "amber", label: GOLDEN_LEAKAGE_LABEL, text: "Not calculated" },
+        {
+          kind: "callout",
+          tone: "amber",
+          label: GOLDEN_LEAKAGE_LABEL,
+          text: needsRegen ? REGENERATION_LABEL : "Not calculated",
+        },
         {
           kind: "paragraph",
           text:
@@ -249,24 +266,78 @@ function evidenceSection(report: Record<string, unknown>): Section | null {
 }
 
 
-function topLeaksSection(report: Record<string, unknown>): Section | null {
-  const leaks = Array.isArray(report.top_leaks) ? (report.top_leaks as Record<string, unknown>[]) : [];
-  if (!leaks.length) return null;
-  const blocks: Block[] = [];
-  leaks.forEach((l, i) => {
-    const rank = str(l.rank) || String(i + 1);
-    blocks.push({ kind: "subheading", text: `#${rank} · ${str(l.name) || "Leak"}` });
-    const lo = money(l.dollars_low);
-    const hi = money(l.dollars_high);
-    if (lo || hi) pushIf(blocks, { kind: "kv", label: "Annual cost", value: lo && hi ? `${lo} - ${hi}` : lo || hi });
-    // Every remaining saved field on the leak is exported verbatim.
-    for (const [k, v] of Object.entries(l)) {
-      if (["rank", "name", "dollars_low", "dollars_high"].includes(k)) continue;
-      if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v));
-      else if (has(v)) blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+/**
+ * The canonical global Top 10. Sorted by annual_high desc, then annual_low
+ * desc, then title, then leak_id — a documented, deterministic rule. Every
+ * number here is a ledger entry; nothing is recomputed.
+ */
+/** Auditable proof that every surface agrees, rendered on web and PDF alike. */
+function reconciliationSection(ledger: FinancialLedger): Section | null {
+  const r = ledger.reconciliation;
+  if (!ledger.overall) return null;
+  return {
+    id: "financial-reconciliation",
+    title: "Financial Reconciliation",
+    newPage: false,
+    indexed: false,
+    blocks: [
+      { kind: "kv", label: "Model version", value: String(r.model_version) },
+      { kind: "kv", label: "Priced leaks", value: String(r.priced_count) },
+      { kind: "kv", label: "Unpriced findings", value: String(r.unpriced_count) },
+      { kind: "kv", label: "Ledger total", value: formatUsdRangeAscii(r.ledger_total_low, r.ledger_total_high) },
+      { kind: "kv", label: "Chapter allocation total", value: formatUsdRangeAscii(r.chapter_total_low, r.chapter_total_high) },
+      { kind: "kv", label: "Top 10 subtotal", value: formatUsdRangeAscii(r.top10_subtotal_low, r.top10_subtotal_high) },
+      { kind: "kv", label: "Remainder subtotal", value: formatUsdRangeAscii(r.remainder_low, r.remainder_high) },
+      { kind: "kv", label: "Duplicates removed", value: String(r.duplicate_count) },
+      { kind: "kv", label: "Invariants", value: r.invariant_status },
+      ...(r.violations.length ? [{ kind: "mono" as const, label: "Reconciliation issues", lines: r.violations.map((v) => `${v.code}: ${v.detail}`) }] : []),
+    ],
+  };
+}
+
+function topLeaksSection(ledger: FinancialLedger): Section | null {
+  if (!ledger.active.length || !ledger.overall) return null;
+  const t = ledger.top10;
+  const blocks: Block[] = [
+    { kind: "kv", label: "Scope", value: t.label },
+  ];
+  for (const e of t.entries) {
+    blocks.push({ kind: "subheading", text: `#${e.rank} · ${e.title}` });
+    blocks.push({ kind: "kv", label: "Annual cost", value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+    blocks.push({ kind: "kv", label: "Allocated to chapter", value: e.primary_chapter });
+    if (e.pricing_basis) blocks.push({ kind: "kv", label: "Pricing basis", value: e.pricing_basis });
+  }
+  blocks.push({ kind: "kv", label: "Top 10 subtotal", value: formatUsdRangeAscii(t.subtotal_low, t.subtotal_high) });
+  if (t.remaining_count > 0) {
+    blocks.push({ kind: "kv", label: "Remaining priced leaks", value: String(t.remaining_count) });
+    blocks.push({ kind: "kv", label: "Remainder subtotal", value: formatUsdRangeAscii(t.remainder_low, t.remainder_high) });
+    // The remainder is itemised so no priced leak is ever hidden from the reader.
+    blocks.push({ kind: "subheading", text: `Remaining ${t.remaining_count} priced leaks` });
+    for (const e of t.remainder) {
+      blocks.push({ kind: "kv", label: e.title, value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+      blocks.push({ kind: "kv", label: `${e.title} · chapter`, value: e.primary_chapter });
+      if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
     }
+  }
+  blocks.push({
+    kind: "kv",
+    label: "Report total",
+    value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
   });
-  return { id: "top-leaks", title: "Top Leaks", newPage: true, indexed: true, blocks };
+  // Leaks that are real findings but whose money is already carried by their
+  // chapter. Shown for completeness, never added to a total a second time.
+  const absorbed = ledger.entries.filter((e) => e.status === "included_in_chapter" || e.status === "duplicate");
+  if (absorbed.length) {
+    blocks.push({ kind: "subheading", text: "Also identified (already counted in a chapter total)" });
+    for (const e of absorbed) {
+      blocks.push({ kind: "kv", label: e.title, value: `Included in the ${e.primary_chapter} chapter total` });
+      if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
+      for (const x of e.cross_referenced_chapters) {
+        blocks.push({ kind: "kv", label: `${e.title} · also discussed in`, value: x });
+      }
+    }
+  }
+  return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
 }
 
 function labelize(k: string): string {
@@ -400,13 +471,51 @@ function scheduleSection(d: GoldenDeliverables): Section | null {
   return { id: "schedule", title: `Content Schedule (${days.length} days)`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
-function chapterSection(ch: Record<string, unknown>, idx: number): Section {
+function chapterSection(ch: Record<string, unknown>, idx: number, ledger: FinancialLedger): Section {
   const no = Number(ch.no) || idx + 1;
+  const slug = String(ch.slug || "").toLowerCase();
   const blocks: Block[] = [];
+  const rollup = NON_PRICEABLE_CHAPTER_SLUGS.has(slug);
+  const alloc = chapterAllocation(ledger, slug);
+  if (rollup) {
+    // Roll-up chapters never carry their own money: they render the canonical
+    // global view so no second Top 10 total can exist.
+    blocks.push({
+      kind: "kv",
+      label: "Financial allocation",
+      value: "None — this chapter summarises leaks priced in other chapters.",
+    });
+    if (ledger.overall) {
+      blocks.push({ kind: "kv", label: "Canonical view", value: ledger.top10.label });
+      blocks.push({
+        kind: "kv",
+        label: "Top 10 subtotal",
+        value: formatUsdRangeAscii(ledger.top10.subtotal_low, ledger.top10.subtotal_high),
+      });
+      blocks.push({
+        kind: "kv",
+        label: "Report total",
+        value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
+      });
+    }
+  } else {
+    blocks.push({
+      kind: "kv",
+      label: "Chapter annual allocation",
+      value: alloc ? formatUsdRangeAscii(alloc.annual_low, alloc.annual_high) : "Not priced",
+    });
+    for (const x of crossReferencedIn(ledger, slug)) {
+      blocks.push({
+        kind: "kv",
+        label: `Cross-referenced · ${x.title}`,
+        value: `Included in the ${slug} chapter total`,
+      });
+    }
+  }
   if (has(ch.verdict)) blocks.push({ kind: "callout", tone: "red", label: "Verdict", text: str(ch.verdict) });
   blocks.push(...block("What we found", ch.what_we_found));
   blocks.push(...block("Why it's leaking", ch.why_its_leaking));
-  blocks.push(...block("What it's costing (USD)", ch.what_its_costing));
+  if (!rollup) blocks.push(...block("What it's costing (USD)", ch.what_its_costing));
   const wtd = ch.what_to_do as Record<string, unknown> | undefined;
   if (wtd && typeof wtd === "object") {
     blocks.push({ kind: "subheading", text: "What to do" });
@@ -422,7 +531,7 @@ function chapterSection(ch: Record<string, unknown>, idx: number): Section {
   }
   // Any additional saved chapter field is exported rather than silently dropped.
   for (const [k, v] of Object.entries(ch)) {
-    if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence"].includes(k)) continue;
+    if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence", "annual_low", "annual_high"].includes(k)) continue;
     if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
     else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
   }
@@ -509,6 +618,9 @@ export function buildGoldenReportModel(opts: {
   generatedAt?: Date;
 }): GoldenReportModel {
   const report = (opts.report || {}) as Record<string, unknown>;
+  // ONE financial source for every surface: the persisted ledger when present,
+  // otherwise rebuilt deterministically from the same stored evidence.
+  const ledger = resolveFinancialLedger(report as never);
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
 
@@ -525,7 +637,17 @@ export function buildGoldenReportModel(opts: {
   });
 
   pushIf(sections as never, degradedSection(report) as never);
-  sections.push(leakageSection(leakage));
+  sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
+  if (hasLegacyFinancialProse(report as never)) {
+    sections.push({
+      id: "legacy-financial-note",
+      title: "About the figures in this report",
+      newPage: false,
+      indexed: false,
+      blocks: [{ kind: "paragraph", text: LEGACY_PROSE_NOTE }],
+    });
+  }
+  pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
   if (has(report.executive_summary)) {
@@ -538,7 +660,7 @@ export function buildGoldenReportModel(opts: {
     });
   }
 
-  pushIf(sections as never, topLeaksSection(report) as never);
+  pushIf(sections as never, topLeaksSection(ledger) as never);
 
   const d = (report.deliverables || null) as GoldenDeliverables | null;
   if (d) {
@@ -561,7 +683,7 @@ export function buildGoldenReportModel(opts: {
   }
 
   const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
-  chapters.forEach((ch, i) => sections.push(chapterSection(ch, i)));
+  chapters.forEach((ch, i) => sections.push(chapterSection(ch, i, ledger)));
 
   // ── FUTURE-PROOF CATCH-ALL ──
   // Any saved top-level field that no section above claims is rendered here, so
