@@ -265,17 +265,19 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
     const cats = new Set(amounts.map((a) => a.category as MoneyCategory));
     const notes: string[] = [];
     if (cats.has("implementation_investment") || cats.has("recovery_scenario")) {
-      if (!out.includes(PLANNING_FIGURES_NOTE)) notes.push(PLANNING_FIGURES_NOTE);
+      // Check the whole text: the note becomes its own sentence, so a
+      // sentence-local check would re-append it on every pass.
+      if (!input.includes(PLANNING_FIGURES_NOTE)) notes.push(PLANNING_FIGURES_NOTE);
     }
     if (cats.has("source_evidence") && !cats.has("annual_revenue_loss")) {
       const n = MONEY_CATEGORY_NOTE.source_evidence;
-      if (!out.includes(n)) notes.push(n);
+      if (!input.includes(n)) notes.push(n);
     }
     // Leak money stays unlabelled inline (the amounts read as prose), but the
     // sentence still states the category so nothing is left ambiguous.
     if (cats.has("annual_revenue_loss")) {
       const n = `${MONEY_CATEGORY_LABEL.annual_revenue_loss}. ${MONEY_CATEGORY_NOTE.annual_revenue_loss}`;
-      if (!out.includes(MONEY_CATEGORY_NOTE.annual_revenue_loss)) notes.push(n);
+      if (!input.includes(MONEY_CATEGORY_NOTE.annual_revenue_loss)) notes.push(n);
     }
 
     if (!notes.length) return out + trailing;
