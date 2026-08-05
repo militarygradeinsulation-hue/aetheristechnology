@@ -333,6 +333,89 @@ const RevenueLeakAuditPage: React.FC = () => {
               </p>
             </section>
 
+            {/* 6b. PRICING */}
+            <section aria-labelledby="rla-pricing">
+              <div id="rla-pricing">
+                <SectionHeading
+                  eyebrow="Pricing"
+                  title="Pick the level of evidence you need."
+                  sub="Every paid tier credits toward the next. Buy directly below, no call required."
+                />
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {AUDIT_TIERS.map((tier) => (
+                  <div
+                    key={tier.name}
+                    className={`glass rounded-lg border p-6 flex flex-col ${
+                      tier.highlight ? 'border-amber/60' : 'border-border/60'
+                    }`}
+                  >
+                    {tier.badge && (
+                      <div className="font-case text-[10px] uppercase tracking-[0.25em] text-amber mb-3">
+                        {tier.badge}
+                      </div>
+                    )}
+                    <h3 className="font-forensic text-xl font-bold text-foreground">{tier.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="font-forensic text-3xl font-bold text-amber">{tier.price}</span>
+                      <span className="font-case text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {tier.cadence}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{tier.blurb}</p>
+                    <ul className="mt-4 space-y-2 flex-1">
+                      {tier.includes.map((item) => (
+                        <li key={item} className="text-sm text-foreground/90 leading-relaxed flex gap-2">
+                          <span className="text-amber shrink-0" aria-hidden>
+                            &rsaquo;
+                          </span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-6">
+                      {tier.priceId ? (
+                        <Button
+                          onClick={() => setCheckoutTier({ name: tier.name, priceId: tier.priceId as string })}
+                          className="w-full bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        >
+                          {tier.cta}
+                        </Button>
+                      ) : (
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="w-full focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        >
+                          <Link to={tier.href as string}>{tier.cta}</Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {checkoutTier && (
+                <div className="mt-8 glass rounded-lg border border-amber/40 p-6 max-w-3xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-forensic text-xl font-bold text-foreground">{checkoutTier.name}</h3>
+                    <button
+                      onClick={() => setCheckoutTier(null)}
+                      className="text-xs text-muted-foreground hover:text-amber underline focus-visible:ring-2 focus-visible:ring-amber rounded-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <StripeEmbeddedCheckout
+                    priceId={checkoutTier.priceId}
+                    returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
+                    metadata={{ source: 'revenue_leak_audit', package: checkoutTier.name }}
+                  />
+                </div>
+              )}
+            </section>
+
             {/* 7. FINAL CTA */}
             <section aria-labelledby="rla-final" className="glass rounded-lg border border-amber/30 p-6 md:p-10">
               <h2
