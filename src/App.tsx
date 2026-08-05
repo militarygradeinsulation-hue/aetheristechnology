@@ -239,7 +239,10 @@ const App = () => (
                       ))}
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
-                      <Route path="/leak-audit" element={<LeakAuditPage />} />
+                      <Route path="/leak-audit" element={<RevenueLeakAuditPage />} />
+                      <Route path="/leak-audit/self-scan" element={<LeakAuditPage />} />
+                      <Route path="/partners" element={<PartnersPage />} />
+
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
