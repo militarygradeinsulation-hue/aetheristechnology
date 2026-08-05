@@ -455,7 +455,10 @@ export function generateForensicGoldenPdf(opts: {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     const capLines = wrap(doc, caption, CW - 8);
-    const boxH = 24 + capLines.length * 4;
+    // The category key travels with the cover total so the reader knows which
+    // of the four money categories every later figure belongs to.
+    const legendLines = model.leakage ? wrap(doc, MONEY_TAXONOMY_LEGEND, CW - 8) : [];
+    const boxH = 24 + (capLines.length + legendLines.length + (model.leakage ? 1 : 0)) * 4;
     doc.setFillColor(...(model.leakage ? [40, 15, 15] : [34, 26, 10]) as [number, number, number]);
     doc.rect(M, boxY, CW, boxH, "F");
     doc.setDrawColor(...tone);
@@ -467,8 +470,18 @@ export function generateForensicGoldenPdf(opts: {
     doc.text(headline, M + 4, boxY + 20);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
     let capY = boxY + 26;
+    if (model.leakage) {
+      doc.setFont("helvetica", "bold");
+      doc.text(MONEY_CATEGORY_LABEL.annual_revenue_loss, M + 4, capY);
+      doc.setFont("helvetica", "normal");
+      capY += 4;
+    }
     for (const l of capLines) { doc.text(l, M + 4, capY); capY += 4; }
+    doc.setFontSize(6.5);
+    for (const l of legendLines) { doc.text(l, M + 4, capY); capY += 4; }
+    doc.setFontSize(8);
   }
+
 
 
   // ───────── INDEX (clickable, back-filled with real page numbers) ─────────
