@@ -14,6 +14,8 @@ import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenc
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
+import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
+import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
 import { Wrench } from "lucide-react";
 
 
@@ -529,12 +531,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                               <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{c.why_its_leaking}</div>
                             </div>
                           )}
-                          {c.what_its_costing && (
-                            <div>
-                              <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">COST (USD)</div>
-                              <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{c.what_its_costing}</div>
-                            </div>
-                          )}
+                          <ChapterFinancials report={report as never} slug={c.slug} costing={c.what_its_costing} />
                           {c.what_to_do && (
                             <div>
                               <div className="text-[10px] font-mono font-bold text-amber-500 tracking-widest mb-1">WHAT TO DO</div>
