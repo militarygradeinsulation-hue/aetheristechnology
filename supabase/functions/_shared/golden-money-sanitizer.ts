@@ -404,8 +404,16 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
     for (const key of PROSE_KEYS_CHAPTER) {
       if (typeof ch[key] !== "string") continue;
       const r = sanitizeLeakProse(renderLeakPlaceholders(ch[key] as string, place), { allowed, where: `chapter:${slug}.${key}` });
-      ch[key] = r.text;
+      // "What it's costing" is the chapter's leak paragraph, so an unlabelled
+      // amount there inherits ANNUAL REVENUE LOSS. Narrative fields inherit
+      // nothing: an amount they cannot justify is omitted.
+      const t = annotateMoneyProse(r.text, {
+        defaultCategory: key === "what_its_costing" || key === "cost_basis" ? "annual_revenue_loss" : null,
+        where: `chapter:${slug}.${key}`,
+      });
+      ch[key] = t.text;
       removals.push(...r.removed);
+      omissions.push(...t.omitted);
     }
     const wtd = ch.what_to_do as Record<string, unknown> | undefined;
     if (wtd && typeof wtd === "object") {
@@ -414,8 +422,14 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
         wtd[horizon] = list.map((item) => {
           if (typeof item !== "string") return item;
           const r = sanitizeLeakProse(renderLeakPlaceholders(item, place), { allowed, where: `chapter:${slug}.${horizon}` });
+          // Action lines are proposed work: their money is spend, not loss.
+          const t = annotateMoneyProse(r.text, {
+            defaultCategory: "implementation_investment",
+            where: `chapter:${slug}.${horizon}`,
+          });
           removals.push(...r.removed);
-          return r.text;
+          omissions.push(...t.omitted);
+          return t.text;
         });
       }
     }
@@ -433,6 +447,11 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
       if (r.removed.length) {
         e.value = NEUTRAL_LEAK_SENTENCE;
         removals.push(...r.removed);
+      } else if (/\$\s?\d/.test(value)) {
+        // A surviving dollar amount in evidence is an observed company figure.
+        e.value = tagMoney(value, "source_evidence");
+        e.money_category = "source_evidence";
+        e.money_category_note = MONEY_CATEGORY_NOTE.source_evidence;
       } else {
         e.value = value;
       }
@@ -443,9 +462,12 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
   for (const key of ["executive_summary", "summary", "verdict", "recommendations_summary", "conclusion"]) {
     if (typeof clone[key] !== "string") continue;
     const r = sanitizeLeakProse(renderLeakPlaceholders(clone[key] as string, { report: totalLabel }), { allowed: globalAllowed, where: key });
-    clone[key] = r.text;
+    const t = annotateMoneyProse(r.text, { defaultCategory: null, where: key });
+    clone[key] = t.text;
     removals.push(...r.removed);
+    omissions.push(...t.omitted);
   }
+
   const recs = clone.recommendations;
   if (Array.isArray(recs)) {
     clone.recommendations = recs.map((item, i) => {
