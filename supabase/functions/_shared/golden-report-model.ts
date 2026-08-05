@@ -308,26 +308,46 @@ function reconciliationSection(ledger: FinancialLedger): Section | null {
   };
 }
 
-function topLeaksSection(ledger: FinancialLedger): Section | null {
+function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => string): Section | null {
   if (!ledger.active.length || !ledger.overall) return null;
   const t = ledger.top10;
+  const subtotal = formatUsdRangeAscii(t.subtotal_low, t.subtotal_high);
+  const remainder = formatUsdRangeAscii(t.remainder_low, t.remainder_high);
+  const total = formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high);
   const blocks: Block[] = [
     { kind: "kv", label: "Scope", value: t.label },
+    { kind: "kv", label: "Money category", value: MONEY_CATEGORY_LABEL.annual_revenue_loss },
   ];
   for (const e of t.entries) {
     blocks.push({ kind: "subheading", text: `#${e.rank} · ${e.title}` });
-    blocks.push({ kind: "kv", label: "Annual cost", value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+    blocks.push({
+      kind: "kv",
+      label: "Annual cost",
+      value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+    });
     blocks.push({ kind: "kv", label: "Allocated to chapter", value: e.primary_chapter });
     if (e.pricing_basis) blocks.push({ kind: "kv", label: "Pricing basis", value: e.pricing_basis });
   }
-  blocks.push({ kind: "kv", label: "Top 10 subtotal", value: formatUsdRangeAscii(t.subtotal_low, t.subtotal_high) });
+  blocks.push({
+    kind: "kv",
+    label: "Top 10 subtotal",
+    value: tagMoney(subtotal, "annual_revenue_loss"),
+  });
   if (t.remaining_count > 0) {
     blocks.push({ kind: "kv", label: "Remaining priced leaks", value: String(t.remaining_count) });
-    blocks.push({ kind: "kv", label: "Remainder subtotal", value: formatUsdRangeAscii(t.remainder_low, t.remainder_high) });
+    blocks.push({
+      kind: "kv",
+      label: "Remainder subtotal",
+      value: tagMoney(remainder, "annual_revenue_loss"),
+    });
     // The remainder is itemised so no priced leak is ever hidden from the reader.
     blocks.push({ kind: "subheading", text: `Remaining ${t.remaining_count} priced leaks` });
     for (const e of t.remainder) {
-      blocks.push({ kind: "kv", label: e.title, value: formatUsdRangeAscii(e.annual_low, e.annual_high) });
+      blocks.push({
+        kind: "kv",
+        label: e.title,
+        value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+      });
       blocks.push({ kind: "kv", label: `${e.title} · chapter`, value: e.primary_chapter });
       if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
     }
@@ -335,15 +355,18 @@ function topLeaksSection(ledger: FinancialLedger): Section | null {
   blocks.push({
     kind: "kv",
     label: "Report total",
-    value: formatUsdRangeAscii(ledger.overall.annual_low, ledger.overall.annual_high),
+    value: tagMoney(total, "annual_revenue_loss"),
   });
+  // Exact sum relationship, spelled out so the three figures can never read as
+  // three competing totals.
+  blocks.push({ kind: "paragraph", text: topTenSumNote(subtotal, t.remaining_count, remainder, total) });
   // Leaks that are real findings but whose money is already carried by their
   // chapter. Shown for completeness, never added to a total a second time.
   const absorbed = ledger.entries.filter((e) => e.status === "included_in_chapter" || e.status === "duplicate");
   if (absorbed.length) {
     blocks.push({ kind: "subheading", text: "Also identified (already counted in a chapter total)" });
     for (const e of absorbed) {
-      blocks.push({ kind: "kv", label: e.title, value: `Included in the ${e.primary_chapter} chapter total` });
+      blocks.push({ kind: "kv", label: e.title, value: crossReferenceNote(chapterRef(e.primary_chapter)) });
       if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
       for (const x of e.cross_referenced_chapters) {
         blocks.push({ kind: "kv", label: `${e.title} · also discussed in`, value: x });
@@ -352,6 +375,7 @@ function topLeaksSection(ledger: FinancialLedger): Section | null {
   }
   return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
 }
+
 
 function labelize(k: string): string {
   return k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
