@@ -308,7 +308,7 @@ function reconciliationSection(ledger: FinancialLedger): Section | null {
   };
 }
 
-function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => string): Section | null {
+function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => string | number): Section | null {
   if (!ledger.active.length || !ledger.overall) return null;
   const t = ledger.top10;
   const subtotal = formatUsdRangeAscii(t.subtotal_low, t.subtotal_high);
