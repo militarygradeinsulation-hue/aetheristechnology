@@ -157,7 +157,10 @@ describe("determinism", () => {
   it("produces byte-identical output for identical input", () => {
     const a = compileGoldenReport({ report: twoChapterReport(), rawFindings: htmlFindings });
     const b = compileGoldenReport({ report: twoChapterReport(), rawFindings: htmlFindings });
-    expect(JSON.stringify(a.report)).toBe(JSON.stringify(b.report));
+    // Timestamps are wall-clock by design; everything else must match exactly.
+    const strip = (r: unknown) =>
+      JSON.stringify(r).replace(/\d{4}-\d{2}-\d{2}T[\d:.]+Z/g, "T");
+    expect(strip(a.report)).toBe(strip(b.report));
   });
 
   it("keeps the chapter allocations within the report total", () => {
