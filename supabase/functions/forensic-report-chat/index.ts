@@ -104,7 +104,9 @@ ${context}` },
     if (!raw.trim()) throw new Error("No answer produced. Try again.");
     // Validate the OUTPUT, not just the input: the model may quote canonical
     // scoped values but must never compute, add, extrapolate or invent money.
-    const answer = guardChatMoney(raw, report as never).text;
+    // For an unpublishable report the allowed set is empty by construction, so
+    // every leak figure the model might still produce is redacted here.
+    const answer = guardChatMoney(raw, unpublishable ? null : (report as never)).text;
     const cites: { chapter_no: number; slug: string; title: string }[] = [];
     for (const c of report.chapters || []) {
       const re = new RegExp(`Ch\\s*${c.no}\\b`, "i");
