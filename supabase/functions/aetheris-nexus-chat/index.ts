@@ -184,6 +184,11 @@ Deno.serve(async (req) => {
   // Build message list with system prompt
   const messages: any[] = [
     { role: "system", content: SYSTEM_PROMPT },
+    {
+      role: "system",
+      content:
+        "GOLDEN REPORT MONEY LOCK. Any scan report you are shown has already been rendered from the canonical Financial Leak Ledger. You may quote a dollar figure ONLY if it appears verbatim in that sanitized report, and only in the same scope it appears in (a chapter figure stays in that chapter, the report total stays a report total). You must never add, sum, average, extrapolate, annualize, discount or otherwise derive a new dollar amount, and never invent one. If a number is not in the report, say it is not modeled. USD only.",
+    },
     ...incoming,
   ];
 
