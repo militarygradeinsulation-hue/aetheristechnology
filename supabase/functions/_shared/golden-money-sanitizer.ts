@@ -372,9 +372,15 @@ export function sanitizeGoldenReportFinancials<T extends LedgerReportLike | null
       if (typeof leak[key] !== "string") continue;
       const rendered = renderLeakPlaceholders(leak[key] as string, { report: totalLabel, leak: leakLabel });
       const r = sanitizeLeakProse(rendered, { allowed: globalAllowed, where: `top_leaks[${i}].${key}` });
-      leak[key] = r.text;
+      const t = annotateMoneyProse(r.text, {
+        defaultCategory: "annual_revenue_loss",
+        where: `top_leaks[${i}].${key}`,
+      });
+      leak[key] = t.text;
       removals.push(...r.removed);
+      omissions.push(...t.omitted);
     }
+
   });
 
   // ── 3. chapters: allocation of record + sanitized prose ────────────────────
