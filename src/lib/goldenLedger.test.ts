@@ -178,7 +178,7 @@ describe("value hygiene", () => {
       chapters: Array.from({ length: 6 }, (_, i) => ch(`c${i}`)),
     } as never);
     expect(l.reconciliation.invariant_status).not.toBe("ok");
-    expect(l.reconciliation.violations.map((v) => v.code)).toContain("implausible_total");
+    expect(l.reconciliation.violations.map((v) => v.code)).toContain("scale_warning");
   });
 
   it("never lets a roll-up chapter contribute its own money", () => {
