@@ -11,9 +11,9 @@ import { compileGoldenReport } from "./goldenCompiler";
 import {
   chapterAllowedValues,
   guardChatMoney,
-  resolveFinancialLedger,
   sanitizedGoldenReport,
 } from "./goldenMoneySanitizer";
+import { resolveFinancialLedger } from "./goldenLedger";
 import { annotateMoneyProse, classifyMoneyAt } from "./goldenMoneyTaxonomy";
 
 const htmlFindings = {
