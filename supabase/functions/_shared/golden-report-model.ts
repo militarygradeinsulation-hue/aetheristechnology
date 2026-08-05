@@ -25,6 +25,16 @@ import {
   type FinancialLedger,
 } from "./golden-ledger.ts";
 import { sanitizeGoldenReportFinancials, FINANCIAL_METHODOLOGY_NOTE } from "./golden-money-sanitizer.ts";
+import {
+  MONEY_CATEGORY_LABEL,
+  MONEY_CATEGORY_NOTE,
+  MONEY_TAXONOMY_LEGEND,
+  CHAPTER_ALLOCATION_NOTE,
+  crossReferenceNote,
+  topTenSumNote,
+  tagMoney,
+} from "./golden-money-taxonomy.ts";
+
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
 
 
