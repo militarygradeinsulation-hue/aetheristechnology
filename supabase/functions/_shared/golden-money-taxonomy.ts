@@ -204,11 +204,27 @@ function splitSentences(text: string): string[] {
   }, []);
 }
 
+/**
+ * Deterministic replacement for a sentence whose money cannot be placed in a
+ * category. Sanitation must never leave a half-written sentence behind, so the
+ * whole sentence is swapped for grammatical, field-aware text.
+ */
+export const AMBIGUOUS_MONEY_FALLBACK: Record<string, string> = {
+  annual_revenue_loss: "The annual revenue loss for this item is the allocation shown above.",
+  implementation_investment:
+    "Implementation cost for this action is scoped during the engagement, not modeled here.",
+  recovery_scenario: "Recovery upside for this item is not modeled as a separate figure.",
+  source_evidence: "No verified source amount was captured for this item.",
+  default: "No verified dollar figure is available for this item.",
+};
+
 export type AnnotateOptions = {
   /** Category every unclassified amount in this field inherits. */
   defaultCategory?: MoneyCategory | null;
   /** Human location used in omission logs. */
   where?: string;
+  /** Sentence rendered in place of unclassifiable money. Must be grammatical. */
+  fallbackSentence?: string;
 };
 
 export type AnnotateResult = { text: string; omitted: string[] };
@@ -221,7 +237,8 @@ export type AnnotateResult = { text: string; omitted: string[] };
  *  • Source evidence is labelled and marked as not a separate leak total.
  *  • Annual revenue loss keeps the ledger wording it already carries.
  *  • A sentence holding an amount that cannot be classified and has no field
- *    default is OMITTED rather than shown as ambiguous money.
+ *    default is REPLACED with deterministic fallback text — never deleted —
+ *    so sanitation can never produce broken grammar.
  */
 export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): AnnotateResult {
   const input = String(text ?? "");
@@ -229,6 +246,10 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
 
   const where = opts.where || "text";
   const omitted: string[] = [];
+  const fallback =
+    opts.fallbackSentence ||
+    AMBIGUOUS_MONEY_FALLBACK[String(opts.defaultCategory ?? "default")] ||
+    AMBIGUOUS_MONEY_FALLBACK.default;
 
   const kept = splitSentences(input).map((sentence) => {
     const trailing = sentence.match(/\s*$/)?.[0] ?? "";
@@ -242,13 +263,14 @@ export function annotateMoneyProse(text: string, opts: AnnotateOptions = {}): An
 
     if (amounts.some((a) => a.category == null)) {
       omitted.push(
-        `${where}: omitted unclassifiable amount(s) ${amounts
+        `${where}: replaced unclassifiable amount(s) ${amounts
           .filter((a) => a.category == null)
           .map((a) => a.token.trim())
-          .join(", ")}`,
+          .join(", ")} with deterministic fallback text`,
       );
-      return "";
+      return fallback + (trailing || " ");
     }
+
 
     // Label planning + evidence money inline, right to left so indices hold.
     let out = core;
