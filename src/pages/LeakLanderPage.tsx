@@ -66,8 +66,9 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Revenue Leak Audit for $5M–$50M Businesses | Aetheris — Chaos Theory Forensics"
-          description="Aetheris investigates where US $5M–$50M businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. 30% average recovery on named leaks. Written guarantee. Indianapolis + nationwide."
+          title="Revenue Leak Audit for $5M-$50M Businesses"
+          description="Aetheris finds where mid-market businesses lose money: friction, contradictions, drop-offs, follow-up failures and waste. Operator-led forensic audit."
+
           path="/"
           keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
         />
