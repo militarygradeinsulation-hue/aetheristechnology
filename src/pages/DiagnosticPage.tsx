@@ -43,7 +43,7 @@ const DiagnosticPage: React.FC = () => {
     <div className="relative min-h-screen text-foreground overflow-x-hidden">
       <SEOHead
         title="The Leak Audit™ — fixed-fee 21-Day Revenue Diagnostic | Aetheris"
-        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. fixed-fee. Map where CRM, sales follow-up, and lead flow are losing money."
+        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. a fixed fee. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
@@ -148,7 +148,7 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '01',
                     name: 'Leak Audit',
-                    price: 'fixed-fee',
+                    price: 'Fixed fee',
                     sub: 'Named leaks + dollar exposure',
                     note: 'Fastest way in.',
                     why: 'Why fixed-fee',
@@ -159,7 +159,7 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '02',
                     name: '21-Day Revenue Diagnostic',
-                    price: 'fixed-fee',
+                    price: 'Fixed fee',
                     sub: 'Full forensic dig',
                     note: 'Credited 1:1 to Active Case.',
                     featured: true,
@@ -295,7 +295,7 @@ const DiagnosticPage: React.FC = () => {
                   <ul className="space-y-2 text-sm text-foreground/90 leading-relaxed">
                     <li>— A human operator runs 9 forensic instruments <strong className="text-amber">against your business</strong></li>
                     <li>— You get a written leak map, not a software login</li>
-                    <li>— One fixed fee. fixed-fee. Nothing else owed to read the report</li>
+                    <li>— One fixed fee, quoted up front. Nothing else owed to read the report</li>
                     <li>— 20+ years operating real P&Ls before the AI was bolted on</li>
                     <li>— Findings tied to dollars: deal stalls, CRM bleed, lost follow-up</li>
                     <li>— We tell you exactly where the money is leaking and what to fix first</li>
@@ -320,7 +320,7 @@ const DiagnosticPage: React.FC = () => {
                 <p className="mt-1 text-xs text-foreground/60 italic">Said by every CFO who hasn't done the math. Here's the math.</p>
 
                 <h3 className="font-forensic text-lg md:text-xl font-bold text-foreground mt-5 mb-4 leading-snug">
-                  fixed-fee buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
+                  A fixed fee buys what the alternative shelf charges <span className="text-crimson">$82K–$215K</span> for — and most still won't touch your CRM data.
                 </h3>
 
                 <div className="overflow-x-auto rounded-sm border border-amber/20 bg-background/40">
@@ -343,7 +343,7 @@ const DiagnosticPage: React.FC = () => {
                       <tr className="border-t-2 border-amber/50 bg-amber/[0.03]">
                         <td className="py-2.5 pl-3 pr-2 font-bold text-foreground">TOTAL</td>
                         <td className="py-2.5 px-2 font-bold text-muted-foreground whitespace-nowrap">$82K – $215K</td>
-                        <td className="py-2.5 px-2 font-bold text-amber whitespace-nowrap">fixed-fee</td>
+                        <td className="py-2.5 px-2 font-bold text-amber whitespace-nowrap">Fixed fee</td>
                       </tr>
                     </tbody>
                   </table>
@@ -364,7 +364,7 @@ const DiagnosticPage: React.FC = () => {
 
                 <p className="mt-5 text-sm text-foreground/85 leading-relaxed text-center">
                   Average $5M–$25M manufacturer leaks <span className="text-crimson font-bold">$400K–$1.4M/yr</span> through stalled pipeline, broken follow-up, and CRM rot.{' '}
-                  <span className="text-amber font-semibold">fixed-fee to find it is a rounding error.</span> One recovered deal usually pays 100×.
+                  <span className="text-amber font-semibold">A fixed fee to find it is a rounding error.</span> One recovered deal usually pays 100×.
                 </p>
               </div>
             </section>
