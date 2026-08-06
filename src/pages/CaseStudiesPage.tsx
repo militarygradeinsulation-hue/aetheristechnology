@@ -22,7 +22,7 @@ const CaseStudiesPage: React.FC = () => {
     },
     {
       question: 'How much is the Leak Audit?',
-      answer: 'fixed-fee fee, operator-led. Applied 1:1 toward any engagement that follows.',
+      answer: 'fixed fee, operator-led. Applied 1:1 toward any engagement that follows.',
     },
     {
       question: 'How fast do you find the first leak?',
@@ -70,7 +70,7 @@ const CaseStudiesPage: React.FC = () => {
               Sample preliminary dossiers and 50 sourced, verified case files. Every study mirrors the leak-audit methodology: name the leak, trace the cause, quantify the damage, and recover the money.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
-              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit — fixed-fee.</span>
+              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit — a fixed fee.</span>
             </p>
           </div>
         </section>
@@ -90,7 +90,7 @@ const CaseStudiesPage: React.FC = () => {
               The methodology travels.
             </h2>
             <p className="text-foreground/85 text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. fixed-fee. Applied 1:1 toward engagement.
+              If revenue moves through systems and people, there are leaks. One fixed fee. Applied 1:1 toward engagement.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button

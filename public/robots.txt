@@ -152,7 +152,7 @@ Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
 
-Sitemap: https://aetheris.technology/sitemap.xml
+Sitemap: https://businessforensics.tech/sitemap.xml
 
 # AEO directories (llmstxt.org spec)
 # llms.txt:      https://aetheris.technology/llms.txt

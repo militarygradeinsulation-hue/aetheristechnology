@@ -66,8 +66,9 @@ const LeakLanderPage: React.FC = () => {
       <Background />
       <div className="relative z-10 flex flex-col flex-1">
         <SEOHead
-          title="Revenue Leak Audit for $5M–$50M Businesses | Aetheris — Chaos Theory Forensics"
-          description="Aetheris investigates where US $5M–$50M businesses lose money — vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. 30% average recovery on named leaks. Written guarantee. Indianapolis + nationwide."
+          title="Revenue Leak Audit for $5M-$50M Businesses"
+          description="Aetheris finds where mid-market businesses lose money: friction, contradictions, drop-offs, follow-up failures and waste. Operator-led forensic audit."
+
           path="/"
           keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
         />
@@ -110,14 +111,16 @@ const LeakLanderPage: React.FC = () => {
           {/* TOP PITCH — money-back guarantee framing */}
           <section className="mt-2 max-w-6xl mx-auto text-center animate-fade-in">
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              {"\n"}
+              Revenue Leak Audit for $5M to $50M Businesses
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              {"\n"}
+              Your business is leaking. You just cannot see it from the inside. We run the forensic
+              scan, name every leak in writing, and hand you the plan to close it.
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              {"\n"}
+              Indianapolis · Operating nationwide
             </p>
+
           </section>
 
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
