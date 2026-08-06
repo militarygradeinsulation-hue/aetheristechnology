@@ -110,14 +110,16 @@ const LeakLanderPage: React.FC = () => {
           {/* TOP PITCH — money-back guarantee framing */}
           <section className="mt-2 max-w-6xl mx-auto text-center animate-fade-in">
             <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              {"\n"}
+              Revenue Leak Audit for $5M to $50M Businesses
             </h1>
             <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              {"\n"}
+              Your business is leaking. You just cannot see it from the inside. We run the forensic
+              scan, name every leak in writing, and hand you the plan to close it.
             </p>
             <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              {"\n"}
+              Indianapolis · Operating nationwide
             </p>
+
           </section>
 
           {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
