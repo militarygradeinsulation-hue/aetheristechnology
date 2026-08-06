@@ -55,7 +55,7 @@ const ServicesPage: React.FC = () => {
                 </ul>
                 <Link to="/diagnostic" className="mt-6">
                   <Button className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
-                    Book my Diagnostic — fixed-fee <ArrowRight className="w-4 h-4 ml-2" />
+                    Book my Diagnostic — fixed fee <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
                 <p className="text-[10px] text-center text-muted-foreground mt-2 font-mono uppercase tracking-widest">
@@ -110,7 +110,7 @@ const ServicesPage: React.FC = () => {
                 <div className="forensic-tile rounded-sm border border-amber/40 p-6">
                   <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 1 · Diagnostic close</div>
                   <div className="font-forensic text-4xl font-bold text-foreground">$2,000</div>
-                  <p className="text-xs text-muted-foreground mt-1">Per signed 21-Day Diagnostic (fixed-fee)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Per signed 21-Day Diagnostic (fixed fee)</p>
                   <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
                     Paid within 7 days of the diagnostic invoice clearing. One flat fee, every time, no scaling math.
                   </p>

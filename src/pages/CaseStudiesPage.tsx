@@ -90,7 +90,7 @@ const CaseStudiesPage: React.FC = () => {
               The methodology travels.
             </h2>
             <p className="text-foreground/85 text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. a fixed fee. Applied 1:1 toward engagement.
+              If revenue moves through systems and people, there are leaks. One fixed fee. Applied 1:1 toward engagement.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button

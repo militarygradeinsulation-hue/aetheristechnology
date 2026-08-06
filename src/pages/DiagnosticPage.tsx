@@ -43,7 +43,7 @@ const DiagnosticPage: React.FC = () => {
     <div className="relative min-h-screen text-foreground overflow-x-hidden">
       <SEOHead
         title="The Leak Audit™ — fixed-fee 21-Day Revenue Diagnostic | Aetheris"
-        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. a fixed fee. Map where CRM, sales follow-up, and lead flow are losing money."
+        description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. One fixed fee. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Leak Audit', path: '/diagnostic' }]}
@@ -82,7 +82,7 @@ const DiagnosticPage: React.FC = () => {
                 We map where your CRM, sales follow-up, and lead flow are losing money. Written report with prioritized fixes, ROI projections, and an implementation roadmap.
               </p>
               <p className="mt-3 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-                fixed-fee · One operator · Nothing ongoing
+                Fixed fee · One operator · Nothing ongoing
               </p>
 
               {/* video */}
@@ -110,7 +110,7 @@ const DiagnosticPage: React.FC = () => {
               <div className="relative rounded-sm border-2 border-crimson/50 bg-crimson/[0.04] p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--crimson,0_60%_45%)/0.6)] text-center">
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-crimson mb-2">Fixed fee · Applied toward any engagement</div>
                 <div className="font-forensic text-6xl md:text-7xl font-bold text-foreground leading-none">
-                  fixed-fee
+                  Fixed fee
                 </div>
                 <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-xl mx-auto">
                   Operator-led. No percentage-of-savings. No retainer. If the number sounds "expensive," the leak is bigger than you think — and you aren't our client.
