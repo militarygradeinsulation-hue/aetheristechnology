@@ -98,14 +98,14 @@ const CareersPage = () => {
                 Ask anything about the operator track, the Strategic Scout program, commissions, or bringing us your existing client book. No pitch, no pressure — just next steps.
               </p>
               <a
-                href="https://cal.com/aetheristechnology/example"
+                href="/book"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackCareersCta('careers_book_call_hero')}
                 className="inline-block"
               >
                 <Button size="lg" className="bg-amber text-background hover:bg-amber/90 font-bold text-base px-8 py-6 shadow-lg">
-                  📅 Book a call — cal.com/aetheristechnology →
+                  📅 Book a call — Book with Joseph →
                 </Button>
               </a>
             </div>
@@ -126,7 +126,7 @@ const CareersPage = () => {
               </p>
               <div className="flex justify-center pt-2">
                 <a
-                  href="https://cal.com/aetheristechnology/example"
+                  href="/book"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackCareersCta('careers_partner_book_call')}
