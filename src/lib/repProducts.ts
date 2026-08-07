@@ -92,74 +92,65 @@ export const companyCentsForProduct = (p: RepProduct) =>
   p.priceCents - repCentsForProduct(p) - partnerCentsForProduct(p);
 
 export const REP_PRODUCTS: RepProduct[] = [
-  // ── PUBLIC FUNNEL (in ascending order) ──
+  // ── PUBLIC TIER LADDER (ascending) ──
 
-  // Step 2 — The One-Leak Investigation (percent split, Tier 3 rates).
-  // 100% credited toward The Full Leak Investigation within 90 days.
-  // Note: price shown to public is a range $4,500–$6,500; commission math
-  // still uses the fixed reference price below (adjust at close if scoped higher).
+  // Tier 01 — Signal Pack (percent split, Tier 3 rates).
   {
-    name: 'The One-Leak Investigation',
-    priceCents: 450_000,
+    name: 'Signal Pack',
+    priceCents: 750_000,
     tier: 3,
+    bundle: true,
     highlight: true,
-    description: 'One leak, traced to origin in 5 business days. Written trace + true annual cost + removal plan. 100% credited toward The Full Leak Investigation within 90 days.',
-    forWho: 'Operators who already know where it hurts and want proof before committing to the Full Leak Investigation.',
+    description: 'Named leaks with dollar exposure. Website scan, CRM data audit, brand and friction diagnostics run by an operator. Written leak map + 30-minute readout. Credited toward any higher tier.',
+    forWho: 'Owners who want proof the bleed is real before committing to a full engagement.',
   },
 
-  // Step 3 — The Full Leak Investigation (flagship fixed-dollar split).
+  // Tier 02 — Revenue Pack (percent split, Tier 3 rates).
   {
-    name: 'The Full Leak Investigation',
-    priceCents: 1_850_000,
+    name: 'Revenue Pack',
+    priceCents: 1_000_000,
+    tier: 3,
+    bundle: true,
+    highlight: true,
+    description: 'Signal Pack plus the revenue instruments: sales scripts, follow-up sequences, strategic questions, and a 30-day content calendar built against your live data.',
+    forWho: 'Teams that know where the leaks are and need the plays to close them.',
+  },
+
+  // Tier 03 — Operator Suite (percent split, Tier 3 rates).
+  {
+    name: 'Operator Suite',
+    priceCents: 1_500_000,
+    tier: 3,
+    bundle: true,
+    highlight: true,
+    description: 'Operator embeds for three weeks. Runs the full instrument set against your live business, ships fixes, and hands you a working revenue system. Credited 1:1 toward the Diagnostic.',
+    forWho: 'Operators who want the work done with them, not handed to them as a PDF.',
+  },
+
+  // Tier 04 — 21-Day Diagnostic (flagship fixed-dollar split).
+  {
+    name: '21-Day Diagnostic',
+    priceCents: 2_350_000,
     tier: 3,
     flagship: 'diagnostic',
     highlight: true,
-    description: '21-day forensic examination of the entire business. Findings Report + Removal Roadmap + live Findings Call. Guarantee: recoverable losses of at least 3x the fee, in writing. 100% credited toward Leak Removal & System Build.',
-    forWho: 'Owners $1M-$25M who need every leak traced to origin before spending on a fix.',
+    description: '21-day forensic examination of the entire business. Findings Report + Removal Roadmap + live Findings Call. Guarantee: recoverable losses of at least 3x the fee, in writing. Credited 1:1 toward Active Case.',
+    forWho: 'Owners $5M-$50M who need every leak traced to origin before spending on a fix.',
   },
 
-  // Step 4 — Leak Removal & System Build (flagship fixed-dollar split, recurring).
+  // Tier 05 — Active Case (flagship fixed-dollar split, recurring).
   {
-    name: 'Leak Removal & System Build',
-    priceCents: 1_500_000,
+    name: 'Active Case',
+    priceCents: 2_000_000,
     tier: 3,
     recurring: true,
     flagship: 'activeCase',
     highlight: true,
-    description: 'Monthly embedded operator. Removes causes and builds what belongs in their place: custom AI systems, automation, and strategic infrastructure. 3-month minimum. Only proposed inside a completed Full Leak Investigation.',
-    forWho: 'Full Leak Investigation graduates ready to install the fixes, not read another PDF.',
+    description: 'Monthly embedded operator. Removes causes and builds what belongs in their place: custom AI systems, automation, and strategic infrastructure. 3-month minimum. Diagnostic clients only.',
+    forWho: 'Diagnostic graduates ready to install the fixes, not read another report.',
   },
 
 
-  // ── LEGACY OPERATOR-LED BUNDLES (not for public sale — spec Part 2 demoted these) ──
-  // Kept for back-compat with existing Stripe products + rep-portal internal sales.
-  {
-    name: 'Signal Pack',
-    priceCents: 250_000,
-    tier: 3,
-    bundle: true,
-    legacy: true,
-    description: 'One-day forensic snapshot: website scan, CRM data audit, top-of-funnel leak map. Operator walks the report with you.',
-    forWho: 'Legacy bundle — replaced by the One-Leak Investigation in the public funnel.',
-  },
-  {
-    name: 'Revenue Pack',
-    priceCents: 500_000,
-    tier: 3,
-    bundle: true,
-    legacy: true,
-    description: 'Signal Pack + 2-week sales-cycle teardown. Includes call-recording review, deal-stage forensics, and 3 hands-on rebuilds.',
-    forWho: 'Legacy bundle — replaced by the Full Leak Investigation in the public funnel.',
-  },
-  {
-    name: 'Operator Suite',
-    priceCents: 1_000_000,
-    tier: 3,
-    bundle: true,
-    legacy: true,
-    description: 'Operator embeds for 3 weeks. Runs every tool against your live business, ships fixes, hands you a working revenue system.',
-    forWho: 'Legacy bundle — folded into Implementation in the public funnel.',
-  },
 
 
 
