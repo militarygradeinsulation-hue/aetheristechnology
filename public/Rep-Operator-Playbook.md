@@ -29,7 +29,7 @@ Memorize this line. Use it on every first call:
 | 2 | **Revenue Pack** | $5,000 | one-time | Operator-led bundle · ~14 hrs |
 | 3 | **Operator Suite** | $10,000 | one-time | Operator-led bundle · ~30 hrs / 3 weeks |
 | 4 | **21-Day Revenue Diagnostic** | $23,500 | one-time | **FLAGSHIP** · fixed-fee, fit call required |
-| 5 | **Active Case** | $15,000 / mo | recurring (3-mo min) | **FLAGSHIP** · Diagnostic clients only |
+| 5 | **Active Case** | $20,000 / mo | recurring (3-mo min) | **FLAGSHIP** · Diagnostic clients only |
 
 That's it. Anything else (Digital Snapshot $149, Strategy Blueprint $349,
 Website Evaluation $599, etc.) is **legacy à la carte** — still in your rep
@@ -83,16 +83,16 @@ Every public bundle is Tier 3. The rep keeps:
 
 | Bundle | Sale | **Rep gets** | Partner gets | Company |
 |---|---|---|---|---|
-| Signal Pack | $2,500 | **$500** | $250 | $1,750 |
-| Revenue Pack | $5,000 | **$1,000** | $500 | $3,500 |
-| Operator Suite | $10,000 | **$2,000** | $1,000 | $7,000 |
+| Signal Pack | $7,500 | **$500** | $250 | $1,750 |
+| Revenue Pack | $10,000 | **$1,000** | $500 | $3,500 |
+| Operator Suite | $15,000 | **$2,000** | $1,000 | $7,000 |
 
 ### Model B — Flagship fixed-dollar (Diagnostic + Active Case only)
 
 | Flagship | Sale | **Rep gets** | Partner gets | Company |
 |---|---|---|---|---|
 | 21-Day Diagnostic | $23,500 once | **$5,000** | $3,000 | $10,500 |
-| Active Case | $15,000 **/mo** | **$4,000 /mo** | $3,000 /mo | $8,000 /mo |
+| Active Case | $20,000 **/mo** | **$4,000 /mo** | $3,000 /mo | $8,000 /mo |
 
 **The active case pays out every single month the client stays subscribed.**
 If your client stays 12 months, you collect **$48,000** in active case
@@ -177,10 +177,10 @@ into one Leak Findings memo by an operator. Reframe accordingly.
 **Q: What if a client wants to buy just a Sales Script Pack at $59?**
 A: You can still sell it through the rep portal — that pays you 30% ($17.70).
 But that is a rep-led private sale, not the public path. Steer them to the
-Revenue Pack ($5,000, you get $1,000) by explaining the script alone gets
+Revenue Pack ($10,000, you get $1,000) by explaining the script alone gets
 forgotten without the follow-up system around it.
 
-**Q: Does the Operator Suite $10,000 credit reduce my Active Case commission?**
+**Q: Does the Operator Suite $15,000 credit reduce my Active Case commission?**
 A: No. The credit reduces the client's invoice for the first Active Case
 month(s). Your $4,000/mo commission is paid on the gross active case price,
 not the net the client pays. Open question with admin if your specific
@@ -194,4 +194,4 @@ embedded operator, the answer is **Operator Suite → Active Case**.
 
 ## 7. One-line cheat sheet
 
-> Signal $2,500 ($500 rep) · Revenue $5,000 ($1k rep) · Operator Suite $10,000 ($2k rep) · Diagnostic $23,500 ($5k rep) · Active Case $15k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.
+> Signal $7,500 ($500 rep) · Revenue $10,000 ($1k rep) · Operator Suite $15,000 ($2k rep) · Diagnostic $23,500 ($5k rep) · Active Case $20k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.

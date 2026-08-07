@@ -146,7 +146,7 @@ MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
 
 • REJECTION-THEN-RETREAT (reciprocity + contrast fusion): open with
   the anchor ask ($18k Diagnostic / $15k Active Case), then retreat
-  to the smaller ask ($2,500 Signal Pack, free /leak-audit). The
+  to the smaller ask ($7,500 Signal Pack, free /leak-audit). The
   retreat itself is felt as a concession and triggers reciprocation.
 
 • FOOT-IN-THE-DOOR → IDENTITY LADDER: micro-yes ("your business is
@@ -178,7 +178,7 @@ MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
   never present the target offer first. Anchor on the painful/
   expensive item so the target ask reads as relief:
     Cost of Inaction ($340k/yr leak) → then $18k to fix it once.
-    $18k Diagnostic → then $2,500 Signal Pack → then free scan.
+    $18k Diagnostic → then $7,500 Signal Pack → then free scan.
     Long consequence paragraph → then short cheap next step.
   The contrast is invisible to the reader — that's what makes it work.
 

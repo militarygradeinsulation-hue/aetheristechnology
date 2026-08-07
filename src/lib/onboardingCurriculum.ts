@@ -40,9 +40,9 @@ export const ONBOARDING_CURRICULUM: OnboardingModuleDef[] = [
     scriptOutline: `Welcome a brand-new sales rep to Aetheris Technology, a Chaos Theory Forensics operator based in Indianapolis.
 Cover the positioning in one line: "Your business is leaking. You just can't see it from the inside." We do not sell tools. We sell the operator who wields the tools.
 The public site offers exactly five things, in this order:
-  1) Signal Pack — $2,500 one-time, operator-led bundle (~6 hrs).
-  2) Revenue Pack — $5,000 one-time bundle (~14 hrs).
-  3) Operator Suite — $10,000 one-time bundle (~30 hrs, credits 1:1 toward Active Case).
+  1) Signal Pack — $7,500 one-time, operator-led bundle (~6 hrs).
+  2) Revenue Pack — $10,000 one-time bundle (~14 hrs).
+  3) Operator Suite — $15,000 one-time bundle (~30 hrs, credits 1:1 toward Active Case).
   4) FLAGSHIP: 21-Day Revenue Diagnostic — $23,500 fixed fee, fit call required.
   5) FLAGSHIP: Active Case — $20,000/mo, 3-month minimum, Diagnostic clients only.
 Commission has two models. Bundles use the tiered split — all three bundles are Tier 3 (70/20/10), so the rep keeps 20% (Signal $500, Revenue $1,000, Operator Suite $2,000). Flagships use FIXED dollars — $5,000 to the rep on every Diagnostic close, $4,000/mo to the rep EVERY MONTH the Active Case client stays subscribed. Partner gets $3,000 on Diagnostic and $3,000/mo on Active Case. Company keeps the rest.
@@ -59,7 +59,7 @@ Walk through the three sealed bundles and why they only work together:
   - Signal Pack: website + brand contradiction + friction audit. Run apart, each is a PDF. Run together by an operator, you get one Leak Findings memo naming the dollar bleed.
   - Revenue Pack: scripts + follow-up + question engine + content calendar built as one engine, so a lead today closes in 90 days.
   - Operator Suite: 3 weeks of an embedded operator running the full stack — credits 1:1 toward the Active Case.
-The flagships sit above the bundles: Diagnostic ($23,500) and Active Case ($15k/mo) require a 15-minute fit call first. Reps should pitch the Diagnostic when the prospect already knows something is broken and is exhausted from looking for the fix.
+The flagships sit above the bundles: Diagnostic ($23,500) and Active Case ($20k/mo) require a 15-minute fit call first. Reps should pitch the Diagnostic when the prospect already knows something is broken and is exhausted from looking for the fix.
 Hard rule for outbound: never lead with "we have a tool that does X". Always lead with "an operator will sit down with you, find every leak, and rebuild the system causing it." End: send them to the bundles page or book them on the fit call.`,
     routeHints: { home: "/", services: "/services", portal_tools: "/portal?tab=tools" },
   },
