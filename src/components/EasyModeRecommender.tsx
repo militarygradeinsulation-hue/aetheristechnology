@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
-import { SHOP_TOOLS, SHOP_PRICES, findTool } from "@/lib/tool-shop-catalog";
+import { SHOP_TOOLS, findTool } from "@/lib/tool-shop-catalog";
+import { AETHERIS_TIERS, tierForTool, tierBadgeForTool } from "@/lib/aetherisTiers";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { Sparkles, ShoppingCart, CalendarClock, X, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -98,13 +99,15 @@ export function EasyModeRecommender() {
   const visiblePicks = (rec?.picks || []).filter(p => {
     if (dismissedTools.has(p.id)) return false;
     const t = findTool(p.id);
-    return !!t && !t.internalOnly && t.priceCents != null;
+    return !!t;
   });
   const activeCount = visiblePicks.length;
-  const listPrice = visiblePicks.reduce((sum, p) => sum + (findTool(p.id)?.priceCents ?? 0), 0);
-  // Evidence Kit caps the total once the pick list exceeds its price.
-  const bundlePrice = Math.min(listPrice, SHOP_PRICES.unlimited.amount);
-  const savings = Math.max(0, listPrice - bundlePrice);
+  // Lowest Aetheris tier that covers every recommended instrument.
+  const recommendedTier = (() => {
+    if (!activeCount) return AETHERIS_TIERS[1];
+    const ranks = visiblePicks.map(p => AETHERIS_TIERS.findIndex(t => t.id === tierForTool(p.id)));
+    return AETHERIS_TIERS[Math.max(...ranks)];
+  })();
 
   return (
     <section className="mb-10 relative rounded-sm border border-amber/50 bg-gradient-to-br from-amber/10 via-background/60 to-background p-6 md:p-8 overflow-hidden">
@@ -117,7 +120,7 @@ export function EasyModeRecommender() {
           Confused on what you need?
         </h2>
         <p className="text-sm md:text-base text-muted-foreground mb-5 max-w-2xl">
-          Paste your URL and let's see what tools could remove your workload. We'll pick the top 3 for your business — with a bundle discount if you grab them now, or book a call to walk through the findings.
+          Paste your URL and let's see what tools could remove your workload. We'll pick the top 3 for your business and show you which Aetheris tier runs them.
         </p>
 
         {!rec && (
@@ -163,13 +166,14 @@ export function EasyModeRecommender() {
                     </button>
                     <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-amber/70 mb-1">Pick #{i + 1}</div>
                     <h3 className="font-forensic text-base font-bold mb-1.5 pr-6">{tool.name}</h3>
-                    <p className="text-xs text-foreground/80 mb-3 flex-1">{p.reason}</p>
+                    <p className="text-xs text-foreground/80 mb-2 flex-1">{p.reason}</p>
+                    <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber mb-3">{tierBadgeForTool(tool.id)}</div>
                     <div className="flex gap-1.5 mt-auto">
                       <Button asChild size="sm" variant="outline" className="flex-1 border-amber/40 text-amber hover:bg-amber/10 text-xs h-8">
                         <Link to={`/try/${tool.id}`}><Sparkles className="w-3 h-3 mr-1" /> Try free</Link>
                       </Button>
                       <Button size="sm" onClick={() => openBuyOne(tool.id)} className="flex-1 bg-amber text-background hover:bg-amber/90 text-xs h-8 font-semibold">
-                        <ShoppingCart className="w-3 h-3 mr-1" /> Own
+                        <ShoppingCart className="w-3 h-3 mr-1" /> Which tier
                       </Button>
                     </div>
                   </div>
@@ -187,17 +191,12 @@ export function EasyModeRecommender() {
                   <X className="w-3.5 h-3.5" />
                 </button>
                 <div className="flex-1 pr-6">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">// bundle offer · today only</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">// recommended tier</div>
                   <div className="font-forensic text-lg font-bold">
-                    Grab all {activeCount} now for <span className="text-amber">${(bundlePrice / 100).toFixed(0)}</span>
-                    {savings > 0 && (
-                      <span className="ml-2 text-xs font-mono text-crimson line-through">${(listPrice / 100).toFixed(0)}</span>
-                    )}
-                    {savings > 0 && (
-                      <span className="ml-1 text-xs font-mono text-amber">save ${(savings / 100).toFixed(0)}</span>
-                    )}
+                    All {activeCount} run inside <span className="text-amber">{recommendedTier.name}</span>
+                    <span className="ml-2 text-xs font-mono text-amber">{recommendedTier.priceLabel}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">Yearly access · renews annually. Or book a free call and we'll walk you through the findings.</div>
+                  <div className="text-xs text-muted-foreground">Instruments are not sold separately. Book a call and an operator walks you through the findings.</div>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button asChild size="sm" variant="outline" className="border-amber/50 text-amber hover:bg-amber/20">
@@ -206,7 +205,7 @@ export function EasyModeRecommender() {
                     </a>
                   </Button>
                   <Button size="sm" onClick={openBuyAll} className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    <ShoppingCart className="w-3.5 h-3.5 mr-1.5" /> Buy bundle
+                    <ShoppingCart className="w-3.5 h-3.5 mr-1.5" /> See what's included
                   </Button>
                 </div>
               </div>
