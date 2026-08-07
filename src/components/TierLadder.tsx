@@ -1,0 +1,134 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, CalendarClock, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AETHERIS_TIERS, type AetherisTier } from "@/lib/aetherisTiers";
+import { BOOK_MEETING_URL } from "@/lib/links";
+
+/**
+ * The public Aetheris ladder: Free -> Signal -> Revenue -> Operator Suite ->
+ * 21-Day Diagnostic -> Active Case Retainer. Single source of truth lives in
+ * `src/lib/aetherisTiers.ts`. Instruments are never priced individually.
+ */
+export const TierLadder: React.FC<{ compact?: boolean; id?: string }> = ({ compact = false, id }) => (
+  <section id={id} className="mb-16">
+    <div className="mb-6">
+      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-2">
+        Diagnose → Arm → Operate → Investigate → Sustain
+      </div>
+      <h2 className="font-forensic text-3xl md:text-4xl font-bold leading-tight">
+        The instruments are not the product. <span className="text-amber italic">The method is.</span>
+      </h2>
+      {!compact && (
+        <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl leading-relaxed">
+          Tools sold separately are a hardware store. Bundled into tiers and run by an operator,
+          they become a method. Each rung includes everything below it.
+        </p>
+      )}
+    </div>
+
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {AETHERIS_TIERS.map((t, i) => (
+        <TierCard key={t.id} tier={t} step={i} compact={compact} />
+      ))}
+    </div>
+  </section>
+);
+
+export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: boolean }> = ({
+  tier: t,
+  step,
+  compact,
+}) => {
+  const crimson = t.id === "diagnostic" || t.id === "active";
+  return (
+    <div
+      className={`forensic-tile relative rounded-sm border p-5 flex flex-col ${
+        crimson ? "border-crimson/45" : "border-amber/30"
+      }`}
+    >
+      {t.flagship && (
+        <div className="absolute -top-2 right-3 font-mono text-[9px] tracking-widest uppercase bg-crimson text-background px-1.5 py-0.5">
+          Flagship
+        </div>
+      )}
+      <div className="flex items-center gap-2 mb-1">
+        <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
+          0{step + 1}
+        </span>
+        <span
+          className={`font-mono text-[9px] uppercase tracking-[0.25em] ${
+            crimson ? "text-crimson" : "text-amber"
+          }`}
+        >
+          {t.verb}
+        </span>
+      </div>
+
+      <h3 className="font-forensic text-xl font-bold leading-tight">{t.name}</h3>
+      <div className="font-forensic text-3xl font-bold mt-1 mb-2">
+        {t.priceLabel}
+        {t.cadence === "one-time" && (
+          <span className="text-xs font-normal text-muted-foreground ml-2 font-mono">one-time</span>
+        )}
+      </div>
+
+      <p className="text-sm text-foreground/80 leading-relaxed mb-3">{t.headline}</p>
+
+      {t.inherits && (
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber mb-2">
+          {t.inherits} +
+        </div>
+      )}
+
+      <ul className="space-y-1.5 mb-4">
+        {(compact ? t.adds.slice(0, 4) : t.adds).map(a => (
+          <li key={a} className="text-[13px] text-foreground/80 flex gap-2 leading-snug">
+            <span className={crimson ? "text-crimson" : "text-amber"}>·</span>
+            {a}
+          </li>
+        ))}
+      </ul>
+
+      {!compact && (
+        <p className="text-xs text-muted-foreground italic mb-4">For: {t.useCase}</p>
+      )}
+
+      <div className="mt-auto">
+        {t.id === "free" ? (
+          <Button asChild className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
+            <Link to={t.ctaHref}>
+              {t.ctaLabel} <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            </Link>
+          </Button>
+        ) : t.qualificationOnly ? (
+          <Button
+            asChild
+            variant="outline"
+            className="w-full border-crimson/50 text-crimson hover:bg-crimson/10 font-semibold"
+          >
+            <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+              <Lock className="w-3.5 h-3.5 mr-1.5" /> {t.ctaLabel}
+            </a>
+          </Button>
+        ) : (
+          <Button
+            asChild
+            variant={crimson ? "outline" : "default"}
+            className={
+              crimson
+                ? "w-full border-crimson/50 text-crimson hover:bg-crimson/10 font-semibold"
+                : "w-full bg-amber text-background hover:bg-amber/90 font-semibold"
+            }
+          >
+            <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+              <CalendarClock className="w-3.5 h-3.5 mr-1.5" /> {t.ctaLabel}
+            </a>
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TierLadder;
