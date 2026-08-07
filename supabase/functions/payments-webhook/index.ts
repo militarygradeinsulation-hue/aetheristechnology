@@ -43,11 +43,11 @@ function ratesForAmount(amountCents: number): { company: number; rep: number; pa
 // Matches FLAGSHIP_SPLITS in src/lib/repProducts.ts and the rep portal UI.
 // Mapped by Stripe price lookup_key (or lovable_external_id) passed in metadata.priceId.
 //
-// Diagnostic $18,500 one-time → Co $10,500 · Rep $5,000 · Partner $3,000
-// Active Case   $15,000/mo       → Co  $8,000 · Rep $4,000 · Partner $3,000  (every month)
+// Diagnostic $23,500 one-time → Co $15,500 · Rep $5,000 · Partner $3,000
+// Active Case   $20,000/mo       → Co $13,000 · Rep $4,000 · Partner $3,000  (every month)
 const FLAGSHIP_FIXED_SPLITS: Record<string, { company: number; rep: number; partner: number; label: string }> = {
-  diagnostic_21day_once:   { company: 1_050_000, rep: 500_000, partner: 300_000, label: '21-Day Revenue Diagnostic' },
-  implementation_retainer: { company:   800_000, rep: 400_000, partner: 300_000, label: 'Active Case'   },
+  diagnostic_21day_once:   { company: 1_550_000, rep: 500_000, partner: 300_000, label: '21-Day Diagnostic' },
+  implementation_retainer: { company: 1_300_000, rep: 400_000, partner: 300_000, label: 'Active Case'   },
 };
 
 function flagshipFixedSplit(priceId: string | null | undefined) {

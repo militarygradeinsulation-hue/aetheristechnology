@@ -164,7 +164,7 @@ function renderBackCover(doc: jsPDF) {
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BODY);
   const ctaLines = doc.splitTextToSize(
-    'This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan, a 21-day deep-dive custom-built for your business, your leaks, and your revenue goals. $18,500, applied toward engagement.',
+    'This playbook gives you the framework. The Forensic Diagnostic gives you the execution plan, a 21-day deep-dive custom-built for your business, your leaks, and your revenue goals. $23,500, applied toward engagement.',
     CONTENT_W - 20,
   );
   doc.text(ctaLines, PAGE_W / 2, 108, { align: 'center' });

@@ -22,7 +22,7 @@ interface ChatMsg {
 const STORAGE_KEY = "aetheris_briefing_chat_v1";
 
 const STARTER_TOPICS = [
-  "How the $18,500 Diagnostic actually runs day-by-day",
+  "How the $23,500 Diagnostic actually runs day-by-day",
   "Cold outreach playbook for specialty manufacturers",
   "Onboarding checklist for a new rep in week 1",
   "How to brief a partner on the Active Case",

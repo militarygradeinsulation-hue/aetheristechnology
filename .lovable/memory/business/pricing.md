@@ -27,15 +27,15 @@ Defined in `src/lib/repProducts.ts` TIER_RATES + `ratesForAmount()` in `payments
 - T2 ($79–$349, ≤34900¢): Company 60 / Rep 25 / Partner 15
 - T3 ($599+, incl. all 3 bundles): Company 70 / Rep 20 / Partner 10
 
-Bundle splits (all T3):
-- Signal $2,500 → Co $1,750 / Rep $500 / Partner $250
-- Revenue $5,000 → Co $3,500 / Rep $1,000 / Partner $500
-- Operator Suite $10,000 → Co $7,000 / Rep $2,000 / Partner $1,000
+Pack splits (all T3):
+- Signal $7,500 → Co $5,250 / Rep $1,500 / Partner $750
+- Revenue $10,000 → Co $7,000 / Rep $2,000 / Partner $1,000
+- Operator Suite $15,000 → Co $10,500 / Rep $3,000 / Partner $1,500
 
 ### Model B — Flagship fixed-dollar
-Defined in `FLAGSHIP_SPLITS` (src/lib/repProducts.ts) and `FLAGSHIP_FIXED_SPLITS` / `flagshipFixedSplit()` (payments-webhook). Mapped by Stripe price lookup_key:
-- `diagnostic_21day_once` → Co $10,500 / Rep $5,000 / Partner $3,000 (legacy $18,500 math; NEEDS RE-CONFIRMATION against the $23,500 public price)
-- `implementation_retainer` → Co $8,000 / Rep $4,000 / Partner $3,000 (legacy $15,000 math; NEEDS RE-CONFIRMATION against the $20,000/mo public price)
+Defined in `FLAGSHIP_SPLITS` (src/lib/repProducts.ts) and `FLAGSHIP_FIXED_SPLITS` / `flagshipFixedSplit()` (payments-webhook). Mapped by Stripe price lookup_key. Rep and partner dollars are unchanged from the old ladder; the price increase goes to the company.
+- `diagnostic_21day_once` → Co $15,500 / Rep $5,000 / Partner $3,000 (sum = $23,500)
+- `implementation_retainer` → Co $13,000 / Rep $4,000 / Partner $3,000 (sum = $20,000/mo, every month)
 
 Webhook precedence: `flagshipFixedSplit(priceId)` wins; otherwise falls back to `ratesForAmount()`.
 

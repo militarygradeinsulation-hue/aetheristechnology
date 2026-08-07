@@ -252,7 +252,7 @@ export function ReciprocationDoctrineTool() {
         </div>
         <Textarea
           rows={3}
-          placeholder="Scenario: who you're contacting, the leak you're naming, the outcome you want. e.g. 'Cold-DM a $12M HVAC operator whose ServiceTitan shows $340k/yr follow-up leak; push toward a $2,500 Signal Pack.'"
+          placeholder="Scenario: who you're contacting, the leak you're naming, the outcome you want. e.g. 'Cold-DM a $12M HVAC operator whose ServiceTitan shows $340k/yr follow-up leak; push toward a $7,500 Signal Pack.'"
           value={scenario}
           onChange={(e) => setScenario(e.target.value)}
         />

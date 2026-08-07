@@ -40,12 +40,12 @@ Rule: uninvited gifts create debt. We give first, then ask.
   could act on today without buying anything.
 • Reject "salesy" openers. Open with the gift.
 • REJECTION-THEN-RETREAT: when a CTA is needed, anchor first on the
-  larger flagship ($18k Forensic Diagnostic / $15k retainer), then
-  retreat to the smaller ($2,500 self-scan or free /leak-audit).
+  larger flagship ($23.5k Forensic Diagnostic / $20k retainer), then
+  retreat to the smaller (free self-scan or free /leak-audit).
 • Language patterns:
     "Here's the exact diagnostic — no email required."
     "Take this playbook. Use it tonight. Then decide."
-    "If the $18k Diagnostic isn't right, run the free Leak Scan first."
+    "If the $23.5k Diagnostic isn't right, run the free Leak Scan first."
 
 ────────────────────────────────────────────────
 2) COMMITMENT & CONSISTENCY — The Fortress
@@ -122,8 +122,8 @@ Rule: opportunities gain value as they become less available.
 PERCEPTUAL CONTRAST — always set the anchor first
 ────────────────────────────────────────────────
 Present the expensive/painful item before the target ask.
-• $18k Forensic Diagnostic → then $2,500 self-scan → then free /leak-audit.
-• "Losing $340k/year to Follow-Up Failure" → then "$18k to fix it once".
+• $23.5k Forensic Diagnostic → then free self-scan → then free /leak-audit.
+• "Losing $340k/year to Follow-Up Failure" → then "$23.5k to fix it once".
 • Long consequence paragraph → then short, cheap next step.
 
 ────────────────────────────────────────────────
@@ -145,8 +145,8 @@ collapses on contact.
 MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
 
 • REJECTION-THEN-RETREAT (reciprocity + contrast fusion): open with
-  the anchor ask ($18k Diagnostic / $15k Active Case), then retreat
-  to the smaller ask ($2,500 Signal Pack, free /leak-audit). The
+  the anchor ask ($23.5k Diagnostic / $20k Active Case), then retreat
+  to the smaller ask ($7,500 Signal Pack, free /leak-audit). The
   retreat itself is felt as a concession and triggers reciprocation.
 
 • FOOT-IN-THE-DOOR → IDENTITY LADDER: micro-yes ("your business is
@@ -177,8 +177,8 @@ MECHANISM UPGRADES (mandatory sub-tactics under the 6 weapons):
 • CONTRAST — SETUP-PROPERTY ANCHOR (Cialdini's real-estate trick):
   never present the target offer first. Anchor on the painful/
   expensive item so the target ask reads as relief:
-    Cost of Inaction ($340k/yr leak) → then $18k to fix it once.
-    $18k Diagnostic → then $2,500 Signal Pack → then free scan.
+    Cost of Inaction ($340k/yr leak) → then $23.5k to fix it once.
+    $23.5k Diagnostic → then $7,500 Signal Pack → then free scan.
     Long consequence paragraph → then short cheap next step.
   The contrast is invisible to the reader — that's what makes it work.
 
@@ -603,7 +603,7 @@ export const INFLUENCE_BLUEPRINT_COMPACT = `
 INFLUENCE BASELINE (Cialdini, mandatory — weaponize ≥2 per output):
 
 1. RECIPROCITY — give a usable diagnostic BEFORE any ask. Rejection-then-
-   retreat: anchor on flagship ($18k Diagnostic), retreat to /leak-audit.
+   retreat: anchor on flagship ($23.5k Diagnostic), retreat to /leak-audit.
 2. COMMITMENT — earn a micro-yes ("your business is leaking, you already
    suspect it") before any CTA. Never CTA cold.
 3. SOCIAL PROOF — every claim rides a specific pattern anchor (7/10 audits,
@@ -616,7 +616,7 @@ INFLUENCE BASELINE (Cialdini, mandatory — weaponize ≥2 per output):
    costs $X." Never "save", always "stop bleeding".
 
 PERCEPTUAL CONTRAST — anchor on the expensive/painful first (setup-
-property trick — CoI → $18k Diagnostic → $2,500 Pack → free scan).
+property trick — CoI → $23.5k Diagnostic → $7,500 Pack → free scan).
 5-BEAT CLOSE (any CTA) — Gift → Commit → Proof → Authority → Scarcity → CTA.
 MECHANISM UPGRADES: rejection-then-retreat · foot-in-the-door identity
 ladder · kill pluralistic ignorance with ONE direct command · symbols

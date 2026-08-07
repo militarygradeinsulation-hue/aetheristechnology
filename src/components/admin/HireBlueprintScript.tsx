@@ -139,7 +139,7 @@ If they balk at $2,500, you are not talking to a buyer. You're talking to a tire
 
 The $18,000 Forensic Diagnostic — same methodology, but at enterprise depth. The split is fixed: $10k to the company, $5k to you as the rep, $3k to the partner.
 
-And the $15,000/month Active Case — ongoing operator presence. The split is $8k company, $4k rep, $3k partner — every single month it renews.
+And the $20,000/month Active Case — ongoing operator presence. The split is $8k company, $4k rep, $3k partner — every single month it renews.
 
 That active case is the prize. One $15k active case pays you $4,000 a month for as long as it lives. Three of those and you don't need anything else.
 

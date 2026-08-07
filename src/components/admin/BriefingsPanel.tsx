@@ -29,13 +29,13 @@ const SITE_BRIEFING: Briefing = {
   id: 'site',
   label: 'Main Website — Aetheris.technology',
   icon: Globe,
-  tagline: 'Forensic operator funnel. Every block is built to move a stranger one step closer to booking the $18,500 Diagnostic.',
+  tagline: 'Forensic operator funnel. Every block is built to move a stranger one step closer to booking the $23,500 Diagnostic.',
   sections: [
     {
       id: 'goal',
       title: 'Primary Conversion Goal',
       body: [
-        'The site has ONE goal: get a qualified specialty manufacturer ($5M-$25M) to book a 15-minute qualification call for the 21-Day Revenue Diagnostic ($18,500 fixed fee).',
+        'The site has ONE goal: get a qualified specialty manufacturer ($5M-$25M) to book a 15-minute qualification call for the 21-Day Revenue Diagnostic ($23,500 fixed fee).',
         'Every section either (1) builds trust, (2) reframes their pain in dollars, or (3) hands them a no-friction next step. Anything that does not do one of those three things is pulled.',
       ],
     },
@@ -59,7 +59,7 @@ const SITE_BRIEFING: Briefing = {
         'Why it works: the prospect SEES their own leak before we pitch anything. By the time sales touches them they\'ve already accepted "we are leaking" — the pricing conversation becomes "how much" not "do we need this."',
         '- Output gates behind email so we capture every scan.',
         '- Auto-feeds drip_prospects + diagnostic_leads tables.',
-        '- The $2,500 Forensic Diagnostic is the upsell from this free scan; the $18,500 21-Day is the upsell from THAT.',
+        '- The $2,500 Forensic Diagnostic is the upsell from this free scan; the $23,500 21-Day is the upsell from THAT.',
       ],
     },
     {
@@ -69,17 +69,17 @@ const SITE_BRIEFING: Briefing = {
         'Two PDFs that go to every prospect BEFORE pricing is discussed. They exist to kill the "how do I know this isn\'t snake oil?" objection in writing.',
         '- /methodology: 2-page, how-we-define-a-leak, how-we-baseline, how-we-attribute-recovery. Operator-grade transparency = price-anchor justification.',
         '- /credentials: 1-page bio, military service, certs, business-continuity plan. Sales attaches it to every proposal.',
-        'Conversion logic: a $18,500 fixed fee feels expensive in a vacuum. With a written methodology + credentials sheet, it reads as "fair price for a serious operator." Removes haggling.',
+        'Conversion logic: a $23,500 fixed fee feels expensive in a vacuum. With a written methodology + credentials sheet, it reads as "fair price for a serious operator." Removes haggling.',
       ],
     },
     {
       id: 'services',
       title: '/services + /implementation — Two Offers, On Purpose',
       body: [
-        'The public site shows ONLY two offers: 21-Day Diagnostic ($18,500) and Active Case ($15K/mo, 3-mo min, Diagnostic clients only).',
+        'The public site shows ONLY two offers: 21-Day Diagnostic ($23,500) and Active Case ($15K/mo, 3-mo min, Diagnostic clients only).',
         'Why only two: decision fatigue kills B2B close rates. A 40-tool catalog reads as "operator." Two offers reads as "operator with a clear engagement path."',
         'Legacy products (14-Day, Fractional CTO, tool packs) still resolve at their URLs so rep-portal links don\'t break — but they are hidden from Navbar / Footer / Home. They resurface publicly only after the 90-day wedge proves out.',
-        'No Buy Now button on flagships. Sales-led only. A $18,500 self-checkout would convert worse AND attract lower-fit buyers.',
+        'No Buy Now button on flagships. Sales-led only. A $23,500 self-checkout would convert worse AND attract lower-fit buyers.',
       ],
     },
     {
@@ -225,7 +225,7 @@ const BACKEND_BRIEFING: Briefing = {
         '1. Friction is the enemy of revenue. Code-only rep login, in-tab AI coach, in-tab collateral generation — a rep never leaves the portal to close a deal.',
         '2. Visible money = activity. Forecast Center, Flagship Commission Panel, and Incentive Plan all keep the dollar number in front of the rep every login.',
         '3. Operator credibility = price defense. Methodology PDF, credentials PDF, written reports, fixed fees — every layer reinforces "this is a serious shop, the price is fair."',
-        '4. Diagnose-first wedge. Free /leak-audit → $2,500 Forensic → $18,500 Diagnostic → $15K/mo Active Case. Each step costs more and demands more commitment, but each step has already been de-risked by the previous one.',
+        '4. Diagnose-first wedge. Free /leak-audit → $2,500 Forensic → $23,500 Diagnostic → $15K/mo Active Case. Each step costs more and demands more commitment, but each step has already been de-risked by the previous one.',
         '5. Single source of truth. One database, one commission engine, one content library. Nothing falls through the cracks because there are no cracks.',
         '6. AI as force multiplier, never as identity. The product is operator judgment + leak diagnosis. AI runs the heavy work invisibly. The brand stays "forensic operator," not "AI guru."',
       ],

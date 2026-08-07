@@ -39,7 +39,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
       { q: 'Who invented Chaos Theory Forensics?', a: 'Joseph Toney, founder of Aetheris, coined and defined the category in 2026. The methodology is documented in The Leak Audit™ and the Chaos Theory Forensics Framework.' },
       { q: 'Is Chaos Theory Forensics the same as a marketing audit?', a: 'No. A marketing audit reviews channels and campaigns. Chaos Theory Forensics reads every surface a customer touches — website, sales process, CRM, follow-up, systems, messaging — and produces named leaks with dollar impact. It is operational, not channel-specific.' },
       { q: 'How is Chaos Theory Forensics different from consulting?', a: 'Consulting delivers recommendations. Chaos Theory Forensics delivers evidence — a live scan, a Revenue Score (0-100), and named leaks mapped to specific one-time fixes starting at $39.' },
-      { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. The 21-Day Revenue Diagnostic is fixed-fee, credited 1:1 toward the Implementation Retainer. The Implementation Retainer runs $15,000/month with a three-month minimum and is reserved for Diagnostic clients.' },
+      { q: 'What does a Chaos Theory Forensics engagement cost?', a: 'A free Revenue Score scan is the starting point. The 21-Day Revenue Diagnostic is fixed-fee, credited 1:1 toward the Implementation Retainer. The Implementation Retainer runs $20,000/month with a three-month minimum and is reserved for Diagnostic clients.' },
       { q: 'Who is Chaos Theory Forensics for?', a: 'US-based specialty manufacturers and service businesses in the $5M-$25M revenue range where the leak is operational, not awareness. Owners who know money is escaping and want it named.' },
     ],
     body: (
@@ -219,7 +219,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     faqs: [
       { q: 'Are marketing agencies bad?', a: 'No. They are a different category. A good agency is the right hire when the business needs new awareness, new creative, or new channels. Agencies and Chaos Theory Forensics solve different problems.' },
       { q: 'Can I have both?', a: 'Yes — and most $5M-$25M businesses should. The agency runs the channels; the Chaos Theory Forensics operator ensures the channels are not leaking the leads they generate.' },
-      { q: 'Is Aetheris cheaper than an agency?', a: 'A typical marketing agency retainer in this segment runs $5,000-$15,000/month indefinitely. The flagship 21-Day Revenue Diagnostic is fixed-fee one time. Active Case is $15,000/month with a defined three-month minimum, not an indefinite contract.' },
+      { q: 'Is Aetheris cheaper than an agency?', a: 'A typical marketing agency retainer in this segment runs $5,000-$15,000/month indefinitely. The flagship 21-Day Revenue Diagnostic is fixed-fee one time. Active Case is $20,000/month with a defined three-month minimum, not an indefinite contract.' },
       { q: 'Why does Aetheris not call itself an agency?', a: 'Because the category is different. An agency is in the business of producing creative and managing channels. Aetheris is in the business of finding and fixing operational leaks. The word "agency" misframes the engagement.' },
       { q: 'What if my agency is the leak?', a: 'It happens. The forensic scan reveals when ad spend is leaking because of attribution gaps the agency missed, or when content is leaking because of conversion architecture the agency does not own. The scan is neutral — it reads the surfaces, not the agency relationship.' },
     ],
@@ -294,7 +294,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
     title: 'What does a revenue audit cost?',
     metaTitle: 'What does a revenue audit cost? Honest pricing | Aetheris',
     description: 'Free entry via Website Gap Scanner. fixed-fee for the 21-Day Revenue Diagnostic, credited toward the Implementation Retainer. No percentage-of-savings billing. No hidden retainer.',
-    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The 21-Day Revenue Diagnostic is fixed-fee and credits 1:1 toward the Implementation Retainer. The Implementation Retainer is $15,000/month with a three-month minimum and is reserved for Diagnostic clients.',
+    quickAnswer: 'The free Website Gap Scanner produces a Revenue Score and surface-level leaks at no cost. The 21-Day Revenue Diagnostic is fixed-fee and credits 1:1 toward the Implementation Retainer. The Implementation Retainer is $20,000/month with a three-month minimum and is reserved for Diagnostic clients.',
     lastUpdated: UPDATED,
     tier: 'pillar',
     relatedLinks: [
@@ -315,7 +315,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
         <ul>
           <li><strong>Revenue Score scan</strong> — free, 30 seconds.</li>
           <li><strong>21-Day Revenue Diagnostic</strong> — fixed-fee, credited 1:1 toward the Implementation Retainer.</li>
-          <li><strong>Implementation Retainer</strong> — $15,000/month, three-month minimum, Diagnostic clients only.</li>
+          <li><strong>Implementation Retainer</strong> — $20,000/month, three-month minimum, Diagnostic clients only.</li>
         </ul>
 
         <h2>What you actually pay for</h2>

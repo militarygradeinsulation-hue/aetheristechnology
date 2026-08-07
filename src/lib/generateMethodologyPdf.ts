@@ -33,7 +33,7 @@ const SECTIONS: Section[] = [
   },
   {
     title: '21-Day Diagnostic, deliverables',
-    body: 'Written report (15-30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $18,500. Timeline: 21 calendar days. CRM-agnostic, runs on a CSV export.',
+    body: 'Written report (15-30 pp): leak map, prioritized fixes, ROI, roadmap. Source-data appendix. 60-min readout with you and up to two team members. Fixed implementation quote. Fee: $23,500. Timeline: 21 calendar days. CRM-agnostic, runs on a CSV export.',
   },
 ];
 

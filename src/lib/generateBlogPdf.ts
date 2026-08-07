@@ -330,7 +330,7 @@ export const generateBlogPdf = async (data: BlogPdfData) => {
   pdf.setFontSize(11);
   pdf.setTextColor(...inkSoft);
   const ctaLines = pdf.splitTextToSize(
-    'The 21-Day Revenue Diagnostic, $18,500 flat, applied toward engagement. A 21-day operator-led audit that maps every revenue, margin, and capacity leak in your business.',
+    'The 21-Day Revenue Diagnostic, $23,500 flat, applied toward engagement. A 21-day operator-led audit that maps every revenue, margin, and capacity leak in your business.',
     contentW - 30,
   );
   pdf.text(ctaLines, pageW / 2, cy, { align: 'center' });

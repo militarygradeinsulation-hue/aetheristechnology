@@ -82,7 +82,7 @@ const FLAGSHIPS: Flagship[] = [
     name: '21-Day Revenue Diagnostic',
     band: 'flagship',
     blurb: 'Fixed-fee forensic audit. CRM-agnostic. Fit call required.',
-    priceCents: 1_850_000,
+    priceCents: 2_350_000,
     cadence: 'one-time',
     included: [
       '12-month CRM snapshot and lead-flow review',
@@ -90,15 +90,15 @@ const FLAGSHIPS: Flagship[] = [
       '15-30 page written findings report with prioritized fixes',
       'ROI projections, source-data appendix, and 60-minute readout',
     ],
-    // Fixed: $10,500 / $5,000 / $3,000  (sum = $18,500)
-    split: { company: 1_050_000, rep: 500_000, partner: 300_000 },
+    // Fixed: $15,500 / $5,000 / $3,000  (sum = $23,500)
+    split: { company: 1_550_000, rep: 500_000, partner: 300_000 },
   },
   {
     key: 'activeCase',
     name: 'Active Case',
     band: 'flagship',
     blurb: '3-month minimum. Diagnostic clients only. Recurring monthly. Rep & partner get paid EVERY month the client stays.',
-    priceCents: 1_500_000,
+    priceCents: 2_000_000,
     recurring: true,
     cadence: 'per month',
     included: [
@@ -107,8 +107,8 @@ const FLAGSHIPS: Flagship[] = [
       'Operator-led weekly priorities and implementation oversight',
       'Monthly progress math tied to retained revenue and pipeline',
     ],
-    // Fixed: $8,000 / $4,000 / $3,000
-    split: { company: 800_000, rep: 400_000, partner: 300_000 },
+    // Fixed: $13,000 / $4,000 / $3,000
+    split: { company: 1_300_000, rep: 400_000, partner: 300_000 },
   },
 ];
 

@@ -83,13 +83,13 @@ Joseph (CEO) is a Marine, former Director of Strategy at a $25M aerospace firm w
     tagline: "Know every product, price, what's included, what's NOT.",
     lesson: {
       title: "Two public offers. One private wedge. Zero discounting.",
-      body: `Public Offer #1 — 21-Day Revenue Diagnostic, $18,500 flat fee.
+      body: `Public Offer #1 — 21-Day Revenue Diagnostic, $23,500 flat fee.
 We map where CRM, sales follow-up, and lead flow are losing money. Deliverable: written report, prioritized fixes, ROI projections, implementation roadmap. CRM-agnostic (runs on a CSV export). No percentage-of-savings games. No active case required.
 
-Public Offer #2 — Active Case, $15,000/month, 3-month minimum.
+Public Offer #2 — Active Case, $20,000/month, 3-month minimum.
 Only available to Diagnostic clients. We do the actual repair.
 
-Private Wedge — Forensic Diagnostic, $2,500 flat (applied toward engagement).
+Private Wedge — Signal Pack, $7,500 flat (applied toward engagement).
 Used in outbound when $18.5K is too big a first ask. Same forensic frame, scoped tighter, credits in.
 
 Pilot pricing ($9,500 for first three) exists in outreach scripts only — never on the public site, never volunteered. If a prospect references it, you confirm. You never offer it unprompted.`,
@@ -224,8 +224,8 @@ You will see these names again in: the audit-engine code, the Diagnostic PDF, ev
     tagline: "Fixed-dollar splits — know what every deal pays you.",
     lesson: {
       title: "Flagship splits are FIXED dollars. Catalog splits are tiered.",
-      body: `Flagship Diagnostic ($18,500): Company $10K · Rep $5K · Partner (Braden) $3K. One sale = $5K to you.
-Flagship Active Case ($15,000/month): Company $8K · Rep $4K · Partner $3K. EVERY MONTH the client stays. A 6-month active case = $24K to the closing rep.
+      body: `Flagship Diagnostic ($23,500): Company $10K · Rep $5K · Partner (Braden) $3K. One sale = $5K to you.
+Flagship Active Case ($20,000/month): Company $8K · Rep $4K · Partner $3K. EVERY MONTH the client stays. A 6-month active case = $24K to the closing rep.
 
 Catalog/smaller offers use a tiered split (50/30/20 → 60/25/15 → 70/20/10) as you hit volume.
 
@@ -778,7 +778,7 @@ const week5: DayPlan6W[] = [
       title: "Anchor the deliverable, then the price. Never the other way.",
       body: `Pitch structure (5 minutes):
 1. "Based on what you shared, you're sitting on at least $X in measurable leak across [3 specific categories]."
-2. "Our 21-Day Diagnostic maps it formally — written report, ROI projections, prioritized fix list. Fixed fee, $18,500. No active case required, no percentage-of-savings, no surprises."
+2. "Our 21-Day Diagnostic maps it formally — written report, ROI projections, prioritized fix list. Fixed fee, $23,500. No active case required, no percentage-of-savings, no surprises."
 3. "If you decide to fix it with us afterward, the Active Case is $15K/month with a 3-month minimum. But you can also take the report and execute internally — about half our clients do."
 4. "Want me to send the SOW today or do you need to loop someone in first?"
 
