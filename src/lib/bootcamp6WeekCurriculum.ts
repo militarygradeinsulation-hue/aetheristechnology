@@ -89,7 +89,7 @@ We map where CRM, sales follow-up, and lead flow are losing money. Deliverable: 
 Public Offer #2 — Active Case, $20,000/month, 3-month minimum.
 Only available to Diagnostic clients. We do the actual repair.
 
-Private Wedge — Forensic Diagnostic, $2,500 flat (applied toward engagement).
+Private Wedge — Signal Pack, $7,500 flat (applied toward engagement).
 Used in outbound when $18.5K is too big a first ask. Same forensic frame, scoped tighter, credits in.
 
 Pilot pricing ($9,500 for first three) exists in outreach scripts only — never on the public site, never volunteered. If a prospect references it, you confirm. You never offer it unprompted.`,

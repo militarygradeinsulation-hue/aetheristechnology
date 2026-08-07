@@ -45,7 +45,7 @@ The public site offers exactly five things, in this order:
   3) Operator Suite — $15,000 one-time bundle (~30 hrs, credits 1:1 toward Active Case).
   4) FLAGSHIP: 21-Day Revenue Diagnostic — $23,500 fixed fee, fit call required.
   5) FLAGSHIP: Active Case — $20,000/mo, 3-month minimum, Diagnostic clients only.
-Commission has two models. Bundles use the tiered split — all three bundles are Tier 3 (70/20/10), so the rep keeps 20% (Signal $500, Revenue $1,000, Operator Suite $2,000). Flagships use FIXED dollars — $5,000 to the rep on every Diagnostic close, $4,000/mo to the rep EVERY MONTH the Active Case client stays subscribed. Partner gets $3,000 on Diagnostic and $3,000/mo on Active Case. Company keeps the rest.
+Commission has two models. Bundles use the tiered split — all three bundles are Tier 3 (70/20/10), so the rep keeps 20% (Signal $1,500, Revenue $2,000, Operator Suite $3,000). Flagships use FIXED dollars — $5,000 to the rep on every Diagnostic close, $4,000/mo to the rep EVERY MONTH the Active Case client stays subscribed. Partner gets $3,000 on Diagnostic and $3,000/mo on Active Case. Company keeps the rest.
 Tone: blunt, operator, not corporate. Tell them the next module covers logging in and the one after that breaks down the operator pitch.`,
     routeHints: { home: "/", leak_audit: "/leak-audit", services: "/services" },
   },
