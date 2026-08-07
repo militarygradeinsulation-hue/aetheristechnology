@@ -167,7 +167,7 @@ const PROGRAM: DayPlan[] = [
                   Deep forensic engagement for $5M-$50M operators. Full systems rebuild plan + 90-day execution roadmap.
                   <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $10k / Rep $5k / Partner $3k</div>
                 </Block>
-                <Block title="Flagship Active Case — $15,000 / month">
+                <Block title="Flagship Active Case — $20,000 / month">
                   Ongoing operator partnership. Embedded forensic + execution muscle.
                   <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $8k / Rep $4k / Partner $3k — EVERY month the client stays</div>
                 </Block>

@@ -66,7 +66,7 @@ const ServicesPage: React.FC = () => {
               <div className="forensic-tile rounded-sm border border-border/60 p-7 flex flex-col">
                 <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 2 · Diagnostic clients only</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">Active Case</h2>
-                <div className="font-forensic text-5xl font-bold text-foreground mt-4">$15,000<span className="text-xl text-muted-foreground"> /mo</span></div>
+                <div className="font-forensic text-5xl font-bold text-foreground mt-4">$20,000<span className="text-xl text-muted-foreground"> /mo</span></div>
                 <p className="text-xs text-muted-foreground mt-1">3-month minimum. Case stays open until leaks are sealed.</p>
                 <ul className="space-y-2 mt-5 text-sm text-foreground/85 flex-1">
                   {[
