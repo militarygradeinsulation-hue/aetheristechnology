@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { findTool, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
+import { tierBadgeForTool } from "@/lib/aetherisTiers";
 import { TOOL_INFO } from "@/lib/toolInfo";
 
 const ToolInfoPage: React.FC = () => {
@@ -71,14 +72,12 @@ const ToolInfoPage: React.FC = () => {
                     <Sparkles className="w-4 h-4 mr-1.5" /> Try free
                   </Link>
                 </Button>
-                {tool.priceCents != null && (
-                  <Button
-                    onClick={() => openBuy("single")}
-                    className="bg-amber text-background hover:bg-amber/90 font-semibold"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-1.5" /> Subscribe — {formatToolPrice(tool)}
-                  </Button>
-                )}
+                <Button
+                  onClick={() => openBuy("single")}
+                  className="bg-amber text-background hover:bg-amber/90 font-semibold"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-1.5" /> {tierBadgeForTool(tool.id)}
+                </Button>
                 {tool.route && tool.route !== `/try/${tool.id}` && (
                   <Button asChild variant="ghost" className="text-amber hover:bg-amber/5">
                     <Link to={tool.route}>
@@ -89,12 +88,12 @@ const ToolInfoPage: React.FC = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-amber/15 flex flex-wrap gap-4 text-xs font-mono text-muted-foreground">
-                <span>Yearly access · renews annually</span>
+                <span>Included in your Aetheris tier</span>
                 <span>·</span>
                 <span>Sandbox runs are free</span>
                 <span>·</span>
                 <Link to="/tech-solutions" className="text-amber hover:underline">
-                  See bundle & all-access <ArrowRight className="inline w-3 h-3" />
+                  See the full tier ladder <ArrowRight className="inline w-3 h-3" />
                 </Link>
               </div>
             </div>

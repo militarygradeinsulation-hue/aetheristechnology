@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
-import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -146,7 +146,7 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
   },
   {
     name: 'Signal Pack',
-    price: '$2,500',
+    price: '$7,500',
     cadence: 'one-time · ~6 hrs operator',
     blurb: 'A real operator confirms — in writing — where your business is bleeding and why buyers ghost.',
     outcome: 'You stop guessing. You get a written verdict on what\'s costing you the most, in plain English, from someone who has fixed it before.',
@@ -157,15 +157,15 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
       'Friction Vocabulary Audit (the exact words costing you deals)',
       'Leak Findings memo you can hand to your team',
       '30-min live walkthrough with the operator',
-      'Full $2,500 credits toward any bigger tier',
+      'Credits in full toward any higher tier',
     ],
-    cta: 'Buy Signal Pack',
+    cta: 'Talk to an operator',
     highlight: false,
     priceId: 'leak_signal_pack_onetime',
   },
   {
     name: 'Revenue Pack',
-    price: '$5,000',
+    price: '$10,000',
     cadence: 'one-time · ~14 hrs',
     blurb: 'The fix-it-yourself system in a box. Most operators pick this because it pays for itself in one closed deal.',
     outcome: 'You leave with the exact scripts, questions, and 30-day content plan your team runs on Monday morning — no more "what do I say?" hesitation.',
@@ -179,14 +179,14 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
       'Two 45-min working sessions with the operator',
       'One closed deal typically covers 3–5× the fee',
     ],
-    cta: 'Buy Revenue Pack',
+    cta: 'Talk to an operator',
     highlight: true,
     badge: 'Most Picked',
     priceId: 'leak_revenue_pack_onetime',
   },
   {
     name: 'Operator Suite',
-    price: '$10,000',
+    price: '$15,000',
     cadence: 'one-time · ~30 hrs / 3 wks',
     blurb: 'The playbook + the tech suite. You stop paying five vendors for four tools that don\'t talk to each other.',
     outcome: 'You get the full recovery system installed — strategy, content, lead-nurture, tech — and every dollar credits 1:1 toward the Active Case Retainer if you go deeper.',
@@ -198,15 +198,15 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
       'Digital Snapshot (audit of every buyer touchpoint)',
       'Lead-Nurture Automation (installed, not just designed)',
       'Aetheris Tech Suite access (the tools reps actually use)',
-      '$10K credits 1:1 toward the Active Case Retainer',
+      'Credits 1:1 toward the Active Case Retainer',
     ],
-    cta: 'Buy Operator Suite',
+    cta: 'Talk to an operator',
     highlight: false,
     priceId: 'leak_operator_suite_onetime',
   },
   {
     name: '21-Day Diagnostic',
-    price: '$18,500',
+    price: '$23,500',
     cadence: 'flagship · 21 days',
     blurb: 'An operator inside your business for 21 days. You get a leak ledger with a dollar sign next to every finding.',
     outcome: 'You end with a board-ready document that names every leak, its cost, and the exact fix — priced. This is the only door to the Active Case Retainer.',
@@ -217,9 +217,9 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
       'Implementation plan handoff (do-it-yourself or hand back)',
       '21 days of operator inside your ops, sales, and marketing',
       'Fit call required — we don\'t take every business',
-      'Prerequisite for the $15K/mo Active Case',
+      'Prerequisite for the Active Case Retainer',
     ],
-    cta: 'Buy 21-Day Diagnostic',
+    cta: 'Request a fit call',
     highlight: false,
     badge: 'Flagship',
     flagship: true,
@@ -227,7 +227,7 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
   },
   {
     name: 'Active Case Retainer',
-    price: '$15,000',
+    price: '$20,000',
     cadence: '/month · operator on retainer',
     blurb: 'We stop advising and start running. Aetheris executes the recovery plan month after month until the leak is closed.',
     outcome: 'You get an operator running point on execution — not another consultant with a slide deck. Every month we quantify what got recovered and re-rank what\'s left.',
@@ -241,7 +241,7 @@ const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
       'Cancel or pause any month — no long lock-in',
       'Requires completed 21-Day Diagnostic',
     ],
-    cta: 'Start Active Case ($15K/mo)',
+    cta: 'Diagnostic clients only',
     highlight: false,
     badge: 'Retainer',
     flagship: true,
@@ -261,7 +261,6 @@ const LeakAuditPage = () => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qIndex, setQIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [checkoutTier, setCheckoutTier] = useState<{ name: string; priceId: string } | null>(null);
 
   const currentQ = QUESTIONS[qIndex];
   const totalQs = QUESTIONS.length;
@@ -323,12 +322,6 @@ const LeakAuditPage = () => {
     document.getElementById('leak-audit-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const openTierCheckout = (tier: { name: string; priceId?: string }) => {
-    if (!tier.priceId) return;
-    setCheckoutTier({ name: tier.name, priceId: tier.priceId });
-    setTimeout(() => document.getElementById('leak-audit-checkout')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-  };
-
   const pricingLadder = (context: 'intro' | 'result') => (
     <div className="space-y-4">
       <div className="text-center space-y-2">
@@ -336,32 +329,12 @@ const LeakAuditPage = () => {
           Actual Leak Audit Offers
         </div>
         <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground">
-          Pick the depth. Buy the package. Run the recovery.
+          Pick the depth. Each rung includes everything below it.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-          Every paid tier applies 1:1 toward the next. Start free, or buy the operator-led package now.
+          Instruments are never sold separately. Start free, then talk to an operator about the right tier.
         </p>
       </div>
-
-      {checkoutTier && (
-        <div id="leak-audit-checkout" className="glass rounded-lg border border-amber/40 p-5 md:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber">Secure Checkout</div>
-              <h3 className="font-forensic text-2xl font-bold text-foreground">{checkoutTier.name}</h3>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setCheckoutTier(null)}>
-              Close
-            </Button>
-          </div>
-          <StripeEmbeddedCheckout
-            priceId={checkoutTier.priceId}
-            customerEmail={email || undefined}
-            returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
-            metadata={{ source: 'leak_audit', package: checkoutTier.name, company: company || '' }}
-          />
-        </div>
-      )}
 
       <div className="flex flex-col gap-2.5 max-w-7xl mx-auto -mx-2 md:-mx-8 lg:-mx-16">
         {LEAK_AUDIT_TIERS.map((tier) => (
@@ -430,13 +403,15 @@ const LeakAuditPage = () => {
                 </Button>
               ) : (
                 <Button
+                  asChild
                   size="sm"
-                  onClick={() => openTierCheckout(tier)}
                   className={`w-full md:w-auto ${tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}`}
                   variant={tier.highlight ? 'default' : 'outline'}
                 >
-                  <CreditCard className="w-3.5 h-3.5 mr-1.5" />
-                  {tier.cta}
+                  <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                    <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                    {tier.cta}
+                  </a>
                 </Button>
               )}
             </div>
@@ -447,7 +422,7 @@ const LeakAuditPage = () => {
 
 
       <p className="text-center text-xs text-muted-foreground italic pt-2">
-        Every paid tier credits toward the next. The 21-Day Diagnostic is the gate to the $15K/mo Active Case Retainer.
+        Every paid tier credits toward the next. The 21-Day Diagnostic is the gate to the $20K/mo Active Case Retainer.
       </p>
 
     </div>
@@ -784,51 +759,29 @@ const LeakAuditPage = () => {
                     Next Step
                   </div>
                   <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Forensic Diagnostic — $2,500
+                    The Signal Pack — $7,500
                   </h3>
                   <p className="text-muted-foreground max-w-xl mx-auto">
-                    The Leak Audit was self-reported. The Forensic Diagnostic is the operator-led
-                    investigation: 14 days inside your operation, every leak named, every dollar quantified.
-                    <strong className="text-foreground"> Applied toward engagement if you proceed.</strong>
+                    The Leak Audit was self-reported. The Signal Pack is the operator-led diagnosis:
+                    the full website forensic pass, brand contradictions, friction audit, and a written
+                    findings memo.
+                    <strong className="text-foreground"> Credits in full toward any higher tier.</strong>
                   </p>
-                  {!checkoutTier ? (
-                    <>
-                      <Button
-                        size="lg"
-                        onClick={() => openTierCheckout({ name: 'Signal Pack', priceId: 'leak_signal_pack_onetime' })}
-                        className="bg-amber text-primary-foreground hover:bg-amber/90"
-                      >
-                        Pay $2,500 & Book the Signal Pack
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Button>
-                      <div className="pt-2">
-                        <a
-                          href="/book"
-                          className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
-                        >
-                          <Mail className="w-3.5 h-3.5" />
-                          Or book a 15-min walkthrough first
-                        </a>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="pt-4 text-left">
-                      <StripeEmbeddedCheckout
-                        priceId={checkoutTier.priceId}
-                        customerEmail={email || undefined}
-                        returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
-                        metadata={{ source: 'leak_audit', package: checkoutTier.name, company: company || '' }}
-                      />
-                      <div className="text-center pt-3">
-                        <button
-                          onClick={() => setCheckoutTier(null)}
-                          className="text-xs text-muted-foreground hover:text-amber underline"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <Button asChild size="lg" className="bg-amber text-primary-foreground hover:bg-amber/90">
+                    <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                      Talk to an operator
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </a>
+                  </Button>
+                  <div className="pt-2">
+                    <a
+                      href="/book"
+                      className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Or book a 15-min walkthrough first
+                    </a>
+                  </div>
                 </div>
 
                 {/* Full pricing ladder — Ways to run the audit */}

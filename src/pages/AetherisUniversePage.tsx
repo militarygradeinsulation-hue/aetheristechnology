@@ -1,3 +1,4 @@
+import { tierShortBadge, tierBadgeForTool } from '@/lib/aetherisTiers';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, X, Sparkles, Move3d, RotateCcw, Volume2, VolumeX, SlidersHorizontal, KeyRound, Loader2 } from 'lucide-react';
@@ -43,11 +44,7 @@ type PlacedTool = {
   z: number;
 };
 
-const formatPrice = (cents: number | null): string => {
-  if (cents == null) return 'Included';
-  const dollars = cents / 100;
-  return `$${dollars.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
+
 
 const UNIVERSE_ACCESS_KEY = 'aetheris_universe_access_v1';
 
@@ -290,7 +287,7 @@ const ToolNode = memo(function ToolNode({
               className="font-mono text-[10px] font-bold tracking-tight"
               style={{ color }}
             >
-              {formatPrice(tool.priceCents)}
+              {tierShortBadge(tool.id)}
             </div>
           </div>
         </div>
@@ -1109,7 +1106,7 @@ const AetherisUniversePage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex-shrink-0 font-mono text-base md:text-lg font-bold text-amber">
-                  {formatPrice(tool.priceCents)}
+                  {tierShortBadge(tool.id)}
                 </div>
               </button>
             ))}

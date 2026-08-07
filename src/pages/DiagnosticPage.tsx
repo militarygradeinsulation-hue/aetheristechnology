@@ -42,7 +42,7 @@ const DiagnosticPage: React.FC = () => {
   return (
     <div className="relative min-h-screen text-foreground overflow-x-hidden">
       <SEOHead
-        title="The Leak Audit™ — fixed-fee 21-Day Revenue Diagnostic | Aetheris"
+        title="The Leak Audit™ — $23,500 21-Day Revenue Diagnostic | Aetheris"
         description="Operator-led Leak Audit for specialty manufacturers $5M-$25M. One fixed fee. Map where CRM, sales follow-up, and lead flow are losing money."
         path="/diagnostic"
         keywords="leak audit, revenue diagnostic, manufacturing CRM audit, sales operations diagnostic, fixed fee consulting"
@@ -147,11 +147,11 @@ const DiagnosticPage: React.FC = () => {
                 {[
                   {
                     tier: '01',
-                    name: 'Leak Audit',
-                    price: 'Fixed fee',
+                    name: 'Signal Pack',
+                    price: '$7,500',
                     sub: 'Named leaks + dollar exposure',
                     note: 'Fastest way in.',
-                    why: 'Why fixed-fee',
+                    why: 'Why $7,500',
                     whyBody:
                       'One operator, 8–12 focused hours across your CRM export, site, funnels, and follow-up. You get a written leak map with dollar figures — enough to prove the bleed is real without committing to a full engagement. Priced as a rounding error against a leak that typically costs 10–40× the fee every year unfixed.',
                     scope: ['8–12 operator hours', '5–10 named leaks, $-tagged', 'Written report + 30-min readout', '100% credited to Tier 02 or 03'],
@@ -159,11 +159,11 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '02',
                     name: '21-Day Revenue Diagnostic',
-                    price: 'Fixed fee',
+                    price: '$23,500',
                     sub: 'Full forensic dig',
                     note: 'Credited 1:1 to Active Case.',
                     featured: true,
-                    why: 'Why fixed-fee',
+                    why: 'Why $23,500',
                     whyBody:
                       'Three weeks of operator time running all 9 forensic instruments against live data — CRM, pipeline, site, brand, follow-up, content, AI-readiness. Replaces $82K–$215K worth of separate audits. Every dollar credits 1:1 toward the Active Case, so it costs nothing if you continue.',
                     scope: ['21 days · 1 operator', 'All 9 instruments run live', '15–30 page report + roadmap', 'Fully credited to Tier 03'],
@@ -186,10 +186,10 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '03',
                     name: 'Active Case',
-                    price: '$15,000/mo',
+                    price: '$20,000/mo',
                     sub: 'Operator-led implementation',
                     note: '3-month minimum · Diagnostic clients.',
-                    why: 'Why $15,000/mo',
+                    why: 'Why $20,000/mo',
                     whyBody:
                       'Operator-led removal of the leaks named in the Diagnostic — not a retainer, not seat-based software, not activity theatre. Fee is a fraction of a mid-level ops hire ($180K+ fully-loaded) and typically pays for itself in month one from a single recovered deal or plugged CRM bleed.',
                     scope: ['~40 hrs/mo senior operator', '3-month minimum, no auto-renew', 'Weekly readout + fix log', 'Ends when the leak ends'],

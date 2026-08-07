@@ -7,8 +7,9 @@ import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
-import { SHOP_TOOLS, SHOP_PRICES, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
-import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
+import { SHOP_TOOLS, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
+import { TierLadder } from "@/components/TierLadder";
+import { Sparkles, ShoppingCart, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
 import { EasyModeRecommender } from "@/components/EasyModeRecommender";
@@ -235,7 +236,7 @@ const TechSolutionsPage: React.FC = () => {
                       onClick={() => openBuy("single", [t.id])}
                       className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
                     >
-                      <ShoppingCart className="w-3 h-3 mr-1" /> Own it
+                      <ShoppingCart className="w-3 h-3 mr-1" /> Which tier
                     </Button>
                   </div>
                   <Link
@@ -257,8 +258,8 @@ const TechSolutionsPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Tech Solutions Store — Free Systems + Buy Direct | Aetheris"
-        description="Every Aetheris client-facing tool: 3 free tries, or subscribe yearly from $250. Evidence Kit (all client-facing tools) — $1,450/yr."
+        title="Aetheris Instruments — Included in Every Tier | Aetheris"
+        description="Every Aetheris instrument, free to try. Nothing is sold separately: instruments are included inside Signal Pack, Revenue Pack, Operator Suite, and the 21-Day Diagnostic."
         path="/tech-solutions"
         keywords="aetheris tools, ai tools store, free ai systems, business forensics tools"
       />
@@ -277,12 +278,12 @@ const TechSolutionsPage: React.FC = () => {
               onClick={handleSecretTap}
               className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05] mb-4 select-none cursor-default"
             >
-              Our systems, <span className="text-amber italic">free to try.</span>
-              <br />Or own them for life.
+              Our instruments, <span className="text-amber italic">free to try.</span>
+              <br />Included in every tier.
             </h1>
             <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-              Every diagnostic and content system in the Aetheris stack. Same free-run rules
-              as the ecosystem. Ready to keep one? Buy it right here.
+              Every diagnostic and content system in the Aetheris stack. Try them free. Nothing here
+              is sold separately — each instrument is included inside an Aetheris tier and run with an operator.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 text-xs text-amber/80 font-mono border border-amber/20 bg-amber/5 px-3 py-2 rounded-sm">
               <span className="relative flex h-2 w-2">
@@ -347,45 +348,8 @@ const TechSolutionsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Pricing tiers */}
-
-          <section className="mb-14 grid md:grid-cols-3 gap-4">
-            <div className="forensic-tile rounded-sm border border-amber/30 p-5">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Single</div>
-              <div className="font-forensic text-3xl font-bold">from ${SHOP_PRICES.single.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.single.subtitle}</p>
-              <Button
-                onClick={() => openBuy("single")}
-                className="w-full bg-amber text-background hover:bg-amber/90 font-semibold"
-              >
-                Pick 1 tool
-              </Button>
-            </div>
-            <div className="forensic-tile rounded-sm border border-amber/60 p-5 relative">
-              <div className="absolute -top-2 right-3 font-mono text-[9px] tracking-widest uppercase bg-amber text-background px-1.5 py-0.5">Best</div>
-              <div className="font-mono text-[10px] uppercase tracking-widest text-amber mb-1">Bundle</div>
-              <div className="font-forensic text-3xl font-bold">$1,250<span className="text-base font-normal text-muted-foreground">/yr</span></div>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">Forensic Scan (All) · 5 diagnostics · saves $250</p>
-              <Button
-                onClick={() => openBuy("single")}
-                className="w-full bg-amber text-background hover:bg-amber/90 font-semibold"
-              >
-                <Layers className="w-3.5 h-3.5 mr-1.5" /> Forensic Scan (All)
-              </Button>
-            </div>
-            <div className="forensic-tile rounded-sm border border-crimson/50 p-5">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-crimson mb-1">All-Access</div>
-              <div className="font-forensic text-3xl font-bold">${SHOP_PRICES.unlimited.amount / 100}<span className="text-base font-normal text-muted-foreground">/yr</span></div>
-              <p className="text-xs text-muted-foreground mt-1 mb-4">{SHOP_PRICES.unlimited.subtitle}</p>
-              <Button
-                onClick={() => openBuy("unlimited")}
-                variant="outline"
-                className="w-full border-crimson/60 text-crimson hover:bg-crimson/10 font-semibold"
-              >
-                <InfinityIcon className="w-3.5 h-3.5 mr-1.5" /> Evidence Kit
-              </Button>
-            </div>
-          </section>
+          {/* Aetheris tier ladder — instruments are included, never sold alone */}
+          <TierLadder compact />
 
           <Section title="Featured Systems" tools={featured} icon={Trophy} />
 
@@ -430,9 +394,9 @@ const TechSolutionsPage: React.FC = () => {
 
           <div className="border-l-2 border-crimson/70 pl-5 py-1 max-w-2xl">
             <p className="text-sm text-muted-foreground">
-              Same rules as the Try surface: sandbox runs are free, nothing is saved,
-              each run is independent. A subscription turns any tool into a yearly instance
-              with persistent memory tied to your account. Renews annually. Cancel anytime.
+              Same rules as the Try surface: sandbox runs are free, nothing is saved, each run is
+              independent. Continuous access with persistent memory comes with your Aetheris tier,
+              starting at Signal Pack. There is no standalone tool purchase.
             </p>
           </div>
         </main>

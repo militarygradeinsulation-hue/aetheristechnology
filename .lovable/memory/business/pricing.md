@@ -4,27 +4,20 @@ description: Public offers, bundles, flagship fixed splits, tiered commission, r
 type: feature
 ---
 
-## Public offers (the ONLY paths surfaced on the public site)
+## Public offers — 2026 Aetheris Universe tier ladder (SOURCE OF TRUTH: `src/lib/aetherisTiers.ts`)
 
-### Operator-led bundles (`/catalog`) — three sealed pairings, no à la carte
-1. **Signal Pack — $2,500 one-time.** ~6 hrs operator time. Website Report + Brand Contradiction Finder + Friction Vocabulary Audit + Leak Findings memo + 30-min walkthrough.
-2. **Revenue Pack — $5,000 one-time.** ~14 hrs. Signal Pack + Sales Script Pack + Follow-Up Plan + Strategic Question Engine + 30-Day Content Calendar + two 45-min sessions. "Most operators pick this".
-3. **Operator Suite — $10,000 one-time.** ~30 hrs over 3 weeks. Revenue Pack + Strategy Blueprint + Social Content Pack + Digital Snapshot + Lead-Nurture Automation + Tech Suite access. Credits 1:1 toward Retainer.
+The 24 tools are NOT standalone SKUs. They are instruments included inside tiers.
+No public per-tool price, no per-tool Stripe checkout, no tool-shop retail plans.
+Progression: DIAGNOSE (Signal) -> ARM (Revenue) -> OPERATE (Suite) -> INVESTIGATE (Diagnostic) -> SUSTAIN (Active Case).
 
-All three CTA "Talk to an operator" → ContactModal. **No public Buy/checkout button on bundles.** Operator qualifies, sends Stripe link.
+1. **Free Self-Scan — $0.** One live scan, directional Revenue Score, one named leak.
+2. **Signal Pack — $7,500 one-time.** Website Leak Scanner full pass + Brand Contradictions + Friction Audit + findings memo + operator walkthrough.
+3. **Revenue Pack — $10,000 one-time.** Signal + Strategic Questions, Sales Scripts, Follow-Up Sequences, Content Calendar.
+4. **Operator Suite — $15,000 one-time.** Revenue + Detective Mode, Forensic Scan (All), Head-to-Head, Social Content, Image Studio, Content Engine, All-In-One, Easy Mode, full Tech Suite.
+5. **21-Day Diagnostic — $23,500. FLAGSHIP.** Suite + Golden Report, Nexus IQ, Reciprocation, AI Checklist, Playbook Generator, every remaining instrument, 21 days of operator time. Fit call required.
+6. **Active Case Retainer — $20,000/month.** Diagnostic clients only. Monthly rescans, living Leak Register, priority builds.
 
-### Flagships (sales-led only)
-- **21-Day Revenue Diagnostic — $18,500.** Fit call required.
-- **Implementation Retainer — $15,000/mo, 3-month minimum.** Diagnostic clients only.
-
-### Leak Ecosystem Tool Shop (`/tools-shop`) — self-serve, lifetime unlocks
-Public shop with 3 free runs per tool (email-gated), then buy a lifetime code. Codes unlock unlimited runs + persistent AI memory per tool. Bundle: buy 3, get 1 free is baked into the 3-Tool price.
-- **Single Tool — $40 one-time (lifetime).** Tier 1 → Co $20 / Rep $12 / Partner $8.
-- **3-Tool Bundle — $100 one-time (lifetime, mix & match).** Tier 2 → Co $60 / Rep $25 / Partner $15.
-- **All Access — $1,000 one-time (lifetime, every current + future tool).** Tier 3 → Co $700 / Rep $200 / Partner $100.
-
-Stripe lookup_keys: `tool_single_lifetime`, `tool_triple_lifetime`, `tool_unlimited_lifetime`. Webhook mints a `LEAK-XXXX-XXXX` code on `checkout.session.completed` when `metadata.shop === "tools"` and emails it via the `tool-shop-license` template. Redeem at `/tools-shop/redeem`.
-
+Public tool cards show tier badges ("Included in Operator Suite", "Diagnostic only"), never prices. CTAs go to the tier ladder or /book.
 
 ## Commission math — TWO models (source of truth)
 
@@ -41,8 +34,8 @@ Bundle splits (all T3):
 
 ### Model B — Flagship fixed-dollar
 Defined in `FLAGSHIP_SPLITS` (src/lib/repProducts.ts) and `FLAGSHIP_FIXED_SPLITS` / `flagshipFixedSplit()` (payments-webhook). Mapped by Stripe price lookup_key:
-- `diagnostic_21day_once` → Co $10,500 / Rep $5,000 / Partner $3,000  (sum = $18,500)
-- `implementation_retainer` → Co $8,000 / Rep $4,000 / Partner $3,000 (every month client stays)
+- `diagnostic_21day_once` → Co $10,500 / Rep $5,000 / Partner $3,000 (legacy $18,500 math; NEEDS RE-CONFIRMATION against the $23,500 public price)
+- `implementation_retainer` → Co $8,000 / Rep $4,000 / Partner $3,000 (legacy $15,000 math; NEEDS RE-CONFIRMATION against the $20,000/mo public price)
 
 Webhook precedence: `flagshipFixedSplit(priceId)` wins; otherwise falls back to `ratesForAmount()`.
 
