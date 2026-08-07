@@ -1,29 +1,34 @@
 // Single source of truth for rep commission tables.
 // Prices in cents to avoid float math.
 //
-// PUBLIC OFFER = the renamed ladder (per naming + placement guide):
-//   Free           · The Leak Check
-//   $4,500-$6,500  · The One-Leak Investigation (tiered % split, Tier 3)
-//   $18,500        · The Full Leak Investigation (flagship fixed-dollar split)
-//   $15,000/mo     · Leak Removal & System Build (flagship fixed-dollar split)
+// PUBLIC OFFER = the 2026 Aetheris Universe tier ladder (src/lib/aetherisTiers.ts):
+//   Free           · Free Self-Scan
+//   $7,500         · Signal Pack        (tiered % split, Tier 3)
+//   $10,000        · Revenue Pack       (tiered % split, Tier 3)
+//   $15,000        · Operator Suite     (tiered % split, Tier 3)
+//   $23,500        · 21-Day Diagnostic  (flagship fixed-dollar split)
+//   $20,000/mo     · Active Case        (flagship fixed-dollar split)
 //
 // TWO COMMISSION MODELS LIVE HERE — read before touching anything:
 //
-// 1) TIERED COMMISSION (One-Leak Investigation + legacy à-la-carte + Tool Shop)
+// 1) TIERED COMMISSION (packs + legacy à-la-carte)
 //    Tier 1, Entry ($29-$59):   Company 50% · Rep 30% · Partner 20%
 //    Tier 2, Mid   ($79-$349):  Company 60% · Rep 25% · Partner 15%
 //    Tier 3, High  ($599+):     Company 70% · Rep 20% · Partner 10%
 //
-// 2) FLAGSHIP FIXED-DOLLAR (Full Leak Investigation + Leak Removal & System Build ONLY)
-//    Full Leak Investigation ($18,500 one-time)
-//      → Company $10,500 · Rep $5,000 · Partner $3,000
-//    Leak Removal & System Build ($15,000/mo, paid every month client stays)
-//      → Company $8,000  · Rep $4,000 · Partner $3,000
-//    Enforced server-side in payments-webhook flagshipFixedSplit().
+// 2) FLAGSHIP FIXED-DOLLAR (21-Day Diagnostic + Active Case ONLY)
+//    21-Day Diagnostic ($23,500 one-time)
+//      → Company $15,500 · Rep $5,000 · Partner $3,000
+//    Active Case ($20,000/mo, paid every month client stays)
+//      → Company $13,000 · Rep $4,000 · Partner $3,000
+//    Rep and partner dollars are unchanged from the previous ladder; the price
+//    increase goes to the company. Enforced server-side in
+//    payments-webhook flagshipFixedSplit().
 //
-// The old operator-led bundles (Signal / Revenue / Operator Suite) and every
-// à-la-carte tool are now `legacy: true` — kept for back-compat with existing
-// Stripe products and rep-portal internal sales, but hidden from public catalog.
+// Every à-la-carte tool is `legacy: true` — kept for back-compat with existing
+// Stripe products and rep-portal internal sales. Tools are no longer sold
+// standalone to the public; they are instruments included inside the tiers.
+
 
 export type CommissionTier = 1 | 2 | 3;
 
