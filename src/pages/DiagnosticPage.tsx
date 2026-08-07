@@ -186,10 +186,10 @@ const DiagnosticPage: React.FC = () => {
                   {
                     tier: '03',
                     name: 'Active Case',
-                    price: '$15,000/mo',
+                    price: '$20,000/mo',
                     sub: 'Operator-led implementation',
                     note: '3-month minimum · Diagnostic clients.',
-                    why: 'Why $15,000/mo',
+                    why: 'Why $20,000/mo',
                     whyBody:
                       'Operator-led removal of the leaks named in the Diagnostic — not a retainer, not seat-based software, not activity theatre. Fee is a fraction of a mid-level ops hire ($180K+ fully-loaded) and typically pays for itself in month one from a single recovered deal or plugged CRM bleed.',
                     scope: ['~40 hrs/mo senior operator', '3-month minimum, no auto-renew', 'Weekly readout + fix log', 'Ends when the leak ends'],
