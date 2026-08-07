@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { findTool, formatToolPrice } from "@/lib/tool-shop-catalog";
+import { tierBadgeForTool, tierShortBadge } from "@/lib/aetherisTiers";
 import { toast } from "sonner";
 import { CreationStudioSandbox } from "@/components/CreationStudioSandbox";
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
@@ -664,13 +665,11 @@ export default function TryToolPage() {
                           // next_move
                         </div>
                         <div className="font-forensic text-sm text-foreground leading-tight truncate">
-                          License this tool <span className="text-muted-foreground font-sans text-xs">— own it, or resell the whole ecosystem</span>
+                          Unlock this instrument <span className="text-muted-foreground font-sans text-xs">— included inside an Aetheris tier</span>
                         </div>
                       </div>
                       <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-amber/80 shrink-0">
-                        <span>{tool?.priceCents != null ? formatToolPrice(tool) : "Included"}</span>
-                        <span className="text-amber/30">/</span>
-                        <span className="text-crimson/80">$100 op</span>
+                        <span>{tierBadgeForTool(toolId)}</span>
                       </div>
                       <div className="w-7 h-7 rounded-sm border border-amber/30 flex items-center justify-center text-amber shrink-0">
                         {dossierOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -688,17 +687,17 @@ export default function TryToolPage() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70">
-                              § 01 · Yearly License
+                              § 01 · Tier Access
                             </div>
                             <div className="font-mono text-[9px] text-amber/50">USD</div>
                           </div>
                           <div>
                             <div className="flex items-baseline gap-2">
-                              <div className="font-forensic text-3xl font-bold text-amber leading-none">{tool?.priceCents != null ? formatToolPrice(tool) : "Included"}</div>
-                              <div className="text-[11px] text-muted-foreground">{tool?.priceCents != null ? "renews annually" : "in Full Leak Investigation"}</div>
+                              <div className="font-forensic text-2xl font-bold text-amber leading-none">{tierShortBadge(toolId)}</div>
+                              <div className="text-[11px] text-muted-foreground">operator run</div>
                             </div>
                             <div className="text-xs text-foreground/75 leading-snug mt-2">
-                              Yearly access. Unlimited runs while active. Persistent memory on your account. Cancel anytime.
+                              This instrument is not sold on its own. It is included in the tier above and every tier past it, run with an operator.
                             </div>
                           </div>
                           <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber border-t border-amber/15">
@@ -744,7 +743,7 @@ export default function TryToolPage() {
               </div>
             )}
 
-            {!output && tool?.priceCents != null && (
+            {!output && !!tool && (
               <div className="mt-8 rounded-sm border border-amber/30 bg-background/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-foreground/70 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-amber" />
@@ -755,7 +754,7 @@ export default function TryToolPage() {
                   onClick={() => setBuyOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 whitespace-nowrap"
                 >
-                  <ShoppingCart className="w-3 h-3" /> Buy this tool — {formatToolPrice(tool)}
+                  <ShoppingCart className="w-3 h-3" /> {tierBadgeForTool(toolId)}
                 </button>
               </div>
             )}
