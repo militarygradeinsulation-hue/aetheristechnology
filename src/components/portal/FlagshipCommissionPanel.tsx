@@ -90,7 +90,7 @@ const FLAGSHIPS: Flagship[] = [
       '15-30 page written findings report with prioritized fixes',
       'ROI projections, source-data appendix, and 60-minute readout',
     ],
-    // Fixed: $10,500 / $5,000 / $3,000  (sum = $18,500)
+    // Fixed: $10,500 / $5,000 / $3,000  (sum = $23,500)
     split: { company: 1_050_000, rep: 500_000, partner: 300_000 },
   },
   {

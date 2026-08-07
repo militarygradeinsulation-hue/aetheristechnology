@@ -52,7 +52,7 @@ const TOPICS = [
     angles: [
       "Salesforce just laid off 10% of their workforce while their CRM adoption rate sits at 26% — the tool isn't the problem, the implementation is the leak",
       "HubSpot's free CRM is the most expensive software you'll ever use — here's the hidden revenue drain nobody talks about",
-      "McKinsey charges $500K for a strategy deck. We charge $18,500 for a 21-Day Revenue Diagnostic that finds the actual leaks. Here's why the results are the same.",
+      "McKinsey charges $500K for a strategy deck. We charge $23,500 for a 21-Day Revenue Diagnostic that finds the actual leaks. Here's why the results are the same.",
       "Stripe just raised prices and nobody noticed because they buried it in 'platform fees' — this is exactly how your vendors are bleeding you dry",
       "Shopify's 'build your empire' marketing created a generation of businesses with beautiful storefronts and zero operational infrastructure",
       "Monday.com and Asana are in a feature war while their users can't answer one question: is this tool making us money or costing us money?",
@@ -114,7 +114,7 @@ const TOPICS = [
       "We ran forensic diagnostics on 50 businesses last year. Here are the 5 leaks that showed up in every single one.",
       "The anatomy of a $200K revenue leak: how one missing follow-up sequence cost a B2B company more than their entire marketing budget",
       "Why your P&L looks healthy but your cash flow is dying — the operational forensics behind margin compression",
-      "The Forensic Diagnostic vs. a strategy session: what you actually get for $18,500+ and why it pays for itself in the first finding",
+      "The Forensic Diagnostic vs. a strategy session: what you actually get for $23,500+ and why it pays for itself in the first finding",
       "Most businesses have 3-7 active revenue leaks running right now. Here's how to find yours in 48 hours without hiring a consultant.",
     ],
   },
@@ -126,7 +126,7 @@ const TOPICS = [
 
 const AETHERIS_FRAMEWORKS = [
   "The Leak Audit™ — A 7-step forensic methodology that systematically identifies every point where revenue, margin, or operational capacity is being lost. From pipeline analysis to vendor stack audits, each step exposes a specific category of business hemorrhage.",
-  "The 21-Day Revenue Diagnostic ($18,500 flat) — A 14-day deep-dive into your business operations that produces a prioritized map of every revenue leak, operational bottleneck, and margin drain. The fee is applied toward any engagement, making the diagnosis free when you fix the problem.",
+  "The 21-Day Revenue Diagnostic ($23,500 flat) — A 14-day deep-dive into your business operations that produces a prioritized map of every revenue leak, operational bottleneck, and margin drain. The fee is applied toward any engagement, making the diagnosis free when you fix the problem.",
   "The Revenue Autopsy Framework™ — Post-mortem analysis of lost deals, churned clients, and missed targets to identify the systemic operational failures that caused each loss. Not what went wrong — why the system allowed it to happen.",
   "The Operational X-Ray™ — A rapid diagnostic that maps the gap between what your business claims to do and what it actually does, exposing the process failures, data gaps, and human bottlenecks that create revenue leakage.",
 ];
@@ -172,7 +172,7 @@ const STRATEGIC_INTELLIGENCE = `
 - Average consulting engagement: $150K-$500K with no measurable outcome guarantee
 - 70% of change management initiatives fail to achieve their goals (McKinsey)
 - Companies that measure consulting ROI within 90 days see 4x better outcomes
-- The 21-Day Revenue Diagnostic at $18,500 with fee applied toward engagement converts at 72%
+- The 21-Day Revenue Diagnostic at $23,500 with fee applied toward engagement converts at 72%
 `;
 
 function pickNicheTags(pool: string): string[] {
@@ -255,7 +255,7 @@ serve(async (req) => {
 COMPANY CONTEXT (apply the blueprint above through this lens)
 ═══════════════════════════════════════════════════════════════════
 
-You are a senior content strategist for Aetheris — a Chaos Theory Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer). Headquartered in Indianapolis, Indiana.
+You are a senior content strategist for Aetheris — a Chaos Theory Forensics firm that embeds into operations, exposes revenue leaks, and ships measurable fixes. Led by Joseph Toney, Aetheris operates as an Operator, not a consultant. The core methodology is The Leak Audit™ (7 steps). The entry point is the 21-Day Revenue Diagnostic ($23,500 flat, credited toward the $20,000/mo Implementation Retainer). Headquartered in Indianapolis, Indiana.
 
 ## TONE & VOICE — THIS IS NON-NEGOTIABLE
 
@@ -313,7 +313,7 @@ ${brandedFramework}
 - Make each step specific to B2B operations — not generic advice.
 
 ### 6. THE AETHERIS APPROACH (Conversion Layer)
-- Position the 21-Day Revenue Diagnostic ($18,500 flat) and The Leak Audit as the logical next step.
+- Position the 21-Day Revenue Diagnostic ($23,500 flat) and The Leak Audit as the logical next step.
 - Frame it through the branded framework introduced earlier.
 - Aetheris provides: 14-day deep-dive diagnostic, prioritized leak map, operational system design, AI-powered automation implementation, and ongoing measurement.
 

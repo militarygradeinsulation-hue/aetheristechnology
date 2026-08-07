@@ -127,7 +127,7 @@ export default function CareersLicensePage() {
                         <span className="font-mono text-amber text-sm">15% of collected</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-1">
-                        Example: $2,775 on an $18,500 paid diagnostic. One-time per client.
+                        Example: $2,775 on an $23,500 paid diagnostic. One-time per client.
                       </p>
                     </div>
                     <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
@@ -154,7 +154,7 @@ export default function CareersLicensePage() {
                         <span className="font-mono text-emerald-400 text-sm">20% on first 3</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-1">
-                        Founding Strategic Scouts receive 20% ($3,700 on $18,500) on their first three qualified paid diagnostics.
+                        Founding Strategic Scouts receive 20% ($3,700 on $23,500) on their first three qualified paid diagnostics.
                       </p>
                     </div>
                   </div>
@@ -164,7 +164,7 @@ export default function CareersLicensePage() {
                 <div className="rounded-xl border border-crimson/40 bg-crimson/5 p-4">
                   <p className="font-mono uppercase text-[10px] tracking-[0.3em] text-crimson mb-2">First-year worked example</p>
                   <p className="text-sm text-foreground leading-relaxed">
-                    $18,500 diagnostic + $10,000/mo Active Case × 12 months + $25,000 implementation =
+                    $23,500 diagnostic + $10,000/mo Active Case × 12 months + $25,000 implementation =
                     <span className="font-mono text-amber font-semibold"> $17,275 total Scout compensation</span> on $163,500 of client revenue (10.6% effective).
                   </p>
                 </div>

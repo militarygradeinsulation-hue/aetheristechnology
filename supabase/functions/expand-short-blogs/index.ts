@@ -23,7 +23,7 @@ Required structure:
 7. ## FAQ — exactly 5 Q&A pairs in the format:
    ### Q: [question]?
    A: [2–4 sentences]
-8. ## The Aetheris Approach — 21-Day Revenue Diagnostic ($18,500 flat, credited toward the $15,000/mo Implementation Retainer) and The Leak Audit™ as the next step. One single CTA, no alternatives.
+8. ## The Aetheris Approach — 21-Day Revenue Diagnostic ($23,500 flat, credited toward the $20,000/mo Implementation Retainer) and The Leak Audit™ as the next step. One single CTA, no alternatives.
 9. One-line punch closing.
 
 Rules:

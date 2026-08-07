@@ -28,7 +28,7 @@ Memorize this line. Use it on every first call:
 | 1 | **Signal Pack** | $2,500 | one-time | Operator-led bundle · ~6 hrs |
 | 2 | **Revenue Pack** | $5,000 | one-time | Operator-led bundle · ~14 hrs |
 | 3 | **Operator Suite** | $10,000 | one-time | Operator-led bundle · ~30 hrs / 3 weeks |
-| 4 | **21-Day Revenue Diagnostic** | $18,500 | one-time | **FLAGSHIP** · fixed-fee, fit call required |
+| 4 | **21-Day Revenue Diagnostic** | $23,500 | one-time | **FLAGSHIP** · fixed-fee, fit call required |
 | 5 | **Active Case** | $15,000 / mo | recurring (3-mo min) | **FLAGSHIP** · Diagnostic clients only |
 
 That's it. Anything else (Digital Snapshot $149, Strategy Blueprint $349,
@@ -59,11 +59,11 @@ portal for internal sales, but never lead with it on the public site.
 Both require a **15-minute fit call** before any pricing conversation.
 Never quote either price cold over email.
 
-- **21-Day Revenue Diagnostic — $18,500.** Forensic audit of CRM, sales
+- **21-Day Revenue Diagnostic — $23,500.** Forensic audit of CRM, sales
   follow-up, and ops. Output: a 15–30 page written report, prioritized fixes,
   ROI projections, source-data appendix, 60-minute readout.
 
-- **Active Case — $15,000/mo, 3-month minimum.** Diagnostic
+- **Active Case — $20,000/mo, 3-month minimum.** Diagnostic
   clients only. Operator executes the prioritized fixes and re-measures
   recovered revenue every month.
 
@@ -91,7 +91,7 @@ Every public bundle is Tier 3. The rep keeps:
 
 | Flagship | Sale | **Rep gets** | Partner gets | Company |
 |---|---|---|---|---|
-| 21-Day Diagnostic | $18,500 once | **$5,000** | $3,000 | $10,500 |
+| 21-Day Diagnostic | $23,500 once | **$5,000** | $3,000 | $10,500 |
 | Active Case | $15,000 **/mo** | **$4,000 /mo** | $3,000 /mo | $8,000 /mo |
 
 **The active case pays out every single month the client stays subscribed.**
@@ -194,4 +194,4 @@ embedded operator, the answer is **Operator Suite → Active Case**.
 
 ## 7. One-line cheat sheet
 
-> Signal $2,500 ($500 rep) · Revenue $5,000 ($1k rep) · Operator Suite $10,000 ($2k rep) · Diagnostic $18,500 ($5k rep) · Active Case $15k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.
+> Signal $2,500 ($500 rep) · Revenue $5,000 ($1k rep) · Operator Suite $10,000 ($2k rep) · Diagnostic $23,500 ($5k rep) · Active Case $15k/mo ($4k/mo rep every month). Sell the operator, not the tools. Fit call before any flagship price.

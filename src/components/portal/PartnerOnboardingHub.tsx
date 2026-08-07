@@ -156,7 +156,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
       <Section id="money" title="B · Your Commission (fixed-dollar splits)" icon={<DollarSign className="w-4 h-4" />}>
         <div className="grid md:grid-cols-2 gap-3">
           <div className="rounded-md border border-amber/30 bg-amber/5 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">21-Day Diagnostic · $18,500</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">21-Day Diagnostic · $23,500</div>
             <ul className="mt-2 text-sm text-foreground/90 space-y-1">
               <li>Company: $10,500</li>
               <li>Rep: $5,000</li>
@@ -164,7 +164,7 @@ export const PartnerOnboardingHub: React.FC<Props> = ({ onJump }) => {
             </ul>
           </div>
           <div className="rounded-md border border-amber/30 bg-amber/5 p-4">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">Active Case · $15,000/mo</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-amber">Active Case · $20,000/mo</div>
             <ul className="mt-2 text-sm text-foreground/90 space-y-1">
               <li>Company: $8,000</li>
               <li>Rep: $4,000</li>

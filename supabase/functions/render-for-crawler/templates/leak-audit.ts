@@ -18,15 +18,15 @@ export async function renderLeakAudit(
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
   const title = override?.title || "The Leak Audit™ — 7-Step Forensic Methodology | Aetheris AI";
-  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, then operator-led bundles from $2,500 or the $18,500 21-Day Revenue Diagnostic.";
+  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, then operator-led bundles from $2,500 or the $23,500 21-Day Revenue Diagnostic.";
   const keywords = override?.keywords || "leak audit, revenue leak audit, business autopsy, forensic methodology, operational audit, sales process audit Indianapolis";
 
   const defaultFaqs = [
     { question: "What is The Leak Audit™?", answer: "A 7-step forensic methodology for finding operational revenue leaks: intake autopsy, funnel pressure test, quote-to-close inspection, follow-up pulse check, ops friction map, tooling drag analysis, and leak ledger." },
-    { question: "Free vs. paid — what's the difference?", answer: "The free self-scan walks you through the 7 steps with guided questions and produces a directional report you fill out yourself. The operator-led paths run the audit on your business — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($18,500) for full quantified leak ledgers." },
+    { question: "Free vs. paid — what's the difference?", answer: "The free self-scan walks you through the 7 steps with guided questions and produces a directional report you fill out yourself. The operator-led paths run the audit on your business — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($23,500) for full quantified leak ledgers." },
     { question: "How long is the free self-scan?", answer: "About 6 minutes if you have a rough sense of your numbers. 14 questions across 4 categories." },
     { question: "What's in the leak ledger?", answer: "A prioritized list of every leak we identified, each with: a description of the leak, an estimated annual dollar cost, a difficulty-to-close score, a recommended fix, and a projected ROI." },
-    { question: "What comes after the Diagnostic?", answer: "The Active Case ($15,000/month, 3-month minimum) is the open forensic engagement available to 21-Day Diagnostic clients. The case stays open until the leaks the Diagnostic identified are sealed." },
+    { question: "What comes after the Diagnostic?", answer: "The Active Case ($20,000/month, 3-month minimum) is the open forensic engagement available to 21-Day Diagnostic clients. The case stays open until the leaks the Diagnostic identified are sealed." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
 
@@ -63,7 +63,7 @@ export async function renderLeakAudit(
     <main>
       <header>
         <h1>The Leak Audit™ — Find What's Bleeding Out of Your Business</h1>
-        <p class="tldr"><strong>TL;DR:</strong> A 7-step forensic methodology for finding the silent revenue leaks operators can't see from the inside. Run the free self-scan, then hire an operator to seal them — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($18,500).</p>
+        <p class="tldr"><strong>TL;DR:</strong> A 7-step forensic methodology for finding the silent revenue leaks operators can't see from the inside. Run the free self-scan, then hire an operator to seal them — Signal Pack ($2,500), Revenue Pack ($5,000), Operator Suite ($10,000), or the flagship 21-Day Revenue Diagnostic ($23,500).</p>
       </header>
 
       <section>
@@ -86,7 +86,7 @@ export async function renderLeakAudit(
           <li><strong>Signal Pack — $2,500</strong> — Operator-led confirmation of the leaks the self-scan flagged. Website Report + Brand Contradiction Finder + Friction Vocabulary Audit + Leak Findings memo + 30-min walkthrough.</li>
           <li><strong>Revenue Pack — $5,000</strong> — Signal Pack plus Sales Script Pack, Follow-Up Plan, Strategic Question Engine, 30-Day Content Calendar, two 45-min sessions. Most operators pick this.</li>
           <li><strong>Operator Suite — $10,000</strong> — Revenue Pack plus Strategy Blueprint, Social Content Pack, Digital Snapshot, Lead-Nurture Automation, Tech Suite access. Credits 1:1 toward the Active Case.</li>
-          <li><strong>21-Day Revenue Diagnostic — $18,500</strong> (flagship) — Operator inside the business for 21 days. Full quantified leak ledger. Implementation plan handed off. Required before opening an Active Case ($15,000/mo, 3-mo minimum).</li>
+          <li><strong>21-Day Revenue Diagnostic — $23,500</strong> (flagship) — Operator inside the business for 21 days. Full quantified leak ledger. Implementation plan handed off. Required before opening an Active Case ($20,000/mo, 3-mo minimum).</li>
         </ul>
       </section>
 

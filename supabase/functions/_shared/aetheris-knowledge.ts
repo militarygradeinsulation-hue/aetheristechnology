@@ -65,16 +65,16 @@ Tool: (17) How much does a website audit cost? (18) Fast, affordable website aud
 
 # Public offers (THE ONLY TWO — everything else is retired)
 
-1. **21-Day Revenue Diagnostic — $18,500 flat fee**
+1. **21-Day Revenue Diagnostic — $23,500 flat fee**
    - Stripe price_id: \`diagnostic_21day_once\`
    - 21-day forensic dig into CRM, sales follow-up, and lead flow.
    - Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout.
    - Fixed fee. No percentage-of-savings.
    - CRM-agnostic (runs on a CSV export). HubSpot / Salesforce live integration is an upsell.
    - **Fully credited toward the Active Case if the client engages.**
-   - Checkout link format: \`[Start the 21-Day Diagnostic — $18,500](checkout:diagnostic_21day_once)\`
+   - Checkout link format: \`[Start the 21-Day Diagnostic — $23,500](checkout:diagnostic_21day_once)\`
 
-2. **Active Case — $15,000/month, 3-month minimum**
+2. **Active Case — $20,000/month, 3-month minimum**
    - Stripe price_id: \`implementation_retainer\` (legacy ID — display name is "Active Case", NEVER "Retainer")
    - Operator-led investigation and implementation: CRM, follow-up, sales process, reporting, automation.
    - **Only available to Diagnostic clients.** Never open a Case for someone who has not run the Diagnostic.
@@ -87,7 +87,7 @@ Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Au
 # Commission split (3-way, locked)
 
 **Flagship FIXED-DOLLAR split** (source of truth: payments-webhook \`flagshipFixedSplit()\`):
-- **$18,500 Diagnostic** → Company $10,500 / Rep $5,000 / Partner (Braden) $3,000.
+- **$23,500 Diagnostic** → Company $10,500 / Rep $5,000 / Partner (Braden) $3,000.
 - **$15,000 Active Case** → Company $8,000 / Rep $4,000 / Partner $3,000 EVERY MONTH. 12-month retention = $48,000 to the rep from one client.
 
 **Catalog products (legacy long-tail) tiered split**:

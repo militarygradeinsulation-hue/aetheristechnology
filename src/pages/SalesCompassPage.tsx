@@ -18,7 +18,7 @@ const SalesCompassPage = () => {
         faqs={[
           { question: 'What is the AI Sales Compass?', answer: 'A free Aetheris AI tool that produces sales strategy, workflow automation recommendations, and AI agent playbooks tailored to your sales motion.' },
           { question: 'How does AI improve B2B sales?', answer: 'AI compresses prospecting and follow-up via lead-scoring agents, auto-personalized outbound, conversational qualification, and CRM hygiene automation, letting reps spend more time closing.' },
-          { question: 'Is the Sales Compass really free?', answer: 'Yes. No login, no credit card. For full sales operations rebuilds we offer the 21-Day Revenue Diagnostic (fixed-fee, credited toward the Retainer) and the Implementation Retainer ($15,000/month, three-month minimum, Diagnostic clients only).' },
+          { question: 'Is the Sales Compass really free?', answer: 'Yes. No login, no credit card. For full sales operations rebuilds we offer the 21-Day Revenue Diagnostic (fixed-fee, credited toward the Retainer) and the Implementation Retainer ($20,000/month, three-month minimum, Diagnostic clients only).' },
         ]}
       />
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-sm">
