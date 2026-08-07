@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SHOP_TOOLS, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { TierLadder } from "@/components/TierLadder";
-import { Sparkles, ShoppingCart, Infinity as InfinityIcon, Layers, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
+import { Sparkles, ShoppingCart, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
 import { EasyModeRecommender } from "@/components/EasyModeRecommender";
