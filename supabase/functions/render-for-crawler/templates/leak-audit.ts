@@ -18,7 +18,7 @@ export async function renderLeakAudit(
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
   const title = override?.title || "The Leak Audit™ — 7-Step Forensic Methodology | Aetheris AI";
-  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, then operator-led bundles from $2,500 or the $23,500 21-Day Revenue Diagnostic.";
+  const description = override?.description || "The Leak Audit™ is a 7-step forensic methodology that finds the silent revenue leaks in operational businesses. Free self-scan, then operator-led tiers from $7,500 or the $23,500 21-Day Revenue Diagnostic.";
   const keywords = override?.keywords || "leak audit, revenue leak audit, business autopsy, forensic methodology, operational audit, sales process audit Indianapolis";
 
   const defaultFaqs = [
