@@ -759,51 +759,29 @@ const LeakAuditPage = () => {
                     Next Step
                   </div>
                   <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Forensic Diagnostic — $2,500
+                    The Signal Pack — $7,500
                   </h3>
                   <p className="text-muted-foreground max-w-xl mx-auto">
-                    The Leak Audit was self-reported. The Forensic Diagnostic is the operator-led
-                    investigation: 14 days inside your operation, every leak named, every dollar quantified.
-                    <strong className="text-foreground"> Applied toward engagement if you proceed.</strong>
+                    The Leak Audit was self-reported. The Signal Pack is the operator-led diagnosis:
+                    the full website forensic pass, brand contradictions, friction audit, and a written
+                    findings memo.
+                    <strong className="text-foreground"> Credits in full toward any higher tier.</strong>
                   </p>
-                  {!checkoutTier ? (
-                    <>
-                      <Button
-                        size="lg"
-                        onClick={() => openTierCheckout({ name: 'Signal Pack', priceId: 'leak_signal_pack_onetime' })}
-                        className="bg-amber text-primary-foreground hover:bg-amber/90"
-                      >
-                        Pay $2,500 & Book the Signal Pack
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Button>
-                      <div className="pt-2">
-                        <a
-                          href="/book"
-                          className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
-                        >
-                          <Mail className="w-3.5 h-3.5" />
-                          Or book a 15-min walkthrough first
-                        </a>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="pt-4 text-left">
-                      <StripeEmbeddedCheckout
-                        priceId={checkoutTier.priceId}
-                        customerEmail={email || undefined}
-                        returnUrl={`${window.location.origin}/leak-audit?status=paid&session_id={CHECKOUT_SESSION_ID}`}
-                        metadata={{ source: 'leak_audit', package: checkoutTier.name, company: company || '' }}
-                      />
-                      <div className="text-center pt-3">
-                        <button
-                          onClick={() => setCheckoutTier(null)}
-                          className="text-xs text-muted-foreground hover:text-amber underline"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <Button asChild size="lg" className="bg-amber text-primary-foreground hover:bg-amber/90">
+                    <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                      Talk to an operator
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </a>
+                  </Button>
+                  <div className="pt-2">
+                    <a
+                      href="/book"
+                      className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Or book a 15-min walkthrough first
+                    </a>
+                  </div>
                 </div>
 
                 {/* Full pricing ladder — Ways to run the audit */}
