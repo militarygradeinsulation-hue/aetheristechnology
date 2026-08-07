@@ -17,7 +17,7 @@ const CatalogPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Operator-Led Bundles | Aetheris Chaos Theory Forensics"
-        description="Three operator-led bundles — Signal (fixed-fee), Revenue ($5,000), Operator Suite ($10,000). We don't sell tools. We pair you with an operator who runs them."
+        description="The Aetheris ladder: Signal Pack $7,500, Revenue Pack $10,000, Operator Suite $15,000, 21-Day Diagnostic $23,500, Active Case $20,000 per month."
         path="/catalog"
         keywords="business forensics bundles, operator-led consulting, revenue diagnostic, leak audit packages, Indianapolis"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Bundles', path: '/catalog' }]}
