@@ -73,10 +73,10 @@ export interface RepProduct {
 export interface FixedSplitCents { company: number; rep: number; partner: number; }
 
 export const FLAGSHIP_SPLITS: Record<'diagnostic' | 'activeCase', FixedSplitCents> = {
-  // Full Leak Investigation — $18,500 one-time
-  diagnostic: { company: 1_050_000, rep: 500_000, partner: 300_000 },
-  // Leak Removal & System Build — $15,000/mo, paid every month client stays
-  activeCase:   { company:   800_000, rep: 400_000, partner: 300_000 },
+  // 21-Day Diagnostic — $23,500 one-time
+  diagnostic: { company: 1_550_000, rep: 500_000, partner: 300_000 },
+  // Active Case — $20,000/mo, paid every month client stays
+  activeCase:   { company: 1_300_000, rep: 400_000, partner: 300_000 },
 };
 
 /** Returns the rep cut for a product — fixed-dollar for flagships, % for tiered. */
