@@ -404,8 +404,12 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
       confidence: confidenceOf(basis, "chapter"),
       primary_chapter: slug,
       cross_referenced_chapters: [],
-      status: "active",
+      status: classifyFinancialBasis(basis, true, Boolean(ch?.excluded_from_total)) === "illustrative_scenario"
+        ? "illustrative"
+        : "active",
       origin: "chapter",
+      financial_basis: classifyFinancialBasis(basis, true, Boolean(ch?.excluded_from_total)),
+
       calculation_version: FINANCIAL_MODEL_VERSION,
     };
     if (structured) {
