@@ -22,8 +22,12 @@ import {
   crossReferencedIn,
   formatUsdRangeAscii,
   NON_PRICEABLE_CHAPTER_SLUGS,
+  FINANCIAL_BASIS_LABEL,
+  type FinancialBasis,
   type FinancialLedger,
+  type LedgerEntry,
 } from "./golden-ledger.ts";
+
 import { sanitizeGoldenReportFinancials, FINANCIAL_METHODOLOGY_NOTE } from "./golden-money-sanitizer.ts";
 import {
   MONEY_CATEGORY_LABEL,
@@ -69,6 +73,24 @@ export type GoldenDeliverables = {
   generated_at?: string;
 };
 
+/**
+ * Purpose-built render profiles over ONE saved report.
+ *  • executive     — concise client deliverable (page budget enforced)
+ *  • complete      — full archival export, loses nothing (historic behaviour)
+ *  • data_appendix — machine-readable ledger/consistency dump only
+ */
+export type RenderProfile = "executive" | "complete" | "data_appendix";
+
+export const RENDER_PROFILES: RenderProfile[] = ["executive", "complete", "data_appendix"];
+
+export type ChartVariant =
+  | "exposure_range"
+  | "confidence_distribution"
+  | "impact_effort"
+  | "remediation_timeline";
+
+export type ChartPoint = { label: string; low?: number; high?: number; value?: number; x?: number; y?: number; note?: string };
+
 export type Block =
   | { kind: "paragraph"; text: string }
   | { kind: "subheading"; text: string }
@@ -76,7 +98,8 @@ export type Block =
   | { kind: "bullets"; label?: string; items: string[] }
   | { kind: "mono"; label?: string; lines: string[] }
   | { kind: "callout"; tone: "red" | "amber" | "blue"; label?: string; text: string }
-  | { kind: "table"; label?: string; columns: string[]; widths: number[]; rows: string[][] };
+  | { kind: "table"; label?: string; columns: string[]; widths: number[]; rows: string[][] }
+  | { kind: "chart"; variant: ChartVariant; label?: string; points: ChartPoint[]; /** Rendered by surfaces without chart support. */ fallback: Block };
 
 export type Section = {
   /** Stable id, also used by the parity audit and the clickable PDF index. */
@@ -87,8 +110,11 @@ export type Section = {
   newPage: boolean;
   /** Listed in the PDF index. */
   indexed: boolean;
+  /** Compact sections flow onto the current page instead of forcing a break. */
+  density?: "compact" | "full";
   blocks: Block[];
 };
+
 
 export type GoldenReportModel = {
   meta: {
@@ -100,8 +126,11 @@ export type GoldenReportModel = {
   };
   /** Canonical annual revenue loss, or null when the report has no evidence. */
   leakage: GoldenLeakage | null;
+  /** Which render profile produced this section list. */
+  profile: RenderProfile;
   sections: Section[];
 };
+
 
 /** Anything the report carries that is machinery rather than reader-facing prose. */
 const NON_DISPLAY_KEYS = new Set([
@@ -376,6 +405,212 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
   return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
 }
 
+// ───────────────────────── executive profile helpers ─────────────────────────
+
+/** Normalised form used to decide whether two evidence lines say the same thing. */
+export function evidenceKey(s: string): string {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[?#]\S*/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Removes repeated evidence lines. Case, punctuation, tracking params and
+ * whitespace do not create a new fact. Order of first appearance is kept.
+ * When `seen` is supplied the dedupe is global across the whole report.
+ */
+export function dedupeEvidence(items: string[], seen?: Set<string>): string[] {
+  const local = seen ?? new Set<string>();
+  const out: string[] = [];
+  for (const raw of items || []) {
+    const text = String(raw ?? "").trim();
+    if (!text) continue;
+    const key = evidenceKey(text);
+    if (!key || local.has(key)) continue;
+    local.add(key);
+    out.push(text);
+  }
+  return out;
+}
+
+/** Groups ledger entries by root cause so one driver is explained once. */
+export function groupByRootCause(entries: LedgerEntry[]): { root_cause_id: string; title: string; entries: LedgerEntry[] }[] {
+  const map = new Map<string, { root_cause_id: string; title: string; entries: LedgerEntry[] }>();
+  for (const e of entries) {
+    const id = e.root_cause_id || e.leak_id;
+    const g = map.get(id) ?? { root_cause_id: id, title: e.title, entries: [] };
+    g.entries.push(e);
+    map.set(id, g);
+  }
+  return [...map.values()].sort(
+    (a, b) =>
+      Math.max(...b.entries.map((e) => e.annual_high)) - Math.max(...a.entries.map((e) => e.annual_high)),
+  );
+}
+
+/** A chapter with no findings, no evidence and no money is a coverage gap. */
+export function chapterIsEmpty(ch: Record<string, unknown>): boolean {
+  const has = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x) => String(x ?? "").trim()).length > 0 : String(v ?? "").trim().length > 0;
+  const keys = ["findings", "evidence", "observations", "issues", "body", "summary", "narrative", "recommendations"];
+  return !keys.some((k) => has((ch as Record<string, unknown>)[k]));
+}
+
+function coverageGapsSection(gaps: string[]): Section | null {
+  if (!gaps.length) return null;
+  return {
+    id: "coverage-gaps",
+    title: "Areas Reviewed With No Material Finding",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "paragraph",
+        text:
+          "These areas were reviewed during the scan and produced no material finding. They are listed for completeness so nothing looks skipped.",
+      },
+      { kind: "bullets", items: gaps },
+    ],
+  };
+}
+
+/** Priced items deliberately kept out of every total, shown in one place. */
+function illustrativeSection(ledger: FinancialLedger): Section | null {
+  const items = ledger.illustrative ?? [];
+  if (!items.length) return null;
+  return {
+    id: "illustrative-scenarios",
+    title: "Illustrative Scenarios (Not Counted in Totals)",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "callout",
+        tone: "blue",
+        label: FINANCIAL_BASIS_LABEL.illustrative_scenario,
+        text:
+          "The figures below are scenario illustrations, not measurements of this business. They are excluded from the headline annual exposure and from every chapter allocation.",
+      },
+      {
+        kind: "table",
+        columns: ["Scenario", "Illustrative range", "Basis"],
+        widths: [0.42, 0.26, 0.32],
+        rows: items.map((e) => [
+          e.title,
+          formatUsdRangeAscii(e.annual_low, e.annual_high),
+          e.pricing_basis || FINANCIAL_BASIS_LABEL.illustrative_scenario,
+        ]),
+      },
+    ],
+  };
+}
+
+/** One 30/60/90 plan for the whole report instead of one per chapter. */
+export function collectRoadmap(report: Record<string, unknown>): { horizon: "30" | "60" | "90"; item: string }[] {
+  const out: { horizon: "30" | "60" | "90"; item: string }[] = [];
+  const seen = new Set<string>();
+  const push = (horizon: "30" | "60" | "90", raw: unknown) => {
+    const item = String(raw ?? "").trim();
+    if (!item) return;
+    const key = `${horizon}|${evidenceKey(item)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ horizon, item });
+  };
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== "object") return;
+    for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+      const horizon = /(^|_)(30|first_30|month_1)($|_)/.test(k)
+        ? "30"
+        : /(^|_)(60|month_2)($|_)/.test(k)
+          ? "60"
+          : /(^|_)(90|month_3)($|_)/.test(k)
+            ? "90"
+            : null;
+      if (horizon && (Array.isArray(v) || typeof v === "string")) {
+        for (const item of Array.isArray(v) ? v : [v]) push(horizon as "30" | "60" | "90", item);
+        continue;
+      }
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") walk(v);
+    }
+  };
+  walk(report);
+  return out;
+}
+
+function roadmapSection(report: Record<string, unknown>): Section | null {
+  const items = collectRoadmap(report);
+  if (!items.length) return null;
+  const group = (h: "30" | "60" | "90") => items.filter((i) => i.horizon === h).map((i) => i.item);
+  const blocks: Block[] = [
+    {
+      kind: "paragraph",
+      text: "Every remediation action in this report, collected once, in the order it should be executed.",
+    },
+  ];
+  for (const [h, label] of [["30", "First 30 days"], ["60", "Days 31-60"], ["90", "Days 61-90"]] as const) {
+    const list = group(h);
+    if (list.length) blocks.push({ kind: "bullets", label, items: list });
+  }
+  blocks.push({
+    kind: "chart",
+    variant: "remediation_timeline",
+    label: "Remediation load by horizon",
+    points: (["30", "60", "90"] as const).map((h) => ({ label: `Day ${h}`, value: group(h).length })),
+    fallback: {
+      kind: "mono",
+      label: "Remediation load by horizon",
+      lines: (["30", "60", "90"] as const).map((h) => `Day ${h}: ${group(h).length} action(s)`),
+    },
+  });
+  return { id: "remediation-roadmap", title: "Remediation Roadmap (30/60/90)", newPage: true, indexed: true, blocks };
+}
+
+/** Visual summary of exposure and confidence, always with a text fallback. */
+function visualSummarySection(ledger: FinancialLedger): Section | null {
+  if (!ledger.active.length) return null;
+  const top = ledger.active.slice(0, 8);
+  const conf = { high: 0, medium: 0, low: 0 };
+  for (const e of ledger.active) conf[e.confidence] += 1;
+  return {
+    id: "visual-summary",
+    title: "Exposure At A Glance",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "chart",
+        variant: "exposure_range",
+        label: "Annual exposure by leak (low to high)",
+        points: top.map((e) => ({ label: e.title, low: e.annual_low, high: e.annual_high })),
+        fallback: {
+          kind: "table",
+          columns: ["Leak", "Annual exposure"],
+          widths: [0.62, 0.38],
+          rows: top.map((e) => [e.title, formatUsdRangeAscii(e.annual_low, e.annual_high)]),
+        },
+      },
+      {
+        kind: "chart",
+        variant: "confidence_distribution",
+        label: "Confidence distribution",
+        points: (["high", "medium", "low"] as const).map((c) => ({ label: c, value: conf[c] })),
+        fallback: {
+          kind: "mono",
+          label: "Confidence distribution",
+          lines: (["high", "medium", "low"] as const).map((c) => `${c}: ${conf[c]} leak(s)`),
+        },
+      },
+    ],
+  };
+}
+
 
 function labelize(k: string): string {
   return k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -508,7 +743,14 @@ function scheduleSection(d: GoldenDeliverables): Section | null {
   return { id: "schedule", title: `Content Schedule (${days.length} days)`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
-function chapterSection(ch: Record<string, unknown>, idx: number, ledger: FinancialLedger): Section {
+function chapterSection(
+  ch: Record<string, unknown>,
+  idx: number,
+  ledger: FinancialLedger,
+  opts: { profile: RenderProfile; seenEvidence: Set<string> } = { profile: "complete", seenEvidence: new Set() },
+): Section {
+  const executive = opts.profile === "executive";
+
   const no = Number(ch.no) || idx + 1;
   const slug = String(ch.slug || "").toLowerCase();
   const blocks: Block[] = [];
@@ -564,27 +806,32 @@ function chapterSection(ch: Record<string, unknown>, idx: number, ledger: Financ
   }
   const ev = Array.isArray(ch.evidence) ? (ch.evidence as Record<string, unknown>[]) : [];
   if (ev.length) {
-    blocks.push({
-      kind: "mono",
-      label: "Evidence",
-      lines: ev.map((e) => `${str(e.label)}: ${str(e.value)}`),
-    });
+    const lines = ev.map((e) => `${str(e.label)}: ${str(e.value)}`);
+    const shown = executive ? dedupeEvidence(lines, opts.seenEvidence) : lines;
+    if (shown.length) blocks.push({ kind: "mono", label: "Evidence", lines: shown });
   }
   // Any additional saved chapter field is exported rather than silently dropped.
-  for (const [k, v] of Object.entries(ch)) {
-    if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence", "annual_low", "annual_high"].includes(k)) continue;
-    if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
-    else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+  // The executive profile keeps machinery out of the client deliverable; the
+  // complete profile still carries every field.
+  if (!executive) {
+    for (const [k, v] of Object.entries(ch)) {
+      if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence", "annual_low", "annual_high"].includes(k)) continue;
+      if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
+      else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+    }
   }
+  const compact = executive && blocks.length <= 6;
   return {
     id: `chapter-${no}`,
     title: str(ch.title) || `Chapter ${no}`,
     kicker: `CHAPTER ${String(no).padStart(2, "0")}`,
-    newPage: true,
+    newPage: !compact,
     indexed: true,
+    density: compact ? "compact" : "full",
     blocks,
   };
 }
+
 /** Top-level report keys already owned by a dedicated section above. */
 const CLAIMED_KEYS = new Set([
   "executive_summary",
@@ -657,16 +904,69 @@ export function buildGoldenReportModel(opts: {
   url: string;
   scanId: string;
   generatedAt?: Date;
+  /** Defaults to "complete" so every existing caller keeps its behaviour. */
+  profile?: RenderProfile;
 }): GoldenReportModel {
   // ONE financial source for every surface: the persisted ledger when present,
   // otherwise rebuilt deterministically from the same stored evidence. The
   // report is sanitized FIRST, so no structured field or prose sentence can
   // carry a leak amount the ledger does not back.
+  const profile: RenderProfile = opts.profile ?? "complete";
+  const executive = profile === "executive";
   const sanitized = sanitizeGoldenReportFinancials((opts.report || {}) as Record<string, unknown>);
   const report = sanitized.report as Record<string, unknown>;
   const ledger = sanitized.ledger;
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
+  const seenEvidence = new Set<string>();
+
+  const meta = {
+    company: opts.company || opts.url,
+    url: opts.url,
+    scanId: opts.scanId,
+    generatedAt: opts.generatedAt || new Date(),
+    askUrl: `https://aetheris.technology/report/${opts.scanId}/ask`,
+  };
+
+  // The appendix profile is the machine-readable half of the same report: the
+  // ledger, the reconciliation and nothing written for a human reader.
+  if (profile === "data_appendix") {
+    sections.push({
+      id: "case-metadata",
+      title: "Case Metadata",
+      newPage: false,
+      indexed: false,
+      blocks: [
+        { kind: "kv", label: "Company", value: meta.company },
+        { kind: "kv", label: "Target", value: opts.url },
+        { kind: "kv", label: "Scan ID", value: opts.scanId },
+        { kind: "kv", label: "Financial model version", value: String(ledger.model_version) },
+      ],
+    });
+    pushIf(sections as never, reconciliationSection(ledger) as never);
+    sections.push({
+      id: "ledger-entries",
+      title: "Financial Leak Ledger",
+      newPage: true,
+      indexed: true,
+      blocks: [
+        {
+          kind: "table",
+          columns: ["Leak", "Annual range", "Status", "Basis", "Chapter"],
+          widths: [0.32, 0.2, 0.14, 0.2, 0.14],
+          rows: ledger.entries.map((e) => [
+            e.title,
+            formatUsdRangeAscii(e.annual_low, e.annual_high),
+            e.status,
+            FINANCIAL_BASIS_LABEL[(e.financial_basis ?? "evidence_based_model") as FinancialBasis],
+            e.primary_chapter,
+          ]),
+        },
+      ],
+    });
+    pushIf(sections as never, extrasSection(report) as never);
+    return { meta, leakage, profile, sections };
+  }
 
   sections.push({
     id: "case-metadata",
@@ -674,7 +974,7 @@ export function buildGoldenReportModel(opts: {
     newPage: false,
     indexed: false,
     blocks: [
-      { kind: "kv", label: "Company", value: opts.company || opts.url },
+      { kind: "kv", label: "Company", value: meta.company },
       { kind: "kv", label: "Target", value: opts.url },
       { kind: "kv", label: "Scan ID", value: opts.scanId },
     ],
@@ -682,7 +982,9 @@ export function buildGoldenReportModel(opts: {
 
   pushIf(sections as never, degradedSection(report) as never);
   sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
-  pushIf(sections as never, reconciliationSection(ledger) as never);
+  // Reconciliation is internal machinery: archival export keeps it, the client
+  // deliverable does not carry it.
+  if (!executive) pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
   if (has(report.executive_summary)) {
@@ -705,11 +1007,14 @@ export function buildGoldenReportModel(opts: {
   });
   const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
 
+  if (executive) pushIf(sections as never, visualSummarySection(ledger) as never);
   pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+  pushIf(sections as never, illustrativeSection(ledger) as never);
 
-
+  // Growth assets are a separate deliverable in the executive profile; the
+  // archival export keeps them inline exactly as before.
   const d = (report.deliverables || null) as GoldenDeliverables | null;
-  if (d) {
+  if (d && !executive) {
     pushIf(sections as never, brandSection(d) as never);
     pushIf(sections as never, imagerySection(d) as never);
     pushIf(sections as never, postsSection(d) as never);
@@ -728,27 +1033,83 @@ export function buildGoldenReportModel(opts: {
     }
   }
 
-  const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
-  chapters.forEach((ch, i) => sections.push(chapterSection(ch, i, ledger)));
+  const chapters = chapterList;
+  const gaps: string[] = [];
+  chapters.forEach((ch, i) => {
+    if (executive && chapterIsEmpty(ch) && !chapterAllocation(ledger, String(ch.slug || "").toLowerCase())) {
+      gaps.push(str(ch.title) || `Chapter ${Number(ch.no) || i + 1}`);
+      return;
+    }
+    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence }));
+  });
+  pushIf(sections as never, coverageGapsSection(gaps) as never);
+
+  if (executive) pushIf(sections as never, roadmapSection(report) as never);
 
   // ── FUTURE-PROOF CATCH-ALL ──
   // Any saved top-level field that no section above claims is rendered here, so
-  // a new Golden Report field can never be silently dropped from the export.
-  pushIf(sections as never, extrasSection(report) as never);
+  // a new Golden Report field can never be silently dropped from the archival
+  // export. The executive deliverable omits it by design.
+  if (!executive) pushIf(sections as never, extrasSection(report) as never);
 
-
-  return {
-    meta: {
-      company: opts.company || opts.url,
-      url: opts.url,
-      scanId: opts.scanId,
-      generatedAt: opts.generatedAt || new Date(),
-      askUrl: `https://aetheris.technology/report/${opts.scanId}/ask`,
-    },
-    leakage,
-    sections,
-  };
+  return { meta, leakage, profile, sections };
 }
+
+// ───────────────────────── executive page budget ─────────────────────────
+
+/** Target and hard ceiling for the executive deliverable. */
+export const EXECUTIVE_PAGE_TARGET = 24;
+export const EXECUTIVE_PAGE_CEILING = 28;
+
+/** Deterministic page estimate used to guard the executive profile. */
+export function estimatePageCount(model: GoldenReportModel): number {
+  let lines = 0;
+  let pages = 1;
+  const LINES_PER_PAGE = 46;
+  for (const s of model.sections) {
+    if (s.newPage) {
+      pages += 1;
+      lines = 0;
+    }
+    lines += 3;
+    for (const b of s.blocks) {
+      if (b.kind === "paragraph") lines += Math.ceil(b.text.length / 95) + 1;
+      else if (b.kind === "bullets") lines += b.items.length + 1;
+      else if (b.kind === "mono") lines += b.lines.length + 1;
+      else if (b.kind === "table") lines += b.rows.length + 2;
+      else if (b.kind === "chart") lines += 12;
+      else lines += 2;
+    }
+    while (lines > LINES_PER_PAGE) {
+      pages += 1;
+      lines -= LINES_PER_PAGE;
+    }
+  }
+  return pages;
+}
+
+export type ExportGate = { ok: boolean; reasons: string[]; estimatedPages: number };
+
+/**
+ * Refuses an executive export when the report cannot be presented honestly:
+ * unreconciled financials, a pending regeneration, or a page blow-out.
+ */
+export function executiveExportGate(model: GoldenReportModel, ledger?: FinancialLedger): ExportGate {
+  const reasons: string[] = [];
+  const estimatedPages = estimatePageCount(model);
+  if (estimatedPages > EXECUTIVE_PAGE_CEILING) {
+    reasons.push(`Executive export exceeds the ${EXECUTIVE_PAGE_CEILING} page ceiling (estimated ${estimatedPages}).`);
+  }
+  const r = ledger?.reconciliation;
+  if (r && r.invariant_status !== "ok") {
+    reasons.push(`Financial invariants are ${r.invariant_status}; totals would contradict the chapters.`);
+  }
+  if (r?.violations?.length) {
+    for (const v of r.violations) reasons.push(`${v.code}: ${v.detail}`);
+  }
+  return { ok: reasons.length === 0, reasons, estimatedPages };
+}
+
 
 // ───────────────────────── parity audit ─────────────────────────
 

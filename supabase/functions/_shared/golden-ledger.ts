@@ -25,7 +25,50 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Bump when the financial model changes. Persisted with every report. */
-export const FINANCIAL_MODEL_VERSION = 5;
+export const FINANCIAL_MODEL_VERSION = 6;
+
+/**
+ * How defensible a dollar figure is. Only "measured" and "evidence_based_model"
+ * may enter the headline total; "illustrative_scenario" is shown but never
+ * summed, and "not_evaluated" carries no figure at all.
+ */
+export type FinancialBasis =
+  | "measured"
+  | "evidence_based_model"
+  | "illustrative_scenario"
+  | "not_evaluated";
+
+export const FINANCIAL_BASIS_LABEL: Record<FinancialBasis, string> = {
+  measured: "Measured",
+  evidence_based_model: "Evidence-based model",
+  illustrative_scenario: "Illustrative scenario",
+  not_evaluated: "Not evaluated",
+};
+
+const ILLUSTRATIVE_RE =
+  /\b(illustrative|category benchmark|industry (?:average|benchmark|standard)|not measured|placeholder|hypothetical|for illustration|typical smb|standard smb)\b/i;
+const MEASURED_RE =
+  /\b(observed|measured|logged|recorded|crawled|returned|http\s?\d{3}|detected on|counted)\b/i;
+
+/** Deterministic classification of a priced entry from its pricing basis. */
+export function classifyFinancialBasis(
+  basis: string,
+  hasRange: boolean,
+  excludedFromTotal = false,
+): FinancialBasis {
+  if (!hasRange) return "not_evaluated";
+  const b = String(basis || "");
+  if (excludedFromTotal || ILLUSTRATIVE_RE.test(b)) return "illustrative_scenario";
+  if (MEASURED_RE.test(b) && /\d/.test(b)) return "measured";
+  return "evidence_based_model";
+}
+
+/** Bases that are allowed to contribute to the headline annual total. */
+export const COUNTABLE_BASES: ReadonlySet<FinancialBasis> = new Set<FinancialBasis>([
+  "measured",
+  "evidence_based_model",
+]);
+
 
 /** A single leak above this is a placeholder/data artifact, not evidence. */
 export const MAX_SANE_LEAK = 50_000_000;
@@ -87,7 +130,14 @@ export const formatUsd = (n: number) => `$${Math.round(n).toLocaleString("en-US"
 export const formatUsdRange = (low: number, high: number) => `${formatUsd(low)} – ${formatUsd(high)}`;
 export const formatUsdRangeAscii = (low: number, high: number) => `${formatUsd(low)} - ${formatUsd(high)}`;
 
-export type LedgerEntryStatus = "active" | "included_in_chapter" | "duplicate" | "rejected";
+export type LedgerEntryStatus =
+  | "active"
+  | "included_in_chapter"
+  | "duplicate"
+  | "rejected"
+  /** Priced, shown, deliberately never summed into the headline total. */
+  | "illustrative";
+
 
 export type LedgerEntry = {
   leak_id: string;
@@ -104,7 +154,10 @@ export type LedgerEntry = {
   cross_referenced_chapters: string[];
   status: LedgerEntryStatus;
   origin: "top_leak" | "chapter";
+  /** How defensible this figure is. Illustrative entries are never summed. */
+  financial_basis?: FinancialBasis;
   calculation_version: number;
+
   /** Set when status is not "active": which entry absorbed this one. */
   absorbed_by?: string;
 };
@@ -153,6 +206,9 @@ export type FinancialLedger = {
   entries: LedgerEntry[];
   /** Only status === "active" entries — these and only these are summed. */
   active: LedgerEntry[];
+  /** Priced but deliberately excluded from every total. Shown, never summed. */
+  illustrative?: LedgerEntry[];
+
   overall: { annual_low: number; annual_high: number } | null;
   chapters: ChapterAllocation[];
   top10: {
@@ -351,8 +407,12 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
       confidence: confidenceOf(basis, "chapter"),
       primary_chapter: slug,
       cross_referenced_chapters: [],
-      status: "active",
+      status: classifyFinancialBasis(basis, true, Boolean(ch?.excluded_from_total)) === "illustrative_scenario"
+        ? "illustrative"
+        : "active",
       origin: "chapter",
+      financial_basis: classifyFinancialBasis(basis, true, Boolean(ch?.excluded_from_total)),
+
       calculation_version: FINANCIAL_MODEL_VERSION,
     };
     if (structured) {
@@ -392,9 +452,15 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
       cross_referenced_chapters: rawSlug && rawSlug !== resolved ? [rawSlug] : [],
       // A chapter that prices itself is the allocation of record; the leak is
       // explained there but must not be added to the total a second time.
-      status: owner ? "included_in_chapter" : "active",
+      status: owner
+        ? "included_in_chapter"
+        : classifyFinancialBasis(basis, true, Boolean(leak?.excluded_from_total)) === "illustrative_scenario"
+          ? "illustrative"
+          : "active",
       origin: "top_leak",
+      financial_basis: classifyFinancialBasis(basis, true, Boolean(leak?.excluded_from_total)),
       calculation_version: FINANCIAL_MODEL_VERSION,
+
       ...(owner ? { absorbed_by: owner.leak_id } : {}),
     };
     if (owner) owner.cross_referenced_chapters.push(entry.leak_id);
@@ -573,7 +639,10 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
     currency: "USD",
     entries,
     active,
+    illustrative: entries.filter((e) => e.status === "illustrative"),
     overall,
+
+
     chapters: chapterAllocations,
     top10,
     reconciliation,

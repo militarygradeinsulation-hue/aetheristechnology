@@ -24,9 +24,14 @@ import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler"
 import {
   buildGoldenReportModel,
   auditGoldenReportParity,
+  executiveExportGate,
+  EXECUTIVE_PAGE_CEILING,
+
   type Block,
   type GoldenReportModel,
+  type RenderProfile,
   type Section,
+
 } from "@/lib/goldenReportModel";
 
 export type Chapter = {
@@ -161,7 +166,71 @@ function flow(doc: jsPDF, cur: Cursor, text: string, opts: { x?: number; w?: num
   }
 }
 
+// ───────────────────────── chart renderer ─────────────────────────
+
+/**
+ * Small vector charts drawn with jsPDF primitives. Every chart carries a text
+ * fallback in the model, so a chart can never be the only place a fact lives.
+ */
+function drawChart(
+  doc: jsPDF,
+  cur: Cursor,
+  b: Extract<Block, { kind: "chart" }>,
+  askUrl: string,
+) {
+  const points = (b.points || []).filter(Boolean);
+  if (!points.length) {
+    drawBlock(doc, cur, b.fallback, askUrl);
+    return;
+  }
+  const rows = Math.min(points.length, 8);
+  const rowH = 6.5;
+  const need = 14 + rows * rowH;
+  room(doc, cur, need, askUrl);
+
+  if (b.label) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...AMBER);
+    doc.text(sanitize(b.label).toUpperCase(), M, cur.y);
+    cur.y += 6;
+  }
+
+  const labelW = CW * 0.42;
+  const barX = M + labelW;
+  const barW = CW - labelW - 26;
+  const max = Math.max(
+    1,
+    ...points.map((p) => Number(p.high ?? p.value ?? 0)),
+  );
+
+  doc.setFontSize(8);
+  for (const p of points.slice(0, rows)) {
+    const low = Number(p.low ?? 0);
+    const high = Number(p.high ?? p.value ?? 0);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...BODY);
+    doc.text(wrap(doc, sanitize(p.label), labelW - 4)[0] || "", M, cur.y + 3);
+
+    const x0 = barX + (low / max) * barW;
+    const w = Math.max(0.8, ((high - low) / max) * barW);
+    doc.setFillColor(60, 55, 45);
+    doc.rect(barX, cur.y, barW, 3.2, "F");
+    doc.setFillColor(...AMBER);
+    doc.rect(x0, cur.y, w, 3.2, "F");
+
+    doc.setTextColor(...AMBER);
+    const value = p.high != null
+      ? `${Math.round(low / 1000)}k-${Math.round(high / 1000)}k`
+      : String(p.value ?? 0);
+    doc.text(value, barX + barW + 2, cur.y + 3);
+    cur.y += rowH;
+  }
+  cur.y += 3;
+}
+
 // ───────────────────────── block renderers ─────────────────────────
+
 
 function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
   switch (b.kind) {
@@ -319,7 +388,12 @@ function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
       cur.y += 3;
       break;
     }
+    case "chart": {
+      drawChart(doc, cur, b, askUrl);
+      break;
+    }
   }
+
 }
 
 function drawSection(doc: jsPDF, cur: Cursor, s: Section, askUrl: string) {
@@ -357,8 +431,12 @@ export function generateForensicGoldenPdf(opts: {
   url: string;
   scanId: string;
   generatedAt?: Date;
+  /** Defaults to the concise executive deliverable. */
+  profile?: RenderProfile;
 }): jsPDF {
   const { report, company, url, scanId } = opts;
+  const profile: RenderProfile = opts.profile ?? "executive";
+
 
   // ── HARD GATE ── generic/template reports are never exported, even if they
   // predate the compiler: an unsupported dollar headline must not leave the app.
@@ -379,18 +457,53 @@ export function generateForensicGoldenPdf(opts: {
     );
   }
 
-  const model = buildGoldenReportModel({
+  let model = buildGoldenReportModel({
     report: report as unknown as Record<string, unknown>,
     company,
     url,
     scanId,
     generatedAt: opts.generatedAt,
+    profile,
   });
+
+  // ── PAGE BUDGET GUARD ──
+  // The executive deliverable is the concise client artifact. If a report is so
+  // large that the concise profile still blows the ceiling, fall back to the
+  // complete archival profile rather than shipping a half-truncated document.
+  if (profile === "executive") {
+    const gate = executiveExportGate(model);
+    if (!gate.ok && gate.estimatedPages > EXECUTIVE_PAGE_CEILING) {
+      console.warn(
+        `[golden-pdf] ${scanId}: executive profile estimated ${gate.estimatedPages} pages; exporting complete profile instead.`,
+      );
+      model = buildGoldenReportModel({
+        report: report as unknown as Record<string, unknown>,
+        company,
+        url,
+        scanId,
+        generatedAt: opts.generatedAt,
+        profile: "complete",
+      });
+    }
+  }
+
   // Drift alarm: if a saved report field the website can render is not present
-  // in the export model, surface it loudly in dev instead of losing it silently.
+  // in the ARCHIVAL export model, surface it loudly in dev instead of losing it
+  // silently. The executive profile omits fields on purpose, so it is audited
+  // against the complete model rather than against itself.
   try {
     if (typeof import.meta !== "undefined" && (import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
-      const parity = auditGoldenReportParity(report, model);
+      const archival = model.profile === "complete"
+        ? model
+        : buildGoldenReportModel({
+            report: report as unknown as Record<string, unknown>,
+            company,
+            url,
+            scanId,
+            profile: "complete",
+          });
+      const parity = auditGoldenReportParity(report, archival);
+
       if (!parity.ok) {
         console.warn(
           `[golden-pdf] parity drift on ${scanId}: ${parity.issues.length} saved field(s) missing from the export`,
@@ -551,5 +664,8 @@ export function auditGoldenPdfParity(opts: {
 export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]) {
   const doc = generateForensicGoldenPdf(opts);
   const safe = (opts.company || "report").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-  doc.save(`aetheris-forensic-${safe}-${opts.scanId.slice(0, 8)}.pdf`);
+  const profile = opts.profile ?? "executive";
+  const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
+  doc.save(`aetheris-forensic-${safe}-${opts.scanId.slice(0, 8)}${suffix}.pdf`);
 }
+
