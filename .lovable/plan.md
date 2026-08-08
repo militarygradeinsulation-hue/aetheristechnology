@@ -1,5 +1,6 @@
 # Golden Report: Executive Render Profile Cleanup
 
+
 Goal: every future company report defaults to a concise executive PDF of roughly 16 to 24 pages with a hard ceiling of 28, while the full archival export and a machine-readable appendix remain available. The saved report stays the source of truth; what changes is how it is rendered.
 
 ## What is causing the 61-page output today
@@ -99,3 +100,13 @@ Complete and data_appendix profiles remain exportable in those cases so an opera
 - The ledger version bump means stored ledgers recompute on read, and the existing recompile function can persist them.
 - Public and portal web views keep reading the same model, defaulting to `complete` unless a surface opts into `executive`.
 - No change to `forensic_scans` schema.
+
+## Implementation sequence
+
+1. Add `RenderProfile` and `FinancialBasis` types plus dedupe/grouping helpers in `golden-report-model.ts` with `complete` as the default so nothing changes yet.
+2. Implement the executive filters: skip extras/unknown dumps, growth assets, duplicate Top 10, add coverage-gaps and central roadmap sections.
+3. Add `financial_basis` in `golden-compiler.ts` and exclude illustrative scenarios in `golden-ledger.ts` (model version 6); align `golden-evidence-confidence.ts` with reconciliation counts.
+4. Add the count/total contradiction violation and wire the executive export gate.
+5. Update `generateForensicGoldenPdf.ts`: profile parameter, compact cards, chart renderers, page-budget and density guard; add profile buttons in `ForensicScanAllPanel.tsx`.
+6. Tighten `forensic-scan-all` prompts (evidence cap, horizon-tagged actions, root cause, `no_signal` fallbacks).
+7. Add fixtures and tests, extend `_qa_pdf.ts`, run typecheck plus the full Golden suite, then run the recompile backfill.
