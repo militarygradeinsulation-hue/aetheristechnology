@@ -449,9 +449,15 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
       cross_referenced_chapters: rawSlug && rawSlug !== resolved ? [rawSlug] : [],
       // A chapter that prices itself is the allocation of record; the leak is
       // explained there but must not be added to the total a second time.
-      status: owner ? "included_in_chapter" : "active",
+      status: owner
+        ? "included_in_chapter"
+        : classifyFinancialBasis(basis, true, Boolean(leak?.excluded_from_total)) === "illustrative_scenario"
+          ? "illustrative"
+          : "active",
       origin: "top_leak",
+      financial_basis: classifyFinancialBasis(basis, true, Boolean(leak?.excluded_from_total)),
       calculation_version: FINANCIAL_MODEL_VERSION,
+
       ...(owner ? { absorbed_by: owner.leak_id } : {}),
     };
     if (owner) owner.cross_referenced_chapters.push(entry.leak_id);
