@@ -439,10 +439,41 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                 <Button
                   size="sm"
                   variant="outline"
+                  disabled={!isDeliverable(report)}
+                  title="Full archival export: every saved field, no page budget."
+                  onClick={() => {
+                    if (!isDeliverable(report)) return;
+                    downloadForensicGoldenPdf({
+                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
+                      profile: "complete",
+                    });
+                  }}
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> Complete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!isDeliverable(report)}
+                  title="Machine-readable financial ledger and reconciliation only."
+                  onClick={() => {
+                    if (!isDeliverable(report)) return;
+                    downloadForensicGoldenPdf({
+                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
+                      profile: "data_appendix",
+                    });
+                  }}
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> Appendix
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => { setFixSeed(null); setFixOpen(true); }}
                 >
                   <Wrench className="w-4 h-4 mr-1" /> Fix this for me
                 </Button>
+
               </div>
             </div>
             {!isDeliverable(report) && (
