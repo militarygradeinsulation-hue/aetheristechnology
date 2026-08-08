@@ -405,6 +405,212 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
   return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
 }
 
+// ───────────────────────── executive profile helpers ─────────────────────────
+
+/** Normalised form used to decide whether two evidence lines say the same thing. */
+export function evidenceKey(s: string): string {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, (m) => m.replace(/[?#].*$/, ""))
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Removes repeated evidence lines. Case, punctuation, tracking params and
+ * whitespace do not create a new fact. Order of first appearance is kept.
+ * When `seen` is supplied the dedupe is global across the whole report.
+ */
+export function dedupeEvidence(items: string[], seen?: Set<string>): string[] {
+  const local = seen ?? new Set<string>();
+  const out: string[] = [];
+  for (const raw of items || []) {
+    const text = String(raw ?? "").trim();
+    if (!text) continue;
+    const key = evidenceKey(text);
+    if (!key || local.has(key)) continue;
+    local.add(key);
+    out.push(text);
+  }
+  return out;
+}
+
+/** Groups ledger entries by root cause so one driver is explained once. */
+export function groupByRootCause(entries: LedgerEntry[]): { root_cause_id: string; title: string; entries: LedgerEntry[] }[] {
+  const map = new Map<string, { root_cause_id: string; title: string; entries: LedgerEntry[] }>();
+  for (const e of entries) {
+    const id = e.root_cause_id || e.leak_id;
+    const g = map.get(id) ?? { root_cause_id: id, title: e.title, entries: [] };
+    g.entries.push(e);
+    map.set(id, g);
+  }
+  return [...map.values()].sort(
+    (a, b) =>
+      Math.max(...b.entries.map((e) => e.annual_high)) - Math.max(...a.entries.map((e) => e.annual_high)),
+  );
+}
+
+/** A chapter with no findings, no evidence and no money is a coverage gap. */
+export function chapterIsEmpty(ch: Record<string, unknown>): boolean {
+  const has = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x) => String(x ?? "").trim()).length > 0 : String(v ?? "").trim().length > 0;
+  const keys = ["findings", "evidence", "observations", "issues", "body", "summary", "narrative", "recommendations"];
+  return !keys.some((k) => has((ch as Record<string, unknown>)[k]));
+}
+
+function coverageGapsSection(gaps: string[]): Section | null {
+  if (!gaps.length) return null;
+  return {
+    id: "coverage-gaps",
+    title: "Areas Reviewed With No Material Finding",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "paragraph",
+        text:
+          "These areas were reviewed during the scan and produced no material finding. They are listed for completeness so nothing looks skipped.",
+      },
+      { kind: "bullets", items: gaps },
+    ],
+  };
+}
+
+/** Priced items deliberately kept out of every total, shown in one place. */
+function illustrativeSection(ledger: FinancialLedger): Section | null {
+  const items = ledger.illustrative ?? [];
+  if (!items.length) return null;
+  return {
+    id: "illustrative-scenarios",
+    title: "Illustrative Scenarios (Not Counted in Totals)",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "callout",
+        tone: "blue",
+        label: FINANCIAL_BASIS_LABEL.illustrative_scenario,
+        text:
+          "The figures below are scenario illustrations, not measurements of this business. They are excluded from the headline annual exposure and from every chapter allocation.",
+      },
+      {
+        kind: "table",
+        columns: ["Scenario", "Illustrative range", "Basis"],
+        widths: [0.42, 0.26, 0.32],
+        rows: items.map((e) => [
+          e.title,
+          formatUsdRangeAscii(e.annual_low, e.annual_high),
+          e.pricing_basis || FINANCIAL_BASIS_LABEL.illustrative_scenario,
+        ]),
+      },
+    ],
+  };
+}
+
+/** One 30/60/90 plan for the whole report instead of one per chapter. */
+export function collectRoadmap(report: Record<string, unknown>): { horizon: "30" | "60" | "90"; item: string }[] {
+  const out: { horizon: "30" | "60" | "90"; item: string }[] = [];
+  const seen = new Set<string>();
+  const push = (horizon: "30" | "60" | "90", raw: unknown) => {
+    const item = String(raw ?? "").trim();
+    if (!item) return;
+    const key = `${horizon}|${evidenceKey(item)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ horizon, item });
+  };
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== "object") return;
+    for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+      const horizon = /(^|_)(30|first_30|month_1)($|_)/.test(k)
+        ? "30"
+        : /(^|_)(60|month_2)($|_)/.test(k)
+          ? "60"
+          : /(^|_)(90|month_3)($|_)/.test(k)
+            ? "90"
+            : null;
+      if (horizon && (Array.isArray(v) || typeof v === "string")) {
+        for (const item of Array.isArray(v) ? v : [v]) push(horizon as "30" | "60" | "90", item);
+        continue;
+      }
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") walk(v);
+    }
+  };
+  walk(report);
+  return out;
+}
+
+function roadmapSection(report: Record<string, unknown>): Section | null {
+  const items = collectRoadmap(report);
+  if (!items.length) return null;
+  const group = (h: "30" | "60" | "90") => items.filter((i) => i.horizon === h).map((i) => i.item);
+  const blocks: Block[] = [
+    {
+      kind: "paragraph",
+      text: "Every remediation action in this report, collected once, in the order it should be executed.",
+    },
+  ];
+  for (const [h, label] of [["30", "First 30 days"], ["60", "Days 31-60"], ["90", "Days 61-90"]] as const) {
+    const list = group(h);
+    if (list.length) blocks.push({ kind: "bullets", label, items: list });
+  }
+  blocks.push({
+    kind: "chart",
+    variant: "remediation_timeline",
+    label: "Remediation load by horizon",
+    points: (["30", "60", "90"] as const).map((h) => ({ label: `Day ${h}`, value: group(h).length })),
+    fallback: {
+      kind: "mono",
+      label: "Remediation load by horizon",
+      lines: (["30", "60", "90"] as const).map((h) => `Day ${h}: ${group(h).length} action(s)`),
+    },
+  });
+  return { id: "remediation-roadmap", title: "Remediation Roadmap (30/60/90)", newPage: true, indexed: true, blocks };
+}
+
+/** Visual summary of exposure and confidence, always with a text fallback. */
+function visualSummarySection(ledger: FinancialLedger): Section | null {
+  if (!ledger.active.length) return null;
+  const top = ledger.active.slice(0, 8);
+  const conf = { high: 0, medium: 0, low: 0 };
+  for (const e of ledger.active) conf[e.confidence] += 1;
+  return {
+    id: "visual-summary",
+    title: "Exposure At A Glance",
+    newPage: false,
+    indexed: true,
+    density: "compact",
+    blocks: [
+      {
+        kind: "chart",
+        variant: "exposure_range",
+        label: "Annual exposure by leak (low to high)",
+        points: top.map((e) => ({ label: e.title, low: e.annual_low, high: e.annual_high })),
+        fallback: {
+          kind: "table",
+          columns: ["Leak", "Annual exposure"],
+          widths: [0.62, 0.38],
+          rows: top.map((e) => [e.title, formatUsdRangeAscii(e.annual_low, e.annual_high)]),
+        },
+      },
+      {
+        kind: "chart",
+        variant: "confidence_distribution",
+        label: "Confidence distribution",
+        points: (["high", "medium", "low"] as const).map((c) => ({ label: c, value: conf[c] })),
+        fallback: {
+          kind: "mono",
+          label: "Confidence distribution",
+          lines: (["high", "medium", "low"] as const).map((c) => `${c}: ${conf[c]} leak(s)`),
+        },
+      },
+    ],
+  };
+}
+
 
 function labelize(k: string): string {
   return k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
