@@ -126,8 +126,11 @@ export type GoldenReportModel = {
   };
   /** Canonical annual revenue loss, or null when the report has no evidence. */
   leakage: GoldenLeakage | null;
+  /** Which render profile produced this section list. */
+  profile: RenderProfile;
   sections: Section[];
 };
+
 
 /** Anything the report carries that is machinery rather than reader-facing prose. */
 const NON_DISPLAY_KEYS = new Set([
