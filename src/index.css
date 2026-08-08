@@ -8,43 +8,44 @@
 
 @layer base {
   :root {
-    --background: 220 15% 8%;
-    --foreground: 40 10% 92%;
+    /* Aetheris Lander minimal palette */
+    --background: 252 14% 7%;
+    --foreground: 40 18% 90%;
 
-    --card: 220 14% 12%;
-    --card-foreground: 40 10% 92%;
+    --card: 240 13% 9%;
+    --card-foreground: 40 18% 90%;
 
-    --popover: 220 14% 10%;
-    --popover-foreground: 40 10% 92%;
+    --popover: 245 14% 8%;
+    --popover-foreground: 40 18% 90%;
 
-    --primary: 36 90% 55%;
-    --primary-foreground: 220 15% 8%;
+    --primary: 33 75% 49%;
+    --primary-foreground: 252 14% 7%;
 
-    --secondary: 220 12% 18%;
-    --secondary-foreground: 40 10% 80%;
+    --secondary: 245 15% 12%;
+    --secondary-foreground: 40 14% 82%;
 
-    --muted: 220 12% 16%;
-    --muted-foreground: 220 14% 75%;
+    --muted: 245 13% 13%;
+    --muted-foreground: 42 8% 64%;
 
-    --accent: 36 70% 45%;
-    --accent-foreground: 220 15% 8%;
+    --accent: 33 70% 42%;
+    --accent-foreground: 252 14% 7%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 40 10% 92%;
+    --destructive: 0 73% 41%;
+    --destructive-foreground: 40 18% 90%;
 
-    --border: 220 12% 20%;
-    --input: 220 12% 20%;
-    --ring: 36 90% 55%;
+    --border: 245 13% 19%;
+    --input: 245 13% 19%;
+    --ring: 33 75% 49%;
 
     --radius: 0.75rem;
 
-    /* Custom ArchVision tokens */
-    --surface-elevated: 220 14% 14%;
-    --surface-overlay: 220 14% 10%;
-    --amber-glow: 36 90% 55%;
+    /* Surfaces */
+    --surface-elevated: 245 15% 12%;
+    --surface-overlay: 245 14% 8%;
+    --amber-glow: 33 75% 49%;
 
     /* Forensic accent — oxidized red, used sparingly for leak callouts & case files */
-    --crimson: 0 65% 38%;
+    --crimson: 0 73% 41%;
     --crimson-deep: 0 70% 28%;
 
     /* Gradients */
