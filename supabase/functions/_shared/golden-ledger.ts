@@ -206,6 +206,9 @@ export type FinancialLedger = {
   entries: LedgerEntry[];
   /** Only status === "active" entries — these and only these are summed. */
   active: LedgerEntry[];
+  /** Priced but deliberately excluded from every total. Shown, never summed. */
+  illustrative?: LedgerEntry[];
+
   overall: { annual_low: number; annual_high: number } | null;
   chapters: ChapterAllocation[];
   top10: {
