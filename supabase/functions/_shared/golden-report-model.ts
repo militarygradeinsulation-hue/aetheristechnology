@@ -1179,7 +1179,11 @@ export type ExportGate = { ok: boolean; reasons: string[]; estimatedPages: numbe
  * Refuses an executive export when the report cannot be presented honestly:
  * unreconciled financials, a pending regeneration, or a page blow-out.
  */
-export function executiveExportGate(model: GoldenReportModel, ledger?: FinancialLedger): ExportGate {
+export function executiveExportGate(
+  model: GoldenReportModel,
+  ledger?: FinancialLedger,
+  report?: Record<string, unknown>,
+): ExportGate {
   const reasons: string[] = [];
   const estimatedPages = estimatePageCount(model);
   if (estimatedPages > EXECUTIVE_PAGE_CEILING) {
@@ -1192,8 +1196,22 @@ export function executiveExportGate(model: GoldenReportModel, ledger?: Financial
   if (r?.violations?.length) {
     for (const v of r.violations) reasons.push(`${v.code}: ${v.detail}`);
   }
+  // Contradiction blocking: a report awaiting financial regeneration, or one
+  // carrying open compiler violations, must not ship as a client deliverable.
+  if (report) {
+    if (needsFinancialRegeneration(report as never)) {
+      reasons.push("This report is awaiting financial regeneration; its figures are not publishable.");
+    }
+    const compiler = (report.compiler_audit || report.compiler || null) as
+      | { violations?: Array<{ code?: unknown; detail?: unknown }> }
+      | null;
+    for (const v of compiler?.violations ?? []) {
+      reasons.push(`Unresolved contradiction ${String(v.code ?? "")}: ${String(v.detail ?? "")}`.trim());
+    }
+  }
   return { ok: reasons.length === 0, reasons, estimatedPages };
 }
+
 
 
 // ───────────────────────── parity audit ─────────────────────────
