@@ -73,6 +73,24 @@ export type GoldenDeliverables = {
   generated_at?: string;
 };
 
+/**
+ * Purpose-built render profiles over ONE saved report.
+ *  • executive     — concise client deliverable (page budget enforced)
+ *  • complete      — full archival export, loses nothing (historic behaviour)
+ *  • data_appendix — machine-readable ledger/consistency dump only
+ */
+export type RenderProfile = "executive" | "complete" | "data_appendix";
+
+export const RENDER_PROFILES: RenderProfile[] = ["executive", "complete", "data_appendix"];
+
+export type ChartVariant =
+  | "exposure_range"
+  | "confidence_distribution"
+  | "impact_effort"
+  | "remediation_timeline";
+
+export type ChartPoint = { label: string; low?: number; high?: number; value?: number; x?: number; y?: number; note?: string };
+
 export type Block =
   | { kind: "paragraph"; text: string }
   | { kind: "subheading"; text: string }
@@ -80,7 +98,8 @@ export type Block =
   | { kind: "bullets"; label?: string; items: string[] }
   | { kind: "mono"; label?: string; lines: string[] }
   | { kind: "callout"; tone: "red" | "amber" | "blue"; label?: string; text: string }
-  | { kind: "table"; label?: string; columns: string[]; widths: number[]; rows: string[][] };
+  | { kind: "table"; label?: string; columns: string[]; widths: number[]; rows: string[][] }
+  | { kind: "chart"; variant: ChartVariant; label?: string; points: ChartPoint[]; /** Rendered by surfaces without chart support. */ fallback: Block };
 
 export type Section = {
   /** Stable id, also used by the parity audit and the clickable PDF index. */
@@ -91,8 +110,11 @@ export type Section = {
   newPage: boolean;
   /** Listed in the PDF index. */
   indexed: boolean;
+  /** Compact sections flow onto the current page instead of forcing a break. */
+  density?: "compact" | "full";
   blocks: Block[];
 };
+
 
 export type GoldenReportModel = {
   meta: {
