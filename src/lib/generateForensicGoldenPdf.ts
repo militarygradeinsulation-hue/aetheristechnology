@@ -161,7 +161,71 @@ function flow(doc: jsPDF, cur: Cursor, text: string, opts: { x?: number; w?: num
   }
 }
 
+// ───────────────────────── chart renderer ─────────────────────────
+
+/**
+ * Small vector charts drawn with jsPDF primitives. Every chart carries a text
+ * fallback in the model, so a chart can never be the only place a fact lives.
+ */
+function drawChart(
+  doc: jsPDF,
+  cur: Cursor,
+  b: Extract<Block, { kind: "chart" }>,
+  askUrl: string,
+) {
+  const points = (b.points || []).filter(Boolean);
+  if (!points.length) {
+    drawBlock(doc, cur, b.fallback, askUrl);
+    return;
+  }
+  const rows = Math.min(points.length, 8);
+  const rowH = 6.5;
+  const need = 14 + rows * rowH;
+  room(doc, cur, need, askUrl);
+
+  if (b.label) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...AMBER);
+    doc.text(sanitize(b.label).toUpperCase(), M, cur.y);
+    cur.y += 6;
+  }
+
+  const labelW = CW * 0.42;
+  const barX = M + labelW;
+  const barW = CW - labelW - 26;
+  const max = Math.max(
+    1,
+    ...points.map((p) => Number(p.high ?? p.value ?? 0)),
+  );
+
+  doc.setFontSize(8);
+  for (const p of points.slice(0, rows)) {
+    const low = Number(p.low ?? 0);
+    const high = Number(p.high ?? p.value ?? 0);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...BODY);
+    doc.text(wrap(doc, sanitize(p.label), labelW - 4)[0] || "", M, cur.y + 3);
+
+    const x0 = barX + (low / max) * barW;
+    const w = Math.max(0.8, ((high - low) / max) * barW);
+    doc.setFillColor(60, 55, 45);
+    doc.rect(barX, cur.y, barW, 3.2, "F");
+    doc.setFillColor(...AMBER);
+    doc.rect(x0, cur.y, w, 3.2, "F");
+
+    doc.setTextColor(...AMBER);
+    const value = p.high != null
+      ? `${Math.round(low / 1000)}k-${Math.round(high / 1000)}k`
+      : String(p.value ?? 0);
+    doc.text(value, barX + barW + 2, cur.y + 3);
+    cur.y += rowH;
+  }
+  cur.y += 3;
+}
+
 // ───────────────────────── block renderers ─────────────────────────
+
 
 function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
   switch (b.kind) {
