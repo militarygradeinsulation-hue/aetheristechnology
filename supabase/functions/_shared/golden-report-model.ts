@@ -337,7 +337,11 @@ function reconciliationSection(ledger: FinancialLedger): Section | null {
   };
 }
 
-function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => string | number): Section | null {
+function topLeaksSection(
+  ledger: FinancialLedger,
+  chapterRef: (slug: string) => string | number,
+  executive = false,
+): Section | null {
   if (!ledger.active.length || !ledger.overall) return null;
   const t = ledger.top10;
   const subtotal = formatUsdRangeAscii(t.subtotal_low, t.subtotal_high);
@@ -347,15 +351,42 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
     { kind: "kv", label: "Scope", value: t.label },
     { kind: "kv", label: "Money category", value: MONEY_CATEGORY_LABEL.annual_revenue_loss },
   ];
-  for (const e of t.entries) {
-    blocks.push({ kind: "subheading", text: `#${e.rank} · ${e.title}` });
+  if (executive) {
+    // One compact table instead of four key/value rows per leak, and root
+    // causes collapsed so a single driver is explained once.
+    const rankedIds = new Set(t.entries.map((e) => e.leak_id));
+    const groups = groupByRootCause(ledger.active.filter((e) => rankedIds.has(e.leak_id)));
+
     blocks.push({
-      kind: "kv",
-      label: "Annual cost",
-      value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+      kind: "table",
+      columns: ["#", "Leak", "Annual exposure", "Chapter"],
+      widths: [0.07, 0.48, 0.25, 0.2],
+      rows: t.entries.map((e) => [
+        `#${e.rank}`,
+        e.title,
+        tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+        String(chapterRef(e.primary_chapter)),
+      ]),
     });
-    blocks.push({ kind: "kv", label: "Allocated to chapter", value: e.primary_chapter });
-    if (e.pricing_basis) blocks.push({ kind: "kv", label: "Pricing basis", value: e.pricing_basis });
+    const shared = groups.filter((g) => g.entries.length > 1);
+    if (shared.length) {
+      blocks.push({
+        kind: "bullets",
+        label: "Shared root causes",
+        items: shared.map((g) => `${g.title}: drives ${g.entries.length} of the ranked leaks`),
+      });
+    }
+  } else {
+    for (const e of t.entries) {
+      blocks.push({ kind: "subheading", text: `#${e.rank} · ${e.title}` });
+      blocks.push({
+        kind: "kv",
+        label: "Annual cost",
+        value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+      });
+      blocks.push({ kind: "kv", label: "Allocated to chapter", value: e.primary_chapter });
+      if (e.pricing_basis) blocks.push({ kind: "kv", label: "Pricing basis", value: e.pricing_basis });
+    }
   }
   blocks.push({
     kind: "kv",
@@ -371,14 +402,27 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
     });
     // The remainder is itemised so no priced leak is ever hidden from the reader.
     blocks.push({ kind: "subheading", text: `Remaining ${t.remaining_count} priced leaks` });
-    for (const e of t.remainder) {
+    if (executive) {
       blocks.push({
-        kind: "kv",
-        label: e.title,
-        value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+        kind: "table",
+        columns: ["Leak", "Annual exposure", "Chapter"],
+        widths: [0.52, 0.26, 0.22],
+        rows: t.remainder.map((e) => [
+          e.title,
+          tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+          String(chapterRef(e.primary_chapter)),
+        ]),
       });
-      blocks.push({ kind: "kv", label: `${e.title} · chapter`, value: e.primary_chapter });
-      if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
+    } else {
+      for (const e of t.remainder) {
+        blocks.push({
+          kind: "kv",
+          label: e.title,
+          value: tagMoney(formatUsdRangeAscii(e.annual_low, e.annual_high), "annual_revenue_loss"),
+        });
+        blocks.push({ kind: "kv", label: `${e.title} · chapter`, value: e.primary_chapter });
+        if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
+      }
     }
   }
   blocks.push({
@@ -394,16 +438,33 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
   const absorbed = ledger.entries.filter((e) => e.status === "included_in_chapter" || e.status === "duplicate");
   if (absorbed.length) {
     blocks.push({ kind: "subheading", text: "Also identified (already counted in a chapter total)" });
-    for (const e of absorbed) {
-      blocks.push({ kind: "kv", label: e.title, value: crossReferenceNote(chapterRef(e.primary_chapter)) });
-      if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
-      for (const x of e.cross_referenced_chapters) {
-        blocks.push({ kind: "kv", label: `${e.title} · also discussed in`, value: x });
+    if (executive) {
+      blocks.push({
+        kind: "table",
+        columns: ["Finding", "Where it is already counted"],
+        widths: [0.5, 0.5],
+        rows: absorbed.map((e) => [e.title, crossReferenceNote(chapterRef(e.primary_chapter))]),
+      });
+    } else {
+      for (const e of absorbed) {
+        blocks.push({ kind: "kv", label: e.title, value: crossReferenceNote(chapterRef(e.primary_chapter)) });
+        if (e.pricing_basis) blocks.push({ kind: "kv", label: `${e.title} · basis`, value: e.pricing_basis });
+        for (const x of e.cross_referenced_chapters) {
+          blocks.push({ kind: "kv", label: `${e.title} · also discussed in`, value: x });
+        }
       }
     }
   }
-  return { id: "top-leaks", title: "Top 10 Active Leaks (Ranked by $ Exposure)", newPage: true, indexed: true, blocks };
+  return {
+    id: "top-leaks",
+    title: "Top 10 Active Leaks (Ranked by $ Exposure)",
+    newPage: true,
+    indexed: true,
+    density: executive ? "compact" : "full",
+    blocks,
+  };
 }
+
 
 // ───────────────────────── executive profile helpers ─────────────────────────
 
@@ -747,7 +808,11 @@ function chapterSection(
   ch: Record<string, unknown>,
   idx: number,
   ledger: FinancialLedger,
-  opts: { profile: RenderProfile; seenEvidence: Set<string> } = { profile: "complete", seenEvidence: new Set() },
+  opts: { profile: RenderProfile; seenEvidence: Set<string>; seenActions?: Set<string> } = {
+    profile: "complete",
+    seenEvidence: new Set(),
+    seenActions: new Set(),
+  },
 ): Section {
   const executive = opts.profile === "executive";
 
@@ -801,9 +866,29 @@ function chapterSection(
   if (!rollup) blocks.push(...block("What it's costing (USD)", ch.what_its_costing));
   const wtd = ch.what_to_do as Record<string, unknown> | undefined;
   if (wtd && typeof wtd === "object") {
-    blocks.push({ kind: "subheading", text: "What to do" });
-    for (const [k, v] of Object.entries(wtd)) pushIf(blocks, bullets(labelize(k), v));
+    const entries = Object.entries(wtd).filter(([k]) =>
+      // Horizon buckets are owned by the single centralised roadmap in the
+      // executive deliverable, so the same action is never printed twice.
+      !(executive && /(^|_)(30|60|90|first_30|month_[123])($|_)/.test(k)),
+    );
+    let emitted = false;
+    for (const [k, v] of entries) {
+      const items = (Array.isArray(v) ? v : [v]).map(str).filter(Boolean);
+      const shown = executive ? dedupeEvidence(items, opts.seenActions) : items;
+      const b = bullets(labelize(k), shown);
+      if (b) {
+        if (!emitted) {
+          blocks.push({ kind: "subheading", text: "What to do" });
+          emitted = true;
+        }
+        blocks.push(b);
+      }
+    }
+    if (executive && entries.length !== Object.keys(wtd).length) {
+      blocks.push({ kind: "kv", label: "Sequenced actions", value: "See the Remediation Roadmap (30/60/90)." });
+    }
   }
+
   const ev = Array.isArray(ch.evidence) ? (ch.evidence as Record<string, unknown>[]) : [];
   if (ev.length) {
     const lines = ev.map((e) => `${str(e.label)}: ${str(e.value)}`);
@@ -820,7 +905,10 @@ function chapterSection(
       else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
     }
   }
-  const compact = executive && blocks.length <= 6;
+  // Only a genuinely long chapter earns its own page in the executive
+  // deliverable; short ones flow so the PDF has no near-empty pages.
+  const compact = executive && blocks.length <= 14;
+
   return {
     id: `chapter-${no}`,
     title: str(ch.title) || `Chapter ${no}`,
@@ -919,6 +1007,8 @@ export function buildGoldenReportModel(opts: {
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
   const seenEvidence = new Set<string>();
+  const seenActions = new Set<string>();
+
 
   const meta = {
     company: opts.company || opts.url,
@@ -1008,7 +1098,7 @@ export function buildGoldenReportModel(opts: {
   const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
 
   if (executive) pushIf(sections as never, visualSummarySection(ledger) as never);
-  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never, executive) as never);
   pushIf(sections as never, illustrativeSection(ledger) as never);
 
   // Growth assets are a separate deliverable in the executive profile; the
@@ -1040,7 +1130,7 @@ export function buildGoldenReportModel(opts: {
       gaps.push(str(ch.title) || `Chapter ${Number(ch.no) || i + 1}`);
       return;
     }
-    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence }));
+    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence, seenActions }));
   });
   pushIf(sections as never, coverageGapsSection(gaps) as never);
 
@@ -1094,7 +1184,11 @@ export type ExportGate = { ok: boolean; reasons: string[]; estimatedPages: numbe
  * Refuses an executive export when the report cannot be presented honestly:
  * unreconciled financials, a pending regeneration, or a page blow-out.
  */
-export function executiveExportGate(model: GoldenReportModel, ledger?: FinancialLedger): ExportGate {
+export function executiveExportGate(
+  model: GoldenReportModel,
+  ledger?: FinancialLedger,
+  report?: Record<string, unknown>,
+): ExportGate {
   const reasons: string[] = [];
   const estimatedPages = estimatePageCount(model);
   if (estimatedPages > EXECUTIVE_PAGE_CEILING) {
@@ -1107,8 +1201,24 @@ export function executiveExportGate(model: GoldenReportModel, ledger?: Financial
   if (r?.violations?.length) {
     for (const v of r.violations) reasons.push(`${v.code}: ${v.detail}`);
   }
+  // Contradiction blocking: a report awaiting financial regeneration, or one
+  // carrying open compiler violations, must not ship as a client deliverable.
+  if (report) {
+    const state = String(report.report_state ?? "").toLowerCase();
+    if (needsFinancialRegeneration(report as never) || state === "regeneration_required") {
+
+      reasons.push("This report is awaiting financial regeneration; its figures are not publishable.");
+    }
+    const compiler = (report.compiler_audit || report.compiler || null) as
+      | { violations?: Array<{ code?: unknown; detail?: unknown }> }
+      | null;
+    for (const v of compiler?.violations ?? []) {
+      reasons.push(`Unresolved contradiction ${String(v.code ?? "")}: ${String(v.detail ?? "")}`.trim());
+    }
+  }
   return { ok: reasons.length === 0, reasons, estimatedPages };
 }
+
 
 
 // ───────────────────────── parity audit ─────────────────────────
