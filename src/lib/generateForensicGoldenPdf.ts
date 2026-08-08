@@ -426,8 +426,12 @@ export function generateForensicGoldenPdf(opts: {
   url: string;
   scanId: string;
   generatedAt?: Date;
+  /** Defaults to the concise executive deliverable. */
+  profile?: RenderProfile;
 }): jsPDF {
   const { report, company, url, scanId } = opts;
+  const profile: RenderProfile = opts.profile ?? "executive";
+
 
   // ── HARD GATE ── generic/template reports are never exported, even if they
   // predate the compiler: an unsupported dollar headline must not leave the app.
