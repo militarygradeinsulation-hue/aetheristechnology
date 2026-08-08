@@ -1201,7 +1201,9 @@ export function executiveExportGate(
   // Contradiction blocking: a report awaiting financial regeneration, or one
   // carrying open compiler violations, must not ship as a client deliverable.
   if (report) {
-    if (needsFinancialRegeneration(report as never)) {
+    const state = String(report.report_state ?? "").toLowerCase();
+    if (needsFinancialRegeneration(report as never) || state === "regeneration_required") {
+
       reasons.push("This report is awaiting financial regeneration; its figures are not publishable.");
     }
     const compiler = (report.compiler_audit || report.compiler || null) as
