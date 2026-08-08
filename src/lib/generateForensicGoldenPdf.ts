@@ -319,7 +319,12 @@ function drawBlock(doc: jsPDF, cur: Cursor, b: Block, askUrl: string) {
       cur.y += 3;
       break;
     }
+    case "chart": {
+      drawChart(doc, cur, b, askUrl);
+      break;
+    }
   }
+
 }
 
 function drawSection(doc: jsPDF, cur: Cursor, s: Section, askUrl: string) {
