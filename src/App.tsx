@@ -142,6 +142,7 @@ import { ThumbShimmerOnScroll } from "@/components/ThumbShimmerOnScroll";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <AmbientBackground />
       <Toaster />
       <Sonner />
       <ThumbShimmerOnScroll />
