@@ -1091,7 +1091,7 @@ export function buildGoldenReportModel(opts: {
   const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
 
   if (executive) pushIf(sections as never, visualSummarySection(ledger) as never);
-  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+  pushIf(sections as never, topLeaksSection(ledger, chapterRef as never, executive) as never);
   pushIf(sections as never, illustrativeSection(ledger) as never);
 
   // Growth assets are a separate deliverable in the executive profile; the
