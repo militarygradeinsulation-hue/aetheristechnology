@@ -471,7 +471,7 @@ export function generateForensicGoldenPdf(opts: {
   // large that the concise profile still blows the ceiling, fall back to the
   // complete archival profile rather than shipping a half-truncated document.
   if (profile === "executive") {
-    const gate = executiveExportGate(model);
+    const gate = executiveExportGate(model, undefined, report as unknown as Record<string, unknown>);
     if (!gate.ok && gate.estimatedPages > EXECUTIVE_PAGE_CEILING) {
       console.warn(
         `[golden-pdf] ${scanId}: executive profile estimated ${gate.estimatedPages} pages; exporting complete profile instead.`,
