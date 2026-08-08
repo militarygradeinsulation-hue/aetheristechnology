@@ -24,6 +24,9 @@ import type { ReportConsistency, CompilerViolation } from "@/lib/goldenCompiler"
 import {
   buildGoldenReportModel,
   auditGoldenReportParity,
+  executiveExportGate,
+  EXECUTIVE_PAGE_CEILING,
+
   type Block,
   type GoldenReportModel,
   type RenderProfile,
