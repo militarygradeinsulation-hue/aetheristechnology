@@ -130,7 +130,14 @@ export const formatUsd = (n: number) => `$${Math.round(n).toLocaleString("en-US"
 export const formatUsdRange = (low: number, high: number) => `${formatUsd(low)} – ${formatUsd(high)}`;
 export const formatUsdRangeAscii = (low: number, high: number) => `${formatUsd(low)} - ${formatUsd(high)}`;
 
-export type LedgerEntryStatus = "active" | "included_in_chapter" | "duplicate" | "rejected";
+export type LedgerEntryStatus =
+  | "active"
+  | "included_in_chapter"
+  | "duplicate"
+  | "rejected"
+  /** Priced, shown, deliberately never summed into the headline total. */
+  | "illustrative";
+
 
 export type LedgerEntry = {
   leak_id: string;
