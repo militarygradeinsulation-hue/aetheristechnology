@@ -138,6 +138,7 @@ const RouteFallback = () => (
 );
 
 import { ThumbShimmerOnScroll } from "@/components/ThumbShimmerOnScroll";
+import { AmbientBackground } from "@/components/AmbientBackground";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
