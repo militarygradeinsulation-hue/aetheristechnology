@@ -78,6 +78,27 @@ const ResourcesPage = () => {
     if (playbook.file_url) window.open(playbook.file_url, '_blank');
   };
 
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
+  const handleDownloadAll = async () => {
+    const files = (playbooks || []).filter((p: any) => p.file_url);
+    if (files.length === 0) return;
+    setDownloadingAll(true);
+    for (const p of files) {
+      const a = document.createElement('a');
+      a.href = p.file_url as string;
+      a.download = '';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    setDownloadingAll(false);
+  };
+
+
 
   return (
     <div className="relative min-h-screen">
@@ -184,7 +205,22 @@ const ResourcesPage = () => {
             ) : (() => {
               const visible = playbooks || [];
               return (
+                <>
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {visible.length} free guides. No email required.
+                  </p>
+                  <Button
+                    onClick={handleDownloadAll}
+                    disabled={downloadingAll || visible.length === 0}
+                    className="bg-amber hover:bg-amber/90 text-background font-bold"
+                  >
+                    {downloadingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                    {downloadingAll ? 'Downloading...' : 'Download all guides'}
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                   {visible.map((resource, index) => {
                     const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
                     return (
@@ -220,7 +256,9 @@ const ResourcesPage = () => {
                     );
                   })}
                 </div>
+                </>
               );
+
             })()}
 
           </div>
