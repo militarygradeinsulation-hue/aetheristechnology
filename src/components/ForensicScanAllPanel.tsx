@@ -420,7 +420,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                   disabled={!isDeliverable(report)}
                   title={
                     isDeliverable(report)
-                      ? "Download the compiled report"
+                      ? "Executive PDF: the concise client deliverable (default)"
                       : "Blocked: this report is not evidence-backed. Re-run the scan before sending it out."
                   }
                   onClick={() => {
@@ -430,11 +430,13 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     );
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
+                      profile: "executive",
                     });
                   }}
                   className="bg-amber-500 text-black hover:bg-amber-400"
                 >
-                  <FileDown className="w-4 h-4 mr-1" /> Download PDF
+                  <FileDown className="w-4 h-4 mr-1" /> Executive PDF
+
                 </Button>
                 <Button
                   size="sm"
