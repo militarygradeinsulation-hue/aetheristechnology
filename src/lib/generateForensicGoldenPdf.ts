@@ -26,7 +26,9 @@ import {
   auditGoldenReportParity,
   type Block,
   type GoldenReportModel,
+  type RenderProfile,
   type Section,
+
 } from "@/lib/goldenReportModel";
 
 export type Chapter = {
