@@ -454,13 +454,36 @@ export function generateForensicGoldenPdf(opts: {
     );
   }
 
-  const model = buildGoldenReportModel({
+  let model = buildGoldenReportModel({
     report: report as unknown as Record<string, unknown>,
     company,
     url,
     scanId,
     generatedAt: opts.generatedAt,
+    profile,
   });
+
+  // ── PAGE BUDGET GUARD ──
+  // The executive deliverable is the concise client artifact. If a report is so
+  // large that the concise profile still blows the ceiling, fall back to the
+  // complete archival profile rather than shipping a half-truncated document.
+  if (profile === "executive") {
+    const gate = executiveExportGate(model);
+    if (!gate.ok && gate.estimatedPages > EXECUTIVE_PAGE_CEILING) {
+      console.warn(
+        `[golden-pdf] ${scanId}: executive profile estimated ${gate.estimatedPages} pages; exporting complete profile instead.`,
+      );
+      model = buildGoldenReportModel({
+        report: report as unknown as Record<string, unknown>,
+        company,
+        url,
+        scanId,
+        generatedAt: opts.generatedAt,
+        profile: "complete",
+      });
+    }
+  }
+
   // Drift alarm: if a saved report field the website can render is not present
   // in the export model, surface it loudly in dev instead of losing it silently.
   try {
