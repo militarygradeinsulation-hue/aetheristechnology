@@ -806,7 +806,11 @@ function chapterSection(
   ch: Record<string, unknown>,
   idx: number,
   ledger: FinancialLedger,
-  opts: { profile: RenderProfile; seenEvidence: Set<string> } = { profile: "complete", seenEvidence: new Set() },
+  opts: { profile: RenderProfile; seenEvidence: Set<string>; seenActions?: Set<string> } = {
+    profile: "complete",
+    seenEvidence: new Set(),
+    seenActions: new Set(),
+  },
 ): Section {
   const executive = opts.profile === "executive";
 
