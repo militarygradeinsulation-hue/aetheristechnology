@@ -1002,6 +1002,8 @@ export function buildGoldenReportModel(opts: {
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
   const seenEvidence = new Set<string>();
+  const seenActions = new Set<string>();
+
 
   const meta = {
     company: opts.company || opts.url,
