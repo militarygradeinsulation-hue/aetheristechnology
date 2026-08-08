@@ -1,0 +1,71 @@
+import React, { Suspense, lazy, useEffect, useState } from "react";
+
+const GenerativeArtScene = lazy(() => import("./GenerativeArtScene"));
+
+interface AnomalousMatterHeroProps {
+  eyebrow?: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+/** Static fallback used when motion is reduced or WebGL is unavailable. */
+const StaticField: React.FC = () => (
+  <div
+    aria-hidden
+    className="absolute inset-0"
+    style={{
+      background:
+        "radial-gradient(circle at 50% 45%, hsl(var(--amber-glow) / 0.18) 0%, transparent 55%)",
+    }}
+  />
+);
+
+export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
+  eyebrow,
+  title,
+  description,
+  children,
+}) => {
+  const [allowMotion, setAllowMotion] = useState(false);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setAllowMotion(!reduced);
+  }, []);
+
+  return (
+    <section className="relative w-full min-h-[78vh] md:min-h-[88vh] bg-background text-foreground overflow-hidden flex flex-col justify-center items-center py-24 px-6">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {allowMotion ? (
+          <Suspense fallback={<StaticField />}>
+            <GenerativeArtScene />
+          </Suspense>
+        ) : (
+          <StaticField />
+        )}
+      </div>
+
+      <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-background via-background/60 to-background/20" />
+
+      <div className="relative z-20 flex flex-col items-center justify-center max-w-3xl text-center mx-auto space-y-6">
+        {eyebrow && (
+          <span className="font-case text-[10px] sm:text-xs tracking-[0.3em] text-amber uppercase px-3 py-1 rounded-full bg-amber/10 border border-amber/20">
+            {eyebrow}
+          </span>
+        )}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+            {description}
+          </p>
+        )}
+        {children}
+      </div>
+    </section>
+  );
+};
+
+export default AnomalousMatterHero;

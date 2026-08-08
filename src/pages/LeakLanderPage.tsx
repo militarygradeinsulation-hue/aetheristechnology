@@ -1,587 +1,247 @@
-import React, { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Calendar, FileText, Phone, Mail, MapPin, ChevronDown, Play, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Calendar, Mail, Phone, MapPin } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
-import { Background } from "@/components/Background";
 import { BOOK_MEETING_URL } from "@/lib/links";
-
-import callingCard from "@/assets/joseph-toney-calling-card.jpg.asset.json";
-import { ForensicDeckCarousel } from "@/components/ForensicDeckCarousel";
-
-
-import { Navbar } from "@/components/Navbar";
-import { HomeMindMapSection } from "@/components/HomeMindMapSection";
-import { HomeFreeTrialArsenal } from "@/components/HomeFreeTrialArsenal";
-import { HomeToolShopGrid } from "@/components/HomeToolShopGrid";
+import { LanderNavbar } from "@/components/lander/LanderNavbar";
+import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
+import { CaseFilePreview } from "@/components/lander/CaseFilePreview";
+import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
+import { TierLadder } from "@/components/TierLadder";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
+import { Footer } from "@/components/Footer";
 
+const STEPS = [
+  {
+    n: "01",
+    t: "Free Scan",
+    d: "I run a forensic scan on your company. No cost, no pitch.",
+    href: "/golden-report",
+    cta: "Start the free scan",
+  },
+  {
+    n: "02",
+    t: "Find the Leaks",
+    d: "I show you exactly where the money is leaving, in writing.",
+    href: "/leak-audit",
+    cta: "See what we look for",
+  },
+  {
+    n: "03",
+    t: "Recover and Scale",
+    d: "We build the system and plan to recover the money and grow.",
+    href: BOOK_MEETING_URL,
+    cta: "Book the operator",
+    external: true,
+  },
+];
 
+const FINDINGS = [
+  { t: "Conversion drop-off", d: "Where visitors quit before they ever reach you." },
+  { t: "Brand contradictions", d: "Claims on your site that argue with each other." },
+  { t: "Follow-up failure", d: "Leads that go cold because nobody closed the loop." },
+  { t: "Vocabulary friction", d: "Language your buyer does not use, so they bounce." },
+  { t: "CRM data decay", d: "Pipelines built on records nobody trusts." },
+  { t: "Operational waste", d: "Manual work that quietly eats your margin." },
+];
 
+const SIGNALS = [
+  { k: "Named leaks", v: "Every finding tied to evidence on your own site." },
+  { k: "One number", v: "A single annual leak total, not competing estimates." },
+  { k: "Plain language", v: "Written for an owner, not for a consultant." },
+];
 
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-4">{children}</p>
+);
 
 const LeakLanderPage: React.FC = () => {
-  const [deckOpen, setDeckOpen] = useState(false);
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const navigate = useNavigate();
-  const tapCountRef = useRef(0);
-  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const handleLogoTap = () => {
-    tapCountRef.current += 1;
-    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-    if (tapCountRef.current >= 3) {
-      tapCountRef.current = 0;
-      navigate("/staff");
-      return;
-    }
-    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
-  };
-
-  const toggleVideo = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) {
-      v.muted = false;
-      v.volume = 1;
-      v.play()
-        .then(() => setPlaying(true))
-        .catch(() => {
-          v.muted = true;
-          v.play().then(() => setPlaying(true)).catch(() => {});
-        });
-    } else {
-      v.pause();
-      v.currentTime = 0;
-      setPlaying(false);
-    }
-  };
-
   return (
-    <div className="relative min-h-screen text-foreground overflow-x-hidden flex flex-col">
-      <Background />
-      <div className="relative z-10 flex flex-col flex-1">
-        <SEOHead
-          title="Revenue Leak Audit for $5M-$50M Businesses"
-          description="Aetheris finds where mid-market businesses lose money: friction, contradictions, drop-offs, follow-up failures and waste. Operator-led forensic audit."
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <SEOHead
+        title="Revenue Leak Audit for $5M-$50M Businesses"
+        description="Aetheris finds where mid-market businesses lose money: friction, contradictions, drop-offs, follow-up failures and waste. Operator-led forensic audit."
+        path="/"
+        keywords="revenue leak audit, revenue forensics, business forensics operator, forensic revenue diagnostic, brand contradiction analysis, conversion drop-off audit, mid-market revenue diagnostic, forensic diagnostic Indianapolis"
+      />
 
-          path="/"
-          keywords="revenue leak audit, revenue forensics, chaos theory forensics, business forensics operator, forensic revenue diagnostic, vocabulary friction audit, brand contradiction analysis, conversion drop-off audit, sales follow-up audit, CRM data hygiene audit, operational waste diagnostic, growth ceiling diagnosis, specialty manufacturer revenue audit, 21-day revenue diagnostic, active case operator, leak audit methodology, revenue leak detection USA, nationwide revenue forensics, US business revenue audit, mid-market revenue diagnostic, $5M to $50M business audit, forensic diagnostic Indianapolis, forensic diagnostic Chicago, forensic diagnostic Dallas, forensic diagnostic Atlanta, forensic diagnostic Denver"
-        />
+      <LanderNavbar />
 
-
-        {/* Free tools banner — value-first, prominent */}
-        <Link
-          to="/aetheris-universe"
-          className="relative z-30 block w-full border-b-2 border-amber/60 transition-all hover:brightness-125 group mt-[92px] sm:mt-[100px]"
-          style={{ background: 'linear-gradient(90deg, hsl(36 75% 14%) 0%, hsl(36 80% 22%) 50%, hsl(36 75% 14%) 100%)' }}
-        >
-          <div className="max-w-6xl mx-auto px-4 py-3 text-center">
-            <div className="font-case uppercase tracking-[0.2em] text-[10px] sm:text-xs text-amber/90 mb-1">
-              // Free · No pitch
-            </div>
-            <div className="font-forensic text-lg sm:text-2xl md:text-3xl font-bold text-amber leading-tight">
-              Try My Free Tools
-              <span className="ml-3 inline-block text-amber-50 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-            <div className="text-[11px] sm:text-sm text-amber-50/80 mt-1">
-              I'd rather help you first than sell to you. Use the whole toolkit on the house.
-            </div>
-          </div>
-        </Link>
-
-        <Navbar onContactClick={() => {}} />
-
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-0 opacity-[0.06] mix-blend-overlay z-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 30%, hsl(var(--amber)) 0%, transparent 40%), radial-gradient(circle at 80% 70%, hsl(var(--crimson, 0 60% 45%)) 0%, transparent 45%)",
-          }}
-        />
-
-        <main className="relative flex-1 flex items-center justify-center max-w-7xl w-full mx-auto px-4 sm:px-8 py-4">
-
-        <div className="w-full">
-          {/* TOP PITCH — money-back guarantee framing */}
-          <section className="mt-2 max-w-6xl mx-auto text-center animate-fade-in">
-            <h1 className="font-forensic text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
-              Revenue Leak Audit for $5M to $50M Businesses
-            </h1>
-            <p className="mt-4 text-base sm:text-lg text-foreground/85 max-w-4xl mx-auto">
-              Your business is leaking. You just cannot see it from the inside. We run the forensic
-              scan, name every leak in writing, and hand you the plan to close it.
-            </p>
-            <p className="mt-2 font-case text-[11px] uppercase tracking-[0.28em] text-amber/80">
-              Indianapolis · Operating nationwide
-            </p>
-
-          </section>
-
-          {/* Aetheris logo. top-left, triple-tap to /staff (admins + reps) */}
-          <div className="max-w-6xl mx-auto flex justify-start mt-5 mb-1">
-            <button
-              type="button"
-              onClick={handleLogoTap}
-              aria-label="Aetheris"
-              className="rounded-full focus:outline-none focus:ring-2 focus:ring-amber/60 select-none"
-            >
-              <img
-                src="/aetheris-logo.png"
-                alt="Aetheris"
-                className="h-16 sm:h-24 md:h-32 w-auto opacity-90 hover:opacity-100 transition-opacity pointer-events-none"
-                draggable={false}
-              />
-            </button>
-          </div>
-
-          {/* WHAT WE SELL — top of page */}
-          <section
-            className="mt-6 max-w-6xl mx-auto text-center animate-fade-in"
-            aria-label="What Aetheris sells"
+      <AnomalousMatterHero
+        eyebrow="Revenue Leak Audit"
+        title={
+          <>
+            Find where your revenue
+            <br className="hidden sm:block" /> is <span className="text-amber">leaking</span>.
+          </>
+        }
+        description="Your business is leaking. You just cannot see it from the inside. We run the forensic scan, name every leak in writing, and hand you the plan to close it."
+      >
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <Link
+            to="/golden-report"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
-            <div className="forensic-tile rounded-sm px-6 py-10 sm:px-10 sm:py-14 md:px-14 md:py-18">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.24em] text-amber/80 mb-3">
-                // Aetheris Technology · Founder Pitch
-              </div>
-              <h2 className="font-forensic text-3xl sm:text-4xl md:text-6xl font-bold text-foreground leading-[1.05] tracking-tight max-w-5xl mx-auto">
-                Helping Founders Turn <span className="text-crimson italic">Wasted Marketing Dollars</span> Into the <span className="text-amber italic">Right Leads</span> and More Sales.
-              </h2>
-              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-foreground/90 font-medium leading-relaxed max-w-4xl mx-auto">
-                One honest question for every founder:
-              </p>
-              <p className="mt-3 font-forensic text-xl sm:text-2xl md:text-3xl text-amber leading-snug max-w-4xl mx-auto italic">
-                "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales?"
-              </p>
-              <p className="mt-6 text-base sm:text-lg md:text-xl text-foreground/85 max-w-4xl mx-auto">
-                If that hits, you're in the right place. We solve the problem you already feel: <span className="text-crimson font-semibold">marketing dollars that don't create enough good leads or sales</span> — and we turn them into the right leads and revenue.
-              </p>
-            </div>
-          </section>
-
-          {/* 3-step process */}
-          <section
-            className="mt-6 max-w-6xl mx-auto animate-fade-in"
-            aria-label="How it works in three steps"
+            Start free scan <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href={BOOK_MEETING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
           >
-            <div className="forensic-tile rounded-sm px-6 py-8 sm:px-10 sm:py-10">
-              <div className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.24em] text-amber/80 mb-6 text-center">
-                // How It Works · Three Steps
-              </div>
-              <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
-                {[
-                  {
-                    n: "01",
-                    t: "Free Scan",
-                    d: "I run a scan on your company — free.",
-                    actions: [
-                      { label: "See a sample Golden Report", href: "/golden-report", internal: true },
-                    ],
-                  },
-                  {
-                    n: "02",
-                    t: "Find the Leaks",
-                    d: "I show you exactly where you're losing money.",
-                    actions: [] as { label: string; href: string; internal?: boolean }[],
-                  },
-                  {
-                    n: "03",
-                    t: "Recover & Scale",
-                    d: "Build the system and plan to recover your money and scale.",
-                    actions: [
-                      { label: "Book a time on my calendar", href: BOOK_MEETING_URL, internal: false },
-                      { label: "aetheris.technology@outlook.com", href: "mailto:aetheris.technology@outlook.com?subject=Recover%20%26%20Scale%20-%20Ready%20to%20talk", internal: false },
-                    ],
-                  },
-                ].map((s) => (
-                  <div
-                    key={s.n}
-                    className="relative rounded-sm border border-amber/25 bg-background/40 px-5 py-6 hover:border-amber/50 transition-colors flex flex-col"
-                  >
-                    <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-amber/70 mb-2">
-                      Step {s.n}
-                    </div>
-                    <div className="font-forensic text-xl sm:text-2xl text-foreground mb-2">
-                      {s.t}
-                    </div>
-                    <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">
-                      {s.d}
-                    </p>
-                    {s.actions.length > 0 && (
-                      <div className="mt-4 flex flex-col gap-2">
-                        {s.actions.map((a) =>
-                          a.internal ? (
-                            <Link
-                              key={a.href}
-                              to={a.href}
-                              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-amber border border-amber/40 hover:bg-amber/10 px-3 py-2 rounded-sm transition-colors"
-                            >
-                              {a.label} <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
-                          ) : (
-                            <a
-                              key={a.href}
-                              href={a.href}
-                              target={a.href.startsWith("mailto:") ? undefined : "_blank"}
-                              rel={a.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-                              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-amber border border-amber/40 hover:bg-amber/10 px-3 py-2 rounded-sm transition-colors break-all"
-                            >
-                              {a.href.startsWith("mailto:") ? <Mail className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
-                              {a.label}
-                            </a>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-
-
-
-          {/* Aetheris positioning */}
-          <section className="mt-6 max-w-6xl mx-auto text-center animate-fade-in">
-            <div className="relative rounded-lg border border-amber/30 bg-card/60 backdrop-blur-sm px-5 py-6 sm:px-8 sm:py-8 shadow-[0_0_40px_-15px_hsl(var(--amber)/0.35)]">
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
-                If I can't save you <span className="text-crimson">money</span>, I don't want to do <span className="text-crimson">business</span> with you.
-              </p>
-            </div>
-          </section>
-
-          {/* Aetheris Case Intake — branded booking link */}
-          <section className="mt-6 max-w-3xl mx-auto animate-fade-in" aria-label="Book an Aetheris case intake">
-            <div className="relative rounded-lg border border-amber/40 bg-card/70 backdrop-blur-sm p-6 sm:p-8 text-center shadow-[0_0_60px_-20px_hsl(var(--amber)/0.5)]">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2">
-                // Aetheris · Case Intake //
-              </p>
-              <h2 className="font-forensic text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                Book the operator directly.
-              </h2>
-              <p className="text-sm sm:text-base text-muted-foreground mb-5 max-w-lg mx-auto">
-                30 minutes. No pitch deck. We look at your business and I tell you where the money is leaking.
-              </p>
-              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Open aetheris.technology/book
-                </Button>
-              </a>
-              <p className="mt-3 text-[11px] font-mono text-muted-foreground tracking-wide">
-                aetheris.technology/book
-              </p>
-            </div>
-          </section>
-
-          <ObsidianVibeWaitlist />
-
-
-
-
-
-
-          {/* AUTHORITY + OUTCOMES STRIP — proof above the fold */}
-          <section
-            className="mt-4 max-w-6xl mx-auto animate-fade-in"
-            style={{ animationDelay: "80ms", animationFillMode: "both" }}
-            aria-label="Aetheris outcomes and credentials"
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-              {[
-                { stat: "30%", label: "AVG. RECOVERY ON NAMED LEAKS\n\n\nFREE FORENSIC SCAN\n\n\nMONEY BACK GUARANTEE IF WE CAN'T HELP", tone: "amber" },,
-                { stat: "10–40×", label: "TYPICAL LEAK / FEE RATIO\nROI ON INVESTMENT INSTANTLY ", tone: "amber" },
-                { stat: "20 yrs", label: "BUILDING REVENUE SYSTEMS\n-FORMER CONSTRUCTION CEO\n-OVER 200 PERSONAL CLIENTS\n\n", tone: "amber" },
-                { stat: "USMC + MS + BA + IBM", label: "MARINE VET · DIGITAL FORENSICS", tone: "crimson" },
-              ].map((it) => (
-                <div
-                  key={it.label}
-                  className={`rounded-sm border ${it.tone === "crimson" ? "border-crimson/40" : "border-amber/30"} bg-card/60 backdrop-blur-sm p-2.5 sm:p-3 text-center`}
-                >
-                  <div className={`font-forensic text-base sm:text-xl font-bold leading-none ${it.tone === "crimson" ? "text-crimson" : "text-amber"}`}>
-                    {it.stat}
-                  </div>
-                  <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground/70 leading-tight">
-                    {it.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* GOLDEN REPORT — the one tool. No mind map, no distractions. */}
-          <HomeToolShopGrid />
-
-
-
-
-          {/* Chaos Theory Forensics hero + CTAs removed per request */}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          {/* THE LEAK ECOSYSTEM moved to industry pages */}
-
-
-          {/* Golden Report CTA now lives above; no duplicate here. */}
-
-
-
-
-
-
-
-
-
-
-          {/* CUSTOM BUILD — specific idea or tool */}
-          <section
-            className="mt-6 max-w-6xl mx-auto animate-fade-in"
-            style={{ animationDelay: "280ms", animationFillMode: "both" }}
-          >
-            <style>{`
-              @keyframes customBuildMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-              @keyframes customBuildPulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.85; } }
-              @keyframes customBuildOrbit { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-              .cb-marquee-track { animation: customBuildMarquee 42s linear infinite; }
-              .cb-marquee:hover .cb-marquee-track { animation-play-state: paused; }
-              .cb-dot { animation: customBuildPulse 2.6s ease-in-out infinite; }
-              .cb-orbit { animation: customBuildOrbit 22s linear infinite; }
-            `}</style>
-
-            <div className="relative rounded-sm border border-amber/40 bg-gradient-to-br from-card/90 via-background/60 to-card/80 backdrop-blur-md p-6 sm:p-9 overflow-hidden shadow-[0_0_60px_-20px_hsl(var(--amber)/0.45)]">
-              {/* Ambient chaos glow */}
-              <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full opacity-30 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--amber)/0.5), transparent 70%)" }} />
-              <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-24 w-72 h-72 rounded-full opacity-25 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--crimson,0 60% 45%)/0.5), transparent 70%)" }} />
-
-              {/* Orbiting corner sigil */}
-              <div aria-hidden className="pointer-events-none absolute top-3 right-3 w-14 h-14 opacity-70">
-                <div className="absolute inset-0 rounded-full border border-amber/40" />
-                <div className="absolute inset-2 rounded-full border border-dashed border-amber/30 cb-orbit" />
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber cb-dot" />
-              </div>
-
-              {/* Corner brackets */}
-              {["top-2 left-2 border-l border-t","top-2 right-2 border-r border-t","bottom-2 left-2 border-l border-b","bottom-2 right-2 border-r border-b"].map(c => (
-                <span key={c} aria-hidden className={`absolute ${c} w-3 h-3 border-amber/70`} />
-              ))}
-
-              <div className="relative text-center">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <span className="h-px w-8 bg-amber/50" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-amber">Custom Build · Case File 0-Day</span>
-                  <span className="h-px w-8 bg-amber/50" />
-                </div>
-
-                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full border border-amber/40 bg-background/60">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber cb-dot" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber/90">200+ apps shipped · Receipts below</span>
-                </div>
-
-                <h2 className="font-forensic text-2xl sm:text-3xl md:text-4xl font-bold leading-tight max-w-5xl mx-auto">
-                  Have a specific idea or tool you want built?{" "}
-                  <span className="text-amber italic">I can build it.</span>
-                </h2>
-
-                <p className="mt-3 font-forensic text-lg sm:text-xl italic text-crimson/90 max-w-4xl mx-auto">
-                  The more crazy or impossible — the better.
-                </p>
-
-                <p className="mt-4 text-sm sm:text-base text-foreground/80 leading-relaxed max-w-4xl mx-auto">
-                  One-off automations. Internal AI tools. Forensic diagnostics.
-                  Scraping pipelines. Private dashboards. Custom operator systems.
-                  If it doesn't exist yet, I'll build it from scratch and hand it to you working.
-                </p>
-
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                  <button
-                    onClick={() => setBookingOpen(true)}
-                    className="group relative inline-flex items-center justify-center h-14 px-8 font-mono uppercase tracking-[0.2em] text-sm font-bold text-background overflow-hidden rounded-sm"
-                  >
-                    {/* animated gradient background */}
-                    <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-amber via-amber/80 to-amber bg-[length:200%_100%]" style={{ animation: "shimmer-gold-drift 3s linear infinite" }} />
-                    {/* pulsing outer glow */}
-                    <span aria-hidden className="absolute -inset-0.5 bg-amber/60 blur-lg opacity-70 group-hover:opacity-100 transition-opacity" />
-                    {/* corner brackets */}
-                    <span aria-hidden className="absolute top-1 left-1 w-2.5 h-2.5 border-l border-t border-background/70" />
-                    <span aria-hidden className="absolute top-1 right-1 w-2.5 h-2.5 border-r border-t border-background/70" />
-                    <span aria-hidden className="absolute bottom-1 left-1 w-2.5 h-2.5 border-l border-b border-background/70" />
-                    <span aria-hidden className="absolute bottom-1 right-1 w-2.5 h-2.5 border-r border-b border-background/70" />
-                    <span className="relative flex items-center">
-                      <Calendar className="w-4 h-4 mr-2.5" />
-                      Tell me what you want built
-                      <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </span>
-                  </button>
-                </div>
-
-                <p className="mt-3 text-xs text-foreground/60 italic">
-                  Scoped, priced, delivered — no ongoing retainers unless you want them.
-                </p>
-
-                <div className="mt-6 flex flex-col items-center gap-3">
-                  <p className="text-center text-xs sm:text-sm text-foreground/70 max-w-md">
-                    Want to see what's underneath?{" "}
-                    <button
-                      onClick={() => setBookingOpen(true)}
-                      className="text-amber underline underline-offset-4 hover:text-amber/80 transition-colors"
-                    >
-                      Get in touch
-                    </button>{" "}
-                    and I'll walk you through what I've built.
-                  </p>
-                </div>
-
-
-              </div>
-
-
-              {/* Receipts marquee — real apps shipped */}
-              <div className="relative mt-7 pt-5 border-t border-dashed border-amber/25">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-amber/80">Selected receipts · live builds</span>
-                  <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-foreground/50 hidden sm:inline">Hover to pause</span>
-                </div>
-                <div
-                  className="cb-marquee relative overflow-hidden"
-                  style={{ maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)" }}
-                >
-                  <div className="cb-marquee-track flex gap-3 whitespace-nowrap w-max">
-                    {(() => {
-                      const apps = [
-                        "Lumina Studio", "Genesis Control", "Kelly Oracle Machine",
-                        "Firecrawl AI", "Auto-Influence Nexus", "Token Risk Analyzer",
-                        "Muscle Memory Forge", "Sales-Fit Assessment Engine", "RenderRight AI",
-                        "AI Command Center", "Resume-Fit Compass", "Clear CRM Flow",
-                        "Founder Finder Pro", "Playground Insights Bot", "Script Spark",
-                        "Tax Treasure Chest", "MCP Interface", "Business Post Analyst",
-                        "Gemini Powerhouse", "Photo-to-Scene", "Friction Finder",
-                        "Aetheris AI Studio", "CTOguy Lead Gen", "AI Tile Haven",
-                        "Perfect System Builder", "Swift Code Composer", "Echo Influence Scribe",
-                        "Quantum Vision", "Build It Better", "Playful Blueprints Studio",
-                      ];
-                      const loop = [...apps, ...apps];
-                      return loop.map((name, i) => (
-                        <span
-                          key={i}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border border-amber/25 bg-background/50 font-mono text-[11px] uppercase tracking-widest text-foreground/85 hover:border-amber/70 hover:text-amber transition-colors"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-amber/70" />
-                          {name}
-                        </span>
-                      ));
-                    })()}
-                  </div>
-                </div>
-                <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.28em] text-foreground/55">
-                  …and ~170 more in the vault. Bring me your impossible one.
-                </p>
-              </div>
-            </div>
-          </section>
-
-
-
-
-
-
-
-
-
-
-          {/* Scan + free tools now live inside HomeMindMapSection above */}
-
-
-
-          {/* Downloads + Deck section removed per request */}
-
-
-
-
-          {/* Contact info. compact glass row */}
-          <section
-            className="relative mt-6 animate-fade-in"
-            style={{ animationDelay: "340ms", animationFillMode: "both" }}
-          >
-            <div className="rounded-lg border border-amber/25 bg-card/80 backdrop-blur-sm px-3 py-3 sm:px-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.5)]">
-              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm">
-                <a href="tel:+13173762110" className="group inline-flex items-center gap-1.5 hover:text-amber transition-colors">
-                  <Phone className="w-3.5 h-3.5 text-amber" />
-                  <span className="font-semibold">(317) 376-2110</span>
-                </a>
-                <span className="h-3.5 w-px bg-white/15 hidden sm:block" />
-                <a href="mailto:Aetheris.technology@outlook.com" className="group inline-flex items-center gap-1.5 hover:text-amber transition-colors">
-                  <Mail className="w-3.5 h-3.5 text-amber" />
-                  <span className="font-semibold break-all">Aetheris.technology@outlook.com</span>
-                </a>
-                <span className="h-3.5 w-px bg-white/15 hidden sm:block" />
-                <span className="inline-flex items-center gap-1.5 text-foreground">
-                  <MapPin className="w-3.5 h-3.5 text-amber" />
-                  <span className="font-semibold">Noblesville, Indiana</span>
-                </span>
-              </div>
-            </div>
-            <p className="mt-2 text-center text-[10px] font-mono tracking-[0.25em] text-muted-foreground uppercase">
-              Aetheris · Chaos Theory Forensics · aetheris.technology
-            </p>
-          </section>
-
-
-          {/* Signature calling card — moved to bottom of page */}
-          <section className="mt-12 max-w-6xl mx-auto animate-fade-in" aria-label="Joseph Toney, AI Architect — Aetheris Business Forensics">
-            <div className="shimmer-gold-border">
-              <img
-                src={callingCard.url}
-                alt="Joseph Toney, AI Architect — IBM AI Certified. I find the cause of chaos and remove it at the source. Aetheris Business Forensics."
-                className="w-full h-auto animate-float rounded-sm"
-                loading="lazy"
-                decoding="async"
-                width={1280}
-                height={731}
-              />
-            </div>
-          </section>
+            <Calendar className="h-4 w-4" /> Book 30 minutes
+          </a>
         </div>
-      </main>
+        <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
+          Indianapolis · Operating nationwide
+        </p>
+      </AnomalousMatterHero>
 
-      <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
-        <DialogContent className="max-w-3xl w-[95vw] p-0 border border-amber/30 bg-card/95 backdrop-blur-xl overflow-hidden">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Book The Findings Call</DialogTitle>
-            <DialogDescription>Pick a time to walk through your leaks. 15 minutes, free.</DialogDescription>
-          </DialogHeader>
-          <div className="p-2 md:p-4">
-            <iframe
-              src={`${BOOK_MEETING_URL}?embed=true`}
-              title="Book The Findings Call"
-              className="w-full h-[70vh] min-h-[500px] rounded-sm border-0"
-              loading="lazy"
-            />
+      {/* Case file preview */}
+      <section className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <SectionLabel>// The deliverable</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
+              A case file, not a slide deck.
+            </h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed max-w-lg">
+              Every scan produces the Golden Report: named leaks, evidence pulled from your own
+              site, a single annual exposure number, and the order to fix them in.
+            </p>
+            <ul className="mt-8 space-y-4">
+              {SIGNALS.map((s) => (
+                <li key={s.k} className="border-l border-amber/40 pl-4">
+                  <p className="font-case text-[10px] uppercase tracking-widest text-amber">{s.k}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{s.v}</p>
+                </li>
+              ))}
+            </ul>
           </div>
-        </DialogContent>
-      </Dialog>
+          <CaseFilePreview />
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// How it works</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-10">Three steps.</h2>
+          <div className="grid gap-px bg-border/60 md:grid-cols-3 rounded-xl overflow-hidden border border-border/60">
+            {STEPS.map((s) => (
+              <div key={s.n} className="bg-background p-8 flex flex-col">
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/70">
+                  Step {s.n}
+                </span>
+                <h3 className="mt-3 text-xl font-bold">{s.t}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-1">{s.d}</p>
+                {s.external ? (
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-flex items-center gap-1.5 font-case text-[11px] uppercase tracking-widest text-amber hover:gap-2.5 transition-all"
+                  >
+                    {s.cta} <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                ) : (
+                  <Link
+                    to={s.href}
+                    className="mt-6 inline-flex items-center gap-1.5 font-case text-[11px] uppercase tracking-widest text-amber hover:gap-2.5 transition-all"
+                  >
+                    {s.cta} <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What we find */}
+      <section id="what-we-find" className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// What we find</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-10">
+            The leaks that never show up in your P&amp;L.
+          </h2>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {FINDINGS.map((f) => (
+              <div key={f.t} className="border-t border-border pt-5">
+                <h3 className="text-base font-bold">{f.t}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Case files */}
+      <section id="case-studies" className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// Case files</SectionLabel>
+          <RealCaseStudiesSection />
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// Engagement ladder</SectionLabel>
+          <TierLadder />
+        </div>
+      </section>
+
+      {/* Intake */}
+      <section className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <SectionLabel>// Case intake</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
+            Book the operator directly.
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            30 minutes. No pitch deck. We look at your business and I tell you where the money is
+            leaking. If I cannot save you money, I do not want to do business with you.
+          </p>
+          <a
+            href={BOOK_MEETING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
+          >
+            <Calendar className="h-4 w-4" /> aetheris.technology/book
+          </a>
+        </div>
+      </section>
+
+      <div className="border-t border-border/60 py-20 px-6">
+        <div className="mx-auto max-w-6xl">
+          <ObsidianVibeWaitlist />
+        </div>
       </div>
+
+      {/* Contact strip */}
+      <section className="border-t border-border/60 py-10 px-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+          <a href="tel:+13173762110" className="inline-flex items-center gap-2 hover:text-amber transition-colors">
+            <Phone className="h-3.5 w-3.5 text-amber" /> (317) 376-2110
+          </a>
+          <a
+            href="mailto:Aetheris.technology@outlook.com"
+            className="inline-flex items-center gap-2 hover:text-amber transition-colors"
+          >
+            <Mail className="h-3.5 w-3.5 text-amber" /> Aetheris.technology@outlook.com
+          </a>
+          <span className="inline-flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 text-amber" /> Noblesville, Indiana
+          </span>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 };
 
 export default LeakLanderPage;
-
