@@ -640,6 +640,8 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
     entries,
     active,
     illustrative: entries.filter((e) => e.status === "illustrative"),
+    overall,
+
 
     chapters: chapterAllocations,
     top10,
