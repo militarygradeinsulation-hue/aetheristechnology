@@ -652,5 +652,8 @@ export function auditGoldenPdfParity(opts: {
 export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]) {
   const doc = generateForensicGoldenPdf(opts);
   const safe = (opts.company || "report").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-  doc.save(`aetheris-forensic-${safe}-${opts.scanId.slice(0, 8)}.pdf`);
+  const profile = opts.profile ?? "executive";
+  const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
+  doc.save(`aetheris-forensic-${safe}-${opts.scanId.slice(0, 8)}${suffix}.pdf`);
 }
+
