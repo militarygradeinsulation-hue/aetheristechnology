@@ -1123,7 +1123,7 @@ export function buildGoldenReportModel(opts: {
       gaps.push(str(ch.title) || `Chapter ${Number(ch.no) || i + 1}`);
       return;
     }
-    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence }));
+    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence, seenActions }));
   });
   pushIf(sections as never, coverageGapsSection(gaps) as never);
 
