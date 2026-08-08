@@ -205,7 +205,22 @@ const ResourcesPage = () => {
             ) : (() => {
               const visible = playbooks || [];
               return (
+                <>
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {visible.length} free guides. No email required.
+                  </p>
+                  <Button
+                    onClick={handleDownloadAll}
+                    disabled={downloadingAll || visible.length === 0}
+                    className="bg-amber hover:bg-amber/90 text-background font-bold"
+                  >
+                    {downloadingAll ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                    {downloadingAll ? 'Downloading...' : 'Download all guides'}
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                   {visible.map((resource, index) => {
                     const IconComp = ICON_MAP[resource.icon_name || 'FileText'] || FileText;
                     return (
