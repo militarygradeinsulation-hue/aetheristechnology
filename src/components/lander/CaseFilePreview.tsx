@@ -27,11 +27,11 @@ export const CaseFilePreview: React.FC = () => (
     <div className="grid grid-cols-2 gap-4 mb-6">
       <div className="rounded-lg border border-border bg-secondary/40 p-4">
         <p className="font-case text-[10px] uppercase text-muted-foreground mb-1">Exposure Range</p>
-        <p className="font-heading text-2xl text-foreground">$142k - $218k</p>
+        <p className="font-display text-2xl text-foreground">$142k - $218k</p>
       </div>
       <div className="rounded-lg border border-border bg-secondary/40 p-4">
         <p className="font-case text-[10px] uppercase text-muted-foreground mb-1">Evidence Confidence</p>
-        <p className="font-heading text-2xl text-foreground">High</p>
+        <p className="font-display text-2xl text-foreground">High</p>
       </div>
     </div>
 

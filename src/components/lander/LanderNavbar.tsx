@@ -22,7 +22,7 @@ const LogoMark: React.FC = () => (
       className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-105"
     />
     <span className="flex flex-col justify-center">
-      <span className="font-heading font-bold text-base tracking-[0.2em] text-foreground leading-none">
+      <span className="font-display font-bold text-base tracking-[0.2em] text-foreground leading-none">
         AETHERIS
       </span>
       <span className="text-[8px] font-case tracking-[0.25em] text-amber uppercase mt-0.5 leading-none">
