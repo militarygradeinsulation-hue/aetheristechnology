@@ -1014,3 +1014,6 @@ body { background-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .ambient-mote, .ambient-ripple { animation: none; }
 }
+
+/* Let the ambient layer show through full-page shells (html keeps the base color) */
+.min-h-screen.bg-background { background-color: transparent; }
