@@ -354,7 +354,9 @@ function topLeaksSection(
   if (executive) {
     // One compact table instead of four key/value rows per leak, and root
     // causes collapsed so a single driver is explained once.
-    const groups = groupByRootCause(t.entries);
+    const rankedIds = new Set(t.entries.map((e) => e.leak_id));
+    const groups = groupByRootCause(ledger.active.filter((e) => rankedIds.has(e.leak_id)));
+
     blocks.push({
       kind: "table",
       columns: ["#", "Leak", "Annual exposure", "Chapter"],
