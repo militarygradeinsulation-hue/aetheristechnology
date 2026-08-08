@@ -488,10 +488,22 @@ export function generateForensicGoldenPdf(opts: {
   }
 
   // Drift alarm: if a saved report field the website can render is not present
-  // in the export model, surface it loudly in dev instead of losing it silently.
+  // in the ARCHIVAL export model, surface it loudly in dev instead of losing it
+  // silently. The executive profile omits fields on purpose, so it is audited
+  // against the complete model rather than against itself.
   try {
     if (typeof import.meta !== "undefined" && (import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
-      const parity = auditGoldenReportParity(report, model);
+      const archival = model.profile === "complete"
+        ? model
+        : buildGoldenReportModel({
+            report: report as unknown as Record<string, unknown>,
+            company,
+            url,
+            scanId,
+            profile: "complete",
+          });
+      const parity = auditGoldenReportParity(report, archival);
+
       if (!parity.ok) {
         console.warn(
           `[golden-pdf] parity drift on ${scanId}: ${parity.issues.length} saved field(s) missing from the export`,
