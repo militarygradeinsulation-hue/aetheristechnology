@@ -25,7 +25,7 @@ function chapter(no: number, over: Record<string, unknown> = {}) {
     annual_low: 40000,
     annual_high: 60000,
     evidence: [{ label: "HTTP", value: `500 observed on /contact-${no}` }],
-    internal_debug_blob: { tokens: 1234, prompt_hash: "abc" },
+    internal_debug_note: "tokens=1234 prompt_hash=abc",
     ...over,
   };
 }
@@ -94,8 +94,8 @@ describe("executive profile", () => {
   it("omits internal machinery the archival profile keeps", () => {
     const exec = JSON.stringify(build("executive"));
     const full = JSON.stringify(build("complete"));
-    expect(full).toContain("Internal Debug Blob");
-    expect(exec).not.toContain("Internal Debug Blob");
+    expect(full).toContain("Internal Debug Note");
+    expect(exec).not.toContain("Internal Debug Note");
   });
 
   it("keeps the executive summary and chapter findings", () => {
@@ -158,7 +158,7 @@ describe("financial classification", () => {
     const exec = build("executive", report);
     const section = exec.sections.find((s) => s.id === "illustrative-scenarios");
     expect(section).toBeTruthy();
-    expect(JSON.stringify(section)).toContain("Category benchmark upside");
+    expect(JSON.stringify(section)).toContain("$900,000 - $1,200,000");
     expect(exec.leakage?.high ?? 0).toBeLessThan(900000);
   });
 });

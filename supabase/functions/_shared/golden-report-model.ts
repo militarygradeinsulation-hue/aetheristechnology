@@ -411,7 +411,7 @@ function topLeaksSection(ledger: FinancialLedger, chapterRef: (slug: string) => 
 export function evidenceKey(s: string): string {
   return String(s || "")
     .toLowerCase()
-    .replace(/https?:\/\/\S+/g, (m) => m.replace(/[?#].*$/, ""))
+    .replace(/[?#]\S*/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 }
