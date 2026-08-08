@@ -78,6 +78,27 @@ const ResourcesPage = () => {
     if (playbook.file_url) window.open(playbook.file_url, '_blank');
   };
 
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
+  const handleDownloadAll = async () => {
+    const files = (playbooks || []).filter((p: any) => p.file_url);
+    if (files.length === 0) return;
+    setDownloadingAll(true);
+    for (const p of files) {
+      const a = document.createElement('a');
+      a.href = p.file_url as string;
+      a.download = '';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    setDownloadingAll(false);
+  };
+
+
 
   return (
     <div className="relative min-h-screen">
