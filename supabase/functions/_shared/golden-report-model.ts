@@ -905,7 +905,10 @@ function chapterSection(
       else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
     }
   }
-  const compact = executive && blocks.length <= 6;
+  // Only a genuinely long chapter earns its own page in the executive
+  // deliverable; short ones flow so the PDF has no near-empty pages.
+  const compact = executive && blocks.length <= 14;
+
   return {
     id: `chapter-${no}`,
     title: str(ch.title) || `Chapter ${no}`,
