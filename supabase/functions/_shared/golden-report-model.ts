@@ -22,8 +22,12 @@ import {
   crossReferencedIn,
   formatUsdRangeAscii,
   NON_PRICEABLE_CHAPTER_SLUGS,
+  FINANCIAL_BASIS_LABEL,
+  type FinancialBasis,
   type FinancialLedger,
+  type LedgerEntry,
 } from "./golden-ledger.ts";
+
 import { sanitizeGoldenReportFinancials, FINANCIAL_METHODOLOGY_NOTE } from "./golden-money-sanitizer.ts";
 import {
   MONEY_CATEGORY_LABEL,
