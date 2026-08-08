@@ -904,16 +904,69 @@ export function buildGoldenReportModel(opts: {
   url: string;
   scanId: string;
   generatedAt?: Date;
+  /** Defaults to "complete" so every existing caller keeps its behaviour. */
+  profile?: RenderProfile;
 }): GoldenReportModel {
   // ONE financial source for every surface: the persisted ledger when present,
   // otherwise rebuilt deterministically from the same stored evidence. The
   // report is sanitized FIRST, so no structured field or prose sentence can
   // carry a leak amount the ledger does not back.
+  const profile: RenderProfile = opts.profile ?? "complete";
+  const executive = profile === "executive";
   const sanitized = sanitizeGoldenReportFinancials((opts.report || {}) as Record<string, unknown>);
   const report = sanitized.report as Record<string, unknown>;
   const ledger = sanitized.ledger;
   const leakage = computeGoldenLeakage(report as never);
   const sections: Section[] = [];
+  const seenEvidence = new Set<string>();
+
+  const meta = {
+    company: opts.company || opts.url,
+    url: opts.url,
+    scanId: opts.scanId,
+    generatedAt: opts.generatedAt || new Date(),
+    askUrl: `https://aetheris.technology/report/${opts.scanId}/ask`,
+  };
+
+  // The appendix profile is the machine-readable half of the same report: the
+  // ledger, the reconciliation and nothing written for a human reader.
+  if (profile === "data_appendix") {
+    sections.push({
+      id: "case-metadata",
+      title: "Case Metadata",
+      newPage: false,
+      indexed: false,
+      blocks: [
+        { kind: "kv", label: "Company", value: meta.company },
+        { kind: "kv", label: "Target", value: opts.url },
+        { kind: "kv", label: "Scan ID", value: opts.scanId },
+        { kind: "kv", label: "Financial model version", value: String(ledger.model_version) },
+      ],
+    });
+    pushIf(sections as never, reconciliationSection(ledger) as never);
+    sections.push({
+      id: "ledger-entries",
+      title: "Financial Leak Ledger",
+      newPage: true,
+      indexed: true,
+      blocks: [
+        {
+          kind: "table",
+          columns: ["Leak", "Annual range", "Status", "Basis", "Chapter"],
+          widths: [0.32, 0.2, 0.14, 0.2, 0.14],
+          rows: ledger.entries.map((e) => [
+            e.title,
+            formatUsdRangeAscii(e.annual_low, e.annual_high),
+            e.status,
+            FINANCIAL_BASIS_LABEL[(e.financial_basis ?? "evidence_based_model") as FinancialBasis],
+            e.primary_chapter,
+          ]),
+        },
+      ],
+    });
+    pushIf(sections as never, extrasSection(report) as never);
+    return { meta, leakage, profile, sections };
+  }
 
   sections.push({
     id: "case-metadata",
@@ -921,7 +974,7 @@ export function buildGoldenReportModel(opts: {
     newPage: false,
     indexed: false,
     blocks: [
-      { kind: "kv", label: "Company", value: opts.company || opts.url },
+      { kind: "kv", label: "Company", value: meta.company },
       { kind: "kv", label: "Target", value: opts.url },
       { kind: "kv", label: "Scan ID", value: opts.scanId },
     ],
@@ -929,7 +982,9 @@ export function buildGoldenReportModel(opts: {
 
   pushIf(sections as never, degradedSection(report) as never);
   sections.push(leakageSection(leakage, needsFinancialRegeneration(report as never)));
-  pushIf(sections as never, reconciliationSection(ledger) as never);
+  // Reconciliation is internal machinery: archival export keeps it, the client
+  // deliverable does not carry it.
+  if (!executive) pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
 
   if (has(report.executive_summary)) {
@@ -952,11 +1007,14 @@ export function buildGoldenReportModel(opts: {
   });
   const chapterRef = (slug: string) => chapterNoBySlug.get(String(slug).toLowerCase()) ?? slug;
 
+  if (executive) pushIf(sections as never, visualSummarySection(ledger) as never);
   pushIf(sections as never, topLeaksSection(ledger, chapterRef as never) as never);
+  pushIf(sections as never, illustrativeSection(ledger) as never);
 
-
+  // Growth assets are a separate deliverable in the executive profile; the
+  // archival export keeps them inline exactly as before.
   const d = (report.deliverables || null) as GoldenDeliverables | null;
-  if (d) {
+  if (d && !executive) {
     pushIf(sections as never, brandSection(d) as never);
     pushIf(sections as never, imagerySection(d) as never);
     pushIf(sections as never, postsSection(d) as never);
@@ -975,27 +1033,83 @@ export function buildGoldenReportModel(opts: {
     }
   }
 
-  const chapters = Array.isArray(report.chapters) ? (report.chapters as Record<string, unknown>[]) : [];
-  chapters.forEach((ch, i) => sections.push(chapterSection(ch, i, ledger)));
+  const chapters = chapterList;
+  const gaps: string[] = [];
+  chapters.forEach((ch, i) => {
+    if (executive && chapterIsEmpty(ch) && !chapterAllocation(ledger, String(ch.slug || "").toLowerCase())) {
+      gaps.push(str(ch.title) || `Chapter ${Number(ch.no) || i + 1}`);
+      return;
+    }
+    sections.push(chapterSection(ch, i, ledger, { profile, seenEvidence }));
+  });
+  pushIf(sections as never, coverageGapsSection(gaps) as never);
+
+  if (executive) pushIf(sections as never, roadmapSection(report) as never);
 
   // ── FUTURE-PROOF CATCH-ALL ──
   // Any saved top-level field that no section above claims is rendered here, so
-  // a new Golden Report field can never be silently dropped from the export.
-  pushIf(sections as never, extrasSection(report) as never);
+  // a new Golden Report field can never be silently dropped from the archival
+  // export. The executive deliverable omits it by design.
+  if (!executive) pushIf(sections as never, extrasSection(report) as never);
 
-
-  return {
-    meta: {
-      company: opts.company || opts.url,
-      url: opts.url,
-      scanId: opts.scanId,
-      generatedAt: opts.generatedAt || new Date(),
-      askUrl: `https://aetheris.technology/report/${opts.scanId}/ask`,
-    },
-    leakage,
-    sections,
-  };
+  return { meta, leakage, profile, sections };
 }
+
+// ───────────────────────── executive page budget ─────────────────────────
+
+/** Target and hard ceiling for the executive deliverable. */
+export const EXECUTIVE_PAGE_TARGET = 24;
+export const EXECUTIVE_PAGE_CEILING = 28;
+
+/** Deterministic page estimate used to guard the executive profile. */
+export function estimatePageCount(model: GoldenReportModel): number {
+  let lines = 0;
+  let pages = 1;
+  const LINES_PER_PAGE = 46;
+  for (const s of model.sections) {
+    if (s.newPage) {
+      pages += 1;
+      lines = 0;
+    }
+    lines += 3;
+    for (const b of s.blocks) {
+      if (b.kind === "paragraph") lines += Math.ceil(b.text.length / 95) + 1;
+      else if (b.kind === "bullets") lines += b.items.length + 1;
+      else if (b.kind === "mono") lines += b.lines.length + 1;
+      else if (b.kind === "table") lines += b.rows.length + 2;
+      else if (b.kind === "chart") lines += 12;
+      else lines += 2;
+    }
+    while (lines > LINES_PER_PAGE) {
+      pages += 1;
+      lines -= LINES_PER_PAGE;
+    }
+  }
+  return pages;
+}
+
+export type ExportGate = { ok: boolean; reasons: string[]; estimatedPages: number };
+
+/**
+ * Refuses an executive export when the report cannot be presented honestly:
+ * unreconciled financials, a pending regeneration, or a page blow-out.
+ */
+export function executiveExportGate(model: GoldenReportModel, ledger?: FinancialLedger): ExportGate {
+  const reasons: string[] = [];
+  const estimatedPages = estimatePageCount(model);
+  if (estimatedPages > EXECUTIVE_PAGE_CEILING) {
+    reasons.push(`Executive export exceeds the ${EXECUTIVE_PAGE_CEILING} page ceiling (estimated ${estimatedPages}).`);
+  }
+  const r = ledger?.reconciliation;
+  if (r && r.invariant_status !== "ok") {
+    reasons.push(`Financial invariants are ${r.invariant_status}; totals would contradict the chapters.`);
+  }
+  if (r?.violations?.length) {
+    for (const v of r.violations) reasons.push(`${v.code}: ${v.detail}`);
+  }
+  return { ok: reasons.length === 0, reasons, estimatedPages };
+}
+
 
 // ───────────────────────── parity audit ─────────────────────────
 
