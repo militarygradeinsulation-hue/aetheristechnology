@@ -1,5 +1,6 @@
 # Golden Report: Executive Render Profile Cleanup
 
+
 Goal: every future company report defaults to a concise executive PDF of roughly 16 to 24 pages with a hard ceiling of 28, while the full archival export and a machine-readable appendix remain available. The saved report stays the source of truth; what changes is how it is rendered.
 
 ## What is causing the 61-page output today
