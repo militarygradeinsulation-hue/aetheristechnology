@@ -256,7 +256,9 @@ const ResourcesPage = () => {
                     );
                   })}
                 </div>
+                </>
               );
+
             })()}
 
           </div>
