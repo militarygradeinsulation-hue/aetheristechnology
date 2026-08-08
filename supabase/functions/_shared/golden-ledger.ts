@@ -154,7 +154,10 @@ export type LedgerEntry = {
   cross_referenced_chapters: string[];
   status: LedgerEntryStatus;
   origin: "top_leak" | "chapter";
+  /** How defensible this figure is. Illustrative entries are never summed. */
+  financial_basis?: FinancialBasis;
   calculation_version: number;
+
   /** Set when status is not "active": which entry absorbed this one. */
   absorbed_by?: string;
 };
