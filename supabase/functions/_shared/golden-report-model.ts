@@ -743,7 +743,14 @@ function scheduleSection(d: GoldenDeliverables): Section | null {
   return { id: "schedule", title: `Content Schedule (${days.length} days)`, kicker: "GROWTH ASSETS", newPage: true, indexed: true, blocks };
 }
 
-function chapterSection(ch: Record<string, unknown>, idx: number, ledger: FinancialLedger): Section {
+function chapterSection(
+  ch: Record<string, unknown>,
+  idx: number,
+  ledger: FinancialLedger,
+  opts: { profile: RenderProfile; seenEvidence: Set<string> } = { profile: "complete", seenEvidence: new Set() },
+): Section {
+  const executive = opts.profile === "executive";
+
   const no = Number(ch.no) || idx + 1;
   const slug = String(ch.slug || "").toLowerCase();
   const blocks: Block[] = [];
