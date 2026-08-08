@@ -806,27 +806,32 @@ function chapterSection(
   }
   const ev = Array.isArray(ch.evidence) ? (ch.evidence as Record<string, unknown>[]) : [];
   if (ev.length) {
-    blocks.push({
-      kind: "mono",
-      label: "Evidence",
-      lines: ev.map((e) => `${str(e.label)}: ${str(e.value)}`),
-    });
+    const lines = ev.map((e) => `${str(e.label)}: ${str(e.value)}`);
+    const shown = executive ? dedupeEvidence(lines, opts.seenEvidence) : lines;
+    if (shown.length) blocks.push({ kind: "mono", label: "Evidence", lines: shown });
   }
   // Any additional saved chapter field is exported rather than silently dropped.
-  for (const [k, v] of Object.entries(ch)) {
-    if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence", "annual_low", "annual_high"].includes(k)) continue;
-    if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
-    else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+  // The executive profile keeps machinery out of the client deliverable; the
+  // complete profile still carries every field.
+  if (!executive) {
+    for (const [k, v] of Object.entries(ch)) {
+      if (["no", "slug", "title", "verdict", "what_we_found", "why_its_leaking", "what_its_costing", "what_to_do", "evidence", "annual_low", "annual_high"].includes(k)) continue;
+      if (Array.isArray(v)) pushIf(blocks, bullets(labelize(k), v.map(str)));
+      else if (has(v) && typeof v !== "object") blocks.push({ kind: "kv", label: labelize(k), value: str(v) });
+    }
   }
+  const compact = executive && blocks.length <= 6;
   return {
     id: `chapter-${no}`,
     title: str(ch.title) || `Chapter ${no}`,
     kicker: `CHAPTER ${String(no).padStart(2, "0")}`,
-    newPage: true,
+    newPage: !compact,
     indexed: true,
+    density: compact ? "compact" : "full",
     blocks,
   };
 }
+
 /** Top-level report keys already owned by a dedicated section above. */
 const CLAIMED_KEYS = new Set([
   "executive_summary",
