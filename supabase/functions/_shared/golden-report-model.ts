@@ -860,9 +860,29 @@ function chapterSection(
   if (!rollup) blocks.push(...block("What it's costing (USD)", ch.what_its_costing));
   const wtd = ch.what_to_do as Record<string, unknown> | undefined;
   if (wtd && typeof wtd === "object") {
-    blocks.push({ kind: "subheading", text: "What to do" });
-    for (const [k, v] of Object.entries(wtd)) pushIf(blocks, bullets(labelize(k), v));
+    const entries = Object.entries(wtd).filter(([k]) =>
+      // Horizon buckets are owned by the single centralised roadmap in the
+      // executive deliverable, so the same action is never printed twice.
+      !(executive && /(^|_)(30|60|90|first_30|month_[123])($|_)/.test(k)),
+    );
+    let emitted = false;
+    for (const [k, v] of entries) {
+      const items = (Array.isArray(v) ? v : [v]).map(str).filter(Boolean);
+      const shown = executive ? dedupeEvidence(items, opts.seenActions) : items;
+      const b = bullets(labelize(k), shown);
+      if (b) {
+        if (!emitted) {
+          blocks.push({ kind: "subheading", text: "What to do" });
+          emitted = true;
+        }
+        blocks.push(b);
+      }
+    }
+    if (executive && entries.length !== Object.keys(wtd).length) {
+      blocks.push({ kind: "kv", label: "Sequenced actions", value: "See the Remediation Roadmap (30/60/90)." });
+    }
   }
+
   const ev = Array.isArray(ch.evidence) ? (ch.evidence as Record<string, unknown>[]) : [];
   if (ev.length) {
     const lines = ev.map((e) => `${str(e.label)}: ${str(e.value)}`);
