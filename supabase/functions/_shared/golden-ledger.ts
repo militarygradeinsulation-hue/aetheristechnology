@@ -639,7 +639,8 @@ export function buildFinancialLedger(report: LedgerReportLike | null | undefined
     currency: "USD",
     entries,
     active,
-    overall,
+    illustrative: entries.filter((e) => e.status === "illustrative"),
+
     chapters: chapterAllocations,
     top10,
     reconciliation,
