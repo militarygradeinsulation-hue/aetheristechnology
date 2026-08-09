@@ -23,6 +23,7 @@
 - [Revenue Forensics Strategy](mem://strategy/revenue-forensics-category) — Category play, 5 structural moats, hard kill list, build priority
 - [Design System](mem://style/design-system) — HSL color tokens, typography stack, gradients, motion utilities
 - [Pricing & Business Model](mem://business/pricing) — Five public offers (3 bundles + 2 flagships), TWO commission models (tiered % for bundles, fixed-dollar for flagships), webhook flagshipFixedSplit, rep portal alignment, Rep-Operator-Playbook.md
+- [Pricing Page Copy](mem://business/pricing-page-copy) — Buyer-facing tier copy rules: outcome bullets, "You leave with", timelines, no internal tool names
 - [Brand Strategy](mem://business/brand-strategy) — Specialty-manufacturer wedge, credentials-first positioning, two-offer surface
 - [Content Strategy](mem://marketing/content-strategy) — Automated blog/playbook schedules, LinkedIn 360 Brew
 - [Aetheris Lexicon](mem://marketing/aetheris-lexicon) — REQUIRED Leak Audit™ vocabulary + structural rules for ALL LinkedIn posts/comments/replies (enforced in linkedin-post-respond + linkedin-post-studio)
