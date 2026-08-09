@@ -63,7 +63,6 @@ const VerticalLandingPage: React.FC = () => {
         keywords={vertical.keywords}
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'Careers', path: '/careers' },
           { name: vertical.industry, path },
         ]}
         faqs={vertical.faqs}

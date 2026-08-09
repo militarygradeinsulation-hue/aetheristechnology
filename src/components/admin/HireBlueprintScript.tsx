@@ -130,23 +130,23 @@ If they balk at $2,500, you are not talking to a buyer. You're talking to a tire
       },
       {
         id: "flagship",
-        title: "Flagships — $18k Diagnostic & $15k Active Case",
+        title: "Flagships — $23.5k Diagnostic & $20k Active Case",
         icon: Briefcase,
         duration: "4 min",
         goal: "Get them excited about the upmarket numbers without skipping the small-ticket reps.",
         say:
 `We also run two flagship engagements:
 
-The $18,000 Forensic Diagnostic — same methodology, but at enterprise depth. The split is fixed: $10k to the company, $5k to you as the rep, $3k to the partner.
+The $23,500 Forensic Diagnostic — same methodology, but at enterprise depth. The split is fixed: $15.5k to the company, $5k to you as the rep, $3k to the partner.
 
-And the $20,000/month Active Case — ongoing operator presence. The split is $8k company, $4k rep, $3k partner — every single month it renews.
+And the $20,000/month Active Case — ongoing operator presence. The split is $13k company, $4k rep, $3k partner — every single month it renews.
 
 That active case is the prize. One $15k active case pays you $4,000 a month for as long as it lives. Three of those and you don't need anything else.
 
 But — and write this down — flagship deals come from disciplined $2,500 diagnostics. Skip the small ticket and you'll starve waiting for whales.`,
         beats: [
-          "$18k diagnostic split: $10k / $5k / $3k",
-          "$15k active case split: $8k / $4k / $3k MONTHLY",
+          "$23.5k diagnostic split: $15.5k / $5k / $3k",
+          "$20k active case split: $13k / $4k / $3k MONTHLY",
           "Flagships are earned by closing diagnostics first",
         ],
         followUp: "Show them the Commissions tab in the portal. Have them calculate what 2 active cases + 1 diagnostic pays them in a month.",

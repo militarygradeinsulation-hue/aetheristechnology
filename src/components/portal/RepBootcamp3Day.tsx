@@ -160,16 +160,16 @@ const PROGRAM: DayPlan[] = [
           },
           {
             id: "d1-s2-2",
-            label: "Memorize the $18k Diagnostic + $15k/mo Active Case flagship economics",
+            label: "Memorize the $23.5k Diagnostic + $20k/mo Active Case flagship economics",
             expand: (
               <div className="space-y-3">
-                <Block title="Flagship Diagnostic — $18,000 fixed">
+                <Block title="Flagship Diagnostic — $23,500 fixed">
                   Deep forensic engagement for $5M-$50M operators. Full systems rebuild plan + 90-day execution roadmap.
-                  <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $10k / Rep $5k / Partner $3k</div>
+                  <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $15.5k / Rep $5k / Partner $3k</div>
                 </Block>
                 <Block title="Flagship Active Case — $20,000 / month">
                   Ongoing operator partnership. Embedded forensic + execution muscle.
-                  <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $8k / Rep $4k / Partner $3k — EVERY month the client stays</div>
+                  <div className="mt-2 font-mono text-[11px] text-muted-foreground">Split: Company $13k / Rep $4k / Partner $3k — EVERY month the client stays</div>
                 </Block>
                 <Block title="Why this matters to you">
                   One flagship close = $5k upfront + $4k/mo recurring. Three retained clients = $12k/mo personal recurring on top of new business.
@@ -404,7 +404,7 @@ const PROGRAM: DayPlan[] = [
         tasks: [
           {
             id: "d3-s3-1",
-            label: "Memorize fixed-dollar split: $18k Diagnostic = $5k Rep / $3k Partner / $10k Company",
+            label: "Memorize fixed-dollar split: $23.5k Diagnostic = $5k Rep / $3k Partner / $15.5k Company",
             expand: (
               <Block title="What this means for you">
                 Every flagship Diagnostic you close puts <strong>$5,000</strong> in your pocket. One close per month = $60k/yr from Diagnostics alone, before active cases stack.
@@ -413,7 +413,7 @@ const PROGRAM: DayPlan[] = [
           },
           {
             id: "d3-s3-2",
-            label: "Memorize Active Case split: $15k/mo = $4k Rep / $3k Partner / $8k Company EVERY month",
+            label: "Memorize Active Case split: $20k/mo = $4k Rep / $3k Partner / $13k Company EVERY month",
             expand: (
               <Block title="The compounding math">
                 <Bullets items={[

@@ -440,7 +440,7 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
               const toolIds = pickToolsForNode(n);
               const tools = toolIds
                 .map((id) => SHOP_TOOLS.find((t) => t.id === id))
-                .filter((t): t is (typeof SHOP_TOOLS)[number] => !!t && !t.internalOnly && t.priceCents != null);
+                .filter((t): t is (typeof SHOP_TOOLS)[number] => !!t && !t.internalOnly);
               if (!tools.length) return null;
               return (
                 <div className="mt-3 pt-2 border-t border-amber/25">
