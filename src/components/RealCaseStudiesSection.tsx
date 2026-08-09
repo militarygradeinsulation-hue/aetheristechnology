@@ -187,7 +187,7 @@ const CaseModal: React.FC<{ c: RealCase; onClose: () => void }> = ({ c, onClose 
 export const RealCaseStudiesSection: React.FC = () => {
   const [active, setActive] = useState<RealCaseCategory | 'all'>('all');
   const [query, setQuery] = useState('');
-  const [expanded, setExpanded] = useState(false);
+  const [selected, setSelected] = useState<RealCase | null>(null);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: REAL_CASES.length };
