@@ -74,15 +74,18 @@ const LeakLanderPage: React.FC = () => {
           <img
             src={aetherisWordmark.url}
             alt="Aetheris — tools for professionals big tech companies forgot"
-            className="w-[115%] max-w-none -mx-[7.5%] sm:w-full sm:max-w-4xl sm:mx-auto h-auto select-none mix-blend-screen"
+            className="w-[130%] max-w-none -mx-[15%] sm:w-[115%] sm:max-w-none sm:-mx-[7.5%] h-auto select-none mix-blend-screen"
             style={{
               WebkitMaskImage:
-                "radial-gradient(120% 100% at 50% 65%, #000 45%, rgba(0,0,0,0.75) 62%, transparent 88%)",
+                "linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)",
               maskImage:
-                "radial-gradient(120% 100% at 50% 65%, #000 45%, rgba(0,0,0,0.75) 62%, transparent 88%)",
+                "linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)",
+              WebkitMaskComposite: "source-in",
+              maskComposite: "intersect",
             }}
             loading="eager"
           />
+
         }
         description=""
       >
