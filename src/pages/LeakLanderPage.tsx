@@ -127,27 +127,47 @@ const LeakLanderPage: React.FC = () => {
             attached to it.
           </p>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr] md:items-stretch text-left">
+          <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr] md:items-start text-left">
             <div className="flex flex-col items-center md:items-start gap-4">
               <a
                 href={methodologyPdf.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block w-[200px] overflow-hidden rounded-lg border border-amber/25 bg-card/40 shadow-2xl transition-transform hover:-translate-y-1"
                 aria-label="Open The Aetheris Methodology PDF"
+                className="group block h-[290px] w-[210px] shrink-0"
+                style={{ perspective: 1200 }}
               >
-                <object
-                  data={`${methodologyPdf.url}#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0`}
-                  type="application/pdf"
-                  className="pointer-events-none h-[260px] w-full"
-                  aria-label="Methodology cover"
+                <div
+                  className="relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)] transition-transform duration-300 group-hover:-translate-y-1"
+                  style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
                 >
-                  <div className="flex h-[260px] items-center justify-center p-6 text-center font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                    Aetheris Methodology PDF
+                  <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/70 via-amber/25 to-transparent" />
+                  <div className="pointer-events-none absolute inset-y-0 left-6 w-px bg-amber/25" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/[0.06] to-transparent" />
+
+                  <div className="relative flex h-full flex-col justify-between pl-9 pr-4 py-5">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <p className="font-case text-[9px] uppercase tracking-[0.2em] text-amber">Methodology</p>
+                        <span className="rounded-sm border border-amber/40 px-1.5 py-0.5 font-case text-[8px] tracking-widest text-amber/80">
+                          AM
+                        </span>
+                      </div>
+                      <div className="mt-3 h-px w-10 bg-amber/50" />
+                      <h3 className="mt-3 font-display text-lg font-bold leading-snug">
+                        The Aetheris Methodology
+                      </h3>
+                    </div>
+                    <div>
+                      <p className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
+                        Field document
+                      </p>
+                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors group-hover:bg-amber/10">
+                        Open PDF
+                      </span>
+                    </div>
                   </div>
-                </object>
-                <div className="border-t border-border/60 px-3 py-2 font-case text-[10px] uppercase tracking-[0.24em] text-amber/90">
-                  Open document
                 </div>
               </a>
 
@@ -159,6 +179,7 @@ const LeakLanderPage: React.FC = () => {
                 Download PDF
               </a>
             </div>
+
 
             <MethodologyAI />
           </div>
