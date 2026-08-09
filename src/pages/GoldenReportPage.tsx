@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Background } from "@/components/Background";
-import { Navbar } from "@/components/Navbar";
+import { LanderNavbar } from "@/components/lander/LanderNavbar";
 import { Footer } from "@/components/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { SEOHead } from "@/components/SEOHead";
@@ -35,7 +35,7 @@ const GoldenReportPage: React.FC = () => {
       />
       <Background />
       <div className="relative z-10">
-        <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+        <LanderNavbar minimal />
         <div className="pt-24 px-4 pb-16">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">

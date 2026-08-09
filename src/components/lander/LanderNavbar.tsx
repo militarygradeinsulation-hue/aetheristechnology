@@ -60,7 +60,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
         >
           <LogoMark />
           <div className="flex flex-1 flex-row items-center justify-center gap-1">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -119,7 +119,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                 exit={{ opacity: 0, y: -10 }}
                 className="absolute inset-x-0 top-full mt-2 z-50 flex w-full flex-col items-start gap-3 rounded-xl border border-border bg-background/95 p-6 shadow-2xl backdrop-blur-xl"
               >
-                {NAV_ITEMS.map((item) => (
+                {navItems.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
