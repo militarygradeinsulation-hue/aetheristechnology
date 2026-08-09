@@ -31,7 +31,9 @@ const LogoMark: React.FC = () => (
 const pillBase =
   "px-4 py-2 rounded-full text-[11px] font-case font-bold tracking-wider uppercase cursor-pointer transition-all duration-200 inline-block text-center hover:-translate-y-0.5";
 
-export const LanderNavbar: React.FC = () => {
+/** `minimal` renders only a Home link (used on the Golden Report page). */
+export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false }) => {
+  const navItems = minimal ? [{ name: "Home", to: "/" }] : NAV_ITEMS;
   const { scrollY } = useScroll();
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
