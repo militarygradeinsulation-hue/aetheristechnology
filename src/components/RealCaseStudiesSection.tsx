@@ -29,9 +29,15 @@ const CategoryPill: React.FC<{
   </button>
 );
 
+const businessOf = (title: string) => title.split(/\s[—–-]\s/)[0].trim();
+
 const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
   const [showMore, setShowMore] = useState(false);
   const credit = CASE_CREDITS[c.id];
+  const business = businessOf(c.title);
+  const avatar = credit
+    ? `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(credit.name)}&backgroundColor=transparent`
+    : null;
   return (
     <Card className="flex flex-col h-full border border-border/60 bg-card/40 backdrop-blur-sm transition-colors hover:border-amber/50">
       <CardHeader className="pb-3 space-y-3">
@@ -43,18 +49,35 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
             {c.category}
           </span>
         </div>
+
+        <div className="flex items-start gap-3">
+          {avatar && (
+            <img
+              src={avatar}
+              alt={`${credit!.name}, client contact`}
+              loading="lazy"
+              className="w-14 h-14 rounded-full border border-amber/40 bg-background/60 shrink-0 object-cover"
+            />
+          )}
+          <div className="min-w-0">
+            <CardTitle className="font-forensic text-xl font-bold leading-tight truncate">
+              {credit ? credit.name : business}
+            </CardTitle>
+            <div className="font-forensic text-base font-semibold text-amber leading-snug">
+              {business}
+            </div>
+            {credit && (
+              <CardDescription className="font-case text-[10px] uppercase tracking-widest mt-1">
+                Worked together // {credit.year}
+              </CardDescription>
+            )}
+          </div>
+        </div>
+
         <div>
           <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Result</div>
-          <div className="font-forensic text-2xl font-bold text-amber leading-tight">{c.outcome}</div>
+          <div className="font-forensic text-sm font-bold text-amber leading-snug">{c.outcome}</div>
         </div>
-        <CardTitle className="font-forensic text-base font-bold leading-snug">{c.title}</CardTitle>
-        {credit && (
-          <CardDescription className="font-case text-[10px] uppercase tracking-widest">
-            Worked with <span className="text-amber">{credit.name}</span>
-            <span className="opacity-50"> // </span>
-            <span className="text-foreground/80">{credit.year}</span>
-          </CardDescription>
-        )}
       </CardHeader>
 
       <CardContent className="pt-0 pb-4 space-y-3">
