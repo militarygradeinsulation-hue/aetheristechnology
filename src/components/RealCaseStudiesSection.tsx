@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
+import { portraitFor } from '@/data/casePortraits';
+
 
 
 
@@ -35,9 +37,8 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
   const [showMore, setShowMore] = useState(false);
   const credit = CASE_CREDITS[c.id];
   const business = businessOf(c.title);
-  const avatar = credit
-    ? `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(credit.name)}&backgroundColor=transparent`
-    : null;
+  const avatar = credit ? portraitFor(credit.name) : null;
+
   return (
     <Card className="flex flex-col h-full border border-border/60 bg-card/40 backdrop-blur-sm transition-colors hover:border-amber/50">
       <CardHeader className="pb-3 space-y-3">
