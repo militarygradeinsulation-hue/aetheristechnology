@@ -72,6 +72,9 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
           <span className="text-xs font-normal text-muted-foreground ml-2 font-mono">one-time</span>
         )}
       </div>
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
+        {t.timeline}
+      </div>
 
       <p className="text-sm text-foreground/80 leading-relaxed mb-3">{t.headline}</p>
 
@@ -90,8 +93,26 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
         ))}
       </ul>
 
+      {t.credit && (
+        <div
+          className={`font-mono text-[10px] uppercase tracking-[0.18em] mb-3 ${
+            crimson ? "text-crimson" : "text-amber"
+          }`}
+        >
+          {t.credit}
+        </div>
+      )}
+
       {!compact && (
-        <p className="text-xs text-muted-foreground italic mb-4">For: {t.useCase}</p>
+        <div className="mb-4 space-y-2">
+          <p className="text-xs text-muted-foreground italic">For you if: {t.useCase}</p>
+          <div className="border-l-2 border-amber/60 pl-3">
+            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-amber mb-0.5">
+              You leave with
+            </div>
+            <p className="text-[13px] text-foreground/90 leading-snug">{t.outcome}</p>
+          </div>
+        </div>
       )}
 
       <div className="mt-auto">
