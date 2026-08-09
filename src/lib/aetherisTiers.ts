@@ -24,14 +24,20 @@ export type AetherisTier = {
   amountCents: number;
   cadence: "free" | "one-time" | "monthly";
   priceLabel: string;
-  /** Short positioning line. */
+  /** Delivery expectation, e.g. "about a week". */
+  timeline: string;
+  /** Short positioning line. Says what changed versus the rung below. */
   headline: string;
   /** Who this is for. */
   useCase: string;
-  /** Capabilities added AT this tier (not inherited). */
+  /** The closing line: what the buyer walks away holding. */
+  outcome: string;
+  /** Capabilities added AT this tier (not inherited). Outcomes, not product names. */
   adds: string[];
   /** Inheritance line, empty for the first two rungs. */
   inherits?: string;
+  /** Credit note, stated once per tier where it applies. */
+  credit?: string;
   flagship?: boolean;
   /** Cannot be bought cold. */
   qualificationOnly?: boolean;
@@ -47,13 +53,17 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 0,
     cadence: "free",
     priceLabel: "$0",
-    headline: "One live scan of one URL. A directional Revenue Score and one real named leak.",
+    timeline: "about 6 minutes · no call",
+    headline:
+      "We scan one page of your site live and show you one thing that is costing you money.",
     useCase: "You want proof this is real before you talk to anyone.",
+    outcome: "One specific problem you did not know you had.",
     adds: [
-      "Website Leak Scanner, limited pass",
-      "Directional Revenue Score",
-      "One real named leak you can share internally",
-      "Directional dollar range where the scan data supports it",
+      "One live scan of one URL",
+      "Your Revenue Score, 0 to 100",
+      "One named leak, in plain language, with the evidence behind it",
+      "A dollar range on that leak where the data supports it",
+      "A PDF you can forward to your partner without explaining it first",
     ],
     ctaLabel: "Run the free scan",
     ctaHref: "/scan",
@@ -65,14 +75,20 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 750000,
     cadence: "one-time",
     priceLabel: "$7,500",
-    headline: "The diagnosis triangle. You know something is wrong. This names it.",
-    useCase: "Owner knows something is wrong but cannot name it.",
+    timeline: "about a week",
+    headline:
+      "Three instruments run together to name what is actually wrong. Any one alone gives you a symptom. Together they give you a diagnosis.",
+    useCase: "You know something is wrong but cannot name it, and you are tired of guessing.",
+    outcome:
+      "The problem named in writing, with evidence, from someone who has fixed it before.",
     adds: [
-      "Website Leak Scanner, full pass — structural leaks and what is broken in the machine",
-      "Brand Contradictions — where your messaging fights itself",
-      "Friction Audit — the exact language and CTA friction costing you deals",
-      "Leak findings memo plus an operator walkthrough",
+      "Full site scan — every structural leak across your public surface, not just one page",
+      "Message conflict report — every place your site contradicts itself, your sales pitch, or your delivery promise",
+      "Friction language audit — the exact words, forms, and buttons that make buyers hesitate or leave",
+      "Written findings memo — a verdict you can hand to your team, not a checklist",
+      "30-minute walkthrough with the operator who ran it",
     ],
+    credit: "Full $7,500 credits toward any higher tier",
     ctaLabel: "Talk to an operator",
     ctaHref: "/book",
   },
@@ -83,14 +99,18 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 1000000,
     cadence: "one-time",
     priceLabel: "$10,000",
-    headline: "Diagnosis plus the words and cadence your team uses Monday morning.",
-    useCase: "Founder with a team but no consistent sales or content system.",
+    timeline: "about two weeks",
+    headline:
+      "Signal Pack tells you what is broken. Revenue Pack gives your team the words to fix it, built from your leaks and not from a template.",
+    useCase: "You have a team but no system. Every sales call is improvised and every post is a guess.",
+    outcome: "What your people say Monday morning, written down.",
     inherits: "Everything in Signal Pack",
     adds: [
-      "Strategic Questions",
-      "Sales Scripts",
-      "Follow-Up Sequences",
-      "Content Calendar",
+      "Sales scripts — discovery through close, in real language, with objection handling built from the contradictions we found on your site",
+      "Follow-up sequences — the cadence you are not running, aimed at the response-time gap that shows up in almost every audit",
+      "Strategic question set — the questions that make unqualified buyers disqualify themselves before they waste your team's week",
+      "30-day content calendar — built around your specific leaks, so marketing stops running on instinct",
+      "Two 45-minute working sessions to install it with your team",
     ],
     ctaLabel: "Talk to an operator",
     ctaHref: "/book",
@@ -102,20 +122,22 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 1500000,
     cadence: "one-time",
     priceLabel: "$15,000",
-    headline: "You stop receiving outputs and start running the instruments yourself.",
-    useCase: "Business consolidating multiple vendors and disconnected tools into one operating system.",
+    timeline: "about 3 weeks",
+    headline:
+      "You stop receiving reports and start running the instruments yourself. This is where you own the loop.",
+    useCase: "You are paying five vendors for four tools that do not talk to each other.",
+    outcome: "One system you operate yourself, replacing the stack you are currently renting.",
     inherits: "Everything in Revenue Pack",
     adds: [
-      "Detective Mode",
-      "Forensic Scan (All)",
-      "Head-to-Head Report",
-      "Social Content Studio",
-      "Image Studio",
-      "Content Engine",
-      "All-In-One Content",
-      "Easy Mode",
-      "Full Aetheris Tech Suite access — diagnose, fix, re-scan, publish, measure",
+      "Run the full forensic battery yourself, on demand — re-scan monthly and watch your score move",
+      "Deep-dive any single surface when the broad scan flags something worth investigating",
+      "Scan your competitors — run the same forensic pass on a rival and see their leaks priced out",
+      "Content production stack — social, imagery, and long-form built to your voice without a separate agency",
+      "12-month strategy blueprint, priced by leak, so you know the order to fix things in",
+      "Lead-nurture automation installed, not just designed",
+      "Full Aetheris Tech Suite access — the whole loop: diagnose, fix, re-scan, publish, measure",
     ],
+    credit: "Credits 1:1 toward the Active Case Retainer",
     ctaLabel: "Talk to an operator",
     ctaHref: "/book",
   },
@@ -126,18 +148,21 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 2350000,
     cadence: "one-time",
     priceLabel: "$23,500",
+    timeline: "21 days · fit call required",
     headline:
-      "An operator runs the systems inside your business for 21 days with CRM, pipeline, and internal data connected. Modeled loss becomes measured loss.",
-    useCase: "Business needing a board-ready quantified leak ledger before scaling, hiring, or raising.",
+      "Everything above analyzes your public surface. This is the only tier where an operator works inside your business, with your CRM, pipeline, and internal data connected. Estimated loss becomes measured loss.",
+    useCase: "You need a board-ready number before you scale, hire, or raise.",
+    outcome:
+      "A signed, dated, defensible ledger of what your business is losing and exactly what it costs to stop.",
     inherits: "Everything in Operator Suite",
     adds: [
-      "Golden Report — the synthesis case file, never sold separately",
-      "Nexus IQ",
-      "Reciprocation Gift",
-      "AI Readiness Checklist",
-      "Playbook Generator",
-      "Every remaining Aetheris Universe instrument",
-      "21 days of operator time inside your business",
+      "21 days of operator time inside your ops, sales, and marketing",
+      "The Golden Report — the full case file, every leak named, evidenced, ranked, and priced. Never sold separately, because it is the synthesis of every other instrument's output",
+      "Quantified leak ledger — a dollar figure next to every finding, ranked by exposure",
+      "Account intelligence on your own pipeline — the forensic method pointed outward at your target accounts",
+      "Automation readiness scoring — where AI actually pays, and where it is theater",
+      "Operating playbooks your team runs after we leave",
+      "Implementation plan handoff — do it yourself, or hand it back to us",
     ],
     flagship: true,
     ctaLabel: "Request a fit call",
@@ -150,21 +175,28 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     amountCents: 2000000,
     cadence: "monthly",
     priceLabel: "$20,000/mo",
+    timeline: "3-month minimum · requires a completed Diagnostic",
     headline:
-      "Everything, continuously, plus priority builds. Monthly rescans track recovery and the Leak Register becomes a living document of dollars recovered versus remaining.",
-    useCase: "Post-Diagnostic businesses that want recovery execution and ongoing measurement.",
+      "We stop advising and start running it. Every month we show you what got recovered and what is left.",
+    useCase:
+      "The Diagnostic named the leaks and you would rather we closed them than hand it to an already-overloaded team.",
+    outcome:
+      "Monthly proof of recovery, in dollars, against a baseline we established together.",
     inherits: "Everything in the 21-Day Diagnostic",
     adds: [
-      "Monthly rescans and recovery tracking",
-      "Living Leak Register — recovered versus remaining",
-      "Priority builds via Tool Generator and the Aetheris build stack",
-      "Standing operator capacity",
+      "Weekly execution sprints across sales, content, ops, and tech",
+      "Monthly re-scans tracking recovery against your original baseline",
+      "Living Leak Register — dollars recovered versus dollars remaining, updated monthly",
+      "Priority builds — when you need an instrument that does not exist yet, we build it",
+      "Standing operator capacity and direct access, not an account manager",
+      "Pause or cancel any month — no long lock-in",
     ],
     qualificationOnly: true,
     ctaLabel: "Diagnostic clients only",
     ctaHref: "/book",
   },
 ];
+
 
 export function tier(id: TierId): AetherisTier {
   return AETHERIS_TIERS.find(t => t.id === id) ?? AETHERIS_TIERS[0];
