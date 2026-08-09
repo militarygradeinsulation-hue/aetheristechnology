@@ -55,7 +55,7 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
           {avatar && (
             <img
               src={avatar}
-              alt={`${credit!.name}, client contact`}
+              alt={`${credit?.name ?? business}, client contact`}
               loading="lazy"
               className="w-14 h-14 rounded-full border border-amber/40 bg-background/60 shrink-0 object-cover"
             />
