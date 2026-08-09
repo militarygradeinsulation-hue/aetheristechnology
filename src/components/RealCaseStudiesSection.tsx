@@ -216,8 +216,10 @@ export const RealCaseStudiesSection: React.FC = () => {
     });
   }, [active, query]);
 
-  const INITIAL = 6;
-  const visible = expanded ? filtered : filtered.slice(0, INITIAL);
+  const rows = useMemo(() => {
+    const per = Math.ceil(filtered.length / 3) || 1;
+    return [filtered.slice(0, per), filtered.slice(per, per * 2), filtered.slice(per * 2)];
+  }, [filtered]);
 
   return (
     <section className="py-16 px-4 scroll-mt-24" id="real-case-files">
