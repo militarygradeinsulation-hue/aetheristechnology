@@ -35,8 +35,21 @@ export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
   }, []);
 
   return (
-    <section className="relative w-full min-h-[78vh] md:min-h-[88vh] bg-background text-foreground overflow-hidden flex flex-col justify-center items-center py-24 px-6">
-      <div className="absolute inset-0 z-0 pointer-events-none">
+    <section className="relative w-full min-h-[78vh] md:min-h-[88vh] text-foreground overflow-hidden flex flex-col justify-center items-center py-24 px-6">
+      {/* Ambient field behind the orb: grid, corner brackets, drifting motes */}
+      <div aria-hidden className="ambient-bg absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="ambient-grid absolute inset-0" />
+        <div className="ambient-corner absolute left-6 top-6 border-l border-t" />
+        <div className="ambient-corner absolute right-6 top-6 border-r border-t" />
+        <div className="ambient-corner absolute bottom-6 left-6 border-b border-l" />
+        <div className="ambient-corner absolute bottom-6 right-6 border-b border-r" />
+        <div className="ambient-mote" style={{ left: "14%", top: "24%", animationDelay: "0s" }} />
+        <div className="ambient-mote" style={{ left: "80%", top: "30%", animationDelay: "1.4s" }} />
+        <div className="ambient-mote" style={{ left: "30%", top: "70%", animationDelay: "2.6s" }} />
+        <div className="ambient-mote" style={{ left: "68%", top: "78%", animationDelay: "3.8s" }} />
+      </div>
+
+      <div className="absolute inset-0 z-[1] pointer-events-none">
         {allowMotion ? (
           <Suspense fallback={<StaticField />}>
             <GenerativeArtScene />
@@ -46,7 +59,7 @@ export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
         )}
       </div>
 
-      <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-background via-background/60 to-background/20" />
+      <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-background/85 via-background/35 to-transparent" />
 
       <div className="relative z-20 flex flex-col items-center justify-center max-w-3xl text-center mx-auto space-y-6">
         {eyebrow && (
