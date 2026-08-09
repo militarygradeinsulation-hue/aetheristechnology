@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
-import { portraitFor } from '@/data/casePortraits';
+import { portraitForCase } from '@/data/casePortraits';
 
 
 
@@ -37,7 +37,7 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
   const [showMore, setShowMore] = useState(false);
   const credit = CASE_CREDITS[c.id];
   const business = businessOf(c.title);
-  const avatar = credit ? portraitFor(credit.name) : null;
+  const avatar = portraitForCase(c.id);
 
   return (
     <Card className="flex flex-col h-full border border-border/60 bg-card/40 backdrop-blur-sm transition-colors hover:border-amber/50">
