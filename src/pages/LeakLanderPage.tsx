@@ -11,6 +11,8 @@ import { TierLadder } from "@/components/TierLadder";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
 import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
+import { MethodologyAI } from "@/components/lander/MethodologyAI";
+
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 import methodologyPdf from "@/assets/aetheris-methodology.pdf.asset.json";
