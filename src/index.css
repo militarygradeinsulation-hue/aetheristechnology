@@ -1043,3 +1043,21 @@ body { background-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .wordmark-storm { animation: none; }
 }
+
+/* Case capsule marquee rows */
+@keyframes case-marquee-left {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes case-marquee-right {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+.case-marquee-left  { animation: case-marquee-left  var(--case-marquee-duration, 60s) linear infinite; }
+.case-marquee-right { animation: case-marquee-right var(--case-marquee-duration, 60s) linear infinite; }
+.case-marquee-row:hover .case-marquee-left,
+.case-marquee-row:hover .case-marquee-right { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .case-marquee-left, .case-marquee-right { animation: none; }
+}
