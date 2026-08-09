@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
+import { portraitFor } from '@/data/casePortraits';
+
 
 
 
