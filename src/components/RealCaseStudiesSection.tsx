@@ -278,9 +278,9 @@ export const RealCaseStudiesSection: React.FC = () => {
             <div className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10 bg-gradient-to-r from-background to-transparent" />
             <div className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10 bg-gradient-to-l from-background to-transparent" />
             <div className="space-y-3">
-              <MarqueeRow cases={rows[0]} duration={70} onSelect={setSelected} />
-              <MarqueeRow cases={rows[1]} duration={90} reverse onSelect={setSelected} />
-              <MarqueeRow cases={rows[2]} duration={80} onSelect={setSelected} />
+              <MarqueeRow cases={rows[0]} duration={120} onSelect={setSelected} />
+              <MarqueeRow cases={rows[1]} duration={140} reverse onSelect={setSelected} />
+              <MarqueeRow cases={rows[2]} duration={130} onSelect={setSelected} />
             </div>
           </div>
         )}
