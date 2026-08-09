@@ -35,9 +35,16 @@ export const CaseFilePreview: React.FC = () => (
       </div>
     </div>
 
+    <div className="mb-6 rounded-lg border border-border bg-secondary/30 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-case text-[10px] uppercase text-muted-foreground">Leak Trend (12 mo)</p>
+        <p className="font-case text-[10px] uppercase text-crimson">Compounding</p>
+      </div>
+      <LeakChart />
+    </div>
+
     <div className="space-y-3">
       <p className="font-case text-[10px] uppercase text-muted-foreground">Highest-Priority Findings</p>
-      {FINDINGS.map((f) => (
         <div
           key={f.label}
           className="flex items-center justify-between rounded bg-secondary/40 px-3 py-2.5 border border-border/50 hover:border-border transition-colors"
