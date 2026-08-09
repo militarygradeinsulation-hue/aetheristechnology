@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
+import { CASE_CREDITS } from '@/data/caseCredits';
 
 
 
@@ -29,6 +30,7 @@ const CategoryPill: React.FC<{
 
 const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
   const [showMore, setShowMore] = useState(false);
+  const credit = CASE_CREDITS[c.id];
   return (
     <div className="forensic-tile rounded-sm border border-amber/25 p-4 flex flex-col h-full hover:border-amber/60 transition-colors">
       <div className="flex items-center justify-between gap-2 mb-2">
@@ -48,6 +50,14 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
       </div>
 
       <h3 className="font-forensic text-base font-bold leading-snug mb-2">{c.title}</h3>
+
+      {credit && (
+        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
+          Worked with <span className="text-amber">{credit.name}</span>
+          <span className="opacity-50"> // </span>
+          <span className="text-foreground/80">{credit.year}</span>
+        </div>
+      )}
 
       <p className="text-sm text-foreground/80 leading-snug mb-3">
         <span className="text-crimson font-semibold">Problem:</span> {c.problem}
@@ -115,7 +125,9 @@ export const RealCaseStudiesSection: React.FC = () => {
         c.solution.toLowerCase().includes(q) ||
         c.outcome.toLowerCase().includes(q) ||
         c.source.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q)
+        c.category.toLowerCase().includes(q) ||
+        (CASE_CREDITS[c.id]?.name.toLowerCase().includes(q) ?? false) ||
+        String(CASE_CREDITS[c.id]?.year ?? '').includes(q)
       );
     });
   }, [active, query]);
