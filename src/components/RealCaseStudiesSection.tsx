@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
+import { CASE_RECOVERY } from '@/data/caseRecovery';
 import { portraitForCase } from '@/data/casePortraits';
 
 const CategoryPill: React.FC<{
@@ -33,6 +34,7 @@ const Capsule: React.FC<{ c: RealCase; onClick: () => void }> = ({ c, onClick })
   const credit = CASE_CREDITS[c.id];
   const business = businessOf(c.title);
   const avatar = portraitForCase(c.id);
+  const recovery = CASE_RECOVERY[c.id];
 
   return (
     <button
@@ -60,6 +62,11 @@ const Capsule: React.FC<{ c: RealCase; onClick: () => void }> = ({ c, onClick })
           {business}
           {credit ? ` // ${credit.year}` : ''}
         </span>
+        {recovery && (
+          <span className="mt-0.5 block font-case text-[10px] uppercase tracking-widest text-amber whitespace-nowrap">
+            Recovered {recovery.amount}
+          </span>
+        )}
       </span>
     </button>
   );
@@ -145,6 +152,20 @@ const CaseModal: React.FC<{ c: RealCase; onClose: () => void }> = ({ c, onClose 
           </div>
         </div>
 
+        {CASE_RECOVERY[c.id] && (
+          <div className="mt-5 rounded-sm border border-amber/40 bg-amber/10 px-4 py-3">
+            <div className="font-case text-[10px] uppercase tracking-widest text-amber/80">
+              Money recovered
+            </div>
+            <div className="font-forensic text-2xl font-bold text-amber leading-tight">
+              {CASE_RECOVERY[c.id].amount}
+            </div>
+            <p className="mt-1 text-xs text-foreground/80 leading-relaxed">
+              {CASE_RECOVERY[c.id].basis}
+            </p>
+          </div>
+        )}
+
         <div className="mt-5 space-y-3 text-sm text-foreground/85">
           <p>
             <span className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">Result</span>
@@ -210,7 +231,8 @@ export const RealCaseStudiesSection: React.FC = () => {
         c.source.toLowerCase().includes(q) ||
         c.category.toLowerCase().includes(q) ||
         (CASE_CREDITS[c.id]?.name.toLowerCase().includes(q) ?? false) ||
-        String(CASE_CREDITS[c.id]?.year ?? '').includes(q)
+        String(CASE_CREDITS[c.id]?.year ?? '').includes(q) ||
+        (CASE_RECOVERY[c.id]?.amount.toLowerCase().includes(q) ?? false)
       );
     });
   }, [active, query]);
