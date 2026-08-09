@@ -125,7 +125,9 @@ export const RealCaseStudiesSection: React.FC = () => {
         c.solution.toLowerCase().includes(q) ||
         c.outcome.toLowerCase().includes(q) ||
         c.source.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q)
+        c.category.toLowerCase().includes(q) ||
+        (CASE_CREDITS[c.id]?.name.toLowerCase().includes(q) ?? false) ||
+        String(CASE_CREDITS[c.id]?.year ?? '').includes(q)
       );
     });
   }, [active, query]);
