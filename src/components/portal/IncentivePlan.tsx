@@ -8,7 +8,7 @@ import { DollarSign, Users, Calendar, Megaphone, Copy, Sparkles, Trophy, Target 
 /**
  * IncentivePlan, Aetheris Referral & Lead-Gen Incentive Plan
  * Calibrated to the real flagship economics:
- *   • 21-Day Revenue Diagnostic, $23,500  → Rep $5,000 / Partner $3,000 / Company $10,000
+ *   • 21-Day Revenue Diagnostic, $23,500  → Rep $5,000 / Partner $3,000 / Company $15,500
  *   • Active Case , $20,000/mo → Rep $4,000/mo / Partner $3,000/mo / Company $13,000/mo
  *   • Existing referral overlay: $500 onboard + $7,000 first-close + $500/sale override 12 months
  *
@@ -105,7 +105,7 @@ export function IncentivePlan() {
           <div className="rounded-lg border border-border/60 bg-card/50 p-4">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">21-Day Revenue Diagnostic</div>
             <div className="font-mono text-2xl text-foreground mt-1">$23,500 flat</div>
-            <div className="mt-2 text-sm">Rep: <span className="font-mono text-amber">$5,000</span> · Partner: <span className="font-mono">$3,000</span> · Company: <span className="font-mono">$10,000</span></div>
+            <div className="mt-2 text-sm">Rep: <span className="font-mono text-amber">$5,000</span> · Partner: <span className="font-mono">$3,000</span> · Company: <span className="font-mono">$15,500</span></div>
           </div>
           <div className="rounded-lg border border-border/60 bg-card/50 p-4">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">Active Case</div>

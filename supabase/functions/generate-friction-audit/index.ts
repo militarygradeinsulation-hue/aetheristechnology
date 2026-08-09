@@ -39,21 +39,59 @@ serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: formattedUrl,
-        formats: ["markdown"],
-        onlyMainContent: false,
-      }),
-    });
+    const firecrawlScrape = async (waitFor?: number) => {
+      const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          formats: ["markdown"],
+          onlyMainContent: false,
+          ...(waitFor ? { waitFor, location: { country: "US" } } : {}),
+        }),
+        signal: AbortSignal.timeout(45_000),
+      });
+      const data = await res.json().catch(() => ({}));
+      return data?.data?.markdown || data?.markdown || "";
+    };
 
-    const scrapeData = await scrapeRes.json();
-    const siteContent = scrapeData?.data?.markdown || scrapeData?.markdown || "";
+    // Strip HTML → rough text, used only by the direct-fetch fallback.
+    const htmlToText = (html: string) =>
+      html
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    let siteContent = "";
+    for (const attempt of [0, 1]) {
+      try {
+        siteContent = await firecrawlScrape(attempt === 1 ? 3000 : undefined);
+        if (siteContent && siteContent.length >= 50) break;
+        console.warn(`Firecrawl attempt ${attempt + 1} empty, retrying`);
+      } catch (e) {
+        console.warn(`Firecrawl attempt ${attempt + 1} failed:`, e instanceof Error ? e.message : e);
+      }
+    }
+
+    if (!siteContent || siteContent.length < 50) {
+      console.warn("Firecrawl exhausted, falling back to direct fetch");
+      try {
+        const direct = await fetch(formattedUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; AetherisBot/1.0)" },
+          signal: AbortSignal.timeout(20_000),
+        });
+        if (direct.ok) siteContent = htmlToText(await direct.text());
+      } catch (e) {
+        console.warn("Direct fetch fallback failed:", e instanceof Error ? e.message : e);
+      }
+    }
+
 
     if (!siteContent || siteContent.length < 50) {
       return new Response(JSON.stringify({ error: "Could not extract enough content from the website." }), {
