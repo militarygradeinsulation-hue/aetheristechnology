@@ -70,12 +70,14 @@ const LeakLanderPage: React.FC = () => {
       <AnomalousMatterHero
         eyebrow="Revenue Leak Audit"
         title={
-          <>
-            Find where your revenue
-            <br className="hidden sm:block" /> is <span className="text-amber">leaking</span>.
-          </>
+          <img
+            src={aetherisWordmark.url}
+            alt="Aetheris — tools for professionals big tech companies forgot"
+            className="w-full max-w-2xl mx-auto h-auto select-none"
+            loading="eager"
+          />
         }
-        description="Your business is leaking. You just cannot see it from the inside. We run the forensic scan, name every leak in writing, and hand you the plan to close it."
+        description=""
       >
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
