@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { name: "Leak Audit", to: "/leak-audit" },
+  { name: "Leak Audit", to: "/#pricing" },
   { name: "Golden Report", to: "/golden-report" },
   { name: "Partners", to: "/partners" },
 ];
@@ -38,6 +38,22 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  /** Anchor links (e.g. /#pricing) smooth-scroll instead of hard-jumping. */
+  const handleNav = (to: string) => (e: React.MouseEvent) => {
+    if (!to.includes("#")) return;
+    const id = to.split("#")[1];
+    e.preventDefault();
+    setOpen(false);
+    const scrollTo = () =>
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (pathname === "/") scrollTo();
+    else {
+      navigate("/");
+      window.setTimeout(scrollTo, 350);
+    }
+  };
 
   useMotionValueEvent(scrollY, "change", (latest) => setVisible(latest > 50));
 
@@ -64,6 +80,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
               <Link
                 key={item.to}
                 to={item.to}
+                onClick={handleNav(item.to)}
                 className={cn(
                   "relative rounded-full px-3 py-1.5 text-[11px] font-case uppercase tracking-widest transition-colors",
                   pathname === item.to
@@ -123,7 +140,10 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                   <Link
                     key={item.to}
                     to={item.to}
-                    onClick={() => setOpen(false)}
+                    onClick={(e) => {
+                      handleNav(item.to)(e);
+                      setOpen(false);
+                    }}
                     className="block w-full py-1 text-sm font-case uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {item.name}
