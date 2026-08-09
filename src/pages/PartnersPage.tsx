@@ -180,10 +180,11 @@ const PartnersPage: React.FC = () => {
                 size="lg"
                 className="mt-7 bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                <a href={BOOK_MEETING_URL}>
-                  Become a Partner
+                <a href={PARTNER_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                  Book an appointment
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </a>
+
               </Button>
               <div className="mt-7 pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm">
                 <a
