@@ -275,29 +275,21 @@ export const RealCaseStudiesSection: React.FC = () => {
             </p>
           </div>
         ) : (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {visible.map((c) => (
-                <CaseCard key={c.id} c={c} />
-              ))}
+          <div className="relative -mx-4 px-4">
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10 bg-gradient-to-r from-background to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10 bg-gradient-to-l from-background to-transparent" />
+            <div className="space-y-3">
+              <MarqueeRow cases={rows[0]} duration={70} onSelect={setSelected} />
+              <MarqueeRow cases={rows[1]} duration={90} reverse onSelect={setSelected} />
+              <MarqueeRow cases={rows[2]} duration={80} onSelect={setSelected} />
             </div>
-
-            {filtered.length > INITIAL && (
-              <div className="text-center mt-8">
-                <Button
-                  variant="outline"
-                  onClick={() => setExpanded((v) => !v)}
-                  className="border-amber/40 text-amber hover:bg-amber/10 font-case uppercase tracking-widest text-xs"
-                >
-                  {expanded
-                    ? `Show fewer`
-                    : `Show all ${filtered.length} cases`}
-                </Button>
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {selected && <CaseModal c={selected} onClose={() => setSelected(null)} />}
+      </AnimatePresence>
     </section>
   );
 };
