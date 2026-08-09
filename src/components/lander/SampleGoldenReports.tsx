@@ -183,39 +183,64 @@ const BookCard = ({ report, index, total, progress, config }: BookCardProps) => 
   );
   const zIndex = useTransform(offset, (o) => Math.round(100 - Math.abs(o) * 10));
 
+  const initials = report.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
   return (
     <motion.article
-      style={{ x, y, rotate, scale, opacity, zIndex }}
-      className={cn(
-        "absolute h-[210px] w-[300px] sm:h-[240px] sm:w-[420px]",
-        "rounded-r-xl rounded-l-sm border border-amber/25 bg-card",
-        "shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)] overflow-hidden",
-      )}
+      style={{ x, y, rotate, scale, opacity, zIndex, perspective: 1200 }}
+      className="absolute h-[250px] w-[190px] sm:h-[290px] sm:w-[220px]"
     >
-      {/* Spine */}
-      <div className="absolute inset-y-0 left-0 w-7 bg-gradient-to-r from-amber/50 via-amber/15 to-transparent border-r border-amber/30" />
-      <div className="absolute inset-y-0 left-7 w-px bg-border/70" />
-      {/* Page edges */}
-      <div className="absolute inset-y-2 right-0 w-1.5 rounded-r-md bg-gradient-to-l from-foreground/10 to-transparent" />
+      <div
+        className={cn(
+          "relative h-full w-full rounded-l-[3px] rounded-r-lg overflow-hidden",
+          "border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)]",
+          "shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)]",
+        )}
+        style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
+      >
+        {/* Page block on the right edge */}
+        <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
+        {/* Spine */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/70 via-amber/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-6 w-px bg-amber/25" />
+        {/* Cover sheen */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/[0.06] to-transparent" />
 
-      <div className="relative flex h-full flex-col justify-between pl-11 pr-6 py-6">
-        <div>
-          <p className="font-case text-[10px] uppercase tracking-widest text-amber">Golden Report</p>
-          <h3 className="mt-3 text-lg sm:text-xl font-bold leading-tight line-clamp-3">{report.name}</h3>
-          <p className="mt-2 font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-            {report.sector}
-          </p>
+        <div className="relative flex h-full flex-col justify-between pl-9 pr-4 py-5">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="font-case text-[9px] uppercase tracking-[0.2em] text-amber">Golden Report</p>
+              <span className="rounded-sm border border-amber/40 px-1.5 py-0.5 font-case text-[8px] tracking-widest text-amber/80">
+                {initials}
+              </span>
+            </div>
+            <div className="mt-3 h-px w-10 bg-amber/50" />
+            <h3 className="mt-3 font-display text-base sm:text-lg font-bold leading-snug line-clamp-4">
+              {report.name}
+            </h3>
+          </div>
+
+          <div>
+            <p className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
+              {report.sector}
+            </p>
+            <a
+              href={report.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onPointerDownCapture={(e) => e.stopPropagation()}
+              className="relative z-[60] mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
+            >
+              <FileText className="h-3 w-3" /> Open PDF <ExternalLink className="h-2.5 w-2.5" />
+            </a>
+          </div>
         </div>
-
-        <a
-          href={report.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          onPointerDownCapture={(e) => e.stopPropagation()}
-          className="relative z-[60] inline-flex w-fit items-center gap-2 rounded-full border border-amber/40 px-4 py-2 font-case text-[10px] uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
-        >
-          <FileText className="h-3.5 w-3.5" /> Open PDF <ExternalLink className="h-3 w-3" />
-        </a>
       </div>
     </motion.article>
   );
