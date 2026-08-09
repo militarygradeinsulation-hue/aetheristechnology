@@ -1,89 +1,78 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { ExternalLink, Code2, Lock } from "lucide-react";
+import { ExternalLink, Code2, Mic, FileText, Search, Layers } from "lucide-react";
+
+const CAPABILITIES = [
+  { icon: Mic, label: "Transcription", copy: "Record the walkthrough, get the notes written up." },
+  { icon: FileText, label: "Work orders & quotes", copy: "Turn a conversation into a priced, sendable document." },
+  { icon: Layers, label: "Categorization", copy: "Sort jobs, receipts, materials and files automatically." },
+  { icon: Search, label: "Research", copy: "Pull the answers, codes and comps you need in minutes." },
+];
 
 export function ObsidianVibeWaitlist() {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [joined, setJoined] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.includes("@")) return toast.error("Enter a valid email");
-    setLoading(true);
-    const { error } = await supabase
-      .from("obsidian_waitlist")
-      .insert({ email: email.trim().toLowerCase(), source: "aetheris_home" });
-    setLoading(false);
-    if (error && !error.message.toLowerCase().includes("duplicate")) {
-      return toast.error(error.message);
-    }
-    setJoined(true);
-    toast.success("You're on the whitelist. We'll email you before public launch.");
-  };
-
   return (
     <section
-      className="mt-8 max-w-5xl mx-auto animate-fade-in px-3"
-      aria-label="Obsidian Vibe early access"
+      className="mt-8 max-w-6xl mx-auto animate-fade-in px-3"
+      aria-label="Obsidian Vibe"
     >
       <div className="relative overflow-hidden rounded-lg border border-amber/40 bg-gradient-to-br from-black/80 via-background/60 to-black/80 backdrop-blur-sm p-6 sm:p-10 shadow-[0_0_80px_-20px_hsl(var(--amber)/0.6)]">
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-crimson">
-          <Lock className="w-3 h-3" />
-          Whitelist · Pre-Public
-        </div>
-
         <p className="font-mono text-[10px] uppercase tracking-widest text-amber mb-2 flex items-center gap-2">
           <Code2 className="w-3.5 h-3.5" />
           // New from the Aetheris Lab //
         </p>
         <h2 className="font-forensic text-3xl sm:text-4xl font-bold text-foreground mb-3">
-          Meet <span className="text-amber">Obsidian Vibe</span> — the coder built for operators.
+          Meet <span className="text-amber">Obsidian Vibe</span>, custom tools for real work.
         </h2>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mb-5">
-          Same forensic obsession as Aetheris, aimed at code. Ship the tool, dashboard, or
-          internal system you've been quoting $30k for — without the agency. Get on the
-          whitelist before public pricing goes live.
+        <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mb-6">
+          For people who want custom tools. Construction, real estate and normal jobs deserve
+          software as sophisticated as the work itself. Automate transcription, work orders,
+          quotes, categorization and research in minutes instead of days. Build anything you can
+          imagine, as simple as talking to ChatGPT.
         </p>
 
-        {!joined ? (
-          <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2 max-w-lg">
-            <Input
-              type="email"
-              required
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-background/70 border-amber/40"
-            />
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold whitespace-nowrap"
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-7">
+          {CAPABILITIES.map(({ icon: Icon, label, copy }) => (
+            <div
+              key={label}
+              className="rounded-sm border border-amber/25 bg-background/40 p-3"
             >
-              {loading ? "Adding..." : "Join whitelist"}
-            </Button>
-          </form>
-        ) : (
-          <p className="font-mono text-sm text-amber">
-            ✓ You're in. Watch your inbox for the early-access invite.
-          </p>
-        )}
+              <div className="flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-amber mb-1.5">
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{copy}</p>
+            </div>
+          ))}
+        </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-4">
-          <a
-            href="https://obsidianvibe.live"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-amber hover:text-amber/80 font-mono underline underline-offset-4"
-          >
-            Preview obsidianvibe.live <ExternalLink className="w-3.5 h-3.5" />
+        {/* Wide live window */}
+        <div className="rounded-lg border border-amber/30 overflow-hidden bg-black/60">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-amber/20 bg-background/60">
+            <span className="flex gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-crimson/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/50" />
+            </span>
+            <span className="font-mono text-[11px] text-muted-foreground truncate">
+              obsidianvibe.live
+            </span>
+          </div>
+          <iframe
+            src="https://obsidianvibe.live"
+            title="Obsidian Vibe live preview"
+            loading="lazy"
+            className="w-full h-[420px] sm:h-[560px] lg:h-[640px] border-0 bg-black"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          />
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <a href="https://obsidianvibe.live" target="_blank" rel="noopener noreferrer">
+            <Button className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
+              Open Obsidian Vibe <ExternalLink className="w-3.5 h-3.5 ml-2" />
+            </Button>
           </a>
           <span className="text-[11px] font-mono text-muted-foreground">
-            Whitelist members get early pricing + first buy window.
+            Describe the tool. It gets built.
           </span>
         </div>
       </div>
