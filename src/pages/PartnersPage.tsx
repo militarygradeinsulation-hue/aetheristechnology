@@ -15,6 +15,11 @@ import {
   CONTACT_PHONE_HREF,
   RUN_AUDIT_URL,
 } from '@/lib/links';
+import connectorGuide from '@/assets/Aetheris_Connector_Guide.pdf.asset.json';
+
+/** Partner booking calendar. */
+const PARTNER_BOOKING_URL = 'https://cal.com/aetheristechnology/example';
+
 
 /**
  * Public partner program page.
