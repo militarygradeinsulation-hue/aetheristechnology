@@ -10,6 +10,8 @@ import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import { TierLadder } from "@/components/TierLadder";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
+import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
+
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 
 const STEPS = [
@@ -130,7 +132,9 @@ const LeakLanderPage: React.FC = () => {
                 </li>
               ))}
             </ul>
+            <SampleGoldenReports />
           </div>
+
           <CaseFilePreview />
         </div>
       </section>
