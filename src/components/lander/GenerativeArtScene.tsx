@@ -24,7 +24,7 @@ const GenerativeArtScene: React.FC = () => {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.z = 3;
+    camera.position.z = 5.2;
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -167,6 +167,8 @@ const GenerativeArtScene: React.FC = () => {
       material.uniforms.pointLightPos.value = pos;
     };
 
+    const ro = new ResizeObserver(() => handleResize());
+    ro.observe(currentMount);
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
 
@@ -174,6 +176,7 @@ const GenerativeArtScene: React.FC = () => {
       running = false;
       cancelAnimationFrame(frameId);
       observer.disconnect();
+      ro.disconnect();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       if (currentMount.contains(renderer.domElement)) {
