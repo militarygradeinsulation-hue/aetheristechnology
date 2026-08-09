@@ -91,8 +91,8 @@ const PartnersPage: React.FC = () => {
                   size="lg"
                   className="bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <a href={BOOK_MEETING_URL}>
-                    Become a Partner
+                  <a href={PARTNER_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                    Book an appointment
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </a>
                 </Button>
@@ -102,9 +102,12 @@ const PartnersPage: React.FC = () => {
                   variant="outline"
                   className="focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <Link to={RUN_AUDIT_URL}>See the Audit First</Link>
+                  <a href={connectorGuide.url} target="_blank" rel="noopener noreferrer">
+                    Read the Connector Guide
+                  </a>
                 </Button>
               </div>
+
             </section>
 
             <section aria-labelledby="partners-how">
