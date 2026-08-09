@@ -130,7 +130,9 @@ const LeakLanderPage: React.FC = () => {
                 </li>
               ))}
             </ul>
+            <SampleGoldenReports />
           </div>
+
           <CaseFilePreview />
         </div>
       </section>
