@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react';
 import { ExternalLink, Search, FileText, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
@@ -234,7 +233,7 @@ export const RealCaseStudiesSection: React.FC = () => {
             Real problems. Real fixes. Real numbers.
           </h2>
           <p className="text-foreground/80 max-w-2xl mx-auto text-base md:text-lg">
-            Each card: what broke, the result. Tap <span className="text-amber">More detail</span> for the fix, or the source to read the original.
+            Tap any capsule to open the full case file: what broke, the fix, and the result.
           </p>
         </div>
 
