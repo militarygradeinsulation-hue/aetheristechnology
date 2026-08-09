@@ -10,6 +10,7 @@ import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import { TierLadder } from "@/components/TierLadder";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
+import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 
 const STEPS = [
   {
