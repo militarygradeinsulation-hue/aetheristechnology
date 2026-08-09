@@ -45,6 +45,7 @@ export const CaseFilePreview: React.FC = () => (
 
     <div className="space-y-3">
       <p className="font-case text-[10px] uppercase text-muted-foreground">Highest-Priority Findings</p>
+      {FINDINGS.map((f) => (
         <div
           key={f.label}
           className="flex items-center justify-between rounded bg-secondary/40 px-3 py-2.5 border border-border/50 hover:border-border transition-colors"
