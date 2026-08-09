@@ -7,10 +7,6 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { name: "Leak Audit", to: "/leak-audit" },
   { name: "Golden Report", to: "/golden-report" },
-  { name: "Universe", to: "/aetheris-universe" },
-  { name: "Guides", to: "/resources" },
-  { name: "Blog", to: "/blog" },
-  { name: "Careers", to: "/careers" },
   { name: "Partners", to: "/partners" },
 ];
 
