@@ -15,6 +15,11 @@ import {
   CONTACT_PHONE_HREF,
   RUN_AUDIT_URL,
 } from '@/lib/links';
+import connectorGuide from '@/assets/Aetheris_Connector_Guide.pdf.asset.json';
+
+/** Partner booking calendar. */
+const PARTNER_BOOKING_URL = 'https://cal.com/aetheristechnology/example';
+
 
 /**
  * Public partner program page.
@@ -91,8 +96,8 @@ const PartnersPage: React.FC = () => {
                   size="lg"
                   className="bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <a href={BOOK_MEETING_URL}>
-                    Become a Partner
+                  <a href={PARTNER_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                    Book an appointment
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </a>
                 </Button>
@@ -102,9 +107,12 @@ const PartnersPage: React.FC = () => {
                   variant="outline"
                   className="focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <Link to={RUN_AUDIT_URL}>See the Audit First</Link>
+                  <a href={connectorGuide.url} target="_blank" rel="noopener noreferrer">
+                    Read the Connector Guide
+                  </a>
                 </Button>
               </div>
+
             </section>
 
             <section aria-labelledby="partners-how">
@@ -172,10 +180,11 @@ const PartnersPage: React.FC = () => {
                 size="lg"
                 className="mt-7 bg-amber text-primary-foreground hover:bg-amber/90 focus-visible:ring-2 focus-visible:ring-amber focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                <a href={BOOK_MEETING_URL}>
-                  Become a Partner
+                <a href={PARTNER_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                  Book an appointment
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </a>
+
               </Button>
               <div className="mt-7 pt-6 border-t border-border/50 flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm">
                 <a
