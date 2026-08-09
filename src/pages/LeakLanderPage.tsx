@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
+import methodologyPdf from "@/assets/aetheris-methodology.pdf.asset.json";
 
 const STEPS = [
   {
@@ -111,6 +112,51 @@ const LeakLanderPage: React.FC = () => {
           Indianapolis · Operating nationwide
         </p>
       </AnomalousMatterHero>
+
+      {/* The Aetheris Methodology */}
+      <section id="methodology" className="border-t border-border/60 py-16 px-6">
+        <div className="mx-auto max-w-4xl text-center">
+          <SectionLabel>// The system</SectionLabel>
+          <h2 className="font-forensic text-3xl sm:text-4xl font-bold leading-tight">
+            The Aetheris Methodology
+          </h2>
+          <p className="mt-4 text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            How the Golden Report becomes a system for fixing the company. Read it in full below.
+          </p>
+
+          <div className="mt-8 rounded-xl border border-amber/25 bg-card/40 overflow-hidden shadow-2xl">
+            <object
+              data={`${methodologyPdf.url}#view=FitH`}
+              type="application/pdf"
+              className="w-full h-[70vh] min-h-[420px]"
+              aria-label="The Aetheris Methodology"
+            >
+              <div className="p-10 text-sm text-muted-foreground">
+                Your browser cannot display the PDF inline.
+              </div>
+            </object>
+          </div>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href={methodologyPdf.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-amber px-7 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
+            >
+              Open full document <ArrowRight className="h-4 w-4" />
+            </a>
+            <a
+              href={methodologyPdf.url}
+              download="Aetheris-Methodology.pdf"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border px-7 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
+            >
+              Download PDF
+            </a>
+          </div>
+        </div>
+      </section>
+
 
       {/* Case file preview */}
       <section className="border-t border-border/60 py-20 px-6">
