@@ -102,7 +102,7 @@ export const MethodologyAI: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col rounded-xl border border-amber/25 bg-card/40 text-left">
+    <div className="flex h-[480px] max-h-[70vh] flex-col overflow-hidden rounded-xl border border-amber/25 bg-card/40 text-left">
       <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
         <Sparkles className="h-4 w-4 text-amber" />
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-amber/90">
