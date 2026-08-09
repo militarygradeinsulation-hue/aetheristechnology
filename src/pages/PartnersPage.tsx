@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Background } from '@/components/Background';
-import { Navbar } from '@/components/Navbar';
+import { LanderNavbar } from '@/components/lander/LanderNavbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
@@ -71,7 +71,7 @@ const PartnersPage: React.FC = () => {
       />
       <Background />
       <div className="relative z-10">
-        <Navbar onContactClick={() => setIsContactModalOpen(true)} />
+        <LanderNavbar />
 
         <main className="pt-28 pb-20 px-4">
           <div className="max-w-4xl mx-auto space-y-16 md:space-y-20">
