@@ -25,7 +25,7 @@ const PARTNER_BOOKING_URL = 'https://cal.com/aetheristechnology/example';
  * Public partner program page.
  *
  * Only the terms supplied by Aetheris appear here: a tracked partner ID,
- * Aetheris performs the audit, and a 15% referral fee. No payout schedule,
+ * Aetheris performs the audit, and a referral fee. No payout schedule,
  * tier ladder or contract term is implied, because none has been confirmed.
  */
 
@@ -62,7 +62,7 @@ const PartnersPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Aetheris Partner Program | Revenue Leak Audits for Your Clients"
-        description="Consultants, fractional executives and service providers can introduce Aetheris through a tracked partner relationship. Aetheris performs the Revenue Leak Audit and pays a 15% referral fee when your introduction becomes a paying client."
+        description="Consultants, fractional executives and service providers can introduce Aetheris through a tracked partner relationship. Aetheris performs the Revenue Leak Audit and pays a referral fee when your introduction becomes a paying client."
         path="/partners"
         keywords="aetheris partner program, referral partner, consultant referral, revenue leak audit partner"
         breadcrumbs={[
