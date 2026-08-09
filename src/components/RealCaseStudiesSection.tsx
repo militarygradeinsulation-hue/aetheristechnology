@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { ExternalLink, Search, FileText, Wrench } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { REAL_CASES, REAL_CASE_CATEGORIES, type RealCase, type RealCaseCategory } from '@/data/realCaseStudies';
 import { CASE_DELIVERY } from '@/data/caseDelivery';
 import { CASE_CREDITS } from '@/data/caseCredits';
@@ -32,54 +33,53 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
   const [showMore, setShowMore] = useState(false);
   const credit = CASE_CREDITS[c.id];
   return (
-    <div className="forensic-tile rounded-sm border border-amber/25 p-4 flex flex-col h-full hover:border-amber/60 transition-colors">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="font-case text-[9px] uppercase tracking-widest text-crimson">
-          Case №{String(c.id).padStart(3, '0')}
-        </span>
-        <span className="font-case text-[9px] uppercase tracking-widest text-amber/70 truncate">
-          {c.category}
-        </span>
-      </div>
-
-      <div className="mb-3 border-l-4 border-amber pl-3">
-        <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-1">Result</div>
-        <div className="font-forensic text-xl md:text-2xl font-bold text-amber leading-tight">
-          {c.outcome}
+    <Card className="flex flex-col h-full border border-border/60 bg-card/40 backdrop-blur-sm transition-colors hover:border-amber/50">
+      <CardHeader className="pb-3 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
+            Case №{String(c.id).padStart(3, '0')}
+          </span>
+          <span className="font-case text-[9px] uppercase tracking-widest text-amber/70 truncate">
+            {c.category}
+          </span>
         </div>
-      </div>
-
-      <h3 className="font-forensic text-base font-bold leading-snug mb-2">{c.title}</h3>
-
-      {credit && (
-        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-3">
-          Worked with <span className="text-amber">{credit.name}</span>
-          <span className="opacity-50"> // </span>
-          <span className="text-foreground/80">{credit.year}</span>
+        <div>
+          <div className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Result</div>
+          <div className="font-forensic text-2xl font-bold text-amber leading-tight">{c.outcome}</div>
         </div>
-      )}
+        <CardTitle className="font-forensic text-base font-bold leading-snug">{c.title}</CardTitle>
+        {credit && (
+          <CardDescription className="font-case text-[10px] uppercase tracking-widest">
+            Worked with <span className="text-amber">{credit.name}</span>
+            <span className="opacity-50"> // </span>
+            <span className="text-foreground/80">{credit.year}</span>
+          </CardDescription>
+        )}
+      </CardHeader>
 
-      <p className="text-sm text-foreground/80 leading-snug mb-3">
-        <span className="text-crimson font-semibold">Problem:</span> {c.problem}
-      </p>
+      <CardContent className="pt-0 pb-4 space-y-3">
+        <p className="text-sm text-foreground/80 leading-snug">
+          <span className="text-muted-foreground font-semibold">Problem:</span> {c.problem}
+        </p>
 
-      {showMore && (
-        <div className="text-sm text-foreground/80 space-y-2 mb-3">
-          <p><span className="text-amber font-semibold">Fix:</span> {c.solution}</p>
-          <p className="italic text-foreground/70 text-xs">Mirrors Aetheris: {c.mirrors}</p>
-          {CASE_DELIVERY[c.id] && (
-            <div className="flex flex-wrap gap-1 pt-1">
-              {CASE_DELIVERY[c.id].tools.map((t) => (
-                <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {showMore && (
+          <div className="text-sm text-foreground/80 space-y-2">
+            <p><span className="text-amber font-semibold">Fix:</span> {c.solution}</p>
+            <p className="italic text-foreground/70 text-xs">Mirrors Aetheris: {c.mirrors}</p>
+            {CASE_DELIVERY[c.id] && (
+              <div className="flex flex-wrap gap-1 pt-1">
+                {CASE_DELIVERY[c.id].tools.map((t) => (
+                  <span key={t} className="font-case text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-amber/30 text-amber/90 bg-background/40">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
 
-      <div className="mt-auto pt-3 border-t border-border/60 flex items-center justify-between gap-2">
+      <CardFooter className="mt-auto pt-3 pb-4 border-t border-border/60 flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={() => setShowMore(v => !v)}
@@ -95,10 +95,11 @@ const CaseCard: React.FC<{ c: RealCase }> = ({ c }) => {
         >
           {c.source} <ExternalLink className="w-3 h-3" />
         </a>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
+
 
 export const RealCaseStudiesSection: React.FC = () => {
   const [active, setActive] = useState<RealCaseCategory | 'all'>('all');
