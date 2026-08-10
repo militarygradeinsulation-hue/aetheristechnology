@@ -28,7 +28,7 @@ export const ExecutiveDesk: React.FC = () => {
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
   const [dayOpen, setDayOpen] = useState<string | null>(null);
-  const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
+  const [dayDraft, setDayDraft] = useState<{ title: string; time: string; assignee: string; details: string; kind: "event" | "task" }>({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" });
   const [focusId, setFocusId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -67,7 +67,7 @@ export const ExecutiveDesk: React.FC = () => {
     if (!dayOpen || !dayDraft.title.trim()) return;
     try {
       const item = await createExecItem({
-        kind: "event",
+        kind: dayDraft.kind,
         title: dayDraft.title.trim(),
         details: dayDraft.details.trim() || null,
         assignee: dayDraft.assignee,
@@ -98,7 +98,7 @@ export const ExecutiveDesk: React.FC = () => {
     }
   };
 
-  const events = useMemo(() => items.filter((i) => i.kind === "event"), [items]);
+  
   const tasks = useMemo(() => items.filter((i) => i.kind === "task"), [items]);
   const notes = useMemo(() => items.filter((i) => i.kind === "note"), [items]);
 
@@ -115,13 +115,17 @@ export const ExecutiveDesk: React.FC = () => {
 
   const byDay = useMemo(() => {
     const m: Record<string, ExecItem[]> = {};
-    for (const e of events) {
-      if (!e.starts_at) continue;
+    for (const e of items) {
+      if (e.kind === "note" || !e.starts_at) continue;
       const k = toISODate(new Date(e.starts_at));
       (m[k] ||= []).push(e);
     }
+    for (const k of Object.keys(m)) {
+      m[k].sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
+    }
     return m;
-  }, [events]);
+  }, [items]);
+
 
   if (loading) {
     return <Card><CardContent className="py-10 flex items-center justify-center text-muted-foreground">
@@ -220,8 +224,8 @@ export const ExecutiveDesk: React.FC = () => {
                     key={k}
                     role="button"
                     tabIndex={0}
-                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
-                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); } }}
+                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
+                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); } }}
                     className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
                   >
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
@@ -231,13 +235,15 @@ export const ExecutiveDesk: React.FC = () => {
                           key={e.id}
                           role="button"
                           tabIndex={0}
-                          title={`${e.title}${e.details ? ` — ${e.details}` : ""}`}
-                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
+                          title={`${e.kind === "task" ? "Task: " : ""}${e.title}${e.details ? ` — ${e.details}` : ""}`}
+                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
                           onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); } }}
-                          className="group cursor-pointer rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight hover:bg-primary/25"
+                          className={`group cursor-pointer rounded px-1 py-0.5 text-[10px] leading-tight ${e.kind === "task" ? "bg-emerald-500/15 hover:bg-emerald-500/25" : "bg-primary/15 hover:bg-primary/25"}`}
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <span className="truncate">{e.title}</span>
+                            <span className={`truncate ${e.kind === "task" && e.status === "done" ? "line-through opacity-60" : ""}`}>
+                              {e.kind === "task" ? "✓ " : ""}{e.title}
+                            </span>
                             <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-3 h-3" />
                             </button>
@@ -245,6 +251,7 @@ export const ExecutiveDesk: React.FC = () => {
                           <span className="text-muted-foreground">{execPersonLabel(e.assignee)}</span>
                         </div>
                       ))}
+
                     </div>
                   </div>
                 );
@@ -330,14 +337,28 @@ export const ExecutiveDesk: React.FC = () => {
                 className={`rounded-lg border p-3 space-y-2 ${focusId === e.id ? "border-amber/70 bg-amber/5" : "border-border/60"}`}
               >
                 <div className="flex items-start gap-2">
+                  {e.kind === "task" && (
+                    <Checkbox
+                      checked={e.status === "done"}
+                      onCheckedChange={(v) => void patch(e.id, { status: v ? "done" : "open" })}
+                      className="mt-2"
+                    />
+                  )}
                   <Input
                     defaultValue={e.title}
                     onBlur={(ev) => { if (ev.target.value.trim() && ev.target.value !== e.title) void patch(e.id, { title: ev.target.value.trim() }); }}
-                    className="h-8 text-sm"
+                    className={`h-8 text-sm ${e.kind === "task" && e.status === "done" ? "line-through text-muted-foreground" : ""}`}
                   />
                   <Button size="icon" variant="ghost" onClick={() => void remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  <Select value={e.kind} onValueChange={(v) => void patch(e.id, { kind: v as ExecKind })}>
+                    <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="task">Task</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Input
                     type="time"
                     className="h-8 w-[110px]"
@@ -350,6 +371,7 @@ export const ExecutiveDesk: React.FC = () => {
                   </Select>
                   <Badge variant="outline" className="text-[9px] self-center">by {execPersonLabel(e.author)}</Badge>
                 </div>
+
                 <Textarea
                   defaultValue={e.details || ""}
                   rows={2}
@@ -363,10 +385,17 @@ export const ExecutiveDesk: React.FC = () => {
 
           <div className="border-t border-border/60 pt-3 space-y-2">
             <div className="flex gap-2">
+              <Select value={dayDraft.kind} onValueChange={(v) => setDayDraft((s) => ({ ...s, kind: v as "event" | "task" }))}>
+                <SelectTrigger className="w-[110px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="task">Task</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={dayDraft.title}
                 onChange={(ev) => setDayDraft((s) => ({ ...s, title: ev.target.value }))}
-                placeholder="New event on this day…"
+                placeholder={dayDraft.kind === "task" ? "New task on this day…" : "New event on this day…"}
                 onKeyDown={(ev) => { if (ev.key === "Enter") void addOnDay(); }}
               />
               <Input type="time" className="w-[110px]" value={dayDraft.time} onChange={(ev) => setDayDraft((s) => ({ ...s, time: ev.target.value }))} />
@@ -379,6 +408,7 @@ export const ExecutiveDesk: React.FC = () => {
               <Input value={dayDraft.details} onChange={(ev) => setDayDraft((s) => ({ ...s, details: ev.target.value }))} placeholder="Details (optional)" />
               <Button onClick={() => void addOnDay()}><Plus className="w-4 h-4 mr-1" /> Add</Button>
             </div>
+
           </div>
         </DialogContent>
       </Dialog>
