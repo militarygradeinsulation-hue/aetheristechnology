@@ -62,6 +62,24 @@ export const ExecutiveDesk: React.FC = () => {
       toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
     }
   };
+  const addOnDay = async () => {
+    if (!dayOpen || !dayDraft.title.trim()) return;
+    try {
+      const item = await createExecItem({
+        kind: "event",
+        title: dayDraft.title.trim(),
+        details: dayDraft.details.trim() || null,
+        assignee: dayDraft.assignee,
+        priority: "normal",
+        starts_at: new Date(`${dayOpen}T${dayDraft.time || "09:00"}`).toISOString(),
+      });
+      setItems((p) => [item, ...p]);
+      setDayDraft((s) => ({ ...s, title: "", details: "" }));
+    } catch (e) {
+      toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
+    }
+  };
+
 
   const patch = async (id: string, p: Partial<ExecItem>) => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...p } as ExecItem : i)));
