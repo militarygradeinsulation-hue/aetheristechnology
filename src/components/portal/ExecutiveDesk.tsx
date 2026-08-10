@@ -283,6 +283,74 @@ export const ExecutiveDesk: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!dayOpen} onOpenChange={(o) => !o && setDayOpen(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              {dayOpen ? new Date(`${dayOpen}T12:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : ""}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
+            {(dayOpen ? byDay[dayOpen] || [] : []).length === 0 && (
+              <p className="text-sm text-muted-foreground">Nothing scheduled. Add something below.</p>
+            )}
+            {(dayOpen ? byDay[dayOpen] || [] : []).map((e) => (
+              <div key={e.id} className="rounded-lg border border-border/60 p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Input
+                    defaultValue={e.title}
+                    onBlur={(ev) => { if (ev.target.value.trim() && ev.target.value !== e.title) void patch(e.id, { title: ev.target.value.trim() }); }}
+                    className="h-8 text-sm"
+                  />
+                  <Button size="icon" variant="ghost" onClick={() => void remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="time"
+                    className="h-8 w-[110px]"
+                    defaultValue={e.starts_at ? new Date(e.starts_at).toTimeString().slice(0, 5) : "09:00"}
+                    onChange={(ev) => { if (ev.target.value && dayOpen) void patch(e.id, { starts_at: new Date(`${dayOpen}T${ev.target.value}`).toISOString() }); }}
+                  />
+                  <Select value={e.assignee} onValueChange={(v) => void patch(e.id, { assignee: v })}>
+                    <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Badge variant="outline" className="text-[9px] self-center">by {execPersonLabel(e.author)}</Badge>
+                </div>
+                <Textarea
+                  defaultValue={e.details || ""}
+                  rows={2}
+                  placeholder="Details"
+                  className="text-sm"
+                  onBlur={(ev) => { if (ev.target.value !== (e.details || "")) void patch(e.id, { details: ev.target.value }); }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-border/60 pt-3 space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={dayDraft.title}
+                onChange={(ev) => setDayDraft((s) => ({ ...s, title: ev.target.value }))}
+                placeholder="New event on this day…"
+                onKeyDown={(ev) => { if (ev.key === "Enter") void addOnDay(); }}
+              />
+              <Input type="time" className="w-[110px]" value={dayDraft.time} onChange={(ev) => setDayDraft((s) => ({ ...s, time: ev.target.value }))} />
+            </div>
+            <div className="flex gap-2">
+              <Select value={dayDraft.assignee} onValueChange={(v) => setDayDraft((s) => ({ ...s, assignee: v }))}>
+                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
+              </Select>
+              <Input value={dayDraft.details} onChange={(ev) => setDayDraft((s) => ({ ...s, details: ev.target.value }))} placeholder="Details (optional)" />
+              <Button onClick={() => void addOnDay()}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
