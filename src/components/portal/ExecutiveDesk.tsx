@@ -115,13 +115,17 @@ export const ExecutiveDesk: React.FC = () => {
 
   const byDay = useMemo(() => {
     const m: Record<string, ExecItem[]> = {};
-    for (const e of events) {
-      if (!e.starts_at) continue;
+    for (const e of items) {
+      if (e.kind === "note" || !e.starts_at) continue;
       const k = toISODate(new Date(e.starts_at));
       (m[k] ||= []).push(e);
     }
+    for (const k of Object.keys(m)) {
+      m[k].sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
+    }
     return m;
-  }, [events]);
+  }, [items]);
+
 
   if (loading) {
     return <Card><CardContent className="py-10 flex items-center justify-center text-muted-foreground">
