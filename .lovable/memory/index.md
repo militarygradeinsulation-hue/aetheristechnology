@@ -40,6 +40,7 @@
 - [Admin & Infrastructure](mem://features/admin-analytics-hub) — Hardcoded passcode 9822, HubSpot ID, notify domain
 - [Smart Subscriptions](mem://features/smart-subscriptions) — Monthly AI-powered deliveries
 - [Rep & Partner Portal](mem://features/rep-partner-portal) — Code-only portal (intact, not promoted publicly)
+- [Executive Desk](mem://features/executive-desk) — Private shared calendar/tasks/notes for Joseph, Braden and Dean only
 - [Rep Time Clock](mem://features/rep-timeclock) — Clock-in/out per rep
 - [Team Training](mem://features/team-training) — Admin trainings + AI Q&A
 - [Power-Words Arsenal](mem://marketing/power-words-sales-arsenal) — 7 power-word families, "because" clause + risk-free/proven mandatories on every page and every AI output

@@ -2475,6 +2475,57 @@ export type Database = {
         }
         Relationships: []
       }
+      exec_items: {
+        Row: {
+          all_day: boolean
+          assignee: string
+          author: string
+          created_at: string
+          details: string | null
+          ends_at: string | null
+          id: string
+          kind: string
+          pinned: boolean
+          priority: string
+          starts_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          all_day?: boolean
+          assignee?: string
+          author?: string
+          created_at?: string
+          details?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          pinned?: boolean
+          priority?: string
+          starts_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          all_day?: boolean
+          assignee?: string
+          author?: string
+          created_at?: string
+          details?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          pinned?: boolean
+          priority?: string
+          starts_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       forecast_briefings: {
         Row: {
           briefing_date: string
