@@ -27,6 +27,8 @@ export const ExecutiveDesk: React.FC = () => {
   const [tab, setTab] = useState<ExecKind>("event");
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
+  const [dayOpen, setDayOpen] = useState<string | null>(null);
+  const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
 
   const refresh = useCallback(async () => {
     try {
