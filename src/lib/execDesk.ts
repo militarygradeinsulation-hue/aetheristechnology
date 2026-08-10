@@ -38,10 +38,25 @@ function headers(): Record<string, string> {
 
 async function call<T>(body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke("exec-desk", { body, headers: headers() });
-  if (error) throw new Error(error.message);
+  if (error) {
+    // Surface the real server message instead of "non-2xx status code".
+    const res = (error as { context?: Response }).context;
+    if (res && typeof res.text === "function") {
+      try {
+        const txt = await res.text();
+        const parsed = JSON.parse(txt) as { error?: string };
+        const msg = parsed?.error || txt;
+        throw new Error(res.status === 401 ? `401 ${msg}` : msg || error.message);
+      } catch (e) {
+        if (e instanceof Error && e.message && !/JSON/i.test(e.message)) throw e;
+      }
+    }
+    throw new Error(error.message);
+  }
   if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
   return data as T;
 }
+
 
 export const listExecItems = () =>
   call<{ ok: true; me: ExecPerson; items: ExecItem[] }>({ action: "list" });
