@@ -80,7 +80,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
           <div className="flex flex-1 flex-row items-center justify-center gap-1">
             {navItems.map((item) => (
               <Link
-                key={item.to}
+                key={item.name}
                 to={item.to}
                 onClick={handleNav(item.to)}
                 className={cn(
@@ -140,7 +140,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
               >
                 {navItems.map((item) => (
                   <Link
-                    key={item.to}
+                    key={item.name}
                     to={item.to}
                     onClick={(e) => {
                       handleNav(item.to)(e);
