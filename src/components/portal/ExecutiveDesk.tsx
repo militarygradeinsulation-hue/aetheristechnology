@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, CalendarDays, ListChecks, StickyNote, Plus, Trash2, ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -26,6 +27,8 @@ export const ExecutiveDesk: React.FC = () => {
   const [tab, setTab] = useState<ExecKind>("event");
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
+  const [dayOpen, setDayOpen] = useState<string | null>(null);
+  const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
 
   const refresh = useCallback(async () => {
     try {
@@ -59,6 +62,24 @@ export const ExecutiveDesk: React.FC = () => {
       toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
     }
   };
+  const addOnDay = async () => {
+    if (!dayOpen || !dayDraft.title.trim()) return;
+    try {
+      const item = await createExecItem({
+        kind: "event",
+        title: dayDraft.title.trim(),
+        details: dayDraft.details.trim() || null,
+        assignee: dayDraft.assignee,
+        priority: "normal",
+        starts_at: new Date(`${dayOpen}T${dayDraft.time || "09:00"}`).toISOString(),
+      });
+      setItems((p) => [item, ...p]);
+      setDayDraft((s) => ({ ...s, title: "", details: "" }));
+    } catch (e) {
+      toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
+    }
+  };
+
 
   const patch = async (id: string, p: Partial<ExecItem>) => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...p } as ExecItem : i)));
@@ -194,14 +215,21 @@ export const ExecutiveDesk: React.FC = () => {
                 const dim = d.getMonth() !== month.getMonth();
                 const today = k === toISODate(new Date());
                 return (
-                  <div key={k} className={`min-h-[86px] rounded-md border p-1 text-left ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}>
+                  <div
+                    key={k}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
+                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); } }}
+                    className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
+                  >
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
                     <div className="space-y-1 mt-1">
                       {dayItems.map((e) => (
                         <div key={e.id} className="group rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight">
                           <div className="flex items-start justify-between gap-1">
                             <span className="truncate">{e.title}</span>
-                            <button onClick={() => void remove(e.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
+                            <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
@@ -273,6 +301,74 @@ export const ExecutiveDesk: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!dayOpen} onOpenChange={(o) => !o && setDayOpen(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              {dayOpen ? new Date(`${dayOpen}T12:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : ""}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
+            {(dayOpen ? byDay[dayOpen] || [] : []).length === 0 && (
+              <p className="text-sm text-muted-foreground">Nothing scheduled. Add something below.</p>
+            )}
+            {(dayOpen ? byDay[dayOpen] || [] : []).map((e) => (
+              <div key={e.id} className="rounded-lg border border-border/60 p-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <Input
+                    defaultValue={e.title}
+                    onBlur={(ev) => { if (ev.target.value.trim() && ev.target.value !== e.title) void patch(e.id, { title: ev.target.value.trim() }); }}
+                    className="h-8 text-sm"
+                  />
+                  <Button size="icon" variant="ghost" onClick={() => void remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="time"
+                    className="h-8 w-[110px]"
+                    defaultValue={e.starts_at ? new Date(e.starts_at).toTimeString().slice(0, 5) : "09:00"}
+                    onChange={(ev) => { if (ev.target.value && dayOpen) void patch(e.id, { starts_at: new Date(`${dayOpen}T${ev.target.value}`).toISOString() }); }}
+                  />
+                  <Select value={e.assignee} onValueChange={(v) => void patch(e.id, { assignee: v })}>
+                    <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Badge variant="outline" className="text-[9px] self-center">by {execPersonLabel(e.author)}</Badge>
+                </div>
+                <Textarea
+                  defaultValue={e.details || ""}
+                  rows={2}
+                  placeholder="Details"
+                  className="text-sm"
+                  onBlur={(ev) => { if (ev.target.value !== (e.details || "")) void patch(e.id, { details: ev.target.value }); }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-border/60 pt-3 space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={dayDraft.title}
+                onChange={(ev) => setDayDraft((s) => ({ ...s, title: ev.target.value }))}
+                placeholder="New event on this day…"
+                onKeyDown={(ev) => { if (ev.key === "Enter") void addOnDay(); }}
+              />
+              <Input type="time" className="w-[110px]" value={dayDraft.time} onChange={(ev) => setDayDraft((s) => ({ ...s, time: ev.target.value }))} />
+            </div>
+            <div className="flex gap-2">
+              <Select value={dayDraft.assignee} onValueChange={(v) => setDayDraft((s) => ({ ...s, assignee: v }))}>
+                <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
+              </Select>
+              <Input value={dayDraft.details} onChange={(ev) => setDayDraft((s) => ({ ...s, details: ev.target.value }))} placeholder="Details (optional)" />
+              <Button onClick={() => void addOnDay()}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
