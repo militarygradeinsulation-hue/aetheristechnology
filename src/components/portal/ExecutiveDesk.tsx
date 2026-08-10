@@ -28,7 +28,7 @@ export const ExecutiveDesk: React.FC = () => {
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
   const [dayOpen, setDayOpen] = useState<string | null>(null);
-  const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
+  const [dayDraft, setDayDraft] = useState<{ title: string; time: string; assignee: string; details: string; kind: "event" | "task" }>({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" });
   const [focusId, setFocusId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -67,7 +67,7 @@ export const ExecutiveDesk: React.FC = () => {
     if (!dayOpen || !dayDraft.title.trim()) return;
     try {
       const item = await createExecItem({
-        kind: "event",
+        kind: dayDraft.kind,
         title: dayDraft.title.trim(),
         details: dayDraft.details.trim() || null,
         assignee: dayDraft.assignee,
@@ -224,8 +224,8 @@ export const ExecutiveDesk: React.FC = () => {
                     key={k}
                     role="button"
                     tabIndex={0}
-                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: tab === "note" ? "event" : tab }); }}
-                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: tab === "note" ? "event" : tab }); } }}
+                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
+                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); } }}
                     className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
                   >
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
