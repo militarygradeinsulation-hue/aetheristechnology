@@ -224,8 +224,8 @@ export const ExecutiveDesk: React.FC = () => {
                     key={k}
                     role="button"
                     tabIndex={0}
-                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
-                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); } }}
+                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: tab === "note" ? "event" : tab }); }}
+                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: tab === "note" ? "event" : tab }); } }}
                     className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
                   >
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
@@ -235,13 +235,15 @@ export const ExecutiveDesk: React.FC = () => {
                           key={e.id}
                           role="button"
                           tabIndex={0}
-                          title={`${e.title}${e.details ? ` — ${e.details}` : ""}`}
-                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
+                          title={`${e.kind === "task" ? "Task: " : ""}${e.title}${e.details ? ` — ${e.details}` : ""}`}
+                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
                           onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); } }}
-                          className="group cursor-pointer rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight hover:bg-primary/25"
+                          className={`group cursor-pointer rounded px-1 py-0.5 text-[10px] leading-tight ${e.kind === "task" ? "bg-emerald-500/15 hover:bg-emerald-500/25" : "bg-primary/15 hover:bg-primary/25"}`}
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <span className="truncate">{e.title}</span>
+                            <span className={`truncate ${e.kind === "task" && e.status === "done" ? "line-through opacity-60" : ""}`}>
+                              {e.kind === "task" ? "✓ " : ""}{e.title}
+                            </span>
                             <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-3 h-3" />
                             </button>
@@ -249,6 +251,7 @@ export const ExecutiveDesk: React.FC = () => {
                           <span className="text-muted-foreground">{execPersonLabel(e.assignee)}</span>
                         </div>
                       ))}
+
                     </div>
                   </div>
                 );
