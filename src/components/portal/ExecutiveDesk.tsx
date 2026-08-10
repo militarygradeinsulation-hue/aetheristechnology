@@ -385,10 +385,17 @@ export const ExecutiveDesk: React.FC = () => {
 
           <div className="border-t border-border/60 pt-3 space-y-2">
             <div className="flex gap-2">
+              <Select value={dayDraft.kind} onValueChange={(v) => setDayDraft((s) => ({ ...s, kind: v as "event" | "task" }))}>
+                <SelectTrigger className="w-[110px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="task">Task</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={dayDraft.title}
                 onChange={(ev) => setDayDraft((s) => ({ ...s, title: ev.target.value }))}
-                placeholder="New event on this day…"
+                placeholder={dayDraft.kind === "task" ? "New task on this day…" : "New event on this day…"}
                 onKeyDown={(ev) => { if (ev.key === "Enter") void addOnDay(); }}
               />
               <Input type="time" className="w-[110px]" value={dayDraft.time} onChange={(ev) => setDayDraft((s) => ({ ...s, time: ev.target.value }))} />
@@ -401,6 +408,7 @@ export const ExecutiveDesk: React.FC = () => {
               <Input value={dayDraft.details} onChange={(ev) => setDayDraft((s) => ({ ...s, details: ev.target.value }))} placeholder="Details (optional)" />
               <Button onClick={() => void addOnDay()}><Plus className="w-4 h-4 mr-1" /> Add</Button>
             </div>
+
           </div>
         </DialogContent>
       </Dialog>
