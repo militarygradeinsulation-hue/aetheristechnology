@@ -55,7 +55,7 @@ serve(async (req) => {
     if (action === "create") {
       const title = String(body.title || "").trim();
       if (!title) return json(400, { error: "title required" });
-      const kind = ["event", "task", "note"].includes(body.kind) ? body.kind : "task";
+      const kind = ["event", "meeting", "task", "note"].includes(body.kind) ? body.kind : "task";
       const { data, error } = await supabase
         .from("exec_items")
         .insert({
@@ -90,7 +90,7 @@ serve(async (req) => {
       if (["low", "normal", "high", "urgent"].includes(body.priority)) patch.priority = body.priority;
       if (["all", "joseph", "braden", "dean"].includes(body.assignee)) patch.assignee = body.assignee;
       if ("pinned" in body) patch.pinned = !!body.pinned;
-      if (["event", "task", "note"].includes(body.kind)) patch.kind = body.kind;
+      if (["event", "meeting", "task", "note"].includes(body.kind)) patch.kind = body.kind;
       const { data, error } = await supabase.from("exec_items").update(patch).eq("id", id).select().single();
       if (error) return json(500, { error: error.message });
       return json(200, { ok: true, item: data });
