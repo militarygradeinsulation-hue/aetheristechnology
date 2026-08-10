@@ -311,7 +311,7 @@ export const ExecutiveDesk: React.FC = () => {
         </Card>
       )}
 
-      <Dialog open={!!dayOpen} onOpenChange={(o) => !o && setDayOpen(null)}>
+      <Dialog open={!!dayOpen} onOpenChange={(o) => { if (!o) { setDayOpen(null); setFocusId(null); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-display">
@@ -324,7 +324,11 @@ export const ExecutiveDesk: React.FC = () => {
               <p className="text-sm text-muted-foreground">Nothing scheduled. Add something below.</p>
             )}
             {(dayOpen ? byDay[dayOpen] || [] : []).map((e) => (
-              <div key={e.id} className="rounded-lg border border-border/60 p-3 space-y-2">
+              <div
+                key={e.id}
+                ref={(el) => { if (el && focusId === e.id) el.scrollIntoView({ block: "nearest" }); }}
+                className={`rounded-lg border p-3 space-y-2 ${focusId === e.id ? "border-amber/70 bg-amber/5" : "border-border/60"}`}
+              >
                 <div className="flex items-start gap-2">
                   <Input
                     defaultValue={e.title}
