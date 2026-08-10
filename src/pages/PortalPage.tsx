@@ -28,6 +28,8 @@ import { TrainingPanel } from '@/components/portal/TrainingPanel';
 import { OnboardingLibrary } from '@/components/portal/OnboardingLibrary';
 import { PortalCareersPanel } from '@/components/portal/PortalCareersPanel';
 import SharedWorkspace from '@/components/admin/SharedWorkspace';
+import ExecutiveDesk from '@/components/portal/ExecutiveDesk';
+import { EXEC_CODES } from '@/lib/execDesk';
 import { InterviewsPanel } from '@/components/admin/InterviewsPanel';
 import { InterviewBriefingPanel } from '@/components/portal/InterviewBriefingPanel';
 import { WhosWorkingBar } from '@/components/portal/WhosWorkingBar';
@@ -108,7 +110,7 @@ import { DialerPanel } from '@/components/portal/DialerPanel';
 import { Phone as PhoneIcon } from 'lucide-react';
 
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas' | 'execdesk';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -178,7 +180,7 @@ const PortalPage: React.FC = () => {
     return next;
   });
   // Tabs that benefit from a wider canvas (workspace boards, company portal, etc.)
-  const WIDE_TABS = new Set<Tab>(['workspace','sharedws','company','briefing','interviews','careers','leads','forecast','documents','training','onboarding']);
+  const WIDE_TABS = new Set<Tab>(['execdesk','workspace','sharedws','company','briefing','interviews','careers','leads','forecast','documents','training','onboarding']);
 
 
 
@@ -355,7 +357,7 @@ const PortalPage: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
     const toolParam = params.get('tool');
-    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas'];
+    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas','execdesk'];
     const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','golden-report','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
     if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
       setTab(tabParam as Tab);
@@ -628,6 +630,7 @@ const PortalPage: React.FC = () => {
     { id: 'linkedin', label: 'Set Up LinkedIn', icon: <Linkedin className="w-4 h-4" />, iconCmp: Linkedin },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen, adminOrPartnerOnly: true },
     { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket, adminOrPartnerOnly: true },
+    { id: 'execdesk', label: 'Executive Desk', icon: <ShieldCheck className="w-4 h-4" />, iconCmp: ShieldCheck },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
     { id: 'training', label: 'Team Training', icon: <GraduationCap className="w-4 h-4" />, iconCmp: GraduationCap },
@@ -648,12 +651,14 @@ const PortalPage: React.FC = () => {
   // "Shared with Joseph" / interviews / briefing are partner+admin-only collaboration spaces.
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
-  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing']);
+  const execUnlocked = isAdmin || (!!profile && EXEC_CODES.has(profile.code));
+  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing', 'execdesk']);
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
     && (!t.adminOrPartnerOnly || isAdmin || isPartner)
     && (t.id !== 'careers' || careersUnlocked)
+    && (t.id !== 'execdesk' || execUnlocked)
     && (t.id !== 'sharedws' || sharedWsUnlocked)
     && (t.id !== 'interviews' || sharedWsUnlocked)
     && (t.id !== 'briefing' || sharedWsUnlocked)
@@ -797,6 +802,7 @@ const PortalPage: React.FC = () => {
       case 'team': return <TeamMessageBoard isAdmin={false} authorName={profile?.rep_name} />;
       case 'workspace': return <WorkspaceTab />;
       case 'ideas': return <IdeaRoom isAdmin={false} />;
+      case 'execdesk': return <ExecutiveDesk />;
       case 'sharedws': return <SharedWorkspace me="braden" />;
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
