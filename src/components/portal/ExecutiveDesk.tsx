@@ -29,6 +29,7 @@ export const ExecutiveDesk: React.FC = () => {
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
   const [dayOpen, setDayOpen] = useState<string | null>(null);
   const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
