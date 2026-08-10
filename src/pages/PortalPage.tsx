@@ -84,6 +84,7 @@ import { PortalDocuments } from '@/components/portal/PortalDocuments';
 import { IncentivePlan } from '@/components/portal/IncentivePlan';
 import { Trophy } from 'lucide-react';
 import { Linkedin } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { LinkedInSetupGuide } from '@/components/portal/LinkedInSetupGuide';
 import { CompanyCalendarRepView } from '@/components/portal/CompanyCalendarRepView';
 import { LanguageToggle } from '@/components/portal/LanguageToggle';

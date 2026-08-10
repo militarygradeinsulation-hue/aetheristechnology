@@ -72,6 +72,7 @@ const AdminComponentStudioPanel = lazy(() => import('@/components/admin/AdminCom
 const AdminChaosScanTool = lazy(() => import('@/components/admin/ChaosScanTool'));
 const AdminHeadToHeadTool = lazy(() => import('@/components/admin/HeadToHeadTool'));
 const SharedWorkspace = lazy(() => import('@/components/admin/SharedWorkspace'));
+const ExecutiveDesk = lazy(() => import('@/components/portal/ExecutiveDesk'));
 const InterviewsPanel = lazy(() => import('@/components/admin/InterviewsPanel').then(m => ({ default: m.InterviewsPanel })));
 const InterviewBriefingPanel = lazy(() => import('@/components/portal/InterviewBriefingPanel').then(m => ({ default: m.InterviewBriefingPanel })));
 const AdminImageStudio = lazy(() => import('@/components/admin/AdminImageStudio').then(m => ({ default: m.AdminImageStudio })));
@@ -223,7 +224,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved) return saved as any;
@@ -264,6 +265,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'news', label: 'News', icon: Newspaper },
     { key: 'outlook', label: 'Outlook Sync', icon: Send },
     { key: 'overview', label: 'Overview', icon: BarChart3 },
+    { key: 'execdesk', label: 'Executive Desk', icon: CalendarDays },
     { key: 'calendars', label: 'Rep Calendars', icon: CalendarDays },
     { key: 'playbook', label: 'Rep Playbook', icon: BookMarked },
     { key: 'sales', label: 'Sales & Customers', icon: DollarSign },
@@ -625,6 +627,7 @@ const AdminDashboard: React.FC = () => {
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
       case 'onboarding': return <AdminOnboardingStudio />;
+      case 'execdesk': return <ExecutiveDesk />;
       case 'calendars': return <AdminRepCalendarPanel />;
       case 'companycal': return (
         <div className="space-y-6">
@@ -836,7 +839,7 @@ const AdminDashboard: React.FC = () => {
                 { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
                 { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
-                { name: 'Ops', keys: ['calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
+                { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
                 { name: 'Forensics & Tools', keys: ['systems', 'easymode', 'briefings', 'tools'] },
                 { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
               ];
