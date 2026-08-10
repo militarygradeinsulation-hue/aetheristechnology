@@ -226,7 +226,15 @@ export const ExecutiveDesk: React.FC = () => {
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
                     <div className="space-y-1 mt-1">
                       {dayItems.map((e) => (
-                        <div key={e.id} className="group rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight">
+                        <div
+                          key={e.id}
+                          role="button"
+                          tabIndex={0}
+                          title={`${e.title}${e.details ? ` — ${e.details}` : ""}`}
+                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
+                          onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); } }}
+                          className="group cursor-pointer rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight hover:bg-primary/25"
+                        >
                           <div className="flex items-start justify-between gap-1">
                             <span className="truncate">{e.title}</span>
                             <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
