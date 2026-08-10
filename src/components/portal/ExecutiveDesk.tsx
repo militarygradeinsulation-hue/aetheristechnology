@@ -98,7 +98,7 @@ export const ExecutiveDesk: React.FC = () => {
     }
   };
 
-  const events = useMemo(() => items.filter((i) => i.kind === "event"), [items]);
+  
   const tasks = useMemo(() => items.filter((i) => i.kind === "task"), [items]);
   const notes = useMemo(() => items.filter((i) => i.kind === "note"), [items]);
 
