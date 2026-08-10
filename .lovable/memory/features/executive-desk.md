@@ -9,3 +9,7 @@ type: feature
 - UI: `src/components/portal/ExecutiveDesk.tsx` — Calendar (month grid), Tasks (checkbox + assignee), Notes (inline editable).
 - Mounted as `Executive Desk` tab in the rep/partner portal (only for the three codes) and in the admin dashboard Ops group.
 - Client helpers: `src/lib/execDesk.ts`.
+- Kinds: event / meeting / task / note (DB check constraint updated). Calendar shows event+meeting+task.
+- Calendar supports HTML5 drag-and-drop rescheduling (drop on a day keeps the time, changes the date).
+- Views: Calendar (with All/Events/Meetings/Tasks filter), Events, Meetings, Tasks, Notes.
+- Notifications: bell popover with overdue tasks + next-48h items, 15-minute-before toast and optional browser desktop notification.
