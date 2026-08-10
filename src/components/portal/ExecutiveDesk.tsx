@@ -337,14 +337,28 @@ export const ExecutiveDesk: React.FC = () => {
                 className={`rounded-lg border p-3 space-y-2 ${focusId === e.id ? "border-amber/70 bg-amber/5" : "border-border/60"}`}
               >
                 <div className="flex items-start gap-2">
+                  {e.kind === "task" && (
+                    <Checkbox
+                      checked={e.status === "done"}
+                      onCheckedChange={(v) => void patch(e.id, { status: v ? "done" : "open" })}
+                      className="mt-2"
+                    />
+                  )}
                   <Input
                     defaultValue={e.title}
                     onBlur={(ev) => { if (ev.target.value.trim() && ev.target.value !== e.title) void patch(e.id, { title: ev.target.value.trim() }); }}
-                    className="h-8 text-sm"
+                    className={`h-8 text-sm ${e.kind === "task" && e.status === "done" ? "line-through text-muted-foreground" : ""}`}
                   />
                   <Button size="icon" variant="ghost" onClick={() => void remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  <Select value={e.kind} onValueChange={(v) => void patch(e.id, { kind: v as ExecKind })}>
+                    <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="task">Task</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Input
                     type="time"
                     className="h-8 w-[110px]"
@@ -357,6 +371,7 @@ export const ExecutiveDesk: React.FC = () => {
                   </Select>
                   <Badge variant="outline" className="text-[9px] self-center">by {execPersonLabel(e.author)}</Badge>
                 </div>
+
                 <Textarea
                   defaultValue={e.details || ""}
                   rows={2}
