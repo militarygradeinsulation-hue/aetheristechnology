@@ -29,6 +29,7 @@ export const ExecutiveDesk: React.FC = () => {
   const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
   const [dayOpen, setDayOpen] = useState<string | null>(null);
   const [dayDraft, setDayDraft] = useState({ title: "", time: "09:00", assignee: "all", details: "" });
+  const [focusId, setFocusId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -226,7 +227,15 @@ export const ExecutiveDesk: React.FC = () => {
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
                     <div className="space-y-1 mt-1">
                       {dayItems.map((e) => (
-                        <div key={e.id} className="group rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight">
+                        <div
+                          key={e.id}
+                          role="button"
+                          tabIndex={0}
+                          title={`${e.title}${e.details ? ` — ${e.details}` : ""}`}
+                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "" }); }}
+                          onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); } }}
+                          className="group cursor-pointer rounded bg-primary/15 px-1 py-0.5 text-[10px] leading-tight hover:bg-primary/25"
+                        >
                           <div className="flex items-start justify-between gap-1">
                             <span className="truncate">{e.title}</span>
                             <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
@@ -302,7 +311,7 @@ export const ExecutiveDesk: React.FC = () => {
         </Card>
       )}
 
-      <Dialog open={!!dayOpen} onOpenChange={(o) => !o && setDayOpen(null)}>
+      <Dialog open={!!dayOpen} onOpenChange={(o) => { if (!o) { setDayOpen(null); setFocusId(null); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-display">
@@ -315,7 +324,11 @@ export const ExecutiveDesk: React.FC = () => {
               <p className="text-sm text-muted-foreground">Nothing scheduled. Add something below.</p>
             )}
             {(dayOpen ? byDay[dayOpen] || [] : []).map((e) => (
-              <div key={e.id} className="rounded-lg border border-border/60 p-3 space-y-2">
+              <div
+                key={e.id}
+                ref={(el) => { if (el && focusId === e.id) el.scrollIntoView({ block: "nearest" }); }}
+                className={`rounded-lg border p-3 space-y-2 ${focusId === e.id ? "border-amber/70 bg-amber/5" : "border-border/60"}`}
+              >
                 <div className="flex items-start gap-2">
                   <Input
                     defaultValue={e.title}
