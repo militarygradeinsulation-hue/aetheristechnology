@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 
-export type ExecKind = "event" | "task" | "note";
+export type ExecKind = "event" | "meeting" | "task" | "note";
 export type ExecStatus = "open" | "doing" | "done";
 export type ExecPriority = "low" | "normal" | "high" | "urgent";
 export type ExecPerson = "joseph" | "braden" | "dean";

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, CalendarDays, ListChecks, StickyNote, Plus, Trash2, ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Loader2, CalendarDays, ListChecks, StickyNote, Plus, Trash2, ShieldCheck,
+  ChevronLeft, ChevronRight, Bell, Handshake, GripVertical,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   listExecItems, createExecItem, updateExecItem, deleteExecItem,
@@ -16,7 +20,21 @@ import {
 
 const PEOPLE = ["all", "joseph", "braden", "dean"] as const;
 
+/** Scheduled kinds shown on the calendar. */
+const SCHEDULED: ExecKind[] = ["event", "meeting", "task"];
+
+const KIND_META: Record<string, { label: string; chip: string; dot: string }> = {
+  event:   { label: "Event",   chip: "bg-primary/15 hover:bg-primary/25",             dot: "bg-primary" },
+  meeting: { label: "Meeting", chip: "bg-fuchsia-500/15 hover:bg-fuchsia-500/25",     dot: "bg-fuchsia-500" },
+  task:    { label: "Task",    chip: "bg-emerald-500/15 hover:bg-emerald-500/25",     dot: "bg-emerald-500" },
+  note:    { label: "Note",    chip: "bg-muted hover:bg-muted/80",                    dot: "bg-muted-foreground" },
+};
+
+type ViewTab = "calendar" | "event" | "meeting" | "task" | "note";
+type CalFilter = "all" | "event" | "meeting" | "task";
+
 const toISODate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const timeOf = (iso: string | null) => (iso ? new Date(iso).toTimeString().slice(0, 5) : "09:00");
 
 export const ExecutiveDesk: React.FC = () => {
   const { toast } = useToast();
@@ -24,12 +42,18 @@ export const ExecutiveDesk: React.FC = () => {
   const [me, setMe] = useState<ExecPerson>("joseph");
   const [loading, setLoading] = useState(true);
   const [denied, setDenied] = useState(false);
-  const [tab, setTab] = useState<ExecKind>("event");
+  const [tab, setTab] = useState<ViewTab>("calendar");
+  const [calFilter, setCalFilter] = useState<CalFilter>("all");
   const [month, setMonth] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
-  const [draft, setDraft] = useState({ title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal" });
+  const [draft, setDraft] = useState<{ title: string; details: string; date: string; time: string; assignee: string; priority: string; kind: ExecKind }>(
+    { title: "", details: "", date: toISODate(new Date()), time: "09:00", assignee: "all", priority: "normal", kind: "event" }
+  );
   const [dayOpen, setDayOpen] = useState<string | null>(null);
-  const [dayDraft, setDayDraft] = useState<{ title: string; time: string; assignee: string; details: string; kind: "event" | "task" }>({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" });
+  const [dayDraft, setDayDraft] = useState<{ title: string; time: string; assignee: string; details: string; kind: ExecKind }>({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" });
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverDay, setDragOverDay] = useState<string | null>(null);
+  const notifiedRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     try {
@@ -45,17 +69,23 @@ export const ExecutiveDesk: React.FC = () => {
   }, [toast]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  // Keep the desk fresh so teammates' changes show up.
+  useEffect(() => {
+    const t = setInterval(() => { void refresh(); }, 120000);
+    return () => clearInterval(t);
+  }, [refresh]);
 
   const add = async () => {
     if (!draft.title.trim()) return;
+    const kind: ExecKind = tab === "calendar" ? draft.kind : (tab as ExecKind);
     try {
       const item = await createExecItem({
-        kind: tab,
+        kind,
         title: draft.title.trim(),
         details: draft.details.trim() || null,
         assignee: draft.assignee,
         priority: draft.priority as ExecItem["priority"],
-        starts_at: tab === "note" ? null : new Date(`${draft.date}T${draft.time || "09:00"}`).toISOString(),
+        starts_at: kind === "note" ? null : new Date(`${draft.date}T${draft.time || "09:00"}`).toISOString(),
       });
       setItems((p) => [item, ...p]);
       setDraft((s) => ({ ...s, title: "", details: "" }));
@@ -63,6 +93,7 @@ export const ExecutiveDesk: React.FC = () => {
       toast({ title: "Save failed", description: (e as Error).message, variant: "destructive" });
     }
   };
+
   const addOnDay = async () => {
     if (!dayOpen || !dayDraft.title.trim()) return;
     try {
@@ -81,7 +112,6 @@ export const ExecutiveDesk: React.FC = () => {
     }
   };
 
-
   const patch = async (id: string, p: Partial<ExecItem>) => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...p } as ExecItem : i)));
     try { await updateExecItem(id, p); } catch (e) {
@@ -98,9 +128,23 @@ export const ExecutiveDesk: React.FC = () => {
     }
   };
 
-  
-  const tasks = useMemo(() => items.filter((i) => i.kind === "task"), [items]);
-  const notes = useMemo(() => items.filter((i) => i.kind === "note"), [items]);
+  /** Drop a dragged item onto a day — keeps the time, changes the date. */
+  const dropOnDay = async (day: string) => {
+    const id = dragId;
+    setDragId(null);
+    setDragOverDay(null);
+    if (!id) return;
+    const it = items.find((i) => i.id === id);
+    if (!it) return;
+    const current = it.starts_at ? toISODate(new Date(it.starts_at)) : null;
+    if (current === day) return;
+    const iso = new Date(`${day}T${timeOf(it.starts_at)}`).toISOString();
+    await patch(id, { starts_at: iso });
+    toast({ title: "Rescheduled", description: `${it.title} → ${new Date(`${day}T12:00`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}` });
+  };
+
+  const byKind = useCallback((k: ExecKind) => items.filter((i) => i.kind === k), [items]);
+  const notes = useMemo(() => byKind("note"), [byKind]);
 
   const grid = useMemo(() => {
     const first = new Date(month.getFullYear(), month.getMonth(), 1);
@@ -116,16 +160,68 @@ export const ExecutiveDesk: React.FC = () => {
   const byDay = useMemo(() => {
     const m: Record<string, ExecItem[]> = {};
     for (const e of items) {
-      if (e.kind === "note" || !e.starts_at) continue;
+      if (!SCHEDULED.includes(e.kind) || !e.starts_at) continue;
+      if (calFilter !== "all" && e.kind !== calFilter) continue;
       const k = toISODate(new Date(e.starts_at));
       (m[k] ||= []).push(e);
     }
-    for (const k of Object.keys(m)) {
-      m[k].sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
-    }
+    for (const k of Object.keys(m)) m[k].sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
     return m;
-  }, [items]);
+  }, [items, calFilter]);
 
+  // ===== Notifications =====
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowTs(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  const alerts = useMemo(() => {
+    const soon: ExecItem[] = [];
+    const overdue: ExecItem[] = [];
+    for (const i of items) {
+      if (!i.starts_at || i.kind === "note") continue;
+      if (i.kind === "task" && i.status === "done") continue;
+      const t = new Date(i.starts_at).getTime();
+      if (t < nowTs) { if (i.kind === "task") overdue.push(i); }
+      else if (t - nowTs <= 48 * 3600 * 1000) soon.push(i);
+    }
+    soon.sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
+    overdue.sort((a, b) => (b.starts_at || "").localeCompare(a.starts_at || ""));
+    return { soon, overdue };
+  }, [items, nowTs]);
+
+  // Fire a toast + browser notification 15 minutes before anything starts.
+  useEffect(() => {
+    for (const i of alerts.soon) {
+      const t = new Date(i.starts_at as string).getTime();
+      const mins = (t - nowTs) / 60000;
+      if (mins > 15 || mins < 0 || notifiedRef.current.has(i.id)) continue;
+      notifiedRef.current.add(i.id);
+      const body = `${new Date(i.starts_at as string).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · ${execPersonLabel(i.assignee)}`;
+      toast({ title: `${KIND_META[i.kind]?.label ?? "Item"} starting soon: ${i.title}`, description: body });
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        try { new Notification(`Executive Desk — ${i.title}`, { body }); } catch { /* ignore */ }
+      }
+    }
+  }, [alerts.soon, nowTs, toast]);
+
+  const askNotifPermission = async () => {
+    if (typeof Notification === "undefined") {
+      toast({ title: "Not supported", description: "This browser can't show desktop notifications." });
+      return;
+    }
+    const p = await Notification.requestPermission();
+    toast({ title: p === "granted" ? "Desktop alerts on" : "Desktop alerts not enabled" });
+  };
+
+  const alertCount = alerts.soon.length + alerts.overdue.length;
+
+  const openDay = (k: string, id?: string) => {
+    setDayOpen(k);
+    setFocusId(id ?? null);
+    setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" });
+  };
 
   if (loading) {
     return <Card><CardContent className="py-10 flex items-center justify-center text-muted-foreground">
@@ -138,6 +234,49 @@ export const ExecutiveDesk: React.FC = () => {
       This desk is private to Joseph, Braden and Dean.
     </CardContent></Card>;
   }
+
+  const listView = (kind: ExecKind) => {
+    const rows = byKind(kind).slice().sort((a, b) => (a.starts_at || "").localeCompare(b.starts_at || ""));
+    return (
+      <Card>
+        <CardContent className="pt-6 space-y-2">
+          {rows.length === 0 && <p className="text-sm text-muted-foreground">Nothing here yet.</p>}
+          {rows.map((t) => (
+            <div key={t.id} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+              {kind === "task" && (
+                <Checkbox
+                  checked={t.status === "done"}
+                  onCheckedChange={(v) => void patch(t.id, { status: v ? "done" : "open" })}
+                  className="mt-1"
+                />
+              )}
+              <span className={`mt-2 h-2 w-2 shrink-0 rounded-full ${KIND_META[kind].dot}`} />
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-medium ${t.status === "done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</div>
+                {t.details && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{t.details}</p>}
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge variant="outline" className="text-[9px]">by {execPersonLabel(t.author)}</Badge>
+                  {t.starts_at && (
+                    <button
+                      className="text-[10px] text-amber underline-offset-2 hover:underline"
+                      onClick={() => { const d = new Date(t.starts_at as string); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setTab("calendar"); openDay(toISODate(d), t.id); }}
+                    >
+                      {new Date(t.starts_at).toLocaleString()}
+                    </button>
+                  )}
+                  <Select value={t.assignee} onValueChange={(v) => void patch(t.id, { assignee: v })}>
+                    <SelectTrigger className="h-6 w-[120px] text-[10px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button size="icon" variant="ghost" onClick={() => void remove(t.id)}><Trash2 className="w-4 h-4" /></Button>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -152,9 +291,11 @@ export const ExecutiveDesk: React.FC = () => {
                 Private to Joseph · Braden · Dean — signed in as {execPersonLabel(me)}
               </p>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap items-center">
               {([
-                { k: "event", label: "Calendar", Icon: CalendarDays },
+                { k: "calendar", label: "Calendar", Icon: CalendarDays },
+                { k: "event", label: "Events", Icon: CalendarDays },
+                { k: "meeting", label: "Meetings", Icon: Handshake },
                 { k: "task", label: "Tasks", Icon: ListChecks },
                 { k: "note", label: "Notes", Icon: StickyNote },
               ] as const).map(({ k, label, Icon }) => (
@@ -162,15 +303,69 @@ export const ExecutiveDesk: React.FC = () => {
                   <Icon className="w-4 h-4 mr-1" /> {label}
                 </Button>
               ))}
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="sm" variant="outline" className="relative">
+                    <Bell className="w-4 h-4" />
+                    {alertCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] rounded-full bg-crimson px-1 text-[9px] font-bold leading-4 text-white">
+                        {alertCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-80 p-0">
+                  <div className="flex items-center justify-between border-b border-border/60 p-3">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">Notifications</span>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => void askNotifPermission()}>Enable desktop alerts</Button>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto p-2 space-y-1">
+                    {alertCount === 0 && <p className="p-2 text-sm text-muted-foreground">You're clear — nothing due in the next 48 hours.</p>}
+                    {alerts.overdue.map((i) => (
+                      <button
+                        key={i.id}
+                        className="w-full rounded-md border border-crimson/40 bg-crimson/5 p-2 text-left hover:bg-crimson/10"
+                        onClick={() => { const d = new Date(i.starts_at as string); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setTab("calendar"); openDay(toISODate(d), i.id); }}
+                      >
+                        <div className="text-xs font-medium">Overdue · {i.title}</div>
+                        <div className="text-[10px] text-muted-foreground">{new Date(i.starts_at as string).toLocaleString()} · {execPersonLabel(i.assignee)}</div>
+                      </button>
+                    ))}
+                    {alerts.soon.map((i) => (
+                      <button
+                        key={i.id}
+                        className="w-full rounded-md border border-border/60 p-2 text-left hover:bg-muted/50"
+                        onClick={() => { const d = new Date(i.starts_at as string); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setTab("calendar"); openDay(toISODate(d), i.id); }}
+                      >
+                        <div className="flex items-center gap-2 text-xs font-medium">
+                          <span className={`h-2 w-2 rounded-full ${KIND_META[i.kind]?.dot}`} /> {i.title}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">{new Date(i.starts_at as string).toLocaleString()} · {execPersonLabel(i.assignee)}</div>
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid gap-2 md:grid-cols-[1fr_auto_auto_auto] items-center">
+          <div className="grid gap-2 md:grid-cols-[auto_1fr_auto_auto_auto] items-center">
+            {tab === "calendar" && (
+              <Select value={draft.kind} onValueChange={(v) => setDraft((s) => ({ ...s, kind: v as ExecKind }))}>
+                <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
+                  <SelectItem value="task">Task</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
             <Input
               value={draft.title}
               onChange={(e) => setDraft((s) => ({ ...s, title: e.target.value }))}
-              placeholder={tab === "event" ? "New meeting or event…" : tab === "task" ? "New task…" : "New note title…"}
+              placeholder={tab === "note" ? "New note title…" : tab === "task" ? "New task…" : tab === "meeting" ? "New meeting…" : "New item…"}
               onKeyDown={(e) => { if (e.key === "Enter") void add(); }}
             />
             {tab !== "note" && (
@@ -196,18 +391,26 @@ export const ExecutiveDesk: React.FC = () => {
         </CardContent>
       </Card>
 
-      {tab === "event" && (
+      {tab === "calendar" && (
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-base font-display">
                 {month.toLocaleString("en-US", { month: "long", year: "numeric" })}
               </CardTitle>
-              <div className="flex gap-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex gap-1">
+                  {(["all", "event", "meeting", "task"] as CalFilter[]).map((f) => (
+                    <Button key={f} size="sm" variant={calFilter === f ? "secondary" : "ghost"} className="h-7 text-[11px]" onClick={() => setCalFilter(f)}>
+                      {f === "all" ? "All" : `${KIND_META[f].label}s`}
+                    </Button>
+                  ))}
+                </div>
                 <Button size="icon" variant="outline" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><ChevronLeft className="w-4 h-4" /></Button>
                 <Button size="icon" variant="outline" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}><ChevronRight className="w-4 h-4" /></Button>
               </div>
             </div>
+            <p className="text-[11px] text-muted-foreground">Drag any item to another day to reschedule it.</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-7 gap-1 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
@@ -219,14 +422,18 @@ export const ExecutiveDesk: React.FC = () => {
                 const dayItems = byDay[k] || [];
                 const dim = d.getMonth() !== month.getMonth();
                 const today = k === toISODate(new Date());
+                const over = dragOverDay === k;
                 return (
                   <div
                     key={k}
                     role="button"
                     tabIndex={0}
-                    onClick={() => { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
-                    onKeyDown={(ev) => { if (ev.key === "Enter") { setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); } }}
-                    className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
+                    onClick={() => openDay(k)}
+                    onKeyDown={(ev) => { if (ev.key === "Enter") openDay(k); }}
+                    onDragOver={(ev) => { if (dragId) { ev.preventDefault(); setDragOverDay(k); } }}
+                    onDragLeave={() => setDragOverDay((c) => (c === k ? null : c))}
+                    onDrop={(ev) => { ev.preventDefault(); void dropOnDay(k); }}
+                    className={`min-h-[86px] cursor-pointer rounded-md border p-1 text-left transition-colors hover:border-amber/60 hover:bg-amber/5 ${dim ? "opacity-40" : ""} ${over ? "border-amber bg-amber/10 ring-1 ring-amber" : today ? "border-amber/60 bg-amber/5" : "border-border/60"}`}
                   >
                     <div className="text-[11px] text-muted-foreground">{d.getDate()}</div>
                     <div className="space-y-1 mt-1">
@@ -235,14 +442,18 @@ export const ExecutiveDesk: React.FC = () => {
                           key={e.id}
                           role="button"
                           tabIndex={0}
-                          title={`${e.kind === "task" ? "Task: " : ""}${e.title}${e.details ? ` — ${e.details}` : ""}`}
-                          onClick={(ev) => { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); setDayDraft({ title: "", time: "09:00", assignee: "all", details: "", kind: "event" }); }}
-                          onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); setFocusId(e.id); setDayOpen(k); } }}
-                          className={`group cursor-pointer rounded px-1 py-0.5 text-[10px] leading-tight ${e.kind === "task" ? "bg-emerald-500/15 hover:bg-emerald-500/25" : "bg-primary/15 hover:bg-primary/25"}`}
+                          draggable
+                          onDragStart={(ev) => { ev.stopPropagation(); setDragId(e.id); ev.dataTransfer.effectAllowed = "move"; try { ev.dataTransfer.setData("text/plain", e.id); } catch { /* ignore */ } }}
+                          onDragEnd={() => { setDragId(null); setDragOverDay(null); }}
+                          title={`${KIND_META[e.kind]?.label}: ${e.title}${e.details ? ` — ${e.details}` : ""}`}
+                          onClick={(ev) => { ev.stopPropagation(); openDay(k, e.id); }}
+                          onKeyDown={(ev) => { if (ev.key === "Enter") { ev.stopPropagation(); openDay(k, e.id); } }}
+                          className={`group cursor-grab active:cursor-grabbing rounded px-1 py-0.5 text-[10px] leading-tight ${KIND_META[e.kind]?.chip} ${dragId === e.id ? "opacity-50" : ""}`}
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <span className={`truncate ${e.kind === "task" && e.status === "done" ? "line-through opacity-60" : ""}`}>
-                              {e.kind === "task" ? "✓ " : ""}{e.title}
+                            <span className={`flex min-w-0 items-center gap-1 truncate ${e.kind === "task" && e.status === "done" ? "line-through opacity-60" : ""}`}>
+                              <GripVertical className="w-2.5 h-2.5 shrink-0 opacity-50" />
+                              <span className="truncate">{e.kind === "task" ? "✓ " : e.kind === "meeting" ? "🤝 " : ""}{e.title}</span>
                             </span>
                             <button onClick={(ev) => { ev.stopPropagation(); void remove(e.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-3 h-3" />
@@ -251,7 +462,6 @@ export const ExecutiveDesk: React.FC = () => {
                           <span className="text-muted-foreground">{execPersonLabel(e.assignee)}</span>
                         </div>
                       ))}
-
                     </div>
                   </div>
                 );
@@ -261,36 +471,9 @@ export const ExecutiveDesk: React.FC = () => {
         </Card>
       )}
 
-      {tab === "task" && (
-        <Card>
-          <CardContent className="pt-6 space-y-2">
-            {tasks.length === 0 && <p className="text-sm text-muted-foreground">No executive tasks yet.</p>}
-            {tasks.map((t) => (
-              <div key={t.id} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
-                <Checkbox
-                  checked={t.status === "done"}
-                  onCheckedChange={(v) => void patch(t.id, { status: v ? "done" : "open" })}
-                  className="mt-1"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-medium ${t.status === "done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</div>
-                  {t.details && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{t.details}</p>}
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <Badge variant="outline" className="text-[9px]">{execPersonLabel(t.assignee)}</Badge>
-                    <Badge variant="outline" className="text-[9px]">by {execPersonLabel(t.author)}</Badge>
-                    {t.starts_at && <span className="text-[10px] text-muted-foreground">{new Date(t.starts_at).toLocaleString()}</span>}
-                    <Select value={t.assignee} onValueChange={(v) => void patch(t.id, { assignee: v })}>
-                      <SelectTrigger className="h-6 w-[120px] text-[10px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>{PEOPLE.map((p) => <SelectItem key={p} value={p}>{execPersonLabel(p)}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Button size="icon" variant="ghost" onClick={() => void remove(t.id)}><Trash2 className="w-4 h-4" /></Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+      {tab === "event" && listView("event")}
+      {tab === "meeting" && listView("meeting")}
+      {tab === "task" && listView("task")}
 
       {tab === "note" && (
         <Card>
@@ -356,13 +539,20 @@ export const ExecutiveDesk: React.FC = () => {
                     <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="meeting">Meeting</SelectItem>
                       <SelectItem value="task">Task</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input
+                    type="date"
+                    className="h-8 w-[150px]"
+                    defaultValue={e.starts_at ? toISODate(new Date(e.starts_at)) : dayOpen || ""}
+                    onChange={(ev) => { if (ev.target.value) void patch(e.id, { starts_at: new Date(`${ev.target.value}T${timeOf(e.starts_at)}`).toISOString() }); }}
+                  />
+                  <Input
                     type="time"
                     className="h-8 w-[110px]"
-                    defaultValue={e.starts_at ? new Date(e.starts_at).toTimeString().slice(0, 5) : "09:00"}
+                    defaultValue={timeOf(e.starts_at)}
                     onChange={(ev) => { if (ev.target.value && dayOpen) void patch(e.id, { starts_at: new Date(`${dayOpen}T${ev.target.value}`).toISOString() }); }}
                   />
                   <Select value={e.assignee} onValueChange={(v) => void patch(e.id, { assignee: v })}>
@@ -385,17 +575,18 @@ export const ExecutiveDesk: React.FC = () => {
 
           <div className="border-t border-border/60 pt-3 space-y-2">
             <div className="flex gap-2">
-              <Select value={dayDraft.kind} onValueChange={(v) => setDayDraft((s) => ({ ...s, kind: v as "event" | "task" }))}>
+              <Select value={dayDraft.kind} onValueChange={(v) => setDayDraft((s) => ({ ...s, kind: v as ExecKind }))}>
                 <SelectTrigger className="w-[110px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
                   <SelectItem value="task">Task</SelectItem>
                 </SelectContent>
               </Select>
               <Input
                 value={dayDraft.title}
                 onChange={(ev) => setDayDraft((s) => ({ ...s, title: ev.target.value }))}
-                placeholder={dayDraft.kind === "task" ? "New task on this day…" : "New event on this day…"}
+                placeholder={dayDraft.kind === "task" ? "New task on this day…" : dayDraft.kind === "meeting" ? "New meeting on this day…" : "New event on this day…"}
                 onKeyDown={(ev) => { if (ev.key === "Enter") void addOnDay(); }}
               />
               <Input type="time" className="w-[110px]" value={dayDraft.time} onChange={(ev) => setDayDraft((s) => ({ ...s, time: ev.target.value }))} />
@@ -408,7 +599,6 @@ export const ExecutiveDesk: React.FC = () => {
               <Input value={dayDraft.details} onChange={(ev) => setDayDraft((s) => ({ ...s, details: ev.target.value }))} placeholder="Details (optional)" />
               <Button onClick={() => void addOnDay()}><Plus className="w-4 h-4 mr-1" /> Add</Button>
             </div>
-
           </div>
         </DialogContent>
       </Dialog>

@@ -1,0 +1,2 @@
+ALTER TABLE public.exec_items DROP CONSTRAINT IF EXISTS exec_items_kind_check;
+ALTER TABLE public.exec_items ADD CONSTRAINT exec_items_kind_check CHECK (kind = ANY (ARRAY['event'::text,'meeting'::text,'task'::text,'note'::text]));
