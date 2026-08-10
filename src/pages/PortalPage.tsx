@@ -652,7 +652,7 @@ const PortalPage: React.FC = () => {
   // Reps must NEVER see them, regardless of saved visibleTabs config.
   const sharedWsUnlocked = (isPartner || isAdmin) && !!profile && CAREERS_ALLOWED_CODES.has(profile.code);
   const execUnlocked = isAdmin || (!!profile && EXEC_CODES.has(profile.code));
-  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing', 'execdesk']);
+  const HIDDEN_FOR_REPS = new Set<Tab>(['sharedws', 'interviews', 'briefing']);
   const availableTabs = tabs.filter(t =>
     (!t.partnerOnly || isPartner)
     && (!t.adminOnly || isAdmin)
