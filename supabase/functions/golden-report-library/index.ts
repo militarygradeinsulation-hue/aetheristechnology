@@ -188,8 +188,30 @@ serve(async (req) => {
     const internal = req.headers.get("x-internal-key") === SVC;
 
     if (!isAdmin && !portal && !internal) return json({ error: "Unauthorized" }, 401);
-    // Reps see only their own reports; partners/admins see everything they own.
-    const repScope = portal && portal.role === "rep" ? portal.code : null;
+
+    // Tenant scope. Admin/internal are global. Every other portal role is
+    // pinned to explicit owner codes; an untieable token reads nothing.
+    const globalScope = isAdmin || internal;
+    let scopeCodes: string[] | null = null; // null => global
+    if (!globalScope) {
+      if (!portal) return json({ error: "Unauthorized" }, 401);
+      if (portal.role === "rep") {
+        scopeCodes = [portal.code];
+      } else if (portal.role === "partner") {
+        const { data: self } = await sb.from("rep_codes").select("team_name").eq("code", portal.code).maybeSingle();
+        const team = (self as { team_name?: string | null } | null)?.team_name || null;
+        let codes = [portal.code];
+        if (team) {
+          const { data: mates } = await sb.from("rep_codes").select("code").eq("team_name", team);
+          codes = codes.concat(((mates || []) as Array<{ code: string }>).map((r) => r.code));
+        }
+        scopeCodes = [...new Set(codes)];
+      } else {
+        scopeCodes = [];
+      }
+    }
+    const scoped = <T extends { in: (c: string, v: string[]) => T }>(q: T): T =>
+      scopeCodes === null ? q : q.in("rep_code", scopeCodes.length ? scopeCodes : ["\u0000none"]);
 
     /* archive a single scan (completion hook / admin retry) */
     if (action === "archive_scan") {
@@ -270,7 +292,7 @@ serve(async (req) => {
       // Scope by matching archive rows first (also enforces rep scoping).
       let aq = sb.from("golden_report_archive")
         .select("id, company_id, scan_id, report_state, is_valid, report_source, rep_code, annual_low, annual_high, finding_count, root_cause_count, grade, score, completed_at, executive_summary, target_url, report_version");
-      if (repScope) aq = aq.eq("rep_code", repScope);
+      aq = scoped(aq as never) as never;
       if (source) aq = aq.eq("report_source", source);
       if (state) aq = aq.eq("report_state", state);
       if (body.since) aq = aq.gte("completed_at", String(body.since));
@@ -387,10 +409,10 @@ serve(async (req) => {
       const { data: company } = await sb.from("golden_report_companies").select("*").eq("id", companyId).maybeSingle();
       if (!company) return json({ error: "not found" }, 404);
       let aq = sb.from("golden_report_archive").select("*").eq("company_id", companyId);
-      if (repScope) aq = aq.eq("rep_code", repScope);
+      aq = scoped(aq as never) as never;
       const { data: reports } = await aq.order("completed_at", { ascending: false });
       const list = (reports || []) as Record<string, unknown>[];
-      if (repScope && list.length === 0) return json({ error: "Forbidden" }, 403);
+      if (scopeCodes !== null && list.length === 0) return json({ error: "Forbidden" }, 403);
       const { data: bps } = await sb.from("golden_system_blueprints")
         .select("id, scan_id, blueprint_version, status, approval_state, validation_passed, created_at, error_message")
         .in("scan_id", list.map((r) => String(r.scan_id)))
@@ -403,7 +425,7 @@ serve(async (req) => {
       const scanId = String(body.scan_id ?? "");
       if (!scanId) return json({ error: "scan_id required" }, 400);
       let aq = sb.from("golden_report_archive").select("*").eq("scan_id", scanId);
-      if (repScope) aq = aq.eq("rep_code", repScope);
+      aq = scoped(aq as never) as never;
       const { data: archive } = await aq.maybeSingle();
       if (!archive) return json({ error: "not found" }, 404);
       const { data: findings } = await sb.from("golden_report_findings_index")
