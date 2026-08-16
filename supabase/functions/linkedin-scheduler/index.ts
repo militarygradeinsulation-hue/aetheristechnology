@@ -93,7 +93,8 @@ Deno.serve(async (req) => {
 
         results.push({ id: post.id, postUrn, commentStatus });
       } catch (e) {
-        const details = e instanceof LinkedInError ? `${e.label} ${e.status}: ${e.details.slice(0, 300)}`
+        const details = e instanceof LinkedInError
+          ? `${e.label} ${e.status}: ${e.details.slice(0, 300)}`
           : (e as Error).message;
         console.error('[linkedin-scheduler] publish failed', post.id, details);
         await supabase.from('content_engine_posts').update({
