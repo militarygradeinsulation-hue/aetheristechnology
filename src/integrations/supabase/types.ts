@@ -2360,6 +2360,7 @@ export type Database = {
       }
       content_engine_posts: {
         Row: {
+          auto_comment: string | null
           caption: string
           created_at: string
           format: string
@@ -2367,6 +2368,13 @@ export type Database = {
           hashtags: string[]
           hook: string
           id: string
+          linkedin_enabled: boolean
+          linkedin_error: string | null
+          linkedin_post_urn: string | null
+          linkedin_published_at: string | null
+          linkedin_scheduled_at: string | null
+          linkedin_status: string
+          linkedin_visibility: string
           scheduled_date: string
           scheduled_time: string
           script: string
@@ -2380,6 +2388,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_comment?: string | null
           caption?: string
           created_at?: string
           format: string
@@ -2387,6 +2396,13 @@ export type Database = {
           hashtags?: string[]
           hook?: string
           id?: string
+          linkedin_enabled?: boolean
+          linkedin_error?: string | null
+          linkedin_post_urn?: string | null
+          linkedin_published_at?: string | null
+          linkedin_scheduled_at?: string | null
+          linkedin_status?: string
+          linkedin_visibility?: string
           scheduled_date: string
           scheduled_time?: string
           script?: string
@@ -2400,6 +2416,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_comment?: string | null
           caption?: string
           created_at?: string
           format?: string
@@ -2407,6 +2424,13 @@ export type Database = {
           hashtags?: string[]
           hook?: string
           id?: string
+          linkedin_enabled?: boolean
+          linkedin_error?: string | null
+          linkedin_post_urn?: string | null
+          linkedin_published_at?: string | null
+          linkedin_scheduled_at?: string | null
+          linkedin_status?: string
+          linkedin_visibility?: string
           scheduled_date?: string
           scheduled_time?: string
           script?: string
@@ -4677,6 +4701,74 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      linkedin_publications: {
+        Row: {
+          auto_comment: string | null
+          auto_comment_status: string | null
+          auto_comment_urn: string | null
+          content_post_id: string | null
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          error: string | null
+          id: string
+          image_url: string | null
+          post_urn: string | null
+          published_at: string
+          source: string
+          status: string
+          text: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          auto_comment?: string | null
+          auto_comment_status?: string | null
+          auto_comment_urn?: string | null
+          content_post_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          post_urn?: string | null
+          published_at?: string
+          source?: string
+          status?: string
+          text: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          auto_comment?: string | null
+          auto_comment_status?: string | null
+          auto_comment_urn?: string | null
+          content_post_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          post_urn?: string | null
+          published_at?: string
+          source?: string
+          status?: string
+          text?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "linkedin_publications_content_post_id_fkey"
+            columns: ["content_post_id"]
+            isOneToOne: false
+            referencedRelation: "content_engine_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       linkedin_reply_library: {
         Row: {

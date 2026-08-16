@@ -95,6 +95,14 @@ type Post = {
   thumbnail_status?: string | null;
   thumbnail_reference_id?: string | null;
   thumbnail_generated_at?: string | null;
+  linkedin_enabled?: boolean | null;
+  linkedin_scheduled_at?: string | null;
+  linkedin_visibility?: string | null;
+  linkedin_status?: string | null;
+  linkedin_post_urn?: string | null;
+  linkedin_published_at?: string | null;
+  linkedin_error?: string | null;
+  auto_comment?: string | null;
 };
 
 type Headshot = {
@@ -213,6 +221,33 @@ async function call(action: string, payload: Record<string, unknown> = {}) {
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
   return data;
+}
+
+async function callLinkedIn(action: string, payload: Record<string, unknown> = {}) {
+  const token = getAdminToken();
+  const { data, error } = await supabase.functions.invoke('linkedin-publish', {
+    body: { action, ...payload },
+    headers: token ? { 'x-admin-token': token } : undefined,
+  });
+  if (error) {
+    const detail = (error as any)?.context ? await (error as any).context.text().catch(() => '') : '';
+    throw new Error(detail || error.message);
+  }
+  if (data?.error) throw new Error(`${data.error}${data.details ? `: ${data.details}` : ''}`);
+  return data;
+}
+
+function composeLinkedInText(p: Post) {
+  const tags = (p.hashtags || []).map((h) => `#${h}`).join(' ');
+  return [p.caption, tags].filter(Boolean).join('\n\n').slice(0, 3000);
+}
+
+function toLocalInput(iso?: string | null, fallbackDate?: string, fallbackTime?: string) {
+  if (iso) {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  return `${fallbackDate}T${(fallbackTime || '07:30').slice(0, 5)}`;
 }
 
 async function callThumb(action: string, payload: Record<string, unknown> = {}) {
@@ -369,6 +404,67 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  async function handlePostNow(id: string) {
+    const p = posts.find((x) => x.id === id);
+    if (!p) return;
+    try {
+      const res = await callLinkedIn('publish', {
+        text: composeLinkedInText(p),
+        visibility: p.linkedin_visibility === 'CONNECTIONS' ? 'CONNECTIONS' : 'PUBLIC',
+        autoComment: (p.auto_comment || '').trim() || undefined,
+        imageUrl: p.thumbnail_url || undefined,
+        imageAlt: p.hook || undefined,
+        contentPostId: p.id,
+      });
+      const patch: Partial<Post> = {
+        status: 'posted',
+        linkedin_status: 'published',
+        linkedin_post_urn: res?.postId ?? null,
+        linkedin_published_at: new Date().toISOString(),
+        linkedin_error: null,
+      };
+      setPosts((prev) => prev.map((x) => x.id === id ? { ...x, ...patch } : x));
+      setSelectedPost((prev) => prev && prev.id === id ? { ...prev, ...patch } : prev);
+      toast({ title: 'Posted to LinkedIn', description: res?.postId || 'Live now.' });
+    } catch (e) {
+      toast({ title: 'LinkedIn publish failed', description: String((e as Error).message), variant: 'destructive' });
+    }
+  }
+
+  async function handleScheduleMonth() {
+    const y = calendarMonth.getFullYear();
+    const m = calendarMonth.getMonth();
+    const target = posts.filter((p) => {
+      const d = new Date(`${p.scheduled_date}T00:00:00`);
+      return d.getFullYear() === y && d.getMonth() === m
+        && p.linkedin_status !== 'published' && p.linkedin_status !== 'publishing';
+    });
+    if (target.length === 0) {
+      toast({ title: 'Nothing to schedule', description: 'No unpublished posts this month.' });
+      return;
+    }
+    const now = Date.now();
+    let queued = 0;
+    for (const p of target) {
+      const when = new Date(`${p.scheduled_date}T${(p.scheduled_time || '07:30').slice(0, 5)}:00`);
+      if (when.getTime() < now) continue;
+      const updates: Partial<Post> = {
+        status: 'approved',
+        linkedin_enabled: true,
+        linkedin_status: 'queued',
+        linkedin_scheduled_at: when.toISOString(),
+        linkedin_visibility: p.linkedin_visibility || 'PUBLIC',
+        linkedin_error: null,
+      };
+      await handleUpdatePost(p.id, updates);
+      queued++;
+    }
+    toast({
+      title: queued ? `${queued} posts approved & queued` : 'Nothing queued',
+      description: queued ? 'They publish automatically at their scheduled times.' : 'All remaining slots are in the past.',
+    });
+  }
+
   // Headshots library, loaded once
   const [headshots, setHeadshots] = useState<Headshot[]>([]);
   useEffect(() => {
@@ -484,6 +580,7 @@ export const ContentEngine: React.FC = () => {
           generating={generating}
           onExport={exportTSV}
           onClear={handleClearCalendar}
+          onScheduleMonth={handleScheduleMonth}
           strategy={strategy}
         />
       )}
@@ -517,6 +614,7 @@ export const ContentEngine: React.FC = () => {
           onRegenerate={handleRegenerate}
           onDuplicate={handleDuplicate}
           onGenerateThumbnail={handleGenerateThumbnail}
+          onPostNow={handlePostNow}
           headshots={headshots}
         />
       )}
@@ -526,11 +624,12 @@ export const ContentEngine: React.FC = () => {
 
 // ----------------- Calendar View -----------------
 
-function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, strategy }: {
+function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, onScheduleMonth, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
   onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void; generating: boolean;
-  onExport: () => void; onClear: () => void; strategy: Strategy;
+  onExport: () => void; onClear: () => void; onScheduleMonth: () => void; strategy: Strategy;
 }) {
+  const [schedulingMonth, setSchedulingMonth] = useState(false);
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   const firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
   const startDay = firstOfMonth.getDay();
@@ -565,6 +664,15 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
         <div className="flex gap-2">
           {posts.length > 0 && (
             <>
+              <Button
+                variant="outline" size="sm"
+                disabled={schedulingMonth}
+                onClick={async () => { setSchedulingMonth(true); try { await onScheduleMonth(); } finally { setSchedulingMonth(false); } }}
+                className="border-[#0A66C2]/50 text-[#0A66C2] hover:bg-[#0A66C2]/10"
+              >
+                {schedulingMonth ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 mr-1.5" />}
+                Approve &amp; Schedule Month
+              </Button>
               <Button variant="outline" size="sm" onClick={onExport}>
                 <Download className="w-3.5 h-3.5 mr-1.5" /> Export
               </Button>
@@ -622,7 +730,12 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
                     >
                       <div className="flex items-center justify-between">
                         <span className={`text-[9px] font-bold uppercase tracking-wider ${fmt.text}`}>{p.scheduled_time}</span>
-                        <span className="text-[8px]" style={{ color: STATUS_INFO[p.status]?.cls.includes('emerald') ? '#10b981' : STATUS_INFO[p.status]?.cls.includes('blue') ? '#3b82f6' : '#eab308' }}>●</span>
+                        <span className="flex items-center gap-1">
+                          {p.linkedin_status === 'published' && <span className="text-[8px] text-[#0A66C2]" title="Live on LinkedIn">in</span>}
+                          {p.linkedin_status === 'queued' && <Clock className="w-2.5 h-2.5 text-[#0A66C2]" />}
+                          {p.linkedin_status === 'failed' && <span className="text-[8px] text-crimson" title="LinkedIn publish failed">!</span>}
+                          <span className="text-[8px]" style={{ color: STATUS_INFO[p.status]?.cls.includes('emerald') ? '#10b981' : STATUS_INFO[p.status]?.cls.includes('blue') ? '#3b82f6' : '#eab308' }}>●</span>
+                        </span>
                       </div>
                       <div className="text-[10px] leading-tight text-foreground/90 line-clamp-2 mt-0.5">{p.hook}</div>
                     </button>
@@ -1196,9 +1309,132 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+// ----------------- LinkedIn scheduling panel -----------------
+
+function LinkedInPanel({ post, onUpdate, onPostNow }: {
+  post: Post;
+  onUpdate: (id: string, updates: Partial<Post>) => void;
+  onPostNow: (id: string) => Promise<void>;
+}) {
+  const [when, setWhen] = useState(toLocalInput(post.linkedin_scheduled_at, post.scheduled_date, post.scheduled_time));
+  const [visibility, setVisibility] = useState<'PUBLIC' | 'CONNECTIONS'>(post.linkedin_visibility === 'CONNECTIONS' ? 'CONNECTIONS' : 'PUBLIC');
+  const [comment, setComment] = useState(post.auto_comment || '');
+  const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    setWhen(toLocalInput(post.linkedin_scheduled_at, post.scheduled_date, post.scheduled_time));
+    setVisibility(post.linkedin_visibility === 'CONNECTIONS' ? 'CONNECTIONS' : 'PUBLIC');
+    setComment(post.auto_comment || '');
+  }, [post.id, post.linkedin_scheduled_at, post.linkedin_visibility, post.auto_comment, post.scheduled_date, post.scheduled_time]);
+
+  const published = post.linkedin_status === 'published';
+  const queued = post.linkedin_status === 'queued';
+
+  const approve = () => {
+    const iso = new Date(when).toISOString();
+    onUpdate(post.id, {
+      status: 'approved',
+      linkedin_enabled: true,
+      linkedin_status: 'queued',
+      linkedin_scheduled_at: iso,
+      linkedin_visibility: visibility,
+      auto_comment: comment.trim() || null,
+      linkedin_error: null,
+    });
+  };
+
+  const unschedule = () => {
+    onUpdate(post.id, { linkedin_enabled: false, linkedin_status: 'idle', linkedin_scheduled_at: null });
+  };
+
+  return (
+    <div className="rounded-lg border border-[#0A66C2]/40 bg-[#0A66C2]/5 p-4 space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-[#0A66C2]">Auto-post to LinkedIn</div>
+        {published && (
+          <Badge variant="outline" className="text-[9px] uppercase text-emerald-400 border-emerald-500/40">
+            Live {post.linkedin_published_at ? new Date(post.linkedin_published_at).toLocaleString() : ''}
+          </Badge>
+        )}
+        {queued && <Badge variant="outline" className="text-[9px] uppercase text-[#0A66C2] border-[#0A66C2]/40">Queued</Badge>}
+        {post.linkedin_status === 'failed' && (
+          <Badge variant="outline" className="text-[9px] uppercase text-crimson border-crimson/40">Failed</Badge>
+        )}
+      </div>
+
+      {post.linkedin_error && (
+        <div className="text-[11px] text-crimson break-words">{post.linkedin_error}</div>
+      )}
+
+      {!published && (
+        <>
+          <div className="flex flex-wrap gap-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Publish at</div>
+              <Input type="datetime-local" className="h-8 w-56 text-xs" value={when} onChange={(e) => setWhen(e.target.value)} />
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Visibility</div>
+              <select
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as 'PUBLIC' | 'CONNECTIONS')}
+                className="h-8 text-xs border border-border rounded px-2 bg-background"
+              >
+                <option value="PUBLIC">Public</option>
+                <option value="CONNECTIONS">Connections</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Auto first comment</div>
+            <Textarea rows={3} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Dropped as the first comment seconds after the post goes live." />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={approve} className="bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90">
+              <Check className="w-3.5 h-3.5 mr-1.5" />{queued ? 'Update schedule' : 'Approve & Schedule'}
+            </Button>
+            {queued && (
+              <Button size="sm" variant="outline" onClick={unschedule}>
+                <X className="w-3.5 h-3.5 mr-1.5" />Unschedule
+              </Button>
+            )}
+            <Button
+              size="sm" variant="outline"
+              disabled={posting}
+              onClick={async () => {
+                setPosting(true);
+                onUpdate(post.id, { auto_comment: comment.trim() || null, linkedin_visibility: visibility });
+                try { await onPostNow(post.id); } finally { setPosting(false); }
+              }}
+            >
+              {posting ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 mr-1.5" />}
+              Post now
+            </Button>
+          </div>
+          <div className="text-[10px] text-muted-foreground">
+            Publishes the caption + hashtags{post.thumbnail_url ? ' with the generated image' : ''}. The scheduler checks every 5 minutes.
+          </div>
+        </>
+      )}
+
+      {published && post.linkedin_post_urn && (
+        <a
+          href={`https://www.linkedin.com/feed/update/${post.linkedin_post_urn}/`}
+          target="_blank" rel="noopener noreferrer"
+          className="text-xs text-[#0A66C2] underline"
+        >
+          View live post — edit or delete it from the LinkedIn Publisher history
+        </a>
+      )}
+    </div>
+  );
+}
+
 // ----------------- Post Modal -----------------
 
-function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate, onGenerateThumbnail, headshots }: {
+function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicate, onGenerateThumbnail, onPostNow, headshots }: {
   post: Post;
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<Post>) => void;
@@ -1206,6 +1442,7 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
   onRegenerate: (id: string) => Promise<void>;
   onDuplicate: (id: string) => void;
   onGenerateThumbnail: (id: string, headshotId?: string) => Promise<void>;
+  onPostNow: (id: string) => Promise<void>;
   headshots: Headshot[];
 }) {
   const fmt = FORMAT_INFO[post.format] || FORMAT_INFO.auditRoast;
@@ -1303,6 +1540,8 @@ function PostModal({ post, onClose, onUpdate, onDelete, onRegenerate, onDuplicat
             onUpdate={onUpdate}
             onGenerateThumbnail={onGenerateThumbnail}
           />
+          <LinkedInPanel post={post} onUpdate={onUpdate} onPostNow={onPostNow} />
+
           <Field label="Topic Angle">
             {editing
               ? <Textarea rows={2} value={draft.topic_angle} onChange={(e) => setDraft({ ...draft, topic_angle: e.target.value })} />

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Linkedin, Loader2, CheckCircle2, RefreshCw, ImagePlus, X } from 'lucide-react';
+import LinkedInHistory from './LinkedInHistory';
 
 const MAX = 3000;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -24,6 +25,8 @@ export const AdminLinkedInPublisher: React.FC = () => {
   const [imageMime, setImageMime] = useState<string>('');
   const [imageName, setImageName] = useState<string>('');
   const [imageAlt, setImageAlt] = useState('');
+  const [autoComment, setAutoComment] = useState('');
+  const [historyKey, setHistoryKey] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
 
@@ -97,6 +100,7 @@ export const AdminLinkedInPublisher: React.FC = () => {
       const data = await invoke('publish', {
         text: text.trim(),
         visibility,
+        ...(autoComment.trim() ? { autoComment: autoComment.trim() } : {}),
         ...(imageData ? { imageBase64: imageData, imageMime, imageAlt: imageAlt.trim() } : {}),
       });
       setLastPostId(data?.postId ?? 'published');
@@ -105,7 +109,9 @@ export const AdminLinkedInPublisher: React.FC = () => {
         description: data?.postId ? `Post ID: ${data.postId}` : 'Published successfully.',
       });
       setText('');
+      setAutoComment('');
       clearImage();
+      setHistoryKey((k) => k + 1);
     } catch (e) {
       toast({
         title: 'LinkedIn publish failed',
@@ -203,6 +209,19 @@ export const AdminLinkedInPublisher: React.FC = () => {
 
 
 
+      <div>
+        <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1 block">
+          Auto first comment (optional)
+        </label>
+        <Textarea
+          value={autoComment}
+          onChange={(e) => setAutoComment(e.target.value)}
+          rows={3}
+          placeholder="Posted as the first comment immediately after publishing (links, CTA, sources)…"
+          className="text-sm"
+        />
+      </div>
+
       <div className="flex items-center gap-3">
         <label className="text-xs font-mono uppercase text-muted-foreground">Visibility</label>
         <select
@@ -231,9 +250,13 @@ export const AdminLinkedInPublisher: React.FC = () => {
       </div>
 
       <p className="text-xs text-muted-foreground border-t border-border pt-3">
-        Publishes to the LinkedIn account linked in Workspace → Connectors. Commenting on posts
-        isn't supported by LinkedIn's API through this connector.
+        Publishes to the LinkedIn account linked in Workspace → Connectors. The first comment is
+        posted automatically right after the post goes live.
       </p>
+
+      <div className="border-t border-border pt-4">
+        <LinkedInHistory refreshKey={historyKey} />
+      </div>
     </div>
   );
 };
