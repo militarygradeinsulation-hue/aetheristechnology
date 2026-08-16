@@ -88,16 +88,42 @@ export async function uploadImage(sub: string, bytes: Uint8Array, mime: string):
     throw new LinkedInError('registerUpload', 502, JSON.stringify(reg).slice(0, 500));
   }
 
-  const proxiedUrl = uploadUrl.replace(/^https:\/\/[^/]*linkedin\.com/, LI_GATEWAY);
   const { 'Content-Type': _ct, ...authHeaders } = liHeaders();
-  const upRes = await fetch(proxiedUrl, {
-    method: 'PUT',
-    headers: { ...authHeaders, 'Content-Type': mime },
-    body: bytes,
-  });
-  await ensureOk(upRes, 'imageUpload');
-  return assetUrn;
+  const proxiedUrl = uploadUrl.replace(/^https:\/\/[^/]*linkedin\.com/, LI_GATEWAY);
+
+  // The signed upload URL is served by LinkedIn's media host, which the connector
+  // gateway does not always allow for binary PUTs (nginx 405). Try the known-good
+  // variants in order and keep the first one that succeeds.
+  const attempts: Array<{ label: string; url: string; method: string; headers: Record<string, string> }> = [
+    { label: 'gateway-put', url: proxiedUrl, method: 'PUT', headers: { ...authHeaders, 'Content-Type': mime } },
+    { label: 'gateway-post', url: proxiedUrl, method: 'POST', headers: { ...authHeaders, 'Content-Type': mime } },
+    { label: 'direct-put', url: uploadUrl, method: 'PUT', headers: { 'Content-Type': mime } },
+    { label: 'direct-post', url: uploadUrl, method: 'POST', headers: { 'Content-Type': mime } },
+  ];
+
+  const failures: string[] = [];
+  for (const attempt of attempts) {
+    try {
+      const upRes = await fetch(attempt.url, {
+        method: attempt.method,
+        headers: attempt.headers,
+        body: bytes,
+      });
+      if (upRes.ok) {
+        console.log(`[linkedin] imageUpload succeeded via ${attempt.label}`);
+        return assetUrn;
+      }
+      const body = await upRes.text();
+      failures.push(`${attempt.label} ${upRes.status}: ${body.slice(0, 200)}`);
+    } catch (e) {
+      failures.push(`${attempt.label} threw: ${(e as Error).message}`);
+    }
+  }
+
+  console.error(`[linkedin] imageUpload all attempts failed: ${failures.join(' | ')}`);
+  throw new LinkedInError('imageUpload', 502, failures.join(' | '));
 }
+
 
 export type PublishInput = {
   text: string;
