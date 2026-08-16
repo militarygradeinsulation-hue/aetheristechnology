@@ -106,6 +106,20 @@ export const seedRegistry = () => call<{ seeded: number }>({ action: "seed_regis
 export const composeSystem = (scanId: string, tier = "diagnostic", force = false, portalToken?: string | null) =>
   call<{ system: CompanySystemRow; reused: boolean }>({ action: "compose", scan_id: scanId, tier, force }, portalToken);
 
+export interface BatchResult {
+  processed: number;
+  created: number;
+  reused: number;
+  failed: Array<{ scan_id: string; error?: string }>;
+  eligible_total: number;
+  systems_total: number;
+}
+
+/** Controlled historical queue: bounded per call, resumable, idempotent. */
+export const composeBatch = (limit = 5, tier = "diagnostic") =>
+  call<BatchResult>({ action: "compose_batch", limit, tier });
+
+
 export const getWorkspace = (systemId: string, portalToken?: string | null) =>
   call<WorkspacePayload>({ action: "get", system_id: systemId }, portalToken);
 
