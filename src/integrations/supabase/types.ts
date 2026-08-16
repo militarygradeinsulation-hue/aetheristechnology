@@ -1742,6 +1742,68 @@ export type Database = {
           },
         ]
       }
+      company_system_confirmations: {
+        Row: {
+          action_id: string
+          actor: string
+          actor_role: string
+          affects: Json
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          input_hash: string
+          module_id: string
+          preview: Json
+          source_report_hash: string
+          system_id: string
+          system_version: number
+          token: string
+        }
+        Insert: {
+          action_id: string
+          actor: string
+          actor_role: string
+          affects?: Json
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          input_hash: string
+          module_id: string
+          preview?: Json
+          source_report_hash: string
+          system_id: string
+          system_version?: number
+          token: string
+        }
+        Update: {
+          action_id?: string
+          actor?: string
+          actor_role?: string
+          affects?: Json
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          input_hash?: string
+          module_id?: string
+          preview?: Json
+          source_report_hash?: string
+          system_id?: string
+          system_version?: number
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_confirmations_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_system_connections: {
         Row: {
           created_at: string
