@@ -27,11 +27,22 @@ import {
   buildBrandContext,
   validateAction,
   validateMemoryItem,
-  activeMemory,
+  selectMemory,
   findModule,
   shouldRecompose,
+  registryAdapterGaps,
+  actionIsExecutable,
+  buildConfirmation,
+  confirmationMismatch,
+  inputHash,
+  scopeAllows,
+  codeScope,
+  ADMIN_SCOPE,
+  type ActorRole,
+  type ConfirmationClaim,
   type ModuleTier,
   type RootCauseInput,
+  type StoredMemoryItem,
   type MemoryItem,
 } from "../_shared/universe-system.ts";
 
@@ -61,16 +72,47 @@ serve(async (req) => {
     const portal = isAdmin ? null : await verifyPortalToken(getPortalTokenFromRequest(req), SVC);
     const internal = req.headers.get("x-internal-key") === SVC;
     if (!isAdmin && !portal && !internal) return json({ error: "Unauthorized" }, 401);
-    const repScope = portal && portal.role === "rep" ? portal.code : null;
-    const role: "admin" | "operator" | "viewer" = isAdmin || internal ? "admin" : repScope ? "operator" : "viewer";
-    const actor = isAdmin ? "admin" : repScope ? `rep:${repScope}` : "internal";
+    // Tenant scope. Admin + internal are global. EVERY other portal role is
+    // pinned to an explicit owner-code set; a token we cannot tie to an owner
+    // gets an empty set and therefore reads nothing (default deny).
+    let scope = ADMIN_SCOPE;
+    if (!isAdmin && !internal) {
+      if (!portal) return json({ error: "Unauthorized" }, 401);
+      if (portal.role === "rep") {
+        scope = codeScope([portal.code]);
+      } else if (portal.role === "partner") {
+        // A partner sees their own code plus the rep codes on their team.
+        const { data: self } = await sb.from("rep_codes").select("code, team_name").eq("code", portal.code).maybeSingle();
+        const team = (self as { team_name?: string | null } | null)?.team_name || null;
+        let codes: string[] = [portal.code];
+        if (team) {
+          const { data: mates } = await sb.from("rep_codes").select("code").eq("team_name", team);
+          codes = codes.concat(((mates || []) as Array<{ code: string }>).map((r) => r.code));
+        }
+        scope = codeScope(codes);
+      } else {
+        scope = codeScope([]); // unknown role -> deny everything
+      }
+    }
+    const role: ActorRole = isAdmin || internal ? "admin" : portal?.role === "rep" ? "operator" : "viewer";
+    const actor = isAdmin ? "admin" : internal ? "internal" : `${portal!.role}:${portal!.code}`;
 
-    /** Rep scoping: a rep may only touch systems for their own reports. */
+    /** Owner scoping: a portal caller may only touch rows they own. */
     async function loadSystem(systemId: string) {
+      if (!systemId) return null;
       const { data } = await sb.from("company_systems").select("*").eq("id", systemId).maybeSingle();
       if (!data) return null;
-      if (repScope && (data as { rep_code: string | null }).rep_code !== repScope) return "forbidden" as const;
+      if (!scopeAllows(scope, (data as { rep_code: string | null }).rep_code)) return "forbidden" as const;
       return data as Record<string, unknown>;
+    }
+
+    /** Company access requires at least one in-scope system for that company. */
+    async function companyAllowed(companyId: string): Promise<boolean> {
+      if (scope.kind === "admin") return true;
+      if (!companyId || !scope.codes.length) return false;
+      const { data } = await sb.from("company_systems").select("id")
+        .eq("company_id", companyId).in("rep_code", scope.codes).limit(1);
+      return !!data?.length;
     }
 
     async function logEvent(row: Record<string, unknown>) {
@@ -79,7 +121,7 @@ serve(async (req) => {
 
     /* ── registry ─────────────────────────────────────────────────────── */
     if (action === "registry") {
-      return json({ modules: UNIVERSE_MODULE_REGISTRY, template_version: COMPANY_SYSTEM_TEMPLATE_VERSION });
+      return json({ modules: UNIVERSE_MODULE_REGISTRY, template_version: COMPANY_SYSTEM_TEMPLATE_VERSION, adapter_gaps: registryAdapterGaps() });
     }
 
     if (action === "seed_registry") {
@@ -157,7 +199,7 @@ serve(async (req) => {
       const { data: scanRow } = await sb.from("forensic_scans").select(SCAN_COLS).eq("id", scanId).maybeSingle();
       if (!scanRow) return json({ error: "Scan not found" }, 404);
       const scan = scanRow as unknown as ScanRow & { brand_kit?: unknown; brand_kit_status?: string | null };
-      if (repScope && (scan as { rep_code?: string | null }).rep_code !== repScope) return json({ error: "Forbidden" }, 403);
+      if (!scopeAllows(scope, (scan as { rep_code?: string | null }).rep_code ?? null)) return json({ error: "Forbidden" }, 403);
 
       if (!isBlueprintEligible(scan.report, scan.report_state)) {
         return json({ error: "Report must be repaired first." }, 409);
@@ -405,7 +447,10 @@ serve(async (req) => {
 
     if (action === "list") {
       let q = sb.from("company_systems").select("*").order("created_at", { ascending: false }).limit(100);
-      if (repScope) q = q.eq("rep_code", repScope);
+      if (scope.kind !== "admin") {
+        if (!scope.codes.length) return json({ systems: [] });
+        q = q.in("rep_code", scope.codes);
+      }
       if (body.company_id) q = q.eq("company_id", String(body.company_id));
       const { data } = await q;
       return json({ systems: data || [] });
@@ -461,10 +506,7 @@ serve(async (req) => {
     if (action === "memory_list") {
       const companyId = String(body.company_id ?? "");
       if (!companyId) return json({ error: "company_id required" }, 400);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id").eq("company_id", companyId).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed(companyId))) return json({ error: "Forbidden" }, 403);
       let q = sb.from("company_system_memory").select("*").eq("company_id", companyId);
       if (body.scope) q = q.eq("scope", String(body.scope));
       const { data } = await q.order("updated_at", { ascending: false }).limit(300);
@@ -477,10 +519,7 @@ serve(async (req) => {
       if (!v.ok) return json({ error: v.error }, 400);
       const companyId = String(item.company_id ?? body.company_id ?? "");
       if (!companyId) return json({ error: "company_id required" }, 400);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id").eq("company_id", companyId).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed(companyId))) return json({ error: "Forbidden" }, 403);
       const { data, error } = await sb.from("company_system_memory").upsert({
         company_id: companyId,
         scan_id: item.scan_id ?? null,
@@ -506,11 +545,7 @@ serve(async (req) => {
       if (!["inferred", "approved", "rejected", "superseded"].includes(status)) return json({ error: "bad status" }, 400);
       const { data: row } = await sb.from("company_system_memory").select("company_id").eq("id", id).maybeSingle();
       if (!row) return json({ error: "Not found" }, 404);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id")
-          .eq("company_id", (row as { company_id: string }).company_id).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed((row as { company_id: string }).company_id))) return json({ error: "Forbidden" }, 403);
       const { data } = await sb.from("company_system_memory").update({
         status, author: actor, last_verified_at: new Date().toISOString(),
       }).eq("id", id).select("*").maybeSingle();
