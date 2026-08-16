@@ -18,7 +18,7 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
 import { computeGoldenLeakage } from "../_shared/golden-leakage.ts";
-import { sanitizedGoldenReport, guardChatMoney } from "../_shared/golden-money-sanitizer.ts";
+import { buildReportEvidence, guardAnswer, moneyRules, OPERATOR_VOICE } from "../_shared/report-brain.ts";
 import { reportHash, isBlueprintEligible, resolveBusinessIdentity, type ScanRow } from "../_shared/golden-archive.ts";
 import {
   UNIVERSE_MODULE_REGISTRY,
@@ -688,8 +688,10 @@ serve(async (req) => {
       ]);
       if (!scan?.report) return json({ error: "Report not found" }, 404);
 
-      const unpublishable = (scan as { report_state?: string }).report_state === "regeneration_required";
-      const report = sanitizedGoldenReport(scan.report as never) as Record<string, unknown>;
+      // Same shared brain as forensic-report-chat: one evidence builder, one
+      // sanitised ledger, one money guard. This surface only adds control.
+      const ev = buildReportEvidence(scan as never);
+      const unpublishable = ev.unpublishable;
 
       // Scoped retrieval: business memory for the company, report memory only
       // for THIS scan, system/conversation memory only for THIS system.
@@ -733,19 +735,15 @@ serve(async (req) => {
         "You may read, explain and draft immediately. Any write, send, publish, schedule, CRM change, automation change, brand-fact change, delete or deploy requires Plan -> Confirm -> Execute.",
         "When the operator asks for an action, reply with the plan: which module, which action id, what inputs are still missing, what it affects, the rollback path and the check you will run afterwards. Do not claim it is done.",
         "You may only reference the module actions listed below. Never claim an action that is not listed.",
-        unpublishable
-          ? "FINANCIALS WITHHELD: this report failed validation. State no dollar figures."
-          : "Quote only canonical figures present in the report context. Never add, sum or derive a new dollar amount. USD only.",
-        "Blunt operator voice. Short sentences. No filler, no emoji, no em-dashes.",
+        moneyRules(unpublishable),
+        OPERATOR_VOICE,
         "",
         `ENABLED MODULES + ALLOWED ACTIONS:\n${JSON.stringify(catalogue)}`,
         locked.length ? `RECOMMENDED BUT LOCKED (cannot execute): ${JSON.stringify(locked)}` : "",
         `GOALS:\n${JSON.stringify((goals || []).slice(0, 30))}`,
         `CHECKS:\n${JSON.stringify((checks || []).slice(0, 20))}`,
         `ACTIVE MEMORY (approved or high-confidence, labelled):\n${JSON.stringify(usable.slice(0, 60))}`,
-        `CANONICAL FINANCIALS:\n${unpublishable ? "withheld" : JSON.stringify(report.overall_leakage || {})}`,
-        `EXECUTIVE SUMMARY:\n${String(report.executive_summary || "").slice(0, 6000)}`,
-        `TOP LEAKS:\n${JSON.stringify(report.top_leaks || []).slice(0, 8000)}`,
+        ev.briefContext,
       ].filter(Boolean).join("\n\n");
 
       const res = await routedChatCompletion({
@@ -759,7 +757,7 @@ serve(async (req) => {
           { role: "user", content: question },
         ],
       });
-      const answer = guardChatMoney(res.content || "", unpublishable ? null : (report as never)).text;
+      const answer = guardAnswer(res.content || "", ev);
       await logEvent({ system_id: systemId, company_id: sys.company_id, scan_id: sys.scan_id, kind: "operator_turn", input: { question }, result: { answer: answer.slice(0, 4000) } });
       return json({ answer });
     }
