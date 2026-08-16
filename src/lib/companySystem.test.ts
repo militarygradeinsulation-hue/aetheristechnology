@@ -248,7 +248,7 @@ describe("report AI control plane", () => {
       [RC("rc_content", "No publishing cadence", "social dormant, blog inactive")],
       "signal",
     );
-    const executable = r.modules.filter(m => !m.locked && !m.gap_status);
+    const executable = r.modules.filter(m => !m.locked);
     for (const m of executable) expect(moduleAllowedForTier(m.module_id, "signal")).toBe(true);
   });
 
