@@ -251,6 +251,8 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
 
       <BlueprintPanel archive={archive} blueprints={blueprints} onRefresh={load} />
 
+      <CompanySystemPanel scanId={archive.scan_id} eligible={archive.is_valid} />
+
       <div className="rounded-xl border border-border bg-card/40 p-4">
         <h4 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
           <FileText className="h-4 w-4 text-amber" /> Findings &amp; root causes ({findings.length})
