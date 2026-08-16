@@ -1446,6 +1446,24 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error(`scan ${id}: report is ${compilerState} — downloads and delivery are gated until it compiles clean`);
     }
 
+    // Golden Report Library: archive the completed report (idempotent by scan
+    // id). Never allowed to fail or delay the scan itself.
+    try {
+      const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/golden-report-library`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${svc}`,
+          "x-internal-key": svc,
+        },
+        body: JSON.stringify({ action: "archive_scan", scan_id: id }),
+      });
+    } catch (archiveErr) {
+      console.error("golden report archive failed:", (archiveErr as Error).message);
+    }
+
+
     // Growth assets: message, hero imagery, per-platform posts and the 30-day
     // schedule. Runs after the report is persisted so it can never delay or
     // fail the Golden Report itself.
