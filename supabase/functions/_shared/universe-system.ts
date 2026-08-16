@@ -22,12 +22,44 @@ export function systemTierRank(t: ModuleTier | null | undefined): number {
 
 export type RiskLevel = "read" | "draft" | "write" | "external";
 
+/** Adapter shapes. Every one targets a function that already ships. */
+export type PayloadKind = "tool_sandbox" | "scan" | "passthrough" | "internal_forecast";
+
+/**
+ * Edge functions that actually exist in this repo. An action whose `fn` is not
+ * in this list is NOT executable: it degrades to a GAP_REQUIRED proposal
+ * instead of pretending a placeholder adapter works.
+ */
+export const EXISTING_EDGE_FUNCTIONS: string[] = [
+  "try-tool-sandbox",
+  "scan-website",
+  "send-transactional-email",
+  "social-scheduler",
+  "hygiene-execute",
+  "company-system",
+];
+
+export function actionIsExecutable(a: Pick<ModuleAction, "fn">): boolean {
+  return EXISTING_EDGE_FUNCTIONS.includes(a.fn);
+}
+
+/** Registry entries whose adapter target does not exist. Must always be empty. */
+export function registryAdapterGaps(): Array<{ module_id: string; action_id: string; fn: string }> {
+  const out: Array<{ module_id: string; action_id: string; fn: string }> = [];
+  for (const m of UNIVERSE_MODULE_REGISTRY) {
+    for (const a of m.actions) if (!actionIsExecutable(a)) out.push({ module_id: m.id, action_id: a.id, fn: a.fn });
+  }
+  return out;
+}
+
 export interface ModuleAction {
   /** Stable action id used by the operator action bus. */
   id: string;
   label: string;
   /** Existing edge function invoked through the adapter. Never new tool code. */
   fn: string;
+  /** How the bus shapes the payload for that existing function. */
+  payload_kind: PayloadKind;
   risk: RiskLevel;
   /** Required confirmation before execution (any non-read/draft action). */
   confirm: boolean;
@@ -66,7 +98,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "brand_kit", "report_findings"],
     outputs: ["approved_messaging_context", "brand_conflicts"],
     actions: [
-      { id: "draft_contradictions", label: "Draft brand contradiction review", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
+      { id: "draft_contradictions", label: "Draft brand contradiction review", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
     ],
     sensitivity: "low",
   },
@@ -80,7 +112,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["friction_list", "approved_messaging_context"],
     actions: [
-      { id: "draft_friction_audit", label: "Draft friction audit", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
+      { id: "draft_friction_audit", label: "Draft friction audit", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
     ],
     sensitivity: "low",
   },
@@ -94,7 +126,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["website_url"],
     outputs: ["scan_result", "check_signal"],
     actions: [
-      { id: "run_rescan", label: "Run recovery re-scan", fn: "website-scan", risk: "write", confirm: true, input: ["website_url"], rollback: "Scan records are additive. Delete the scan row." },
+      { id: "run_rescan", label: "Run recovery re-scan", fn: "scan-website", payload_kind: "scan", risk: "write", confirm: true, input: ["website_url"], rollback: "Scan records are additive. Delete the scan row." },
     ],
     sensitivity: "low",
   },
@@ -108,7 +140,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["decision_queue"],
     actions: [
-      { id: "draft_questions", label: "Draft boardroom questions", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_questions", label: "Draft boardroom questions", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -122,7 +154,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "brand_kit", "company_context"],
     outputs: ["sales_assets"],
     actions: [
-      { id: "draft_scripts", label: "Draft sales scripts", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context", "approved_messaging_context"], rollback: "Draft only." },
+      { id: "draft_scripts", label: "Draft sales scripts", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context", "approved_messaging_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -136,8 +168,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "company_context"],
     outputs: ["sequence_assets"],
     actions: [
-      { id: "draft_sequence", label: "Draft follow-up sequence", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "send_sequence", label: "Send follow-up sequence", fn: "send-email", risk: "external", confirm: true, input: ["sequence_id", "recipients"], rollback: "Sent email cannot be recalled. Suppress the recipients and stop the sequence." },
+      { id: "draft_sequence", label: "Draft follow-up sequence", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "send_sequence", label: "Send follow-up sequence", fn: "send-transactional-email", payload_kind: "passthrough", risk: "external", confirm: true, input: ["sequence_id", "recipients"], rollback: "Sent email cannot be recalled. Suppress the recipients and stop the sequence." },
     ],
     sensitivity: "high",
   },
@@ -151,7 +183,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "brand_kit"],
     outputs: ["content_plan"],
     actions: [
-      { id: "draft_calendar", label: "Draft 30-day calendar", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_calendar", label: "Draft 30-day calendar", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -165,8 +197,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["content_plan", "approved_messaging_context", "brand_kit"],
     outputs: ["social_posts"],
     actions: [
-      { id: "draft_posts", label: "Draft social posts", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "schedule_posts", label: "Schedule social posts", fn: "social-scheduler", risk: "external", confirm: true, input: ["post_ids", "scheduled_for"], rollback: "Unschedule the queued posts before their send time." },
+      { id: "draft_posts", label: "Draft social posts", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "schedule_posts", label: "Schedule social posts", fn: "social-scheduler", payload_kind: "passthrough", risk: "external", confirm: true, input: ["post_ids", "scheduled_for"], rollback: "Unschedule the queued posts before their send time." },
     ],
     sensitivity: "high",
   },
@@ -180,7 +212,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["brand_kit", "content_plan"],
     outputs: ["image_assets"],
     actions: [
-      { id: "draft_images", label: "Generate on-brand imagery", fn: "generate-image", risk: "draft", confirm: false, input: ["prompt"], rollback: "Delete the generated asset." },
+      { id: "draft_images", label: "Draft imagery direction brief", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the brief." },
     ],
     sensitivity: "low",
   },
@@ -194,7 +226,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["brand_kit", "content_plan"],
     outputs: ["campaign_assets"],
     actions: [
-      { id: "draft_assets", label: "Draft campaign assets", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_assets", label: "Draft campaign assets", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -208,7 +240,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["playbooks"],
     actions: [
-      { id: "draft_playbook", label: "Draft operating playbook", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_playbook", label: "Draft operating playbook", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -222,8 +254,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["hygiene_actions", "check_signal"],
     actions: [
-      { id: "draft_hygiene_plan", label: "Draft CRM hygiene plan", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "apply_hygiene_action", label: "Apply CRM hygiene action", fn: "hygiene-execute", risk: "external", confirm: true, input: ["action_id"], rollback: "Hygiene actions log prior values; re-apply the logged snapshot." },
+      { id: "draft_hygiene_plan", label: "Draft CRM hygiene plan", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "apply_hygiene_action", label: "Apply CRM hygiene action", fn: "hygiene-execute", payload_kind: "passthrough", risk: "external", confirm: true, input: ["action_id"], rollback: "Hygiene actions log prior values; re-apply the logged snapshot." },
     ],
     sensitivity: "high",
   },
@@ -237,7 +269,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["canonical_ledger", "check_signal"],
     outputs: ["forecast_scenarios"],
     actions: [
-      { id: "refresh_forecast", label: "Refresh recovery forecast", fn: "company-system", risk: "write", confirm: true, input: ["system_id"], rollback: "Forecast rows are versioned; restore the prior version." },
+      { id: "refresh_forecast", label: "Refresh recovery forecast", fn: "company-system", payload_kind: "internal_forecast", risk: "write", confirm: true, input: ["system_id"], rollback: "Forecast rows are versioned; restore the prior version." },
     ],
     sensitivity: "medium",
   },
@@ -251,7 +283,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["capability_brief"],
     outputs: ["module_scaffold"],
     actions: [
-      { id: "draft_module_scaffold", label: "Propose module scaffold", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["capability_brief"], rollback: "Proposal only. Requires operator approval before enabling." },
+      { id: "draft_module_scaffold", label: "Propose module scaffold", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["capability_brief"], rollback: "Proposal only. Requires operator approval before enabling." },
     ],
     sensitivity: "medium",
   },
