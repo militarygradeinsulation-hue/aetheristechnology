@@ -18,7 +18,7 @@ import {
   generateBlueprint, setBlueprintApproval, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
-import { composeSystem, type CompanySystemRow } from '@/lib/companySystem';
+import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
