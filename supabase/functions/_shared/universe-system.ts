@@ -471,69 +471,212 @@ export function composeCompanySystem(
   };
 }
 
+/* ── Tenant scope ────────────────────────────────────────────────────────── */
+
+export type ActorRole = "admin" | "operator" | "viewer";
+
+/**
+ * Every non-admin, non-internal caller is pinned to an explicit set of owner
+ * codes. There is no "authenticated therefore global" state: a scope with no
+ * codes can read nothing, and a row with no owner is admin-only.
+ */
+export interface TenantScope {
+  kind: "admin" | "codes";
+  codes: string[];
+}
+
+export const ADMIN_SCOPE: TenantScope = { kind: "admin", codes: [] };
+
+export function codeScope(codes: Array<string | null | undefined>): TenantScope {
+  return { kind: "codes", codes: [...new Set(codes.filter((c): c is string => !!c))] };
+}
+
+/** Default deny: unowned rows and out-of-scope owners are both refused. */
+export function scopeAllows(scope: TenantScope, ownerCode: string | null | undefined): boolean {
+  if (scope.kind === "admin") return true;
+  if (!ownerCode) return false;
+  return scope.codes.includes(ownerCode);
+}
+
+/* ── Deterministic hashing (shared by confirmation binding) ──────────────── */
+
+export function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value ?? null);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
+}
+
+export function hashString(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  let g = 0x811c9dc5;
+  for (let i = s.length - 1; i >= 0; i--) { g ^= s.charCodeAt(i); g = Math.imul(g, 0x01000193) >>> 0; }
+  return `${h.toString(16).padStart(8, "0")}${g.toString(16).padStart(8, "0")}${s.length.toString(16)}`;
+}
+
+export function inputHash(input: Record<string, unknown> | undefined | null): string {
+  return hashString(stableStringify(input ?? {}));
+}
+
 /* ── Action bus validation ───────────────────────────────────────────────── */
 
 export interface ActionRequest {
   module_id: string;
   action_id: string;
   input?: Record<string, unknown>;
-  confirmed?: boolean;
+}
+
+/** Server-issued, single-use plan record. The client never mints one. */
+export interface ConfirmationClaim {
+  token: string;
+  actor: string;
+  system_id: string;
+  module_id: string;
+  action_id: string;
+  input_hash: string;
+  source_report_hash: string;
+  system_version: number;
+  affects: string[];
+  expires_at: string;
+  consumed_at?: string | null;
+}
+
+export const CONFIRMATION_TTL_MS = 5 * 60 * 1000;
+
+export interface ActionPreview {
+  module: string;
+  action: string;
+  fn: string;
+  risk: RiskLevel;
+  rollback: string;
+  affects: string[];
+  check_after: string;
 }
 
 export interface ActionDecision {
   ok: boolean;
   error?: string;
   requires_confirmation: boolean;
-  preview?: {
-    module: string;
-    action: string;
-    fn: string;
-    risk: RiskLevel;
-    rollback: string;
-    affects: string[];
-  };
+  preview?: ActionPreview;
 }
+
+export interface ActionContext {
+  clientTier: ModuleTier | null | undefined;
+  enabledModuleIds: string[];
+  role: ActorRole;
+  /** Company system approval_state; writes need "approved". */
+  systemApprovalState?: string | null;
+  /** Active brand context status; writes need "approved". */
+  brandStatus?: string | null;
+  /** Present only on execute. Must have been issued by action_preview. */
+  confirmation?: ConfirmationClaim | null;
+  actor?: string;
+  systemId?: string;
+  sourceReportHash?: string;
+  systemVersion?: number;
+  now?: number;
+}
+
+const deny = (error: string): ActionDecision => ({ ok: false, requires_confirmation: false, error });
 
 /**
  * The operator may only call registered, permissioned module actions with
- * validated schemas. Never arbitrary code, never an unlisted function.
+ * validated schemas. Never arbitrary code, never an unlisted function, and
+ * never a write without a server-issued confirmation bound to this exact plan.
  */
-export function validateAction(
-  req: ActionRequest,
-  ctx: { clientTier: ModuleTier | null | undefined; enabledModuleIds: string[]; role: "admin" | "operator" | "viewer" },
-): ActionDecision {
+export function validateAction(req: ActionRequest, ctx: ActionContext): ActionDecision {
   const mod = findModule(req.module_id);
-  if (!mod) return { ok: false, requires_confirmation: false, error: "Unknown module" };
+  if (!mod) return deny("Unknown module");
   const action = mod.actions.find((a) => a.id === req.action_id);
-  if (!action) return { ok: false, requires_confirmation: false, error: "Unknown action for module" };
-  if (!ctx.enabledModuleIds.includes(mod.id)) {
-    return { ok: false, requires_confirmation: false, error: "Module is not enabled in this company system" };
+  if (!action) return deny("Unknown action for module");
+  if (!actionIsExecutable(action)) {
+    return deny("Capability is not implemented yet (GAP_REQUIRED). Propose a module scaffold instead.");
   }
+  if (!ctx.enabledModuleIds.includes(mod.id)) return deny("Module is not enabled in this company system");
   if (!moduleAllowedForTier(mod.id, ctx.clientTier)) {
-    return { ok: false, requires_confirmation: false, error: `Locked. Requires the ${mod.requiredTier} tier.` };
+    return deny(`Locked. Requires the ${mod.requiredTier} tier.`);
   }
-  if (ctx.role === "viewer" && action.risk !== "read") {
-    return { ok: false, requires_confirmation: false, error: "Viewer role may not execute actions" };
-  }
+  if (ctx.role === "viewer" && action.risk !== "read") return deny("Viewer role may not execute actions");
+
   const input = req.input || {};
   const extra = Object.keys(input).filter((k) => !action.input.includes(k));
-  if (extra.length) return { ok: false, requires_confirmation: false, error: `Unexpected input keys: ${extra.join(", ")}` };
+  if (extra.length) return deny(`Unexpected input keys: ${extra.join(", ")}`);
   const missing = action.input.filter((k) => input[k] === undefined || input[k] === null || input[k] === "");
-  if (missing.length) return { ok: false, requires_confirmation: false, error: `Missing required input: ${missing.join(", ")}` };
+  if (missing.length) return deny(`Missing required input: ${missing.join(", ")}`);
 
-  const preview = {
+  const preview: ActionPreview = {
     module: mod.name,
     action: action.label,
     fn: action.fn,
     risk: action.risk,
     rollback: action.rollback,
     affects: mod.outputs,
+    check_after: `Run the registered check for ${mod.name} and record whether the goal moved.`,
   };
-  if (action.confirm && !req.confirmed) {
-    return { ok: false, requires_confirmation: true, preview, error: "Confirmation required" };
+
+  // Reads and drafts stay immediate: they produce nothing live and nothing external.
+  if (!action.confirm) return { ok: true, requires_confirmation: false, preview };
+
+  // Everything that changes live behaviour needs an approved system + brand.
+  if (ctx.systemApprovalState !== "approved") {
+    return { ok: false, requires_confirmation: false, preview, error: "Company system is not approved for execution." };
   }
+  if (ctx.brandStatus !== "approved") {
+    return { ok: false, requires_confirmation: false, preview, error: "Brand facts must be approved before live actions." };
+  }
+
+  const c = ctx.confirmation;
+  if (!c) return { ok: false, requires_confirmation: true, preview, error: "Confirmation required" };
+  const bad = confirmationMismatch(c, req, ctx);
+  if (bad) return { ok: false, requires_confirmation: true, preview, error: bad };
+
   return { ok: true, requires_confirmation: false, preview };
 }
+
+/** Returns the reason a confirmation token cannot be spent, or null when valid. */
+export function confirmationMismatch(
+  c: ConfirmationClaim,
+  req: ActionRequest,
+  ctx: ActionContext,
+): string | null {
+  const now = ctx.now ?? Date.now();
+  if (c.consumed_at) return "Confirmation already used.";
+  if (new Date(c.expires_at).getTime() <= now) return "Confirmation expired. Preview the action again.";
+  if (ctx.actor && c.actor !== ctx.actor) return "Confirmation was issued to a different operator.";
+  if (ctx.systemId && c.system_id !== ctx.systemId) return "Confirmation belongs to a different system.";
+  if (c.module_id !== req.module_id || c.action_id !== req.action_id) return "Confirmation does not match this action.";
+  if (c.input_hash !== inputHash(req.input)) return "Inputs changed after confirmation. Preview again.";
+  if (ctx.sourceReportHash && c.source_report_hash !== ctx.sourceReportHash) {
+    return "Source report changed after confirmation. Preview again.";
+  }
+  if (ctx.systemVersion !== undefined && c.system_version !== ctx.systemVersion) {
+    return "System version changed after confirmation. Preview again.";
+  }
+  return null;
+}
+
+/** Issues the claim body that the server persists for single-use consumption. */
+export function buildConfirmation(
+  req: ActionRequest,
+  ctx: Required<Pick<ActionContext, "actor" | "systemId" | "sourceReportHash" | "systemVersion">> & { affects: string[]; now?: number },
+): Omit<ConfirmationClaim, "token"> {
+  const now = ctx.now ?? Date.now();
+  return {
+    actor: ctx.actor,
+    system_id: ctx.systemId,
+    module_id: req.module_id,
+    action_id: req.action_id,
+    input_hash: inputHash(req.input),
+    source_report_hash: ctx.sourceReportHash,
+    system_version: ctx.systemVersion,
+    affects: ctx.affects,
+    expires_at: new Date(now + CONFIRMATION_TTL_MS).toISOString(),
+    consumed_at: null,
+  };
+}
+
+
 
 /* ── Memory ──────────────────────────────────────────────────────────────── */
 
