@@ -75,19 +75,94 @@ Deno.serve(async (req) => {
         });
       }
 
+      // ---- optional image upload ----
+      const imageData: string = String(body?.imageBase64 ?? '');
+      const imageMime: string = String(body?.imageMime ?? 'image/png');
+      const imageAlt: string = String(body?.imageAlt ?? '').slice(0, 200);
+      let assetUrn: string | null = null;
+
+      if (imageData) {
+        const raw = imageData.includes(',') ? imageData.split(',')[1] : imageData;
+        let bytes: Uint8Array;
+        try {
+          const bin = atob(raw);
+          bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        } catch {
+          return new Response(JSON.stringify({ error: 'Invalid image data' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        if (bytes.length > 10 * 1024 * 1024) {
+          return new Response(JSON.stringify({ error: 'Image exceeds 10MB' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        const regRes = await fetch(`${GATEWAY}/v2/assets?action=registerUpload`, {
+          method: 'POST',
+          headers: liHeaders(),
+          body: JSON.stringify({
+            registerUploadRequest: {
+              owner: `urn:li:person:${sub}`,
+              recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
+              serviceRelationships: [{
+                relationshipType: 'OWNER',
+                identifier: 'urn:li:userGeneratedContent',
+              }],
+              supportedUploadMechanism: ['SYNCHRONOUS_UPLOAD'],
+            },
+          }),
+        });
+        if (!regRes.ok) return relay(regRes, 'registerUpload');
+        const reg = await regRes.json();
+        const mech = reg?.value?.uploadMechanism?.[
+          'com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'
+        ];
+        const uploadUrl: string | undefined = mech?.uploadUrl;
+        assetUrn = reg?.value?.asset ?? null;
+        if (!uploadUrl || !assetUrn) {
+          return new Response(JSON.stringify({ error: 'registerUpload returned no upload URL', reg }), {
+            status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+
+        // Route the upload through the connector gateway (member token lives there).
+        const proxiedUrl = uploadUrl.replace(/^https:\/\/[^/]*linkedin\.com/, GATEWAY);
+        const { 'Content-Type': _ct, ...authHeaders } = liHeaders() as Record<string, string>;
+        const upRes = await fetch(proxiedUrl, {
+          method: 'PUT',
+          headers: { ...authHeaders, 'Content-Type': imageMime },
+          body: bytes,
+        });
+        if (!upRes.ok) return relay(upRes, 'imageUpload');
+      }
+
       const payload = {
         author: `urn:li:person:${sub}`,
         lifecycleState: 'PUBLISHED',
         specificContent: {
           'com.linkedin.ugc.ShareContent': {
             shareCommentary: { text },
-            shareMediaCategory: 'NONE',
+            shareMediaCategory: assetUrn ? 'IMAGE' : 'NONE',
+            ...(assetUrn
+              ? {
+                  media: [{
+                    status: 'READY',
+                    media: assetUrn,
+                    ...(imageAlt
+                      ? { description: { text: imageAlt }, title: { text: imageAlt } }
+                      : {}),
+                  }],
+                }
+              : {}),
           },
         },
         visibility: {
           'com.linkedin.ugc.MemberNetworkVisibility': visibility,
         },
       };
+
 
       const pRes = await fetch(`${GATEWAY}/v2/ugcPosts`, {
         method: 'POST',
