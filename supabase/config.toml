@@ -267,3 +267,6 @@ verify_jwt = false
 
 [functions.golden-report-recompile]
 verify_jwt = false
+
+[functions.linkedin-scheduler]
+verify_jwt = false

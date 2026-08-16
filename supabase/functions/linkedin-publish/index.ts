@@ -1,31 +1,26 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
 import { verifyAdminToken, getAdminTokenFromRequest } from '../_shared/admin-token.ts';
+import {
+  LI_GATEWAY, liHeaders, publishPost, addComment, deletePost, updatePostText, LinkedInError,
+} from '../_shared/linkedin.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-token',
 };
 
-const GATEWAY = 'https://connector-gateway.lovable.dev/linkedin';
-
-function liHeaders() {
-  const lovable = Deno.env.get('LOVABLE_API_KEY');
-  const li = Deno.env.get('LINKEDIN_API_KEY');
-  if (!lovable) throw new Error('LOVABLE_API_KEY missing');
-  if (!li) throw new Error('LINKEDIN_API_KEY missing — connect LinkedIn in Connectors');
-  return {
-    Authorization: `Bearer ${lovable}`,
-    'X-Connection-Api-Key': li,
-    'Content-Type': 'application/json',
-  };
+function json(payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
 
-async function relay(res: Response, label: string) {
-  const body = await res.text();
-  console.error(`[linkedin-publish] ${label} ${res.status}: ${body}`);
-  return new Response(
-    JSON.stringify({ error: `LinkedIn ${label} failed`, status: res.status, details: body }),
-    { status: res.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-  );
+function fail(e: unknown) {
+  if (e instanceof LinkedInError) {
+    return json({ error: `LinkedIn ${e.label} failed`, status: e.status, details: e.details }, e.status);
+  }
+  console.error('[linkedin-publish]', e);
+  return json({ error: e instanceof Error ? e.message : 'Unknown error' }, 500);
 }
 
 Deno.serve(async (req) => {
@@ -34,158 +29,148 @@ Deno.serve(async (req) => {
   try {
     const svcKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const ok = await verifyAdminToken(getAdminTokenFromRequest(req), svcKey);
-    if (!ok) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    if (!ok) return json({ error: 'Unauthorized' }, 401);
 
+    const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', svcKey);
     const body = await req.json().catch(() => ({}));
     const action = body?.action ?? 'publish';
 
+    // ---------------- profile ----------------
     if (action === 'profile') {
-      const res = await fetch(`${GATEWAY}/v2/userinfo`, { headers: liHeaders() });
-      if (!res.ok) return relay(res, 'userinfo');
+      const res = await fetch(`${LI_GATEWAY}/v2/userinfo`, { headers: liHeaders() });
+      if (!res.ok) {
+        const details = await res.text();
+        return json({ error: 'LinkedIn userinfo failed', status: res.status, details }, res.status);
+      }
       return new Response(await res.text(), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (action === 'publish') {
-      const text: string = String(body?.text ?? '').trim();
-      const visibility: string = body?.visibility === 'CONNECTIONS' ? 'CONNECTIONS' : 'PUBLIC';
-      if (!text) {
-        return new Response(JSON.stringify({ error: 'text is required' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (text.length > 3000) {
-        return new Response(JSON.stringify({ error: 'text exceeds 3000 chars' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const uRes = await fetch(`${GATEWAY}/v2/userinfo`, { headers: liHeaders() });
-      if (!uRes.ok) return relay(uRes, 'userinfo');
-      const user = await uRes.json();
-      const sub = user?.sub;
-      if (!sub) {
-        return new Response(JSON.stringify({ error: 'No LinkedIn member sub returned', user }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      // ---- optional image upload ----
-      const imageData: string = String(body?.imageBase64 ?? '');
-      const imageMime: string = String(body?.imageMime ?? 'image/png');
-      const imageAlt: string = String(body?.imageAlt ?? '').slice(0, 200);
-      let assetUrn: string | null = null;
-
-      if (imageData) {
-        const raw = imageData.includes(',') ? imageData.split(',')[1] : imageData;
-        let bytes: Uint8Array;
-        try {
-          const bin = atob(raw);
-          bytes = new Uint8Array(bin.length);
-          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        } catch {
-          return new Response(JSON.stringify({ error: 'Invalid image data' }), {
-            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        if (bytes.length > 10 * 1024 * 1024) {
-          return new Response(JSON.stringify({ error: 'Image exceeds 10MB' }), {
-            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        const regRes = await fetch(`${GATEWAY}/v2/assets?action=registerUpload`, {
-          method: 'POST',
-          headers: liHeaders(),
-          body: JSON.stringify({
-            registerUploadRequest: {
-              owner: `urn:li:person:${sub}`,
-              recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
-              serviceRelationships: [{
-                relationshipType: 'OWNER',
-                identifier: 'urn:li:userGeneratedContent',
-              }],
-              supportedUploadMechanism: ['SYNCHRONOUS_UPLOAD'],
-            },
-          }),
-        });
-        if (!regRes.ok) return relay(regRes, 'registerUpload');
-        const reg = await regRes.json();
-        const mech = reg?.value?.uploadMechanism?.[
-          'com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'
-        ];
-        const uploadUrl: string | undefined = mech?.uploadUrl;
-        assetUrn = reg?.value?.asset ?? null;
-        if (!uploadUrl || !assetUrn) {
-          return new Response(JSON.stringify({ error: 'registerUpload returned no upload URL', reg }), {
-            status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-
-        // Route the upload through the connector gateway (member token lives there).
-        const proxiedUrl = uploadUrl.replace(/^https:\/\/[^/]*linkedin\.com/, GATEWAY);
-        const { 'Content-Type': _ct, ...authHeaders } = liHeaders() as Record<string, string>;
-        const upRes = await fetch(proxiedUrl, {
-          method: 'PUT',
-          headers: { ...authHeaders, 'Content-Type': imageMime },
-          body: bytes,
-        });
-        if (!upRes.ok) return relay(upRes, 'imageUpload');
-      }
-
-      const payload = {
-        author: `urn:li:person:${sub}`,
-        lifecycleState: 'PUBLISHED',
-        specificContent: {
-          'com.linkedin.ugc.ShareContent': {
-            shareCommentary: { text },
-            shareMediaCategory: assetUrn ? 'IMAGE' : 'NONE',
-            ...(assetUrn
-              ? {
-                  media: [{
-                    status: 'READY',
-                    media: assetUrn,
-                    ...(imageAlt
-                      ? { description: { text: imageAlt }, title: { text: imageAlt } }
-                      : {}),
-                  }],
-                }
-              : {}),
-          },
-        },
-        visibility: {
-          'com.linkedin.ugc.MemberNetworkVisibility': visibility,
-        },
-      };
-
-
-      const pRes = await fetch(`${GATEWAY}/v2/ugcPosts`, {
-        method: 'POST',
-        headers: { ...liHeaders(), 'X-Restli-Protocol-Version': '2.0.0' },
-        body: JSON.stringify(payload),
-      });
-      if (!pRes.ok) return relay(pRes, 'ugcPosts');
-
-      const postId = pRes.headers.get('x-restli-id') || pRes.headers.get('X-RestLi-Id');
-      return new Response(JSON.stringify({
-        ok: true,
-        postId,
-        member: { name: user?.name, email: user?.email },
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // ---------------- history ----------------
+    if (action === 'history') {
+      const limit = Math.min(Math.max(parseInt(body?.limit) || 50, 1), 200);
+      const { data, error } = await supabase
+        .from('linkedin_publications')
+        .select('*')
+        .order('published_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return json({ history: data ?? [] });
     }
 
-    return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
-      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // ---------------- publish ----------------
+    if (action === 'publish') {
+      const text = String(body?.text ?? '').trim();
+      const visibility = body?.visibility === 'CONNECTIONS' ? 'CONNECTIONS' : 'PUBLIC';
+      const autoComment = String(body?.autoComment ?? '').trim();
+      const contentPostId: string | null = body?.contentPostId ?? null;
+
+      const { postUrn, sub } = await publishPost({
+        text,
+        visibility,
+        imageBase64: body?.imageBase64 ?? null,
+        imageMime: body?.imageMime ?? null,
+        imageUrl: body?.imageUrl ?? null,
+        imageAlt: body?.imageAlt ?? null,
+      });
+
+      let commentUrn: string | null = null;
+      let commentStatus: string | null = null;
+      if (autoComment) {
+        try {
+          commentUrn = await addComment(postUrn, sub, autoComment);
+          commentStatus = 'posted';
+        } catch (e) {
+          commentStatus = 'failed';
+          console.error('[linkedin-publish] auto-comment failed', e);
+        }
+      }
+
+      await supabase.from('linkedin_publications').upsert({
+        post_urn: postUrn,
+        content_post_id: contentPostId,
+        text,
+        visibility,
+        image_url: body?.imageUrl ?? null,
+        auto_comment: autoComment || null,
+        auto_comment_urn: commentUrn,
+        auto_comment_status: commentStatus,
+        source: contentPostId ? 'calendar' : 'manual',
+        status: 'published',
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'post_urn' });
+
+      if (contentPostId) {
+        await supabase.from('content_engine_posts').update({
+          status: 'posted',
+          linkedin_status: 'published',
+          linkedin_post_urn: postUrn,
+          linkedin_published_at: new Date().toISOString(),
+          linkedin_error: null,
+        }).eq('id', contentPostId);
+      }
+
+      return json({ postId: postUrn, commentStatus });
+    }
+
+    // ---------------- edit a live post ----------------
+    if (action === 'update') {
+      const postUrn = String(body?.postUrn ?? '').trim();
+      const text = String(body?.text ?? '').trim();
+      if (!postUrn) return json({ error: 'postUrn required' }, 400);
+      if (!text) return json({ error: 'text required' }, 400);
+      if (text.length > 3000) return json({ error: 'text exceeds 3000 chars' }, 400);
+
+      await updatePostText(postUrn, text);
+      await supabase.from('linkedin_publications')
+        .update({ text, edited_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('post_urn', postUrn);
+      return json({ success: true });
+    }
+
+    // ---------------- delete a live post ----------------
+    if (action === 'delete') {
+      const postUrn = String(body?.postUrn ?? '').trim();
+      if (!postUrn) return json({ error: 'postUrn required' }, 400);
+
+      await deletePost(postUrn);
+      await supabase.from('linkedin_publications')
+        .update({ status: 'deleted', deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('post_urn', postUrn);
+      await supabase.from('content_engine_posts')
+        .update({ linkedin_status: 'deleted', linkedin_post_urn: null })
+        .eq('linkedin_post_urn', postUrn);
+      return json({ success: true });
+    }
+
+    // ---------------- remove a history row only ----------------
+    if (action === 'forget') {
+      const id = String(body?.id ?? '');
+      if (!id) return json({ error: 'id required' }, 400);
+      const { error } = await supabase.from('linkedin_publications').delete().eq('id', id);
+      if (error) throw error;
+      return json({ success: true });
+    }
+
+    // ---------------- comment on an existing post ----------------
+    if (action === 'comment') {
+      const postUrn = String(body?.postUrn ?? '').trim();
+      const message = String(body?.message ?? '').trim();
+      if (!postUrn || !message) return json({ error: 'postUrn and message required' }, 400);
+      const uRes = await fetch(`${LI_GATEWAY}/v2/userinfo`, { headers: liHeaders() });
+      if (!uRes.ok) return json({ error: 'LinkedIn userinfo failed', details: await uRes.text() }, uRes.status);
+      const sub = (await uRes.json())?.sub;
+      const commentUrn = await addComment(postUrn, sub, message);
+      await supabase.from('linkedin_publications')
+        .update({ auto_comment: message, auto_comment_urn: commentUrn, auto_comment_status: 'posted', updated_at: new Date().toISOString() })
+        .eq('post_urn', postUrn);
+      return json({ success: true, commentUrn });
+    }
+
+    return json({ error: 'Unknown action' }, 400);
   } catch (e) {
-    console.error('[linkedin-publish] fatal', e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return fail(e);
   }
 });
