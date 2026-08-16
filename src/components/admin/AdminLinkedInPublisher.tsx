@@ -156,6 +156,53 @@ export const AdminLinkedInPublisher: React.FC = () => {
         </div>
       </div>
 
+      <div>
+        <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1 block">
+          Image (optional)
+        </label>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => onPickImage(e.target.files?.[0])}
+        />
+        {!imageData ? (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="w-full border border-dashed border-border rounded-lg p-6 text-sm text-muted-foreground hover:border-amber hover:text-foreground transition flex flex-col items-center gap-2"
+          >
+            <ImagePlus className="w-5 h-5" />
+            Upload an image (PNG or JPG, max 10MB)
+          </button>
+        ) : (
+          <div className="border border-border rounded-lg p-3 space-y-3">
+            <div className="flex items-start gap-3">
+              <img src={imageData} alt="Selected upload preview" className="w-28 h-28 object-cover rounded-md border border-border" />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm truncate">{imageName}</div>
+                <div className="text-xs text-muted-foreground">{imageMime}</div>
+                <div className="flex gap-2 mt-2">
+                  <Button variant="ghost" size="sm" onClick={() => fileRef.current?.click()}>Replace</Button>
+                  <Button variant="ghost" size="sm" onClick={clearImage}>
+                    <X className="w-3.5 h-3.5 mr-1" />Remove
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <Input
+              value={imageAlt}
+              onChange={(e) => setImageAlt(e.target.value)}
+              placeholder="Alt text / caption (recommended)"
+              maxLength={200}
+            />
+          </div>
+        )}
+      </div>
+
+
+
       <div className="flex items-center gap-3">
         <label className="text-xs font-mono uppercase text-muted-foreground">Visibility</label>
         <select
