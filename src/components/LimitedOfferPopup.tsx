@@ -140,7 +140,7 @@ export function LimitedOfferPopup() {
             One honest question for every founder:
           </DialogTitle>
           <DialogDescription className="text-foreground/90 text-lg pt-3 font-serif italic">
-            "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales?"
+            "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales? Do you wish it was all done for you and you had all the answers custom to you?"
           </DialogDescription>
         </DialogHeader>
 
