@@ -186,9 +186,18 @@ ${context}${control ? `\n\n${control.block}` : ""}` },
       const re = new RegExp(`Ch\\s*${c.no}\\b`, "i");
       if (re.test(answer)) cites.push({ chapter_no: c.no, slug: c.slug, title: c.title });
     }
-    return new Response(JSON.stringify({ answer, citations: cites }), {
+    return new Response(JSON.stringify({
+      answer,
+      citations: cites,
+      // Advice-only for everyone; an authorized operator additionally gets the
+      // workspace pointer where a planned action can be confirmed and executed.
+      mode: control ? "operator" : "advice_only",
+      system_id: control?.system_id ?? null,
+      workspace_url: control ? `/company-system/${control.system_id}` : null,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (e) {
     return new Response(JSON.stringify({ error: String((e as Error).message || e) }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
