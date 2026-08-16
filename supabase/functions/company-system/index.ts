@@ -57,6 +57,64 @@ const json = (b: unknown, status = 200) =>
 const SCAN_COLS =
   "id, target_url, company_name, report, raw_findings, brand_kit, brand_kit_status, report_source, portal_source, rep_code, creator_name, creator_email, report_state, financial_model_version, completed_at, status";
 
+
+/**
+ * Adapter shaping. Every branch targets an edge function that already exists;
+ * the bus never invents a tool and never forwards a client-supplied brand or
+ * company context — those are attached server-side from approved records.
+ */
+function buildAdapterPayload(
+  kind: string,
+  ctx: {
+    moduleId: string;
+    input: Record<string, unknown>;
+    systemId: string;
+    scanId: string;
+    companyId: string;
+    targetUrl: string;
+    brand: Record<string, unknown> | null;
+  },
+): Record<string, unknown> {
+  const base = {
+    company_system_id: ctx.systemId,
+    scan_id: ctx.scanId,
+    company_id: ctx.companyId,
+    // Approved brand only. Draft/inferred brand facts never reach a module.
+    brand_context: ctx.brand
+      ? {
+          version: ctx.brand.version,
+          colors: ctx.brand.colors,
+          typography: ctx.brand.typography,
+          tone: ctx.brand.tone,
+          terminology: ctx.brand.terminology,
+          audience: ctx.brand.audience,
+          cta_style: ctx.brand.cta_style,
+          imagery_direction: ctx.brand.imagery_direction,
+        }
+      : null,
+  };
+  switch (kind) {
+    case "tool_sandbox":
+      return {
+        ...base,
+        toolId: ctx.moduleId,
+        url: ctx.targetUrl,
+        context: [
+          String(ctx.input.company_context ?? ctx.input.capability_brief ?? ""),
+          ctx.input.approved_messaging_context ? String(ctx.input.approved_messaging_context) : "",
+          ctx.brand ? `Brand tone: ${String(ctx.brand.tone ?? "")}` : "",
+        ].filter(Boolean).join("\n").slice(0, 1500),
+      };
+    case "scan":
+      return { ...base, url: String(ctx.input.website_url ?? ctx.targetUrl) };
+    case "internal_forecast":
+      return { ...base, action: "refresh_forecast", system_id: ctx.systemId };
+    case "passthrough":
+    default:
+      return { ...base, ...ctx.input };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -481,9 +539,48 @@ serve(async (req) => {
       if ((row as { locked: boolean }).locked && body.enabled) {
         return json({ error: (row as { lock_reason: string }).lock_reason || "Module is locked" }, 403);
       }
+      if (role === "viewer") return json({ error: "Viewer role may not change module state" }, 403);
+
+      // Enabling/disabling changes live behaviour, so it follows the same
+      // preview -> confirm -> execute path as any other write.
+      const wantEnabled = !!body.enabled;
+      const systemVersion = Number(sys.system_version ?? 1);
+      const toggleReq = { module_id: moduleId, action_id: "module_set_enabled", input: { enabled: String(wantEnabled) } };
+      const tokenIn = typeof body.confirmation_token === "string" ? body.confirmation_token : "";
+      if (wantEnabled && sys.approval_state !== "approved") {
+        return json({ error: "Company system is not approved for execution." }, 403);
+      }
+      let claim: ConfirmationClaim | null = null;
+      if (tokenIn) {
+        const { data: crow } = await sb.from("company_system_confirmations").select("*").eq("token", tokenIn).maybeSingle();
+        if (crow) claim = crow as unknown as ConfirmationClaim;
+      }
+      const ctxBind = {
+        actor, systemId, sourceReportHash: String(sys.source_report_hash ?? ""),
+        systemVersion, now: Date.now(),
+      };
+      if (!claim || confirmationMismatch(claim, toggleReq, ctxBind)) {
+        const bound = buildConfirmation(toggleReq, { ...ctxBind, affects: [`module:${moduleId}`] });
+        const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
+        await sb.from("company_system_confirmations").insert({
+          token, actor_role: role,
+          preview: { module: moduleId, action: wantEnabled ? "Enable module" : "Disable module", risk: "write", rollback: "Toggle the module back." },
+          ...bound,
+        });
+        return json({
+          ok: false, requires_confirmation: true,
+          error: claim ? confirmationMismatch(claim, toggleReq, ctxBind) : "Confirmation required",
+          preview: { module: moduleId, enabled: wantEnabled, affects: [`module:${moduleId}`], rollback: "Toggle the module back." },
+          confirmation: { token, expires_at: bound.expires_at, single_use: true },
+        }, 200);
+      }
+      const { data: spent } = await sb.from("company_system_confirmations")
+        .update({ consumed_at: new Date().toISOString() }).eq("token", tokenIn).is("consumed_at", null).select("id").maybeSingle();
+      if (!spent) return json({ error: "Confirmation already used." }, 409);
+
       const { data } = await sb.from("company_system_modules")
-        .update({ enabled: !!body.enabled }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
-      await logEvent({ system_id: systemId, kind: "module_toggle", module_id: moduleId, result: { enabled: !!body.enabled } });
+        .update({ enabled: wantEnabled }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
+      await logEvent({ system_id: systemId, kind: "module_toggle", module_id: moduleId, result: { enabled: wantEnabled } });
       return json({ module: data });
     }
 
@@ -492,7 +589,9 @@ serve(async (req) => {
       const systemId = String(body.system_id ?? "");
       const state = String(body.approval_state ?? "approved");
       if (!["draft", "approved", "rejected"].includes(state)) return json({ error: "bad state" }, 400);
+      const { data: prior } = await sb.from("company_systems").select("system_version").eq("id", systemId).maybeSingle();
       const { data } = await sb.from("company_systems").update({
+        system_version: Number((prior as { system_version?: number } | null)?.system_version ?? 1) + 1,
         approval_state: state,
         status: state === "approved" ? "active" : "draft",
         approved_by: state === "approved" ? actor : null,
@@ -809,7 +908,7 @@ serve(async (req) => {
           metric_key: `${mod.id}.${act.id}.executions`,
           value: 1,
           source: "action_bus",
-          note: "Execution count only. Not a recovery measurement.",
+          label: "Execution count only. Not a recovery measurement.",
         }).then(() => undefined, () => undefined);
       }
 
