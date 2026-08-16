@@ -1015,7 +1015,7 @@ export function buildGoldenReportModel(opts: {
     url: opts.url,
     scanId: opts.scanId,
     generatedAt: opts.generatedAt || new Date(),
-    askUrl: `https://aetheris.technology/report/${opts.scanId}/ask`,
+    askUrl: `${ASK_REPORT_BASE_URL}/report/${opts.scanId}/ask`,
   };
 
   // The appendix profile is the machine-readable half of the same report: the
