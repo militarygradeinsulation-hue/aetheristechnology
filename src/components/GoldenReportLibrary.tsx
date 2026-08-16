@@ -451,6 +451,27 @@ export const GoldenReportLibrary: React.FC = () => {
     } finally { setBackfilling(false); }
   };
 
+  // Historical company systems are built one small batch at a time on purpose:
+  // no fan-out over the whole archive, and every run is resumable.
+  const runSystemBatch = async () => {
+    setSysBatching(true);
+    try {
+      const res = await composeBatch(5);
+      setSysMsg(
+        `${res.created} created, ${res.reused} already current, ${res.failed.length} failed · ${res.systems_total} of ${res.eligible_total} valid reports have a draft system.`,
+      );
+      if (res.failed.length) {
+        toast({ title: `${res.failed.length} failed`, description: res.failed[0]?.error ?? '', variant: 'destructive' });
+      } else {
+        toast({ title: 'Batch complete' });
+      }
+    } catch (e) {
+      setSysMsg(`Batch stopped: ${(e as Error).message}`);
+      toast({ title: 'Batch stopped', description: (e as Error).message, variant: 'destructive' });
+    } finally { setSysBatching(false); }
+  };
+
+
   const pages = useMemo(() => Math.max(1, Math.ceil(total / LIMIT)), [total]);
 
   if (scanId) return <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />;
