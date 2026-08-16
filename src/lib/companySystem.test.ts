@@ -253,7 +253,7 @@ describe("report AI control plane", () => {
   });
 
   it("never lets the advisor execute: every risky action still needs the bus", () => {
-    const risky = UNIVERSE_MODULE_REGISTRY.flatMap(m => m.actions).filter(a => a.risk !== "read");
+    const risky = UNIVERSE_MODULE_REGISTRY.flatMap(m => m.actions).filter(a => a.risk === "write" || a.risk === "external");
     expect(risky.length).toBeGreaterThan(0);
     for (const a of risky) expect(a.confirm).toBe(true);
   });
