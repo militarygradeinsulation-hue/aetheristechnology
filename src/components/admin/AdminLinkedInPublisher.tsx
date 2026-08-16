@@ -59,6 +59,33 @@ export const AdminLinkedInPublisher: React.FC = () => {
 
   useEffect(() => { loadProfile(); }, []);
 
+  const clearImage = () => {
+    setImageData(null);
+    setImageMime('');
+    setImageName('');
+    setImageAlt('');
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const onPickImage = (file?: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Images only', variant: 'destructive' });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({ title: 'Image too large', description: 'Max 10MB.', variant: 'destructive' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageData(String(reader.result));
+      setImageMime(file.type);
+      setImageName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const publish = async () => {
     if (!text.trim()) {
       toast({ title: 'Post is empty', variant: 'destructive' });
@@ -67,13 +94,18 @@ export const AdminLinkedInPublisher: React.FC = () => {
     setPublishing(true);
     setLastPostId(null);
     try {
-      const data = await invoke('publish', { text: text.trim(), visibility });
+      const data = await invoke('publish', {
+        text: text.trim(),
+        visibility,
+        ...(imageData ? { imageBase64: imageData, imageMime, imageAlt: imageAlt.trim() } : {}),
+      });
       setLastPostId(data?.postId ?? 'published');
       toast({
         title: 'Posted to LinkedIn',
         description: data?.postId ? `Post ID: ${data.postId}` : 'Published successfully.',
       });
       setText('');
+      clearImage();
     } catch (e) {
       toast({
         title: 'LinkedIn publish failed',
@@ -87,6 +119,7 @@ export const AdminLinkedInPublisher: React.FC = () => {
 
   const remaining = MAX - text.length;
   const over = remaining < 0;
+
 
   return (
     <div className="space-y-4 max-w-2xl">
