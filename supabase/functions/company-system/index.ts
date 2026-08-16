@@ -510,7 +510,19 @@ serve(async (req) => {
       let q = sb.from("company_system_memory").select("*").eq("company_id", companyId);
       if (body.scope) q = q.eq("scope", String(body.scope));
       const { data } = await q.order("updated_at", { ascending: false }).limit(300);
-      return json({ memory: data || [] });
+      let rows = (data || []) as Array<Record<string, unknown>>;
+      if (scope.kind !== "admin") {
+        // Only memory attached to the caller's own systems/reports.
+        const { data: own } = await sb.from("company_systems").select("id, scan_id")
+          .eq("company_id", companyId).in("rep_code", scope.codes);
+        const sysIds = new Set(((own || []) as Array<{ id: string }>).map((r) => r.id));
+        const scanIds = new Set(((own || []) as Array<{ scan_id: string }>).map((r) => r.scan_id));
+        rows = rows.filter((r) =>
+          r.scope === "business" ||
+          (r.scope === "report" && scanIds.has(String(r.scan_id))) ||
+          ((r.scope === "system" || r.scope === "conversation") && sysIds.has(String(r.system_id))));
+      }
+      return json({ memory: rows });
     }
 
     if (action === "memory_upsert") {
@@ -572,7 +584,7 @@ serve(async (req) => {
         sb.from("forensic_scans").select("report, target_url, company_name, report_state").eq("id", sys.scan_id as string).maybeSingle(),
         sb.from("company_system_modules").select("*").eq("system_id", systemId).order("display_order"),
         sb.from("company_system_goals").select("*").eq("system_id", systemId).order("priority"),
-        sb.from("company_system_memory").select("*").eq("company_id", sys.company_id as string).limit(200),
+        sb.from("company_system_memory").select("*").eq("company_id", sys.company_id as string).limit(300),
         sb.from("company_system_checks").select("*").eq("system_id", systemId),
       ]);
       if (!scan?.report) return json({ error: "Report not found" }, 404);
@@ -580,15 +592,27 @@ serve(async (req) => {
       const unpublishable = (scan as { report_state?: string }).report_state === "regeneration_required";
       const report = sanitizedGoldenReport(scan.report as never) as Record<string, unknown>;
 
-      const memItems: MemoryItem[] = ((mem || []) as Array<Record<string, unknown>>).map((m) => ({
+      // Scoped retrieval: business memory for the company, report memory only
+      // for THIS scan, system/conversation memory only for THIS system.
+      const memItems: StoredMemoryItem[] = ((mem || []) as Array<Record<string, unknown>>).map((m) => ({
+        company_id: String(m.company_id),
+        scan_id: (m.scan_id as string | null) ?? null,
+        system_id: (m.system_id as string | null) ?? null,
         scope: m.scope as MemoryItem["scope"],
         key: String(m.memory_key),
         value: String(m.value),
         provenance: String(m.provenance),
         confidence: Number(m.confidence),
         status: m.status as MemoryItem["status"],
+        sensitivity: (m.sensitivity as MemoryItem["sensitivity"]) ?? "low",
+        expires_at: (m.expires_at as string | null) ?? null,
       }));
-      const usable = activeMemory(memItems);
+      const usable = selectMemory(memItems, {
+        companyId: String(sys.company_id),
+        scanId: String(sys.scan_id),
+        systemId,
+        role,
+      });
 
       const enabled = ((mods || []) as Array<Record<string, unknown>>).filter((m) => m.enabled);
       const catalogue = enabled.map((m) => {
