@@ -261,6 +261,7 @@ const App = () => (
                       <Route path="/detective-mode" element={<DetectiveModePage />} />
                       <Route path="/ecosystem" element={<EcosystemPage />} />
                       <Route path="/aetheris-universe" element={<AetherisUniversePage />} />
+                      <Route path="/company-system/:systemId" element={<CompanySystemWorkspacePage />} />
                       <Route path="/universe" element={<Navigate to="/aetheris-universe" replace />} />
                       <Route path="/team" element={<Navigate to="/ecosystem" replace />} />
                       <Route path="/tools" element={<Navigate to="/ecosystem" replace />} />
