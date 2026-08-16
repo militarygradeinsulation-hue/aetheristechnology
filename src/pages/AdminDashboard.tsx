@@ -36,6 +36,7 @@ const FrictionVocabularyAudit = lazy(() => import('@/components/FrictionVocabula
 const PlaybookCreator = lazy(() => import('@/components/PlaybookCreator').then(m => ({ default: m.PlaybookCreator })));
 const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').then(m => ({ default: m.AllInOneGenerator })));
 const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
+const GoldenReportLibrary = lazy(() => import('@/components/GoldenReportLibrary').then(m => ({ default: m.GoldenReportLibrary })));
 const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
 const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
 const AuthorityPromptStudio = lazy(() => import('@/components/admin/AuthorityPromptStudio'));
