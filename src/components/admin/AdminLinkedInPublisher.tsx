@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Linkedin, Loader2, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Linkedin, Loader2, CheckCircle2, RefreshCw, ImagePlus, X } from 'lucide-react';
 
 const MAX = 3000;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 type Profile = { name?: string; email?: string; picture?: string; sub?: string };
 
@@ -18,6 +20,12 @@ export const AdminLinkedInPublisher: React.FC = () => {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [lastPostId, setLastPostId] = useState<string | null>(null);
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [imageMime, setImageMime] = useState<string>('');
+  const [imageName, setImageName] = useState<string>('');
+  const [imageAlt, setImageAlt] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
 
   const invoke = async (action: 'profile' | 'publish', body: Record<string, unknown> = {}) => {
     const token = getAdminToken();
