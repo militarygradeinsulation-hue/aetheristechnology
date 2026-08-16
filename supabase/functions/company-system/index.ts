@@ -169,6 +169,17 @@ serve(async (req) => {
 
       const composed = composeCompanySystem(rootCauses, clientTier);
 
+      // Keep the persisted registry in step with the code registry (code is the
+      // source of truth; the table is the queryable mirror).
+      await sb.from("universe_module_registry").upsert(
+        UNIVERSE_MODULE_REGISTRY.map((m) => ({
+          id: m.id, name: m.name, route: m.route, category: m.category,
+          required_tier: m.requiredTier, capabilities: m.capabilities, inputs: m.inputs,
+          outputs: m.outputs, actions: m.actions, sensitivity: m.sensitivity, is_active: true,
+        })),
+        { onConflict: "id" },
+      );
+
       const { data: system, error: sysErr } = await sb.from("company_systems").upsert({
         company_id: companyId,
         archive_id: (archive as { id: string }).id,
