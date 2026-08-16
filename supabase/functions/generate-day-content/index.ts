@@ -1,6 +1,7 @@
 // Generate Aetheris-voice content for a specific day.
 // Admin-gated. Returns { title, hook, body, cta, hashtags }.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
@@ -73,7 +74,7 @@ Return ONLY valid JSON, no markdown fences, in this exact shape:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: system },
+          { role: "system", content: `${system}\n\n${NO_DASH_PROMPT_RULE}` },
           { role: "user", content: user },
         ],
         response_format: { type: "json_object" },
@@ -97,6 +98,7 @@ Return ONLY valid JSON, no markdown fences, in this exact shape:
     }
     if (!parsed.body) return json({ error: "AI did not return usable content. Try again." }, 502);
 
+    parsed = stripDashesDeep(parsed);
     return json({
       content: {
         title: parsed.title || "Untitled dispatch",

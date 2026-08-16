@@ -155,7 +155,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
           {
             role: "system",
             content:
-              "You write LinkedIn posts in the 2026 short-line / one-sentence-per-line style. Diagnostic operator voice. Massive whitespace. No em dashes. No copy-bro language. Return only valid JSON, no markdown fences.",
+              "You write LinkedIn posts in the 2026 short line, one sentence per line style. Diagnostic operator voice. Massive whitespace. No copy bro language. Return only valid JSON, no markdown fences.\n\n" + NO_DASH_PROMPT_RULE,
           },
           { role: "user", content: prompt },
         ],

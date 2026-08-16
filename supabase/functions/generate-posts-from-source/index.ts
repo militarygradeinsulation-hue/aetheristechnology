@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 import { buildPersonaDirective, PERSONAS } from "../_shared/contentPersonas.ts";
@@ -145,7 +146,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are the AETHERIS forensic operator${personaLabel ? `, writing this post in the voice of ${personaLabel}. Persona cadence WINS over default voice rules where they conflict; forensic CONTENT (real numbers, real mechanism, real verdict) stays intact` : ''}. ${personaLabel ? 'Follow the PERSONA LOCK directive at the top of the user message verbatim.' : 'Strictly enforce the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words).'} No em dashes. No emojis. No hedging. No motivational language. Return only valid JSON.` },
+          { role: "system", content: `${AETHERIS_FORENSIC_OPERATOR_VOICE}\n\nYou are the AETHERIS forensic operator${personaLabel ? `, writing this post in the voice of ${personaLabel}. Persona cadence WINS over default voice rules where they conflict; forensic CONTENT (real numbers, real mechanism, real verdict) stays intact` : ''}. ${personaLabel ? 'Follow the PERSONA LOCK directive at the top of the user message verbatim.' : 'Strictly enforce the 4-Part Architecture above (REFRAME → ANCHOR → MECHANISM → VERDICT ≤15 words).'} ${NO_DASH_PROMPT_RULE} No emojis. No hedging. No motivational language. Return only valid JSON.` },
 
           { role: "user", content: prompt },
         ],
@@ -189,6 +190,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
         };
       });
     }
+    result = stripDashesDeep(result);
     result.sourceLabel = sourceLabel;
 
     return new Response(JSON.stringify(result), {
