@@ -119,7 +119,22 @@ describe("tier enforcement", () => {
 });
 
 describe("action bus: plan -> confirm -> execute", () => {
-  const ctx = { clientTier: "active" as const, enabledModuleIds: ["follow-up-plan", "website-scanner"], role: "admin" as const };
+  const ctx = {
+    clientTier: "active" as const,
+    enabledModuleIds: ["follow-up-plan", "website-scanner"],
+    role: "admin" as const,
+    systemApprovalState: "approved",
+    brandStatus: "approved",
+    actor: "admin",
+    systemId: "sys-1",
+    sourceReportHash: "hash-1",
+    systemVersion: 1,
+  };
+  const ticket = (req: Parameters<typeof validateAction>[0], over: Record<string, unknown> = {}) => ({
+    token: "t", ...buildConfirmation(req, {
+      actor: "admin", systemId: "sys-1", sourceReportHash: "hash-1", systemVersion: 1, affects: ["scan"],
+    }), ...over,
+  });
 
   it("rejects unknown modules and actions", () => {
     expect(validateAction({ module_id: "ghost", action_id: "x" }, ctx).ok).toBe(false);
@@ -153,11 +168,43 @@ describe("action bus: plan -> confirm -> execute", () => {
     expect(d.ok).toBe(false);
     expect(d.requires_confirmation).toBe(true);
     expect(d.preview?.rollback).toBeTruthy();
-    const ok = validateAction(
-      { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" }, confirmed: true },
-      ctx,
-    );
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const ok = validateAction(req, { ...ctx, confirmation: ticket(req) as never });
     expect(ok.ok).toBe(true);
+  });
+
+  it("refuses a raw confirmed flag: only a server-issued ticket executes", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const forged = validateAction({ ...req, confirmed: true } as never, ctx);
+    expect(forged.ok).toBe(false);
+    expect(forged.requires_confirmation).toBe(true);
+  });
+
+  it("rejects reused, expired, mismatched-actor, mutated-input and stale-version tickets", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const base = ticket(req);
+    expect(validateAction(req, { ...ctx, confirmation: { ...base, consumed_at: new Date().toISOString() } as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, confirmation: { ...base, expires_at: new Date(Date.now() - 1000).toISOString() } as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, actor: "rep:B", confirmation: base as never }).ok).toBe(false);
+    expect(validateAction(
+      { ...req, input: { website_url: "https://evil.com" } },
+      { ...ctx, confirmation: base as never },
+    ).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, systemVersion: 2, confirmation: base as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, sourceReportHash: "hash-2", confirmation: base as never }).ok).toBe(false);
+    // The clean ticket still works, proving the rejections are specific.
+    expect(validateAction(req, { ...ctx, confirmation: base as never }).ok).toBe(true);
+  });
+
+  it("blocks live actions until the system and brand facts are approved", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const t = ticket(req);
+    const unapproved = validateAction(req, { ...ctx, systemApprovalState: "draft", confirmation: t as never });
+    expect(unapproved.ok).toBe(false);
+    expect(unapproved.error).toMatch(/not approved/);
+    const draftBrand = validateAction(req, { ...ctx, brandStatus: "draft", confirmation: t as never });
+    expect(draftBrand.ok).toBe(false);
+    expect(draftBrand.error).toMatch(/Brand facts/);
   });
 
   it("lets drafting run immediately but blocks viewers from acting", () => {
@@ -172,9 +219,13 @@ describe("action bus: plan -> confirm -> execute", () => {
     expect(viewer.ok).toBe(false);
   });
 
-  it("only ever targets registered functions", () => {
+  it("only ever targets edge functions that actually exist", () => {
+    expect(registryAdapterGaps()).toEqual([]);
     for (const m of UNIVERSE_MODULE_REGISTRY) {
-      for (const a of m.actions) expect(a.fn).toMatch(/^[a-z0-9-]+$/);
+      for (const a of m.actions) {
+        expect(a.fn).toMatch(/^[a-z0-9-]+$/);
+        expect(EXISTING_EDGE_FUNCTIONS).toContain(a.fn);
+      }
     }
   });
 });
