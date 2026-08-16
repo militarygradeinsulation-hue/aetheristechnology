@@ -231,3 +231,30 @@ describe("brand context", () => {
     expect(ctx.inferred_fields.length).toBeGreaterThan(3);
   });
 });
+
+/* ── control-plane exposure rules (report AI upgrade) ─────────────────── */
+
+describe("report AI control plane", () => {
+  it("only ever surfaces actions that exist in the registry", () => {
+    // The advisor is given enabled modules' registry actions; a module id that
+    // is not registered must resolve to nothing rather than an invented tool.
+    expect(findModule("totally-made-up")).toBeUndefined();
+    const m = UNIVERSE_MODULE_REGISTRY[0];
+    expect(findModule(m.id)!.actions.length).toBeGreaterThan(0);
+  });
+
+  it("keeps locked modules out of the executable surface", () => {
+    const r = composeCompanySystem(
+      [RC("rc_content", "No publishing cadence", "social dormant, blog inactive")],
+      "signal",
+    );
+    const executable = r.modules.filter(m => !m.locked);
+    for (const m of executable) expect(moduleAllowedForTier(m.module_id, "signal")).toBe(true);
+  });
+
+  it("never lets the advisor execute: every risky action still needs the bus", () => {
+    const risky = UNIVERSE_MODULE_REGISTRY.flatMap(m => m.actions).filter(a => a.risk === "write" || a.risk === "external");
+    expect(risky.length).toBeGreaterThan(0);
+    for (const a of risky) expect(a.confirm).toBe(true);
+  });
+});

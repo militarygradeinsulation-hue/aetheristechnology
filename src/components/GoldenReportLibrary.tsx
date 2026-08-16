@@ -18,7 +18,7 @@ import {
   generateBlueprint, setBlueprintApproval, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
-import { composeSystem, type CompanySystemRow } from '@/lib/companySystem';
+import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
@@ -412,6 +412,8 @@ export const GoldenReportLibrary: React.FC = () => {
   const [stats, setStats] = useState<{ total_scans: number; total_archived: number; total_companies: number } | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillMsg, setBackfillMsg] = useState('');
+  const [sysBatching, setSysBatching] = useState(false);
+  const [sysMsg, setSysMsg] = useState('');
   const LIMIT = 24;
 
   useEffect(() => { const t = setTimeout(() => { setDebounced(search); setPage(0); }, 350); return () => clearTimeout(t); }, [search]);
@@ -451,6 +453,27 @@ export const GoldenReportLibrary: React.FC = () => {
     } finally { setBackfilling(false); }
   };
 
+  // Historical company systems are built one small batch at a time on purpose:
+  // no fan-out over the whole archive, and every run is resumable.
+  const runSystemBatch = async () => {
+    setSysBatching(true);
+    try {
+      const res = await composeBatch(5);
+      setSysMsg(
+        `${res.created} created, ${res.reused} already current, ${res.failed.length} failed · ${res.systems_total} of ${res.eligible_total} valid reports have a draft system.`,
+      );
+      if (res.failed.length) {
+        toast({ title: `${res.failed.length} failed`, description: res.failed[0]?.error ?? '', variant: 'destructive' });
+      } else {
+        toast({ title: 'Batch complete' });
+      }
+    } catch (e) {
+      setSysMsg(`Batch stopped: ${(e as Error).message}`);
+      toast({ title: 'Batch stopped', description: (e as Error).message, variant: 'destructive' });
+    } finally { setSysBatching(false); }
+  };
+
+
   const pages = useMemo(() => Math.max(1, Math.ceil(total / LIMIT)), [total]);
 
   if (scanId) return <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />;
@@ -475,9 +498,15 @@ export const GoldenReportLibrary: React.FC = () => {
             {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
             Archive historical reports
           </Button>
+          <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
+            {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
+            Draft 5 company systems
+          </Button>
         </div>
       </div>
       {backfillMsg && <p className="font-mono text-[11px] text-amber">{backfillMsg}</p>}
+      {sysMsg && <p className="font-mono text-[11px] text-muted-foreground">{sysMsg}</p>}
+
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] flex-1">

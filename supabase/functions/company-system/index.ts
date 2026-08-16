@@ -94,8 +94,62 @@ serve(async (req) => {
       return json({ seeded: rows.length });
     }
 
+    /* ── historical batch: resumable, capped, idempotent ──────────────── */
+    if (action === "compose_batch") {
+      if (!isAdmin && !internal) return json({ error: "Forbidden" }, 403);
+      // Never fan out over the whole archive: the admin walks a bounded queue
+      // so cost and failure stay visible per batch.
+      const limit = Math.min(Math.max(Number(body.limit ?? 5) || 5, 1), 25);
+      const tier = String(body.tier ?? "diagnostic");
+      const explicit = Array.isArray(body.scan_ids) ? body.scan_ids.map(String).slice(0, limit) : null;
+
+      let queue: string[] = explicit ?? [];
+      if (!explicit) {
+        // Compiled + archived reports that have no system for this template.
+        const { data: done } = await sb.from("company_systems")
+          .select("scan_id").eq("template_version", COMPANY_SYSTEM_TEMPLATE_VERSION);
+        const have = new Set(((done || []) as Array<{ scan_id: string }>).map((r) => r.scan_id));
+        const { data: cand } = await sb.from("golden_report_archive")
+          .select("scan_id, is_valid, completed_at").eq("is_valid", true)
+          .order("completed_at", { ascending: false }).limit(limit + have.size);
+        queue = ((cand || []) as Array<{ scan_id: string }>)
+          .map((r) => r.scan_id).filter((id) => !have.has(id)).slice(0, limit);
+      }
+
+      const results: Array<{ scan_id: string; ok: boolean; reused?: boolean; error?: string }> = [];
+      for (const scanId of queue) {
+        try {
+          const r = await fetch(`${SUPABASE_URL}/functions/v1/company-system`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-internal-key": SVC, Authorization: `Bearer ${SVC}` },
+            body: JSON.stringify({ action: "compose", scan_id: scanId, tier }),
+          });
+          const payload = await r.json().catch(() => ({}));
+          results.push({ scan_id: scanId, ok: r.ok, reused: !!payload.reused, error: r.ok ? undefined : String(payload.error || r.status) });
+        } catch (e) {
+          results.push({ scan_id: scanId, ok: false, error: (e as Error).message });
+        }
+      }
+
+      const { count: remaining } = await sb.from("golden_report_archive")
+        .select("scan_id", { count: "exact", head: true }).eq("is_valid", true);
+      const { count: built } = await sb.from("company_systems")
+        .select("id", { count: "exact", head: true }).eq("template_version", COMPANY_SYSTEM_TEMPLATE_VERSION);
+
+      return json({
+        processed: results.length,
+        created: results.filter((r) => r.ok && !r.reused).length,
+        reused: results.filter((r) => r.reused).length,
+        failed: results.filter((r) => !r.ok),
+        eligible_total: remaining ?? 0,
+        systems_total: built ?? 0,
+        results,
+      });
+    }
+
     /* ── compose ──────────────────────────────────────────────────────── */
     if (action === "compose") {
+
       const scanId = String(body.scan_id ?? "");
       if (!scanId) return json({ error: "scan_id required" }, 400);
       const clientTier = (String(body.tier ?? "diagnostic") || "diagnostic") as ModuleTier;
