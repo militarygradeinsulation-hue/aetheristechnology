@@ -2745,6 +2745,171 @@ export type Database = {
         }
         Relationships: []
       }
+      golden_report_archive: {
+        Row: {
+          annual_high: number | null
+          annual_low: number | null
+          company_id: string
+          compiler_version: string | null
+          completed_at: string | null
+          created_at: string
+          creator_email: string | null
+          creator_name: string | null
+          currency: string
+          executive_summary: string | null
+          financial_model_version: number | null
+          finding_count: number
+          grade: string | null
+          id: string
+          is_valid: boolean
+          leak_count: number
+          portal_source: string | null
+          raw_company_name: string | null
+          rep_code: string | null
+          report_hash: string | null
+          report_source: string | null
+          report_state: string | null
+          report_version: number
+          root_cause_count: number
+          scan_id: string
+          score: number | null
+          target_url: string | null
+          top_leaks: Json
+          top_priorities: Json
+          updated_at: string
+        }
+        Insert: {
+          annual_high?: number | null
+          annual_low?: number | null
+          company_id: string
+          compiler_version?: string | null
+          completed_at?: string | null
+          created_at?: string
+          creator_email?: string | null
+          creator_name?: string | null
+          currency?: string
+          executive_summary?: string | null
+          financial_model_version?: number | null
+          finding_count?: number
+          grade?: string | null
+          id?: string
+          is_valid?: boolean
+          leak_count?: number
+          portal_source?: string | null
+          raw_company_name?: string | null
+          rep_code?: string | null
+          report_hash?: string | null
+          report_source?: string | null
+          report_state?: string | null
+          report_version?: number
+          root_cause_count?: number
+          scan_id: string
+          score?: number | null
+          target_url?: string | null
+          top_leaks?: Json
+          top_priorities?: Json
+          updated_at?: string
+        }
+        Update: {
+          annual_high?: number | null
+          annual_low?: number | null
+          company_id?: string
+          compiler_version?: string | null
+          completed_at?: string | null
+          created_at?: string
+          creator_email?: string | null
+          creator_name?: string | null
+          currency?: string
+          executive_summary?: string | null
+          financial_model_version?: number | null
+          finding_count?: number
+          grade?: string | null
+          id?: string
+          is_valid?: boolean
+          leak_count?: number
+          portal_source?: string | null
+          raw_company_name?: string | null
+          rep_code?: string | null
+          report_hash?: string | null
+          report_source?: string | null
+          report_state?: string | null
+          report_version?: number
+          root_cause_count?: number
+          scan_id?: string
+          score?: number | null
+          target_url?: string | null
+          top_leaks?: Json
+          top_priorities?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "golden_report_archive_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "golden_report_archive_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: true
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      golden_report_companies: {
+        Row: {
+          aliases: string[]
+          business_summary: string | null
+          contact_names: string[]
+          created_at: string
+          display_name: string
+          id: string
+          industry: string | null
+          location: string | null
+          normalized_name: string
+          primary_domain: string | null
+          summary_generated_at: string | null
+          summary_source: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          aliases?: string[]
+          business_summary?: string | null
+          contact_names?: string[]
+          created_at?: string
+          display_name: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          normalized_name: string
+          primary_domain?: string | null
+          summary_generated_at?: string | null
+          summary_source?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          aliases?: string[]
+          business_summary?: string | null
+          contact_names?: string[]
+          created_at?: string
+          display_name?: string
+          id?: string
+          industry?: string | null
+          location?: string | null
+          normalized_name?: string
+          primary_domain?: string | null
+          summary_generated_at?: string | null
+          summary_source?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       golden_report_events: {
         Row: {
           city: string | null
@@ -2801,6 +2966,188 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: []
+      }
+      golden_report_findings_index: {
+        Row: {
+          annual_high: number | null
+          annual_low: number | null
+          archive_id: string
+          category: string | null
+          chapter_slug: string | null
+          company_id: string
+          created_at: string
+          detail: string | null
+          evidence_grade: string | null
+          finding_key: string
+          id: string
+          leak_ref: string | null
+          priority: number | null
+          recommended_action: string | null
+          root_cause_id: string | null
+          root_cause_title: string | null
+          scan_id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          annual_high?: number | null
+          annual_low?: number | null
+          archive_id: string
+          category?: string | null
+          chapter_slug?: string | null
+          company_id: string
+          created_at?: string
+          detail?: string | null
+          evidence_grade?: string | null
+          finding_key: string
+          id?: string
+          leak_ref?: string | null
+          priority?: number | null
+          recommended_action?: string | null
+          root_cause_id?: string | null
+          root_cause_title?: string | null
+          scan_id: string
+          status?: string
+          title: string
+        }
+        Update: {
+          annual_high?: number | null
+          annual_low?: number | null
+          archive_id?: string
+          category?: string | null
+          chapter_slug?: string | null
+          company_id?: string
+          created_at?: string
+          detail?: string | null
+          evidence_grade?: string | null
+          finding_key?: string
+          id?: string
+          leak_ref?: string | null
+          priority?: number | null
+          recommended_action?: string | null
+          root_cause_id?: string | null
+          root_cause_title?: string | null
+          scan_id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "golden_report_findings_index_archive_id_fkey"
+            columns: ["archive_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "golden_report_findings_index_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "golden_report_findings_index_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      golden_system_blueprints: {
+        Row: {
+          ai_model: string | null
+          ai_provider: string | null
+          approval_state: string
+          approved_at: string | null
+          approved_by: string | null
+          archive_id: string
+          blueprint_version: number
+          company_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          master_prompt: string | null
+          output_json: Json | null
+          output_markdown: string | null
+          scan_id: string
+          source_report_hash: string
+          status: string
+          template_version: string
+          updated_at: string
+          validation: Json
+          validation_passed: boolean
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_provider?: string | null
+          approval_state?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archive_id: string
+          blueprint_version?: number
+          company_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          master_prompt?: string | null
+          output_json?: Json | null
+          output_markdown?: string | null
+          scan_id: string
+          source_report_hash: string
+          status?: string
+          template_version: string
+          updated_at?: string
+          validation?: Json
+          validation_passed?: boolean
+        }
+        Update: {
+          ai_model?: string | null
+          ai_provider?: string | null
+          approval_state?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archive_id?: string
+          blueprint_version?: number
+          company_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          master_prompt?: string | null
+          output_json?: Json | null
+          output_markdown?: string | null
+          scan_id?: string
+          source_report_hash?: string
+          status?: string
+          template_version?: string
+          updated_at?: string
+          validation?: Json
+          validation_passed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "golden_system_blueprints_archive_id_fkey"
+            columns: ["archive_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "golden_system_blueprints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "golden_system_blueprints_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hire_playbook_entries: {
         Row: {
@@ -7620,6 +7967,8 @@ export type Database = {
         Args: { _stale_minutes?: number }
         Returns: number
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       update_deliverable_intake: {
         Args: { _access_token: string; _intake_data: Json }
         Returns: boolean
