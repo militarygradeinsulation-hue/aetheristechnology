@@ -18,6 +18,8 @@
 - **INFLUENCE BASELINE (locked):** Every AI output + every page must weaponize ≥2 of Cialdini's 6 (Reciprocity, Commitment, Social Proof, Liking, Authority, Scarcity) + Perceptual Contrast, AND fire ≥2 of the 5 POWER-LEXICON families (Trust · Urgency · Curiosity · Exclusivity · Emotion) matched to the surface. Any CTA must be preceded by the 5-Beat Close (Gift → Commit → Proof → Authority → Scarcity → CTA). Enforced in `supabase/functions/_shared/influenceBlueprint.ts`. See [Influence Blueprint](mem://marketing/influence-blueprint) + [Power Lexicon](mem://marketing/power-lexicon).
 - **2026 GROWTH DOCTRINE (locked):** Stay inside the 3 pillars (Revenue Leak Forensics · Operator Systems · AI-Augmented Sales/RevOps) — LinkedIn 360 Brew semantic AI rewards ≥80% pillar-aligned content. All LinkedIn posts/comments/DMs follow the 4-part architecture (Reframe → Audit Anchor → Mechanism → Verdict <15 words). Every profile/hero/CTA answers the 5-Second Heatmap (Who / How / Proof). Optimize for Citation Share + Saves + Dwell, never likes. Bake GEO signals (recency, chunkable structure, earned-media anchors, llms.txt) into blogs. Sell RevOps in VECTOR frame. Close via No-Call DM-to-Loom. See [2026 Growth Doctrine](mem://marketing/growth-doctrine-2026).
 
+- NO DASHES, EVER: no em/en dashes, hyphens between words, or "- " bullets in any written output. See [No Dash Rule](mem://rules/no-dashes).
+
 ## Memories
 - [AI Authority Playbook](mem://strategy/ai-authority-playbook) — Full 531-line playbook: canonical entity description (long/short/founder), per-engine rules (ChatGPT/Claude/Gemini/Perplexity/Meta AI/Copilot/Grok), 12 universal content rules, content architecture (Tier 1 pillars / Tier 2 question articles / Tier 3 data pages), 7 prompt templates, weekly/monthly/quarterly/annual cadence, technical checklist, 20 questions to win
 - [Revenue Forensics Strategy](mem://strategy/revenue-forensics-category) — Category play, 5 structural moats, hard kill list, build priority
@@ -44,3 +46,4 @@
 - [Rep Time Clock](mem://features/rep-timeclock) — Clock-in/out per rep
 - [Team Training](mem://features/team-training) — Admin trainings + AI Q&A
 - [Power-Words Arsenal](mem://marketing/power-words-sales-arsenal) — 7 power-word families, "because" clause + risk-free/proven mandatories on every page and every AI output
+- [No Dash Rule](mem://rules/no-dashes) — Absolute dash ban, NO_DASH_PROMPT_RULE + stripDashesDeep sanitizers in every copy generator
