@@ -671,42 +671,113 @@ serve(async (req) => {
       if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
       if (!sys) return json({ error: "Not found" }, 404);
 
-      const { data: mods } = await sb.from("company_system_modules").select("module_id, enabled").eq("system_id", systemId);
+      const moduleId = String(body.module_id ?? "");
+      const actionId = String(body.action_id ?? "");
+      const input = (body.input || {}) as Record<string, unknown>;
+
+      const [{ data: mods }, { data: brandRow }] = await Promise.all([
+        sb.from("company_system_modules").select("module_id, enabled").eq("system_id", systemId),
+        sys.brand_context_id
+          ? sb.from("company_brand_contexts").select("*").eq("id", sys.brand_context_id as string).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
       const enabledIds = ((mods || []) as Array<{ module_id: string; enabled: boolean }>)
         .filter((m) => m.enabled).map((m) => m.module_id);
+      const brand = (brandRow || null) as Record<string, unknown> | null;
+      const brandStatus = (brand?.status as string | undefined) ?? null;
 
+      // The confirmation ticket is looked up server-side. The client only ever
+      // hands back an opaque token issued by a prior action_preview.
+      let claim: ConfirmationClaim | null = null;
+      const tokenIn = typeof body.confirmation_token === "string" ? body.confirmation_token : "";
+      if (action === "action_execute" && tokenIn) {
+        const { data: row } = await sb.from("company_system_confirmations")
+          .select("*").eq("token", tokenIn).maybeSingle();
+        if (row) claim = row as unknown as ConfirmationClaim;
+      }
+
+      const systemVersion = Number(sys.system_version ?? 1);
       const decision = validateAction(
+        { module_id: moduleId, action_id: actionId, input },
         {
-          module_id: String(body.module_id ?? ""),
-          action_id: String(body.action_id ?? ""),
-          input: (body.input || {}) as Record<string, unknown>,
-          confirmed: action === "action_execute" ? !!body.confirmed : false,
+          clientTier: sys.tier as ModuleTier,
+          enabledModuleIds: enabledIds,
+          role,
+          systemApprovalState: (sys.approval_state as string) ?? null,
+          brandStatus,
+          confirmation: action === "action_execute" ? claim : null,
+          actor,
+          systemId,
+          sourceReportHash: String(sys.source_report_hash ?? ""),
+          systemVersion,
         },
-        { clientTier: sys.tier as ModuleTier, enabledModuleIds: enabledIds, role },
       );
 
       if (action === "action_preview" || !decision.ok) {
+        // Issue a bound, single-use ticket only when the plan is otherwise
+        // valid and merely awaiting the operator's confirmation.
+        let confirmation: Record<string, unknown> | null = null;
+        if (action === "action_preview" && decision.requires_confirmation && decision.preview && !claim) {
+          const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
+          const bound = buildConfirmation(
+            { module_id: moduleId, action_id: actionId, input },
+            {
+              actor, systemId,
+              sourceReportHash: String(sys.source_report_hash ?? ""),
+              systemVersion,
+              affects: decision.preview.affects,
+            },
+          );
+          const { error: cErr } = await sb.from("company_system_confirmations").insert({
+            token, actor_role: role, preview: decision.preview, ...bound,
+          });
+          if (cErr) throw cErr;
+          confirmation = {
+            token,
+            expires_at: bound.expires_at,
+            affects: bound.affects,
+            input_hash: bound.input_hash,
+            single_use: true,
+          };
+        }
         await logEvent({
-          system_id: systemId, kind: "action_planned", module_id: String(body.module_id ?? ""),
-          action_id: String(body.action_id ?? ""), input: body.input || {}, preview: decision.preview || null,
+          system_id: systemId, kind: "action_planned", module_id: moduleId,
+          action_id: actionId, input, preview: decision.preview || null,
           status: decision.ok ? "ready" : decision.requires_confirmation ? "awaiting_confirmation" : "rejected",
           error_message: decision.ok ? null : decision.error,
         });
-        return json(decision, decision.ok || decision.requires_confirmation ? 200 : 400);
+        return json({ ...decision, confirmation }, decision.ok || decision.requires_confirmation ? 200 : 400);
+      }
+
+      const mod = findModule(moduleId)!;
+      const act = mod.actions.find((a) => a.id === actionId)!;
+
+      // Atomic single-use consumption. A racing second execute finds no
+      // unconsumed row and loses.
+      if (claim) {
+        const { data: spent } = await sb.from("company_system_confirmations")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("token", tokenIn).is("consumed_at", null).select("id").maybeSingle();
+        if (!spent) {
+          return json({ ok: false, requires_confirmation: true, error: "Confirmation already used. Preview the action again." }, 409);
+        }
       }
 
       // Execute: the bus only ever invokes the registered function for the
       // registered action, with the validated input. No arbitrary code.
-      const mod = findModule(String(body.module_id))!;
-      const act = mod.actions.find((a) => a.id === String(body.action_id))!;
       let result: unknown = null;
       let status = "executed";
       let errorMessage: string | null = null;
       try {
+        const payload = buildAdapterPayload(act.payload_kind, {
+          moduleId: mod.id, input, systemId, scanId: String(sys.scan_id),
+          companyId: String(sys.company_id), targetUrl: String(sys.manifest && (sys.manifest as Record<string, Record<string, string>>).identity?.website_url || ""),
+          brand: brandStatus === "approved" ? brand : null,
+        });
         const r = await fetch(`${SUPABASE_URL}/functions/v1/${act.fn}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-internal-key": SVC, Authorization: `Bearer ${SVC}` },
-          body: JSON.stringify({ ...(body.input || {}), company_system_id: systemId, scan_id: sys.scan_id }),
+          body: JSON.stringify(payload),
         });
         const text = await r.text();
         result = { status: r.status, body: text.slice(0, 4000) };
@@ -716,15 +787,47 @@ serve(async (req) => {
         errorMessage = (e as Error).message;
       }
 
+      // Post-action verification: run/queue the registered check and record
+      // whether anything actually moved. Never claim recovery without it.
+      let verification: Record<string, unknown> | null = null;
+      if (status === "executed") {
+        const { data: checkRow } = await sb.from("company_system_checks")
+          .select("*").eq("system_id", systemId).order("created_at", { ascending: true }).limit(1).maybeSingle();
+        if (checkRow) {
+          const c = checkRow as { id: string; name: string; threshold: string | null };
+          await sb.from("company_system_checks").update({
+            last_status: "queued",
+            last_run_at: new Date().toISOString(),
+            last_result: { queued_by: `${mod.id}.${act.id}`, note: "Awaiting measurement window." },
+          }).eq("id", c.id);
+          verification = { check: c.name, state: "queued", threshold: c.threshold, measured: false };
+        } else {
+          verification = { check: null, state: "no_registered_check", measured: false };
+        }
+        await sb.from("company_system_metrics").insert({
+          system_id: systemId,
+          metric_key: `${mod.id}.${act.id}.executions`,
+          value: 1,
+          source: "action_bus",
+          note: "Execution count only. Not a recovery measurement.",
+        }).then(() => undefined, () => undefined);
+      }
+
       await logEvent({
         system_id: systemId, company_id: sys.company_id, scan_id: sys.scan_id,
         kind: "action_executed", module_id: mod.id, action_id: act.id,
-        input: body.input || {}, preview: decision.preview, result, status,
+        input, preview: decision.preview, result: { ...(result as Record<string, unknown>), verification }, status,
         error_message: errorMessage, rollback_note: act.rollback,
       });
 
-      return json({ ok: status === "executed", status, result, rollback: act.rollback, error: errorMessage });
+      return json({
+        ok: status === "executed", status, result, verification,
+        rollback: act.rollback, error: errorMessage,
+        goal_movement: "unmeasured until the registered check reports.",
+      });
     }
+
+
 
     if (action === "events") {
       const systemId = String(body.system_id ?? "");
