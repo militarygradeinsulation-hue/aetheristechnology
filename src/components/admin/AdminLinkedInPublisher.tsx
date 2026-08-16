@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Linkedin, Loader2, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Linkedin, Loader2, CheckCircle2, RefreshCw, ImagePlus, X } from 'lucide-react';
 
 const MAX = 3000;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 type Profile = { name?: string; email?: string; picture?: string; sub?: string };
 
@@ -18,6 +20,12 @@ export const AdminLinkedInPublisher: React.FC = () => {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [lastPostId, setLastPostId] = useState<string | null>(null);
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [imageMime, setImageMime] = useState<string>('');
+  const [imageName, setImageName] = useState<string>('');
+  const [imageAlt, setImageAlt] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
 
   const invoke = async (action: 'profile' | 'publish', body: Record<string, unknown> = {}) => {
     const token = getAdminToken();
@@ -51,6 +59,33 @@ export const AdminLinkedInPublisher: React.FC = () => {
 
   useEffect(() => { loadProfile(); }, []);
 
+  const clearImage = () => {
+    setImageData(null);
+    setImageMime('');
+    setImageName('');
+    setImageAlt('');
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const onPickImage = (file?: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Images only', variant: 'destructive' });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({ title: 'Image too large', description: 'Max 10MB.', variant: 'destructive' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageData(String(reader.result));
+      setImageMime(file.type);
+      setImageName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const publish = async () => {
     if (!text.trim()) {
       toast({ title: 'Post is empty', variant: 'destructive' });
@@ -59,13 +94,18 @@ export const AdminLinkedInPublisher: React.FC = () => {
     setPublishing(true);
     setLastPostId(null);
     try {
-      const data = await invoke('publish', { text: text.trim(), visibility });
+      const data = await invoke('publish', {
+        text: text.trim(),
+        visibility,
+        ...(imageData ? { imageBase64: imageData, imageMime, imageAlt: imageAlt.trim() } : {}),
+      });
       setLastPostId(data?.postId ?? 'published');
       toast({
         title: 'Posted to LinkedIn',
         description: data?.postId ? `Post ID: ${data.postId}` : 'Published successfully.',
       });
       setText('');
+      clearImage();
     } catch (e) {
       toast({
         title: 'LinkedIn publish failed',
@@ -79,6 +119,7 @@ export const AdminLinkedInPublisher: React.FC = () => {
 
   const remaining = MAX - text.length;
   const over = remaining < 0;
+
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -114,6 +155,53 @@ export const AdminLinkedInPublisher: React.FC = () => {
           {remaining} characters remaining
         </div>
       </div>
+
+      <div>
+        <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-1 block">
+          Image (optional)
+        </label>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => onPickImage(e.target.files?.[0])}
+        />
+        {!imageData ? (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="w-full border border-dashed border-border rounded-lg p-6 text-sm text-muted-foreground hover:border-amber hover:text-foreground transition flex flex-col items-center gap-2"
+          >
+            <ImagePlus className="w-5 h-5" />
+            Upload an image (PNG or JPG, max 10MB)
+          </button>
+        ) : (
+          <div className="border border-border rounded-lg p-3 space-y-3">
+            <div className="flex items-start gap-3">
+              <img src={imageData} alt="Selected upload preview" className="w-28 h-28 object-cover rounded-md border border-border" />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm truncate">{imageName}</div>
+                <div className="text-xs text-muted-foreground">{imageMime}</div>
+                <div className="flex gap-2 mt-2">
+                  <Button variant="ghost" size="sm" onClick={() => fileRef.current?.click()}>Replace</Button>
+                  <Button variant="ghost" size="sm" onClick={clearImage}>
+                    <X className="w-3.5 h-3.5 mr-1" />Remove
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <Input
+              value={imageAlt}
+              onChange={(e) => setImageAlt(e.target.value)}
+              placeholder="Alt text / caption (recommended)"
+              maxLength={200}
+            />
+          </div>
+        )}
+      </div>
+
+
 
       <div className="flex items-center gap-3">
         <label className="text-xs font-mono uppercase text-muted-foreground">Visibility</label>

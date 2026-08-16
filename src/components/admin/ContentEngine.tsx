@@ -13,10 +13,11 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone,
+  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
+import AdminLinkedInPublisher from './AdminLinkedInPublisher';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
@@ -227,7 +228,7 @@ async function callThumb(action: string, payload: Record<string, unknown> = {}) 
 
 export const ContentEngine: React.FC = () => {
   const { toast } = useToast();
-  const [view, setView] = useState<'calendar' | 'generator' | 'studio' | 'email' | 'strategy'>('calendar');
+  const [view, setView] = useState<'calendar' | 'generator' | 'studio' | 'linkedin' | 'email' | 'strategy'>('calendar');
   const [strategy, setStrategy] = useState<Strategy | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -444,6 +445,7 @@ export const ContentEngine: React.FC = () => {
               { id: 'calendar', label: 'Calendar', Icon: Calendar },
               { id: 'generator', label: 'Generator', Icon: Sparkles },
               { id: 'studio', label: 'Post Studio', Icon: PenLine },
+              { id: 'linkedin', label: 'LinkedIn Publisher', Icon: Megaphone },
               { id: 'email', label: 'Email', Icon: Mail },
               { id: 'strategy', label: 'Strategy', Icon: Settings },
             ] as const).map((t) => (
@@ -492,6 +494,10 @@ export const ContentEngine: React.FC = () => {
 
       {view === 'studio' && (
         <LinkedInPostStudio />
+      )}
+
+      {view === 'linkedin' && (
+        <AdminLinkedInPublisher />
       )}
 
       {view === 'email' && (
