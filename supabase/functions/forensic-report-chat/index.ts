@@ -8,13 +8,76 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { sanitizedGoldenReport, guardChatMoney } from "../_shared/golden-money-sanitizer.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { activeMemory, findModule, type MemoryItem } from "../_shared/universe-system.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token",
 };
 
-const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+const SVC = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const sb = createClient(Deno.env.get("SUPABASE_URL")!, SVC);
+
+/**
+ * Control-plane context for the report advisor.
+ *
+ * The public/shared report chat stays advice-only: it never sees the company
+ * system, its memory or its action surface. Only an authenticated admin, or a
+ * rep scoped to their own report, gets the operator layer — and even then this
+ * endpoint only ever PLANS. Execution lives behind company-system's
+ * Plan -> Confirm -> Execute bus, which is the single audited action path.
+ */
+async function loadControlPlane(scanId: string, req: Request) {
+  const isAdmin = await verifyAdminToken(getAdminTokenFromRequest(req), SVC);
+  const portal = isAdmin ? null : await verifyPortalToken(getPortalTokenFromRequest(req), SVC);
+  const repScope = portal && portal.role === "rep" ? portal.code : null;
+  if (!isAdmin && !repScope) return null;
+
+  const { data: sys } = await sb.from("company_systems").select("*").eq("scan_id", scanId)
+    .order("system_version", { ascending: false }).limit(1).maybeSingle();
+  if (!sys) return null;
+  if (repScope && (sys as { rep_code: string | null }).rep_code !== repScope) return null;
+
+  const [{ data: mods }, { data: goals }, { data: mem }, { data: events }] = await Promise.all([
+    sb.from("company_system_modules").select("*").eq("system_id", sys.id).order("display_order"),
+    sb.from("company_system_goals").select("*").eq("system_id", sys.id).order("priority").limit(30),
+    sb.from("company_system_memory").select("*").eq("company_id", sys.company_id).limit(200),
+    sb.from("company_system_events").select("kind, module_id, action_id, status, created_at")
+      .eq("system_id", sys.id).order("created_at", { ascending: false }).limit(15),
+  ]);
+
+  const usable = activeMemory(((mem || []) as Array<Record<string, unknown>>).map((m) => ({
+    scope: m.scope, key: String(m.memory_key), value: String(m.value),
+    provenance: String(m.provenance), confidence: Number(m.confidence), status: m.status,
+  })) as MemoryItem[]);
+
+  const rows = (mods || []) as Array<Record<string, unknown>>;
+  const enabled = rows.filter((m) => m.enabled && !m.locked).map((m) => {
+    const reg = findModule(String(m.module_id));
+    return {
+      module_id: m.module_id, name: m.module_name, route: m.route, addresses: m.root_cause_ids,
+      actions: (reg?.actions || []).map((a) => ({ id: a.id, label: a.label, risk: a.risk, confirm: a.confirm, input: a.input })),
+    };
+  });
+  const locked = rows.filter((m) => m.locked).map((m) => ({ name: m.module_name, reason: m.lock_reason }));
+
+  return {
+    system_id: sys.id as string,
+    status: sys.status as string,
+    block: [
+      `## COMPANY SYSTEM (control plane, version ${sys.system_version}, status ${sys.status})`,
+      `Workspace: /company-system/${sys.id}`,
+      `ENABLED MODULES + ALLOWED ACTIONS:\n${JSON.stringify(enabled)}`,
+      locked.length ? `RECOMMENDED BUT LOCKED (never claim these can run): ${JSON.stringify(locked)}` : "",
+      `GOALS:\n${JSON.stringify(goals || [])}`,
+      `ACTIVE MEMORY (approved or high-confidence only):\n${JSON.stringify(usable.slice(0, 60))}`,
+      `RECENT ACTIONS:\n${JSON.stringify(events || [])}`,
+    ].filter(Boolean).join("\n\n"),
+  };
+}
+
 
 interface Chapter { no: number; slug: string; title: string; verdict?: string;
   what_we_found?: string; why_its_leaking?: string; what_its_costing?: string;
