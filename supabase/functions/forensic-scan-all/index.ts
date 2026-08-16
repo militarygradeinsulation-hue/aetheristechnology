@@ -1463,6 +1463,28 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error("golden report archive failed:", (archiveErr as Error).message);
     }
 
+    // Compose the draft Aetheris Company System from the archived report.
+    // Draft only: no module is activated and no external write happens until an
+    // operator approves it. Idempotent on (scan, report hash, template).
+    if (compilerState === "compiled") {
+      try {
+        const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/company-system`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${svc}`,
+            "x-internal-key": svc,
+          },
+          body: JSON.stringify({ action: "compose", scan_id: id }),
+        });
+      } catch (sysErr) {
+        console.error("company system compose failed:", (sysErr as Error).message);
+      }
+    }
+
+
+
 
     // Growth assets: message, hero imagery, per-platform posts and the 30-day
     // schedule. Runs after the report is persisted so it can never delay or

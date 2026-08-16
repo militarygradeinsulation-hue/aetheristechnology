@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import {
   Loader2, Search, RefreshCw, Building2, ExternalLink, FileText, Copy, Download,
-  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck,
+  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck, Network,
 } from 'lucide-react';
 import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
@@ -18,6 +18,7 @@ import {
   generateBlueprint, setBlueprintApproval, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
+import { composeSystem, type CompanySystemRow } from '@/lib/companySystem';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
@@ -196,7 +197,53 @@ const BlueprintPanel: React.FC<{ archive: ArchiveRow; blueprints: BlueprintRow[]
   );
 };
 
+/* ─────────────────── composed Aetheris Company System ─────────────────── */
+
+const CompanySystemPanel: React.FC<{ scanId: string; eligible: boolean }> = ({ scanId, eligible }) => {
+  const [busy, setBusy] = useState(false);
+  const [system, setSystem] = useState<CompanySystemRow | null>(null);
+
+  const compose = async (force: boolean) => {
+    setBusy(true);
+    try {
+      const res = await composeSystem(scanId, 'diagnostic', force);
+      setSystem(res.system);
+      toast({ title: res.reused ? 'Existing company system reused' : 'Company system composed' });
+    } catch (e) {
+      toast({ title: 'Composition failed', description: (e as Error).message, variant: 'destructive' });
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card/40 p-4">
+      <h4 className="mb-2 flex items-center gap-2 font-display text-sm font-bold text-foreground">
+        <Network className="h-4 w-4 text-amber" /> Aetheris Company System
+      </h4>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Composes this report into a live workspace built from existing Aetheris Universe instruments. Draft only — nothing runs until approved.
+      </p>
+      {!eligible ? (
+        <p className="text-xs text-destructive">Report must be repaired first.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => compose(false)} disabled={busy}>
+            {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Network className="mr-1 h-3.5 w-3.5" />}
+            {system ? 'Recompose if changed' : 'Compose company system'}
+          </Button>
+          {system && (
+            <a href={`/company-system/${system.id}`} target="_blank" rel="noopener noreferrer">
+              <Button size="sm" variant="outline"><ExternalLink className="mr-1 h-3.5 w-3.5" /> Open workspace</Button>
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ───────────────────────── report detail ───────────────────────── */
+
+
 
 const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId, onBack }) => {
   const [loading, setLoading] = useState(true);
@@ -250,6 +297,8 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
       </div>
 
       <BlueprintPanel archive={archive} blueprints={blueprints} onRefresh={load} />
+
+      <CompanySystemPanel scanId={archive.scan_id} eligible={archive.is_valid} />
 
       <div className="rounded-xl border border-border bg-card/40 p-4">
         <h4 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">

@@ -1517,6 +1517,84 @@ export type Database = {
           },
         ]
       }
+      company_brand_contexts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          audience: string | null
+          colors: Json
+          company_id: string
+          created_at: string
+          cta_style: string | null
+          id: string
+          imagery_direction: string | null
+          inferred_fields: Json
+          logo_urls: Json
+          scan_id: string | null
+          status: string
+          terminology: Json
+          tone: string | null
+          typography: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audience?: string | null
+          colors?: Json
+          company_id: string
+          created_at?: string
+          cta_style?: string | null
+          id?: string
+          imagery_direction?: string | null
+          inferred_fields?: Json
+          logo_urls?: Json
+          scan_id?: string | null
+          status?: string
+          terminology?: Json
+          tone?: string | null
+          typography?: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          audience?: string | null
+          colors?: Json
+          company_id?: string
+          created_at?: string
+          cta_style?: string | null
+          id?: string
+          imagery_direction?: string | null
+          inferred_fields?: Json
+          logo_urls?: Json
+          scan_id?: string | null
+          status?: string
+          terminology?: Json
+          tone?: string | null
+          typography?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_brand_contexts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_brand_contexts_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_briefs: {
         Row: {
           brief: Json
@@ -1600,6 +1678,587 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      company_system_checks: {
+        Row: {
+          alert: string | null
+          created_at: string
+          evidence_basis: string | null
+          goal_id: string | null
+          id: string
+          last_result: Json | null
+          last_run_at: string | null
+          last_status: string | null
+          module_id: string | null
+          name: string
+          system_id: string
+          threshold: string | null
+          updated_at: string
+        }
+        Insert: {
+          alert?: string | null
+          created_at?: string
+          evidence_basis?: string | null
+          goal_id?: string | null
+          id?: string
+          last_result?: Json | null
+          last_run_at?: string | null
+          last_status?: string | null
+          module_id?: string | null
+          name: string
+          system_id: string
+          threshold?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alert?: string | null
+          created_at?: string
+          evidence_basis?: string | null
+          goal_id?: string | null
+          id?: string
+          last_result?: Json | null
+          last_run_at?: string | null
+          last_status?: string | null
+          module_id?: string | null
+          name?: string
+          system_id?: string
+          threshold?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_checks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "company_system_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_system_checks_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_connections: {
+        Row: {
+          created_at: string
+          from_module: string
+          id: string
+          payload: string
+          system_id: string
+          to_module: string
+        }
+        Insert: {
+          created_at?: string
+          from_module: string
+          id?: string
+          payload: string
+          system_id: string
+          to_module: string
+        }
+        Update: {
+          created_at?: string
+          from_module?: string
+          id?: string
+          payload?: string
+          system_id?: string
+          to_module?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_connections_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_events: {
+        Row: {
+          action_id: string | null
+          actor: string | null
+          actor_role: string | null
+          company_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input: Json | null
+          kind: string
+          module_id: string | null
+          preview: Json | null
+          result: Json | null
+          rollback_note: string | null
+          scan_id: string | null
+          status: string
+          system_id: string
+        }
+        Insert: {
+          action_id?: string | null
+          actor?: string | null
+          actor_role?: string | null
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json | null
+          kind: string
+          module_id?: string | null
+          preview?: Json | null
+          result?: Json | null
+          rollback_note?: string | null
+          scan_id?: string | null
+          status?: string
+          system_id: string
+        }
+        Update: {
+          action_id?: string | null
+          actor?: string | null
+          actor_role?: string | null
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input?: Json | null
+          kind?: string
+          module_id?: string | null
+          preview?: Json | null
+          result?: Json | null
+          rollback_note?: string | null
+          scan_id?: string | null
+          status?: string
+          system_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_events_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_forecasts: {
+        Row: {
+          assumptions: Json
+          basis: string | null
+          canonical_annual_high: number | null
+          canonical_annual_low: number | null
+          created_at: string
+          currency: string
+          id: string
+          scenarios: Json
+          system_id: string
+          version: number
+        }
+        Insert: {
+          assumptions?: Json
+          basis?: string | null
+          canonical_annual_high?: number | null
+          canonical_annual_low?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          scenarios?: Json
+          system_id: string
+          version?: number
+        }
+        Update: {
+          assumptions?: Json
+          basis?: string | null
+          canonical_annual_high?: number | null
+          canonical_annual_low?: number | null
+          created_at?: string
+          currency?: string
+          id?: string
+          scenarios?: Json
+          system_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_forecasts_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_goals: {
+        Row: {
+          baseline: string | null
+          classification: string | null
+          created_at: string
+          id: string
+          kpi: string | null
+          module_id: string | null
+          owner_role: string | null
+          priority: number
+          review_cadence: string | null
+          root_cause_id: string | null
+          status: string
+          system_id: string
+          target: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          baseline?: string | null
+          classification?: string | null
+          created_at?: string
+          id?: string
+          kpi?: string | null
+          module_id?: string | null
+          owner_role?: string | null
+          priority?: number
+          review_cadence?: string | null
+          root_cause_id?: string | null
+          status?: string
+          system_id: string
+          target?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          baseline?: string | null
+          classification?: string | null
+          created_at?: string
+          id?: string
+          kpi?: string | null
+          module_id?: string | null
+          owner_role?: string | null
+          priority?: number
+          review_cadence?: string | null
+          root_cause_id?: string | null
+          status?: string
+          system_id?: string
+          target?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_goals_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_memory: {
+        Row: {
+          author: string | null
+          company_id: string
+          confidence: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_verified_at: string | null
+          memory_key: string
+          provenance: string
+          scan_id: string | null
+          scope: string
+          sensitivity: string
+          status: string
+          system_id: string | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          author?: string | null
+          company_id: string
+          confidence?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          memory_key: string
+          provenance: string
+          scan_id?: string | null
+          scope: string
+          sensitivity?: string
+          status?: string
+          system_id?: string | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          author?: string | null
+          company_id?: string
+          confidence?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_verified_at?: string | null
+          memory_key?: string
+          provenance?: string
+          scan_id?: string | null
+          scope?: string
+          sensitivity?: string
+          status?: string
+          system_id?: string | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_memory_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_system_memory_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_system_memory_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_metrics: {
+        Row: {
+          captured_at: string
+          created_at: string
+          goal_id: string | null
+          id: string
+          label: string | null
+          metric_key: string
+          source: string | null
+          system_id: string
+          unit: string | null
+          value: number | null
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          label?: string | null
+          metric_key: string
+          source?: string | null
+          system_id: string
+          unit?: string | null
+          value?: number | null
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          label?: string | null
+          metric_key?: string
+          source?: string | null
+          system_id?: string
+          unit?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_metrics_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "company_system_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_system_metrics_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_modules: {
+        Row: {
+          capabilities: Json
+          category: string | null
+          config: Json
+          created_at: string
+          dependencies: Json
+          display_order: number
+          enabled: boolean
+          gap_status: string | null
+          id: string
+          lock_reason: string | null
+          locked: boolean
+          module_id: string
+          module_name: string
+          required_tier: string | null
+          root_cause_ids: Json
+          route: string | null
+          system_id: string
+          updated_at: string
+        }
+        Insert: {
+          capabilities?: Json
+          category?: string | null
+          config?: Json
+          created_at?: string
+          dependencies?: Json
+          display_order?: number
+          enabled?: boolean
+          gap_status?: string | null
+          id?: string
+          lock_reason?: string | null
+          locked?: boolean
+          module_id: string
+          module_name: string
+          required_tier?: string | null
+          root_cause_ids?: Json
+          route?: string | null
+          system_id: string
+          updated_at?: string
+        }
+        Update: {
+          capabilities?: Json
+          category?: string | null
+          config?: Json
+          created_at?: string
+          dependencies?: Json
+          display_order?: number
+          enabled?: boolean
+          gap_status?: string | null
+          id?: string
+          lock_reason?: string | null
+          locked?: boolean
+          module_id?: string
+          module_name?: string
+          required_tier?: string | null
+          root_cause_ids?: Json
+          route?: string | null
+          system_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_modules_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_systems: {
+        Row: {
+          approval_state: string
+          approved_at: string | null
+          approved_by: string | null
+          archive_id: string | null
+          blueprint_id: string | null
+          brand_context_id: string | null
+          brand_version: number | null
+          company_id: string
+          coverage: Json
+          created_at: string
+          id: string
+          manifest: Json
+          rep_code: string | null
+          scan_id: string
+          source_report_hash: string
+          status: string
+          system_version: number
+          template_version: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          approval_state?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archive_id?: string | null
+          blueprint_id?: string | null
+          brand_context_id?: string | null
+          brand_version?: number | null
+          company_id: string
+          coverage?: Json
+          created_at?: string
+          id?: string
+          manifest?: Json
+          rep_code?: string | null
+          scan_id: string
+          source_report_hash: string
+          status?: string
+          system_version?: number
+          template_version?: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_state?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archive_id?: string | null
+          blueprint_id?: string | null
+          brand_context_id?: string | null
+          brand_version?: number | null
+          company_id?: string
+          coverage?: Json
+          created_at?: string
+          id?: string
+          manifest?: Json
+          rep_code?: string | null
+          scan_id?: string
+          source_report_hash?: string
+          status?: string
+          system_version?: number
+          template_version?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_systems_archive_id_fkey"
+            columns: ["archive_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_systems_blueprint_id_fkey"
+            columns: ["blueprint_id"]
+            isOneToOne: false
+            referencedRelation: "golden_system_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_systems_brand_context_id_fkey"
+            columns: ["brand_context_id"]
+            isOneToOne: false
+            referencedRelation: "company_brand_contexts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_systems_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_systems_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_submissions: {
         Row: {
@@ -7692,6 +8351,57 @@ export type Database = {
           passing_score?: number
           reference_text?: string | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      universe_module_registry: {
+        Row: {
+          actions: Json
+          capabilities: Json
+          category: string
+          config_schema: Json
+          created_at: string
+          id: string
+          inputs: Json
+          is_active: boolean
+          name: string
+          outputs: Json
+          required_tier: string
+          route: string
+          sensitivity: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          capabilities?: Json
+          category: string
+          config_schema?: Json
+          created_at?: string
+          id: string
+          inputs?: Json
+          is_active?: boolean
+          name: string
+          outputs?: Json
+          required_tier?: string
+          route: string
+          sensitivity?: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          capabilities?: Json
+          category?: string
+          config_schema?: Json
+          created_at?: string
+          id?: string
+          inputs?: Json
+          is_active?: boolean
+          name?: string
+          outputs?: Json
+          required_tier?: string
+          route?: string
+          sensitivity?: string
           updated_at?: string
         }
         Relationships: []
