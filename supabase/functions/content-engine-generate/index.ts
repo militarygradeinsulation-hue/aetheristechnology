@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { FORENSIC_BLUEPRINT_PROMPT, AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
+import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,6 +98,7 @@ CHANNEL-SPECIFIC RULES:
 }
 
 async function callAI(model: string, system: string, user: string, tool: any) {
+  system = `${system}\n\n${NO_DASH_PROMPT_RULE}`;
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY missing");
 
@@ -127,7 +129,7 @@ async function callAI(model: string, system: string, user: string, tool: any) {
   const data = await res.json();
   const call = data?.choices?.[0]?.message?.tool_calls?.[0];
   if (!call?.function?.arguments) throw new Error("No tool call returned");
-  return JSON.parse(call.function.arguments);
+  return stripDashesDeep(JSON.parse(call.function.arguments));
 }
 
 const PLAN_TOOL = {
