@@ -22,12 +22,44 @@ export function systemTierRank(t: ModuleTier | null | undefined): number {
 
 export type RiskLevel = "read" | "draft" | "write" | "external";
 
+/** Adapter shapes. Every one targets a function that already ships. */
+export type PayloadKind = "tool_sandbox" | "scan" | "passthrough" | "internal_forecast";
+
+/**
+ * Edge functions that actually exist in this repo. An action whose `fn` is not
+ * in this list is NOT executable: it degrades to a GAP_REQUIRED proposal
+ * instead of pretending a placeholder adapter works.
+ */
+export const EXISTING_EDGE_FUNCTIONS: string[] = [
+  "try-tool-sandbox",
+  "scan-website",
+  "send-transactional-email",
+  "social-scheduler",
+  "hygiene-execute",
+  "company-system",
+];
+
+export function actionIsExecutable(a: Pick<ModuleAction, "fn">): boolean {
+  return EXISTING_EDGE_FUNCTIONS.includes(a.fn);
+}
+
+/** Registry entries whose adapter target does not exist. Must always be empty. */
+export function registryAdapterGaps(): Array<{ module_id: string; action_id: string; fn: string }> {
+  const out: Array<{ module_id: string; action_id: string; fn: string }> = [];
+  for (const m of UNIVERSE_MODULE_REGISTRY) {
+    for (const a of m.actions) if (!actionIsExecutable(a)) out.push({ module_id: m.id, action_id: a.id, fn: a.fn });
+  }
+  return out;
+}
+
 export interface ModuleAction {
   /** Stable action id used by the operator action bus. */
   id: string;
   label: string;
   /** Existing edge function invoked through the adapter. Never new tool code. */
   fn: string;
+  /** How the bus shapes the payload for that existing function. */
+  payload_kind: PayloadKind;
   risk: RiskLevel;
   /** Required confirmation before execution (any non-read/draft action). */
   confirm: boolean;
@@ -66,7 +98,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "brand_kit", "report_findings"],
     outputs: ["approved_messaging_context", "brand_conflicts"],
     actions: [
-      { id: "draft_contradictions", label: "Draft brand contradiction review", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
+      { id: "draft_contradictions", label: "Draft brand contradiction review", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
     ],
     sensitivity: "low",
   },
@@ -80,7 +112,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["friction_list", "approved_messaging_context"],
     actions: [
-      { id: "draft_friction_audit", label: "Draft friction audit", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
+      { id: "draft_friction_audit", label: "Draft friction audit", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the record." },
     ],
     sensitivity: "low",
   },
@@ -94,7 +126,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["website_url"],
     outputs: ["scan_result", "check_signal"],
     actions: [
-      { id: "run_rescan", label: "Run recovery re-scan", fn: "website-scan", risk: "write", confirm: true, input: ["website_url"], rollback: "Scan records are additive. Delete the scan row." },
+      { id: "run_rescan", label: "Run recovery re-scan", fn: "scan-website", payload_kind: "scan", risk: "write", confirm: true, input: ["website_url"], rollback: "Scan records are additive. Delete the scan row." },
     ],
     sensitivity: "low",
   },
@@ -108,7 +140,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["decision_queue"],
     actions: [
-      { id: "draft_questions", label: "Draft boardroom questions", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_questions", label: "Draft boardroom questions", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -122,7 +154,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "brand_kit", "company_context"],
     outputs: ["sales_assets"],
     actions: [
-      { id: "draft_scripts", label: "Draft sales scripts", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context", "approved_messaging_context"], rollback: "Draft only." },
+      { id: "draft_scripts", label: "Draft sales scripts", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context", "approved_messaging_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -136,8 +168,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "company_context"],
     outputs: ["sequence_assets"],
     actions: [
-      { id: "draft_sequence", label: "Draft follow-up sequence", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "send_sequence", label: "Send follow-up sequence", fn: "send-email", risk: "external", confirm: true, input: ["sequence_id", "recipients"], rollback: "Sent email cannot be recalled. Suppress the recipients and stop the sequence." },
+      { id: "draft_sequence", label: "Draft follow-up sequence", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "send_sequence", label: "Send follow-up sequence", fn: "send-transactional-email", payload_kind: "passthrough", risk: "external", confirm: true, input: ["sequence_id", "recipients"], rollback: "Sent email cannot be recalled. Suppress the recipients and stop the sequence." },
     ],
     sensitivity: "high",
   },
@@ -151,7 +183,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["approved_messaging_context", "brand_kit"],
     outputs: ["content_plan"],
     actions: [
-      { id: "draft_calendar", label: "Draft 30-day calendar", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_calendar", label: "Draft 30-day calendar", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -165,8 +197,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["content_plan", "approved_messaging_context", "brand_kit"],
     outputs: ["social_posts"],
     actions: [
-      { id: "draft_posts", label: "Draft social posts", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "schedule_posts", label: "Schedule social posts", fn: "social-scheduler", risk: "external", confirm: true, input: ["post_ids", "scheduled_for"], rollback: "Unschedule the queued posts before their send time." },
+      { id: "draft_posts", label: "Draft social posts", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "schedule_posts", label: "Schedule social posts", fn: "social-scheduler", payload_kind: "passthrough", risk: "external", confirm: true, input: ["post_ids", "scheduled_for"], rollback: "Unschedule the queued posts before their send time." },
     ],
     sensitivity: "high",
   },
@@ -180,7 +212,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["brand_kit", "content_plan"],
     outputs: ["image_assets"],
     actions: [
-      { id: "draft_images", label: "Generate on-brand imagery", fn: "generate-image", risk: "draft", confirm: false, input: ["prompt"], rollback: "Delete the generated asset." },
+      { id: "draft_images", label: "Draft imagery direction brief", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only. Discard the brief." },
     ],
     sensitivity: "low",
   },
@@ -194,7 +226,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["brand_kit", "content_plan"],
     outputs: ["campaign_assets"],
     actions: [
-      { id: "draft_assets", label: "Draft campaign assets", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_assets", label: "Draft campaign assets", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -208,7 +240,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["playbooks"],
     actions: [
-      { id: "draft_playbook", label: "Draft operating playbook", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "draft_playbook", label: "Draft operating playbook", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
     ],
     sensitivity: "low",
   },
@@ -222,8 +254,8 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["company_context", "report_findings"],
     outputs: ["hygiene_actions", "check_signal"],
     actions: [
-      { id: "draft_hygiene_plan", label: "Draft CRM hygiene plan", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "apply_hygiene_action", label: "Apply CRM hygiene action", fn: "hygiene-execute", risk: "external", confirm: true, input: ["action_id"], rollback: "Hygiene actions log prior values; re-apply the logged snapshot." },
+      { id: "draft_hygiene_plan", label: "Draft CRM hygiene plan", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
+      { id: "apply_hygiene_action", label: "Apply CRM hygiene action", fn: "hygiene-execute", payload_kind: "passthrough", risk: "external", confirm: true, input: ["action_id"], rollback: "Hygiene actions log prior values; re-apply the logged snapshot." },
     ],
     sensitivity: "high",
   },
@@ -237,7 +269,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["canonical_ledger", "check_signal"],
     outputs: ["forecast_scenarios"],
     actions: [
-      { id: "refresh_forecast", label: "Refresh recovery forecast", fn: "company-system", risk: "write", confirm: true, input: ["system_id"], rollback: "Forecast rows are versioned; restore the prior version." },
+      { id: "refresh_forecast", label: "Refresh recovery forecast", fn: "company-system", payload_kind: "internal_forecast", risk: "write", confirm: true, input: ["system_id"], rollback: "Forecast rows are versioned; restore the prior version." },
     ],
     sensitivity: "medium",
   },
@@ -251,7 +283,7 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     inputs: ["capability_brief"],
     outputs: ["module_scaffold"],
     actions: [
-      { id: "draft_module_scaffold", label: "Propose module scaffold", fn: "generate-tool-output", risk: "draft", confirm: false, input: ["capability_brief"], rollback: "Proposal only. Requires operator approval before enabling." },
+      { id: "draft_module_scaffold", label: "Propose module scaffold", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["capability_brief"], rollback: "Proposal only. Requires operator approval before enabling." },
     ],
     sensitivity: "medium",
   },
@@ -439,69 +471,212 @@ export function composeCompanySystem(
   };
 }
 
+/* ── Tenant scope ────────────────────────────────────────────────────────── */
+
+export type ActorRole = "admin" | "operator" | "viewer";
+
+/**
+ * Every non-admin, non-internal caller is pinned to an explicit set of owner
+ * codes. There is no "authenticated therefore global" state: a scope with no
+ * codes can read nothing, and a row with no owner is admin-only.
+ */
+export interface TenantScope {
+  kind: "admin" | "codes";
+  codes: string[];
+}
+
+export const ADMIN_SCOPE: TenantScope = { kind: "admin", codes: [] };
+
+export function codeScope(codes: Array<string | null | undefined>): TenantScope {
+  return { kind: "codes", codes: [...new Set(codes.filter((c): c is string => !!c))] };
+}
+
+/** Default deny: unowned rows and out-of-scope owners are both refused. */
+export function scopeAllows(scope: TenantScope, ownerCode: string | null | undefined): boolean {
+  if (scope.kind === "admin") return true;
+  if (!ownerCode) return false;
+  return scope.codes.includes(ownerCode);
+}
+
+/* ── Deterministic hashing (shared by confirmation binding) ──────────────── */
+
+export function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value ?? null);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj).sort().map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(",")}}`;
+}
+
+export function hashString(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  let g = 0x811c9dc5;
+  for (let i = s.length - 1; i >= 0; i--) { g ^= s.charCodeAt(i); g = Math.imul(g, 0x01000193) >>> 0; }
+  return `${h.toString(16).padStart(8, "0")}${g.toString(16).padStart(8, "0")}${s.length.toString(16)}`;
+}
+
+export function inputHash(input: Record<string, unknown> | undefined | null): string {
+  return hashString(stableStringify(input ?? {}));
+}
+
 /* ── Action bus validation ───────────────────────────────────────────────── */
 
 export interface ActionRequest {
   module_id: string;
   action_id: string;
   input?: Record<string, unknown>;
-  confirmed?: boolean;
+}
+
+/** Server-issued, single-use plan record. The client never mints one. */
+export interface ConfirmationClaim {
+  token: string;
+  actor: string;
+  system_id: string;
+  module_id: string;
+  action_id: string;
+  input_hash: string;
+  source_report_hash: string;
+  system_version: number;
+  affects: string[];
+  expires_at: string;
+  consumed_at?: string | null;
+}
+
+export const CONFIRMATION_TTL_MS = 5 * 60 * 1000;
+
+export interface ActionPreview {
+  module: string;
+  action: string;
+  fn: string;
+  risk: RiskLevel;
+  rollback: string;
+  affects: string[];
+  check_after: string;
 }
 
 export interface ActionDecision {
   ok: boolean;
   error?: string;
   requires_confirmation: boolean;
-  preview?: {
-    module: string;
-    action: string;
-    fn: string;
-    risk: RiskLevel;
-    rollback: string;
-    affects: string[];
-  };
+  preview?: ActionPreview;
 }
+
+export interface ActionContext {
+  clientTier: ModuleTier | null | undefined;
+  enabledModuleIds: string[];
+  role: ActorRole;
+  /** Company system approval_state; writes need "approved". */
+  systemApprovalState?: string | null;
+  /** Active brand context status; writes need "approved". */
+  brandStatus?: string | null;
+  /** Present only on execute. Must have been issued by action_preview. */
+  confirmation?: ConfirmationClaim | null;
+  actor?: string;
+  systemId?: string;
+  sourceReportHash?: string;
+  systemVersion?: number;
+  now?: number;
+}
+
+const deny = (error: string): ActionDecision => ({ ok: false, requires_confirmation: false, error });
 
 /**
  * The operator may only call registered, permissioned module actions with
- * validated schemas. Never arbitrary code, never an unlisted function.
+ * validated schemas. Never arbitrary code, never an unlisted function, and
+ * never a write without a server-issued confirmation bound to this exact plan.
  */
-export function validateAction(
-  req: ActionRequest,
-  ctx: { clientTier: ModuleTier | null | undefined; enabledModuleIds: string[]; role: "admin" | "operator" | "viewer" },
-): ActionDecision {
+export function validateAction(req: ActionRequest, ctx: ActionContext): ActionDecision {
   const mod = findModule(req.module_id);
-  if (!mod) return { ok: false, requires_confirmation: false, error: "Unknown module" };
+  if (!mod) return deny("Unknown module");
   const action = mod.actions.find((a) => a.id === req.action_id);
-  if (!action) return { ok: false, requires_confirmation: false, error: "Unknown action for module" };
-  if (!ctx.enabledModuleIds.includes(mod.id)) {
-    return { ok: false, requires_confirmation: false, error: "Module is not enabled in this company system" };
+  if (!action) return deny("Unknown action for module");
+  if (!actionIsExecutable(action)) {
+    return deny("Capability is not implemented yet (GAP_REQUIRED). Propose a module scaffold instead.");
   }
+  if (!ctx.enabledModuleIds.includes(mod.id)) return deny("Module is not enabled in this company system");
   if (!moduleAllowedForTier(mod.id, ctx.clientTier)) {
-    return { ok: false, requires_confirmation: false, error: `Locked. Requires the ${mod.requiredTier} tier.` };
+    return deny(`Locked. Requires the ${mod.requiredTier} tier.`);
   }
-  if (ctx.role === "viewer" && action.risk !== "read") {
-    return { ok: false, requires_confirmation: false, error: "Viewer role may not execute actions" };
-  }
+  if (ctx.role === "viewer" && action.risk !== "read") return deny("Viewer role may not execute actions");
+
   const input = req.input || {};
   const extra = Object.keys(input).filter((k) => !action.input.includes(k));
-  if (extra.length) return { ok: false, requires_confirmation: false, error: `Unexpected input keys: ${extra.join(", ")}` };
+  if (extra.length) return deny(`Unexpected input keys: ${extra.join(", ")}`);
   const missing = action.input.filter((k) => input[k] === undefined || input[k] === null || input[k] === "");
-  if (missing.length) return { ok: false, requires_confirmation: false, error: `Missing required input: ${missing.join(", ")}` };
+  if (missing.length) return deny(`Missing required input: ${missing.join(", ")}`);
 
-  const preview = {
+  const preview: ActionPreview = {
     module: mod.name,
     action: action.label,
     fn: action.fn,
     risk: action.risk,
     rollback: action.rollback,
     affects: mod.outputs,
+    check_after: `Run the registered check for ${mod.name} and record whether the goal moved.`,
   };
-  if (action.confirm && !req.confirmed) {
-    return { ok: false, requires_confirmation: true, preview, error: "Confirmation required" };
+
+  // Reads and drafts stay immediate: they produce nothing live and nothing external.
+  if (!action.confirm) return { ok: true, requires_confirmation: false, preview };
+
+  // Everything that changes live behaviour needs an approved system + brand.
+  if (ctx.systemApprovalState !== "approved") {
+    return { ok: false, requires_confirmation: false, preview, error: "Company system is not approved for execution." };
   }
+  if (ctx.brandStatus !== "approved") {
+    return { ok: false, requires_confirmation: false, preview, error: "Brand facts must be approved before live actions." };
+  }
+
+  const c = ctx.confirmation;
+  if (!c) return { ok: false, requires_confirmation: true, preview, error: "Confirmation required" };
+  const bad = confirmationMismatch(c, req, ctx);
+  if (bad) return { ok: false, requires_confirmation: true, preview, error: bad };
+
   return { ok: true, requires_confirmation: false, preview };
 }
+
+/** Returns the reason a confirmation token cannot be spent, or null when valid. */
+export function confirmationMismatch(
+  c: ConfirmationClaim,
+  req: ActionRequest,
+  ctx: ActionContext,
+): string | null {
+  const now = ctx.now ?? Date.now();
+  if (c.consumed_at) return "Confirmation already used.";
+  if (new Date(c.expires_at).getTime() <= now) return "Confirmation expired. Preview the action again.";
+  if (ctx.actor && c.actor !== ctx.actor) return "Confirmation was issued to a different operator.";
+  if (ctx.systemId && c.system_id !== ctx.systemId) return "Confirmation belongs to a different system.";
+  if (c.module_id !== req.module_id || c.action_id !== req.action_id) return "Confirmation does not match this action.";
+  if (c.input_hash !== inputHash(req.input)) return "Inputs changed after confirmation. Preview again.";
+  if (ctx.sourceReportHash && c.source_report_hash !== ctx.sourceReportHash) {
+    return "Source report changed after confirmation. Preview again.";
+  }
+  if (ctx.systemVersion !== undefined && c.system_version !== ctx.systemVersion) {
+    return "System version changed after confirmation. Preview again.";
+  }
+  return null;
+}
+
+/** Issues the claim body that the server persists for single-use consumption. */
+export function buildConfirmation(
+  req: ActionRequest,
+  ctx: Required<Pick<ActionContext, "actor" | "systemId" | "sourceReportHash" | "systemVersion">> & { affects: string[]; now?: number },
+): Omit<ConfirmationClaim, "token"> {
+  const now = ctx.now ?? Date.now();
+  return {
+    actor: ctx.actor,
+    system_id: ctx.systemId,
+    module_id: req.module_id,
+    action_id: req.action_id,
+    input_hash: inputHash(req.input),
+    source_report_hash: ctx.sourceReportHash,
+    system_version: ctx.systemVersion,
+    affects: ctx.affects,
+    expires_at: new Date(now + CONFIRMATION_TTL_MS).toISOString(),
+    consumed_at: null,
+  };
+}
+
+
 
 /* ── Memory ──────────────────────────────────────────────────────────────── */
 
@@ -532,6 +707,22 @@ export function validateMemoryItem(item: Partial<MemoryItem>): { ok: boolean; er
   return { ok: true };
 }
 
+export interface StoredMemoryItem extends MemoryItem {
+  company_id: string;
+  scan_id?: string | null;
+  system_id?: string | null;
+  updated_at?: string | null;
+}
+
+export interface MemoryRetrievalContext {
+  companyId: string;
+  scanId?: string | null;
+  systemId?: string | null;
+  /** high-sensitivity memory is withheld from viewers. */
+  role?: ActorRole;
+  now?: number;
+}
+
 /** Retrieval is always scoped to the authenticated company/report/system. */
 export function memoryRetrievalFilter(ctx: { companyId: string; scanId?: string | null; systemId?: string | null }) {
   if (!ctx.companyId) throw new Error("companyId required for memory retrieval");
@@ -542,10 +733,43 @@ export function memoryRetrievalFilter(ctx: { companyId: string; scanId?: string 
   };
 }
 
-/** Only approved (or high-confidence inferred, clearly labelled) memory is used. */
-export function activeMemory(items: MemoryItem[]): MemoryItem[] {
-  return items.filter((i) => i.status === "approved" || (i.status === "inferred" && i.confidence >= 0.6));
+/**
+ * Scope gate. business memory belongs to the company; report memory only to
+ * the current scan; system + conversation memory only to the current system.
+ * Two reports under one company can never read each other's memory.
+ */
+export function memoryInScope(item: StoredMemoryItem, ctx: MemoryRetrievalContext): boolean {
+  if (!ctx.companyId || item.company_id !== ctx.companyId) return false;
+  switch (item.scope) {
+    case "business":
+      return true;
+    case "report":
+      return !!ctx.scanId && item.scan_id === ctx.scanId;
+    case "system":
+    case "conversation":
+      return !!ctx.systemId && item.system_id === ctx.systemId;
+    default:
+      return false;
+  }
 }
+
+/** Only approved (or high-confidence inferred, clearly labelled) memory is used. */
+export function activeMemory(items: MemoryItem[], now = Date.now()): MemoryItem[] {
+  return items.filter((i) => {
+    if (i.status === "rejected" || i.status === "superseded") return false;
+    if (i.expires_at && new Date(i.expires_at).getTime() <= now) return false;
+    return i.status === "approved" || (i.status === "inferred" && i.confidence >= 0.6);
+  });
+}
+
+/** The single retrieval entry point used by the report AI / operator. */
+export function selectMemory(items: StoredMemoryItem[], ctx: MemoryRetrievalContext): StoredMemoryItem[] {
+  const now = ctx.now ?? Date.now();
+  const scoped = items.filter((i) => memoryInScope(i, ctx));
+  const live = activeMemory(scoped, now) as StoredMemoryItem[];
+  return ctx.role === "viewer" ? live.filter((i) => i.sensitivity !== "high") : live;
+}
+
 
 /* ── Idempotency ─────────────────────────────────────────────────────────── */
 
