@@ -225,7 +225,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved) return saved as any;
@@ -843,7 +843,7 @@ const AdminDashboard: React.FC = () => {
                 { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
-                { name: 'Forensics & Tools', keys: ['systems', 'easymode', 'briefings', 'tools'] },
+                { name: 'Forensics & Tools', keys: ['systems', 'goldenlibrary', 'easymode', 'briefings', 'tools'] },
                 { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
               ];
               const visibleSet = new Set(visibleTabs);
