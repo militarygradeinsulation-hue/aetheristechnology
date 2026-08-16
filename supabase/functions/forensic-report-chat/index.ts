@@ -135,6 +135,11 @@ Deno.serve(async (req) => {
       ...((report.chapters || []).map(chapterToContext)),
     ].join("\n\n").slice(0, 160_000);
 
+    // Same advisor, upgraded: for an authorized operator it also knows the
+    // composed company system, its memory and its allowed actions. Public and
+    // shared report readers get exactly the advice-only behaviour as before.
+    const control = await loadControlPlane(scan_id, req).catch(() => null);
+
     const messages = [
       { role: "system", content:
 `You are the Aetheris Operator advising ${company} live, on screen, while they read their forensic report.
@@ -149,12 +154,18 @@ HOW YOU ANSWER:
 - If the report has no signal on something, say so and give the best operator play anyway.
 ${unpublishable ? "- FINANCIALS WITHHELD: this scan's pricing did not pass validation. Do not state, estimate or imply ANY dollar figure for this company. Say the financial model is being regenerated and give the non-financial operator advice instead.\n" : ""}- USD only, every amount as $X,XXX. Quote only figures present in the report above, in the same scope they appear in. Never add, sum, average, annualize or otherwise derive a new dollar amount. Blunt operator voice, short sentences, no em-dashes, no rhetorical questions, no corporate filler.
 - Keep answers tight: under 400 words unless they ask for a full plan, then use numbered steps.
-
+${control ? `
+CONTROL PLANE: this company has a composed Aetheris Company System. Use its modules, goals, memory and recent actions as fact. Treat active memory as approved company truth and never contradict it silently.
+- You may read, explain and draft here. You may NOT execute anything from this chat.
+- When the operator asks you to do something, answer with the plan: which module, which action id, the inputs still missing, what it affects, the rollback path and the check you will run after. Then tell them to confirm it in the system workspace, where the action is executed and logged.
+- Only reference the module actions listed below. Never claim a locked module can run. Never invent credentials, integrations or results.
+` : ""}
 REPORT:
-${context}` },
+${context}${control ? `\n\n${control.block}` : ""}` },
       ...(Array.isArray(history) ? history.slice(-6) : []),
       { role: "user", content: question },
     ];
+
 
     const res = await routedChatCompletion({
       tier: "heavy",
