@@ -1,7 +1,7 @@
 // NO-DASH RULE (project-wide writing rule) — client mirror of supabase/functions/_shared/no-dashes.ts
 // Nothing Aetheris publishes may contain dashes. URLs, slugs and file paths are preserved.
 
-const URL_LIKE = /^(https?:\/\/|www\.|mailto:|\/|#[a-z]|[\w.-]+\.[a-z]{2,}(\/|$))/i;
+const URL_LIKE = /^(https?:\/\/|www\.|mailto:|\/|[\w.-]+\.[a-z]{2,}(\/|$))/i;
 const PROTECTED_KEY = /(url|link|href|src|slug|path|id$|_id|image|video|file|domain|email|handle|time|date|color|hex)/i;
 
 export function stripDashes(input: string): string {

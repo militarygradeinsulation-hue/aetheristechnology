@@ -7,7 +7,7 @@ Never use dashes of any kind in the writing. No em dashes, no en dashes, no hyph
 Use periods, commas, or separate sentences instead. Write compound words as separate words or one word (for example "follow up", "high value", "onboarding").
 This rule is non negotiable and applies to titles, hooks, bodies, captions, hashtags and CTAs.`;
 
-const URL_LIKE = /^(https?:\/\/|www\.|mailto:|\/|#[a-z]|[\w.-]+\.[a-z]{2,}(\/|$))/i;
+const URL_LIKE = /^(https?:\/\/|www\.|mailto:|\/|[\w.-]+\.[a-z]{2,}(\/|$))/i;
 
 /** Keys whose values are technical (URLs, ids, slugs) and must keep their dashes. */
 const PROTECTED_KEY = /(url|link|href|src|slug|path|id$|_id|image|video|file|domain|email|handle|time|date|color|hex)/i;
