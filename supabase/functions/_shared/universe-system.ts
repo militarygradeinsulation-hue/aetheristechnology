@@ -707,6 +707,22 @@ export function validateMemoryItem(item: Partial<MemoryItem>): { ok: boolean; er
   return { ok: true };
 }
 
+export interface StoredMemoryItem extends MemoryItem {
+  company_id: string;
+  scan_id?: string | null;
+  system_id?: string | null;
+  updated_at?: string | null;
+}
+
+export interface MemoryRetrievalContext {
+  companyId: string;
+  scanId?: string | null;
+  systemId?: string | null;
+  /** high-sensitivity memory is withheld from viewers. */
+  role?: ActorRole;
+  now?: number;
+}
+
 /** Retrieval is always scoped to the authenticated company/report/system. */
 export function memoryRetrievalFilter(ctx: { companyId: string; scanId?: string | null; systemId?: string | null }) {
   if (!ctx.companyId) throw new Error("companyId required for memory retrieval");
@@ -717,10 +733,43 @@ export function memoryRetrievalFilter(ctx: { companyId: string; scanId?: string 
   };
 }
 
-/** Only approved (or high-confidence inferred, clearly labelled) memory is used. */
-export function activeMemory(items: MemoryItem[]): MemoryItem[] {
-  return items.filter((i) => i.status === "approved" || (i.status === "inferred" && i.confidence >= 0.6));
+/**
+ * Scope gate. business memory belongs to the company; report memory only to
+ * the current scan; system + conversation memory only to the current system.
+ * Two reports under one company can never read each other's memory.
+ */
+export function memoryInScope(item: StoredMemoryItem, ctx: MemoryRetrievalContext): boolean {
+  if (!ctx.companyId || item.company_id !== ctx.companyId) return false;
+  switch (item.scope) {
+    case "business":
+      return true;
+    case "report":
+      return !!ctx.scanId && item.scan_id === ctx.scanId;
+    case "system":
+    case "conversation":
+      return !!ctx.systemId && item.system_id === ctx.systemId;
+    default:
+      return false;
+  }
 }
+
+/** Only approved (or high-confidence inferred, clearly labelled) memory is used. */
+export function activeMemory(items: MemoryItem[], now = Date.now()): MemoryItem[] {
+  return items.filter((i) => {
+    if (i.status === "rejected" || i.status === "superseded") return false;
+    if (i.expires_at && new Date(i.expires_at).getTime() <= now) return false;
+    return i.status === "approved" || (i.status === "inferred" && i.confidence >= 0.6);
+  });
+}
+
+/** The single retrieval entry point used by the report AI / operator. */
+export function selectMemory(items: StoredMemoryItem[], ctx: MemoryRetrievalContext): StoredMemoryItem[] {
+  const now = ctx.now ?? Date.now();
+  const scoped = items.filter((i) => memoryInScope(i, ctx));
+  const live = activeMemory(scoped, now) as StoredMemoryItem[];
+  return ctx.role === "viewer" ? live.filter((i) => i.sensitivity !== "high") : live;
+}
+
 
 /* ── Idempotency ─────────────────────────────────────────────────────────── */
 
