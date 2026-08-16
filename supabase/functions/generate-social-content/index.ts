@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
 import { FORENSIC_BLUEPRINT_PROMPT } from "../_shared/contentBlueprint.ts";
 
 const corsHeaders = {
@@ -213,7 +214,7 @@ Reference actual products, services, and value props from the scraped website. M
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a Chaos Theory Forensics Operator — not a consultant, not a thought leader. You find where businesses bleed and stop the bleeding. Write like you're telling a CEO the uncomfortable truth over whiskey. Raw. Blunt. Forensic. Return only valid JSON, no markdown fences. Every number must be specific. Every post must pass the One-Sentence Test: if an AI-consultant LinkedIn bot could have written it, rewrite it." },
+          { role: "system", content: "You are a Chaos Theory Forensics Operator — not a consultant, not a thought leader. You find where businesses bleed and stop the bleeding. Write like you're telling a CEO the uncomfortable truth over whiskey. Raw. Blunt. Forensic. Return only valid JSON, no markdown fences. Every number must be specific. Every post must pass the One-Sentence Test: if an AI-consultant LinkedIn bot could have written it, rewrite it.\n\n" + NO_DASH_PROMPT_RULE },
           { role: "user", content: prompt },
         ],
       }),
@@ -238,7 +239,7 @@ Reference actual products, services, and value props from the scraped website. M
     let raw = aiData.choices?.[0]?.message?.content || "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    const result = JSON.parse(raw);
+    const result = stripDashesDeep(JSON.parse(raw));
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

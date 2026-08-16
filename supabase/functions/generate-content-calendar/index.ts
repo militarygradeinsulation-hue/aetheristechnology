@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -154,7 +155,7 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
           {
             role: "system",
             content:
-              "You write LinkedIn posts in the 2026 short-line / one-sentence-per-line style. Diagnostic operator voice. Massive whitespace. No em dashes. No copy-bro language. Return only valid JSON, no markdown fences.",
+              "You write LinkedIn posts in the 2026 short line, one sentence per line style. Diagnostic operator voice. Massive whitespace. No copy bro language. Return only valid JSON, no markdown fences.\n\n" + NO_DASH_PROMPT_RULE,
           },
           { role: "user", content: prompt },
         ],
@@ -188,15 +189,11 @@ Return ONLY the JSON. No markdown fences. No commentary.`;
       result = JSON.parse(cleaned);
     }
 
-    // Strip em dashes server-side as a safety net
+    // NO-DASH RULE: strip every dash from generated copy
     if (Array.isArray(result?.days)) {
-      result.days = result.days.map((d: any, i: number) => ({
-        ...d,
-        day: i + 1,
-        hook: typeof d.hook === "string" ? d.hook.replace(/—/g, ".").replace(/–/g, ".") : d.hook,
-        caption: typeof d.caption === "string" ? d.caption.replace(/—/g, ".").replace(/–/g, ".") : d.caption,
-      }));
+      result.days = result.days.map((d: any, i: number) => ({ ...d, day: i + 1 }));
     }
+    result = stripDashesDeep(result);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
