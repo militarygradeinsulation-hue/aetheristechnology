@@ -15,6 +15,8 @@ export function stripDashes(input: string): string {
         .map((tok) => {
           if (!tok.trim()) return tok;
           if (URL_LIKE.test(tok)) return tok;
+          // hashtags collapse instead of splitting: #Revenue-Leak -> #RevenueLeak
+          if (tok.startsWith("#")) return tok.replace(/[-–—‐‑‒−]/g, "");
           let t = tok;
           t = t.replace(/\s*[—–]\s*/g, ", ");
           t = t.replace(/(?<=\w)[-‐‑‒−](?=\w)/g, " ");
