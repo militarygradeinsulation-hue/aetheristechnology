@@ -412,6 +412,8 @@ export const GoldenReportLibrary: React.FC = () => {
   const [stats, setStats] = useState<{ total_scans: number; total_archived: number; total_companies: number } | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillMsg, setBackfillMsg] = useState('');
+  const [sysBatching, setSysBatching] = useState(false);
+  const [sysMsg, setSysMsg] = useState('');
   const LIMIT = 24;
 
   useEffect(() => { const t = setTimeout(() => { setDebounced(search); setPage(0); }, 350); return () => clearTimeout(t); }, [search]);
