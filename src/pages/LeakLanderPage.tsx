@@ -92,7 +92,7 @@ const LeakLanderPage: React.FC = () => {
           />
 
         }
-        description=""
+        description="Experts in making companies visible AND making brand AI be as human as you are."
       >
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
