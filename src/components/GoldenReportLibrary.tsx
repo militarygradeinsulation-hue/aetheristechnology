@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import {
   Loader2, Search, RefreshCw, Building2, ExternalLink, FileText, Copy, Download,
-  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck,
+  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck, Network,
 } from 'lucide-react';
 import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
@@ -18,6 +18,7 @@ import {
   generateBlueprint, setBlueprintApproval, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
+import { composeSystem, type CompanySystemRow } from '@/lib/companySystem';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
