@@ -498,9 +498,15 @@ export const GoldenReportLibrary: React.FC = () => {
             {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
             Archive historical reports
           </Button>
+          <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
+            {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
+            Draft 5 company systems
+          </Button>
         </div>
       </div>
       {backfillMsg && <p className="font-mono text-[11px] text-amber">{backfillMsg}</p>}
+      {sysMsg && <p className="font-mono text-[11px] text-muted-foreground">{sysMsg}</p>}
+
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] flex-1">
