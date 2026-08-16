@@ -15,6 +15,15 @@ import {
   brandContextIsActive,
   moduleAllowedForTier,
   findModule,
+  buildConfirmation,
+  registryAdapterGaps,
+  EXISTING_EDGE_FUNCTIONS,
+  selectMemory,
+  scopeAllows,
+  codeScope,
+  ADMIN_SCOPE,
+  inputHash,
+  type StoredMemoryItem,
   type RootCauseInput,
 } from "@/lib/universeSystem";
 
@@ -307,5 +316,83 @@ describe("report AI control plane", () => {
     const risky = UNIVERSE_MODULE_REGISTRY.flatMap(m => m.actions).filter(a => a.risk === "write" || a.risk === "external");
     expect(risky.length).toBeGreaterThan(0);
     for (const a of risky) expect(a.confirm).toBe(true);
+  });
+});
+
+describe("tenant scope", () => {
+  it("admins are global, everyone else is pinned to explicit owner codes", () => {
+    expect(scopeAllows(ADMIN_SCOPE, null)).toBe(true);
+    const rep = codeScope(["REPA"]);
+    expect(scopeAllows(rep, "REPA")).toBe(true);
+    expect(scopeAllows(rep, "REPB")).toBe(false);
+  });
+
+  it("defaults to deny for unowned rows and untieable tokens", () => {
+    expect(scopeAllows(codeScope(["REPA"]), null)).toBe(false);
+    expect(scopeAllows(codeScope([]), "REPA")).toBe(false);
+    expect(scopeAllows(codeScope([undefined, null]), "REPA")).toBe(false);
+  });
+
+  it("isolates a partner team from another partner team", () => {
+    const partnerA = codeScope(["PARTA", "REP1", "REP2"]);
+    const partnerB = codeScope(["PARTB", "REP3"]);
+    expect(scopeAllows(partnerA, "REP2")).toBe(true);
+    expect(scopeAllows(partnerA, "REP3")).toBe(false);
+    expect(scopeAllows(partnerB, "REP1")).toBe(false);
+  });
+});
+
+describe("memory isolation", () => {
+  const mk = (over: Partial<StoredMemoryItem>): StoredMemoryItem => ({
+    company_id: "co-1", scan_id: null, system_id: null,
+    scope: "business", key: "k", value: "v", provenance: "report",
+    confidence: 0.9, status: "approved", sensitivity: "low", expires_at: null, ...over,
+  });
+
+  it("keeps two reports under one company from reading each other's memory", () => {
+    const items = [
+      mk({ key: "biz", scope: "business" }),
+      mk({ key: "r1", scope: "report", scan_id: "scan-1" }),
+      mk({ key: "r2", scope: "report", scan_id: "scan-2" }),
+      mk({ key: "s1", scope: "system", system_id: "sys-1" }),
+      mk({ key: "s2", scope: "system", system_id: "sys-2" }),
+      mk({ key: "c2", scope: "conversation", system_id: "sys-2" }),
+    ];
+    const got = selectMemory(items, { companyId: "co-1", scanId: "scan-1", systemId: "sys-1" }).map((i) => i.key);
+    expect(got.sort()).toEqual(["biz", "r1", "s1"]);
+  });
+
+  it("never crosses company boundaries", () => {
+    const items = [mk({ key: "other", company_id: "co-2" })];
+    expect(selectMemory(items, { companyId: "co-1", scanId: "scan-1", systemId: "sys-1" })).toEqual([]);
+  });
+
+  it("drops expired, rejected and superseded memory and hides sensitive rows from viewers", () => {
+    const items = [
+      mk({ key: "gone", expires_at: new Date(Date.now() - 1000).toISOString() }),
+      mk({ key: "no", status: "rejected" }),
+      mk({ key: "old", status: "superseded" }),
+      mk({ key: "secret", sensitivity: "high" }),
+      mk({ key: "keep" }),
+    ];
+    expect(selectMemory(items, { companyId: "co-1", role: "viewer" }).map((i) => i.key)).toEqual(["keep"]);
+    expect(selectMemory(items, { companyId: "co-1", role: "operator" }).map((i) => i.key).sort()).toEqual(["keep", "secret"]);
+  });
+});
+
+describe("confirmation binding", () => {
+  it("hashes inputs deterministically regardless of key order", () => {
+    expect(inputHash({ a: 1, b: "x" })).toBe(inputHash({ b: "x", a: 1 }));
+    expect(inputHash({ a: 1 })).not.toBe(inputHash({ a: 2 }));
+  });
+
+  it("binds actor, system, action, inputs, report hash and version", () => {
+    const c = buildConfirmation(
+      { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } },
+      { actor: "rep:A", systemId: "sys-1", sourceReportHash: "h", systemVersion: 3, affects: ["scan"] },
+    );
+    expect(c).toMatchObject({ actor: "rep:A", system_id: "sys-1", module_id: "website-scanner", system_version: 3 });
+    expect(c.consumed_at).toBeNull();
+    expect(new Date(c.expires_at).getTime()).toBeGreaterThan(Date.now());
   });
 });
