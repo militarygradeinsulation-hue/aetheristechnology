@@ -18,7 +18,7 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
 import { computeGoldenLeakage } from "../_shared/golden-leakage.ts";
-import { sanitizedGoldenReport, guardChatMoney } from "../_shared/golden-money-sanitizer.ts";
+import { buildReportEvidence, guardAnswer, moneyRules, OPERATOR_VOICE } from "../_shared/report-brain.ts";
 import { reportHash, isBlueprintEligible, resolveBusinessIdentity, type ScanRow } from "../_shared/golden-archive.ts";
 import {
   UNIVERSE_MODULE_REGISTRY,
@@ -27,11 +27,22 @@ import {
   buildBrandContext,
   validateAction,
   validateMemoryItem,
-  activeMemory,
+  selectMemory,
   findModule,
   shouldRecompose,
+  registryAdapterGaps,
+  actionIsExecutable,
+  buildConfirmation,
+  confirmationMismatch,
+  inputHash,
+  scopeAllows,
+  codeScope,
+  ADMIN_SCOPE,
+  type ActorRole,
+  type ConfirmationClaim,
   type ModuleTier,
   type RootCauseInput,
+  type StoredMemoryItem,
   type MemoryItem,
 } from "../_shared/universe-system.ts";
 
@@ -45,6 +56,64 @@ const json = (b: unknown, status = 200) =>
 
 const SCAN_COLS =
   "id, target_url, company_name, report, raw_findings, brand_kit, brand_kit_status, report_source, portal_source, rep_code, creator_name, creator_email, report_state, financial_model_version, completed_at, status";
+
+
+/**
+ * Adapter shaping. Every branch targets an edge function that already exists;
+ * the bus never invents a tool and never forwards a client-supplied brand or
+ * company context — those are attached server-side from approved records.
+ */
+function buildAdapterPayload(
+  kind: string,
+  ctx: {
+    moduleId: string;
+    input: Record<string, unknown>;
+    systemId: string;
+    scanId: string;
+    companyId: string;
+    targetUrl: string;
+    brand: Record<string, unknown> | null;
+  },
+): Record<string, unknown> {
+  const base = {
+    company_system_id: ctx.systemId,
+    scan_id: ctx.scanId,
+    company_id: ctx.companyId,
+    // Approved brand only. Draft/inferred brand facts never reach a module.
+    brand_context: ctx.brand
+      ? {
+          version: ctx.brand.version,
+          colors: ctx.brand.colors,
+          typography: ctx.brand.typography,
+          tone: ctx.brand.tone,
+          terminology: ctx.brand.terminology,
+          audience: ctx.brand.audience,
+          cta_style: ctx.brand.cta_style,
+          imagery_direction: ctx.brand.imagery_direction,
+        }
+      : null,
+  };
+  switch (kind) {
+    case "tool_sandbox":
+      return {
+        ...base,
+        toolId: ctx.moduleId,
+        url: ctx.targetUrl,
+        context: [
+          String(ctx.input.company_context ?? ctx.input.capability_brief ?? ""),
+          ctx.input.approved_messaging_context ? String(ctx.input.approved_messaging_context) : "",
+          ctx.brand ? `Brand tone: ${String(ctx.brand.tone ?? "")}` : "",
+        ].filter(Boolean).join("\n").slice(0, 1500),
+      };
+    case "scan":
+      return { ...base, url: String(ctx.input.website_url ?? ctx.targetUrl) };
+    case "internal_forecast":
+      return { ...base, action: "refresh_forecast", system_id: ctx.systemId };
+    case "passthrough":
+    default:
+      return { ...base, ...ctx.input };
+  }
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -61,16 +130,47 @@ serve(async (req) => {
     const portal = isAdmin ? null : await verifyPortalToken(getPortalTokenFromRequest(req), SVC);
     const internal = req.headers.get("x-internal-key") === SVC;
     if (!isAdmin && !portal && !internal) return json({ error: "Unauthorized" }, 401);
-    const repScope = portal && portal.role === "rep" ? portal.code : null;
-    const role: "admin" | "operator" | "viewer" = isAdmin || internal ? "admin" : repScope ? "operator" : "viewer";
-    const actor = isAdmin ? "admin" : repScope ? `rep:${repScope}` : "internal";
+    // Tenant scope. Admin + internal are global. EVERY other portal role is
+    // pinned to an explicit owner-code set; a token we cannot tie to an owner
+    // gets an empty set and therefore reads nothing (default deny).
+    let scope = ADMIN_SCOPE;
+    if (!isAdmin && !internal) {
+      if (!portal) return json({ error: "Unauthorized" }, 401);
+      if (portal.role === "rep") {
+        scope = codeScope([portal.code]);
+      } else if (portal.role === "partner") {
+        // A partner sees their own code plus the rep codes on their team.
+        const { data: self } = await sb.from("rep_codes").select("code, team_name").eq("code", portal.code).maybeSingle();
+        const team = (self as { team_name?: string | null } | null)?.team_name || null;
+        let codes: string[] = [portal.code];
+        if (team) {
+          const { data: mates } = await sb.from("rep_codes").select("code").eq("team_name", team);
+          codes = codes.concat(((mates || []) as Array<{ code: string }>).map((r) => r.code));
+        }
+        scope = codeScope(codes);
+      } else {
+        scope = codeScope([]); // unknown role -> deny everything
+      }
+    }
+    const role: ActorRole = isAdmin || internal ? "admin" : portal?.role === "rep" ? "operator" : "viewer";
+    const actor = isAdmin ? "admin" : internal ? "internal" : `${portal!.role}:${portal!.code}`;
 
-    /** Rep scoping: a rep may only touch systems for their own reports. */
+    /** Owner scoping: a portal caller may only touch rows they own. */
     async function loadSystem(systemId: string) {
+      if (!systemId) return null;
       const { data } = await sb.from("company_systems").select("*").eq("id", systemId).maybeSingle();
       if (!data) return null;
-      if (repScope && (data as { rep_code: string | null }).rep_code !== repScope) return "forbidden" as const;
+      if (!scopeAllows(scope, (data as { rep_code: string | null }).rep_code)) return "forbidden" as const;
       return data as Record<string, unknown>;
+    }
+
+    /** Company access requires at least one in-scope system for that company. */
+    async function companyAllowed(companyId: string): Promise<boolean> {
+      if (scope.kind === "admin") return true;
+      if (!companyId || !scope.codes.length) return false;
+      const { data } = await sb.from("company_systems").select("id")
+        .eq("company_id", companyId).in("rep_code", scope.codes).limit(1);
+      return !!data?.length;
     }
 
     async function logEvent(row: Record<string, unknown>) {
@@ -79,7 +179,7 @@ serve(async (req) => {
 
     /* ── registry ─────────────────────────────────────────────────────── */
     if (action === "registry") {
-      return json({ modules: UNIVERSE_MODULE_REGISTRY, template_version: COMPANY_SYSTEM_TEMPLATE_VERSION });
+      return json({ modules: UNIVERSE_MODULE_REGISTRY, template_version: COMPANY_SYSTEM_TEMPLATE_VERSION, adapter_gaps: registryAdapterGaps() });
     }
 
     if (action === "seed_registry") {
@@ -157,7 +257,7 @@ serve(async (req) => {
       const { data: scanRow } = await sb.from("forensic_scans").select(SCAN_COLS).eq("id", scanId).maybeSingle();
       if (!scanRow) return json({ error: "Scan not found" }, 404);
       const scan = scanRow as unknown as ScanRow & { brand_kit?: unknown; brand_kit_status?: string | null };
-      if (repScope && (scan as { rep_code?: string | null }).rep_code !== repScope) return json({ error: "Forbidden" }, 403);
+      if (!scopeAllows(scope, (scan as { rep_code?: string | null }).rep_code ?? null)) return json({ error: "Forbidden" }, 403);
 
       if (!isBlueprintEligible(scan.report, scan.report_state)) {
         return json({ error: "Report must be repaired first." }, 409);
@@ -405,7 +505,10 @@ serve(async (req) => {
 
     if (action === "list") {
       let q = sb.from("company_systems").select("*").order("created_at", { ascending: false }).limit(100);
-      if (repScope) q = q.eq("rep_code", repScope);
+      if (scope.kind !== "admin") {
+        if (!scope.codes.length) return json({ systems: [] });
+        q = q.in("rep_code", scope.codes);
+      }
       if (body.company_id) q = q.eq("company_id", String(body.company_id));
       const { data } = await q;
       return json({ systems: data || [] });
@@ -436,9 +539,48 @@ serve(async (req) => {
       if ((row as { locked: boolean }).locked && body.enabled) {
         return json({ error: (row as { lock_reason: string }).lock_reason || "Module is locked" }, 403);
       }
+      if (role === "viewer") return json({ error: "Viewer role may not change module state" }, 403);
+
+      // Enabling/disabling changes live behaviour, so it follows the same
+      // preview -> confirm -> execute path as any other write.
+      const wantEnabled = !!body.enabled;
+      const systemVersion = Number(sys.system_version ?? 1);
+      const toggleReq = { module_id: moduleId, action_id: "module_set_enabled", input: { enabled: String(wantEnabled) } };
+      const tokenIn = typeof body.confirmation_token === "string" ? body.confirmation_token : "";
+      if (wantEnabled && sys.approval_state !== "approved") {
+        return json({ error: "Company system is not approved for execution." }, 403);
+      }
+      let claim: ConfirmationClaim | null = null;
+      if (tokenIn) {
+        const { data: crow } = await sb.from("company_system_confirmations").select("*").eq("token", tokenIn).maybeSingle();
+        if (crow) claim = crow as unknown as ConfirmationClaim;
+      }
+      const ctxBind = {
+        actor, systemId, sourceReportHash: String(sys.source_report_hash ?? ""),
+        systemVersion, now: Date.now(),
+      };
+      if (!claim || confirmationMismatch(claim, toggleReq, ctxBind)) {
+        const bound = buildConfirmation(toggleReq, { ...ctxBind, affects: [`module:${moduleId}`] });
+        const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
+        await sb.from("company_system_confirmations").insert({
+          token, actor_role: role,
+          preview: { module: moduleId, action: wantEnabled ? "Enable module" : "Disable module", risk: "write", rollback: "Toggle the module back." },
+          ...bound,
+        });
+        return json({
+          ok: false, requires_confirmation: true,
+          error: claim ? confirmationMismatch(claim, toggleReq, ctxBind) : "Confirmation required",
+          preview: { module: moduleId, enabled: wantEnabled, affects: [`module:${moduleId}`], rollback: "Toggle the module back." },
+          confirmation: { token, expires_at: bound.expires_at, single_use: true },
+        }, 200);
+      }
+      const { data: spent } = await sb.from("company_system_confirmations")
+        .update({ consumed_at: new Date().toISOString() }).eq("token", tokenIn).is("consumed_at", null).select("id").maybeSingle();
+      if (!spent) return json({ error: "Confirmation already used." }, 409);
+
       const { data } = await sb.from("company_system_modules")
-        .update({ enabled: !!body.enabled }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
-      await logEvent({ system_id: systemId, kind: "module_toggle", module_id: moduleId, result: { enabled: !!body.enabled } });
+        .update({ enabled: wantEnabled }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
+      await logEvent({ system_id: systemId, kind: "module_toggle", module_id: moduleId, result: { enabled: wantEnabled } });
       return json({ module: data });
     }
 
@@ -447,7 +589,9 @@ serve(async (req) => {
       const systemId = String(body.system_id ?? "");
       const state = String(body.approval_state ?? "approved");
       if (!["draft", "approved", "rejected"].includes(state)) return json({ error: "bad state" }, 400);
+      const { data: prior } = await sb.from("company_systems").select("system_version").eq("id", systemId).maybeSingle();
       const { data } = await sb.from("company_systems").update({
+        system_version: Number((prior as { system_version?: number } | null)?.system_version ?? 1) + 1,
         approval_state: state,
         status: state === "approved" ? "active" : "draft",
         approved_by: state === "approved" ? actor : null,
@@ -461,14 +605,23 @@ serve(async (req) => {
     if (action === "memory_list") {
       const companyId = String(body.company_id ?? "");
       if (!companyId) return json({ error: "company_id required" }, 400);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id").eq("company_id", companyId).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed(companyId))) return json({ error: "Forbidden" }, 403);
       let q = sb.from("company_system_memory").select("*").eq("company_id", companyId);
       if (body.scope) q = q.eq("scope", String(body.scope));
       const { data } = await q.order("updated_at", { ascending: false }).limit(300);
-      return json({ memory: data || [] });
+      let rows = (data || []) as Array<Record<string, unknown>>;
+      if (scope.kind !== "admin") {
+        // Only memory attached to the caller's own systems/reports.
+        const { data: own } = await sb.from("company_systems").select("id, scan_id")
+          .eq("company_id", companyId).in("rep_code", scope.codes);
+        const sysIds = new Set(((own || []) as Array<{ id: string }>).map((r) => r.id));
+        const scanIds = new Set(((own || []) as Array<{ scan_id: string }>).map((r) => r.scan_id));
+        rows = rows.filter((r) =>
+          r.scope === "business" ||
+          (r.scope === "report" && scanIds.has(String(r.scan_id))) ||
+          ((r.scope === "system" || r.scope === "conversation") && sysIds.has(String(r.system_id))));
+      }
+      return json({ memory: rows });
     }
 
     if (action === "memory_upsert") {
@@ -477,10 +630,7 @@ serve(async (req) => {
       if (!v.ok) return json({ error: v.error }, 400);
       const companyId = String(item.company_id ?? body.company_id ?? "");
       if (!companyId) return json({ error: "company_id required" }, 400);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id").eq("company_id", companyId).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed(companyId))) return json({ error: "Forbidden" }, 403);
       const { data, error } = await sb.from("company_system_memory").upsert({
         company_id: companyId,
         scan_id: item.scan_id ?? null,
@@ -506,11 +656,7 @@ serve(async (req) => {
       if (!["inferred", "approved", "rejected", "superseded"].includes(status)) return json({ error: "bad status" }, 400);
       const { data: row } = await sb.from("company_system_memory").select("company_id").eq("id", id).maybeSingle();
       if (!row) return json({ error: "Not found" }, 404);
-      if (repScope) {
-        const { data: own } = await sb.from("company_systems").select("id")
-          .eq("company_id", (row as { company_id: string }).company_id).eq("rep_code", repScope).limit(1);
-        if (!own?.length) return json({ error: "Forbidden" }, 403);
-      }
+      if (!(await companyAllowed((row as { company_id: string }).company_id))) return json({ error: "Forbidden" }, 403);
       const { data } = await sb.from("company_system_memory").update({
         status, author: actor, last_verified_at: new Date().toISOString(),
       }).eq("id", id).select("*").maybeSingle();
@@ -537,23 +683,37 @@ serve(async (req) => {
         sb.from("forensic_scans").select("report, target_url, company_name, report_state").eq("id", sys.scan_id as string).maybeSingle(),
         sb.from("company_system_modules").select("*").eq("system_id", systemId).order("display_order"),
         sb.from("company_system_goals").select("*").eq("system_id", systemId).order("priority"),
-        sb.from("company_system_memory").select("*").eq("company_id", sys.company_id as string).limit(200),
+        sb.from("company_system_memory").select("*").eq("company_id", sys.company_id as string).limit(300),
         sb.from("company_system_checks").select("*").eq("system_id", systemId),
       ]);
       if (!scan?.report) return json({ error: "Report not found" }, 404);
 
-      const unpublishable = (scan as { report_state?: string }).report_state === "regeneration_required";
-      const report = sanitizedGoldenReport(scan.report as never) as Record<string, unknown>;
+      // Same shared brain as forensic-report-chat: one evidence builder, one
+      // sanitised ledger, one money guard. This surface only adds control.
+      const ev = buildReportEvidence(scan as never);
+      const unpublishable = ev.unpublishable;
 
-      const memItems: MemoryItem[] = ((mem || []) as Array<Record<string, unknown>>).map((m) => ({
+      // Scoped retrieval: business memory for the company, report memory only
+      // for THIS scan, system/conversation memory only for THIS system.
+      const memItems: StoredMemoryItem[] = ((mem || []) as Array<Record<string, unknown>>).map((m) => ({
+        company_id: String(m.company_id),
+        scan_id: (m.scan_id as string | null) ?? null,
+        system_id: (m.system_id as string | null) ?? null,
         scope: m.scope as MemoryItem["scope"],
         key: String(m.memory_key),
         value: String(m.value),
         provenance: String(m.provenance),
         confidence: Number(m.confidence),
         status: m.status as MemoryItem["status"],
+        sensitivity: (m.sensitivity as MemoryItem["sensitivity"]) ?? "low",
+        expires_at: (m.expires_at as string | null) ?? null,
       }));
-      const usable = activeMemory(memItems);
+      const usable = selectMemory(memItems, {
+        companyId: String(sys.company_id),
+        scanId: String(sys.scan_id),
+        systemId,
+        role,
+      });
 
       const enabled = ((mods || []) as Array<Record<string, unknown>>).filter((m) => m.enabled);
       const catalogue = enabled.map((m) => {
@@ -575,19 +735,15 @@ serve(async (req) => {
         "You may read, explain and draft immediately. Any write, send, publish, schedule, CRM change, automation change, brand-fact change, delete or deploy requires Plan -> Confirm -> Execute.",
         "When the operator asks for an action, reply with the plan: which module, which action id, what inputs are still missing, what it affects, the rollback path and the check you will run afterwards. Do not claim it is done.",
         "You may only reference the module actions listed below. Never claim an action that is not listed.",
-        unpublishable
-          ? "FINANCIALS WITHHELD: this report failed validation. State no dollar figures."
-          : "Quote only canonical figures present in the report context. Never add, sum or derive a new dollar amount. USD only.",
-        "Blunt operator voice. Short sentences. No filler, no emoji, no em-dashes.",
+        moneyRules(unpublishable),
+        OPERATOR_VOICE,
         "",
         `ENABLED MODULES + ALLOWED ACTIONS:\n${JSON.stringify(catalogue)}`,
         locked.length ? `RECOMMENDED BUT LOCKED (cannot execute): ${JSON.stringify(locked)}` : "",
         `GOALS:\n${JSON.stringify((goals || []).slice(0, 30))}`,
         `CHECKS:\n${JSON.stringify((checks || []).slice(0, 20))}`,
         `ACTIVE MEMORY (approved or high-confidence, labelled):\n${JSON.stringify(usable.slice(0, 60))}`,
-        `CANONICAL FINANCIALS:\n${unpublishable ? "withheld" : JSON.stringify(report.overall_leakage || {})}`,
-        `EXECUTIVE SUMMARY:\n${String(report.executive_summary || "").slice(0, 6000)}`,
-        `TOP LEAKS:\n${JSON.stringify(report.top_leaks || []).slice(0, 8000)}`,
+        ev.briefContext,
       ].filter(Boolean).join("\n\n");
 
       const res = await routedChatCompletion({
@@ -601,7 +757,7 @@ serve(async (req) => {
           { role: "user", content: question },
         ],
       });
-      const answer = guardChatMoney(res.content || "", unpublishable ? null : (report as never)).text;
+      const answer = guardAnswer(res.content || "", ev);
       await logEvent({ system_id: systemId, company_id: sys.company_id, scan_id: sys.scan_id, kind: "operator_turn", input: { question }, result: { answer: answer.slice(0, 4000) } });
       return json({ answer });
     }
@@ -612,42 +768,113 @@ serve(async (req) => {
       if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
       if (!sys) return json({ error: "Not found" }, 404);
 
-      const { data: mods } = await sb.from("company_system_modules").select("module_id, enabled").eq("system_id", systemId);
+      const moduleId = String(body.module_id ?? "");
+      const actionId = String(body.action_id ?? "");
+      const input = (body.input || {}) as Record<string, unknown>;
+
+      const [{ data: mods }, { data: brandRow }] = await Promise.all([
+        sb.from("company_system_modules").select("module_id, enabled").eq("system_id", systemId),
+        sys.brand_context_id
+          ? sb.from("company_brand_contexts").select("*").eq("id", sys.brand_context_id as string).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
       const enabledIds = ((mods || []) as Array<{ module_id: string; enabled: boolean }>)
         .filter((m) => m.enabled).map((m) => m.module_id);
+      const brand = (brandRow || null) as Record<string, unknown> | null;
+      const brandStatus = (brand?.status as string | undefined) ?? null;
 
+      // The confirmation ticket is looked up server-side. The client only ever
+      // hands back an opaque token issued by a prior action_preview.
+      let claim: ConfirmationClaim | null = null;
+      const tokenIn = typeof body.confirmation_token === "string" ? body.confirmation_token : "";
+      if (action === "action_execute" && tokenIn) {
+        const { data: row } = await sb.from("company_system_confirmations")
+          .select("*").eq("token", tokenIn).maybeSingle();
+        if (row) claim = row as unknown as ConfirmationClaim;
+      }
+
+      const systemVersion = Number(sys.system_version ?? 1);
       const decision = validateAction(
+        { module_id: moduleId, action_id: actionId, input },
         {
-          module_id: String(body.module_id ?? ""),
-          action_id: String(body.action_id ?? ""),
-          input: (body.input || {}) as Record<string, unknown>,
-          confirmed: action === "action_execute" ? !!body.confirmed : false,
+          clientTier: sys.tier as ModuleTier,
+          enabledModuleIds: enabledIds,
+          role,
+          systemApprovalState: (sys.approval_state as string) ?? null,
+          brandStatus,
+          confirmation: action === "action_execute" ? claim : null,
+          actor,
+          systemId,
+          sourceReportHash: String(sys.source_report_hash ?? ""),
+          systemVersion,
         },
-        { clientTier: sys.tier as ModuleTier, enabledModuleIds: enabledIds, role },
       );
 
       if (action === "action_preview" || !decision.ok) {
+        // Issue a bound, single-use ticket only when the plan is otherwise
+        // valid and merely awaiting the operator's confirmation.
+        let confirmation: Record<string, unknown> | null = null;
+        if (action === "action_preview" && decision.requires_confirmation && decision.preview && !claim) {
+          const token = crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "");
+          const bound = buildConfirmation(
+            { module_id: moduleId, action_id: actionId, input },
+            {
+              actor, systemId,
+              sourceReportHash: String(sys.source_report_hash ?? ""),
+              systemVersion,
+              affects: decision.preview.affects,
+            },
+          );
+          const { error: cErr } = await sb.from("company_system_confirmations").insert({
+            token, actor_role: role, preview: decision.preview, ...bound,
+          });
+          if (cErr) throw cErr;
+          confirmation = {
+            token,
+            expires_at: bound.expires_at,
+            affects: bound.affects,
+            input_hash: bound.input_hash,
+            single_use: true,
+          };
+        }
         await logEvent({
-          system_id: systemId, kind: "action_planned", module_id: String(body.module_id ?? ""),
-          action_id: String(body.action_id ?? ""), input: body.input || {}, preview: decision.preview || null,
+          system_id: systemId, kind: "action_planned", module_id: moduleId,
+          action_id: actionId, input, preview: decision.preview || null,
           status: decision.ok ? "ready" : decision.requires_confirmation ? "awaiting_confirmation" : "rejected",
           error_message: decision.ok ? null : decision.error,
         });
-        return json(decision, decision.ok || decision.requires_confirmation ? 200 : 400);
+        return json({ ...decision, confirmation }, decision.ok || decision.requires_confirmation ? 200 : 400);
+      }
+
+      const mod = findModule(moduleId)!;
+      const act = mod.actions.find((a) => a.id === actionId)!;
+
+      // Atomic single-use consumption. A racing second execute finds no
+      // unconsumed row and loses.
+      if (claim) {
+        const { data: spent } = await sb.from("company_system_confirmations")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("token", tokenIn).is("consumed_at", null).select("id").maybeSingle();
+        if (!spent) {
+          return json({ ok: false, requires_confirmation: true, error: "Confirmation already used. Preview the action again." }, 409);
+        }
       }
 
       // Execute: the bus only ever invokes the registered function for the
       // registered action, with the validated input. No arbitrary code.
-      const mod = findModule(String(body.module_id))!;
-      const act = mod.actions.find((a) => a.id === String(body.action_id))!;
       let result: unknown = null;
       let status = "executed";
       let errorMessage: string | null = null;
       try {
+        const payload = buildAdapterPayload(act.payload_kind, {
+          moduleId: mod.id, input, systemId, scanId: String(sys.scan_id),
+          companyId: String(sys.company_id), targetUrl: String(sys.manifest && (sys.manifest as Record<string, Record<string, string>>).identity?.website_url || ""),
+          brand: brandStatus === "approved" ? brand : null,
+        });
         const r = await fetch(`${SUPABASE_URL}/functions/v1/${act.fn}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-internal-key": SVC, Authorization: `Bearer ${SVC}` },
-          body: JSON.stringify({ ...(body.input || {}), company_system_id: systemId, scan_id: sys.scan_id }),
+          body: JSON.stringify(payload),
         });
         const text = await r.text();
         result = { status: r.status, body: text.slice(0, 4000) };
@@ -657,15 +884,47 @@ serve(async (req) => {
         errorMessage = (e as Error).message;
       }
 
+      // Post-action verification: run/queue the registered check and record
+      // whether anything actually moved. Never claim recovery without it.
+      let verification: Record<string, unknown> | null = null;
+      if (status === "executed") {
+        const { data: checkRow } = await sb.from("company_system_checks")
+          .select("*").eq("system_id", systemId).order("created_at", { ascending: true }).limit(1).maybeSingle();
+        if (checkRow) {
+          const c = checkRow as { id: string; name: string; threshold: string | null };
+          await sb.from("company_system_checks").update({
+            last_status: "queued",
+            last_run_at: new Date().toISOString(),
+            last_result: { queued_by: `${mod.id}.${act.id}`, note: "Awaiting measurement window." },
+          }).eq("id", c.id);
+          verification = { check: c.name, state: "queued", threshold: c.threshold, measured: false };
+        } else {
+          verification = { check: null, state: "no_registered_check", measured: false };
+        }
+        await sb.from("company_system_metrics").insert({
+          system_id: systemId,
+          metric_key: `${mod.id}.${act.id}.executions`,
+          value: 1,
+          source: "action_bus",
+          label: "Execution count only. Not a recovery measurement.",
+        }).then(() => undefined, () => undefined);
+      }
+
       await logEvent({
         system_id: systemId, company_id: sys.company_id, scan_id: sys.scan_id,
         kind: "action_executed", module_id: mod.id, action_id: act.id,
-        input: body.input || {}, preview: decision.preview, result, status,
+        input, preview: decision.preview, result: { ...(result as Record<string, unknown>), verification }, status,
         error_message: errorMessage, rollback_note: act.rollback,
       });
 
-      return json({ ok: status === "executed", status, result, rollback: act.rollback, error: errorMessage });
+      return json({
+        ok: status === "executed", status, result, verification,
+        rollback: act.rollback, error: errorMessage,
+        goal_movement: "unmeasured until the registered check reports.",
+      });
     }
+
+
 
     if (action === "events") {
       const systemId = String(body.system_id ?? "");

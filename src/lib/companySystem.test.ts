@@ -15,6 +15,15 @@ import {
   brandContextIsActive,
   moduleAllowedForTier,
   findModule,
+  buildConfirmation,
+  registryAdapterGaps,
+  EXISTING_EDGE_FUNCTIONS,
+  selectMemory,
+  scopeAllows,
+  codeScope,
+  ADMIN_SCOPE,
+  inputHash,
+  type StoredMemoryItem,
   type RootCauseInput,
 } from "@/lib/universeSystem";
 
@@ -119,7 +128,22 @@ describe("tier enforcement", () => {
 });
 
 describe("action bus: plan -> confirm -> execute", () => {
-  const ctx = { clientTier: "active" as const, enabledModuleIds: ["follow-up-plan", "website-scanner"], role: "admin" as const };
+  const ctx = {
+    clientTier: "active" as const,
+    enabledModuleIds: ["follow-up-plan", "website-scanner"],
+    role: "admin" as const,
+    systemApprovalState: "approved",
+    brandStatus: "approved",
+    actor: "admin",
+    systemId: "sys-1",
+    sourceReportHash: "hash-1",
+    systemVersion: 1,
+  };
+  const ticket = (req: Parameters<typeof validateAction>[0], over: Record<string, unknown> = {}) => ({
+    token: "t", ...buildConfirmation(req, {
+      actor: "admin", systemId: "sys-1", sourceReportHash: "hash-1", systemVersion: 1, affects: ["scan"],
+    }), ...over,
+  });
 
   it("rejects unknown modules and actions", () => {
     expect(validateAction({ module_id: "ghost", action_id: "x" }, ctx).ok).toBe(false);
@@ -153,11 +177,43 @@ describe("action bus: plan -> confirm -> execute", () => {
     expect(d.ok).toBe(false);
     expect(d.requires_confirmation).toBe(true);
     expect(d.preview?.rollback).toBeTruthy();
-    const ok = validateAction(
-      { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" }, confirmed: true },
-      ctx,
-    );
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const ok = validateAction(req, { ...ctx, confirmation: ticket(req) as never });
     expect(ok.ok).toBe(true);
+  });
+
+  it("refuses a raw confirmed flag: only a server-issued ticket executes", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const forged = validateAction({ ...req, confirmed: true } as never, ctx);
+    expect(forged.ok).toBe(false);
+    expect(forged.requires_confirmation).toBe(true);
+  });
+
+  it("rejects reused, expired, mismatched-actor, mutated-input and stale-version tickets", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const base = ticket(req);
+    expect(validateAction(req, { ...ctx, confirmation: { ...base, consumed_at: new Date().toISOString() } as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, confirmation: { ...base, expires_at: new Date(Date.now() - 1000).toISOString() } as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, actor: "rep:B", confirmation: base as never }).ok).toBe(false);
+    expect(validateAction(
+      { ...req, input: { website_url: "https://evil.com" } },
+      { ...ctx, confirmation: base as never },
+    ).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, systemVersion: 2, confirmation: base as never }).ok).toBe(false);
+    expect(validateAction(req, { ...ctx, sourceReportHash: "hash-2", confirmation: base as never }).ok).toBe(false);
+    // The clean ticket still works, proving the rejections are specific.
+    expect(validateAction(req, { ...ctx, confirmation: base as never }).ok).toBe(true);
+  });
+
+  it("blocks live actions until the system and brand facts are approved", () => {
+    const req = { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } };
+    const t = ticket(req);
+    const unapproved = validateAction(req, { ...ctx, systemApprovalState: "draft", confirmation: t as never });
+    expect(unapproved.ok).toBe(false);
+    expect(unapproved.error).toMatch(/not approved/);
+    const draftBrand = validateAction(req, { ...ctx, brandStatus: "draft", confirmation: t as never });
+    expect(draftBrand.ok).toBe(false);
+    expect(draftBrand.error).toMatch(/Brand facts/);
   });
 
   it("lets drafting run immediately but blocks viewers from acting", () => {
@@ -172,9 +228,13 @@ describe("action bus: plan -> confirm -> execute", () => {
     expect(viewer.ok).toBe(false);
   });
 
-  it("only ever targets registered functions", () => {
+  it("only ever targets edge functions that actually exist", () => {
+    expect(registryAdapterGaps()).toEqual([]);
     for (const m of UNIVERSE_MODULE_REGISTRY) {
-      for (const a of m.actions) expect(a.fn).toMatch(/^[a-z0-9-]+$/);
+      for (const a of m.actions) {
+        expect(a.fn).toMatch(/^[a-z0-9-]+$/);
+        expect(EXISTING_EDGE_FUNCTIONS).toContain(a.fn);
+      }
     }
   });
 });
@@ -256,5 +316,83 @@ describe("report AI control plane", () => {
     const risky = UNIVERSE_MODULE_REGISTRY.flatMap(m => m.actions).filter(a => a.risk === "write" || a.risk === "external");
     expect(risky.length).toBeGreaterThan(0);
     for (const a of risky) expect(a.confirm).toBe(true);
+  });
+});
+
+describe("tenant scope", () => {
+  it("admins are global, everyone else is pinned to explicit owner codes", () => {
+    expect(scopeAllows(ADMIN_SCOPE, null)).toBe(true);
+    const rep = codeScope(["REPA"]);
+    expect(scopeAllows(rep, "REPA")).toBe(true);
+    expect(scopeAllows(rep, "REPB")).toBe(false);
+  });
+
+  it("defaults to deny for unowned rows and untieable tokens", () => {
+    expect(scopeAllows(codeScope(["REPA"]), null)).toBe(false);
+    expect(scopeAllows(codeScope([]), "REPA")).toBe(false);
+    expect(scopeAllows(codeScope([undefined, null]), "REPA")).toBe(false);
+  });
+
+  it("isolates a partner team from another partner team", () => {
+    const partnerA = codeScope(["PARTA", "REP1", "REP2"]);
+    const partnerB = codeScope(["PARTB", "REP3"]);
+    expect(scopeAllows(partnerA, "REP2")).toBe(true);
+    expect(scopeAllows(partnerA, "REP3")).toBe(false);
+    expect(scopeAllows(partnerB, "REP1")).toBe(false);
+  });
+});
+
+describe("memory isolation", () => {
+  const mk = (over: Partial<StoredMemoryItem>): StoredMemoryItem => ({
+    company_id: "co-1", scan_id: null, system_id: null,
+    scope: "business", key: "k", value: "v", provenance: "report",
+    confidence: 0.9, status: "approved", sensitivity: "low", expires_at: null, ...over,
+  });
+
+  it("keeps two reports under one company from reading each other's memory", () => {
+    const items = [
+      mk({ key: "biz", scope: "business" }),
+      mk({ key: "r1", scope: "report", scan_id: "scan-1" }),
+      mk({ key: "r2", scope: "report", scan_id: "scan-2" }),
+      mk({ key: "s1", scope: "system", system_id: "sys-1" }),
+      mk({ key: "s2", scope: "system", system_id: "sys-2" }),
+      mk({ key: "c2", scope: "conversation", system_id: "sys-2" }),
+    ];
+    const got = selectMemory(items, { companyId: "co-1", scanId: "scan-1", systemId: "sys-1" }).map((i) => i.key);
+    expect(got.sort()).toEqual(["biz", "r1", "s1"]);
+  });
+
+  it("never crosses company boundaries", () => {
+    const items = [mk({ key: "other", company_id: "co-2" })];
+    expect(selectMemory(items, { companyId: "co-1", scanId: "scan-1", systemId: "sys-1" })).toEqual([]);
+  });
+
+  it("drops expired, rejected and superseded memory and hides sensitive rows from viewers", () => {
+    const items = [
+      mk({ key: "gone", expires_at: new Date(Date.now() - 1000).toISOString() }),
+      mk({ key: "no", status: "rejected" }),
+      mk({ key: "old", status: "superseded" }),
+      mk({ key: "secret", sensitivity: "high" }),
+      mk({ key: "keep" }),
+    ];
+    expect(selectMemory(items, { companyId: "co-1", role: "viewer" }).map((i) => i.key)).toEqual(["keep"]);
+    expect(selectMemory(items, { companyId: "co-1", role: "operator" }).map((i) => i.key).sort()).toEqual(["keep", "secret"]);
+  });
+});
+
+describe("confirmation binding", () => {
+  it("hashes inputs deterministically regardless of key order", () => {
+    expect(inputHash({ a: 1, b: "x" })).toBe(inputHash({ b: "x", a: 1 }));
+    expect(inputHash({ a: 1 })).not.toBe(inputHash({ a: 2 }));
+  });
+
+  it("binds actor, system, action, inputs, report hash and version", () => {
+    const c = buildConfirmation(
+      { module_id: "website-scanner", action_id: "run_rescan", input: { website_url: "https://x.com" } },
+      { actor: "rep:A", systemId: "sys-1", sourceReportHash: "h", systemVersion: 3, affects: ["scan"] },
+    );
+    expect(c).toMatchObject({ actor: "rep:A", system_id: "sys-1", module_id: "website-scanner", system_version: 3 });
+    expect(c.consumed_at).toBeNull();
+    expect(new Date(c.expires_at).getTime()).toBeGreaterThan(Date.now());
   });
 });
