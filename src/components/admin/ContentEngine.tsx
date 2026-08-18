@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone,
+  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone, Image as ImageIcon,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
@@ -300,7 +300,7 @@ export const ContentEngine: React.FC = () => {
     return () => clearTimeout(t);
   }, [strategy, loading]);
 
-  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) {
+  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) {
     if (generating) return;
     setGenerating(true);
     setGenerationStatus('Planning slots and writing scripts in parallel...');
@@ -490,6 +490,39 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  const [bulkThumbs, setBulkThumbs] = useState<{ done: number; total: number } | null>(null);
+
+  async function handleGenerateAllThumbnails(targets?: Post[]) {
+    if (bulkThumbs) return;
+    const list = (targets && targets.length ? targets : posts).filter((p) => !p.thumbnail_url);
+    if (list.length === 0) {
+      toast({ title: 'All posts already have images' });
+      return;
+    }
+    setBulkThumbs({ done: 0, total: list.length });
+    let ok = 0;
+    for (const p of list) {
+      try { await handleGenerateThumbnail(p.id); ok++; } catch { /* handled inside */ }
+      setBulkThumbs((prev) => prev ? { ...prev, done: prev.done + 1 } : prev);
+    }
+    setBulkThumbs(null);
+    toast({ title: `${ok}/${list.length} images generated` });
+  }
+
+  async function handleMovePost(id: string, date: string) {
+    const p = posts.find((x) => x.id === id);
+    if (!p || p.scheduled_date === date) return;
+    if (p.linkedin_status === 'published') {
+      toast({ title: 'Already live', description: 'Published posts cannot be moved.', variant: 'destructive' });
+      return;
+    }
+    const updates: Partial<Post> = { scheduled_date: date };
+    if (p.linkedin_status === 'queued') {
+      updates.linkedin_scheduled_at = new Date(`${date}T${(p.scheduled_time || '07:30').slice(0, 5)}:00`).toISOString();
+    }
+    await handleUpdatePost(id, updates);
+  }
+
   function exportTSV() {
     const csv = [
       ['Date','Time','Format','Status','Hook','Script','Caption','Hashtags'].join('\t'),
@@ -581,6 +614,9 @@ export const ContentEngine: React.FC = () => {
           onExport={exportTSV}
           onClear={handleClearCalendar}
           onScheduleMonth={handleScheduleMonth}
+          onGenerateAllImages={handleGenerateAllThumbnails}
+          bulkImageProgress={bulkThumbs}
+          onMovePost={handleMovePost}
           strategy={strategy}
         />
       )}
@@ -624,16 +660,35 @@ export const ContentEngine: React.FC = () => {
 
 // ----------------- Calendar View -----------------
 
-function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, onScheduleMonth, strategy }: {
+function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, onScheduleMonth, onGenerateAllImages, bulkImageProgress, onMovePost, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
-  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void; generating: boolean;
-  onExport: () => void; onClear: () => void; onScheduleMonth: () => void; strategy: Strategy;
+  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) => void; generating: boolean;
+  onExport: () => void; onClear: () => void; onScheduleMonth: () => void;
+  onGenerateAllImages: (targets?: Post[]) => void;
+  bulkImageProgress: { done: number; total: number } | null;
+  onMovePost: (id: string, date: string) => void;
+  strategy: Strategy;
 }) {
   const [schedulingMonth, setSchedulingMonth] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
+  const [batchCount, setBatchCount] = useState(12);
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   const firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
   const startDay = firstOfMonth.getDay();
   const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+
+  // Default generation window follows the month you are looking at.
+  const monthStartStr = ymd(firstOfMonth);
+  const monthEndStr = ymd(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0));
+  const todayStr = ymd(new Date());
+  const defaultStart = monthStartStr < todayStr && monthEndStr >= todayStr ? todayStr : monthStartStr;
+  const [rangeStart, setRangeStart] = useState(defaultStart);
+  const [rangeEnd, setRangeEnd] = useState(monthEndStr);
+  useEffect(() => {
+    setRangeStart(defaultStart);
+    setRangeEnd(monthEndStr);
+  }, [defaultStart, monthEndStr]);
 
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startDay; i++) cells.push(null);
@@ -681,10 +736,46 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
               </Button>
             </>
           )}
-          <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90">
-            {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-            Generate 12 Posts
-          </Button>
+        </div>
+      </div>
+
+      {/* Generation window + bulk image controls */}
+      <div className="glass rounded-lg p-3 mb-4 flex flex-wrap items-end gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Start</div>
+          <Input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">End</div>
+          <Input type="date" value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Posts</div>
+          <Input
+            type="number" min={1} max={60} value={batchCount}
+            onChange={(e) => setBatchCount(Math.min(60, Math.max(1, parseInt(e.target.value) || 1)))}
+            className="h-9 w-[90px]"
+          />
+        </div>
+        <Button
+          onClick={() => onGenerate(batchCount, { startDate: rangeStart, endDate: rangeEnd })}
+          disabled={generating}
+          className="h-9 bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+        >
+          {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+          Generate {batchCount} Posts
+        </Button>
+        <Button
+          variant="outline" className="h-9"
+          disabled={!!bulkImageProgress || posts.length === 0}
+          onClick={() => onGenerateAllImages()}
+        >
+          {bulkImageProgress
+            ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Images {bulkImageProgress.done}/{bulkImageProgress.total}</>
+            : <><ImageIcon className="w-3.5 h-3.5 mr-1.5" /> Generate Images for All Posts</>}
+        </Button>
+        <div className="text-[11px] text-muted-foreground">
+          New posts land inside this window. Drag any post to another day to reschedule it.
         </div>
       </div>
 
@@ -706,7 +797,17 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
           return (
             <div
               key={i}
+              onDragOver={(e) => { if (dragId) { e.preventDefault(); setDragOver(dateStr); } }}
+              onDragLeave={() => setDragOver((prev) => prev === dateStr ? null : prev)}
+              onDrop={(e) => {
+                e.preventDefault();
+                const id = dragId || e.dataTransfer.getData('text/plain');
+                setDragOver(null);
+                setDragId(null);
+                if (id) onMovePost(id, dateStr);
+              }}
               className={`min-h-[110px] rounded-lg p-2 border transition ${
+                dragOver === dateStr ? 'bg-amber/10 border-amber ring-1 ring-amber' :
                 isToday ? 'bg-amber/5 border-amber' :
                 isPostingDay && !isPast ? 'bg-card/50 border-border' :
                 'bg-card/30 border-border/50'
@@ -724,8 +825,11 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
                   return (
                     <button
                       key={p.id}
+                      draggable={p.linkedin_status !== 'published'}
+                      onDragStart={(e) => { setDragId(p.id); e.dataTransfer.setData('text/plain', p.id); e.dataTransfer.effectAllowed = 'move'; }}
+                      onDragEnd={() => { setDragId(null); setDragOver(null); }}
                       onClick={() => onSelectPost(p)}
-                      className={`text-left rounded p-1.5 ${fmt.bg} border ${fmt.ring} border-l-[3px] hover:scale-[1.02] transition`}
+                      className={`text-left rounded p-1.5 ${fmt.bg} border ${fmt.ring} border-l-[3px] hover:scale-[1.02] transition ${dragId === p.id ? 'opacity-40' : ''} ${p.linkedin_status !== 'published' ? 'cursor-grab active:cursor-grabbing' : ''}`}
                       style={{ borderLeftColor: 'currentColor' }}
                     >
                       <div className="flex items-center justify-between">
@@ -734,6 +838,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
                           {p.linkedin_status === 'published' && <span className="text-[8px] text-[#0A66C2]" title="Live on LinkedIn">in</span>}
                           {p.linkedin_status === 'queued' && <Clock className="w-2.5 h-2.5 text-[#0A66C2]" />}
                           {p.linkedin_status === 'failed' && <span className="text-[8px] text-crimson" title="LinkedIn publish failed">!</span>}
+                          {p.thumbnail_url && <ImageIcon className="w-2.5 h-2.5 text-amber" />}
                           <span className="text-[8px]" style={{ color: STATUS_INFO[p.status]?.cls.includes('emerald') ? '#10b981' : STATUS_INFO[p.status]?.cls.includes('blue') ? '#3b82f6' : '#eab308' }}>●</span>
                         </span>
                       </div>
@@ -754,7 +859,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
           <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
             Click "Generate 12 Posts" to fill the next two weeks with audit-driven LinkedIn video scripts.
           </p>
-          <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background">
+          <Button onClick={() => onGenerate(batchCount, { startDate: rangeStart, endDate: rangeEnd })} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background">
             <Sparkles className="w-4 h-4 mr-2" /> Generate Your First Batch
           </Button>
         </div>
@@ -778,7 +883,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
 
 function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
   strategy: Strategy;
-  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void;
+  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) => void;
   generating: boolean;
   postsCount: number;
 }) {
