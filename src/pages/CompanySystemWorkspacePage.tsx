@@ -9,15 +9,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import {
   getWorkspace, setModuleEnabled, approveSystem, setBrandStatus, operatorChat,
-  previewAction, executeAction, setMemoryStatus, forgetMemory,
+  previewAction, executeAction, setMemoryStatus, forgetMemory, setTaskStatus,
   buildCompositionMarkdown, buildCompositionPrompt, downloadText,
-  type WorkspacePayload, type SystemModuleRow,
+  type WorkspacePayload, type SystemModuleRow, type SystemTaskRow,
 } from '@/lib/companySystem';
 import { findModule } from '@/lib/universeSystem';
 import {
   Loader2, Network, Brain, Palette, ListChecks, History, Download, Copy,
-  ShieldCheck, Lock, ExternalLink, Play,
+  ShieldCheck, Lock, ExternalLink, Play, Users,
 } from 'lucide-react';
+
 
 const TABS = ['overview', 'teams', 'crm', 'map', 'operator', 'brand', 'memory', 'audit', 'export'] as const;
 type Tab = typeof TABS[number];
