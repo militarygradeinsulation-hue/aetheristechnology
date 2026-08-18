@@ -23,9 +23,22 @@ import {
   codeScope,
   ADMIN_SCOPE,
   inputHash,
+  COMPANY_SYSTEM_TEMPLATE_VERSION,
   type StoredMemoryItem,
   type RootCauseInput,
 } from "@/lib/universeSystem";
+import {
+  gradeOf,
+  strongestGrade,
+  actionableRootCauses,
+  authorizesLiveAction,
+  memoryStatusForGrade,
+  deriveValidationTasks,
+  seedMemoryFromReport,
+  suggestCrmConfig,
+  validateBlueprint,
+  COMPANY_BLUEPRINT_SCHEMA_VERSION,
+} from "@/lib/companyOs";
 
 const RC = (id: string, title: string, detail = ""): RootCauseInput => ({ id, title, detail });
 
@@ -265,13 +278,125 @@ describe("memory", () => {
 
 describe("idempotency", () => {
   it("reuses a system for the same report hash and template", () => {
-    const existing = { source_report_hash: "h1", template_version: "aetheris-company-system-1" };
+    const existing = { source_report_hash: "h1", template_version: COMPANY_SYSTEM_TEMPLATE_VERSION };
     expect(shouldRecompose(existing, "h1")).toBe(false);
     expect(shouldRecompose(existing, "h2")).toBe(true);
     expect(shouldRecompose(null, "h1")).toBe(true);
-    expect(systemFingerprint("h1")).toBe("h1:aetheris-company-system-1");
+    expect(systemFingerprint("h1")).toBe(`h1:${COMPANY_SYSTEM_TEMPLATE_VERSION}`);
+  });
+
+  it("treats an older template version as needing an upgrade", () => {
+    const old = { source_report_hash: "h1", template_version: "aetheris-company-system-1" };
+    expect(shouldRecompose(old, "h1")).toBe(true);
   });
 });
+
+describe("evidence grades", () => {
+  it("keeps the real grade and never assumes verified", () => {
+    expect(gradeOf({ evidence_grade: "inferred" })).toBe("inferred");
+    expect(gradeOf({ evidence_grade: undefined })).toBe("inferred");
+    expect(strongestGrade(["inferred", "verified", "clean"])).toBe("verified");
+  });
+
+  it("blocks corrective work for contradicted, clean and not-applicable findings", () => {
+    const rcs: RootCauseInput[] = [
+      { id: "a", title: "Slow follow up", evidence_grade: "verified" },
+      { id: "b", title: "Weak brand", evidence_grade: "inferred" },
+      { id: "c", title: "No leak here", evidence_grade: "clean" },
+      { id: "d", title: "Disproved", evidence_grade: "contradicted" },
+    ];
+    const actionable = actionableRootCauses(rcs).map((r) => r.id);
+    expect(actionable).toEqual(["a", "b"]);
+    expect(authorizesLiveAction(gradeOf(rcs[0]))).toBe(true);
+    expect(authorizesLiveAction(gradeOf(rcs[1]))).toBe(false);
+  });
+
+  it("creates validation tasks only for unproven findings", () => {
+    const tasks = deriveValidationTasks([
+      { id: "a", title: "Proven", evidence_grade: "verified" },
+      { id: "b", title: "Unproven", evidence_grade: "unverified" },
+      { id: "c", title: "Clean", evidence_grade: "clean" },
+    ]);
+    expect(tasks.map((t) => t.root_cause_id)).toEqual(["b"]);
+    expect(tasks[0].kind).toBe("validation");
+    expect(tasks[0].requires_company_data).toBe(true);
+  });
+
+  it("seeds memory status from the evidence grade", () => {
+    expect(memoryStatusForGrade(gradeOf({ evidence_grade: "verified" }))).toBe("approved");
+    expect(memoryStatusForGrade(gradeOf({ evidence_grade: "inferred" }))).toBe("inferred");
+    const seeds = seedMemoryFromReport({
+      identity: { display_name: "Acme", primary_domain: "acme.com" },
+      annualLow: 100, annualHigh: 200,
+      rootCauses: [{ id: "b", title: "Weak brand", evidence_grade: "inferred" }],
+      moduleIds: ["brand-lab"], gaps: [], scanId: "s1", reportHash: "h1", brandInferredFields: [],
+    });
+    const rc = seeds.find((s) => s.key === "report.root_cause.b")!;
+    expect(rc.status).toBe("inferred");
+    expect(rc.provenance).toContain("inferred");
+    const money = seeds.find((s) => s.key === "report.canonical_annual_range_usd")!;
+    expect(money.value).toContain("$100");
+    expect(money.value).toContain("$200");
+  });
+});
+
+describe("blueprint manifest", () => {
+  const baseManifest = () => ({
+    schema_version: COMPANY_BLUEPRINT_SCHEMA_VERSION,
+    template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
+    generated_at: new Date().toISOString(),
+    identity: { display_name: "Acme", primary_domain: "acme.com" },
+    source: {
+      scan_id: "s1", archive_id: "a1", report_hash: "h1", report_version: 1,
+      compiler_version: null, financial_model_version: null, financial_confidence: "canonical" as const,
+    },
+    financials: { annual_low: 100, annual_high: 200, currency: "USD" as const, source: "golden_report:financial_ledger" },
+    root_causes: [{
+      id: "a", title: "Slow follow up", detail: "", priority: 1,
+      evidence_grade: "verified" as const, evidence_ids: ["f1"],
+      authorizes_live_action: true, actionable: true, recommended_action: null,
+    }],
+    excluded_root_causes: [],
+    teams: [{ team_key: "sales" as const, name: "Sales", summary: "", root_cause_ids: ["a"], module_ids: ["lead-flow"], display_order: 1 }],
+    modules: [{ module_id: "lead-flow", root_cause_ids: ["a"] }],
+    connections: [], goals: [], tasks: [], playbooks: [], checks: [], dashboards: [],
+    crm: { ...suggestCrmConfig([]), linked_company_id: null },
+    automations: [],
+    memory_seeds: [{ scope: "report", key: "k", value: "v", provenance: "p", confidence: 1, status: "approved", sensitivity: "low", scan_scoped: true, system_scoped: false }],
+    forecast: { basis: "", assumptions: [], canonical_annual_low: 100, canonical_annual_high: 200, confidence: "canonical" },
+    gaps: [], coverage: {},
+  });
+
+  it("passes when every root cause is covered by a module or a gap", () => {
+    const v = validateBlueprint(baseManifest() as never);
+    expect(v.passed).toBe(true);
+    expect(v.errors).toEqual([]);
+  });
+
+  it("fails when a root cause is neither covered nor marked GAP_REQUIRED", () => {
+    const m = baseManifest();
+    m.modules = [];
+    const v = validateBlueprint(m as never);
+    expect(v.passed).toBe(false);
+    expect(v.errors.join(" ")).toContain("GAP_REQUIRED");
+  });
+
+  it("fails without a resolvable business identity or canonical hash", () => {
+    const m = baseManifest();
+    m.identity = {} as never;
+    m.source.report_hash = "";
+    const v = validateBlueprint(m as never);
+    expect(v.passed).toBe(false);
+    expect(v.errors.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("never recomputes canonical money, it only echoes the ledger", () => {
+    const m = baseManifest();
+    expect(m.forecast.canonical_annual_low).toBe(m.financials.annual_low);
+    expect(m.forecast.canonical_annual_high).toBe(m.financials.annual_high);
+  });
+});
+
 
 describe("brand context", () => {
   it("flags inferred fields and stays inactive until approved", () => {

@@ -335,7 +335,13 @@ export interface RootCauseInput {
   detail?: string;
   priority?: number;
   classification?: "AUTOMATABLE" | "ASSISTED" | "HUMAN_REQUIRED";
+  /** Real grade from golden_report_findings_index. Never assume "verified". */
+  evidence_grade?: string;
+  /** Finding ids in golden_report_findings_index backing this root cause. */
+  evidence_ids?: string[];
+  recommended_action?: string | null;
 }
+
 
 export interface SelectedModule {
   module_id: string;
@@ -773,7 +779,7 @@ export function selectMemory(items: StoredMemoryItem[], ctx: MemoryRetrievalCont
 
 /* ── Idempotency ─────────────────────────────────────────────────────────── */
 
-export const COMPANY_SYSTEM_TEMPLATE_VERSION = "aetheris-company-system-1";
+export const COMPANY_SYSTEM_TEMPLATE_VERSION = "aetheris-company-system-2";
 
 /** Deterministic identity for a composed system: same report + template = same system. */
 export function systemFingerprint(sourceReportHash: string, templateVersion = COMPANY_SYSTEM_TEMPLATE_VERSION): string {

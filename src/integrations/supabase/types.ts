@@ -2478,6 +2478,10 @@ export type Database = {
           crm_config: Json
           id: string
           manifest: Json
+          previous_system_id: string | null
+          provisioned_at: string | null
+          provisioning_error: string | null
+          provisioning_state: string
           rep_code: string | null
           scan_id: string
           source_report_hash: string
@@ -2502,6 +2506,10 @@ export type Database = {
           crm_config?: Json
           id?: string
           manifest?: Json
+          previous_system_id?: string | null
+          provisioned_at?: string | null
+          provisioning_error?: string | null
+          provisioning_state?: string
           rep_code?: string | null
           scan_id: string
           source_report_hash: string
@@ -2526,6 +2534,10 @@ export type Database = {
           crm_config?: Json
           id?: string
           manifest?: Json
+          previous_system_id?: string | null
+          provisioned_at?: string | null
+          provisioning_error?: string | null
+          provisioning_state?: string
           rep_code?: string | null
           scan_id?: string
           source_report_hash?: string
@@ -2562,6 +2574,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "golden_report_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_systems_previous_system_id_fkey"
+            columns: ["previous_system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
             referencedColumns: ["id"]
           },
           {

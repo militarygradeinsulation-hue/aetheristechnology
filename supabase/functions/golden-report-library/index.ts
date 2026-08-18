@@ -221,8 +221,30 @@ serve(async (req) => {
       const { data: scan } = await sb.from("forensic_scans").select(SCAN_COLS).eq("id", scanId).maybeSingle();
       if (!scan) return json({ error: "scan not found" }, 404);
       const res = await archiveScan(sb, scan as unknown as ScanRow);
-      return json({ ok: true, ...res });
+
+      // Automatic pipeline: a valid, archived report provisions its Company
+      // Operating System. Fire and forget so the scan response can never fail
+      // because provisioning failed; compose is idempotent and retryable.
+      let provisioning: string = "skipped";
+      if (res.archive_id && body.provision !== false) {
+        const { data: arch } = await sb.from("golden_report_archive")
+          .select("is_valid").eq("id", res.archive_id).maybeSingle();
+        if ((arch as { is_valid?: boolean } | null)?.is_valid) {
+          provisioning = "queued";
+          const call = fetch(`${SUPABASE_URL}/functions/v1/company-system`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-internal-key": SVC, Authorization: `Bearer ${SVC}` },
+            body: JSON.stringify({ action: "compose", scan_id: scanId }),
+          }).catch(() => undefined);
+          const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+          if (rt?.waitUntil) rt.waitUntil(call);
+        } else {
+          provisioning = "blocked:report_not_valid";
+        }
+      }
+      return json({ ok: true, ...res, provisioning });
     }
+
 
     /* resumable, idempotent historical backfill */
     if (action === "backfill") {
