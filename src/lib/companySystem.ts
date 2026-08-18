@@ -73,6 +73,34 @@ export interface BrandContextRow {
   approved_by: string | null; approved_at: string | null;
 }
 
+export interface SystemTeamRow {
+  id: string; team_key: string; name: string; summary: string | null;
+  root_cause_ids: string[]; module_ids: string[]; enabled: boolean; display_order: number;
+}
+export interface SystemTaskRow {
+  id: string; team_key: string; goal_id: string | null; root_cause_id: string | null;
+  module_id: string | null; title: string; detail: string | null; kind: string;
+  owner_role: string | null; status: string; priority: number; due_date: string | null;
+  requires_company_data: boolean; source: string; completed_at: string | null;
+}
+export interface SystemPlaybookRow {
+  id: string; team_key: string; title: string; root_cause_ids: string[];
+  module_ids: string[]; steps: string[]; tips: string[];
+}
+export interface BusEventRow {
+  id: string; event_type: string; from_module: string | null; to_module: string | null;
+  payload: Record<string, unknown>; idempotency_key: string; status: string;
+  attempts: number; last_error: string | null; delivered_at: string | null; created_at: string;
+}
+export interface CrmSlice {
+  linked: boolean;
+  company: { id: string; name: string; website: string | null; industry: string | null } | null;
+  contacts: Array<{ id: string; full_name: string; email: string | null; phone: string | null; title: string | null; created_at?: string }>;
+  deals: Array<{ id: string; title: string; stage: string; value_cents: number; expected_close_date: string | null }>;
+  interactions: Array<{ id: string; type: string; subject: string | null; occurred_at: string }>;
+  config?: Record<string, unknown>;
+}
+
 export interface WorkspacePayload {
   system: CompanySystemRow;
   company: { id: string; display_name: string; primary_domain: string | null; website_url: string | null; business_summary: string | null } | null;
@@ -85,8 +113,14 @@ export interface WorkspacePayload {
   forecasts: SystemForecastRow[];
   events: SystemEventRow[];
   memory: MemoryRow[];
+  teams: SystemTeamRow[];
+  tasks: SystemTaskRow[];
+  playbooks: SystemPlaybookRow[];
+  bus: BusEventRow[];
+  crm: CrmSlice;
   registry: UniverseModule[];
 }
+
 
 function headers(portalToken?: string | null): Record<string, string> {
   if (portalToken) return { "x-portal-token": portalToken };
