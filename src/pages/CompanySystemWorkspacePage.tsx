@@ -152,28 +152,10 @@ const CompanySystemWorkspacePage: React.FC = () => {
 
       {tab === 'operator' && <OperatorPanel data={data} onChange={load} />}
 
-      {tab === 'queues' && (
-        <div className="grid gap-4 md:grid-cols-2">
-          {['sales', 'content', 'brand', 'systems', 'leadership', 'diagnostics'].map(cat => {
-            const items = goals.filter(g => modules.find(m => m.module_id === g.module_id)?.category === cat);
-            return (
-              <Card key={cat}>
-                <h3 className="font-display text-sm font-bold uppercase text-foreground">{cat}</h3>
-                {items.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">Nothing queued.</p> : (
-                  <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
-                    {items.map(g => (
-                      <li key={g.id} className="rounded border border-border/60 p-2">
-                        <span className="font-mono text-[10px] uppercase text-amber">{g.classification}</span> {g.title}
-                        <div className="mt-1">KPI: {g.kpi} · target {g.target} · owner {g.owner_role}</div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      {tab === 'teams' && <TeamsPanel data={data} onChange={load} />}
+
+      {tab === 'crm' && <CrmPanel data={data} />}
+
 
       {tab === 'brand' && (
         <Card>
