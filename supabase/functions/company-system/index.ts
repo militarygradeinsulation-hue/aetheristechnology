@@ -628,7 +628,8 @@ serve(async (req) => {
       if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
       if (!sys) return json({ error: "Not found" }, 404);
 
-      const [mods, conns, goals, checks, forecasts, events, memory, company, archive, brand] = await Promise.all([
+      const [mods, conns, goals, checks, forecasts, events, memory, company, archive, brand,
+             teams, tasks, playbooks, bus] = await Promise.all([
         sb.from("company_system_modules").select("*").eq("system_id", systemId).order("display_order"),
         sb.from("company_system_connections").select("*").eq("system_id", systemId),
         sb.from("company_system_goals").select("*").eq("system_id", systemId).order("priority"),
@@ -641,7 +642,35 @@ serve(async (req) => {
         sys.brand_context_id
           ? sb.from("company_brand_contexts").select("*").eq("id", sys.brand_context_id as string).maybeSingle()
           : Promise.resolve({ data: null }),
+        sb.from("company_system_teams").select("*").eq("system_id", systemId).order("display_order"),
+        sb.from("company_system_tasks").select("*").eq("system_id", systemId).order("priority").limit(400),
+        sb.from("company_system_playbooks").select("*").eq("system_id", systemId),
+        sb.from("company_system_event_bus").select("*").eq("system_id", systemId).order("created_at", { ascending: false }).limit(100),
       ]);
+
+      // Smart CRM: real records only. Nothing is fabricated when empty.
+      const crmCompanyId = (sys.crm_company_id as string | null) ?? null;
+      let crm: Record<string, unknown> = { company: null, contacts: [], deals: [], interactions: [], linked: false };
+      if (crmCompanyId) {
+        const [cc, contacts, deals] = await Promise.all([
+          sb.from("crm_companies").select("*").eq("id", crmCompanyId).maybeSingle(),
+          sb.from("crm_contacts").select("*").eq("company_id", crmCompanyId).order("created_at", { ascending: false }).limit(200),
+          sb.from("crm_deals").select("*").eq("company_id", crmCompanyId).order("position").limit(200),
+        ]);
+        const contactIds = ((contacts.data || []) as Array<{ id: string }>).map((c) => c.id);
+        const interactions = contactIds.length
+          ? await sb.from("crm_interactions").select("*").in("contact_id", contactIds)
+              .order("occurred_at", { ascending: false }).limit(100)
+          : { data: [] };
+        crm = {
+          linked: true,
+          company: cc.data,
+          contacts: contacts.data || [],
+          deals: deals.data || [],
+          interactions: (interactions as { data: unknown[] }).data || [],
+          config: sys.crm_config || {},
+        };
+      }
 
       return json({
         system: sys,
@@ -655,9 +684,68 @@ serve(async (req) => {
         forecasts: forecasts.data || [],
         events: events.data || [],
         memory: memory.data || [],
+        teams: teams.data || [],
+        tasks: tasks.data || [],
+        playbooks: playbooks.data || [],
+        bus: bus.data || [],
+        crm,
         registry: UNIVERSE_MODULE_REGISTRY,
       });
     }
+
+    /* ── tasks ────────────────────────────────────────────────────────── */
+    if (action === "task_set_status") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      if (role === "viewer") return json({ error: "Viewer role may not change tasks" }, 403);
+      const status = String(body.status ?? "");
+      if (!["open", "in_progress", "blocked", "done"].includes(status)) return json({ error: "bad status" }, 400);
+      const { data } = await sb.from("company_system_tasks").update({
+        status, completed_at: status === "done" ? new Date().toISOString() : null,
+      }).eq("id", String(body.task_id ?? "")).eq("system_id", systemId).select("*").maybeSingle();
+      if (!data) return json({ error: "Not found" }, 404);
+      await logEvent({ system_id: systemId, kind: "task_status", status: "logged", result: { task_id: body.task_id, status } });
+      return json({ task: data });
+    }
+
+    /* ── typed event bus ──────────────────────────────────────────────── */
+    if (action === "emit_event") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      const type = String(body.event_type ?? "");
+      if (!isEventType(type)) return json({ error: `Unregistered event contract: ${type}` }, 400);
+      const subject = String(body.subject ?? crypto.randomUUID());
+      const key = String(body.idempotency_key || eventIdempotencyKey(type, subject, String(sys.source_report_hash ?? "1")));
+      const { data, error } = await sb.from("company_system_event_bus").upsert({
+        system_id: systemId, company_id: sys.company_id, event_type: type,
+        from_module: body.from_module ? String(body.from_module) : null,
+        to_module: body.to_module ? String(body.to_module) : null,
+        payload: (body.payload || {}) as Record<string, unknown>,
+        idempotency_key: key, status: "delivered", delivered_at: new Date().toISOString(),
+      }, { onConflict: "system_id,idempotency_key", ignoreDuplicates: true }).select("*").maybeSingle();
+      if (error) throw error;
+      return json({ event: data, duplicate: !data });
+    }
+
+    if (action === "retry_event") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      const { data: row } = await sb.from("company_system_event_bus")
+        .select("*").eq("id", String(body.event_id ?? "")).eq("system_id", systemId).maybeSingle();
+      if (!row) return json({ error: "Not found" }, 404);
+      const { data } = await sb.from("company_system_event_bus").update({
+        status: "delivered", attempts: Number((row as { attempts: number }).attempts) + 1,
+        last_error: null, delivered_at: new Date().toISOString(),
+      }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
+      return json({ event: data });
+    }
+
 
     if (action === "list") {
       let q = sb.from("company_systems").select("*").order("created_at", { ascending: false }).limit(100);
