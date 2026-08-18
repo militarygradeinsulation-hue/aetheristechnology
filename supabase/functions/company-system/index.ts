@@ -48,7 +48,11 @@ import {
 import {
   deriveTeams, deriveTasks, derivePlaybooks, seedMemoryFromReport,
   buildProvisioningEvents, suggestCrmConfig, teamForModule, isEventType, eventIdempotencyKey,
+  actionableRootCauses, isActionableGrade, gradeOf, strongestGrade, authorizesLiveAction,
+  deriveValidationTasks, buildDashboards, buildAutomations, validateBlueprint,
+  COMPANY_BLUEPRINT_SCHEMA_VERSION,
 } from "../_shared/company-os.ts";
+
 
 
 const corsHeaders = {
@@ -210,16 +214,33 @@ serve(async (req) => {
 
       let queue: string[] = explicit ?? [];
       if (!explicit) {
-        // Compiled + archived reports that have no system for this template.
+        // A system counts as done only when it is on the current template AND
+        // its operating surface really exists. Old shells and half-provisioned
+        // rows are re-queued; complete ones stay idempotent.
         const { data: done } = await sb.from("company_systems")
-          .select("scan_id").eq("template_version", COMPANY_SYSTEM_TEMPLATE_VERSION);
-        const have = new Set(((done || []) as Array<{ scan_id: string }>).map((r) => r.scan_id));
+          .select("id, scan_id, provisioning_state")
+          .eq("template_version", COMPANY_SYSTEM_TEMPLATE_VERSION);
+        const doneRows = (done || []) as Array<{ id: string; scan_id: string; provisioning_state?: string | null }>;
+        const complete = new Set<string>();
+        if (doneRows.length) {
+          const ids = doneRows.map((r) => r.id);
+          const [{ data: tRows }, { data: kRows }] = await Promise.all([
+            sb.from("company_system_teams").select("system_id").in("system_id", ids),
+            sb.from("company_system_tasks").select("system_id").in("system_id", ids),
+          ]);
+          const withTeams = new Set(((tRows || []) as Array<{ system_id: string }>).map((r) => r.system_id));
+          const withTasks = new Set(((kRows || []) as Array<{ system_id: string }>).map((r) => r.system_id));
+          for (const r of doneRows) {
+            if (r.provisioning_state === "complete" && withTeams.has(r.id) && withTasks.has(r.id)) complete.add(r.scan_id);
+          }
+        }
         const { data: cand } = await sb.from("golden_report_archive")
           .select("scan_id, is_valid, completed_at").eq("is_valid", true)
-          .order("completed_at", { ascending: false }).limit(limit + have.size);
+          .order("completed_at", { ascending: false }).limit(limit + doneRows.length + 50);
         queue = ((cand || []) as Array<{ scan_id: string }>)
-          .map((r) => r.scan_id).filter((id) => !have.has(id)).slice(0, limit);
+          .map((r) => r.scan_id).filter((id) => !complete.has(id)).slice(0, limit);
       }
+
 
       const results: Array<{ scan_id: string; ok: boolean; reused?: boolean; error?: string }> = [];
       for (const scanId of queue) {
@@ -277,7 +298,11 @@ serve(async (req) => {
       const { data: existing } = await sb.from("company_systems")
         .select("*").eq("scan_id", scanId).eq("template_version", COMPANY_SYSTEM_TEMPLATE_VERSION)
         .order("created_at", { ascending: false }).maybeSingle();
-      if (existing && !shouldRecompose(existing as never, hash) && !body.force) {
+      // Idempotent only when the existing system is on the current template AND
+      // finished provisioning. Incomplete shells are repaired in place.
+      const existingComplete = !!existing &&
+        (existing as { provisioning_state?: string | null }).provisioning_state === "complete";
+      if (existing && existingComplete && !shouldRecompose(existing as never, hash) && !body.force) {
         return json({ system: existing, reused: true });
       }
 
@@ -297,24 +322,38 @@ serve(async (req) => {
         brand = inserted as Record<string, unknown>;
       }
 
-      // Root causes come from the archived findings index + report root_causes.
+      // Root causes come from the archived findings index. The stored
+      // evidence_grade is the ONLY truth about strength: nothing is assumed
+      // "verified", and contradicted/clean findings create no corrective work.
       const { data: findingRows } = await sb.from("golden_report_findings_index")
-        .select("root_cause_id, root_cause_title, title, detail, category, priority")
+        .select("id, root_cause_id, root_cause_title, title, detail, category, priority, evidence_grade, recommended_action, status")
         .eq("scan_id", scanId);
       const rcMap = new Map<string, RootCauseInput>();
+      const rcGrades = new Map<string, string[]>();
       for (const f of (findingRows || []) as Array<Record<string, string | number | null>>) {
         const id = String(f.root_cause_id || f.title || "");
         if (!id) continue;
         const prev = rcMap.get(id);
         const detail = `${prev?.detail || ""} ${f.title || ""} ${f.detail || ""} ${f.category || ""}`.trim();
+        rcGrades.set(id, [...(rcGrades.get(id) || []), String(f.evidence_grade ?? "")]);
         rcMap.set(id, {
           id,
           title: String(f.root_cause_title || f.title || id),
           detail,
           priority: Number(f.priority ?? 3),
+          evidence_ids: [...(prev?.evidence_ids || []), String(f.id ?? "")].filter(Boolean),
+          recommended_action: prev?.recommended_action || (f.recommended_action ? String(f.recommended_action) : null),
         });
       }
-      const rootCauses = [...rcMap.values()];
+      for (const [id, rc] of rcMap) rc.evidence_grade = strongestGrade(rcGrades.get(id) || []);
+      const allRootCauses = [...rcMap.values()];
+      const rootCauses = actionableRootCauses(allRootCauses);
+      const excludedRootCauses = allRootCauses
+        .filter((rc) => !isActionableGrade(gradeOf(rc)))
+        .map((rc) => ({
+          id: rc.id, title: rc.title, evidence_grade: gradeOf(rc),
+          reason: "Grade excludes corrective work and priced claims.",
+        }));
 
       const blueprintRow = await sb.from("golden_system_blueprints")
         .select("id, output_json").eq("scan_id", scanId).order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -327,6 +366,57 @@ serve(async (req) => {
       }
 
       const composed = composeCompanySystem(rootCauses, clientTier);
+      const identity = resolveBusinessIdentity(scan);
+      const leak = computeGoldenLeakage(scan.report as never);
+      const teams = deriveTeams(composed.modules, composed.gaps);
+
+      // Structural gate: an invalid manifest never provisions an executable system.
+      const bpRootCauses = rootCauses.map((rc) => ({
+        id: rc.id, title: rc.title, detail: String(rc.detail || ""), priority: Number(rc.priority ?? 3),
+        evidence_grade: gradeOf(rc), evidence_ids: rc.evidence_ids || [],
+        authorizes_live_action: authorizesLiveAction(gradeOf(rc)),
+        actionable: true,
+        recommended_action: rc.recommended_action ?? null,
+      }));
+      const structural = validateBlueprint({
+        schema_version: COMPANY_BLUEPRINT_SCHEMA_VERSION,
+        template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
+        generated_at: new Date().toISOString(),
+        identity: identity as unknown as Record<string, unknown>,
+        source: {
+          scan_id: scanId, archive_id: (archive as { id: string }).id, report_hash: hash,
+          report_version: null, compiler_version: null, financial_model_version: null,
+          financial_confidence: leak ? "canonical" : "unpriced",
+        },
+        financials: {
+          annual_low: leak ? Math.round(leak.low) : null,
+          annual_high: leak ? Math.round(leak.high) : null,
+          currency: "USD", source: "golden_report:financial_ledger",
+        },
+        root_causes: bpRootCauses,
+        excluded_root_causes: excludedRootCauses,
+        teams,
+        modules: composed.modules as unknown as Array<Record<string, unknown>>,
+        connections: composed.connections as unknown as Array<Record<string, unknown>>,
+        goals: [], tasks: [], playbooks: [], checks: [], dashboards: [],
+        crm: { ...suggestCrmConfig(rootCauses), linked_company_id: null },
+        automations: [], memory_seeds: [],
+        forecast: { basis: "", assumptions: [], canonical_annual_low: null, canonical_annual_high: null, confidence: "" },
+        gaps: composed.gaps,
+        coverage: composed.coverage,
+      });
+      if (!structural.passed) {
+        await sb.from("golden_system_blueprints").upsert({
+          archive_id: (archive as { id: string }).id, scan_id: scanId, company_id: companyId,
+          blueprint_version: COMPANY_BLUEPRINT_SCHEMA_VERSION,
+          template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
+          source_report_hash: hash, status: "failed",
+          validation: structural as unknown as Record<string, unknown>, validation_passed: false,
+          error_message: structural.errors.join("; ").slice(0, 500),
+        }, { onConflict: "scan_id,source_report_hash,template_version,blueprint_version" });
+        return json({ error: "Blueprint validation failed. Report must be repaired first.", reasons: structural.errors }, 409);
+      }
+
 
       // Keep the persisted registry in step with the code registry (code is the
       // source of truth; the table is the queryable mirror).
@@ -339,11 +429,40 @@ serve(async (req) => {
         { onConflict: "id" },
       );
 
+      // Exactly one current blueprint per report hash + template + schema.
+      const { data: bpRow, error: bpErr } = await sb.from("golden_system_blueprints").upsert({
+        archive_id: (archive as { id: string }).id, scan_id: scanId, company_id: companyId,
+        blueprint_version: COMPANY_BLUEPRINT_SCHEMA_VERSION,
+        template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
+        source_report_hash: hash,
+        status: "ready",
+        validation: structural as unknown as Record<string, unknown>,
+        validation_passed: true,
+        error_message: null,
+      }, { onConflict: "scan_id,source_report_hash,template_version,blueprint_version" })
+        .select("id").maybeSingle();
+      if (bpErr) throw bpErr;
+      const blueprintId = (bpRow as { id: string } | null)?.id ?? bp?.id ?? null;
+
+      // Sequential version per company lineage. The same report hash reuses its
+      // own version; a materially changed report becomes the next version and
+      // links back to the system it supersedes. Nothing historical is deleted.
+      const { data: lineage } = await sb.from("company_systems")
+        .select("id, system_version, source_report_hash, template_version, created_at")
+        .eq("company_id", companyId)
+        .order("system_version", { ascending: false });
+      const lineageRows = (lineage || []) as Array<{ id: string; system_version: number; source_report_hash: string | null; template_version: string | null }>;
+      const mine = lineageRows.find((r) => r.source_report_hash === hash && r.template_version === COMPANY_SYSTEM_TEMPLATE_VERSION);
+      const priorRow = lineageRows.find((r) => r.id !== mine?.id) ?? null;
+      const systemVersion = mine?.system_version ?? ((lineageRows[0]?.system_version ?? 0) + 1);
+
       const { data: system, error: sysErr } = await sb.from("company_systems").upsert({
         company_id: companyId,
         archive_id: (archive as { id: string }).id,
         scan_id: scanId,
-        blueprint_id: bp?.id ?? null,
+        blueprint_id: blueprintId,
+        system_version: systemVersion,
+        previous_system_id: mine ? undefined : (priorRow?.id ?? null),
         template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
         source_report_hash: hash,
         brand_context_id: (brand as { id?: string })?.id ?? null,
@@ -351,17 +470,20 @@ serve(async (req) => {
         tier: clientTier,
         status: "draft",
         approval_state: "draft",
+        provisioning_state: "provisioning",
+        provisioning_error: null,
         rep_code: (scan as { rep_code?: string | null }).rep_code ?? null,
         coverage: composed.coverage,
         manifest: {
           gaps: composed.gaps,
           module_count: composed.modules.length,
           connection_count: composed.connections.length,
-          identity: resolveBusinessIdentity(scan),
+          identity,
         },
       }, { onConflict: "scan_id,source_report_hash,template_version" }).select("*").maybeSingle();
       if (sysErr) throw sysErr;
       const systemId = (system as { id: string }).id;
+
 
       await sb.from("company_system_modules").delete().eq("system_id", systemId);
       if (composed.modules.length) {
@@ -443,7 +565,6 @@ serve(async (req) => {
       }
 
       // Forecast: canonical ledger only, never recomputed.
-      const leak = computeGoldenLeakage(scan.report as never);
       const bpForecast = (bp?.output_json?.forecast || {}) as Record<string, unknown>;
       await sb.from("company_system_forecasts").insert({
         system_id: systemId,
@@ -464,8 +585,6 @@ serve(async (req) => {
       });
 
       /* ── Operating surface: teams, CRM link, tasks, playbooks, memory ── */
-      const identity = resolveBusinessIdentity(scan);
-
       // CRM: link to an EXISTING crm_companies row for this domain, or create
       // the company shell only. Contacts, deals and revenue are never invented.
       let crmCompanyId: string | null = (system as { crm_company_id?: string | null }).crm_company_id ?? null;
@@ -496,7 +615,6 @@ serve(async (req) => {
         .eq("id", systemId);
 
       // Teams: only the sections this company actually needs.
-      const teams = deriveTeams(composed.modules, composed.gaps);
       await sb.from("company_system_teams").delete().eq("system_id", systemId);
       if (teams.length) {
         await sb.from("company_system_teams").insert(teams.map((t) => ({
@@ -521,13 +639,18 @@ serve(async (req) => {
         (insertedGoals as Array<{ id: string; root_cause_id: string | null; title: string }>)
           .map((g) => [String(g.root_cause_id || g.title), g.id]),
       );
-      const tasks = deriveTasks({
-        modules: composed.modules,
-        gaps: composed.gaps,
-        goals: insertedGoals as never,
-        crmLinked: !!crmCompanyId,
-        crmContactCount,
-      });
+      const tasks = [
+        ...deriveTasks({
+          modules: composed.modules,
+          gaps: composed.gaps,
+          goals: insertedGoals as never,
+          crmLinked: !!crmCompanyId,
+          crmContactCount,
+        }),
+        // Findings that are labelled but not evidenced get validation work, never
+        // corrective work that could imply a proven leak.
+        ...deriveValidationTasks(rootCauses),
+      ];
       if (tasks.length) {
         await sb.from("company_system_tasks").upsert(tasks.map((t) => ({
           system_id: systemId,
@@ -601,6 +724,76 @@ serve(async (req) => {
         })), { onConflict: "system_id,idempotency_key", ignoreDuplicates: true });
       }
 
+      // Authoritative manifest: the blueprint row now carries the full,
+      // deterministic CompanySystemBlueprint that provisioned this system.
+      const manifest = {
+        schema_version: COMPANY_BLUEPRINT_SCHEMA_VERSION,
+        template_version: COMPANY_SYSTEM_TEMPLATE_VERSION,
+        generated_at: new Date().toISOString(),
+        identity: identity as unknown as Record<string, unknown>,
+        source: {
+          scan_id: scanId, archive_id: (archive as { id: string }).id, report_hash: hash,
+          report_version: (archive as { report_version?: number | null }).report_version ?? null,
+          compiler_version: (scan as { compiler_version?: string | null }).compiler_version ?? null,
+          financial_model_version: (scan as { financial_model_version?: string | null }).financial_model_version ?? null,
+          financial_confidence: leak ? "canonical" as const : "unpriced" as const,
+        },
+        financials: {
+          annual_low: leak ? Math.round(leak.low) : null,
+          annual_high: leak ? Math.round(leak.high) : null,
+          currency: "USD" as const, source: "golden_report:financial_ledger",
+        },
+        root_causes: bpRootCauses,
+        excluded_root_causes: excludedRootCauses,
+        teams,
+        modules: composed.modules as unknown as Array<Record<string, unknown>>,
+        connections: composed.connections as unknown as Array<Record<string, unknown>>,
+        goals: insertedGoals as unknown as Array<Record<string, unknown>>,
+        tasks,
+        playbooks,
+        checks: bpChecks,
+        dashboards: buildDashboards(
+          teams,
+          (insertedGoals as Array<{ module_id?: string | null; kpi?: string | null }>).map((g) => ({
+            team_key: moduleTeam.get(String(g.module_id)) || "executive",
+            kpi: g.kpi ?? null,
+          })),
+        ),
+        crm: { ...crmConfig, linked_company_id: crmCompanyId },
+        automations: buildAutomations(composed.modules, UNIVERSE_MODULE_REGISTRY.map((m) => ({
+          id: m.id, actions: m.actions, sensitivity: m.sensitivity,
+        }))),
+        memory_seeds: seeds,
+        forecast: {
+          basis: "Canonical Golden Report leak ledger. No figure is recomputed here.",
+          assumptions: [
+            "Recovery percentages are planning assumptions, not guarantees.",
+            "Only priced leaks in the canonical ledger are modelled.",
+          ],
+          canonical_annual_low: leak ? Math.round(leak.low) : null,
+          canonical_annual_high: leak ? Math.round(leak.high) : null,
+          confidence: leak ? "canonical" : "requires company data",
+        },
+        gaps: composed.gaps,
+        coverage: composed.coverage,
+      };
+      const finalValidation = validateBlueprint(manifest as never);
+      if (blueprintId) {
+        await sb.from("golden_system_blueprints").update({
+          output_json: manifest as unknown as Record<string, unknown>,
+          validation: finalValidation as unknown as Record<string, unknown>,
+          validation_passed: finalValidation.passed,
+          status: finalValidation.passed ? "ready" : "failed",
+          error_message: finalValidation.passed ? null : finalValidation.errors.join("; ").slice(0, 500),
+        }).eq("id", blueprintId);
+      }
+
+      await sb.from("company_systems").update({
+        provisioning_state: finalValidation.passed ? "complete" : "invalid",
+        provisioning_error: finalValidation.passed ? null : finalValidation.errors.join("; ").slice(0, 500),
+        provisioned_at: new Date().toISOString(),
+      }).eq("id", systemId);
+
       await logEvent({
         system_id: systemId, company_id: companyId, scan_id: scanId,
         kind: "system_composed", status: "logged",
@@ -615,7 +808,10 @@ serve(async (req) => {
       return json({
         system: { ...(system as Record<string, unknown>), crm_company_id: crmCompanyId, crm_config: crmConfig },
         composed,
+        blueprint_id: blueprintId,
+        system_version: systemVersion,
         provisioned: { teams: teams.length, tasks: tasks.length, playbooks: playbooks.length, memory: seeds.length, events: busEvents.length },
+        validation: finalValidation,
         reused: false,
       });
     }

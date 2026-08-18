@@ -162,7 +162,7 @@ export function deriveTeams(modules: SelectedModule[], gaps: Gap[] = []): Derive
 
 /* ── Tasks ───────────────────────────────────────────────────────────────── */
 
-export type TaskKind = "activation" | "measurement" | "data_connection" | "gap" | "crm";
+export type TaskKind = "activation" | "measurement" | "data_connection" | "gap" | "crm" | "validation";
 
 export interface DerivedTask {
   team_key: TeamKey;
@@ -408,13 +408,16 @@ export function seedMemoryFromReport(args: {
     status: "approved", sensitivity: "low", scan_scoped: true, system_scoped: false,
   });
   for (const rc of args.rootCauses.slice(0, 40)) {
+    const grade = normalizeGrade(rc.evidence_grade);
     push({
       scope: "report", key: `report.root_cause.${rc.id}`.slice(0, 180),
-      value: `${rc.title}${rc.detail ? ` — ${String(rc.detail).slice(0, 400)}` : ""}`,
-      provenance: `golden_report_findings_index:${args.scanId}:${rc.id}`, confidence: 0.9,
-      status: "approved", sensitivity: "low", scan_scoped: true, system_scoped: false,
+      value: `[${grade.toUpperCase()}] ${rc.title}${rc.detail ? ` — ${String(rc.detail).slice(0, 400)}` : ""}`,
+      provenance: `golden_report_findings_index:${args.scanId}:${rc.id}:${grade}`,
+      confidence: confidenceForGrade(grade),
+      status: memoryStatusForGrade(grade), sensitivity: "low", scan_scoped: true, system_scoped: false,
     });
   }
+
 
   push({
     scope: "system", key: "system.selected_modules", value: args.moduleIds.join(", ") || "none",
@@ -537,4 +540,189 @@ export function suggestCrmConfig(rootCauses: RootCauseInput[]): CrmConfigSuggest
     requires_approval: true,
     note: "Suggested from verified report root causes. Live CRM behaviour is unchanged until an operator approves it.",
   };
+}
+
+/* ── Evidence grades ──────────────────────────────────────────────────────
+ * golden_report_findings_index.evidence_grade is the only truth about how
+ * strong a finding is. Nothing here upgrades a grade and nothing assumes
+ * "verified".
+ * ------------------------------------------------------------------------ */
+
+export type EvidenceGrade =
+  | "verified" | "supported" | "unverified" | "inferred"
+  | "contradicted" | "clean" | "not_applicable";
+
+const GRADE_RANK: Record<EvidenceGrade, number> = {
+  verified: 6, supported: 5, unverified: 4, inferred: 3,
+  contradicted: 2, clean: 1, not_applicable: 0,
+};
+
+export function normalizeGrade(raw: unknown): EvidenceGrade {
+  const g = String(raw ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return (g in GRADE_RANK ? g : "inferred") as EvidenceGrade;
+}
+
+/** Strongest grade wins when several findings roll up to one root cause. */
+export function strongestGrade(grades: unknown[]): EvidenceGrade {
+  let best: EvidenceGrade = "not_applicable";
+  for (const raw of grades) {
+    const g = normalizeGrade(raw);
+    if (GRADE_RANK[g] > GRADE_RANK[best]) best = g;
+  }
+  return best;
+}
+
+/** Contradicted, clean and not-applicable findings never create corrective work. */
+export function isActionableGrade(g: EvidenceGrade): boolean {
+  return g === "verified" || g === "supported" || g === "unverified" || g === "inferred";
+}
+
+/** Only evidenced findings may authorise a live action or a priced claim. */
+export function authorizesLiveAction(g: EvidenceGrade): boolean {
+  return g === "verified" || g === "supported";
+}
+
+export function memoryStatusForGrade(g: EvidenceGrade): "approved" | "inferred" {
+  return authorizesLiveAction(g) ? "approved" : "inferred";
+}
+
+export function confidenceForGrade(g: EvidenceGrade): number {
+  return { verified: 0.95, supported: 0.8, unverified: 0.5, inferred: 0.35,
+    contradicted: 0.1, clean: 0.1, not_applicable: 0.1 }[g];
+}
+
+export function gradeOf(rc: Pick<RootCauseInput, "evidence_grade">): EvidenceGrade {
+  return normalizeGrade(rc.evidence_grade);
+}
+
+/** Root causes that may drive modules, goals and corrective tasks. */
+export function actionableRootCauses(rcs: RootCauseInput[]): RootCauseInput[] {
+  return rcs.filter((rc) => isActionableGrade(gradeOf(rc)));
+}
+
+/** Validation work for findings that are real but not yet evidenced. */
+export function deriveValidationTasks(rcs: RootCauseInput[]): DerivedTask[] {
+  return rcs
+    .filter((rc) => isActionableGrade(gradeOf(rc)) && !authorizesLiveAction(gradeOf(rc)))
+    .slice(0, 60)
+    .map((rc) => ({
+      team_key: "executive" as TeamKey,
+      root_cause_id: rc.id,
+      module_id: null,
+      title: `Validate finding: ${rc.title}`.slice(0, 180),
+      detail: `Evidence grade is ${gradeOf(rc).toUpperCase()}. This finding is labelled, not proven. It may not authorise a live action or a priced recovery claim until it is validated with company data.`,
+      kind: "validation" as TaskKind,
+      owner_role: "Operator",
+      priority: 2,
+      requires_company_data: true,
+      dedupe_key: `validate:${rc.id}`.slice(0, 180),
+      source: "evidence_grade",
+    }));
+}
+
+/* ── Authoritative blueprint manifest ─────────────────────────────────────
+ * Deterministic, structured, built only from canonical report data. No AI
+ * prose, no invented company facts, no recomputed money.
+ * ------------------------------------------------------------------------ */
+
+export const COMPANY_BLUEPRINT_SCHEMA_VERSION = 2;
+
+export interface BlueprintValidation {
+  passed: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface CompanySystemBlueprint {
+  schema_version: number;
+  template_version: string;
+  generated_at: string;
+  identity: Record<string, unknown>;
+  source: {
+    scan_id: string;
+    archive_id: string | null;
+    report_hash: string;
+    report_version: number | null;
+    compiler_version: string | null;
+    financial_model_version: string | null;
+    financial_confidence: "canonical" | "unpriced";
+  };
+  financials: { annual_low: number | null; annual_high: number | null; currency: "USD"; source: string };
+  root_causes: Array<{
+    id: string; title: string; detail: string; priority: number;
+    evidence_grade: EvidenceGrade; evidence_ids: string[];
+    authorizes_live_action: boolean; actionable: boolean;
+    recommended_action: string | null;
+  }>;
+  excluded_root_causes: Array<{ id: string; title: string; evidence_grade: EvidenceGrade; reason: string }>;
+  teams: DerivedTeam[];
+  modules: Array<Record<string, unknown>>;
+  connections: Array<Record<string, unknown>>;
+  goals: Array<Record<string, unknown>>;
+  tasks: DerivedTask[];
+  playbooks: DerivedPlaybook[];
+  checks: Array<Record<string, unknown>>;
+  dashboards: Array<{ team_key: TeamKey; name: string; metrics: string[]; requires_company_data: boolean }>;
+  crm: CrmConfigSuggestion & { linked_company_id: string | null };
+  automations: Array<{ module_id: string; action: string; approval_level: "confirm_required" | "operator_only"; sensitivity: string }>;
+  memory_seeds: SeedMemory[];
+  forecast: { basis: string; assumptions: string[]; canonical_annual_low: number | null; canonical_annual_high: number | null; confidence: string };
+  gaps: Gap[];
+  coverage: unknown;
+  validation: BlueprintValidation;
+}
+
+export function buildDashboards(teams: DerivedTeam[], goals: Array<{ team_key?: string | null; kpi?: string | null }>): CompanySystemBlueprint["dashboards"] {
+  return teams.map((t) => {
+    const metrics = goals
+      .filter((g) => (g.team_key || "executive") === t.team_key)
+      .map((g) => String(g.kpi || "").trim())
+      .filter((k) => k && !/to be defined|not set/i.test(k));
+    return {
+      team_key: t.team_key,
+      name: `${t.name} dashboard`,
+      metrics: [...new Set(metrics)].slice(0, 12),
+      requires_company_data: metrics.length === 0,
+    };
+  });
+}
+
+export function buildAutomations(
+  modules: SelectedModule[],
+  registry: Array<{ id: string; actions?: string[]; sensitivity?: string }>,
+): CompanySystemBlueprint["automations"] {
+  const byId = new Map(registry.map((m) => [m.id, m]));
+  const out: CompanySystemBlueprint["automations"] = [];
+  for (const m of modules) {
+    const reg = byId.get(m.module_id);
+    for (const a of reg?.actions || []) {
+      out.push({
+        module_id: m.module_id,
+        action: a,
+        approval_level: (reg?.sensitivity === "low" ? "operator_only" : "confirm_required"),
+        sensitivity: String(reg?.sensitivity || "medium"),
+      });
+    }
+  }
+  return out;
+}
+
+export function validateBlueprint(bp: Omit<CompanySystemBlueprint, "validation">): BlueprintValidation {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  if (!bp.source.scan_id) errors.push("missing scan_id");
+  if (!bp.source.report_hash) errors.push("missing canonical report hash");
+  if (!bp.identity || !(bp.identity.display_name || bp.identity.primary_domain)) {
+    errors.push("no resolvable business identity");
+  }
+  if (!bp.root_causes.length && !bp.excluded_root_causes.length) errors.push("report has no indexed findings");
+  if (!bp.teams.length && bp.root_causes.length) errors.push("no team workspace could be derived");
+  const covered = new Set<string>();
+  for (const m of bp.modules) for (const id of (m.root_cause_ids as string[]) || []) covered.add(id);
+  for (const g of bp.gaps) covered.add(g.root_cause_id);
+  const uncovered = bp.root_causes.filter((rc) => !covered.has(rc.id)).map((rc) => rc.id);
+  if (uncovered.length) errors.push(`root causes neither covered nor marked GAP_REQUIRED: ${uncovered.slice(0, 10).join(", ")}`);
+  if (bp.financials.annual_low == null) warnings.push("report carries no canonical priced range");
+  if (!bp.memory_seeds.length) warnings.push("no memory seeds produced");
+  return { passed: errors.length === 0, errors, warnings };
 }
