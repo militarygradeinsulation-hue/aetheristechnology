@@ -30,6 +30,8 @@ const CategoryPill: React.FC<{
 
 const businessOf = (title: string) => title.split(/\s[—–-]\s/)[0].trim();
 
+const firstNameOf = (name?: string) => (name ?? '').trim().split(/\s+/)[0] ?? '';
+
 const Capsule: React.FC<{ c: RealCase; onClick: () => void }> = ({ c, onClick }) => {
   const credit = CASE_CREDITS[c.id];
   const business = businessOf(c.title);
@@ -45,7 +47,7 @@ const Capsule: React.FC<{ c: RealCase; onClick: () => void }> = ({ c, onClick })
       {avatar ? (
         <img
           src={avatar}
-          alt={`${credit?.name ?? business}, client contact`}
+          alt={`${firstNameOf(credit?.name) || business}, client contact`}
           loading="lazy"
           className="h-10 w-10 rounded-full border border-amber/40 object-cover shrink-0"
         />
@@ -56,10 +58,10 @@ const Capsule: React.FC<{ c: RealCase; onClick: () => void }> = ({ c, onClick })
       )}
       <span className="text-left">
         <span className="block text-sm font-semibold leading-tight text-foreground whitespace-nowrap">
-          {credit ? credit.name : business}
+          {credit ? firstNameOf(credit.name) : business}
         </span>
         <span className="block font-case text-[10px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-          {business}
+          {c.category}
           {credit ? ` // ${credit.year}` : ''}
         </span>
         {recovery && (
@@ -137,13 +139,13 @@ const CaseModal: React.FC<{ c: RealCase; onClose: () => void }> = ({ c, onClose 
           {avatar && (
             <img
               src={avatar}
-              alt={`${credit?.name ?? business}, client contact`}
+              alt={`${firstNameOf(credit?.name) || business}, client contact`}
               className="h-14 w-14 shrink-0 rounded-full border border-amber/40 object-cover"
             />
           )}
           <div className="min-w-0">
-            <h3 className="font-forensic text-xl font-bold leading-tight">{credit ? credit.name : business}</h3>
-            <p className="font-forensic text-base font-semibold text-amber leading-snug">{business}</p>
+            <h3 className="font-forensic text-xl font-bold leading-tight">{credit ? firstNameOf(credit.name) : business}</h3>
+            <p className="font-forensic text-base font-semibold text-amber leading-snug">{c.category}</p>
             {credit && (
               <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
                 Worked together // {credit.year}
