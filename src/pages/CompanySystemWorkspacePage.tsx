@@ -19,8 +19,9 @@ import {
   ShieldCheck, Lock, ExternalLink, Play,
 } from 'lucide-react';
 
-const TABS = ['overview', 'map', 'operator', 'queues', 'brand', 'memory', 'audit', 'export'] as const;
+const TABS = ['overview', 'teams', 'crm', 'map', 'operator', 'brand', 'memory', 'audit', 'export'] as const;
 type Tab = typeof TABS[number];
+
 
 const money = (v: number | null | undefined) =>
   v == null ? 'n/a' : `$${Math.round(v).toLocaleString('en-US')}`;
