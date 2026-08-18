@@ -300,7 +300,7 @@ export const ContentEngine: React.FC = () => {
     return () => clearTimeout(t);
   }, [strategy, loading]);
 
-  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) {
+  async function handleGenerate(numPosts: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) {
     if (generating) return;
     setGenerating(true);
     setGenerationStatus('Planning slots and writing scripts in parallel...');
@@ -490,6 +490,39 @@ export const ContentEngine: React.FC = () => {
     }
   }
 
+  const [bulkThumbs, setBulkThumbs] = useState<{ done: number; total: number } | null>(null);
+
+  async function handleGenerateAllThumbnails(targets?: Post[]) {
+    if (bulkThumbs) return;
+    const list = (targets && targets.length ? targets : posts).filter((p) => !p.thumbnail_url);
+    if (list.length === 0) {
+      toast({ title: 'All posts already have images' });
+      return;
+    }
+    setBulkThumbs({ done: 0, total: list.length });
+    let ok = 0;
+    for (const p of list) {
+      try { await handleGenerateThumbnail(p.id); ok++; } catch { /* handled inside */ }
+      setBulkThumbs((prev) => prev ? { ...prev, done: prev.done + 1 } : prev);
+    }
+    setBulkThumbs(null);
+    toast({ title: `${ok}/${list.length} images generated` });
+  }
+
+  async function handleMovePost(id: string, date: string) {
+    const p = posts.find((x) => x.id === id);
+    if (!p || p.scheduled_date === date) return;
+    if (p.linkedin_status === 'published') {
+      toast({ title: 'Already live', description: 'Published posts cannot be moved.', variant: 'destructive' });
+      return;
+    }
+    const updates: Partial<Post> = { scheduled_date: date };
+    if (p.linkedin_status === 'queued') {
+      updates.linkedin_scheduled_at = new Date(`${date}T${(p.scheduled_time || '07:30').slice(0, 5)}:00`).toISOString();
+    }
+    await handleUpdatePost(id, updates);
+  }
+
   function exportTSV() {
     const csv = [
       ['Date','Time','Format','Status','Hook','Script','Caption','Hashtags'].join('\t'),
@@ -581,6 +614,9 @@ export const ContentEngine: React.FC = () => {
           onExport={exportTSV}
           onClear={handleClearCalendar}
           onScheduleMonth={handleScheduleMonth}
+          onGenerateAllImages={handleGenerateAllThumbnails}
+          bulkImageProgress={bulkThumbs}
+          onMovePost={handleMovePost}
           strategy={strategy}
         />
       )}
@@ -624,12 +660,19 @@ export const ContentEngine: React.FC = () => {
 
 // ----------------- Calendar View -----------------
 
-function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, onScheduleMonth, strategy }: {
+function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, onGenerate, generating, onExport, onClear, onScheduleMonth, onGenerateAllImages, bulkImageProgress, onMovePost, strategy }: {
   posts: Post[]; calendarMonth: Date; setCalendarMonth: (d: Date) => void;
-  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void; generating: boolean;
-  onExport: () => void; onClear: () => void; onScheduleMonth: () => void; strategy: Strategy;
+  onSelectPost: (p: Post) => void; onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) => void; generating: boolean;
+  onExport: () => void; onClear: () => void; onScheduleMonth: () => void;
+  onGenerateAllImages: (targets?: Post[]) => void;
+  bulkImageProgress: { done: number; total: number } | null;
+  onMovePost: (id: string, date: string) => void;
+  strategy: Strategy;
 }) {
   const [schedulingMonth, setSchedulingMonth] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
+  const [batchCount, setBatchCount] = useState(12);
   const monthName = calendarMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
   const firstOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
   const startDay = firstOfMonth.getDay();
@@ -778,7 +821,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
 
 function GeneratorView({ strategy, onGenerate, generating, postsCount }: {
   strategy: Strategy;
-  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[] }) => void;
+  onGenerate: (n: number, opts?: { userPrompt?: string; blogIds?: string[]; playbookIds?: string[]; topicSeeds?: string[]; startDate?: string; endDate?: string }) => void;
   generating: boolean;
   postsCount: number;
 }) {
