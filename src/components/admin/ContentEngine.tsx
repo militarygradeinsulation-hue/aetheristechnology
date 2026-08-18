@@ -678,6 +678,18 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
   const startDay = firstOfMonth.getDay();
   const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
 
+  // Default generation window follows the month you are looking at.
+  const monthStartStr = ymd(firstOfMonth);
+  const monthEndStr = ymd(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0));
+  const todayStr = ymd(new Date());
+  const defaultStart = monthStartStr < todayStr && monthEndStr >= todayStr ? todayStr : monthStartStr;
+  const [rangeStart, setRangeStart] = useState(defaultStart);
+  const [rangeEnd, setRangeEnd] = useState(monthEndStr);
+  useEffect(() => {
+    setRangeStart(defaultStart);
+    setRangeEnd(monthEndStr);
+  }, [defaultStart, monthEndStr]);
+
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) {
@@ -724,10 +736,46 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
               </Button>
             </>
           )}
-          <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90">
-            {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
-            Generate 12 Posts
-          </Button>
+        </div>
+      </div>
+
+      {/* Generation window + bulk image controls */}
+      <div className="glass rounded-lg p-3 mb-4 flex flex-wrap items-end gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Start</div>
+          <Input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">End</div>
+          <Input type="date" value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)} className="h-9 w-[150px]" />
+        </div>
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Posts</div>
+          <Input
+            type="number" min={1} max={60} value={batchCount}
+            onChange={(e) => setBatchCount(Math.min(60, Math.max(1, parseInt(e.target.value) || 1)))}
+            className="h-9 w-[90px]"
+          />
+        </div>
+        <Button
+          onClick={() => onGenerate(batchCount, { startDate: rangeStart, endDate: rangeEnd })}
+          disabled={generating}
+          className="h-9 bg-gradient-to-r from-amber to-orange-500 text-background hover:opacity-90"
+        >
+          {generating ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1.5" />}
+          Generate {batchCount} Posts
+        </Button>
+        <Button
+          variant="outline" className="h-9"
+          disabled={!!bulkImageProgress || posts.length === 0}
+          onClick={() => onGenerateAllImages()}
+        >
+          {bulkImageProgress
+            ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Images {bulkImageProgress.done}/{bulkImageProgress.total}</>
+            : <><ImageIcon className="w-3.5 h-3.5 mr-1.5" /> Generate Images for All Posts</>}
+        </Button>
+        <div className="text-[11px] text-muted-foreground">
+          New posts land inside this window. Drag any post to another day to reschedule it.
         </div>
       </div>
 
