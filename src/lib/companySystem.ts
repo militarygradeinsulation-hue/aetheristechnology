@@ -46,7 +46,9 @@ export interface SystemGoalRow {
   id: string; root_cause_id: string | null; module_id: string | null; title: string;
   classification: string | null; baseline: string | null; kpi: string | null; target: string | null;
   owner_role: string | null; priority: number; review_cadence: string | null; status: string;
+  team_key?: string | null; requires_company_data?: boolean;
 }
+
 export interface SystemCheckRow {
   id: string; name: string; evidence_basis: string | null; threshold: string | null;
   alert: string | null; last_status: string | null; last_run_at: string | null;
