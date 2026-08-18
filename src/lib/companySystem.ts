@@ -126,8 +126,45 @@ export const getWorkspace = (systemId: string, portalToken?: string | null) =>
 export const listSystems = (companyId?: string, portalToken?: string | null) =>
   call<{ systems: CompanySystemRow[] }>({ action: "list", company_id: companyId }, portalToken);
 
-export const setModuleEnabled = (systemId: string, moduleId: string, enabled: boolean, portalToken?: string | null) =>
-  call<{ module: SystemModuleRow }>({ action: "module_set_enabled", system_id: systemId, module_id: moduleId, enabled }, portalToken);
+/**
+ * Confirmation ticket issued by the server. The client never manufactures one
+ * and never sends a bare `confirmed: true`; it echoes back exactly this token.
+ */
+export interface ConfirmationTicket {
+  token: string;
+  expires_at: string;
+  affects?: string[];
+  input_hash?: string;
+  single_use: boolean;
+}
+
+export interface ActionResponse {
+  ok: boolean;
+  requires_confirmation?: boolean;
+  error?: string;
+  preview?: Record<string, unknown>;
+  confirmation?: ConfirmationTicket | null;
+  status?: string;
+  rollback?: string;
+  result?: unknown;
+  verification?: Record<string, unknown> | null;
+}
+
+/**
+ * Toggling a module changes live behaviour, so it walks the same
+ * Plan -> Confirm -> Execute path: the first call returns a bound ticket, the
+ * second call spends it.
+ */
+export const setModuleEnabled = (
+  systemId: string, moduleId: string, enabled: boolean,
+  confirmationToken?: string | null, portalToken?: string | null,
+) => call<{ module?: SystemModuleRow } & ActionResponse>(
+  {
+    action: "module_set_enabled", system_id: systemId, module_id: moduleId, enabled,
+    ...(confirmationToken ? { confirmation_token: confirmationToken } : {}),
+  },
+  portalToken,
+);
 
 export const approveSystem = (systemId: string, approvalState: "draft" | "approved" | "rejected") =>
   call<{ system: CompanySystemRow }>({ action: "approve_system", system_id: systemId, approval_state: approvalState });
@@ -144,13 +181,36 @@ export const operatorChat = (
 
 export const previewAction = (
   systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>, portalToken?: string | null,
-) => call<{ ok: boolean; requires_confirmation: boolean; error?: string; preview?: Record<string, unknown> }>(
+) => call<ActionResponse>(
   { action: "action_preview", system_id: systemId, module_id: moduleId, action_id: actionId, input }, portalToken);
 
+/**
+ * Execution requires the server-issued, input-bound, single-use token returned
+ * by `previewAction`. Without it the server re-plans instead of executing.
+ */
 export const executeAction = (
-  systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>, portalToken?: string | null,
-) => call<{ ok: boolean; status: string; rollback: string; error?: string }>(
-  { action: "action_execute", system_id: systemId, module_id: moduleId, action_id: actionId, input, confirmed: true }, portalToken);
+  systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>,
+  confirmationToken: string | null, portalToken?: string | null,
+) => call<ActionResponse>(
+  {
+    action: "action_execute", system_id: systemId, module_id: moduleId, action_id: actionId, input,
+    ...(confirmationToken ? { confirmation_token: confirmationToken } : {}),
+  },
+  portalToken,
+);
+
+export const setTaskStatus = (
+  systemId: string, taskId: string, status: "open" | "in_progress" | "blocked" | "done", portalToken?: string | null,
+) => call<{ task: SystemTaskRow }>({ action: "task_set_status", system_id: systemId, task_id: taskId, status }, portalToken);
+
+export const emitSystemEvent = (
+  systemId: string, eventType: string, subject: string, payload: Record<string, unknown> = {}, portalToken?: string | null,
+) => call<{ event: BusEventRow | null; duplicate: boolean }>(
+  { action: "emit_event", system_id: systemId, event_type: eventType, subject, payload }, portalToken);
+
+export const retrySystemEvent = (systemId: string, eventId: string, portalToken?: string | null) =>
+  call<{ event: BusEventRow }>({ action: "retry_event", system_id: systemId, event_id: eventId }, portalToken);
+
 
 export const upsertMemory = (
   companyId: string,
