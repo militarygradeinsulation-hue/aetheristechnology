@@ -1839,6 +1839,65 @@ export type Database = {
           },
         ]
       }
+      company_system_event_bus: {
+        Row: {
+          attempts: number
+          company_id: string | null
+          created_at: string
+          delivered_at: string | null
+          event_type: string
+          from_module: string | null
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          payload: Json
+          status: string
+          system_id: string
+          to_module: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          company_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          event_type: string
+          from_module?: string | null
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          payload?: Json
+          status?: string
+          system_id: string
+          to_module?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          company_id?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          event_type?: string
+          from_module?: string | null
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          payload?: Json
+          status?: string
+          system_id?: string
+          to_module?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_event_bus_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_system_events: {
         Row: {
           action_id: string | null
@@ -1956,16 +2015,19 @@ export type Database = {
           baseline: string | null
           classification: string | null
           created_at: string
+          current_value: string | null
           id: string
           kpi: string | null
           module_id: string | null
           owner_role: string | null
           priority: number
+          requires_company_data: boolean
           review_cadence: string | null
           root_cause_id: string | null
           status: string
           system_id: string
           target: string | null
+          team_key: string | null
           title: string
           updated_at: string
         }
@@ -1973,16 +2035,19 @@ export type Database = {
           baseline?: string | null
           classification?: string | null
           created_at?: string
+          current_value?: string | null
           id?: string
           kpi?: string | null
           module_id?: string | null
           owner_role?: string | null
           priority?: number
+          requires_company_data?: boolean
           review_cadence?: string | null
           root_cause_id?: string | null
           status?: string
           system_id: string
           target?: string | null
+          team_key?: string | null
           title: string
           updated_at?: string
         }
@@ -1990,16 +2055,19 @@ export type Database = {
           baseline?: string | null
           classification?: string | null
           created_at?: string
+          current_value?: string | null
           id?: string
           kpi?: string | null
           module_id?: string | null
           owner_role?: string | null
           priority?: number
+          requires_company_data?: boolean
           review_cadence?: string | null
           root_cause_id?: string | null
           status?: string
           system_id?: string
           target?: string | null
+          team_key?: string | null
           title?: string
           updated_at?: string
         }
@@ -2217,6 +2285,183 @@ export type Database = {
           },
         ]
       }
+      company_system_playbooks: {
+        Row: {
+          created_at: string
+          dedupe_key: string | null
+          id: string
+          module_ids: Json
+          root_cause_ids: Json
+          steps: Json
+          system_id: string
+          team_key: string
+          tips: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          module_ids?: Json
+          root_cause_ids?: Json
+          steps?: Json
+          system_id: string
+          team_key?: string
+          tips?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dedupe_key?: string | null
+          id?: string
+          module_ids?: Json
+          root_cause_ids?: Json
+          steps?: Json
+          system_id?: string
+          team_key?: string
+          tips?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_playbooks_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_tasks: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          detail: string | null
+          due_date: string | null
+          goal_id: string | null
+          id: string
+          kind: string
+          module_id: string | null
+          owner_role: string | null
+          priority: number
+          requires_company_data: boolean
+          root_cause_id: string | null
+          source: string
+          status: string
+          system_id: string
+          team_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          kind?: string
+          module_id?: string | null
+          owner_role?: string | null
+          priority?: number
+          requires_company_data?: boolean
+          root_cause_id?: string | null
+          source?: string
+          status?: string
+          system_id: string
+          team_key?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          kind?: string
+          module_id?: string | null
+          owner_role?: string | null
+          priority?: number
+          requires_company_data?: boolean
+          root_cause_id?: string | null
+          source?: string
+          status?: string
+          system_id?: string
+          team_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_tasks_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_system_teams: {
+        Row: {
+          created_at: string
+          display_order: number
+          enabled: boolean
+          id: string
+          module_ids: Json
+          name: string
+          root_cause_ids: Json
+          summary: string | null
+          system_id: string
+          team_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          module_ids?: Json
+          name: string
+          root_cause_ids?: Json
+          summary?: string | null
+          system_id: string
+          team_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          enabled?: boolean
+          id?: string
+          module_ids?: Json
+          name?: string
+          root_cause_ids?: Json
+          summary?: string | null
+          system_id?: string
+          team_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_system_teams_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "company_systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_systems: {
         Row: {
           approval_state: string
@@ -2229,6 +2474,8 @@ export type Database = {
           company_id: string
           coverage: Json
           created_at: string
+          crm_company_id: string | null
+          crm_config: Json
           id: string
           manifest: Json
           rep_code: string | null
@@ -2251,6 +2498,8 @@ export type Database = {
           company_id: string
           coverage?: Json
           created_at?: string
+          crm_company_id?: string | null
+          crm_config?: Json
           id?: string
           manifest?: Json
           rep_code?: string | null
@@ -2273,6 +2522,8 @@ export type Database = {
           company_id?: string
           coverage?: Json
           created_at?: string
+          crm_company_id?: string | null
+          crm_config?: Json
           id?: string
           manifest?: Json
           rep_code?: string | null
