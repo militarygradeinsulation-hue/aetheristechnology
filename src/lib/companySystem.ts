@@ -46,7 +46,9 @@ export interface SystemGoalRow {
   id: string; root_cause_id: string | null; module_id: string | null; title: string;
   classification: string | null; baseline: string | null; kpi: string | null; target: string | null;
   owner_role: string | null; priority: number; review_cadence: string | null; status: string;
+  team_key?: string | null; requires_company_data?: boolean;
 }
+
 export interface SystemCheckRow {
   id: string; name: string; evidence_basis: string | null; threshold: string | null;
   alert: string | null; last_status: string | null; last_run_at: string | null;
@@ -73,6 +75,34 @@ export interface BrandContextRow {
   approved_by: string | null; approved_at: string | null;
 }
 
+export interface SystemTeamRow {
+  id: string; team_key: string; name: string; summary: string | null;
+  root_cause_ids: string[]; module_ids: string[]; enabled: boolean; display_order: number;
+}
+export interface SystemTaskRow {
+  id: string; team_key: string; goal_id: string | null; root_cause_id: string | null;
+  module_id: string | null; title: string; detail: string | null; kind: string;
+  owner_role: string | null; status: string; priority: number; due_date: string | null;
+  requires_company_data: boolean; source: string; completed_at: string | null;
+}
+export interface SystemPlaybookRow {
+  id: string; team_key: string; title: string; root_cause_ids: string[];
+  module_ids: string[]; steps: string[]; tips: string[];
+}
+export interface BusEventRow {
+  id: string; event_type: string; from_module: string | null; to_module: string | null;
+  payload: Record<string, unknown>; idempotency_key: string; status: string;
+  attempts: number; last_error: string | null; delivered_at: string | null; created_at: string;
+}
+export interface CrmSlice {
+  linked: boolean;
+  company: { id: string; name: string; website: string | null; industry: string | null } | null;
+  contacts: Array<{ id: string; full_name: string; email: string | null; phone: string | null; title: string | null; created_at?: string }>;
+  deals: Array<{ id: string; title: string; stage: string; value_cents: number; expected_close_date: string | null }>;
+  interactions: Array<{ id: string; type: string; subject: string | null; occurred_at: string }>;
+  config?: Record<string, unknown>;
+}
+
 export interface WorkspacePayload {
   system: CompanySystemRow;
   company: { id: string; display_name: string; primary_domain: string | null; website_url: string | null; business_summary: string | null } | null;
@@ -85,8 +115,14 @@ export interface WorkspacePayload {
   forecasts: SystemForecastRow[];
   events: SystemEventRow[];
   memory: MemoryRow[];
+  teams: SystemTeamRow[];
+  tasks: SystemTaskRow[];
+  playbooks: SystemPlaybookRow[];
+  bus: BusEventRow[];
+  crm: CrmSlice;
   registry: UniverseModule[];
 }
+
 
 function headers(portalToken?: string | null): Record<string, string> {
   if (portalToken) return { "x-portal-token": portalToken };
@@ -126,8 +162,45 @@ export const getWorkspace = (systemId: string, portalToken?: string | null) =>
 export const listSystems = (companyId?: string, portalToken?: string | null) =>
   call<{ systems: CompanySystemRow[] }>({ action: "list", company_id: companyId }, portalToken);
 
-export const setModuleEnabled = (systemId: string, moduleId: string, enabled: boolean, portalToken?: string | null) =>
-  call<{ module: SystemModuleRow }>({ action: "module_set_enabled", system_id: systemId, module_id: moduleId, enabled }, portalToken);
+/**
+ * Confirmation ticket issued by the server. The client never manufactures one
+ * and never sends a bare `confirmed: true`; it echoes back exactly this token.
+ */
+export interface ConfirmationTicket {
+  token: string;
+  expires_at: string;
+  affects?: string[];
+  input_hash?: string;
+  single_use: boolean;
+}
+
+export interface ActionResponse {
+  ok: boolean;
+  requires_confirmation?: boolean;
+  error?: string;
+  preview?: Record<string, unknown>;
+  confirmation?: ConfirmationTicket | null;
+  status?: string;
+  rollback?: string;
+  result?: unknown;
+  verification?: Record<string, unknown> | null;
+}
+
+/**
+ * Toggling a module changes live behaviour, so it walks the same
+ * Plan -> Confirm -> Execute path: the first call returns a bound ticket, the
+ * second call spends it.
+ */
+export const setModuleEnabled = (
+  systemId: string, moduleId: string, enabled: boolean,
+  confirmationToken?: string | null, portalToken?: string | null,
+) => call<{ module?: SystemModuleRow } & ActionResponse>(
+  {
+    action: "module_set_enabled", system_id: systemId, module_id: moduleId, enabled,
+    ...(confirmationToken ? { confirmation_token: confirmationToken } : {}),
+  },
+  portalToken,
+);
 
 export const approveSystem = (systemId: string, approvalState: "draft" | "approved" | "rejected") =>
   call<{ system: CompanySystemRow }>({ action: "approve_system", system_id: systemId, approval_state: approvalState });
@@ -144,13 +217,36 @@ export const operatorChat = (
 
 export const previewAction = (
   systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>, portalToken?: string | null,
-) => call<{ ok: boolean; requires_confirmation: boolean; error?: string; preview?: Record<string, unknown> }>(
+) => call<ActionResponse>(
   { action: "action_preview", system_id: systemId, module_id: moduleId, action_id: actionId, input }, portalToken);
 
+/**
+ * Execution requires the server-issued, input-bound, single-use token returned
+ * by `previewAction`. Without it the server re-plans instead of executing.
+ */
 export const executeAction = (
-  systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>, portalToken?: string | null,
-) => call<{ ok: boolean; status: string; rollback: string; error?: string }>(
-  { action: "action_execute", system_id: systemId, module_id: moduleId, action_id: actionId, input, confirmed: true }, portalToken);
+  systemId: string, moduleId: string, actionId: string, input: Record<string, unknown>,
+  confirmationToken: string | null, portalToken?: string | null,
+) => call<ActionResponse>(
+  {
+    action: "action_execute", system_id: systemId, module_id: moduleId, action_id: actionId, input,
+    ...(confirmationToken ? { confirmation_token: confirmationToken } : {}),
+  },
+  portalToken,
+);
+
+export const setTaskStatus = (
+  systemId: string, taskId: string, status: "open" | "in_progress" | "blocked" | "done", portalToken?: string | null,
+) => call<{ task: SystemTaskRow }>({ action: "task_set_status", system_id: systemId, task_id: taskId, status }, portalToken);
+
+export const emitSystemEvent = (
+  systemId: string, eventType: string, subject: string, payload: Record<string, unknown> = {}, portalToken?: string | null,
+) => call<{ event: BusEventRow | null; duplicate: boolean }>(
+  { action: "emit_event", system_id: systemId, event_type: eventType, subject, payload }, portalToken);
+
+export const retrySystemEvent = (systemId: string, eventId: string, portalToken?: string | null) =>
+  call<{ event: BusEventRow }>({ action: "retry_event", system_id: systemId, event_id: eventId }, portalToken);
+
 
 export const upsertMemory = (
   companyId: string,

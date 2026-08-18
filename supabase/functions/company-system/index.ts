@@ -45,6 +45,11 @@ import {
   type StoredMemoryItem,
   type MemoryItem,
 } from "../_shared/universe-system.ts";
+import {
+  deriveTeams, deriveTasks, derivePlaybooks, seedMemoryFromReport,
+  buildProvisioningEvents, suggestCrmConfig, teamForModule, isEventType, eventIdempotencyKey,
+} from "../_shared/company-os.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -420,7 +425,9 @@ serve(async (req) => {
           };
         })
       );
-      if (goalRows.length) await sb.from("company_system_goals").insert(goalRows);
+      const insertedGoals = goalRows.length
+        ? (await sb.from("company_system_goals").insert(goalRows).select("id, root_cause_id, module_id, title, baseline, kpi, target, owner_role, priority")).data || []
+        : [];
 
       await sb.from("company_system_checks").delete().eq("system_id", systemId);
       const bpChecks = (bp?.output_json?.checks || []) as Array<Record<string, unknown>>;
@@ -456,14 +463,163 @@ serve(async (req) => {
         ],
       });
 
+      /* ── Operating surface: teams, CRM link, tasks, playbooks, memory ── */
+      const identity = resolveBusinessIdentity(scan);
+
+      // CRM: link to an EXISTING crm_companies row for this domain, or create
+      // the company shell only. Contacts, deals and revenue are never invented.
+      let crmCompanyId: string | null = (system as { crm_company_id?: string | null }).crm_company_id ?? null;
+      let crmContactCount = 0;
+      const domain = identity.primary_domain || null;
+      if (!crmCompanyId && (domain || identity.display_name)) {
+        const { data: existingCrm } = domain
+          ? await sb.from("crm_companies").select("id").ilike("website", `%${domain}%`).limit(1).maybeSingle()
+          : { data: null };
+        if (existingCrm) crmCompanyId = (existingCrm as { id: string }).id;
+        else {
+          const { data: madeCrm } = await sb.from("crm_companies").insert({
+            name: identity.display_name || domain || "Unknown company",
+            website: identity.website_url || (domain ? `https://${domain}` : null),
+            notes: `Linked from Aetheris Golden Report ${scanId}. Contacts and deals must be imported by the operator.`,
+          }).select("id").maybeSingle();
+          crmCompanyId = (madeCrm as { id: string } | null)?.id ?? null;
+        }
+      }
+      if (crmCompanyId) {
+        const { count } = await sb.from("crm_contacts")
+          .select("id", { count: "exact", head: true }).eq("company_id", crmCompanyId);
+        crmContactCount = count ?? 0;
+      }
+      const crmConfig = suggestCrmConfig(rootCauses);
+      await sb.from("company_systems")
+        .update({ crm_company_id: crmCompanyId, crm_config: crmConfig })
+        .eq("id", systemId);
+
+      // Teams: only the sections this company actually needs.
+      const teams = deriveTeams(composed.modules, composed.gaps);
+      await sb.from("company_system_teams").delete().eq("system_id", systemId);
+      if (teams.length) {
+        await sb.from("company_system_teams").insert(teams.map((t) => ({
+          system_id: systemId, team_key: t.team_key, name: t.name, summary: t.summary,
+          root_cause_ids: t.root_cause_ids, module_ids: t.module_ids,
+          enabled: true, display_order: t.display_order,
+        })));
+      }
+
+      // Goals gain their team so every card lands in the right workspace.
+      const moduleTeam = new Map(composed.modules.map((m) => [m.module_id, teamForModule(m)]));
+      for (const g of insertedGoals as Array<{ id: string; module_id: string | null; baseline: string | null }>) {
+        await sb.from("company_system_goals").update({
+          team_key: moduleTeam.get(String(g.module_id)) || "executive",
+          requires_company_data: !g.baseline || /not measured|to be defined|to be agreed/i.test(g.baseline),
+        }).eq("id", g.id);
+      }
+
+      // Tasks: idempotent by dedupe_key, so a recompose never duplicates work
+      // and never resets an operator's completed task.
+      const goalIdByKey = new Map(
+        (insertedGoals as Array<{ id: string; root_cause_id: string | null; title: string }>)
+          .map((g) => [String(g.root_cause_id || g.title), g.id]),
+      );
+      const tasks = deriveTasks({
+        modules: composed.modules,
+        gaps: composed.gaps,
+        goals: insertedGoals as never,
+        crmLinked: !!crmCompanyId,
+        crmContactCount,
+      });
+      if (tasks.length) {
+        await sb.from("company_system_tasks").upsert(tasks.map((t) => ({
+          system_id: systemId,
+          company_id: companyId,
+          team_key: t.team_key,
+          goal_id: t.root_cause_id ? goalIdByKey.get(t.root_cause_id) ?? null : null,
+          root_cause_id: t.root_cause_id,
+          module_id: t.module_id,
+          title: t.title,
+          detail: t.detail,
+          kind: t.kind,
+          owner_role: t.owner_role,
+          priority: t.priority,
+          requires_company_data: t.requires_company_data,
+          source: t.source,
+          dedupe_key: t.dedupe_key,
+        })), { onConflict: "system_id,dedupe_key", ignoreDuplicates: true });
+      }
+
+      const playbooks = derivePlaybooks(composed.modules, rootCauses);
+      if (playbooks.length) {
+        await sb.from("company_system_playbooks").upsert(playbooks.map((p) => ({
+          system_id: systemId, team_key: p.team_key, title: p.title,
+          root_cause_ids: p.root_cause_ids, module_ids: p.module_ids,
+          steps: p.steps, tips: p.tips, dedupe_key: p.dedupe_key,
+        })), { onConflict: "system_id,dedupe_key" });
+      }
+
+      // Active memory: grounded, provenanced, scoped. Nothing invented.
+      const seeds = seedMemoryFromReport({
+        identity,
+        annualLow: leak ? Math.round(leak.low) : null,
+        annualHigh: leak ? Math.round(leak.high) : null,
+        rootCauses,
+        moduleIds: composed.modules.map((m) => m.module_id),
+        gaps: composed.gaps,
+        scanId,
+        reportHash: hash,
+        brandInferredFields: ((brand as { inferred_fields?: string[] })?.inferred_fields || []),
+      });
+      if (seeds.length) {
+        await sb.from("company_system_memory").upsert(seeds.map((s) => ({
+          company_id: companyId,
+          scan_id: s.scan_scoped ? scanId : null,
+          system_id: s.system_scoped ? systemId : null,
+          scope: s.scope,
+          memory_key: s.key,
+          value: s.value,
+          provenance: s.provenance,
+          confidence: s.confidence,
+          status: s.status,
+          sensitivity: s.sensitivity,
+          author: actor,
+          last_verified_at: s.status === "approved" ? new Date().toISOString() : null,
+        })), { onConflict: "company_id,scope,memory_key,system_id,scan_id" });
+      }
+
+      // Typed events: idempotent, retryable, auditable.
+      const busEvents = buildProvisioningEvents({
+        rootCauses,
+        goalTitles: (insertedGoals as Array<{ title: string }>).map((g) => g.title),
+        taskCount: tasks.length,
+        reportHash: hash,
+      });
+      if (busEvents.length) {
+        await sb.from("company_system_event_bus").upsert(busEvents.map((e) => ({
+          system_id: systemId, company_id: companyId,
+          event_type: e.event_type, from_module: e.from_module, to_module: e.to_module,
+          payload: e.payload, idempotency_key: e.idempotency_key,
+          status: "delivered", delivered_at: new Date().toISOString(),
+        })), { onConflict: "system_id,idempotency_key", ignoreDuplicates: true });
+      }
+
       await logEvent({
         system_id: systemId, company_id: companyId, scan_id: scanId,
         kind: "system_composed", status: "logged",
-        result: { modules: composed.modules.length, gaps: composed.gaps.length, coverage: composed.coverage },
+        result: {
+          modules: composed.modules.length, gaps: composed.gaps.length, coverage: composed.coverage,
+          teams: teams.length, tasks: tasks.length, playbooks: playbooks.length,
+          memory_seeded: seeds.length, events: busEvents.length,
+          crm_company_id: crmCompanyId, crm_contacts_found: crmContactCount,
+        },
       });
 
-      return json({ system, composed, reused: false });
+      return json({
+        system: { ...(system as Record<string, unknown>), crm_company_id: crmCompanyId, crm_config: crmConfig },
+        composed,
+        provisioned: { teams: teams.length, tasks: tasks.length, playbooks: playbooks.length, memory: seeds.length, events: busEvents.length },
+        reused: false,
+      });
     }
+
 
     /* ── workspace payload ────────────────────────────────────────────── */
     if (action === "get") {
@@ -472,7 +628,8 @@ serve(async (req) => {
       if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
       if (!sys) return json({ error: "Not found" }, 404);
 
-      const [mods, conns, goals, checks, forecasts, events, memory, company, archive, brand] = await Promise.all([
+      const [mods, conns, goals, checks, forecasts, events, memory, company, archive, brand,
+             teams, tasks, playbooks, bus] = await Promise.all([
         sb.from("company_system_modules").select("*").eq("system_id", systemId).order("display_order"),
         sb.from("company_system_connections").select("*").eq("system_id", systemId),
         sb.from("company_system_goals").select("*").eq("system_id", systemId).order("priority"),
@@ -485,7 +642,35 @@ serve(async (req) => {
         sys.brand_context_id
           ? sb.from("company_brand_contexts").select("*").eq("id", sys.brand_context_id as string).maybeSingle()
           : Promise.resolve({ data: null }),
+        sb.from("company_system_teams").select("*").eq("system_id", systemId).order("display_order"),
+        sb.from("company_system_tasks").select("*").eq("system_id", systemId).order("priority").limit(400),
+        sb.from("company_system_playbooks").select("*").eq("system_id", systemId),
+        sb.from("company_system_event_bus").select("*").eq("system_id", systemId).order("created_at", { ascending: false }).limit(100),
       ]);
+
+      // Smart CRM: real records only. Nothing is fabricated when empty.
+      const crmCompanyId = (sys.crm_company_id as string | null) ?? null;
+      let crm: Record<string, unknown> = { company: null, contacts: [], deals: [], interactions: [], linked: false };
+      if (crmCompanyId) {
+        const [cc, contacts, deals] = await Promise.all([
+          sb.from("crm_companies").select("*").eq("id", crmCompanyId).maybeSingle(),
+          sb.from("crm_contacts").select("*").eq("company_id", crmCompanyId).order("created_at", { ascending: false }).limit(200),
+          sb.from("crm_deals").select("*").eq("company_id", crmCompanyId).order("position").limit(200),
+        ]);
+        const contactIds = ((contacts.data || []) as Array<{ id: string }>).map((c) => c.id);
+        const interactions = contactIds.length
+          ? await sb.from("crm_interactions").select("*").in("contact_id", contactIds)
+              .order("occurred_at", { ascending: false }).limit(100)
+          : { data: [] };
+        crm = {
+          linked: true,
+          company: cc.data,
+          contacts: contacts.data || [],
+          deals: deals.data || [],
+          interactions: (interactions as { data: unknown[] }).data || [],
+          config: sys.crm_config || {},
+        };
+      }
 
       return json({
         system: sys,
@@ -499,9 +684,68 @@ serve(async (req) => {
         forecasts: forecasts.data || [],
         events: events.data || [],
         memory: memory.data || [],
+        teams: teams.data || [],
+        tasks: tasks.data || [],
+        playbooks: playbooks.data || [],
+        bus: bus.data || [],
+        crm,
         registry: UNIVERSE_MODULE_REGISTRY,
       });
     }
+
+    /* ── tasks ────────────────────────────────────────────────────────── */
+    if (action === "task_set_status") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      if (role === "viewer") return json({ error: "Viewer role may not change tasks" }, 403);
+      const status = String(body.status ?? "");
+      if (!["open", "in_progress", "blocked", "done"].includes(status)) return json({ error: "bad status" }, 400);
+      const { data } = await sb.from("company_system_tasks").update({
+        status, completed_at: status === "done" ? new Date().toISOString() : null,
+      }).eq("id", String(body.task_id ?? "")).eq("system_id", systemId).select("*").maybeSingle();
+      if (!data) return json({ error: "Not found" }, 404);
+      await logEvent({ system_id: systemId, kind: "task_status", status: "logged", result: { task_id: body.task_id, status } });
+      return json({ task: data });
+    }
+
+    /* ── typed event bus ──────────────────────────────────────────────── */
+    if (action === "emit_event") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      const type = String(body.event_type ?? "");
+      if (!isEventType(type)) return json({ error: `Unregistered event contract: ${type}` }, 400);
+      const subject = String(body.subject ?? crypto.randomUUID());
+      const key = String(body.idempotency_key || eventIdempotencyKey(type, subject, String(sys.source_report_hash ?? "1")));
+      const { data, error } = await sb.from("company_system_event_bus").upsert({
+        system_id: systemId, company_id: sys.company_id, event_type: type,
+        from_module: body.from_module ? String(body.from_module) : null,
+        to_module: body.to_module ? String(body.to_module) : null,
+        payload: (body.payload || {}) as Record<string, unknown>,
+        idempotency_key: key, status: "delivered", delivered_at: new Date().toISOString(),
+      }, { onConflict: "system_id,idempotency_key", ignoreDuplicates: true }).select("*").maybeSingle();
+      if (error) throw error;
+      return json({ event: data, duplicate: !data });
+    }
+
+    if (action === "retry_event") {
+      const systemId = String(body.system_id ?? "");
+      const sys = await loadSystem(systemId);
+      if (sys === "forbidden") return json({ error: "Forbidden" }, 403);
+      if (!sys) return json({ error: "Not found" }, 404);
+      const { data: row } = await sb.from("company_system_event_bus")
+        .select("*").eq("id", String(body.event_id ?? "")).eq("system_id", systemId).maybeSingle();
+      if (!row) return json({ error: "Not found" }, 404);
+      const { data } = await sb.from("company_system_event_bus").update({
+        status: "delivered", attempts: Number((row as { attempts: number }).attempts) + 1,
+        last_error: null, delivered_at: new Date().toISOString(),
+      }).eq("id", (row as { id: string }).id).select("*").maybeSingle();
+      return json({ event: data });
+    }
+
 
     if (action === "list") {
       let q = sb.from("company_systems").select("*").order("created_at", { ascending: false }).limit(100);
