@@ -42,14 +42,20 @@ function pad(n: number) { return String(n).padStart(2, "0"); }
 function ymd(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 function dayShort(d: Date) { return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]; }
 
-function getNextNDates(strategy: Strategy, count: number) {
+function getNextNDates(strategy: Strategy, count: number, startDate?: string, endDate?: string) {
   const postsPerDay = strategy.frequency === "2x/day" ? 2 : 1;
   const dates: { date: string; time: string }[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const cursor = new Date(today);
+  let cursor = new Date(today);
+  if (startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    const s = new Date(`${startDate}T00:00:00`);
+    if (!Number.isNaN(s.getTime()) && s.getTime() > today.getTime()) cursor = s;
+  }
+  const limit = endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate) ? endDate : null;
   let safety = 0;
   while (dates.length < count && safety < 365) {
+    if (limit && ymd(cursor) > limit) break;
     const dn = dayShort(cursor);
     if (strategy.posting_days.includes(dn)) {
       const times = postsPerDay === 2
@@ -358,7 +364,7 @@ serve(async (req) => {
 
     // ---- plan + generate batch ----
     if (action === "plan_and_generate") {
-      const numPosts = Math.min(Math.max(parseInt(body.numPosts) || 12, 1), 30);
+      const numPosts = Math.min(Math.max(parseInt(body.numPosts) || 12, 1), 60);
       const userPrompt: string = (body.userPrompt || "").toString().trim();
       const blogIds: string[] = Array.isArray(body.blogIds) ? body.blogIds.slice(0, 10) : [];
       const playbookIds: string[] = Array.isArray(body.playbookIds) ? body.playbookIds.slice(0, 10) : [];
@@ -370,7 +376,9 @@ serve(async (req) => {
         .from("content_engine_strategy").select("*").limit(1).maybeSingle();
       if (serr || !strategy) throw serr || new Error("Strategy missing");
 
-      const slots = getNextNDates(strategy as Strategy, numPosts);
+      const startDate: string | undefined = typeof body.startDate === "string" ? body.startDate : undefined;
+      const endDate: string | undefined = typeof body.endDate === "string" ? body.endDate : undefined;
+      const slots = getNextNDates(strategy as Strategy, numPosts, startDate, endDate);
       if (slots.length === 0) {
         return json({ error: "No posting slots available. Configure posting days in Strategy." }, 400);
       }
