@@ -45,6 +45,11 @@ import {
   type StoredMemoryItem,
   type MemoryItem,
 } from "../_shared/universe-system.ts";
+import {
+  deriveTeams, deriveTasks, derivePlaybooks, seedMemoryFromReport,
+  buildProvisioningEvents, suggestCrmConfig, teamForModule, isEventType, eventIdempotencyKey,
+} from "../_shared/company-os.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
