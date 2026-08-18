@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone,
+  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone, Image as ImageIcon,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
@@ -797,7 +797,17 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
           return (
             <div
               key={i}
+              onDragOver={(e) => { if (dragId) { e.preventDefault(); setDragOver(dateStr); } }}
+              onDragLeave={() => setDragOver((prev) => prev === dateStr ? null : prev)}
+              onDrop={(e) => {
+                e.preventDefault();
+                const id = dragId || e.dataTransfer.getData('text/plain');
+                setDragOver(null);
+                setDragId(null);
+                if (id) onMovePost(id, dateStr);
+              }}
               className={`min-h-[110px] rounded-lg p-2 border transition ${
+                dragOver === dateStr ? 'bg-amber/10 border-amber ring-1 ring-amber' :
                 isToday ? 'bg-amber/5 border-amber' :
                 isPostingDay && !isPast ? 'bg-card/50 border-border' :
                 'bg-card/30 border-border/50'
@@ -815,8 +825,11 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
                   return (
                     <button
                       key={p.id}
+                      draggable={p.linkedin_status !== 'published'}
+                      onDragStart={(e) => { setDragId(p.id); e.dataTransfer.setData('text/plain', p.id); e.dataTransfer.effectAllowed = 'move'; }}
+                      onDragEnd={() => { setDragId(null); setDragOver(null); }}
                       onClick={() => onSelectPost(p)}
-                      className={`text-left rounded p-1.5 ${fmt.bg} border ${fmt.ring} border-l-[3px] hover:scale-[1.02] transition`}
+                      className={`text-left rounded p-1.5 ${fmt.bg} border ${fmt.ring} border-l-[3px] hover:scale-[1.02] transition ${dragId === p.id ? 'opacity-40' : ''} ${p.linkedin_status !== 'published' ? 'cursor-grab active:cursor-grabbing' : ''}`}
                       style={{ borderLeftColor: 'currentColor' }}
                     >
                       <div className="flex items-center justify-between">
@@ -825,6 +838,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
                           {p.linkedin_status === 'published' && <span className="text-[8px] text-[#0A66C2]" title="Live on LinkedIn">in</span>}
                           {p.linkedin_status === 'queued' && <Clock className="w-2.5 h-2.5 text-[#0A66C2]" />}
                           {p.linkedin_status === 'failed' && <span className="text-[8px] text-crimson" title="LinkedIn publish failed">!</span>}
+                          {p.thumbnail_url && <ImageIcon className="w-2.5 h-2.5 text-amber" />}
                           <span className="text-[8px]" style={{ color: STATUS_INFO[p.status]?.cls.includes('emerald') ? '#10b981' : STATUS_INFO[p.status]?.cls.includes('blue') ? '#3b82f6' : '#eab308' }}>●</span>
                         </span>
                       </div>
@@ -845,7 +859,7 @@ function CalendarView({ posts, calendarMonth, setCalendarMonth, onSelectPost, on
           <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
             Click "Generate 12 Posts" to fill the next two weeks with audit-driven LinkedIn video scripts.
           </p>
-          <Button onClick={() => onGenerate(12)} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background">
+          <Button onClick={() => onGenerate(batchCount, { startDate: rangeStart, endDate: rangeEnd })} disabled={generating} className="bg-gradient-to-r from-amber to-orange-500 text-background">
             <Sparkles className="w-4 h-4 mr-2" /> Generate Your First Batch
           </Button>
         </div>
