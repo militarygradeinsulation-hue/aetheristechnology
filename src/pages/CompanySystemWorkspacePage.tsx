@@ -263,7 +263,202 @@ const CompanySystemWorkspacePage: React.FC = () => {
   );
 };
 
+/* ── team workspaces ─────────────────────────────────────────────────────── */
+
+const TASK_STATUSES: Array<SystemTaskRow['status']> = ['open', 'in_progress', 'blocked', 'done'];
+
+const TeamsPanel: React.FC<{ data: WorkspacePayload; onChange: () => void }> = ({ data, onChange }) => {
+  const teams = data.teams.filter(t => t.enabled);
+  const [active, setActive] = useState(teams[0]?.team_key ?? '');
+  const team = teams.find(t => t.team_key === active) || teams[0];
+
+  if (!teams.length) {
+    return <Card><p className="text-xs text-muted-foreground">No team workspaces provisioned yet. Recompose this system from its Golden Report.</p></Card>;
+  }
+
+  const goals = data.goals.filter(g => (g.team_key || 'executive') === team.team_key);
+  const tasks = data.tasks.filter(t => t.team_key === team.team_key);
+  const plays = data.playbooks.filter(p => p.team_key === team.team_key);
+  const tools = data.modules.filter(m => (team.module_ids || []).includes(m.module_id));
+
+  return (
+    <div className="grid gap-4 md:grid-cols-[200px_1fr]">
+      <nav className="flex flex-row flex-wrap gap-1 md:flex-col" aria-label="Team workspaces">
+        {teams.map(t => (
+          <button key={t.team_key} onClick={() => setActive(t.team_key)} aria-current={t.team_key === team.team_key}
+            className={`rounded px-3 py-2 text-left font-mono text-[11px] uppercase tracking-wide ${t.team_key === team.team_key ? 'bg-amber/15 text-amber' : 'text-muted-foreground hover:text-foreground'}`}>
+            {t.name}
+          </button>
+        ))}
+      </nav>
+
+      <div className="space-y-4">
+        <Card>
+          <h2 className="font-display text-sm font-bold text-foreground">{team.name}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{team.summary}</p>
+          <p className="mt-2 font-mono text-[10px] uppercase text-muted-foreground">
+            Root causes: {(team.root_cause_ids || []).join(', ') || 'none linked'}
+          </p>
+        </Card>
+
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Goals</h3>
+          {goals.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">No goals for this team.</p> : (
+            <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
+              {goals.map(g => (
+                <li key={g.id} className="rounded border border-border/60 p-2">
+                  <span className="font-mono text-[10px] uppercase text-amber">{g.classification}</span> {g.title}
+                  <div className="mt-1">KPI: {g.kpi} · baseline {g.baseline || 'not measured'} · target {g.target} · owner {g.owner_role}</div>
+                  {g.requires_company_data && (
+                    <div className="mt-1 font-mono text-[10px] uppercase text-destructive">Requires company data</div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Tasks</h3>
+          {tasks.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">No tasks for this team.</p> : (
+            <ul className="mt-2 space-y-2 text-xs">
+              {tasks.map(t => (
+                <li key={t.id} className="rounded border border-border/60 p-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase text-amber">P{t.priority}</span>
+                    <span className="font-semibold text-foreground">{t.title}</span>
+                    {t.requires_company_data && (
+                      <span className="font-mono text-[10px] uppercase text-destructive">requires company data</span>
+                    )}
+                  </div>
+                  {t.detail && <p className="mt-1 text-muted-foreground">{t.detail}</p>}
+                  <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">
+                    {t.kind} · owner {t.owner_role || 'unassigned'} · source {t.source}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {TASK_STATUSES.map(s => (
+                      <Button key={s} size="sm" variant={t.status === s ? 'default' : 'ghost'}
+                        onClick={async () => {
+                          try { await setTaskStatus(data.system.id, t.id, s as 'open'); onChange(); }
+                          catch (e) { toast({ title: 'Task error', description: (e as Error).message, variant: 'destructive' }); }
+                        }}>
+                        {s.replace('_', ' ')}
+                      </Button>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Playbooks &amp; tips</h3>
+          {plays.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">No playbook for this team.</p> : (
+            <div className="mt-2 space-y-3 text-xs text-muted-foreground">
+              {plays.map(p => (
+                <div key={p.id} className="rounded border border-border/60 p-2">
+                  <p className="font-semibold text-foreground">{p.title}</p>
+                  <ol className="mt-1 list-decimal space-y-0.5 pl-4">{(p.steps || []).map((s, i) => <li key={i}>{s}</li>)}</ol>
+                  {(p.tips || []).length > 0 && (
+                    <p className="mt-2 font-mono text-[10px] uppercase text-amber">Tips</p>
+                  )}
+                  <ul className="space-y-0.5">{(p.tips || []).map((s, i) => <li key={i}>{s}</li>)}</ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Connected instruments</h3>
+          <div className="mt-2 grid gap-2 md:grid-cols-2">
+            {tools.length === 0
+              ? <p className="text-xs text-muted-foreground">No instruments connected to this team.</p>
+              : tools.map(m => <ModuleCard key={m.id} m={m} systemId={data.system.id} onChange={onChange} />)}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+/* ── smart CRM ───────────────────────────────────────────────────────────── */
+
+const CrmPanel: React.FC<{ data: WorkspacePayload }> = ({ data }) => {
+  const crm = data.crm;
+  if (!crm?.linked) {
+    return (
+      <Card>
+        <h2 className="font-display text-sm font-bold text-foreground">Smart CRM</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          No CRM company linked yet. Recompose this system to link or create the company record. Contacts, deals and revenue are never invented.
+        </p>
+      </Card>
+    );
+  }
+  const stages = (crm.config?.stages as string[] | undefined) || [];
+  return (
+    <div className="space-y-4">
+      <Card>
+        <h2 className="flex items-center gap-2 font-display text-sm font-bold text-foreground">
+          <Users className="h-4 w-4 text-amber" /> {crm.company?.name}
+        </h2>
+        <p className="mt-1 font-mono text-[11px] text-muted-foreground">{crm.company?.website || '—'}</p>
+        {stages.length > 0 && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Suggested pipeline: {stages.join(' → ')}. Operator approval is required before live CRM behaviour changes.
+          </p>
+        )}
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Contacts ({crm.contacts.length})</h3>
+          {crm.contacts.length === 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">No contacts imported. Import real contacts to activate follow up automation.</p>
+          ) : (
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {crm.contacts.slice(0, 25).map(c => (
+                <li key={c.id}>{c.full_name} · {c.title || '—'} · {c.email || c.phone || 'no channel'}</li>
+              ))}
+            </ul>
+          )}
+        </Card>
+        <Card>
+          <h3 className="font-display text-sm font-bold text-foreground">Pipeline ({crm.deals.length})</h3>
+          {crm.deals.length === 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">No opportunities recorded.</p>
+          ) : (
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {crm.deals.slice(0, 25).map(d => (
+                <li key={d.id}>
+                  <span className="font-mono text-[10px] uppercase text-amber">{d.stage}</span> {d.title} · {money(d.value_cents / 100)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      <Card>
+        <h3 className="font-display text-sm font-bold text-foreground">Recent interactions</h3>
+        {crm.interactions.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">No interaction history.</p> : (
+          <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+            {crm.interactions.slice(0, 25).map(i => (
+              <li key={i.id}>
+                <span className="font-mono text-[10px] uppercase text-amber">{i.type}</span> {i.subject || '—'} · {new Date(i.occurred_at).toLocaleDateString()}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+};
+
 /* ── module card with action bus ─────────────────────────────────────────── */
+
 
 const ModuleCard: React.FC<{ m: SystemModuleRow; systemId: string; onChange: () => void }> = ({ m, systemId, onChange }) => {
   const reg = findModule(m.module_id);
