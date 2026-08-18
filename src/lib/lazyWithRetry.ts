@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { lazy, type ComponentType } from "react";
 
 /**
@@ -7,7 +8,7 @@ import { lazy, type ComponentType } from "react";
  */
 const RELOAD_KEY = "chunk-reload-at";
 
-export function lazyWithRetry<T extends ComponentType<never>>(
+export function lazyWithRetry<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
 ) {
   return lazy(async () => {
