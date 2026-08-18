@@ -284,20 +284,58 @@ const CompanySystemWorkspacePage: React.FC = () => {
 
 const ModuleCard: React.FC<{ m: SystemModuleRow; systemId: string; onChange: () => void }> = ({ m, systemId, onChange }) => {
   const reg = findModule(m.module_id);
-  const [pending, setPending] = useState<{ actionId: string; preview: Record<string, unknown> } | null>(null);
+  // The ticket is issued by the server and echoed back verbatim. The client
+  // never fabricates one, so a plan is always required before a write.
+  const [pending, setPending] = useState<
+    { actionId: string; preview: Record<string, unknown>; token: string | null; expiresAt: string | null } | null
+  >(null);
 
-  const run = async (actionId: string) => {
+  const inputFor = (actionId: string) => {
     const action = reg?.actions.find(a => a.id === actionId);
     const input: Record<string, unknown> = {};
     for (const k of action?.input || []) input[k] = 'system';
+    return input;
+  };
+
+  const run = async (actionId: string) => {
+    const input = inputFor(actionId);
     try {
       const res = await previewAction(systemId, m.module_id, actionId, input);
-      if (res.requires_confirmation) { setPending({ actionId, preview: res.preview || {} }); return; }
       if (!res.ok) { toast({ title: 'Blocked', description: res.error, variant: 'destructive' }); return; }
-      const out = await executeAction(systemId, m.module_id, actionId, input);
+      if (res.requires_confirmation) {
+        if (!res.confirmation?.token) {
+          toast({ title: 'No confirmation token issued', description: 'The server did not authorize this action.', variant: 'destructive' });
+          return;
+        }
+        setPending({
+          actionId,
+          preview: res.preview || {},
+          token: res.confirmation.token,
+          expiresAt: res.confirmation.expires_at ?? null,
+        });
+        return;
+      }
+      const out = await executeAction(systemId, m.module_id, actionId, input, res.confirmation?.token ?? null);
       toast({ title: out.ok ? 'Action executed' : 'Action failed', description: out.error || out.rollback });
       onChange();
     } catch (e) { toast({ title: 'Action error', description: (e as Error).message, variant: 'destructive' }); }
+  };
+
+  const toggleModule = async () => {
+    try {
+      const plan = await setModuleEnabled(systemId, m.module_id, !m.enabled);
+      if (plan.requires_confirmation) {
+        if (!plan.confirmation?.token) {
+          toast({ title: 'Blocked', description: plan.error || 'No confirmation token issued.', variant: 'destructive' });
+          return;
+        }
+        const done = await setModuleEnabled(systemId, m.module_id, !m.enabled, plan.confirmation.token);
+        if (done.ok === false) { toast({ title: 'Blocked', description: done.error, variant: 'destructive' }); return; }
+      } else if (plan.ok === false) {
+        toast({ title: 'Blocked', description: plan.error, variant: 'destructive' }); return;
+      }
+      onChange();
+    } catch (e) { toast({ title: 'Module error', description: (e as Error).message, variant: 'destructive' }); }
   };
 
   return (
@@ -312,8 +350,7 @@ const ModuleCard: React.FC<{ m: SystemModuleRow; systemId: string; onChange: () 
       {m.lock_reason && <p className="mt-1 text-[11px] text-destructive">{m.lock_reason}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         {!m.locked && (
-          <Button size="sm" variant="outline"
-            onClick={async () => { await setModuleEnabled(systemId, m.module_id, !m.enabled); onChange(); }}>
+          <Button size="sm" variant="outline" onClick={toggleModule}>
             {m.enabled ? 'Disable' : 'Enable'}
           </Button>
         )}
@@ -326,13 +363,17 @@ const ModuleCard: React.FC<{ m: SystemModuleRow; systemId: string; onChange: () 
       {pending && (
         <div className="mt-2 rounded border border-amber/40 p-2 text-[11px]">
           <p className="font-mono uppercase text-amber">Confirmation required</p>
+          {pending.expiresAt && (
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Ticket expires {new Date(pending.expiresAt).toLocaleTimeString()} · single use
+            </p>
+          )}
           <pre className="mt-1 overflow-auto text-muted-foreground">{JSON.stringify(pending.preview, null, 2)}</pre>
           <div className="mt-2 flex gap-2">
             <Button size="sm" onClick={async () => {
-              const action = reg?.actions.find(a => a.id === pending.actionId);
-              const input: Record<string, unknown> = {};
-              for (const k of action?.input || []) input[k] = 'system';
-              const out = await executeAction(systemId, m.module_id, pending.actionId, input);
+              const out = await executeAction(
+                systemId, m.module_id, pending.actionId, inputFor(pending.actionId), pending.token,
+              );
               toast({ title: out.ok ? 'Action executed' : 'Action failed', description: out.error || out.rollback });
               setPending(null); onChange();
             }}>Confirm &amp; execute</Button>
@@ -343,6 +384,7 @@ const ModuleCard: React.FC<{ m: SystemModuleRow; systemId: string; onChange: () 
     </div>
   );
 };
+
 
 /* ── operator ────────────────────────────────────────────────────────────── */
 
