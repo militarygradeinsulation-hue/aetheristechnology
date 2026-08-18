@@ -420,7 +420,9 @@ serve(async (req) => {
           };
         })
       );
-      if (goalRows.length) await sb.from("company_system_goals").insert(goalRows);
+      const insertedGoals = goalRows.length
+        ? (await sb.from("company_system_goals").insert(goalRows).select("id, root_cause_id, module_id, title, baseline, kpi, target, owner_role, priority")).data || []
+        : [];
 
       await sb.from("company_system_checks").delete().eq("system_id", systemId);
       const bpChecks = (bp?.output_json?.checks || []) as Array<Record<string, unknown>>;
@@ -456,14 +458,163 @@ serve(async (req) => {
         ],
       });
 
+      /* ── Operating surface: teams, CRM link, tasks, playbooks, memory ── */
+      const identity = resolveBusinessIdentity(scan);
+
+      // CRM: link to an EXISTING crm_companies row for this domain, or create
+      // the company shell only. Contacts, deals and revenue are never invented.
+      let crmCompanyId: string | null = (system as { crm_company_id?: string | null }).crm_company_id ?? null;
+      let crmContactCount = 0;
+      const domain = identity.primary_domain || null;
+      if (!crmCompanyId && (domain || identity.display_name)) {
+        const { data: existingCrm } = domain
+          ? await sb.from("crm_companies").select("id").ilike("website", `%${domain}%`).limit(1).maybeSingle()
+          : { data: null };
+        if (existingCrm) crmCompanyId = (existingCrm as { id: string }).id;
+        else {
+          const { data: madeCrm } = await sb.from("crm_companies").insert({
+            name: identity.display_name || domain || "Unknown company",
+            website: identity.website_url || (domain ? `https://${domain}` : null),
+            notes: `Linked from Aetheris Golden Report ${scanId}. Contacts and deals must be imported by the operator.`,
+          }).select("id").maybeSingle();
+          crmCompanyId = (madeCrm as { id: string } | null)?.id ?? null;
+        }
+      }
+      if (crmCompanyId) {
+        const { count } = await sb.from("crm_contacts")
+          .select("id", { count: "exact", head: true }).eq("company_id", crmCompanyId);
+        crmContactCount = count ?? 0;
+      }
+      const crmConfig = suggestCrmConfig(rootCauses);
+      await sb.from("company_systems")
+        .update({ crm_company_id: crmCompanyId, crm_config: crmConfig })
+        .eq("id", systemId);
+
+      // Teams: only the sections this company actually needs.
+      const teams = deriveTeams(composed.modules, composed.gaps);
+      await sb.from("company_system_teams").delete().eq("system_id", systemId);
+      if (teams.length) {
+        await sb.from("company_system_teams").insert(teams.map((t) => ({
+          system_id: systemId, team_key: t.team_key, name: t.name, summary: t.summary,
+          root_cause_ids: t.root_cause_ids, module_ids: t.module_ids,
+          enabled: true, display_order: t.display_order,
+        })));
+      }
+
+      // Goals gain their team so every card lands in the right workspace.
+      const moduleTeam = new Map(composed.modules.map((m) => [m.module_id, teamForModule(m)]));
+      for (const g of insertedGoals as Array<{ id: string; module_id: string | null; baseline: string | null }>) {
+        await sb.from("company_system_goals").update({
+          team_key: moduleTeam.get(String(g.module_id)) || "executive",
+          requires_company_data: !g.baseline || /not measured|to be defined|to be agreed/i.test(g.baseline),
+        }).eq("id", g.id);
+      }
+
+      // Tasks: idempotent by dedupe_key, so a recompose never duplicates work
+      // and never resets an operator's completed task.
+      const goalIdByKey = new Map(
+        (insertedGoals as Array<{ id: string; root_cause_id: string | null; title: string }>)
+          .map((g) => [String(g.root_cause_id || g.title), g.id]),
+      );
+      const tasks = deriveTasks({
+        modules: composed.modules,
+        gaps: composed.gaps,
+        goals: insertedGoals as never,
+        crmLinked: !!crmCompanyId,
+        crmContactCount,
+      });
+      if (tasks.length) {
+        await sb.from("company_system_tasks").upsert(tasks.map((t) => ({
+          system_id: systemId,
+          company_id: companyId,
+          team_key: t.team_key,
+          goal_id: t.root_cause_id ? goalIdByKey.get(t.root_cause_id) ?? null : null,
+          root_cause_id: t.root_cause_id,
+          module_id: t.module_id,
+          title: t.title,
+          detail: t.detail,
+          kind: t.kind,
+          owner_role: t.owner_role,
+          priority: t.priority,
+          requires_company_data: t.requires_company_data,
+          source: t.source,
+          dedupe_key: t.dedupe_key,
+        })), { onConflict: "system_id,dedupe_key", ignoreDuplicates: true });
+      }
+
+      const playbooks = derivePlaybooks(composed.modules, rootCauses);
+      if (playbooks.length) {
+        await sb.from("company_system_playbooks").upsert(playbooks.map((p) => ({
+          system_id: systemId, team_key: p.team_key, title: p.title,
+          root_cause_ids: p.root_cause_ids, module_ids: p.module_ids,
+          steps: p.steps, tips: p.tips, dedupe_key: p.dedupe_key,
+        })), { onConflict: "system_id,dedupe_key" });
+      }
+
+      // Active memory: grounded, provenanced, scoped. Nothing invented.
+      const seeds = seedMemoryFromReport({
+        identity,
+        annualLow: leak ? Math.round(leak.low) : null,
+        annualHigh: leak ? Math.round(leak.high) : null,
+        rootCauses,
+        moduleIds: composed.modules.map((m) => m.module_id),
+        gaps: composed.gaps,
+        scanId,
+        reportHash: hash,
+        brandInferredFields: ((brand as { inferred_fields?: string[] })?.inferred_fields || []),
+      });
+      if (seeds.length) {
+        await sb.from("company_system_memory").upsert(seeds.map((s) => ({
+          company_id: companyId,
+          scan_id: s.scan_scoped ? scanId : null,
+          system_id: s.system_scoped ? systemId : null,
+          scope: s.scope,
+          memory_key: s.key,
+          value: s.value,
+          provenance: s.provenance,
+          confidence: s.confidence,
+          status: s.status,
+          sensitivity: s.sensitivity,
+          author: actor,
+          last_verified_at: s.status === "approved" ? new Date().toISOString() : null,
+        })), { onConflict: "company_id,scope,memory_key,system_id,scan_id" });
+      }
+
+      // Typed events: idempotent, retryable, auditable.
+      const busEvents = buildProvisioningEvents({
+        rootCauses,
+        goalTitles: (insertedGoals as Array<{ title: string }>).map((g) => g.title),
+        taskCount: tasks.length,
+        reportHash: hash,
+      });
+      if (busEvents.length) {
+        await sb.from("company_system_event_bus").upsert(busEvents.map((e) => ({
+          system_id: systemId, company_id: companyId,
+          event_type: e.event_type, from_module: e.from_module, to_module: e.to_module,
+          payload: e.payload, idempotency_key: e.idempotency_key,
+          status: "delivered", delivered_at: new Date().toISOString(),
+        })), { onConflict: "system_id,idempotency_key", ignoreDuplicates: true });
+      }
+
       await logEvent({
         system_id: systemId, company_id: companyId, scan_id: scanId,
         kind: "system_composed", status: "logged",
-        result: { modules: composed.modules.length, gaps: composed.gaps.length, coverage: composed.coverage },
+        result: {
+          modules: composed.modules.length, gaps: composed.gaps.length, coverage: composed.coverage,
+          teams: teams.length, tasks: tasks.length, playbooks: playbooks.length,
+          memory_seeded: seeds.length, events: busEvents.length,
+          crm_company_id: crmCompanyId, crm_contacts_found: crmContactCount,
+        },
       });
 
-      return json({ system, composed, reused: false });
+      return json({
+        system: { ...(system as Record<string, unknown>), crm_company_id: crmCompanyId, crm_config: crmConfig },
+        composed,
+        provisioned: { teams: teams.length, tasks: tasks.length, playbooks: playbooks.length, memory: seeds.length, events: busEvents.length },
+        reused: false,
+      });
     }
+
 
     /* ── workspace payload ────────────────────────────────────────────── */
     if (action === "get") {
