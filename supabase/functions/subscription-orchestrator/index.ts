@@ -809,8 +809,14 @@ serve(async (req) => {
     const internal = req.headers.get("x-internal-key") === SVC || bearer === SVC;
     // The scheduled sweeper cannot hold the service role key, so it carries a
     // dedicated secret and may ONLY resume already-queued work.
+    // The scheduler cannot hold the service role key. It may ONLY resume work
+    // that already exists (see the action guard below), so the anon key or a
+    // dedicated sweep secret is enough authority for that one action.
     const sweepKey = Deno.env.get("ORCHESTRATOR_SWEEP_KEY") || "";
-    const isSweeper = !!sweepKey && req.headers.get("x-sweep-key") === sweepKey;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const isSweeper =
+      (!!sweepKey && req.headers.get("x-sweep-key") === sweepKey) ||
+      (!!anonKey && bearer === anonKey);
     const isAdmin = internal ? true : await verifyAdminToken(getAdminTokenFromRequest(req), SVC).catch(() => false);
     if (!internal && !isAdmin && !isSweeper) return json({ error: "Unauthorized" }, 401);
 
