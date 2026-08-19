@@ -686,24 +686,44 @@ const STAGE_FN: Record<Stage, (ctx: Ctx) => Promise<void>> = {
 
 /* ─────────────────────────── workflow runner ───────────────────────────── */
 
-async function runWorkflow(workflowId: string) {
-  const { data: wfRow } = await sb.from("subscription_workflows").select("*").eq("id", workflowId).maybeSingle();
-  if (!wfRow) throw new Error("Workflow not found.");
-  const wf = wfRow as Workflow;
+const LEASE_SECONDS = 180;
 
-  if (wf.status === "completed") return { ok: true, status: "completed", workflow_id: wf.id, replay: true };
-  if (wf.status === "dead_letter") return { ok: false, status: "dead_letter", workflow_id: wf.id, error: wf.last_error };
-  if (wf.status === "running") {
-    // Another invocation owns it. Replay is safe but pointless right now.
-    return { ok: true, status: "running", workflow_id: wf.id, skipped: "already_running" };
+async function runWorkflow(workflowId: string) {
+  const { data: pre } = await sb.from("subscription_workflows").select("status, last_error").eq("id", workflowId).maybeSingle();
+  if (!pre) throw new Error("Workflow not found.");
+  const preStatus = (pre as { status: string }).status;
+  if (preStatus === "completed") return { ok: true, status: "completed", workflow_id: workflowId, replay: true };
+  if (preStatus === "dead_letter") {
+    return { ok: false, status: "dead_letter", workflow_id: workflowId, error: (pre as { last_error: string | null }).last_error };
   }
+
+  // Atomic claim. A racing invocation loses here and never runs a stage. A
+  // 'running' row is only reclaimed once its lease has actually expired.
+  const owner = `orch-${crypto.randomUUID()}`;
+  const { data: claimed, error: claimErr } = await sb.rpc("claim_subscription_workflow", {
+    _workflow_id: workflowId,
+    _owner: owner,
+    _lease_seconds: LEASE_SECONDS,
+  });
+  if (claimErr) throw claimErr;
+  const claimedRow = Array.isArray(claimed) ? claimed[0] : claimed;
+  if (!claimedRow) {
+    return { ok: true, status: "running", workflow_id: workflowId, skipped: "already_running" };
+  }
+  const wf = claimedRow as Workflow;
 
   const sub = await loadSubscription(wf.subscription_id);
   if (!sub) throw new Error("Subscription not found for this workflow.");
 
-  const attempts = (wf.attempts ?? 0) + 1;
-  await patchWorkflow(wf.id, { status: "running", attempts, started_at: wf.started_at ?? nowIso(), last_error: null });
-  wf.attempts = attempts;
+  const attempts = wf.attempts ?? 1;
+
+  /** Keeps the lease alive while a long stage runs; the sweep leaves us alone. */
+  const beat = async () => {
+    await sb.rpc("heartbeat_subscription_workflow", {
+      _workflow_id: wf.id, _owner: owner, _lease_seconds: LEASE_SECONDS,
+    }).then(() => undefined, () => undefined);
+  };
+  const heartbeat = setInterval(() => { void beat(); }, 45_000);
 
   const done = new Set<string>(Array.isArray(wf.stages_completed) ? wf.stages_completed as string[] : []);
   const ctx: Ctx = {
@@ -719,6 +739,9 @@ async function runWorkflow(workflowId: string) {
     system_id: wf.system_id,
     payload: { workflow_id: wf.id, attempt: attempts, plan_id: "intelligence" },
   });
+
+  try {
+
 
   for (const stage of STAGES) {
     // Stages are re-entrant: rehydrate context even for already-completed ones.
