@@ -276,7 +276,7 @@ export const TOOL_TIER: Record<string, TierId> = {
   "easy-mode": "suite",
 
   // Diagnostic — the full investigation
-  "golden-report": "diagnostic",
+  "golden-report": "intelligence",
   "nexus-iq": "diagnostic",
   reciprocation: "diagnostic",
   "ai-checklist": "diagnostic",
@@ -288,7 +288,7 @@ export const TOOL_TIER: Record<string, TierId> = {
 };
 
 /** Tools that only ever run inside a full investigation, never standalone. */
-export const DIAGNOSTIC_ONLY_TOOLS = ["golden-report"];
+export const DIAGNOSTIC_ONLY_TOOLS: string[] = [];
 
 export function tierForTool(toolId: string): TierId {
   return TOOL_TIER[toolId] ?? "diagnostic";
