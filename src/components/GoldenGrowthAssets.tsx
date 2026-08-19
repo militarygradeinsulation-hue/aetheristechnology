@@ -132,6 +132,10 @@ export function GoldenGrowthAssets({
 }) {
   const d = deliverables || null;
   const has = !!d && (!!d.brand || !!d.imagery || !!d.posts?.length || !!d.schedule?.days?.length);
+  // Local view filters only. Nothing here publishes anywhere.
+  const [postPlatform, setPostPlatform] = useState("all");
+  const [dayPlatform, setDayPlatform] = useState("all");
+  const [dayStatus, setDayStatus] = useState("all");
 
   if (!has) {
     return (
