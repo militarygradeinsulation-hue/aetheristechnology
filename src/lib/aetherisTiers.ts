@@ -69,6 +69,40 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     ctaHref: "/scan",
   },
   {
+    id: "intelligence",
+    name: "Golden Report Intelligence",
+    verb: "Monitor",
+    amountCents: 250000,
+    cadence: "monthly",
+    priceLabel: "$2,500/mo",
+    timeline: "live in minutes · no activation fee · no minimum term",
+    headline:
+      "Your Golden Report stops being a document and becomes a living company operating workspace, rescanned and rewritten every month.",
+    useCase:
+      "You want the forensic method running continuously on your business without buying operator time yet.",
+    outcome:
+      "A workspace that always knows what is leaking this month, and an AI that works inside it with you.",
+    adds: [
+      "One living Golden Report workspace for one company, up to 5 users",
+      "Report AI that reads your whole workspace and takes safe internal actions",
+      "Persistent business memory, so it stops asking you the same questions",
+      "Company System dashboard: leak register, goals, tips, tasks, checks, forecasting",
+      "Monthly public-surface rescan with a side-by-side comparison against last month",
+      "Monthly refreshed imagery concepts, 12 posts, and a 30-day schedule",
+      "Everything copyable and downloadable, plus self-serve billing",
+    ],
+    excludes: [
+      "Financial exposure here is modeled from public evidence and stated assumptions, not your internal numbers",
+      "No CRM, pipeline, or internal data integration — that is the 21-Day Diagnostic",
+      "No custom software builds, operator hours, or verified recovery claims — that is Active Case",
+      "No automatic external publishing; the workspace prepares, you publish",
+    ],
+    stripeLookupKey: "golden_report_intelligence_monthly",
+    checkout: true,
+    ctaLabel: "Start for $2,500/mo",
+    ctaHref: "/golden-report-intelligence",
+  },
+  {
     id: "signal",
     name: "Signal Pack",
     verb: "Diagnose",
