@@ -17,6 +17,8 @@
 import { stripDashes } from "./no-dashes.ts";
 
 export const MIN_IMAGERY = 4;
+/** Every stored report must carry at least this many imagery concepts. */
+export const TARGET_IMAGERY = 6;
 export const POST_COUNT = 12;
 export const SCHEDULE_DAYS = 30;
 
@@ -336,6 +338,59 @@ function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEnt
 }
 
 /**
+ * AI enrichment often returns 4 or 5 strong concepts. Accepting that verbatim
+ * used to shrink a 6 concept report down to 5, so top the list back up with the
+ * deterministic concepts the AI did not cover. Richer AI content always wins
+ * and is never replaced; the deterministic ones only fill the tail.
+ */
+export function topUpConcepts(
+  concepts: ImageryConcept[],
+  base: ImageryConcept[],
+  target = TARGET_IMAGERY,
+): ImageryConcept[] {
+  const out = [...concepts];
+  const seen = new Set(out.map((c) => clean(c.title).toLowerCase()));
+  for (const b of base) {
+    if (out.length >= target) break;
+    const key = clean(b.title).toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push({ ...b });
+  }
+  // Deterministic filler if the base itself was short: vary the channel so the
+  // extra concepts stay useful rather than being literal duplicates.
+  let n = 0;
+  while (out.length < target && base.length) {
+    const b = base[n % base.length];
+    n++;
+    const variant = EXTRA_CHANNELS[(out.length - base.length + EXTRA_CHANNELS.length) % EXTRA_CHANNELS.length];
+    const title = clean(`${b.title} (${variant.label})`);
+    if (seen.has(title.toLowerCase())) continue;
+    seen.add(title.toLowerCase());
+    out.push({
+      ...b,
+      title,
+      channel: variant.channel,
+      aspect_ratio: variant.ratio,
+      dimensions: variant.dims,
+      purpose: clean(`${b.purpose} Reformatted for ${variant.channel.toLowerCase()}.`),
+      prompt: clean(`${b.prompt} Reframe for ${variant.channel.toLowerCase()} at ${variant.ratio}.`),
+      hero: false,
+      image_url: null,
+      status: "concept",
+    });
+  }
+  return out.map((c, i) => ({ ...c, id: `img-${String(i + 1).padStart(2, "0")}`, hero: i === 0 }));
+}
+
+const EXTRA_CHANNELS: Array<{ label: string; channel: string; ratio: string; dims: string }> = [
+  { label: "story cut", channel: "Story and reel", ratio: "9:16", dims: "1080x1920" },
+  { label: "email header", channel: "Email header", ratio: "2:1", dims: "1200x600" },
+  { label: "square cut", channel: "Social feed", ratio: "1:1", dims: "1080x1080" },
+  { label: "wide banner", channel: "Landing page banner", ratio: "16:9", dims: "1920x1080" },
+];
+
+/**
  * Merge validated AI output over the deterministic base. Any section that
  * fails validation keeps its fallback content, and the state records that.
  */
@@ -354,7 +409,7 @@ export function normalizeDeliverables(
   );
 
   const upgraded = [concepts, posts, schedule].filter(Boolean).length;
-  const nextConcepts = concepts || base.imagery.concepts;
+  const nextConcepts = topUpConcepts(concepts || base.imagery.concepts, base.imagery.concepts);
 
   return {
     ...base,
@@ -393,7 +448,7 @@ export function deliverablesComplete(d: unknown): boolean {
   const concepts = (o.imagery as { concepts?: unknown[] } | undefined)?.concepts;
   const days = (o.schedule as { days?: unknown[] } | undefined)?.days;
   return (
-    Array.isArray(concepts) && concepts.length >= MIN_IMAGERY &&
+    Array.isArray(concepts) && concepts.length >= TARGET_IMAGERY &&
     Array.isArray(o.posts) && o.posts.length >= POST_COUNT &&
     Array.isArray(days) && days.length >= SCHEDULE_DAYS
   );
