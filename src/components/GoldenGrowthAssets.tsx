@@ -394,16 +394,27 @@ export function GoldenGrowthAssets({
         <TabsContent value="posts" className="space-y-3">
           {!posts.length && <p className="text-sm text-muted-foreground">Posts not available for this scan.</p>}
           {!!posts.length && (
-            <div className="flex justify-end">
-              <CopyBtn text={allPostsText} label="Copy all posts" />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <FilterSelect value={postPlatform} onChange={setPostPlatform} options={postPlatforms} label="Platform" />
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  {shownPosts.length} of {posts.length}
+                </span>
+                <CopyBtn text={allPostsText} label="Copy all posts" />
+              </div>
             </div>
           )}
-          {posts.map((p, i) => (
+          {shownPosts.map((p, i) => (
             <div key={p.id || i} className="border border-border rounded-md p-4 bg-muted/10">
               <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-blue-400 border border-blue-400/30 rounded px-1.5 py-0.5">
-                  {p.platform || "Post"} · {String(i + 1).padStart(2, "0")}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-blue-400 border border-blue-400/30 rounded px-1.5 py-0.5">
+                    {p.platform || "Post"} · {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                    {p.status || "ready"}
+                  </span>
+                </div>
                 <CopyBtn text={postText(p)} label="Copy post" />
               </div>
               {p.hook && <div className="font-serif font-semibold text-base mb-1">{p.hook}</div>}
@@ -430,14 +441,27 @@ export function GoldenGrowthAssets({
           {d!.schedule?.overview && <p className="text-sm text-foreground/90">{d!.schedule!.overview}</p>}
           {!!days.length && (
             <>
-              <div className="flex justify-end">
-                <button
-                  onClick={downloadSchedule}
-                  className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
-                >
-                  Download CSV
-                </button>
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <FilterSelect value={dayPlatform} onChange={setDayPlatform} options={dayPlatforms} label="Platform" />
+                  <FilterSelect value={dayStatus} onChange={setDayStatus} options={dayStatuses} label="Status" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                    {shownDays.length} of {days.length} days
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CopyBtn text={scheduleText} label="Copy schedule" />
+                  <button
+                    onClick={downloadSchedule}
+                    className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
+                  >
+                    Export CSV
+                  </button>
+                </div>
               </div>
+              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                Planning schedule only. Nothing publishes automatically from this report.
+              </p>
               <div className="overflow-x-auto border border-border rounded-md">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/30">
@@ -451,10 +475,11 @@ export function GoldenGrowthAssets({
                       <th className="px-3 py-2">Topic</th>
                       <th className="px-3 py-2">Goal</th>
                       <th className="px-3 py-2">Owner</th>
+                      <th className="px-3 py-2">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {days.map((r, i) => (
+                    {shownDays.map((r, i) => (
                       <tr key={i} className="border-t border-border align-top">
                         <td className="px-3 py-2 font-mono text-amber-500">{r.day ?? i + 1}</td>
                         <td className="px-3 py-2 whitespace-nowrap font-mono text-xs text-muted-foreground">{r.date}</td>
@@ -465,6 +490,9 @@ export function GoldenGrowthAssets({
                         <td className="px-3 py-2 min-w-[220px]">{r.topic}</td>
                         <td className="px-3 py-2 text-xs text-muted-foreground min-w-[180px]">{r.goal}</td>
                         <td className="px-3 py-2 text-xs whitespace-nowrap">{r.owner}</td>
+                        <td className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground whitespace-nowrap">
+                          {r.status || "planned"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
