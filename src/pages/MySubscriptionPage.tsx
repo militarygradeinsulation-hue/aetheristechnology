@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Package, ThumbsUp, ThumbsDown, Settings, Clock, Sparkles, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { IntelligencePlanPanel } from '@/components/IntelligencePlanPanel';
 
 export default function MySubscriptionPage() {
   const { user, loading: authLoading } = useAuth();
