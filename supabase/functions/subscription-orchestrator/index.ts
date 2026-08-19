@@ -87,13 +87,14 @@ async function emit(args: {
   causation_id?: string | null;
   payload?: Record<string, unknown>;
   status?: string;
+  idempotency_key?: string;
 }) {
   const { error } = await sb.from("company_system_event_bus").insert({
     system_id: args.system_id ?? null,
     company_id: args.company_id ?? null,
     event_type: args.event_type,
     status: args.status ?? "emitted",
-    idempotency_key: `${args.event_type}:${args.correlation_id}`,
+    idempotency_key: args.idempotency_key ?? `${args.event_type}:${args.correlation_id}`,
     payload: {
       ...(args.payload ?? {}),
       correlation_id: args.correlation_id,
