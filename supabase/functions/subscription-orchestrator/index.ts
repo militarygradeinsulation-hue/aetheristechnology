@@ -746,6 +746,7 @@ async function runWorkflow(workflowId: string) {
   for (const stage of STAGES) {
     // Stages are re-entrant: rehydrate context even for already-completed ones.
     try {
+      await beat();
       if (done.has(stage)) {
         await rehydrate(stage, ctx);
         continue;
@@ -766,6 +767,8 @@ async function runWorkflow(workflowId: string) {
         last_error: message,
         stages_completed: [...done],
         next_retry_at: dead ? null : new Date(Date.now() + delay * 1000).toISOString(),
+        lease_owner: null,
+        lease_expires_at: null,
       });
       await emit({
         event_type: dead ? "subscription.cycle.dead_letter" : "subscription.cycle.failed",
@@ -782,6 +785,7 @@ async function runWorkflow(workflowId: string) {
   await patchWorkflow(wf.id, {
     status: "completed", stage: null, completed_at: nowIso(),
     next_retry_at: null, stages_completed: [...done],
+    lease_owner: null, lease_expires_at: null,
     result: { ...(wf.result ?? {}), delivery_id: ctx.delivery_id, archive_id: ctx.archive?.id ?? null },
   });
   await emit({
@@ -793,7 +797,11 @@ async function runWorkflow(workflowId: string) {
   });
 
   return { ok: true, workflow_id: wf.id, status: "completed", delivery_id: ctx.delivery_id };
+  } finally {
+    clearInterval(heartbeat);
+  }
 }
+
 
 /** Rebuild context for a stage that already ran, so resume stays correct. */
 async function rehydrate(stage: Stage, ctx: Ctx) {
