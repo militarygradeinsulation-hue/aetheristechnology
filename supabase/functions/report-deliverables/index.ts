@@ -1,7 +1,7 @@
 // Golden Report growth deliverables: background enrichment + backfill.
 //
 // The scan itself never waits on this. forensic-scan-all attaches the
-// deterministic base (>= 4 imagery concepts, 12 posts, 30 schedule days) and
+// deterministic base (6 imagery concepts, 12 posts, 30 schedule days) and
 // marks the report completed, then calls this function fire and forget.
 //
 // Guarantees:
@@ -19,6 +19,8 @@ import {
   buildFallbackDeliverables,
   normalizeDeliverables,
   deliverablesComplete,
+  topUpConcepts,
+  TARGET_IMAGERY,
   type ReportDeliverables,
 } from "../_shared/report-deliverables.ts";
 
@@ -338,6 +340,91 @@ serve(async (req) => {
         processed: scans.length,
         repaired,
         already_complete: ok,
+        errors: errors.slice(0, 5),
+        cursor: scans.length ? String(scans[scans.length - 1].id) : null,
+        done: scans.length < batch,
+      });
+    }
+
+    /**
+     * Targeted historical repair: reports whose imagery.concepts fell below the
+     * 6 concept guarantee (AI enrichment used to be allowed to return 4 or 5).
+     * It only appends to imagery.concepts/prompts. Findings, dollar amounts,
+     * evidence, hashes, posts and schedule are read but never written.
+     */
+    if (action === "topup_imagery") {
+      const batch = Math.max(1, Math.min(100, Number(body.batch) || 25));
+      const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
+
+      let q = sb.from("forensic_scans")
+        .select("id, report, company_name, target_url")
+        .eq("status", "completed").not("report", "is", null)
+        .order("id", { ascending: true }).limit(batch);
+      if (cursor) q = q.gt("id", cursor);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const scans = (rows || []) as Array<Record<string, unknown>>;
+
+      let repaired = 0, skipped = 0;
+      const errors: string[] = [];
+      const repairedIds: string[] = [];
+
+      for (const s of scans) {
+        const id = String(s.id);
+        try {
+          const report = (s.report || {}) as Record<string, unknown>;
+          const existing = report.deliverables as ReportDeliverables | undefined;
+          const concepts = existing?.imagery?.concepts;
+          // Idempotent: anything already at the guarantee is left untouched.
+          if (!existing?.imagery || !Array.isArray(concepts) || concepts.length >= TARGET_IMAGERY) {
+            skipped++;
+            continue;
+          }
+
+          // Deterministic, company and finding specific source for the tail.
+          const base = buildFallbackDeliverables({
+            company: String(s.company_name || ""),
+            url: String(s.target_url || ""),
+            report,
+            brand: (existing.brand as Record<string, unknown>) || null,
+          });
+          const nextConcepts = topUpConcepts(concepts, base.imagery.concepts);
+          if (nextConcepts.length < TARGET_IMAGERY) throw new Error("top up did not reach the guarantee");
+
+          const nextImagery = {
+            ...existing.imagery,
+            concepts: nextConcepts,
+            prompts: nextConcepts.map((c) => ({ title: c.title, prompt: c.prompt })),
+          };
+          // Surgical write: only the imagery sub object is replaced.
+          const nextReport = {
+            ...report,
+            deliverables: { ...existing, imagery: nextImagery },
+          };
+          const { error: upErr } = await sb.from("forensic_scans")
+            .update({ report: nextReport }).eq("id", id);
+          if (upErr) throw upErr;
+
+          // Idempotent re archive, keyed on scan id, no reprovisioning.
+          await fetch(`${SUPABASE_URL}/functions/v1/golden-report-library`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, "x-internal-key": SVC },
+            body: JSON.stringify({ action: "archive_scan", scan_id: id, provision: false }),
+          }).catch(() => undefined);
+
+          repaired++;
+          repairedIds.push(id);
+        } catch (e) {
+          errors.push(`${id}: ${(e as Error).message.slice(0, 120)}`);
+        }
+      }
+
+      return json({
+        ok: true,
+        processed: scans.length,
+        repaired,
+        skipped,
+        repaired_ids: repairedIds,
         errors: errors.slice(0, 5),
         cursor: scans.length ? String(scans[scans.length - 1].id) : null,
         done: scans.length < batch,
