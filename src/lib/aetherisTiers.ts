@@ -34,6 +34,12 @@ export type AetherisTier = {
   outcome: string;
   /** Capabilities added AT this tier (not inherited). Outcomes, not product names. */
   adds: string[];
+  /** Explicit boundary lines. What this tier deliberately does NOT include. */
+  excludes?: string[];
+  /** Stripe price lookup key when the tier is self-serve checkout. */
+  stripeLookupKey?: string;
+  /** True when the CTA goes straight to an in-app checkout instead of a call. */
+  checkout?: boolean;
   /** Inheritance line, empty for the first two rungs. */
   inherits?: string;
   /** Credit note, stated once per tier where it applies. */
