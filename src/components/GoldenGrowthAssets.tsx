@@ -163,12 +163,12 @@ export function GoldenGrowthAssets({
     [p.hook, "", p.body, "", p.cta].filter((x) => x !== undefined).join("\n");
 
   const downloadSchedule = () => {
-    const header = ["Day", "Date", "Content Type", "Platform", "Time", "Purpose", "Topic", "Visual", "Goal", "Owner", "Finding"];
+    const header = ["Day", "Date", "Content Type", "Platform", "Time", "Purpose", "Topic", "Visual", "Goal", "Owner", "Status", "Finding"];
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = [
       header.join(","),
-      ...days.map((r, i) =>
-        [r.day ?? i + 1, r.date, r.content_type, r.platform, r.time, r.purpose, r.topic, r.visual, r.goal, r.owner, r.related_leak]
+      ...shownDays.map((r, i) =>
+        [r.day ?? i + 1, r.date, r.content_type, r.platform, r.time, r.purpose, r.topic, r.visual, r.goal, r.owner, r.status || "planned", r.related_leak]
           .map(esc).join(","),
       ),
     ].join("\n");
