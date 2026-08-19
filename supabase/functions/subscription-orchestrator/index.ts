@@ -517,10 +517,23 @@ async function stageDeliverables(ctx: Ctx) {
     );
   }
 
-  // AI refinement runs in the background and only replaces valid sections.
-  await callFunction("report-deliverables", { action: "enrich", scan_id: scanId }).catch((e) => {
-    console.warn("deliverable enrichment deferred:", (e as Error).message);
-  });
+  // The deterministic package above already satisfies the monthly delivery, so
+  // AI refinement is fired as a detached background job. It may later upgrade
+  // the stored deliverables, but it can never delay or kill this workflow.
+  const enrichKey = `deliverables-enrich:${scanId}:${ctx.wf.id}`;
+  const enrich = emit({
+    event_type: "deliverables.enrichment.requested",
+    correlation_id: ctx.wf.correlation_id,
+    company_id: ctx.wf.company_id,
+    system_id: ctx.wf.system_id,
+    idempotency_key: enrichKey,
+    payload: { scan_id: scanId, workflow_id: ctx.wf.id },
+  })
+    .then(() => callFunction("report-deliverables", { action: "enrich", scan_id: scanId }))
+    .then(() => undefined, (e) => console.warn("deliverable enrichment deferred:", (e as Error).message));
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(enrich);
+
 
   ctx.deliverables = deliverables;
 }
