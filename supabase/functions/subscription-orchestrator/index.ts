@@ -27,7 +27,11 @@ import {
   planById,
   planByLookupKey,
 } from "../_shared/plans.ts";
-import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
+import {
+  type ReportDeliverables,
+  buildFallbackDeliverables,
+  deliverablesComplete,
+} from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -283,7 +287,7 @@ type Ctx = {
   scan: Record<string, unknown> | null;
   comparison: Record<string, unknown> | null;
   system: Record<string, unknown> | null;
-  deliverables: Record<string, unknown> | null;
+  deliverables: ReportDeliverables | null;
   delivery_id: string | null;
 };
 
@@ -600,9 +604,17 @@ async function stageDelivery(ctx: Ctx) {
       top_priorities: ctx.archive.top_priorities ?? [],
     },
     comparison: ctx.comparison,
-    imagery: (ctx.deliverables?.imagery as unknown[]) ?? [],
-    posts: (ctx.deliverables?.posts as unknown[]) ?? [],
-    schedule: (ctx.deliverables?.schedule as unknown[]) ?? [],
+    // Persist the same shape the workspace UI reads: concepts, posts, days.
+    deliverables: ctx.deliverables ?? null,
+    imagery: ctx.deliverables?.imagery?.concepts ?? [],
+    posts: ctx.deliverables?.posts ?? [],
+    schedule: ctx.deliverables?.schedule?.days ?? [],
+    schedule_overview: ctx.deliverables?.schedule?.overview ?? null,
+    deliverable_counts: {
+      imagery: ctx.deliverables?.imagery?.concepts?.length ?? 0,
+      posts: ctx.deliverables?.posts?.length ?? 0,
+      schedule: ctx.deliverables?.schedule?.days?.length ?? 0,
+    },
     changes: (ctx.wf.result as Record<string, unknown>)?.refreshed ?? {},
     actions: ctx.archive.top_priorities ?? [],
     next_month_preview:
@@ -777,8 +789,12 @@ async function rehydrate(stage: Stage, ctx: Ctx) {
   }
   if (stage === "deliverables" && ctx.wf.scan_id) {
     const { data } = await sb.from("forensic_scans").select("report").eq("id", ctx.wf.scan_id).maybeSingle();
-    ctx.deliverables = ((data as Record<string, unknown> | null)?.report as Record<string, unknown> | undefined)
-      ?.deliverables as Record<string, unknown> ?? null;
+    const stored = ((data as Record<string, unknown> | null)?.report as Record<string, unknown> | undefined)
+      ?.deliverables as ReportDeliverables | undefined;
+    // A resumed run must not ship a short package just because the stage was
+    // marked done on an earlier attempt.
+    if (!meetsPlanMinimums(stored)) { await stageDeliverables(ctx); return; }
+    ctx.deliverables = stored ?? null;
   }
 }
 
