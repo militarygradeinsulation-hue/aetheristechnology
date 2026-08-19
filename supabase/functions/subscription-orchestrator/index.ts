@@ -775,11 +775,19 @@ serve(async (req) => {
       const state = accessStateFor(sub);
       if (!canWrite(state)) return json({ ok: true, skipped: `not_entitled:${state}` });
 
-      // Owner always holds seat #1. Idempotent.
+      // Owner always holds seat #1. The seat index is partial, so check then
+      // insert rather than upsert on a partial conflict target.
       if (sub.user_id) {
-        await sb.from("subscription_members").upsert({
-          subscription_id: sub.id, user_id: sub.user_id, role: "owner", status: "active",
-        }, { onConflict: "subscription_id,user_id" });
+        const { data: seat } = await sb.from("subscription_members")
+          .select("id").eq("subscription_id", sub.id).eq("user_id", sub.user_id).maybeSingle();
+        if (!seat) {
+          const { error: seatErr } = await sb.from("subscription_members").insert({
+            subscription_id: sub.id, user_id: sub.user_id, role: "owner", status: "active",
+          });
+          if (seatErr && (seatErr as { code?: string }).code !== "23505") {
+            console.error("owner seat insert:", seatErr.message);
+          }
+        }
       }
       await sb.from("subscriptions")
         .update({ seats_limit: PLAN.entitlements.max_users, plan_id: "intelligence" })
