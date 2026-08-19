@@ -1234,10 +1234,36 @@ serve(async (req) => {
       }
 
       const systemVersion = Number(sys.system_version ?? 1);
+
+      // Subscription entitlement gate. When this system is owned by a paid
+      // plan, the plan — not the stored system row — decides the effective
+      // tier, and a lapsed/read-only subscription may never execute.
+      let effectiveTier = sys.tier as ModuleTier;
+      const { data: subRow } = await sb.from("subscriptions")
+        .select("plan_id, status, current_period_end, cancel_at_period_end")
+        .eq("system_id", systemId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (subRow) {
+        const sub = subRow as unknown as SubscriptionRowLike & { plan_id: string | null };
+        const plan = planForSubscription(sub);
+        if (plan) effectiveTier = plan.module_tier as ModuleTier;
+        const state = accessStateFor(sub);
+        if (action === "action_execute" && !canWrite(state)) {
+          return json({
+            ok: false,
+            error: state === "none"
+              ? "This workspace has no active subscription. Renew Golden Report Intelligence to run actions."
+              : "Subscription is read only right now. Update billing to run actions again.",
+            access_state: state,
+          }, 402);
+        }
+      }
+
       const decision = validateAction(
         { module_id: moduleId, action_id: actionId, input },
         {
-          clientTier: sys.tier as ModuleTier,
+          clientTier: effectiveTier,
+
           enabledModuleIds: enabledIds,
           role,
           systemApprovalState: (sys.approval_state as string) ?? null,
