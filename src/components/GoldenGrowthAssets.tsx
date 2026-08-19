@@ -181,6 +181,42 @@ export function GoldenGrowthAssets({
 
   const allPostsText = posts.map((p, i) => `${i + 1}. ${p.platform}\n${postText(p)}`).join("\n\n———\n\n");
 
+  const uniq = (vals: (string | undefined)[]) =>
+    Array.from(new Set(vals.map((v) => (v || "").trim()).filter(Boolean)));
+  const postPlatforms = uniq(posts.map((p) => p.platform));
+  const dayPlatforms = uniq(days.map((r) => r.platform));
+  const dayStatuses = uniq(days.map((r) => r.status));
+  const shownPosts = posts.filter((p) => postPlatform === "all" || p.platform === postPlatform);
+  const shownDays = days.filter(
+    (r) =>
+      (dayPlatform === "all" || r.platform === dayPlatform) &&
+      (dayStatus === "all" || (r.status || "planned") === dayStatus),
+  );
+  const scheduleText = shownDays
+    .map(
+      (r, i) =>
+        `Day ${r.day ?? i + 1} · ${r.date || ""} · ${r.time || ""} · ${r.platform || ""} (${r.content_type || ""})\n${r.topic || ""}${r.goal ? `\nGoal: ${r.goal}` : ""}${r.owner ? `\nOwner: ${r.owner}` : ""}`,
+    )
+    .join("\n\n");
+
+  const FilterSelect = ({
+    value, onChange, options, label,
+  }: { value: string; onChange: (v: string) => void; options: string[]; label: string }) => (
+    <label className="flex items-center gap-1.5">
+      <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-background border border-border rounded px-2 py-1 text-xs"
+      >
+        <option value="all">All</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
+    </label>
+  );
+
   return (
     <Card className="p-0 bg-card border-border overflow-hidden">
       <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/10 to-transparent">
