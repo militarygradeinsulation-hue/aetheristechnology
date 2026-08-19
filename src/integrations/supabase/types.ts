@@ -5817,6 +5817,8 @@ export type Database = {
           name: string
           plan_id: string
           seat_limit: number
+          stripe_live_price_id: string | null
+          stripe_live_product_id: string | null
           stripe_lookup_key: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
@@ -5832,6 +5834,8 @@ export type Database = {
           name: string
           plan_id: string
           seat_limit?: number
+          stripe_live_price_id?: string | null
+          stripe_live_product_id?: string | null
           stripe_lookup_key?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -5847,6 +5851,8 @@ export type Database = {
           name?: string
           plan_id?: string
           seat_limit?: number
+          stripe_live_price_id?: string | null
+          stripe_live_product_id?: string | null
           stripe_lookup_key?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
