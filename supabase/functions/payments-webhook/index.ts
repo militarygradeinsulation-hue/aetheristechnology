@@ -71,16 +71,30 @@ serve(async (req) => {
     return new Response("Webhook error", { status: 400 });
   }
 
-  // Idempotency
-  const { data: already } = await supabase
-    .from("processed_webhook_events")
-    .select("stripe_event_id")
-    .eq("stripe_event_id", event.id)
-    .maybeSingle();
-  if (already) {
-    return new Response(JSON.stringify({ received: true, duplicate: true }), {
-      status: 200, headers: { "Content-Type": "application/json" },
-    });
+  // ---------------------------------------------------------------------
+  // ATOMIC IDEMPOTENCY CLAIM
+  // Insert first. The unique index on stripe_event_id means two concurrent
+  // deliveries of the same event can never both win the claim, so a handler
+  // runs exactly once. If the handler then fails we release the claim and
+  // return 500 so Stripe retries.
+  // ---------------------------------------------------------------------
+  const { error: claimErr } = await supabase.from("processed_webhook_events").insert({
+    stripe_event_id: event.id,
+    event_type: event.type,
+    environment: env,
+    status: "running",
+    claimed_at: new Date().toISOString(),
+  });
+
+  if (claimErr) {
+    // 23505 = unique_violation → another delivery already claimed this event.
+    if ((claimErr as any).code === "23505") {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        status: 200, headers: { "Content-Type": "application/json" },
+      });
+    }
+    console.error("claim error:", claimErr.message);
+    return new Response("Webhook error", { status: 500 });
   }
 
   try {
@@ -102,13 +116,7 @@ serve(async (req) => {
         await handleInvoicePaid(event.data.object, env);
         break;
       case "invoice.payment_failed":
-        await logActivity({
-          event_type: "invoice.payment_failed",
-          entity_type: "invoice",
-          entity_id: event.data.object.id,
-          summary: `Payment failed: ${event.data.object.id}`,
-          metadata: { invoice: event.data.object.id, amount: event.data.object.amount_due, env },
-        });
+        await handleInvoicePaymentFailed(event.data.object, env);
         break;
       case "charge.refunded":
         await handleChargeRefunded(event.data.object, env);
@@ -117,11 +125,16 @@ serve(async (req) => {
         console.log("Unhandled event:", event.type);
     }
 
-    await supabase.from("processed_webhook_events").insert({
-      stripe_event_id: event.id, event_type: event.type, environment: env,
-    });
+    await supabase
+      .from("processed_webhook_events")
+      .update({ status: "completed" })
+      .eq("stripe_event_id", event.id);
   } catch (e) {
-    console.error("handler error:", e);
+    // Never leave a failed handler marked complete. Release the claim so the
+    // Stripe retry can execute it. Log the message only — never the payload.
+    const msg = e instanceof Error ? e.message : "unknown handler error";
+    console.error("handler error:", msg);
+    await supabase.from("processed_webhook_events").delete().eq("stripe_event_id", event.id);
     return new Response("Webhook error", { status: 500 });
   }
 
@@ -129,6 +142,7 @@ serve(async (req) => {
     status: 200, headers: { "Content-Type": "application/json" },
   });
 });
+
 
 async function logActivity(row: {
   event_type: string;
