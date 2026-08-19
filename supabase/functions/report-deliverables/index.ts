@@ -110,13 +110,14 @@ Exactly 12 posts. Mix the platforms.`;
 Build a practical 30 day publishing schedule that sequences the 12 posts plus supporting email and video content.
 Return JSON:
 { "overview": "<2-3 sentences>",
-  "days": [ { "day": <1-30>, "content_type": "<social post|email|short video|blog>", "platform": "<channel>", "time": "<e.g. 8:30 AM ET>", "purpose": "<authority|proof of process|offer|education|reactivation>", "topic": "<specific to this company>", "visual": "<short visual direction>", "goal": "<what this day is meant to move>", "owner": "<Marketing|Owner|Sales>", "related_leak": "<the finding it maps to>" } ] }
+  "days": [ { "day": <1-30>, "content_type": "<social post|email|short video|blog>", "platform": "<channel>", "time": "<e.g. 8:30 AM ET>", "purpose": "<authority|proof of process|offer|education|reactivation>", "topic": "<one short line specific to this company>", "goal": "<short line on what this day moves>", "owner": "<Marketing|Owner|Sales>" } ] }
+Keep every value short so all 30 entries fit in one response.
 Exactly 30 entries, day 1 through 30, no gaps.`;
 
   const [imagery, posts, schedule] = await Promise.allSettled([
     call(imageryPrompt, 3200),
     call(postsPrompt, 4000),
-    call(schedulePrompt, 4000),
+    call(schedulePrompt, 6000),
   ]);
 
   const ok = <T>(r: PromiseSettledResult<T>): T | null => (r.status === "fulfilled" ? r.value : null);
