@@ -81,9 +81,9 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
     if (sub.company_id) {
       const { data } = await supabase
         .from("golden_report_archive")
-        .select("id, scan_id, company_display_name, archived_at, report_state")
+        .select("id, scan_id, raw_company_name, completed_at, report_state, is_valid")
         .eq("company_id", sub.company_id)
-        .order("archived_at", { ascending: false })
+        .order("completed_at", { ascending: false, nullsFirst: false })
         .limit(1)
         .maybeSingle();
       setReport(data ?? null);
@@ -221,7 +221,8 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
         </div>
         {report ? (
           <p className="text-sm text-foreground/90">
-            {report.company_display_name} · archived {fmtDate(report.archived_at)}
+            {report.raw_company_name || "Your company"} · archived {fmtDate(report.completed_at)}
+            {report.is_valid === false && <span className="text-crimson"> · needs repair</span>}
             {report.report_state && report.report_state !== "complete" && (
               <span className="text-crimson"> · {report.report_state}</span>
             )}
