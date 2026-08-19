@@ -132,7 +132,7 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
       )}
 
       <div className="mt-auto">
-        {t.id === "free" ? (
+        {t.id === "free" || t.checkout ? (
           <Button asChild className="w-full bg-amber text-background hover:bg-amber/90 font-semibold">
             <Link to={t.ctaHref}>
               {t.ctaLabel} <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
