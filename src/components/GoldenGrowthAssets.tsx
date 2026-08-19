@@ -59,6 +59,7 @@ export type DeliverablePost = {
   cta?: string;
   visual?: string;
   related_leak?: string;
+  status?: string;
 };
 
 export type ScheduleEntry = {
@@ -73,6 +74,7 @@ export type ScheduleEntry = {
   visual?: string;
   goal?: string;
   owner?: string;
+  status?: string;
   related_leak?: string;
 };
 
