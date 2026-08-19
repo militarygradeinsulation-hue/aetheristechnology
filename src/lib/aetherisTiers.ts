@@ -10,10 +10,10 @@
 //   -> INVESTIGATE (Diagnostic) -> SUSTAIN (Active Case)
 // ============================================================================
 
-export type TierId = "free" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
+export type TierId = "free" | "intelligence" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
 
 /** Ordered ladder, lowest to highest. Index = entitlement rank. */
-export const TIER_ORDER: TierId[] = ["free", "signal", "revenue", "suite", "diagnostic", "active"];
+export const TIER_ORDER: TierId[] = ["free", "intelligence", "signal", "revenue", "suite", "diagnostic", "active"];
 
 export type AetherisTier = {
   id: TierId;
