@@ -197,7 +197,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     inherits: "Everything in Operator Suite",
     adds: [
       "21 days of operator time inside your ops, sales, and marketing",
-      "The Golden Report — the full case file, every leak named, evidenced, ranked, and priced. Never sold separately, because it is the synthesis of every other instrument's output",
+      "The Golden Report, internally calibrated — the same case file you can subscribe to at $2,500/mo, except here the economics are validated against your CRM, pipeline, and internal numbers instead of public evidence and stated assumptions, and an operator signs off on the judgment",
       "Quantified leak ledger — a dollar figure next to every finding, ranked by exposure",
       "Account intelligence on your own pipeline — the forensic method pointed outward at your target accounts",
       "Automation readiness scoring — where AI actually pays, and where it is theater",
