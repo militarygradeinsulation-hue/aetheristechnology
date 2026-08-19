@@ -8294,9 +8294,12 @@ export type Database = {
           correlation_id: string
           created_at: string
           environment: string
+          heartbeat_at: string | null
           id: string
           idempotency_key: string
           last_error: string | null
+          lease_expires_at: string | null
+          lease_owner: string | null
           max_attempts: number
           next_retry_at: string | null
           plan_id: string | null
@@ -8324,9 +8327,12 @@ export type Database = {
           correlation_id?: string
           created_at?: string
           environment?: string
+          heartbeat_at?: string | null
           id?: string
           idempotency_key: string
           last_error?: string | null
+          lease_expires_at?: string | null
+          lease_owner?: string | null
           max_attempts?: number
           next_retry_at?: string | null
           plan_id?: string | null
@@ -8354,9 +8360,12 @@ export type Database = {
           correlation_id?: string
           created_at?: string
           environment?: string
+          heartbeat_at?: string | null
           id?: string
           idempotency_key?: string
           last_error?: string | null
+          lease_expires_at?: string | null
+          lease_owner?: string | null
           max_attempts?: number
           next_retry_at?: string | null
           plan_id?: string | null
@@ -9206,6 +9215,48 @@ export type Database = {
     }
     Functions: {
       claim_subscription_seats: { Args: never; Returns: number }
+      claim_subscription_workflow: {
+        Args: { _lease_seconds?: number; _owner: string; _workflow_id: string }
+        Returns: {
+          archive_id: string | null
+          attempts: number
+          billing_period_end: string | null
+          billing_period_start: string | null
+          company_id: string | null
+          completed_at: string | null
+          correlation_id: string
+          created_at: string
+          environment: string
+          heartbeat_at: string | null
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          lease_expires_at: string | null
+          lease_owner: string | null
+          max_attempts: number
+          next_retry_at: string | null
+          plan_id: string | null
+          result: Json
+          scan_id: string | null
+          stage: string | null
+          stages_completed: Json
+          started_at: string | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          subscription_id: string | null
+          system_id: string | null
+          updated_at: string
+          workflow_type: string
+          workflow_version: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "subscription_workflows"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       consume_resume_credit: { Args: { _email: string }; Returns: boolean }
       decrypt_token: {
         Args: { _ciphertext: string; _key: string }
@@ -9306,6 +9357,10 @@ export type Database = {
       grant_resume_credits: {
         Args: { _credits: number; _email: string }
         Returns: undefined
+      }
+      heartbeat_subscription_workflow: {
+        Args: { _lease_seconds?: number; _owner: string; _workflow_id: string }
+        Returns: boolean
       }
       increment_rep_sales: {
         Args: { _code: string; _commission: number; _sales: number }

@@ -87,13 +87,14 @@ async function emit(args: {
   causation_id?: string | null;
   payload?: Record<string, unknown>;
   status?: string;
+  idempotency_key?: string;
 }) {
   const { error } = await sb.from("company_system_event_bus").insert({
     system_id: args.system_id ?? null,
     company_id: args.company_id ?? null,
     event_type: args.event_type,
     status: args.status ?? "emitted",
-    idempotency_key: `${args.event_type}:${args.correlation_id}`,
+    idempotency_key: args.idempotency_key ?? `${args.event_type}:${args.correlation_id}`,
     payload: {
       ...(args.payload ?? {}),
       correlation_id: args.correlation_id,
@@ -517,10 +518,23 @@ async function stageDeliverables(ctx: Ctx) {
     );
   }
 
-  // AI refinement runs in the background and only replaces valid sections.
-  await callFunction("report-deliverables", { action: "enrich", scan_id: scanId }).catch((e) => {
-    console.warn("deliverable enrichment deferred:", (e as Error).message);
-  });
+  // The deterministic package above already satisfies the monthly delivery, so
+  // AI refinement is fired as a detached background job. It may later upgrade
+  // the stored deliverables, but it can never delay or kill this workflow.
+  const enrichKey = `deliverables-enrich:${scanId}:${ctx.wf.id}`;
+  const enrich = emit({
+    event_type: "deliverables.enrichment.requested",
+    correlation_id: ctx.wf.correlation_id,
+    company_id: ctx.wf.company_id,
+    system_id: ctx.wf.system_id,
+    idempotency_key: enrichKey,
+    payload: { scan_id: scanId, workflow_id: ctx.wf.id },
+  })
+    .then(() => callFunction("report-deliverables", { action: "enrich", scan_id: scanId }))
+    .then(() => undefined, (e) => console.warn("deliverable enrichment deferred:", (e as Error).message));
+  const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+  if (rt?.waitUntil) rt.waitUntil(enrich);
+
 
   ctx.deliverables = deliverables;
 }
@@ -686,24 +700,44 @@ const STAGE_FN: Record<Stage, (ctx: Ctx) => Promise<void>> = {
 
 /* ─────────────────────────── workflow runner ───────────────────────────── */
 
-async function runWorkflow(workflowId: string) {
-  const { data: wfRow } = await sb.from("subscription_workflows").select("*").eq("id", workflowId).maybeSingle();
-  if (!wfRow) throw new Error("Workflow not found.");
-  const wf = wfRow as Workflow;
+const LEASE_SECONDS = 180;
 
-  if (wf.status === "completed") return { ok: true, status: "completed", workflow_id: wf.id, replay: true };
-  if (wf.status === "dead_letter") return { ok: false, status: "dead_letter", workflow_id: wf.id, error: wf.last_error };
-  if (wf.status === "running") {
-    // Another invocation owns it. Replay is safe but pointless right now.
-    return { ok: true, status: "running", workflow_id: wf.id, skipped: "already_running" };
+async function runWorkflow(workflowId: string) {
+  const { data: pre } = await sb.from("subscription_workflows").select("status, last_error").eq("id", workflowId).maybeSingle();
+  if (!pre) throw new Error("Workflow not found.");
+  const preStatus = (pre as { status: string }).status;
+  if (preStatus === "completed") return { ok: true, status: "completed", workflow_id: workflowId, replay: true };
+  if (preStatus === "dead_letter") {
+    return { ok: false, status: "dead_letter", workflow_id: workflowId, error: (pre as { last_error: string | null }).last_error };
   }
+
+  // Atomic claim. A racing invocation loses here and never runs a stage. A
+  // 'running' row is only reclaimed once its lease has actually expired.
+  const owner = `orch-${crypto.randomUUID()}`;
+  const { data: claimed, error: claimErr } = await sb.rpc("claim_subscription_workflow", {
+    _workflow_id: workflowId,
+    _owner: owner,
+    _lease_seconds: LEASE_SECONDS,
+  });
+  if (claimErr) throw claimErr;
+  const claimedRow = Array.isArray(claimed) ? claimed[0] : claimed;
+  if (!claimedRow) {
+    return { ok: true, status: "running", workflow_id: workflowId, skipped: "already_running" };
+  }
+  const wf = claimedRow as Workflow;
 
   const sub = await loadSubscription(wf.subscription_id);
   if (!sub) throw new Error("Subscription not found for this workflow.");
 
-  const attempts = (wf.attempts ?? 0) + 1;
-  await patchWorkflow(wf.id, { status: "running", attempts, started_at: wf.started_at ?? nowIso(), last_error: null });
-  wf.attempts = attempts;
+  const attempts = wf.attempts ?? 1;
+
+  /** Keeps the lease alive while a long stage runs; the sweep leaves us alone. */
+  const beat = async () => {
+    await sb.rpc("heartbeat_subscription_workflow", {
+      _workflow_id: wf.id, _owner: owner, _lease_seconds: LEASE_SECONDS,
+    }).then(() => undefined, () => undefined);
+  };
+  const heartbeat = setInterval(() => { void beat(); }, 45_000);
 
   const done = new Set<string>(Array.isArray(wf.stages_completed) ? wf.stages_completed as string[] : []);
   const ctx: Ctx = {
@@ -720,9 +754,13 @@ async function runWorkflow(workflowId: string) {
     payload: { workflow_id: wf.id, attempt: attempts, plan_id: "intelligence" },
   });
 
+  try {
+
+
   for (const stage of STAGES) {
     // Stages are re-entrant: rehydrate context even for already-completed ones.
     try {
+      await beat();
       if (done.has(stage)) {
         await rehydrate(stage, ctx);
         continue;
@@ -743,6 +781,8 @@ async function runWorkflow(workflowId: string) {
         last_error: message,
         stages_completed: [...done],
         next_retry_at: dead ? null : new Date(Date.now() + delay * 1000).toISOString(),
+        lease_owner: null,
+        lease_expires_at: null,
       });
       await emit({
         event_type: dead ? "subscription.cycle.dead_letter" : "subscription.cycle.failed",
@@ -759,6 +799,7 @@ async function runWorkflow(workflowId: string) {
   await patchWorkflow(wf.id, {
     status: "completed", stage: null, completed_at: nowIso(),
     next_retry_at: null, stages_completed: [...done],
+    lease_owner: null, lease_expires_at: null,
     result: { ...(wf.result ?? {}), delivery_id: ctx.delivery_id, archive_id: ctx.archive?.id ?? null },
   });
   await emit({
@@ -770,7 +811,11 @@ async function runWorkflow(workflowId: string) {
   });
 
   return { ok: true, workflow_id: wf.id, status: "completed", delivery_id: ctx.delivery_id };
+  } finally {
+    clearInterval(heartbeat);
+  }
 }
+
 
 /** Rebuild context for a stage that already ran, so resume stays correct. */
 async function rehydrate(stage: Stage, ctx: Ctx) {
@@ -908,25 +953,42 @@ serve(async (req) => {
       const workflowId = String(body.workflow_id ?? "");
       if (!workflowId) return json({ error: "workflow_id required" }, 400);
       if (action === "retry") {
-        await patchWorkflow(workflowId, { status: "queued", last_error: null, next_retry_at: null, attempts: 0 });
+        await patchWorkflow(workflowId, {
+          status: "queued", last_error: null, next_retry_at: null, attempts: 0,
+          lease_owner: null, lease_expires_at: null,
+        });
       }
       const result = await runWorkflow(workflowId);
       return json(result);
     }
 
-    /* ── sweep: resume anything due ──────────────────────────────────── */
+    /* ── sweep: resume anything due, plus abandoned leases ───────────── */
     if (action === "sweep") {
-      const { data } = await sb.from("subscription_workflows")
+      const limit = Math.max(1, Math.min(20, Number(body.limit) || 5));
+      const now = nowIso();
+      const due = await sb.from("subscription_workflows")
         .select("id")
         .in("status", ["queued", "failed"])
-        .or(`next_retry_at.is.null,next_retry_at.lte.${nowIso()}`)
+        .or(`next_retry_at.is.null,next_retry_at.lte.${now}`)
         .order("created_at", { ascending: true })
-        .limit(Math.max(1, Math.min(20, Number(body.limit) || 5)));
-      const ids = ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
+        .limit(limit);
+      // A runner killed mid-stage leaves status='running'. Its lease stops
+      // being refreshed, so once it expires the row is safe to reclaim.
+      const stale = await sb.from("subscription_workflows")
+        .select("id")
+        .eq("status", "running")
+        .lt("lease_expires_at", now)
+        .order("created_at", { ascending: true })
+        .limit(limit);
+      const ids = [
+        ...((due.data ?? []) as Array<{ id: string }>).map((r) => r.id),
+        ...((stale.data ?? []) as Array<{ id: string }>).map((r) => r.id),
+      ].filter((id, i, a) => a.indexOf(id) === i).slice(0, limit);
       const results: unknown[] = [];
       for (const id of ids) results.push(await runWorkflow(id).catch((e) => ({ id, error: (e as Error).message })));
       return json({ ok: true, processed: ids.length, results });
     }
+
 
     /* ── status ──────────────────────────────────────────────────────── */
     if (action === "status") {
