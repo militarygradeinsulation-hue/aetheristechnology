@@ -807,11 +807,33 @@ serve(async (req) => {
   try {
     const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() || "";
     const internal = req.headers.get("x-internal-key") === SVC || bearer === SVC;
+    // The scheduled sweeper cannot hold the service role key, so it carries a
+    // dedicated secret and may ONLY resume already-queued work.
+    const sweepKey = Deno.env.get("ORCHESTRATOR_SWEEP_KEY") || "";
+    const isSweeper = !!sweepKey && req.headers.get("x-sweep-key") === sweepKey;
     const isAdmin = internal ? true : await verifyAdminToken(getAdminTokenFromRequest(req), SVC).catch(() => false);
-    if (!internal && !isAdmin) return json({ error: "Unauthorized" }, 401);
+    if (!internal && !isAdmin && !isSweeper) return json({ error: "Unauthorized" }, 401);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
+    if (isSweeper && !internal && !isAdmin && action !== "sweep") {
+      return json({ error: "Sweeper key may only run the sweep action" }, 403);
+    }
+
+    /**
+     * Stripe must get its 200 back well inside its timeout, so a cycle never
+     * runs inside the webhook-triggered request. The workflow row is durable
+     * and every stage is resumable: we start it in the background and the
+     * cron sweeper picks up anything that is still queued.
+     */
+    const startInBackground = (workflowId: string) => {
+      const task = runWorkflow(workflowId).catch((e) =>
+        console.error("background workflow", workflowId, (e as Error).message)
+      );
+      // deno-lint-ignore no-explicit-any
+      const rt = (globalThis as any).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(task);
+    };
 
     /* ── activate ────────────────────────────────────────────────────── */
     if (action === "activate") {
@@ -852,8 +874,8 @@ serve(async (req) => {
         payload: { subscription_id: sub.id, workflow_id: workflow.id, created },
       });
 
-      const result = await runWorkflow(workflow.id);
-      return json({ ok: true, activated: true, created, ...result });
+      startInBackground(workflow.id);
+      return json({ ok: true, activated: true, created, workflow_id: workflow.id, status: "started" });
     }
 
     /* ── enqueue_monthly ─────────────────────────────────────────────── */
@@ -871,8 +893,8 @@ serve(async (req) => {
       if (!created && workflow.status === "completed") {
         return json({ ok: true, duplicate: true, workflow_id: workflow.id, status: "completed" });
       }
-      const result = await runWorkflow(workflow.id);
-      return json({ ok: true, created, ...result });
+      startInBackground(workflow.id);
+      return json({ ok: true, created, workflow_id: workflow.id, status: "started" });
     }
 
     /* ── run / retry ─────────────────────────────────────────────────── */
