@@ -64,7 +64,7 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
   const load = async () => {
     // Accept any pending invite for the signed-in email before reading seats,
     // so an invited teammate genuinely becomes linked rather than decorative.
-    await supabase.rpc("claim_subscription_seats" as any).catch(() => null);
+    await Promise.resolve(supabase.rpc("claim_subscription_seats" as any)).catch(() => null);
 
     const [m, w] = await Promise.all([
       supabase.from("subscription_members").select("*").eq("subscription_id", sub.id),
