@@ -8235,6 +8235,7 @@ export type Database = {
       }
       subscription_members: {
         Row: {
+          accepted_at: string | null
           created_at: string
           id: string
           invited_email: string | null
@@ -8245,6 +8246,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -8255,6 +8257,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
