@@ -5817,6 +5817,8 @@ export type Database = {
           name: string
           plan_id: string
           seat_limit: number
+          stripe_live_price_id: string | null
+          stripe_live_product_id: string | null
           stripe_lookup_key: string | null
           stripe_price_id: string | null
           stripe_product_id: string | null
@@ -5832,6 +5834,8 @@ export type Database = {
           name: string
           plan_id: string
           seat_limit?: number
+          stripe_live_price_id?: string | null
+          stripe_live_product_id?: string | null
           stripe_lookup_key?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -5847,6 +5851,8 @@ export type Database = {
           name?: string
           plan_id?: string
           seat_limit?: number
+          stripe_live_price_id?: string | null
+          stripe_live_product_id?: string | null
           stripe_lookup_key?: string | null
           stripe_price_id?: string | null
           stripe_product_id?: string | null
@@ -8235,6 +8241,7 @@ export type Database = {
       }
       subscription_members: {
         Row: {
+          accepted_at: string | null
           created_at: string
           id: string
           invited_email: string | null
@@ -8245,6 +8252,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -8255,6 +8263,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -9196,6 +9205,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_subscription_seats: { Args: never; Returns: number }
       consume_resume_credit: { Args: { _email: string }; Returns: boolean }
       decrypt_token: {
         Args: { _ciphertext: string; _key: string }

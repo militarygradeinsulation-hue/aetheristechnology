@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Activity, ExternalLink, Loader2, RefreshCw, ShieldCheck, Users,
+  Activity, AlertTriangle, ExternalLink, FileText, Loader2, RefreshCw, ShieldCheck, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,18 +33,39 @@ const STAGE_LABEL: Record<string, string> = {
   notify: "Sending your notification",
 };
 
+/** Mirrors accessStateFor() in supabase/functions/_shared/plans.ts. */
+type AccessState = "active" | "grace" | "read_only" | "none";
+function accessStateFor(sub: Sub): AccessState {
+  const end = sub.current_period_end ? new Date(sub.current_period_end) : null;
+  const inPeriod = !!end && end.getTime() > Date.now();
+  if (sub.status === "active" || sub.status === "trialing") return "active";
+  if (sub.status === "past_due" || sub.status === "unpaid") return "grace";
+  if (sub.status === "canceled" || sub.status === "incomplete_expired" || sub.status === "paused") {
+    return inPeriod ? "active" : "read_only";
+  }
+  return "none";
+}
+
+const fmtDate = (v?: string | null) => (v ? new Date(v).toLocaleDateString() : "—");
+
 /**
- * Golden Report Intelligence control panel. Shows plan state, seat usage, the
- * live monthly workflow and links into the company workspace and billing
- * portal. Entitlements themselves are enforced server side; this is the view.
+ * Golden Report Intelligence control panel. Shows the real plan state, seat
+ * usage, the live monthly workflow, the latest report and links into the
+ * workspace and billing portal. Entitlements are enforced server side; this is
+ * only the view of them.
  */
 export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
   const [members, setMembers] = useState<any[]>([]);
   const [workflows, setWorkflows] = useState<any[]>([]);
+  const [report, setReport] = useState<any>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = async () => {
+    // Accept any pending invite for the signed-in email before reading seats,
+    // so an invited teammate genuinely becomes linked rather than decorative.
+    await Promise.resolve(supabase.rpc("claim_subscription_seats" as any)).catch(() => null);
+
     const [m, w] = await Promise.all([
       supabase.from("subscription_members").select("*").eq("subscription_id", sub.id),
       supabase
@@ -56,6 +77,17 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
     ]);
     setMembers((m.data as any[]) || []);
     setWorkflows((w.data as any[]) || []);
+
+    if (sub.company_id) {
+      const { data } = await supabase
+        .from("golden_report_archive")
+        .select("id, scan_id, company_display_name, archived_at, report_state")
+        .eq("company_id", sub.company_id)
+        .order("archived_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setReport(data ?? null);
+    }
   };
 
   useEffect(() => {
@@ -72,10 +104,24 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sub.id]);
 
-  const seatsUsed = members.filter(m => m.status !== "revoked").length;
+  // Only linked, active members consume a seat — this matches the DB trigger.
+  const activeSeats = members.filter(m => m.status === "active");
+  const pendingSeats = members.filter(m => m.status === "invited");
+  const seatsUsed = activeSeats.length;
   const seatLimit = sub.seats_limit ?? 5;
+
   const current = workflows[0];
-  const running = current && ["pending", "running"].includes(current.status);
+  const running = current && ["queued", "running"].includes(current.status);
+  const lastSuccess = workflows.find(w => w.status === "completed");
+  const state = accessStateFor(sub);
+
+  const stateLabel =
+    state === "grace" ? "Payment retrying · access preserved"
+    : state === "read_only" ? "Read only · billing ended"
+    : sub.cancel_at_period_end || sub.status === "canceled" ? "Active through period end"
+    : sub.status === "trialing" ? "Trial"
+    : sub.status === "active" ? "Active plan"
+    : `Status: ${sub.status}`;
 
   const openPortal = async () => {
     setBusy("portal");
@@ -93,7 +139,7 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
   const invite = async () => {
     const email = inviteEmail.trim().toLowerCase();
     if (!email) return;
-    if (seatsUsed >= seatLimit) {
+    if (seatsUsed + pendingSeats.length >= seatLimit) {
       toast({ title: "Seat limit reached", description: `This plan includes ${seatLimit} users.`, variant: "destructive" });
       return;
     }
@@ -110,7 +156,10 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
       return;
     }
     setInviteEmail("");
-    toast({ title: "Seat invited", description: `${email} can now sign in and reach the workspace.` });
+    toast({
+      title: "Invite recorded",
+      description: `${email} is pending. The seat links the first time they sign in with that exact email.`,
+    });
     load();
   };
 
@@ -119,13 +168,13 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber mb-1">
-            Monitor · Active plan
+            Monitor · {stateLabel}
           </div>
           <h2 className="font-forensic text-2xl font-bold">Golden Report Intelligence</h2>
           <p className="text-xs text-muted-foreground mt-1">
-            {sub.cancel_at_period_end
-              ? `Cancels on ${sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "period end"}`
-              : `Renews ${sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "monthly"}`}
+            {sub.cancel_at_period_end || sub.status === "canceled"
+              ? `Access ends ${fmtDate(sub.current_period_end)}`
+              : `Next cycle ${fmtDate(sub.current_period_end)}`}
             {" · $2,500/mo"}
           </p>
         </div>
@@ -144,11 +193,48 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
         </div>
       </div>
 
+      {state === "grace" && (
+        <p className="mt-4 text-sm text-crimson flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4" />
+          The last payment failed. Your workspace stays open while the card is retried.
+        </p>
+      )}
+      {state === "read_only" && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          This workspace is read only. Nothing was deleted. Reactivate billing to resume monthly cycles.
+        </p>
+      )}
+
       {!sub.system_id && (
         <p className="text-sm text-muted-foreground mt-4">
           Your workspace is being provisioned from your latest Golden Report. This page updates itself as soon as it is ready.
         </p>
       )}
+
+      {/* Latest report */}
+      <div className="mt-6 border-t border-border pt-4">
+        <div className="flex items-center gap-2 mb-2">
+          <FileText className="w-4 h-4 text-amber" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Latest Golden Report
+          </span>
+        </div>
+        {report ? (
+          <p className="text-sm text-foreground/90">
+            {report.company_display_name} · archived {fmtDate(report.archived_at)}
+            {report.report_state && report.report_state !== "complete" && (
+              <span className="text-crimson"> · {report.report_state}</span>
+            )}
+            {report.scan_id && (
+              <Link to={`/golden-report/${report.scan_id}`} className="text-amber ml-2 underline">
+                Open report
+              </Link>
+            )}
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">No archived report yet for this workspace.</p>
+        )}
+      </div>
 
       {/* Monthly workflow */}
       <div className="mt-6 border-t border-border pt-4">
@@ -172,7 +258,11 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
             </p>
             <p className="text-xs text-muted-foreground">
               {(current.stages_completed?.length || 0)} of {Object.keys(STAGE_LABEL).length} stages done
-              {current.completed_at && ` · finished ${new Date(current.completed_at).toLocaleDateString()}`}
+              {current.attempts ? ` · attempt ${current.attempts}` : ""}
+              {current.next_retry_at && ` · retries ${new Date(current.next_retry_at).toLocaleString()}`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Last successful cycle: {lastSuccess ? fmtDate(lastSuccess.completed_at) : "none yet"}
             </p>
           </div>
         )}
@@ -184,13 +274,14 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
           <Users className="w-4 h-4 text-amber" />
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             Seats {seatsUsed} of {seatLimit}
+            {pendingSeats.length > 0 && ` · ${pendingSeats.length} pending`}
           </span>
         </div>
         <div className="flex flex-wrap gap-2 mb-3">
           {members.map(m => (
             <span key={m.id} className="text-xs px-2 py-1 rounded-sm border border-border text-foreground/80">
               {m.invited_email || m.user_id} · {m.role}
-              {m.status !== "active" && <span className="text-muted-foreground"> ({m.status})</span>}
+              {m.status !== "active" && <span className="text-muted-foreground"> ({m.status === "invited" ? "pending" : m.status})</span>}
             </span>
           ))}
           {members.length === 0 && <span className="text-xs text-muted-foreground">Only you so far.</span>}
@@ -202,10 +293,17 @@ export const IntelligencePlanPanel: React.FC<{ sub: Sub }> = ({ sub }) => {
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
           />
-          <Button variant="outline" onClick={invite} disabled={busy === "invite" || seatsUsed >= seatLimit}>
+          <Button
+            variant="outline"
+            onClick={invite}
+            disabled={busy === "invite" || seatsUsed + pendingSeats.length >= seatLimit}
+          >
             Add seat
           </Button>
         </div>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          An invited teammate becomes active the first time they sign in with that exact email address.
+        </p>
       </div>
     </div>
   );

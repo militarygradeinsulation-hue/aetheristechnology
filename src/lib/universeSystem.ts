@@ -10,10 +10,10 @@
 // test suite guards both against drift with aetherisTiers / tool-shop-catalog.
 // ============================================================================
 
-export type ModuleTier = "free" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
+export type ModuleTier = "free" | "intelligence" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
 
 /** Mirrors aetherisTiers.TIER_ORDER. Drift is asserted in tests. */
-export const SYSTEM_TIER_ORDER: ModuleTier[] = ["free", "signal", "revenue", "suite", "diagnostic", "active"];
+export const SYSTEM_TIER_ORDER: ModuleTier[] = ["free", "intelligence", "signal", "revenue", "suite", "diagnostic", "active"];
 
 export function systemTierRank(t: ModuleTier | null | undefined): number {
   const i = SYSTEM_TIER_ORDER.indexOf((t || "free") as ModuleTier);
@@ -293,9 +293,30 @@ export function findModule(id: string): UniverseModule | undefined {
   return UNIVERSE_MODULE_REGISTRY.find((m) => m.id === id);
 }
 
+/**
+ * Golden Report Intelligence sits below Signal on the ladder but is a software
+ * plan with its own explicit instrument set. Rank alone would collapse it to
+ * "free" and enable nothing, so the plan carries an allowlist. Every entry is
+ * read/draft/internal work: external publishing and destructive actions stay
+ * blocked by the action-level risk gate below.
+ */
+export const INTELLIGENCE_MODULE_IDS: string[] = [
+  "brand-contradictions",
+  "friction-audit",
+  "website-scanner",
+  "content-calendar",
+  "social-content",
+  "image-studio",
+  "forecasting",
+];
+
+/** Risk levels Intelligence may execute. Never "external". */
+const INTELLIGENCE_MAX_RISKS: RiskLevel[] = ["read", "draft", "write"];
+
 export function moduleAllowedForTier(moduleId: string, clientTier: ModuleTier | null | undefined): boolean {
   const m = findModule(moduleId);
   if (!m) return false;
+  if (clientTier === "intelligence") return INTELLIGENCE_MODULE_IDS.includes(m.id);
   return systemTierRank(clientTier) >= systemTierRank(m.requiredTier);
 }
 
@@ -604,6 +625,9 @@ export function validateAction(req: ActionRequest, ctx: ActionContext): ActionDe
     return deny(`Locked. Requires the ${mod.requiredTier} tier.`);
   }
   if (ctx.role === "viewer" && action.risk !== "read") return deny("Viewer role may not execute actions");
+  if (ctx.clientTier === "intelligence" && !INTELLIGENCE_MAX_RISKS.includes(action.risk)) {
+    return deny("Golden Report Intelligence cannot publish, send or connect external systems.");
+  }
 
   const input = req.input || {};
   const extra = Object.keys(input).filter((k) => !action.input.includes(k));

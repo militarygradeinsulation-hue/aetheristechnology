@@ -27,7 +27,11 @@ import {
   planById,
   planByLookupKey,
 } from "../_shared/plans.ts";
-import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
+import {
+  type ReportDeliverables,
+  buildFallbackDeliverables,
+  deliverablesComplete,
+} from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -283,7 +287,7 @@ type Ctx = {
   scan: Record<string, unknown> | null;
   comparison: Record<string, unknown> | null;
   system: Record<string, unknown> | null;
-  deliverables: Record<string, unknown> | null;
+  deliverables: ReportDeliverables | null;
   delivery_id: string | null;
 };
 
@@ -440,8 +444,30 @@ async function stageRefresh(ctx: Ctx) {
 
 /**
  * 7. Guaranteed deliverables. The scan already attached a deterministic base;
- * this stage enforces the plan minimums and never returns an empty success.
+ * this stage enforces the plan minimums against the REAL persisted shape
+ * (imagery.concepts[], posts[], schedule.days[]) and never returns an empty
+ * success. ctx.deliverables always ends up holding the normalized object.
  */
+function deliverableCounts(d: unknown) {
+  const o = (d || {}) as Partial<ReportDeliverables>;
+  return {
+    imagery: Array.isArray(o.imagery?.concepts) ? o.imagery!.concepts.length : 0,
+    posts: Array.isArray(o.posts) ? o.posts.length : 0,
+    schedule: Array.isArray(o.schedule?.days) ? o.schedule!.days.length : 0,
+  };
+}
+
+/** Plan minimums are stricter than the global guarantee (6 imagery here). */
+function meetsPlanMinimums(d: unknown): boolean {
+  const c = deliverableCounts(d);
+  return (
+    deliverablesComplete(d) &&
+    c.imagery >= PLAN.entitlements.min_imagery &&
+    c.posts >= PLAN.entitlements.min_posts &&
+    c.schedule >= PLAN.entitlements.schedule_days
+  );
+}
+
 async function stageDeliverables(ctx: Ctx) {
   const scanId = ctx.wf.scan_id!;
   const { data } = await sb.from("forensic_scans").select("id, report, company_name, target_url").eq("id", scanId).maybeSingle();
@@ -449,37 +475,45 @@ async function stageDeliverables(ctx: Ctx) {
   if (!scan) throw new Error("Scan row disappeared before deliverables could be read.");
 
   const report = (scan.report ?? {}) as Record<string, unknown>;
-  let deliverables = (report.deliverables ?? {}) as Record<string, unknown>;
+  let deliverables = (report.deliverables ?? null) as ReportDeliverables | null;
 
-  const count = (k: string) => (Array.isArray(deliverables[k]) ? (deliverables[k] as unknown[]).length : 0);
-  const short = () =>
-    count("imagery") < PLAN.entitlements.min_imagery ||
-    count("posts") < PLAN.entitlements.min_posts ||
-    count("schedule") < PLAN.entitlements.schedule_days;
-
-  if (short()) {
+  if (!meetsPlanMinimums(deliverables)) {
     // Deterministic base first, so the client always has usable output.
     const fallback = buildFallbackDeliverables({
       company: String(scan.company_name ?? ctx.company?.display_name ?? ""),
       url: String(scan.target_url ?? ""),
       report,
-    }) as unknown as Record<string, unknown>;
-    deliverables = {
+      brand: (deliverables?.brand ?? null) as Record<string, unknown> | null,
+    });
+    // Keep whatever the stored copy already did better, section by section.
+    const stored = deliverables;
+    const storedCounts = deliverableCounts(stored);
+    const merged: ReportDeliverables = {
       ...fallback,
-      ...Object.fromEntries(
-        Object.entries(deliverables).filter(([k, v]) => Array.isArray(v) && (v as unknown[]).length >=
-          ((fallback[k] as unknown[] | undefined)?.length ?? 0)),
-      ),
+      brand: stored?.brand ?? fallback.brand ?? null,
+      imagery: storedCounts.imagery >= fallback.imagery.concepts.length && stored?.imagery
+        ? stored.imagery
+        : fallback.imagery,
+      posts: storedCounts.posts >= fallback.posts.length && stored?.posts ? stored.posts : fallback.posts,
+      schedule: storedCounts.schedule >= fallback.schedule.days.length && stored?.schedule
+        ? stored.schedule
+        : fallback.schedule,
       generation_state: "ready_with_fallback",
+      enriched_at: stored?.enriched_at ?? null,
     };
+    deliverables = merged;
     await sb.from("forensic_scans")
       .update({ report: { ...report, deliverables }, updated_at: nowIso() })
       .eq("id", scanId);
   }
 
-  if (short()) {
-    throw new Error(
-      `Deliverables are incomplete (${count("imagery")} imagery, ${count("posts")} posts, ${count("schedule")} schedule entries). The cycle stays resumable.`,
+  if (!meetsPlanMinimums(deliverables)) {
+    const c = deliverableCounts(deliverables);
+    throw new RetryableError(
+      `Deliverables are incomplete (${c.imagery}/${PLAN.entitlements.min_imagery} imagery concepts, ` +
+      `${c.posts}/${PLAN.entitlements.min_posts} posts, ${c.schedule}/${PLAN.entitlements.schedule_days} schedule days). ` +
+      `The cycle stays resumable.`,
+      120,
     );
   }
 
@@ -490,6 +524,7 @@ async function stageDeliverables(ctx: Ctx) {
 
   ctx.deliverables = deliverables;
 }
+
 
 /** 8. Memory, scoped to this company + report + system. No cross-tenant leak. */
 async function stageMemory(ctx: Ctx) {
@@ -569,9 +604,17 @@ async function stageDelivery(ctx: Ctx) {
       top_priorities: ctx.archive.top_priorities ?? [],
     },
     comparison: ctx.comparison,
-    imagery: (ctx.deliverables?.imagery as unknown[]) ?? [],
-    posts: (ctx.deliverables?.posts as unknown[]) ?? [],
-    schedule: (ctx.deliverables?.schedule as unknown[]) ?? [],
+    // Persist the same shape the workspace UI reads: concepts, posts, days.
+    deliverables: ctx.deliverables ?? null,
+    imagery: ctx.deliverables?.imagery?.concepts ?? [],
+    posts: ctx.deliverables?.posts ?? [],
+    schedule: ctx.deliverables?.schedule?.days ?? [],
+    schedule_overview: ctx.deliverables?.schedule?.overview ?? null,
+    deliverable_counts: {
+      imagery: ctx.deliverables?.imagery?.concepts?.length ?? 0,
+      posts: ctx.deliverables?.posts?.length ?? 0,
+      schedule: ctx.deliverables?.schedule?.days?.length ?? 0,
+    },
     changes: (ctx.wf.result as Record<string, unknown>)?.refreshed ?? {},
     actions: ctx.archive.top_priorities ?? [],
     next_month_preview:
@@ -746,8 +789,12 @@ async function rehydrate(stage: Stage, ctx: Ctx) {
   }
   if (stage === "deliverables" && ctx.wf.scan_id) {
     const { data } = await sb.from("forensic_scans").select("report").eq("id", ctx.wf.scan_id).maybeSingle();
-    ctx.deliverables = ((data as Record<string, unknown> | null)?.report as Record<string, unknown> | undefined)
-      ?.deliverables as Record<string, unknown> ?? null;
+    const stored = ((data as Record<string, unknown> | null)?.report as Record<string, unknown> | undefined)
+      ?.deliverables as ReportDeliverables | undefined;
+    // A resumed run must not ship a short package just because the stage was
+    // marked done on an earlier attempt.
+    if (!meetsPlanMinimums(stored)) { await stageDeliverables(ctx); return; }
+    ctx.deliverables = stored ?? null;
   }
 }
 
@@ -760,11 +807,39 @@ serve(async (req) => {
   try {
     const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() || "";
     const internal = req.headers.get("x-internal-key") === SVC || bearer === SVC;
+    // The scheduled sweeper cannot hold the service role key, so it carries a
+    // dedicated secret and may ONLY resume already-queued work.
+    // The scheduler cannot hold the service role key. It may ONLY resume work
+    // that already exists (see the action guard below), so the anon key or a
+    // dedicated sweep secret is enough authority for that one action.
+    const sweepKey = Deno.env.get("ORCHESTRATOR_SWEEP_KEY") || "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const isSweeper =
+      (!!sweepKey && req.headers.get("x-sweep-key") === sweepKey) ||
+      (!!anonKey && bearer === anonKey);
     const isAdmin = internal ? true : await verifyAdminToken(getAdminTokenFromRequest(req), SVC).catch(() => false);
-    if (!internal && !isAdmin) return json({ error: "Unauthorized" }, 401);
+    if (!internal && !isAdmin && !isSweeper) return json({ error: "Unauthorized" }, 401);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "");
+    if (isSweeper && !internal && !isAdmin && action !== "sweep") {
+      return json({ error: "Sweeper key may only run the sweep action" }, 403);
+    }
+
+    /**
+     * Stripe must get its 200 back well inside its timeout, so a cycle never
+     * runs inside the webhook-triggered request. The workflow row is durable
+     * and every stage is resumable: we start it in the background and the
+     * cron sweeper picks up anything that is still queued.
+     */
+    const startInBackground = (workflowId: string) => {
+      const task = runWorkflow(workflowId).catch((e) =>
+        console.error("background workflow", workflowId, (e as Error).message)
+      );
+      // deno-lint-ignore no-explicit-any
+      const rt = (globalThis as any).EdgeRuntime;
+      if (rt?.waitUntil) rt.waitUntil(task);
+    };
 
     /* ── activate ────────────────────────────────────────────────────── */
     if (action === "activate") {
@@ -805,8 +880,8 @@ serve(async (req) => {
         payload: { subscription_id: sub.id, workflow_id: workflow.id, created },
       });
 
-      const result = await runWorkflow(workflow.id);
-      return json({ ok: true, activated: true, created, ...result });
+      startInBackground(workflow.id);
+      return json({ ok: true, activated: true, created, workflow_id: workflow.id, status: "started" });
     }
 
     /* ── enqueue_monthly ─────────────────────────────────────────────── */
@@ -824,8 +899,8 @@ serve(async (req) => {
       if (!created && workflow.status === "completed") {
         return json({ ok: true, duplicate: true, workflow_id: workflow.id, status: "completed" });
       }
-      const result = await runWorkflow(workflow.id);
-      return json({ ok: true, created, ...result });
+      startInBackground(workflow.id);
+      return json({ ok: true, created, workflow_id: workflow.id, status: "started" });
     }
 
     /* ── run / retry ─────────────────────────────────────────────────── */

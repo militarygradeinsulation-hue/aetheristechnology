@@ -8,14 +8,15 @@ type: feature
 
 The 24 tools are NOT standalone SKUs. They are instruments included inside tiers.
 No public per-tool price, no per-tool Stripe checkout, no tool-shop retail plans.
-Progression: DIAGNOSE (Signal) -> ARM (Revenue) -> OPERATE (Suite) -> INVESTIGATE (Diagnostic) -> SUSTAIN (Active Case).
+Progression: DIAGNOSE (Free Scan) -> SUBSCRIBE (Golden Report Intelligence) -> ARM (Signal/Revenue) -> OPERATE (Suite) -> INVESTIGATE (Diagnostic) -> SUSTAIN (Active Case).
 
 1. **Free Self-Scan — $0.** One live scan, directional Revenue Score, one named leak.
-2. **Signal Pack — $7,500 one-time.** Website Leak Scanner full pass + Brand Contradictions + Friction Audit + findings memo + operator walkthrough.
-3. **Revenue Pack — $10,000 one-time.** Signal + Strategic Questions, Sales Scripts, Follow-Up Sequences, Content Calendar.
-4. **Operator Suite — $15,000 one-time.** Revenue + Detective Mode, Forensic Scan (All), Head-to-Head, Social Content, Image Studio, Content Engine, All-In-One, Easy Mode, full Tech Suite.
-5. **21-Day Diagnostic — $23,500. FLAGSHIP.** Suite + Golden Report, Nexus IQ, Reciprocation, AI Checklist, Playbook Generator, every remaining instrument, 21 days of operator time. Fit call required.
-6. **Active Case Retainer — $20,000/month.** Diagnostic clients only. Monthly rescans, living Leak Register, priority builds.
+2. **Golden Report Intelligence — $2,500/month. SOFTWARE-LED ENTRY SUBSCRIPTION.** Internal tier id `intelligence`. Stripe lookup key `golden_report_intelligence_monthly` (sandbox + live prices provisioned). One living Golden Report workspace and its Report AI for ONE company, up to 5 seats. Monthly cycle runs automatically: rescan, archive, compare, compose company system, refresh deliverables (6 imagery / 12 posts / 30 schedule days), update memory. Modules limited to brand, friction, scanner, content, forecasting. Report AI is read/draft/internal only: no external publishing, no integrations, no live actions. Entitlements enforced server-side (`_shared/plans.ts`, company-system action bus, subscription-orchestrator). Page: /golden-report-intelligence.
+3. **Signal Pack — $7,500 one-time.** Website Leak Scanner full pass + Brand Contradictions + Friction Audit + findings memo + operator walkthrough.
+4. **Revenue Pack — $10,000 one-time.** Signal + Strategic Questions, Sales Scripts, Follow-Up Sequences, Content Calendar.
+5. **Operator Suite — $15,000 one-time.** Revenue + Detective Mode, Forensic Scan (All), Head-to-Head, Social Content, Image Studio, Content Engine, All-In-One, Easy Mode, full Tech Suite.
+6. **21-Day Diagnostic — $23,500. FLAGSHIP.** Suite + Golden Report, Nexus IQ, Reciprocation, AI Checklist, Playbook Generator, every remaining instrument, 21 days of operator time. Fit call required.
+7. **Active Case Retainer — $20,000/month.** Diagnostic clients only. Monthly rescans, living Leak Register, priority builds.
 
 Public tool cards show tier badges ("Included in Operator Suite", "Diagnostic only"), never prices. CTAs go to the tier ladder or /book.
 
