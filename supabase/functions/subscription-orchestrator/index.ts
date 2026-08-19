@@ -939,25 +939,42 @@ serve(async (req) => {
       const workflowId = String(body.workflow_id ?? "");
       if (!workflowId) return json({ error: "workflow_id required" }, 400);
       if (action === "retry") {
-        await patchWorkflow(workflowId, { status: "queued", last_error: null, next_retry_at: null, attempts: 0 });
+        await patchWorkflow(workflowId, {
+          status: "queued", last_error: null, next_retry_at: null, attempts: 0,
+          lease_owner: null, lease_expires_at: null,
+        });
       }
       const result = await runWorkflow(workflowId);
       return json(result);
     }
 
-    /* ── sweep: resume anything due ──────────────────────────────────── */
+    /* ── sweep: resume anything due, plus abandoned leases ───────────── */
     if (action === "sweep") {
-      const { data } = await sb.from("subscription_workflows")
+      const limit = Math.max(1, Math.min(20, Number(body.limit) || 5));
+      const now = nowIso();
+      const due = await sb.from("subscription_workflows")
         .select("id")
         .in("status", ["queued", "failed"])
-        .or(`next_retry_at.is.null,next_retry_at.lte.${nowIso()}`)
+        .or(`next_retry_at.is.null,next_retry_at.lte.${now}`)
         .order("created_at", { ascending: true })
-        .limit(Math.max(1, Math.min(20, Number(body.limit) || 5)));
-      const ids = ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
+        .limit(limit);
+      // A runner killed mid-stage leaves status='running'. Its lease stops
+      // being refreshed, so once it expires the row is safe to reclaim.
+      const stale = await sb.from("subscription_workflows")
+        .select("id")
+        .eq("status", "running")
+        .lt("lease_expires_at", now)
+        .order("created_at", { ascending: true })
+        .limit(limit);
+      const ids = [
+        ...((due.data ?? []) as Array<{ id: string }>).map((r) => r.id),
+        ...((stale.data ?? []) as Array<{ id: string }>).map((r) => r.id),
+      ].filter((id, i, a) => a.indexOf(id) === i).slice(0, limit);
       const results: unknown[] = [];
       for (const id of ids) results.push(await runWorkflow(id).catch((e) => ({ id, error: (e as Error).message })));
       return json({ ok: true, processed: ids.length, results });
     }
+
 
     /* ── status ──────────────────────────────────────────────────────── */
     if (action === "status") {
