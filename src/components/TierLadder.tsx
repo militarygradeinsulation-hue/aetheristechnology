@@ -93,6 +93,22 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
         ))}
       </ul>
 
+      {t.excludes && !compact && (
+        <div className="mb-3 border-t border-border/60 pt-2">
+          <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+            Where this stops
+          </div>
+          <ul className="space-y-1">
+            {t.excludes.map(x => (
+              <li key={x} className="text-[12px] text-muted-foreground flex gap-2 leading-snug">
+                <span className="text-muted-foreground/60">·</span>
+                {x}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {t.credit && (
         <div
           className={`font-mono text-[10px] uppercase tracking-[0.18em] mb-3 ${
