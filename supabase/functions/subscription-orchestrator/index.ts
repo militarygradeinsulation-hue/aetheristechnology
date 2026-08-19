@@ -459,7 +459,11 @@ async function stageDeliverables(ctx: Ctx) {
 
   if (short()) {
     // Deterministic base first, so the client always has usable output.
-    const fallback = buildFallbackDeliverables(scan as never) as unknown as Record<string, unknown>;
+    const fallback = buildFallbackDeliverables({
+      company: String(scan.company_name ?? ctx.company?.display_name ?? ""),
+      url: String(scan.target_url ?? ""),
+      report,
+    }) as unknown as Record<string, unknown>;
     deliverables = {
       ...fallback,
       ...Object.fromEntries(
@@ -480,7 +484,7 @@ async function stageDeliverables(ctx: Ctx) {
   }
 
   // AI refinement runs in the background and only replaces valid sections.
-  await callFunction("report-deliverables", { scan_id: scanId }).catch((e) => {
+  await callFunction("report-deliverables", { action: "enrich", scan_id: scanId }).catch((e) => {
     console.warn("deliverable enrichment deferred:", (e as Error).message);
   });
 
