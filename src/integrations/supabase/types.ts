@@ -5806,6 +5806,54 @@ export type Database = {
           },
         ]
       }
+      plan_entitlements: {
+        Row: {
+          active: boolean
+          amount_cents: number
+          cadence: string
+          created_at: string
+          currency: string
+          entitlements: Json
+          name: string
+          plan_id: string
+          seat_limit: number
+          stripe_lookup_key: string | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount_cents: number
+          cadence?: string
+          created_at?: string
+          currency?: string
+          entitlements?: Json
+          name: string
+          plan_id: string
+          seat_limit?: number
+          stripe_lookup_key?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount_cents?: number
+          cadence?: string
+          created_at?: string
+          currency?: string
+          entitlements?: Json
+          name?: string
+          plan_id?: string
+          seat_limit?: number
+          stripe_lookup_key?: string | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       playbooks: {
         Row: {
           best_for_industries: string[] | null
@@ -5910,21 +5958,33 @@ export type Database = {
       }
       processed_webhook_events: {
         Row: {
+          attempts: number
+          claimed_at: string
           environment: string
           event_type: string
+          last_error: string | null
           processed_at: string
+          status: string
           stripe_event_id: string
         }
         Insert: {
+          attempts?: number
+          claimed_at?: string
           environment?: string
           event_type: string
+          last_error?: string | null
           processed_at?: string
+          status?: string
           stripe_event_id: string
         }
         Update: {
+          attempts?: number
+          claimed_at?: string
           environment?: string
           event_type?: string
+          last_error?: string | null
           processed_at?: string
+          status?: string
           stripe_event_id?: string
         }
         Relationships: []
@@ -8130,83 +8190,252 @@ export type Database = {
       }
       subscription_deliveries: {
         Row: {
+          billing_period_start: string | null
           created_at: string
           delivery_date: string
           delivery_type: string
           feedback_score: number | null
           id: string
           output_data: Json
+          plan_id: string | null
           stripe_invoice_id: string | null
           subscription_id: string
           user_id: string
+          workflow_id: string | null
         }
         Insert: {
+          billing_period_start?: string | null
           created_at?: string
           delivery_date?: string
           delivery_type: string
           feedback_score?: number | null
           id?: string
           output_data?: Json
+          plan_id?: string | null
           stripe_invoice_id?: string | null
           subscription_id: string
           user_id: string
+          workflow_id?: string | null
         }
         Update: {
+          billing_period_start?: string | null
           created_at?: string
           delivery_date?: string
           delivery_type?: string
           feedback_score?: number | null
           id?: string
           output_data?: Json
+          plan_id?: string | null
           stripe_invoice_id?: string | null
           subscription_id?: string
           user_id?: string
+          workflow_id?: string | null
         }
         Relationships: []
       }
+      subscription_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_email: string | null
+          role: string
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          role?: string
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          role?: string
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_members_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_workflows: {
+        Row: {
+          archive_id: string | null
+          attempts: number
+          billing_period_end: string | null
+          billing_period_start: string | null
+          company_id: string | null
+          completed_at: string | null
+          correlation_id: string
+          created_at: string
+          environment: string
+          id: string
+          idempotency_key: string
+          last_error: string | null
+          max_attempts: number
+          next_retry_at: string | null
+          plan_id: string | null
+          result: Json
+          scan_id: string | null
+          stage: string | null
+          stages_completed: Json
+          started_at: string | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          subscription_id: string | null
+          system_id: string | null
+          updated_at: string
+          workflow_type: string
+          workflow_version: number
+        }
+        Insert: {
+          archive_id?: string | null
+          attempts?: number
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          correlation_id?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          idempotency_key: string
+          last_error?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          plan_id?: string | null
+          result?: Json
+          scan_id?: string | null
+          stage?: string | null
+          stages_completed?: Json
+          started_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id?: string | null
+          system_id?: string | null
+          updated_at?: string
+          workflow_type?: string
+          workflow_version?: number
+        }
+        Update: {
+          archive_id?: string | null
+          attempts?: number
+          billing_period_end?: string | null
+          billing_period_start?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          correlation_id?: string
+          created_at?: string
+          environment?: string
+          id?: string
+          idempotency_key?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_retry_at?: string | null
+          plan_id?: string | null
+          result?: Json
+          scan_id?: string | null
+          stage?: string | null
+          stages_completed?: Json
+          started_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_id?: string | null
+          system_id?: string | null
+          updated_at?: string
+          workflow_type?: string
+          workflow_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_workflows_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
+          archive_id: string | null
           cancel_at_period_end: boolean | null
+          company_id: string | null
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
+          customer_email: string | null
           environment: string
           id: string
+          plan_id: string | null
           price_id: string
           product_id: string
+          seats_limit: number
           status: string
           stripe_customer_id: string
           stripe_subscription_id: string
+          system_id: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          archive_id?: string | null
           cancel_at_period_end?: boolean | null
+          company_id?: string | null
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          customer_email?: string | null
           environment?: string
           id?: string
+          plan_id?: string | null
           price_id: string
           product_id: string
+          seats_limit?: number
           status?: string
           stripe_customer_id: string
           stripe_subscription_id: string
+          system_id?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          archive_id?: string | null
           cancel_at_period_end?: boolean | null
+          company_id?: string | null
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          customer_email?: string | null
           environment?: string
           id?: string
+          plan_id?: string | null
           price_id?: string
           product_id?: string
+          seats_limit?: number
           status?: string
           stripe_customer_id?: string
           stripe_subscription_id?: string
+          system_id?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
