@@ -9196,6 +9196,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_subscription_seats: { Args: never; Returns: number }
       consume_resume_credit: { Args: { _email: string }; Returns: boolean }
       decrypt_token: {
         Args: { _ciphertext: string; _key: string }
