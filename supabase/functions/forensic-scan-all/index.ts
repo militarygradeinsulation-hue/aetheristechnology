@@ -21,6 +21,7 @@ import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
 import { verifyPortalToken } from "../_shared/portal-token.ts";
 import { resolveScanOrigin } from "../_shared/golden-report-source.ts";
+import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -774,131 +775,8 @@ Return JSON:
 }
 
 
-// ─────────────────────── growth deliverables synthesis ───────────────────────
-// Four practical website deliverables generated from the SAME cleaned findings
-// used by the evidence-based report: brand, imagery, posts, schedule.
-// Bounded: one wave, one attempt each, hard per-call timeout. Never blocks the
-// report — a failure simply leaves that section absent.
-
-const DELIVERABLE_VOICE = `
-DELIVERABLE RULES:
-- Everything must be specific to this company and grounded in the scan findings. No generic agency filler, no invented statistics, awards, client names, or claims.
-- Never use dashes as punctuation in public-facing copy. No em-dashes, no en-dashes, no hyphen used as a pause. Write shorter sentences instead.
-- USD only for any money value.
-- No emoji spam. No "in today's fast-paced world". No rhetorical questions.
-- Return ONLY valid JSON in the exact shape requested.`;
-
-async function deliverableCall(prompt: string, maxTokens: number) {
-  const res = await routedChatCompletion({
-    tier: "bulk",
-    messages: [
-      { role: "system", content: SYSTEM_VOICE + "\n" + DELIVERABLE_VOICE },
-      { role: "user", content: prompt },
-    ],
-    response_format: { type: "json_object" },
-    max_tokens: maxTokens,
-    temperature: 0.5,
-    timeoutMs: 45_000,
-  });
-  const raw = res.content || "{}";
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const m = raw.match(/\{[\s\S]*\}/);
-    return m ? JSON.parse(m[0]) : {};
-  }
-}
-
-async function synthesizeDeliverables(
-  findingsStr: string,
-  target: string,
-  company: string,
-  topLeaks: Array<Record<string, unknown>>,
-) {
-  const name = company || target;
-  const ctx = `COMPANY: ${name}
-WEBSITE: ${target}
-TOP LEAKS FOUND: ${JSON.stringify((topLeaks || []).slice(0, 5))}
-
-SCAN FINDINGS (the only source of truth about this company):
-${findingsStr.slice(0, 14_000)}`;
-
-  const brandPrompt = `${ctx}
-
-Write a concise BRAND BLUEPRINT for ${name}, corrected against what the scan actually found.
-Return JSON:
-{
- "positioning": "<2-3 sentences>",
- "target_audience": "<2-3 sentences naming who actually buys>",
- "voice": { "summary": "<1-2 sentences>", "do": ["<3-5 items>"], "dont": ["<3-5 items>"] },
- "messaging_pillars": [ { "title": "<short>", "detail": "<1-2 sentences>" } ],
- "value_proposition": "<one sentence a buyer would repeat>",
- "differentiators": ["<3-5 specific to this company>"],
- "color_guidance": { "summary": "<1-2 sentences>", "palette": [ { "role": "<primary|accent|surface|text>", "hex": "#RRGGBB", "use": "<where to use it>" } ] },
- "typography_guidance": { "headline": "<font family recommendation>", "body": "<font family recommendation>", "notes": "<1-2 sentences>" },
- "corrections": [ { "issue": "<what the scan found>", "fix": "<what to change>" } ]
-}
-Include 3-5 messaging_pillars and 3-6 corrections. Every correction must reference a real finding.`;
-
-  const imageryPrompt = `${ctx}
-
-Write an IMAGERY DIRECTION BOARD for ${name}.
-Return JSON:
-{
- "visual_style": "<2-3 sentences>",
- "subjects": ["<4-6 concrete subjects to photograph or render>"],
- "composition": "<2-3 sentences>",
- "lighting": "<1-2 sentences>",
- "color_treatment": "<1-2 sentences referencing real hex values>",
- "show": ["<4-6 items>"],
- "avoid": ["<4-6 items>"],
- "prompts": [ { "title": "<short label>", "prompt": "<a complete ready to paste image generation prompt, 40-80 words, naming the company context, subject, composition, lighting, palette and mood>" } ]
-}
-Include 4 to 6 prompts. Each prompt must be usable as-is with no placeholders.`;
-
-  const postsPrompt = `${ctx}
-
-Write 12 READY TO PUBLISH social posts for ${name}. Each is customized to this company and its real findings. No invented claims, no fabricated numbers, no client names.
-Return JSON:
-{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<60-140 words, plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence describing the suggested visual>" } ] }
-Exactly 12 posts. Mix the platforms. Never use dashes as punctuation.`;
-
-  const schedulePrompt = `${ctx}
-
-Build a practical 30 DAY PUBLISHING SCHEDULE for ${name} that assigns the kind of posts and supporting content generated for this company.
-Return JSON:
-{ "overview": "<2-3 sentences on cadence and goal>",
-  "days": [ { "day": <1-30>, "platform": "<channel>", "time": "<e.g. 8:30 AM ET>", "purpose": "<authority|proof|offer|education|reactivation>", "topic": "<specific to this company>", "visual": "<short visual direction>" } ] }
-Exactly 30 day entries, day 1 through 30, no gaps. Vary platform and purpose sensibly.`;
-
-  const specs: Array<[string, string, number]> = [
-    ["brand", brandPrompt, 2200],
-    ["imagery", imageryPrompt, 2200],
-    ["posts", postsPrompt, 3600],
-    ["schedule", schedulePrompt, 3600],
-  ];
-
-  const results = await Promise.allSettled(specs.map(([, p, t]) => deliverableCall(p, t)));
-  const out: Record<string, unknown> = {};
-  results.forEach((r, i) => {
-    const key = specs[i][0];
-    if (r.status !== "fulfilled" || !r.value || !Object.keys(r.value).length) {
-      console.error(`deliverable ${key} failed:`, r.status === "rejected" ? String(r.reason).slice(0, 160) : "empty");
-      return;
-    }
-    if (key === "posts") {
-      const posts = Array.isArray(r.value.posts) ? r.value.posts : [];
-      if (posts.length) out.posts = posts;
-    } else if (key === "schedule") {
-      const days = Array.isArray(r.value.days) ? r.value.days : [];
-      if (days.length) out.schedule = { overview: r.value.overview || "", days };
-    } else {
-      out[key] = r.value;
-    }
-  });
-  if (!Object.keys(out).length) return null;
-  return { ...out, generated_at: new Date().toISOString() };
-}
+// Growth deliverable AI enrichment now lives in the report-deliverables
+// function. This scan only attaches the deterministic base.
 
 
 // Run tasks in bounded waves so one gateway is never hit with 15 large
@@ -1304,25 +1182,30 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error(`scan ${id}: fully generic report — no AI chapter survived`);
     }
 
-    // Growth assets: brand / imagery / posts / schedule, built from the same
-    // cleaned findings. Hard-bounded so it can never re-open the timeout hole.
-    await stage("assets", "running", { cap_seconds: 90 });
+    // Growth assets: deterministic imagery concepts, posts and 30 day schedule
+    // built straight from this company's findings. No AI on the critical path,
+    // so the report can never wait on it and never ships with empty tabs.
+    // AI enrichment runs in the background after completion and merges over
+    // this base (see the report-deliverables function).
+    await stage("assets", "running", { mode: "deterministic" });
     try {
-      const cleanedStr = JSON.stringify(sanitizeFindingsForSynth(findings)).slice(0, 28_000);
-      const assets = await Promise.race([
-        synthesizeDeliverables(cleanedStr, url, company, report?.top_leaks || []),
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 90_000)),
-      ]);
-      if (assets) {
-        report.deliverables = assets;
-        await stage("assets", "done", { sections: Object.keys(assets) });
-      } else {
-        await stage("assets", "degraded", "growth assets unavailable this pass");
-      }
+      report.deliverables = buildFallbackDeliverables({
+        company,
+        url,
+        report,
+        brand: parsedBrand as unknown as Record<string, unknown> | null,
+      });
+      await stage("assets", "done", {
+        mode: "deterministic",
+        imagery: report.deliverables.imagery.concepts.length,
+        posts: report.deliverables.posts.length,
+        schedule: report.deliverables.schedule.days.length,
+      });
     } catch (e) {
       console.error("growth assets failed:", e instanceof Error ? e.message : String(e));
       await stage("assets", "degraded", "growth assets threw");
     }
+
 
 
 
@@ -1446,42 +1329,33 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       console.error(`scan ${id}: report is ${compilerState} — downloads and delivery are gated until it compiles clean`);
     }
 
-    // Golden Report Library: archive the completed report (idempotent by scan
-    // id). Never allowed to fail or delay the scan itself.
-    try {
-      const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/golden-report-library`, {
+    // Post completion work. The scan is already marked completed above, so
+    // none of this can delay the report. Archiving also queues the Company
+    // System compose, and enrichment upgrades the deterministic growth assets.
+    const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const internalCall = (fn: string, payload: Record<string, unknown>) =>
+      fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/${fn}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${svc}`,
           "x-internal-key": svc,
         },
-        body: JSON.stringify({ action: "archive_scan", scan_id: id }),
+        body: JSON.stringify(payload),
+      }).catch((e) => {
+        console.error(`${fn} call failed:`, (e as Error).message);
+        return undefined;
       });
-    } catch (archiveErr) {
-      console.error("golden report archive failed:", (archiveErr as Error).message);
-    }
 
-    // Compose the draft Aetheris Company System from the archived report.
-    // Draft only: no module is activated and no external write happens until an
-    // operator approves it. Idempotent on (scan, report hash, template).
-    if (compilerState === "compiled") {
-      try {
-        const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/company-system`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${svc}`,
-            "x-internal-key": svc,
-          },
-          body: JSON.stringify({ action: "compose", scan_id: id }),
-        });
-      } catch (sysErr) {
-        console.error("company system compose failed:", (sysErr as Error).message);
-      }
-    }
+    // Golden Report Library: archive the completed report (idempotent by scan id).
+    await internalCall("golden-report-library", { action: "archive_scan", scan_id: id });
+
+    // Background growth asset enrichment. Fire and forget, idempotent, and it
+    // re-archives the scan itself once the enriched deliverables are stored.
+    const enrich = internalCall("report-deliverables", { action: "enrich", scan_id: id });
+    const rt = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(enrich);
+
 
 
 

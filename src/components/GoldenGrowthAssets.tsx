@@ -25,13 +25,55 @@ export type GoldenDeliverables = {
     show?: string[];
     avoid?: string[];
     prompts?: { title?: string; prompt?: string }[];
+    concepts?: ImageryConcept[];
   } | null;
-  posts?: { platform?: string; hook?: string; body?: string; cta?: string; visual?: string }[] | null;
+  posts?: DeliverablePost[] | null;
   schedule?: {
     overview?: string;
-    days?: { day?: number; platform?: string; time?: string; purpose?: string; topic?: string; visual?: string }[];
+    days?: ScheduleEntry[];
   } | null;
+  generation_state?: "fallback" | "ready" | "ready_with_fallback" | "degraded";
   generated_at?: string;
+  enriched_at?: string | null;
+};
+
+export type ImageryConcept = {
+  id?: string;
+  title?: string;
+  purpose?: string;
+  channel?: string;
+  prompt?: string;
+  aspect_ratio?: string;
+  dimensions?: string;
+  related_leak?: string;
+  status?: string;
+  hero?: boolean;
+  image_url?: string | null;
+};
+
+export type DeliverablePost = {
+  id?: string;
+  platform?: string;
+  hook?: string;
+  body?: string;
+  cta?: string;
+  visual?: string;
+  related_leak?: string;
+};
+
+export type ScheduleEntry = {
+  day?: number;
+  date?: string;
+  post_id?: string | null;
+  content_type?: string;
+  platform?: string;
+  time?: string;
+  purpose?: string;
+  topic?: string;
+  visual?: string;
+  goal?: string;
+  owner?: string;
+  related_leak?: string;
 };
 
 function CopyBtn({ text, label = "Copy" }: { text: string; label?: string }) {
@@ -105,21 +147,54 @@ export function GoldenGrowthAssets({
   const imagery = d!.imagery;
   const posts = d!.posts || [];
   const days = d!.schedule?.days || [];
+  const concepts: ImageryConcept[] = imagery?.concepts?.length
+    ? imagery.concepts
+    : (imagery?.prompts || []).map((p, i) => ({ id: `img-${i + 1}`, title: p.title, prompt: p.prompt }));
+  const state = d!.generation_state;
+  const refining = state === "fallback" || state === "ready_with_fallback" || state === "degraded";
 
-  const postText = (p: NonNullable<GoldenDeliverables["posts"]>[number]) =>
+  const postText = (p: DeliverablePost) =>
     [p.hook, "", p.body, "", p.cta].filter((x) => x !== undefined).join("\n");
+
+  const downloadSchedule = () => {
+    const header = ["Day", "Date", "Content Type", "Platform", "Time", "Purpose", "Topic", "Visual", "Goal", "Owner", "Finding"];
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const csv = [
+      header.join(","),
+      ...days.map((r, i) =>
+        [r.day ?? i + 1, r.date, r.content_type, r.platform, r.time, r.purpose, r.topic, r.visual, r.goal, r.owner, r.related_leak]
+          .map(esc).join(","),
+      ),
+    ].join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = `30-day-schedule-${(company || "company").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  };
+
+  const allPostsText = posts.map((p, i) => `${i + 1}. ${p.platform}\n${postText(p)}`).join("\n\n———\n\n");
 
   return (
     <Card className="p-0 bg-card border-border overflow-hidden">
       <div className="p-5 border-b border-border bg-gradient-to-b from-amber-500/10 to-transparent">
-        <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500 mb-1">
-          Your Growth Assets
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500">
+            Your Growth Assets
+          </div>
+          {refining && (
+            <span className="text-[10px] font-mono uppercase tracking-widest text-blue-400 border border-blue-400/30 rounded px-1.5 py-0.5">
+              Refining in background
+            </span>
+          )}
         </div>
         <h4 className="font-serif text-xl font-bold">Built from {company}'s own evidence</h4>
         <p className="text-xs text-muted-foreground mt-1">
-          Brand blueprint, imagery direction, ready to publish posts, and a 30 day schedule. All generated from this scan.
+          {concepts.length} imagery concepts, {posts.length} ready to publish posts, and a {days.length} day schedule.
+          {refining ? " These are live now. Refined versions replace them automatically when the deeper pass finishes." : ""}
         </p>
       </div>
+
 
       <Tabs defaultValue="brand" className="p-5">
         <TabsList className="mb-4 flex-wrap h-auto">
@@ -220,17 +295,51 @@ export function GoldenGrowthAssets({
                 <div className="border border-border rounded p-3 bg-muted/10"><Bullets title="Show" items={imagery.show} /></div>
                 <div className="border border-border rounded p-3 bg-muted/10"><Bullets title="Avoid" items={imagery.avoid} tone="red" /></div>
               </div>
-              {!!imagery.prompts?.length && (
+              {!!concepts.length && (
                 <div>
-                  <Label>Ready To Use Image Prompts</Label>
-                  <div className="space-y-2">
-                    {imagery.prompts.map((p, i) => (
-                      <div key={i} className="border border-border rounded p-3 bg-muted/10">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <div className="font-serif font-semibold text-sm">{p.title || `Prompt ${i + 1}`}</div>
-                          <CopyBtn text={p.prompt || ""} label="Copy prompt" />
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Image Concepts · {concepts.length}</Label>
+                    <CopyBtn
+                      text={concepts.map((c, i) => `${i + 1}. ${c.title}\n${c.prompt}`).join("\n\n")}
+                      label="Copy all prompts"
+                    />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {concepts.map((c, i) => (
+                      <div key={c.id || i} className="border border-border rounded p-3 bg-muted/10 flex flex-col gap-2">
+                        {c.image_url && (
+                          <img
+                            src={c.image_url}
+                            alt={`${company} ${c.title || "brand concept"}`}
+                            loading="lazy"
+                            className="w-full rounded border border-border object-cover"
+                          />
+                        )}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="font-serif font-semibold text-sm">{c.title || `Concept ${i + 1}`}</div>
+                            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                              {[c.channel, c.aspect_ratio, c.dimensions].filter(Boolean).join(" · ")}
+                            </div>
+                          </div>
+                          <CopyBtn text={c.prompt || ""} label="Copy prompt" />
                         </div>
-                        <p className="text-xs font-mono leading-relaxed text-foreground/85 whitespace-pre-wrap">{p.prompt}</p>
+                        {c.purpose && <p className="text-xs text-foreground/80">{c.purpose}</p>}
+                        {c.related_leak && (
+                          <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500">
+                            Fixes: {c.related_leak}
+                          </div>
+                        )}
+                        <p className="text-xs font-mono leading-relaxed text-foreground/70 whitespace-pre-wrap">{c.prompt}</p>
+                        {c.image_url && (
+                          <a
+                            href={c.image_url}
+                            download
+                            className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
+                          >
+                            Download image
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -242,8 +351,13 @@ export function GoldenGrowthAssets({
 
         <TabsContent value="posts" className="space-y-3">
           {!posts.length && <p className="text-sm text-muted-foreground">Posts not available for this scan.</p>}
+          {!!posts.length && (
+            <div className="flex justify-end">
+              <CopyBtn text={allPostsText} label="Copy all posts" />
+            </div>
+          )}
           {posts.map((p, i) => (
-            <div key={i} className="border border-border rounded-md p-4 bg-muted/10">
+            <div key={p.id || i} className="border border-border rounded-md p-4 bg-muted/10">
               <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-blue-400 border border-blue-400/30 rounded px-1.5 py-0.5">
                   {p.platform || "Post"} · {String(i + 1).padStart(2, "0")}
@@ -253,11 +367,18 @@ export function GoldenGrowthAssets({
               {p.hook && <div className="font-serif font-semibold text-base mb-1">{p.hook}</div>}
               {p.body && <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{p.body}</p>}
               {p.cta && <div className="mt-2 text-sm text-amber-500">{p.cta}</div>}
-              {p.visual && (
-                <div className="mt-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Visual: {p.visual}
-                </div>
-              )}
+              <div className="mt-2 flex flex-wrap gap-3">
+                {p.visual && (
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                    Visual: {p.visual}
+                  </div>
+                )}
+                {p.related_leak && (
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-amber-500">
+                    Finding: {p.related_leak}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </TabsContent>
@@ -266,34 +387,51 @@ export function GoldenGrowthAssets({
           {!days.length && <p className="text-sm text-muted-foreground">Schedule not available for this scan.</p>}
           {d!.schedule?.overview && <p className="text-sm text-foreground/90">{d!.schedule!.overview}</p>}
           {!!days.length && (
-            <div className="overflow-x-auto border border-border rounded-md">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/30">
-                  <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    <th className="px-3 py-2">Day</th>
-                    <th className="px-3 py-2">Platform</th>
-                    <th className="px-3 py-2">Time</th>
-                    <th className="px-3 py-2">Purpose</th>
-                    <th className="px-3 py-2">Topic</th>
-                    <th className="px-3 py-2">Visual</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {days.map((r, i) => (
-                    <tr key={i} className="border-t border-border align-top">
-                      <td className="px-3 py-2 font-mono text-amber-500">{r.day ?? i + 1}</td>
-                      <td className="px-3 py-2 whitespace-nowrap text-blue-400">{r.platform}</td>
-                      <td className="px-3 py-2 whitespace-nowrap font-mono text-xs">{r.time}</td>
-                      <td className="px-3 py-2 whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground">{r.purpose}</td>
-                      <td className="px-3 py-2">{r.topic}</td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">{r.visual}</td>
+            <>
+              <div className="flex justify-end">
+                <button
+                  onClick={downloadSchedule}
+                  className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
+                >
+                  Download CSV
+                </button>
+              </div>
+              <div className="overflow-x-auto border border-border rounded-md">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/30">
+                    <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      <th className="px-3 py-2">Day</th>
+                      <th className="px-3 py-2">Date</th>
+                      <th className="px-3 py-2">Type</th>
+                      <th className="px-3 py-2">Platform</th>
+                      <th className="px-3 py-2">Time</th>
+                      <th className="px-3 py-2">Purpose</th>
+                      <th className="px-3 py-2">Topic</th>
+                      <th className="px-3 py-2">Goal</th>
+                      <th className="px-3 py-2">Owner</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {days.map((r, i) => (
+                      <tr key={i} className="border-t border-border align-top">
+                        <td className="px-3 py-2 font-mono text-amber-500">{r.day ?? i + 1}</td>
+                        <td className="px-3 py-2 whitespace-nowrap font-mono text-xs text-muted-foreground">{r.date}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground">{r.content_type}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-blue-400">{r.platform}</td>
+                        <td className="px-3 py-2 whitespace-nowrap font-mono text-xs">{r.time}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground">{r.purpose}</td>
+                        <td className="px-3 py-2 min-w-[220px]">{r.topic}</td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground min-w-[180px]">{r.goal}</td>
+                        <td className="px-3 py-2 text-xs whitespace-nowrap">{r.owner}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </TabsContent>
+
       </Tabs>
     </Card>
   );
