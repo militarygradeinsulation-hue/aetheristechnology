@@ -286,6 +286,7 @@ export function toolsForTier(clientTier: TierId): string[] {
 /** Tailwind accent class per tier, kept inside the forensic palette. */
 export const TIER_ACCENT: Record<TierId, string> = {
   free: "text-muted-foreground border-border/60",
+  intelligence: "text-amber border-amber/40",
   signal: "text-amber border-amber/40",
   revenue: "text-amber border-amber/50",
   suite: "text-amber border-amber/60",
