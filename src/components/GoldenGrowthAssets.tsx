@@ -374,13 +374,23 @@ export function GoldenGrowthAssets({
                         )}
                         <p className="text-xs font-mono leading-relaxed text-foreground/70 whitespace-pre-wrap">{c.prompt}</p>
                         {c.image_url && (
-                          <a
-                            href={c.image_url}
-                            download
-                            className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
-                          >
-                            Download image
-                          </a>
+                          <div className="flex items-center gap-3">
+                            <a
+                              href={c.image_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
+                            >
+                              View image
+                            </a>
+                            <a
+                              href={c.image_url}
+                              download
+                              className="text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400"
+                            >
+                              Download image
+                            </a>
+                          </div>
                         )}
                       </div>
                     ))}
