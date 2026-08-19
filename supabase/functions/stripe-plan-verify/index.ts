@@ -16,7 +16,39 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
   }
 
+  const body = await req.json().catch(() => ({} as Record<string, unknown>));
   const out: Record<string, unknown> = {};
+
+  // Optional one-time live provisioning. Guarded: it only runs when no active
+  // price already carries the lookup key in live mode, so it cannot duplicate.
+  if (body.create_live === true) {
+    const stripe = createStripeClient("live");
+    const existing = await stripe.prices.list({ lookup_keys: [PLAN.stripe_lookup_key], active: true, limit: 1 });
+    if (existing.data.length === 0) {
+      const products = await stripe.products.search({
+        query: `active:'true' AND name:'${PLAN.stripe_product_name}'`,
+        limit: 1,
+      }).catch(() => ({ data: [] as Array<{ id: string }> }));
+      const product = products.data[0] ?? await stripe.products.create({
+        name: PLAN.stripe_product_name,
+        description: PLAN.stripe_product_description,
+        tax_code: PLAN.tax_code,
+        metadata: { lovable_external_id: "golden_report_intelligence" },
+      });
+      const created = await stripe.prices.create({
+        product: product.id,
+        unit_amount: PLAN.amount_cents,
+        currency: PLAN.currency,
+        recurring: { interval: PLAN.interval },
+        lookup_key: PLAN.stripe_lookup_key,
+        transfer_lookup_key: true,
+        metadata: { lovable_external_id: PLAN.stripe_lookup_key },
+      });
+      out.created_live = { product: product.id, price: created.id };
+    } else {
+      out.created_live = { skipped: "already exists", price: existing.data[0].id };
+    }
+  }
   for (const env of ["sandbox", "live"] as StripeEnv[]) {
     try {
       const stripe = createStripeClient(env);
