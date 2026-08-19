@@ -33,7 +33,13 @@ Deno.serve(async (req) => {
         currency: p.currency,
         interval: p.recurring?.interval ?? null,
       }));
-      out[env] = { count: prices.length, prices };
+      const all = await stripe.prices.list({ active: true, limit: 100 });
+      out[env] = {
+        count: prices.length,
+        prices,
+        catalog_size: all.data.length,
+        sample_lookup_keys: all.data.map((p) => p.lookup_key).filter(Boolean).slice(0, 15),
+      };
       const match = prices.find((p) => p.unit_amount === PLAN.amount_cents && p.currency === "usd" && p.interval === "month");
       if (match) {
         await sb.from("plan_entitlements").update(
