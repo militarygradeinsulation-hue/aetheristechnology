@@ -545,7 +545,7 @@ async function stageMemory(ctx: Ctx) {
       author: "system",
       last_verified_at: nowIso(),
       updated_at: nowIso(),
-    }, { onConflict: "system_id,scope,memory_key" });
+    }, { onConflict: "company_id,scope,memory_key,system_id,scan_id" });
   }
 }
 
