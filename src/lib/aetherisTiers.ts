@@ -10,10 +10,10 @@
 //   -> INVESTIGATE (Diagnostic) -> SUSTAIN (Active Case)
 // ============================================================================
 
-export type TierId = "free" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
+export type TierId = "free" | "intelligence" | "signal" | "revenue" | "suite" | "diagnostic" | "active";
 
 /** Ordered ladder, lowest to highest. Index = entitlement rank. */
-export const TIER_ORDER: TierId[] = ["free", "signal", "revenue", "suite", "diagnostic", "active"];
+export const TIER_ORDER: TierId[] = ["free", "intelligence", "signal", "revenue", "suite", "diagnostic", "active"];
 
 export type AetherisTier = {
   id: TierId;
@@ -34,6 +34,12 @@ export type AetherisTier = {
   outcome: string;
   /** Capabilities added AT this tier (not inherited). Outcomes, not product names. */
   adds: string[];
+  /** Explicit boundary lines. What this tier deliberately does NOT include. */
+  excludes?: string[];
+  /** Stripe price lookup key when the tier is self-serve checkout. */
+  stripeLookupKey?: string;
+  /** True when the CTA goes straight to an in-app checkout instead of a call. */
+  checkout?: boolean;
   /** Inheritance line, empty for the first two rungs. */
   inherits?: string;
   /** Credit note, stated once per tier where it applies. */
@@ -67,6 +73,40 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     ],
     ctaLabel: "Run the free scan",
     ctaHref: "/scan",
+  },
+  {
+    id: "intelligence",
+    name: "Golden Report Intelligence",
+    verb: "Monitor",
+    amountCents: 250000,
+    cadence: "monthly",
+    priceLabel: "$2,500/mo",
+    timeline: "live in minutes · no activation fee · no minimum term",
+    headline:
+      "Your Golden Report stops being a document and becomes a living company operating workspace, rescanned and rewritten every month.",
+    useCase:
+      "You want the forensic method running continuously on your business without buying operator time yet.",
+    outcome:
+      "A workspace that always knows what is leaking this month, and an AI that works inside it with you.",
+    adds: [
+      "One living Golden Report workspace for one company, up to 5 users",
+      "Report AI that reads your whole workspace and takes safe internal actions",
+      "Persistent business memory, so it stops asking you the same questions",
+      "Company System dashboard: leak register, goals, tips, tasks, checks, forecasting",
+      "Monthly public-surface rescan with a side-by-side comparison against last month",
+      "Monthly refreshed imagery concepts, 12 posts, and a 30-day schedule",
+      "Everything copyable and downloadable, plus self-serve billing",
+    ],
+    excludes: [
+      "Financial exposure here is modeled from public evidence and stated assumptions, not your internal numbers",
+      "No CRM, pipeline, or internal data integration — that is the 21-Day Diagnostic",
+      "No custom software builds, operator hours, or verified recovery claims — that is Active Case",
+      "No automatic external publishing; the workspace prepares, you publish",
+    ],
+    stripeLookupKey: "golden_report_intelligence_monthly",
+    checkout: true,
+    ctaLabel: "Start for $2,500/mo",
+    ctaHref: "/golden-report-intelligence",
   },
   {
     id: "signal",
@@ -157,7 +197,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     inherits: "Everything in Operator Suite",
     adds: [
       "21 days of operator time inside your ops, sales, and marketing",
-      "The Golden Report — the full case file, every leak named, evidenced, ranked, and priced. Never sold separately, because it is the synthesis of every other instrument's output",
+      "The Golden Report, internally calibrated — the same case file you can subscribe to at $2,500/mo, except here the economics are validated against your CRM, pipeline, and internal numbers instead of public evidence and stated assumptions, and an operator signs off on the judgment",
       "Quantified leak ledger — a dollar figure next to every finding, ranked by exposure",
       "Account intelligence on your own pipeline — the forensic method pointed outward at your target accounts",
       "Automation readiness scoring — where AI actually pays, and where it is theater",
@@ -236,7 +276,7 @@ export const TOOL_TIER: Record<string, TierId> = {
   "easy-mode": "suite",
 
   // Diagnostic — the full investigation
-  "golden-report": "diagnostic",
+  "golden-report": "intelligence",
   "nexus-iq": "diagnostic",
   reciprocation: "diagnostic",
   "ai-checklist": "diagnostic",
@@ -248,7 +288,7 @@ export const TOOL_TIER: Record<string, TierId> = {
 };
 
 /** Tools that only ever run inside a full investigation, never standalone. */
-export const DIAGNOSTIC_ONLY_TOOLS = ["golden-report"];
+export const DIAGNOSTIC_ONLY_TOOLS: string[] = [];
 
 export function tierForTool(toolId: string): TierId {
   return TOOL_TIER[toolId] ?? "diagnostic";
@@ -286,6 +326,7 @@ export function toolsForTier(clientTier: TierId): string[] {
 /** Tailwind accent class per tier, kept inside the forensic palette. */
 export const TIER_ACCENT: Record<TierId, string> = {
   free: "text-muted-foreground border-border/60",
+  intelligence: "text-amber border-amber/40",
   signal: "text-amber border-amber/40",
   revenue: "text-amber border-amber/50",
   suite: "text-amber border-amber/60",

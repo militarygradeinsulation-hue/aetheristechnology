@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
+import { planById, planByLookupKey } from "../_shared/plans.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -71,16 +72,30 @@ serve(async (req) => {
     return new Response("Webhook error", { status: 400 });
   }
 
-  // Idempotency
-  const { data: already } = await supabase
-    .from("processed_webhook_events")
-    .select("stripe_event_id")
-    .eq("stripe_event_id", event.id)
-    .maybeSingle();
-  if (already) {
-    return new Response(JSON.stringify({ received: true, duplicate: true }), {
-      status: 200, headers: { "Content-Type": "application/json" },
-    });
+  // ---------------------------------------------------------------------
+  // ATOMIC IDEMPOTENCY CLAIM
+  // Insert first. The unique index on stripe_event_id means two concurrent
+  // deliveries of the same event can never both win the claim, so a handler
+  // runs exactly once. If the handler then fails we release the claim and
+  // return 500 so Stripe retries.
+  // ---------------------------------------------------------------------
+  const { error: claimErr } = await supabase.from("processed_webhook_events").insert({
+    stripe_event_id: event.id,
+    event_type: event.type,
+    environment: env,
+    status: "running",
+    claimed_at: new Date().toISOString(),
+  });
+
+  if (claimErr) {
+    // 23505 = unique_violation → another delivery already claimed this event.
+    if ((claimErr as any).code === "23505") {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        status: 200, headers: { "Content-Type": "application/json" },
+      });
+    }
+    console.error("claim error:", claimErr.message);
+    return new Response("Webhook error", { status: 500 });
   }
 
   try {
@@ -102,13 +117,7 @@ serve(async (req) => {
         await handleInvoicePaid(event.data.object, env);
         break;
       case "invoice.payment_failed":
-        await logActivity({
-          event_type: "invoice.payment_failed",
-          entity_type: "invoice",
-          entity_id: event.data.object.id,
-          summary: `Payment failed: ${event.data.object.id}`,
-          metadata: { invoice: event.data.object.id, amount: event.data.object.amount_due, env },
-        });
+        await handleInvoicePaymentFailed(event.data.object, env);
         break;
       case "charge.refunded":
         await handleChargeRefunded(event.data.object, env);
@@ -117,11 +126,16 @@ serve(async (req) => {
         console.log("Unhandled event:", event.type);
     }
 
-    await supabase.from("processed_webhook_events").insert({
-      stripe_event_id: event.id, event_type: event.type, environment: env,
-    });
+    await supabase
+      .from("processed_webhook_events")
+      .update({ status: "completed" })
+      .eq("stripe_event_id", event.id);
   } catch (e) {
-    console.error("handler error:", e);
+    // Never leave a failed handler marked complete. Release the claim so the
+    // Stripe retry can execute it. Log the message only — never the payload.
+    const msg = e instanceof Error ? e.message : "unknown handler error";
+    console.error("handler error:", msg);
+    await supabase.from("processed_webhook_events").delete().eq("stripe_event_id", event.id);
     return new Response("Webhook error", { status: 500 });
   }
 
@@ -129,6 +143,7 @@ serve(async (req) => {
     status: 200, headers: { "Content-Type": "application/json" },
   });
 });
+
 
 async function logActivity(row: {
   event_type: string;
@@ -580,10 +595,19 @@ function triggerFunction(name: string, body: Record<string, unknown>) {
   }).catch(e => console.error(`trigger ${name}:`, e));
 }
 
+/**
+ * Resolve the human-readable price id. `lookup_key` first: it is stable across
+ * sandbox and live and is what every plan mapping keys off.
+ */
+function resolvePriceId(price: any): string | null {
+  return price?.lookup_key || price?.metadata?.lovable_external_id || price?.id || null;
+}
+
 async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
   const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.metadata?.lovable_external_id || item?.price?.id;
+  const priceId = resolvePriceId(item?.price);
   const productId = item?.price?.product;
+  const plan = planByLookupKey(priceId);
 
   let userId = subscription.metadata?.userId || null;
   const email = subscription.customer_email || subscription.customer_details?.email || null;
@@ -592,14 +616,20 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
     if (profile) userId = profile.id;
   }
 
+  const periodStart = item?.current_period_start ?? subscription.current_period_start;
+  const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+
   await supabase.from("subscriptions").upsert({
     user_id: userId,
     stripe_subscription_id: subscription.id,
     stripe_customer_id: subscription.customer,
     product_id: productId, price_id: priceId,
+    plan_id: plan?.id ?? subscription.metadata?.plan_id ?? null,
+    seats_limit: plan?.entitlements.max_users ?? 5,
+    customer_email: email,
     status: subscription.status,
-    current_period_start: subscription.current_period_start ? new Date(subscription.current_period_start * 1000).toISOString() : null,
-    current_period_end: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : null,
+    current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+    current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     environment: env, updated_at: new Date().toISOString(),
   }, { onConflict: "stripe_subscription_id" });
 
@@ -608,29 +638,48 @@ async function handleSubscriptionCreated(subscription: any, env: StripeEnv) {
     entity_id: subscription.id,
     rep_code: subscription.metadata?.rep_code || null,
     summary: `Subscription created (${priceId})`,
-    metadata: { env, status: subscription.status, email },
+    metadata: { env, status: subscription.status, email, plan_id: plan?.id ?? null },
   });
+
+  await maybeActivateIntelligence(subscription.id, subscription.status, env);
 }
 
 async function handleSubscriptionUpdated(subscription: any, env: StripeEnv) {
   const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.metadata?.lovable_external_id || item?.price?.id;
+  const priceId = resolvePriceId(item?.price);
   const productId = item?.price?.product;
-  await supabase.from("subscriptions").update({
+  const plan = planByLookupKey(priceId);
+  const periodStart = item?.current_period_start ?? subscription.current_period_start;
+  const periodEnd = item?.current_period_end ?? subscription.current_period_end;
+
+  const patch: Record<string, unknown> = {
     status: subscription.status, product_id: productId, price_id: priceId,
-    current_period_start: subscription.current_period_start ? new Date(subscription.current_period_start * 1000).toISOString() : null,
-    current_period_end: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : null,
+    current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+    current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     cancel_at_period_end: subscription.cancel_at_period_end || false,
     updated_at: new Date().toISOString(),
-  }).eq("stripe_subscription_id", subscription.id).eq("environment", env);
+  };
+  if (plan) {
+    patch.plan_id = plan.id;
+    patch.seats_limit = plan.entitlements.max_users;
+  }
+
+  await supabase.from("subscriptions").update(patch)
+    .eq("stripe_subscription_id", subscription.id).eq("environment", env);
 
   await logActivity({
     event_type: "subscription.updated", entity_type: "subscription", entity_id: subscription.id,
-    summary: `Subscription updated → ${subscription.status}`, metadata: { env },
+    summary: `Subscription updated → ${subscription.status}`, metadata: { env, plan_id: plan?.id ?? null },
   });
+
+  // An upgrade or a recovered payment can be the first moment the workspace
+  // becomes entitled. Activation is idempotent, so calling it again is safe.
+  await maybeActivateIntelligence(subscription.id, subscription.status, env);
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
+  // Access is NOT revoked here. accessStateFor() keeps the workspace live
+  // until current_period_end and then makes it read-only. Data is never deleted.
   await supabase.from("subscriptions").update({
     status: "canceled", updated_at: new Date().toISOString(),
   }).eq("stripe_subscription_id", subscription.id).eq("environment", env);
@@ -640,25 +689,51 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
   });
 }
 
+/**
+ * Fire the one internal orchestrator that provisions the Golden Report
+ * Intelligence workspace. Only for entitled statuses, only for that plan.
+ */
+async function maybeActivateIntelligence(stripeSubscriptionId: string, status: string, env: StripeEnv) {
+  if (status !== "active" && status !== "trialing") return;
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("id, plan_id, price_id")
+    .eq("stripe_subscription_id", stripeSubscriptionId)
+    .eq("environment", env)
+    .maybeSingle();
+  if (!sub) return;
+  const plan = planById(sub.plan_id as string) ?? planByLookupKey(sub.price_id as string);
+  if (plan?.id !== "intelligence") return;
+
+  triggerFunction("subscription-orchestrator", {
+    action: "activate",
+    subscription_id: sub.id,
+    environment: env,
+  });
+}
+
+async function handleInvoicePaymentFailed(invoice: any, env: StripeEnv) {
+  const subId = invoice.subscription || invoice.parent?.subscription_details?.subscription || null;
+  await logActivity({
+    event_type: "invoice.payment_failed",
+    entity_type: "invoice",
+    entity_id: invoice.id,
+    summary: `Payment failed: ${invoice.id}`,
+    metadata: { invoice: invoice.id, amount: invoice.amount_due, subscription: subId, env },
+  });
+  // No revocation. Stripe retries; the UI shows a grace banner via accessStateFor().
+}
+
 async function handleInvoicePaid(invoice: any, env: StripeEnv) {
   const email = invoice.customer_email || null;
-  const subId = invoice.subscription || null;
+  const subId = invoice.subscription || invoice.parent?.subscription_details?.subscription || null;
 
-  // Look up rep_code via subscription metadata if possible
-  let repCode: string | null = null;
-  if (subId) {
-    const { data: sub } = await supabase.from("subscriptions")
-      .select("user_id, price_id").eq("stripe_subscription_id", subId).maybeSingle();
-    if (sub?.user_id) {
-      // No rep on subscriptions table yet — fall back to metadata
-    }
-  }
-  repCode = invoice.subscription_details?.metadata?.rep_code
+  const repCode = invoice.subscription_details?.metadata?.rep_code
          || invoice.metadata?.rep_code
          || null;
 
   const line = invoice.lines?.data?.[0];
-  const priceId = line?.price?.metadata?.lovable_external_id || line?.price?.id || null;
+  const priceId = resolvePriceId(line?.price);
 
   await recordSaleAndCommissions({
     amount_cents: invoice.amount_paid ?? 0,
@@ -675,11 +750,34 @@ async function handleInvoicePaid(invoice: any, env: StripeEnv) {
     env,
   });
 
-  // Existing monthly delivery trigger
-  if (subId) {
-    triggerFunction("monthly-delivery", { subscription_id: subId, stripe_invoice_id: invoice.id });
+  if (!subId) return;
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("id, plan_id, price_id")
+    .eq("stripe_subscription_id", subId)
+    .eq("environment", env)
+    .maybeSingle();
+
+  const plan = planById(sub?.plan_id as string) ?? planByLookupKey(sub?.price_id as string ?? priceId);
+
+  if (plan?.id === "intelligence" && sub) {
+    // One idempotent monthly workflow per subscription + billing period.
+    triggerFunction("subscription-orchestrator", {
+      action: "enqueue_monthly",
+      subscription_id: sub.id,
+      environment: env,
+      stripe_invoice_id: invoice.id,
+      billing_period_start: line?.period?.start ? new Date(line.period.start * 1000).toISOString() : null,
+      billing_period_end: line?.period?.end ? new Date(line.period.end * 1000).toISOString() : null,
+    });
+    return;
   }
+
+  // Legacy monthly delivery products keep working exactly as before.
+  triggerFunction("monthly-delivery", { subscription_id: subId, stripe_invoice_id: invoice.id });
 }
+
 
 async function handleChargeRefunded(charge: any, env: StripeEnv) {
   const refunded = charge.amount_refunded ?? 0;

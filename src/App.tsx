@@ -85,6 +85,7 @@ const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboardingPage"));
 const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
+const GoldenReportIntelligencePage = lazy(() => import("./pages/GoldenReportIntelligencePage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
 import { VERTICAL_BY_SLUG } from "@/config/verticals";
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
@@ -239,6 +240,7 @@ const App = () => (
                       <Route path="/reset-password" element={<ResetPasswordPage />} />
                       <Route path="/subscriber-onboarding" element={<SubscriberOnboardingPage />} />
                       <Route path="/my-subscription" element={<MySubscriptionPage />} />
+                      <Route path="/golden-report-intelligence" element={<GoldenReportIntelligencePage />} />
                       <Route path="/industries" element={<Navigate to="/careers" replace />} />
                       <Route path="/case-studies" element={<CaseStudiesPage />} />
                       {Object.keys(VERTICAL_BY_SLUG).map((slug) => (

@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Package, ThumbsUp, ThumbsDown, Settings, Clock, Sparkles, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { IntelligencePlanPanel } from '@/components/IntelligencePlanPanel';
 
 export default function MySubscriptionPage() {
   const { user, loading: authLoading } = useAuth();
@@ -123,15 +124,24 @@ export default function MySubscriptionPage() {
             <p className="text-muted-foreground mt-1">Your personalized deliveries, feedback, and settings.</p>
           </div>
 
+          {/* Golden Report Intelligence control panel */}
+          {subscriptions
+            .filter((s: any) => s.plan_id === 'intelligence')
+            .map((s: any) => <IntelligencePlanPanel key={s.id} sub={s} />)}
+
           {/* Active Subscriptions */}
           {subscriptions.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center">
               <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h2 className="text-xl font-semibold text-foreground mb-2">No active subscriptions</h2>
               <p className="text-muted-foreground mb-4">Subscribe to a monthly plan to get personalized AI-powered deliveries.</p>
-              <Button onClick={() => navigate('/services')}>Browse Solutions</Button>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Button onClick={() => navigate('/golden-report-intelligence')}>Golden Report Intelligence · $2,500/mo</Button>
+                <Button variant="outline" onClick={() => navigate('/services')}>Browse Solutions</Button>
+              </div>
             </div>
           ) : (
+
             <div className="space-y-4 mb-10">
               {subscriptions.map((sub: any) => (
                 <div key={sub.id} className="bg-card border border-border rounded-xl p-5 flex items-center justify-between">
