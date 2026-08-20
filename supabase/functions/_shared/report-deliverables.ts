@@ -48,7 +48,12 @@ export type DeliverablePost = {
   visual: string;
   related_leak: string;
   status: "ready" | "draft";
+  /** Editorial archetype. Internal only, never rendered as a public label. */
+  role?: string;
+  /** One actionable line, reused as the schedule goal. */
+  takeaway?: string;
 };
+
 
 export type ScheduleEntry = {
   day: number;
