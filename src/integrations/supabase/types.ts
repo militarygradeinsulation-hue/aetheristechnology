@@ -9354,6 +9354,25 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      golden_report_quality_page: {
+        Args: { _cursor?: string; _limit?: number }
+        Returns: {
+          company_name: string
+          compiler_state: string
+          content_quality: Json
+          flag_banned: boolean
+          flag_dup_narrative: boolean
+          flag_dup_posts: boolean
+          flag_stale_manifest: boolean
+          id: string
+          imagery_count: number
+          narrative: Json
+          posts: Json
+          posts_count: number
+          schedule_count: number
+          target_url: string
+        }[]
+      }
       grant_resume_credits: {
         Args: { _credits: number; _email: string }
         Returns: undefined
