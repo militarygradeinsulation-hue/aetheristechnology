@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  hasUrlInCopy,
   validatePostSet,
   validateNarrative,
   hasBannedPhrase,
@@ -261,5 +262,17 @@ describe("safeBusinessName rejects machine identifiers", () => {
 
   it("still keeps a real brand label", () => {
     expect(safeBusinessName("Aetheris Technology", "https://aetheris.technology/")).toBe("Aetheris Technology");
+  });
+});
+
+describe("raw URLs never appear in post prose", () => {
+  it("flags a hook containing a URL", () => {
+    const p = { ...built.posts[0], hook: "The finding most owners at https://aetheris.technology/ never see." };
+    expect(hasUrlInCopy(p)).toBe(true);
+    expect(validatePostSet([p], 1).issues.some((i) => i.code === "url_in_copy")).toBe(true);
+  });
+
+  it("passes the deterministic post set", () => {
+    for (const p of built.posts) expect(hasUrlInCopy(p)).toBe(false);
   });
 });
