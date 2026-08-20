@@ -444,13 +444,21 @@ export function postsPassGate(posts: unknown): boolean {
 
 function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEntry[]): ScheduleEntry[] | null {
   const arr = Array.isArray(raw) ? raw : [];
+  const bodies = new Set(posts.map((p) => normalizeText(p.body)));
   const out: ScheduleEntry[] = [];
   arr.forEach((r, i) => {
     const o = (r || {}) as Record<string, unknown>;
-    const topic = clean(o.topic);
+    let topic = clean(o.topic);
     if (!topic) return;
     const b = base[i % base.length];
     const pid = clean(o.post_id);
+    const mapped = posts.find((p) => p.id === pid) || posts[out.length % posts.length];
+    // A schedule line is a calendar label, never a pasted post body.
+    if (topic.length > 160 || bodies.has(normalizeText(topic))) topic = scheduleTopic(mapped);
+    let goal = clean(o.goal) || b.goal;
+    if (goal.length > 160 || bodies.has(normalizeText(goal))) {
+      goal = clean(mapped.takeaway || b.goal);
+    }
     out.push({
       day: out.length + 1,
       date: /^\d{4}-\d{2}-\d{2}$/.test(String(o.date || "")) ? String(o.date) : isoDay(out.length),
@@ -461,7 +469,7 @@ function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEnt
       purpose: clean(o.purpose) || b.purpose,
       topic,
       visual: clean(o.visual) || b.visual,
-      goal: clean(o.goal) || b.goal,
+      goal,
       owner: clean(o.owner) || b.owner,
       status: "planned",
       related_leak: clean(o.related_leak || o.related_finding) || b.related_leak,
@@ -469,6 +477,7 @@ function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEnt
   });
   return out.length >= SCHEDULE_DAYS ? out.slice(0, SCHEDULE_DAYS) : null;
 }
+
 
 /**
  * AI enrichment often returns 4 or 5 strong concepts. Accepting that verbatim
