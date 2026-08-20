@@ -15,6 +15,14 @@
 // Nothing here prices anything, recalculates leakage or invents proof.
 
 import { stripDashes } from "./no-dashes.ts";
+import { writeAllPosts, type PostEvidence } from "./report-post-writers.ts";
+import {
+  validatePostSet,
+  normalizeText,
+  hasBannedPhrase,
+  type QualityManifest,
+} from "./content-uniqueness.ts";
+
 
 export const MIN_IMAGERY = 4;
 /** Every stored report must carry at least this many imagery concepts. */
@@ -48,7 +56,12 @@ export type DeliverablePost = {
   visual: string;
   related_leak: string;
   status: "ready" | "draft";
+  /** Editorial archetype. Internal only, never rendered as a public label. */
+  role?: string;
+  /** One actionable line, reused as the schedule goal. */
+  takeaway?: string;
 };
+
 
 export type ScheduleEntry = {
   day: number;
@@ -85,7 +98,10 @@ export type ReportDeliverables = {
   generated_at: string;
   enriched_at?: string | null;
   enrichment_error?: string | null;
+  /** Content uniqueness manifest for the shipped post set. */
+  quality?: QualityManifest | null;
 };
+
 
 /* ─────────────────────────────── helpers ─────────────────────────────── */
 
@@ -149,6 +165,70 @@ function isoDay(offset: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * One private evidence bundle per post. Observations are pulled from the report
+ * (chapter findings, verdicts, leak descriptions) and each concrete sentence is
+ * handed to exactly one post, so no two posts argue from the same fact.
+ */
+export function buildEvidencePool(
+  report: Record<string, unknown> | null | undefined,
+  leaks: string[],
+  actions: string[],
+  count: number,
+): PostEvidence[] {
+  const seen = new Set<string>();
+  const details: Array<{ leak: string; detail: string }> = [];
+
+  const add = (leak: string, raw: unknown) => {
+    for (const s of String(raw ?? "").split(/(?<=[.!?])\s+/)) {
+      const v = clean(s);
+      if (v.length < 40 || v.length > 320) continue;
+      const key = normalizeText(v);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      details.push({ leak, detail: v });
+      return; // one sentence per source field keeps the pool broad, not deep
+    }
+  };
+
+  const rawLeaks = Array.isArray(report?.top_leaks) ? (report!.top_leaks as Record<string, unknown>[]) : [];
+  rawLeaks.forEach((l, i) => {
+    const name = titleOf(l, i);
+    add(name, l.description || l.detail || l.evidence || l.why || l.summary);
+  });
+
+  const chapters = Array.isArray(report?.chapters) ? (report!.chapters as Record<string, unknown>[]) : [];
+  for (const field of ["what_we_found", "verdict", "why_its_leaking"]) {
+    chapters.forEach((ch, i) => {
+      add(clean(ch.title || ch.slug) || leaks[i % leaks.length], ch[field]);
+    });
+  }
+  add(leaks[0], report?.executive_summary);
+
+  const out: PostEvidence[] = [];
+  for (let i = 0; i < count; i++) {
+    const d = details[i % Math.max(1, details.length)];
+    const leak = d?.leak || leaks[i % leaks.length];
+    // Sparse evidence: derive a different buyer implication per post rather
+    // than repeating the same sentence. The action still differentiates them.
+    const detail = d?.detail ||
+      `the review flagged ${leak.toLowerCase()} as an unresolved gap on the public surface`;
+    const action = actions[i % Math.max(1, actions.length)] ||
+      `assign an owner to ${leak.toLowerCase()} and correct it this week`;
+    out.push({ leak, detail, action });
+  }
+  return out;
+}
+
+/** Short calendar line. Never the post body. */
+export
+function scheduleTopic(post: DeliverablePost): string {
+  const t = clean(post.hook).replace(/^["“]|["”]$/g, "");
+  const short = t.length > 95 ? `${t.slice(0, 92).replace(/\s+\S*$/, "")}…` : t;
+  return clean(`${post.related_leak}: ${short}`);
+}
+
+
 /* ───────────────────────── deterministic fallback ───────────────────── */
 
 export function buildFallbackDeliverables(input: {
@@ -192,27 +272,21 @@ export function buildFallbackDeliverables(input: {
     ),
   }));
 
-  const posts: DeliverablePost[] = Array.from({ length: POST_COUNT }, (_, i) => {
-    const leak = leaks[i % leaks.length];
-    const action = actions[i % Math.max(1, actions.length)] || `Fix ${leak.toLowerCase()} on the site this week.`;
-    const platform = PLATFORM_CYCLE[i % PLATFORM_CYCLE.length];
-    return {
-      id: `post-${String(i + 1).padStart(2, "0")}`,
-      platform,
-      hook: clean(`${leak} is costing ${name} attention it already paid for.`),
-      body: clean(
-        `We looked at how ${name} shows up online and found a gap around ${leak.toLowerCase()}. ` +
-        `Nothing dramatic, just a place where a buyer has to work harder than they should. ` +
-        `Here is the practical correction: ${action} ` +
-        `That single change makes the next visitor's decision easier, and easier decisions turn into more conversations. ` +
-        `If you run a business and you are not sure where your own version of this gap sits, start by walking your own site as a first time buyer.`,
-      ),
-      cta: clean(actions.length ? `Ask us what ${leak.toLowerCase()} is costing you.` : "Reply and we will walk your site with you."),
-      visual: clean(`${concepts[i % concepts.length].title}. ${concepts[i % concepts.length].channel} format.`),
-      related_leak: leak,
-      status: "ready",
-    };
-  });
+  const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
+  const written = writeAllPosts(name, site, evidence);
+
+  const posts: DeliverablePost[] = written.map((w, i) => ({
+    id: `post-${String(i + 1).padStart(2, "0")}`,
+    platform: PLATFORM_CYCLE[i % PLATFORM_CYCLE.length],
+    hook: w.hook,
+    body: w.body,
+    cta: w.cta,
+    visual: clean(`${w.visual} Pairs with: ${concepts[i % concepts.length].title}.`),
+    related_leak: evidence[i % evidence.length].leak,
+    status: "ready",
+    role: w.role,
+    takeaway: w.takeaway,
+  }));
 
   const days: ScheduleEntry[] = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
     const post = posts[i % posts.length];
@@ -226,14 +300,15 @@ export function buildFallbackDeliverables(input: {
       platform: usesPost ? post.platform : (contentType === "email" ? "Email" : "Short video"),
       time: TIME_CYCLE[i % TIME_CYCLE.length],
       purpose: PURPOSE_CYCLE[i % PURPOSE_CYCLE.length],
-      topic: clean(post.hook),
+      topic: scheduleTopic(post),
       visual: post.visual,
-      goal: clean(`Move buyers past ${post.related_leak.toLowerCase()} and into a conversation.`),
+      goal: clean(post.takeaway || `Move buyers past ${post.related_leak.toLowerCase()}.`),
       owner: usesPost ? "Marketing" : "Owner",
       status: "planned",
       related_leak: post.related_leak,
     };
   });
+
 
   return {
     imagery: {
@@ -286,14 +361,15 @@ function validConcepts(raw: unknown, base: ImageryConcept[]): ImageryConcept[] |
   return out.length >= MIN_IMAGERY ? out : null;
 }
 
-function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | null {
+/** Shape raw AI posts into DeliverablePost form. No quality judgement here. */
+export function shapeAiPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] {
   const arr = Array.isArray(raw) ? raw : [];
   const out: DeliverablePost[] = [];
   arr.forEach((r, i) => {
     const o = (r || {}) as Record<string, unknown>;
     const body = clean(o.body);
     const hook = clean(o.hook);
-    if (!body || body.length < 80 || !hook) return;
+    if (!body || !hook) return;
     const b = base[i % base.length];
     out.push({
       id: `post-${String(out.length + 1).padStart(2, "0")}`,
@@ -304,20 +380,89 @@ function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | 
       visual: clean(o.visual) || b.visual,
       related_leak: clean(o.related_leak || o.related_finding) || b.related_leak,
       status: "ready",
+      role: b.role,
+      takeaway: clean(o.takeaway) || b.takeaway,
     });
   });
-  return out.length >= POST_COUNT ? out.slice(0, POST_COUNT) : null;
+  return out;
 }
+
+export type PostQualityResult = {
+  posts: DeliverablePost[];
+  manifest: QualityManifest;
+  ok: boolean;
+  issues: ReturnType<typeof validatePostSet>["issues"];
+  /** How many of the final 12 came from the AI candidate list. */
+  ai_kept: number;
+};
+
+/**
+ * Build the final 12 from AI candidates first, then top up with deterministic
+ * archetype posts that are themselves distinct from everything already kept.
+ * Repetitive filler is never shipped: a candidate that fails the gate is
+ * dropped, not patched.
+ */
+export function qualifyPosts(
+  candidates: DeliverablePost[],
+  deterministic: DeliverablePost[],
+): PostQualityResult {
+  const kept: DeliverablePost[] = [];
+  const tryAdd = (p: DeliverablePost) => {
+    if (kept.length >= POST_COUNT) return false;
+    const res = validatePostSet([...kept, p], kept.length + 1);
+    if (res.qualifiedIndexes.length === kept.length + 1) {
+      kept.push(p);
+      return true;
+    }
+    return false;
+  };
+
+  let aiKept = 0;
+  for (const p of candidates) if (tryAdd(p)) aiKept++;
+  for (const p of deterministic) tryAdd(p);
+
+  const final = kept.slice(0, POST_COUNT).map((p, i) => ({
+    ...p,
+    id: `post-${String(i + 1).padStart(2, "0")}`,
+  }));
+  const res = validatePostSet(final, POST_COUNT);
+  return { posts: final, manifest: res.manifest, ok: res.ok, issues: res.issues, ai_kept: aiKept };
+}
+
+/** Legacy entry point used by normalizeDeliverables. */
+function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | null {
+  const shaped = shapeAiPosts(raw, base).filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+  if (!shaped.length) return null;
+  const { posts, ok, ai_kept } = qualifyPosts(shaped, base);
+  if (!ok || ai_kept === 0) return ai_kept > 0 && posts.length === POST_COUNT ? posts : null;
+  return posts;
+}
+
+/** True when a stored post set already passes the uniqueness gate. */
+export function postsPassGate(posts: unknown): boolean {
+  const arr = Array.isArray(posts) ? (posts as DeliverablePost[]) : [];
+  if (arr.length < POST_COUNT) return false;
+  return validatePostSet(arr.slice(0, POST_COUNT), POST_COUNT).ok;
+}
+
 
 function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEntry[]): ScheduleEntry[] | null {
   const arr = Array.isArray(raw) ? raw : [];
+  const bodies = new Set(posts.map((p) => normalizeText(p.body)));
   const out: ScheduleEntry[] = [];
   arr.forEach((r, i) => {
     const o = (r || {}) as Record<string, unknown>;
-    const topic = clean(o.topic);
+    let topic = clean(o.topic);
     if (!topic) return;
     const b = base[i % base.length];
     const pid = clean(o.post_id);
+    const mapped = posts.find((p) => p.id === pid) || posts[out.length % posts.length];
+    // A schedule line is a calendar label, never a pasted post body.
+    if (topic.length > 160 || bodies.has(normalizeText(topic))) topic = scheduleTopic(mapped);
+    let goal = clean(o.goal) || b.goal;
+    if (goal.length > 160 || bodies.has(normalizeText(goal))) {
+      goal = clean(mapped.takeaway || b.goal);
+    }
     out.push({
       day: out.length + 1,
       date: /^\d{4}-\d{2}-\d{2}$/.test(String(o.date || "")) ? String(o.date) : isoDay(out.length),
@@ -328,7 +473,7 @@ function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEnt
       purpose: clean(o.purpose) || b.purpose,
       topic,
       visual: clean(o.visual) || b.visual,
-      goal: clean(o.goal) || b.goal,
+      goal,
       owner: clean(o.owner) || b.owner,
       status: "planned",
       related_leak: clean(o.related_leak || o.related_finding) || b.related_leak,
@@ -336,6 +481,7 @@ function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEnt
   });
   return out.length >= SCHEDULE_DAYS ? out.slice(0, SCHEDULE_DAYS) : null;
 }
+
 
 /**
  * AI enrichment often returns 4 or 5 strong concepts. Accepting that verbatim

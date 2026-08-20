@@ -666,6 +666,13 @@ Requirements:
 - "what_we_found": cite at least ONE concrete datum from the findings (a score, a quote, a URL count, a missing element, an error). If findings are thin, name what's missing and why that itself is a signal.
 - "what_to_do": 2-3 actions per horizon, each starting with a verb, each specific to THIS chapter.
 - "evidence": 3-5 items pulled from the raw findings JSON with real label/value pairs.
+
+CONTENT UNIQUENESS (hard requirement):
+- This chapter owns ONE root cause. Consolidate related observations under it instead of copying them into other chapters.
+- Evidence and facts belong to the chapter that reports them FIRST. Later chapters must add NEW analysis, not restate earlier prose.
+- Never copy or lightly reword a paragraph or a sentence of nine words or more from another section, including the executive summary.
+- You may cross reference another finding by its number or title. You may not repeat its paragraph.
+- Every narrative field must carry a distinct implication and a distinct next action for this chapter.
 ${chapter.slug === "brand-contradictions" ? `
 BRAND VOICE CHAPTER — mandatory:
 - The findings object contains "brand_contradictions" with a contradictions array, quotes, severities and fixes. Use it. Name each real contradiction, quote both conflicting strings, and say what the buyer concludes.

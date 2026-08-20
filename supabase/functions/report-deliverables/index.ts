@@ -20,9 +20,15 @@ import {
   normalizeDeliverables,
   deliverablesComplete,
   topUpConcepts,
+  qualifyPosts,
+  postsPassGate,
+  scheduleTopic,
   TARGET_IMAGERY,
   type ReportDeliverables,
 } from "../_shared/report-deliverables.ts";
+import { validatePostSet, hasBannedPhrase, issuesToPrompt } from "../_shared/content-uniqueness.ts";
+import { narrativeQuality, repairReportNarrative } from "../_shared/narrative-repair.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -102,9 +108,23 @@ Include 6 concepts. Every prompt must be usable as is.`;
 
   const postsPrompt = `${ctx}
 
-Write 12 READY TO PUBLISH posts for this company. Each maps to a real finding.
+Write 12 READY TO PUBLISH posts for this company. Each maps to a DIFFERENT real finding or a different implication of one.
+
+EDITORIAL MIX (one post each, never label the role in the copy):
+executive observation, buyer problem, myth correction, evidence insight, process explanation,
+practical checklist, objection response, founder or operator perspective, before and after,
+proof and credibility, offer education, direct next step.
+
+UNIQUENESS RULES (a breach fails the whole set):
+- Never reuse an evidence sentence or the same factual bundle in two posts. One finding may appear twice only if the buyer implication and the action are genuinely different.
+- No two posts may share their first four words, their hook, their CTA or any sentence of nine words or more.
+- Vary length, cadence and sentence shape between posts.
+- Use the company name. Do not print the raw URL except as a CTA destination.
+- Every post carries one concrete detail traceable to the evidence above. Invent nothing: no statistics, customers, outcomes or third party validation.
+- BANNED openings and phrases: "We looked at how", "shows up online", "found a gap around", "Nothing dramatic", "here is the thing", "in today's market". Do not paraphrase them either.
+
 Return JSON:
-{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<80 to 150 words of plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence of visual direction>", "related_leak": "<the finding it maps to>" } ] }
+{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<80 to 150 words of plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence of visual direction>", "takeaway": "<one actionable line>", "related_leak": "<the finding it maps to>" } ] }
 Exactly 12 posts. Mix the platforms.`;
 
   const schedulePrompt = `${ctx}
@@ -132,10 +152,43 @@ Exactly 30 entries, day 1 through 30, no gaps.`;
   const postsVal = ok(posts) as Record<string, unknown> | null;
   const schedVal = ok(schedule) as Record<string, unknown> | null;
 
+  // One targeted correction pass. The model is told exactly which pairs failed
+  // and why, then asked to rewrite only those posts.
+  let postList = Array.isArray(postsVal?.posts) ? (postsVal!.posts as Record<string, unknown>[]) : [];
+  if (postList.length) {
+    const gate = validatePostSet(
+      postList.map((p) => ({
+        hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? ""),
+      })),
+      Math.min(12, postList.length),
+    );
+    if (!gate.ok) {
+      try {
+        const fix = await call(
+          `${postsPrompt}
+
+YOUR PREVIOUS ATTEMPT FAILED THE UNIQUENESS GATE. Rewrite the whole set, fixing exactly these problems:
+${issuesToPrompt(gate.issues, postList.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })))}`,
+          4000,
+        ) as Record<string, unknown>;
+        const retry = Array.isArray(fix?.posts) ? (fix.posts as Record<string, unknown>[]) : [];
+        if (retry.length) {
+          const g2 = validatePostSet(
+            retry.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })),
+            Math.min(12, retry.length),
+          );
+          if (g2.qualifiedIndexes.length > gate.qualifiedIndexes.length) postList = retry;
+        }
+      } catch (e) {
+        failures.push(`posts_correction: ${String((e as Error).message).slice(0, 120)}`);
+      }
+    }
+  }
+
   return {
     ai: stripDashesDeep({
       imagery: ok(imagery) || {},
-      posts: Array.isArray(postsVal?.posts) ? postsVal!.posts : [],
+      posts: postList,
       schedule: schedVal || {},
     }) as Record<string, unknown>,
     failures,
@@ -229,6 +282,25 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
     failures = [String((e as Error).message).slice(0, 200)];
     deliverables = { ...base, generation_state: "degraded", enriched_at: new Date().toISOString() };
   }
+  // Final uniqueness gate: qualified AI posts first, distinct deterministic
+  // archetypes fill the rest. Repetitive filler never ships.
+  const gated = qualifyPosts(deliverables.posts, base.posts);
+  deliverables.posts = gated.posts;
+  deliverables.quality = gated.manifest;
+  deliverables.schedule = {
+    ...deliverables.schedule,
+    days: deliverables.schedule.days.map((d, i) => {
+      const post = gated.posts[i % gated.posts.length];
+      return {
+        ...d,
+        post_id: d.post_id ? post.id : d.post_id,
+        topic: d.topic && d.topic.length <= 160 && d.topic !== post.body ? d.topic : scheduleTopic(post),
+        related_leak: post.related_leak,
+      };
+    }),
+  };
+  if (!gated.ok) deliverables.generation_state = "degraded";
+
   deliverables.brand = (existing?.brand as Record<string, unknown>) || deliverables.brand || null;
   deliverables.enrichment_error = failures.length ? failures.join(" | ").slice(0, 400) : null;
 
@@ -284,7 +356,7 @@ serve(async (req) => {
     if (action === "enrich") {
       const scanId = String(body.scan_id ?? "");
       if (!scanId) return json({ error: "scan_id required" }, 400);
-      const res = await enrichScan(sb, scanId, { force: body.force === true, images: body.images !== false });
+      const res = await enrichScan(sb as unknown as SB, scanId, { force: body.force === true, images: body.images !== false });
       return json({ ok: true, ...res });
     }
 
@@ -313,7 +385,7 @@ serve(async (req) => {
           const existing = report.deliverables as ReportDeliverables | undefined;
           if (deliverablesComplete(existing) && !body.force) { ok++; continue; }
           if (withAi) {
-            await enrichScan(sb, id, { force: body.force === true, images: body.images === true });
+            await enrichScan(sb as unknown as SB, id, { force: body.force === true, images: body.images === true });
           } else {
             report.deliverables = normalizeDeliverables(
               buildFallbackDeliverables({
@@ -458,7 +530,161 @@ serve(async (req) => {
       });
     }
 
+    /**
+     * READ ONLY content quality audit: banned filler, exact duplicate posts,
+     * near duplicate posts and duplicated long-form narrative across sections.
+     */
+    if (action === "audit_quality") {
+      const batch = Math.max(1, Math.min(200, Number(body.batch) || 100));
+      const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
+      let q = sb.from("forensic_scans").select("id, report")
+        .eq("status", "completed").not("report", "is", null)
+        .order("id", { ascending: true }).limit(batch);
+      if (cursor) q = q.gt("id", cursor);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const list = (rows || []) as Array<Record<string, unknown>>;
+
+      let banned = 0, exactDupPosts = 0, nearDupPosts = 0, dupNarrative = 0, clean = 0;
+      const offenders: string[] = [];
+      for (const r of list) {
+        const report = (r.report || {}) as Record<string, unknown>;
+        const d = report.deliverables as ReportDeliverables | undefined;
+        const posts = Array.isArray(d?.posts) ? d!.posts : [];
+        const gate = validatePostSet(posts, Math.min(12, posts.length || 12));
+        const hasBanned = posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+        const nq = narrativeQuality(report);
+        const codes = gate.issues.map((i) => String(i.code));
+        const eDup = codes.includes("exact_duplicate");
+        const nDup = codes.some((c) => ["near_duplicate", "repeated_sentence", "duplicate_hook", "duplicate_cta", "shared_opening"].includes(c));
+        if (hasBanned) banned++;
+        if (eDup) exactDupPosts++;
+        if (nDup) nearDupPosts++;
+        if (!nq.ok) dupNarrative++;
+        if (!hasBanned && !eDup && !nDup && nq.ok) clean++;
+        else if (offenders.length < 20) offenders.push(String(r.id));
+      }
+
+      return json({
+        ok: true, processed: list.length,
+        banned_filler: banned, exact_duplicate_posts: exactDupPosts,
+        near_duplicate_posts: nearDupPosts, duplicated_narrative: dupNarrative,
+        clean, offenders,
+        cursor: list.length ? String(list[list.length - 1].id) : null,
+        done: list.length < batch,
+      });
+    }
+
+    /**
+     * Idempotent, paginated content quality repair.
+     *  - Posts are growth deliverables, so failing sets are rebuilt from
+     *    qualified AI posts merged with distinct deterministic archetypes.
+     *  - Narrative repair rewrites ONLY duplicated narrative fields.
+     *  - Brand, imagery assets, findings, evidence, citations, confidence and
+     *    every dollar field are read but never written.
+     */
+    if (action === "repair_quality") {
+      const batch = Math.max(1, Math.min(50, Number(body.batch) || 20));
+      const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
+      const only: string[] = Array.isArray(body.scan_ids) ? body.scan_ids.map(String) : [];
+
+      let q = sb.from("forensic_scans")
+        .select("id, report, company_name, target_url")
+        .eq("status", "completed").not("report", "is", null)
+        .order("id", { ascending: true }).limit(batch);
+      if (only.length) q = q.in("id", only);
+      else if (cursor) q = q.gt("id", cursor);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const scans = (rows || []) as Array<Record<string, unknown>>;
+
+      let repaired = 0, skipped = 0;
+      const repairedIds: string[] = [];
+      const errors: string[] = [];
+
+      for (const s of scans) {
+        const id = String(s.id);
+        try {
+          const report = (s.report || {}) as Record<string, unknown>;
+          const existing = report.deliverables as ReportDeliverables | undefined;
+          const posts = Array.isArray(existing?.posts) ? existing!.posts : [];
+          const postsOk = posts.length >= 12 &&
+            !posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`)) &&
+            postsPassGate(posts);
+          const nq = narrativeQuality(report);
+          if (postsOk && nq.ok && !body.force) { skipped++; continue; }
+
+          const next: Record<string, unknown> = { ...report };
+          const meta: Record<string, unknown> = { repaired_at: new Date().toISOString() };
+
+          if (!postsOk || body.force) {
+            const base = buildFallbackDeliverables({
+              company: String(s.company_name || ""),
+              url: String(s.target_url || ""),
+              report,
+              brand: (existing?.brand as Record<string, unknown>) || null,
+            });
+            const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+            const merged = qualifyPosts(keep, base.posts);
+            const finalPosts = merged.posts;
+            const baseDays = existing?.schedule?.days?.length ? existing.schedule.days : base.schedule.days;
+            const days = baseDays.map((d, i) => {
+              const post = finalPosts[i % finalPosts.length];
+              return {
+                ...d,
+                post_id: d.post_id ? post.id : d.post_id,
+                topic: scheduleTopic(post),
+                goal: String(post.takeaway || d.goal || "").slice(0, 160),
+                related_leak: post.related_leak,
+              };
+            });
+            next.deliverables = {
+              ...(existing || base),
+              posts: finalPosts,
+              schedule: { ...(existing?.schedule || base.schedule), days },
+              quality: merged.manifest,
+            };
+            meta.posts = { ai_kept: merged.ai_kept, replaced: posts.length, passed: merged.ok };
+          }
+
+          if (!nq.ok) {
+            const fixed = repairReportNarrative(next);
+            meta.narrative = {
+              repairs: fixed.repairs,
+              passed: fixed.ok,
+              before: nq.manifest,
+              after: fixed.manifest,
+            };
+            next.content_quality = { ...fixed.manifest, repairs: fixed.repairs.slice(0, 40) };
+          }
+          next.content_quality_repair = meta;
+
+          const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", id);
+          if (upErr) throw upErr;
+
+          await fetch(`${SUPABASE_URL}/functions/v1/golden-report-library`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, "x-internal-key": SVC },
+            body: JSON.stringify({ action: "archive_scan", scan_id: id, provision: false }),
+          }).catch(() => undefined);
+
+          repaired++;
+          repairedIds.push(id);
+        } catch (e) {
+          errors.push(`${id}: ${(e as Error).message.slice(0, 140)}`);
+        }
+      }
+
+      return json({
+        ok: true, processed: scans.length, repaired, skipped,
+        repaired_ids: repairedIds.slice(0, 50), errors: errors.slice(0, 5),
+        cursor: scans.length ? String(scans[scans.length - 1].id) : null,
+        done: scans.length < batch,
+      });
+    }
+
     return json({ error: "Unknown action" }, 400);
+
   } catch (e) {
     console.error("report-deliverables error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
