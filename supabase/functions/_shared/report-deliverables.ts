@@ -114,6 +114,40 @@ function clean(s: unknown): string {
   return stripDashes(String(s ?? "").replace(/\s+/g, " ").trim());
 }
 
+/**
+ * Some scans carry pasted prose (an email body, a chat reply) in company_name
+ * or target_url. Echoing that into every post makes all twelve posts read the
+ * same. Reduce any such value to a usable business label or drop it.
+ */
+export function safeBusinessName(company: unknown, url: unknown): string {
+  const isProse = (v: string) => !v || v.length > 70 || v.split(" ").length > 7 || /[.!?]\s/.test(v);
+  const c = clean(company);
+  if (!isProse(c)) return c;
+  const host = hostLabel(url);
+  if (host) return host;
+  return "this company";
+}
+
+/** A clean host label, or "" when the value is not a usable URL. */
+export function hostLabel(url: unknown): string {
+  const raw = clean(url);
+  const m = raw.match(/https?:\/\/([^\s/?#]+)/i) || raw.match(/^([a-z0-9-]+(?:\.[a-z0-9-]+)+)/i);
+  if (!m) return "";
+  const host = m[1].replace(/^www\./i, "");
+  if (!host.includes(".") || host.length > 60) return "";
+  const label = host.split(".")[0];
+  return label.length >= 2 ? label.charAt(0).toUpperCase() + label.slice(1) : host;
+}
+
+/** Public site string for copy. Empty when the stored value is not a URL. */
+export function safeSiteUrl(url: unknown): string {
+  const raw = clean(url);
+  const m = raw.match(/https?:\/\/[^\s]+/i);
+  const candidate = m ? m[0] : raw;
+  if (!/^[^\s]+$/.test(candidate) || !candidate.includes(".") || candidate.length > 90) return "";
+  return candidate;
+}
+
 function titleOf(leak: unknown, i: number): string {
   const l = (leak || {}) as Record<string, unknown>;
   const name = clean(l.name || l.title || l.leak || "");
