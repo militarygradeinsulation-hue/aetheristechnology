@@ -357,14 +357,15 @@ function validConcepts(raw: unknown, base: ImageryConcept[]): ImageryConcept[] |
   return out.length >= MIN_IMAGERY ? out : null;
 }
 
-function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | null {
+/** Shape raw AI posts into DeliverablePost form. No quality judgement here. */
+export function shapeAiPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] {
   const arr = Array.isArray(raw) ? raw : [];
   const out: DeliverablePost[] = [];
   arr.forEach((r, i) => {
     const o = (r || {}) as Record<string, unknown>;
     const body = clean(o.body);
     const hook = clean(o.hook);
-    if (!body || body.length < 80 || !hook) return;
+    if (!body || !hook) return;
     const b = base[i % base.length];
     out.push({
       id: `post-${String(out.length + 1).padStart(2, "0")}`,
@@ -375,10 +376,71 @@ function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | 
       visual: clean(o.visual) || b.visual,
       related_leak: clean(o.related_leak || o.related_finding) || b.related_leak,
       status: "ready",
+      role: b.role,
+      takeaway: clean(o.takeaway) || b.takeaway,
     });
   });
-  return out.length >= POST_COUNT ? out.slice(0, POST_COUNT) : null;
+  return out;
 }
+
+export type PostQualityResult = {
+  posts: DeliverablePost[];
+  manifest: QualityManifest;
+  ok: boolean;
+  issues: ReturnType<typeof validatePostSet>["issues"];
+  /** How many of the final 12 came from the AI candidate list. */
+  ai_kept: number;
+};
+
+/**
+ * Build the final 12 from AI candidates first, then top up with deterministic
+ * archetype posts that are themselves distinct from everything already kept.
+ * Repetitive filler is never shipped: a candidate that fails the gate is
+ * dropped, not patched.
+ */
+export function qualifyPosts(
+  candidates: DeliverablePost[],
+  deterministic: DeliverablePost[],
+): PostQualityResult {
+  const kept: DeliverablePost[] = [];
+  const tryAdd = (p: DeliverablePost) => {
+    if (kept.length >= POST_COUNT) return false;
+    const res = validatePostSet([...kept, p], kept.length + 1);
+    if (res.qualifiedIndexes.length === kept.length + 1) {
+      kept.push(p);
+      return true;
+    }
+    return false;
+  };
+
+  let aiKept = 0;
+  for (const p of candidates) if (tryAdd(p)) aiKept++;
+  for (const p of deterministic) tryAdd(p);
+
+  const final = kept.slice(0, POST_COUNT).map((p, i) => ({
+    ...p,
+    id: `post-${String(i + 1).padStart(2, "0")}`,
+  }));
+  const res = validatePostSet(final, POST_COUNT);
+  return { posts: final, manifest: res.manifest, ok: res.ok, issues: res.issues, ai_kept: aiKept };
+}
+
+/** Legacy entry point used by normalizeDeliverables. */
+function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | null {
+  const shaped = shapeAiPosts(raw, base).filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+  if (!shaped.length) return null;
+  const { posts, ok, ai_kept } = qualifyPosts(shaped, base);
+  if (!ok || ai_kept === 0) return ai_kept > 0 && posts.length === POST_COUNT ? posts : null;
+  return posts;
+}
+
+/** True when a stored post set already passes the uniqueness gate. */
+export function postsPassGate(posts: unknown): boolean {
+  const arr = Array.isArray(posts) ? (posts as DeliverablePost[]) : [];
+  if (arr.length < POST_COUNT) return false;
+  return validatePostSet(arr.slice(0, POST_COUNT), POST_COUNT).ok;
+}
+
 
 function validSchedule(raw: unknown, posts: DeliverablePost[], base: ScheduleEntry[]): ScheduleEntry[] | null {
   const arr = Array.isArray(raw) ? raw : [];
