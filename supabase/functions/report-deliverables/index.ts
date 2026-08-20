@@ -531,52 +531,40 @@ serve(async (req) => {
     }
 
     /**
-     * READ ONLY content quality audit: banned filler, exact duplicate posts,
-     * near duplicate posts and duplicated long-form narrative across sections.
+     * READ ONLY content quality audit over the COMPACT projection.
+     * The worker never loads a full report payload here: the RPC returns only
+     * posts, narrative prose, the quality manifest, compiler state and counts.
      */
     if (action === "audit_quality") {
-      const batch = Math.max(1, Math.min(200, Number(body.batch) || 100));
+      const limit = clampPage(body.batch);
       const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
-      let q = sb.from("forensic_scans").select("id, report")
-        .eq("status", "completed").not("report", "is", null)
-        .order("id", { ascending: true }).limit(batch);
-      if (cursor) q = q.gt("id", cursor);
-      const { data: rows, error } = await q;
-      if (error) throw error;
-      const list = (rows || []) as Array<Record<string, unknown>>;
+      const rows = await fetchCompactPage(sb as unknown as SB, cursor, limit);
 
-      let banned = 0, exactDupPosts = 0, nearDupPosts = 0, dupNarrative = 0, clean = 0;
-      const offenders: string[] = [];
-      for (const r of list) {
-        const report = (r.report || {}) as Record<string, unknown>;
-        const d = report.deliverables as ReportDeliverables | undefined;
-        const posts = Array.isArray(d?.posts) ? d!.posts : [];
-        const gate = validatePostSet(posts, Math.min(12, posts.length || 12));
-        const hasBanned = posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
-        const nq = narrativeQuality(report);
-        const codes = gate.issues.map((i) => String(i.code));
-        const eDup = codes.includes("exact_duplicate");
-        const nDup = codes.some((c) => ["near_duplicate", "repeated_sentence", "duplicate_hook", "duplicate_cta", "shared_opening"].includes(c));
-        if (hasBanned) banned++;
-        if (eDup) exactDupPosts++;
-        if (nDup) nearDupPosts++;
-        if (!nq.ok) dupNarrative++;
-        if (!hasBanned && !eDup && !nDup && nq.ok) clean++;
-        else if (offenders.length < 20) offenders.push(String(r.id));
+      const totals = emptyTotals();
+      const detail: Array<Record<string, unknown>> = [];
+      for (const row of rows) {
+        const a = assessCompactRow(row);
+        foldAssessment(totals, a);
+        if (body.detail === true && a.needs_repair && detail.length < limit) {
+          detail.push({ id: a.id, reasons: a.reasons, posts: a.posts, imagery: a.imagery, schedule: a.schedule });
+        }
       }
 
       return json({
-        ok: true, processed: list.length,
-        banned_filler: banned, exact_duplicate_posts: exactDupPosts,
-        near_duplicate_posts: nearDupPosts, duplicated_narrative: dupNarrative,
-        clean, offenders,
-        cursor: list.length ? String(list[list.length - 1].id) : null,
-        done: list.length < batch,
+        ok: true,
+        ...totals,
+        detail,
+        page_size: limit,
+        cursor: rows.length ? rows[rows.length - 1].id : null,
+        done: rows.length < limit,
       });
     }
 
     /**
      * Idempotent, paginated content quality repair.
+     *  - Candidates are chosen from the COMPACT projection.
+     *  - Only a scan that needs repair is fetched in full, one at a time, and
+     *    the payload is released before the next scan is loaded.
      *  - Posts are growth deliverables, so failing sets are rebuilt from
      *    qualified AI posts merged with distinct deterministic archetypes.
      *  - Narrative repair rewrites ONLY duplicated narrative fields.
@@ -584,104 +572,57 @@ serve(async (req) => {
      *    every dollar field are read but never written.
      */
     if (action === "repair_quality") {
-      const batch = Math.max(1, Math.min(50, Number(body.batch) || 20));
+      const limit = clampPage(body.batch);
       const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
       const only: string[] = Array.isArray(body.scan_ids) ? body.scan_ids.map(String) : [];
 
-      let q = sb.from("forensic_scans")
-        .select("id, report, company_name, target_url")
-        .eq("status", "completed").not("report", "is", null)
-        .order("id", { ascending: true }).limit(batch);
-      if (only.length) q = q.in("id", only);
-      else if (cursor) q = q.gt("id", cursor);
-      const { data: rows, error } = await q;
-      if (error) throw error;
-      const scans = (rows || []) as Array<Record<string, unknown>>;
+      let candidates: string[] = [];
+      let lastId: string | null = null;
+      let pageCount = 0;
 
-      let repaired = 0, skipped = 0;
+      if (only.length) {
+        candidates = only.slice(0, 25);
+        pageCount = candidates.length;
+      } else {
+        const rows = await fetchCompactPage(sb as unknown as SB, cursor, limit);
+        pageCount = rows.length;
+        lastId = rows.length ? rows[rows.length - 1].id : null;
+        for (const row of rows) {
+          const a = assessCompactRow(row);
+          if (a.needs_repair || body.force === true) candidates.push(a.id);
+        }
+      }
+
+      let repaired = 0, skipped = pageCount - candidates.length, needsReview = 0;
       const repairedIds: string[] = [];
+      const reviewIds: string[] = [];
       const errors: string[] = [];
 
-      for (const s of scans) {
-        const id = String(s.id);
+      // One full report in memory at a time, released before the next.
+      for (const id of candidates) {
         try {
-          const report = (s.report || {}) as Record<string, unknown>;
-          const existing = report.deliverables as ReportDeliverables | undefined;
-          const posts = Array.isArray(existing?.posts) ? existing!.posts : [];
-          const postsOk = posts.length >= 12 &&
-            !posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`)) &&
-            postsPassGate(posts);
-          const nq = narrativeQuality(report);
-          if (postsOk && nq.ok && !body.force) { skipped++; continue; }
-
-          const next: Record<string, unknown> = { ...report };
-          const meta: Record<string, unknown> = { repaired_at: new Date().toISOString() };
-
-          if (!postsOk || body.force) {
-            const base = buildFallbackDeliverables({
-              company: String(s.company_name || ""),
-              url: String(s.target_url || ""),
-              report,
-              brand: (existing?.brand as Record<string, unknown>) || null,
-            });
-            const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
-            const merged = qualifyPosts(keep, base.posts);
-            const finalPosts = merged.posts;
-            const baseDays = existing?.schedule?.days?.length ? existing.schedule.days : base.schedule.days;
-            const days = baseDays.map((d, i) => {
-              const post = finalPosts[i % finalPosts.length];
-              return {
-                ...d,
-                post_id: d.post_id ? post.id : d.post_id,
-                topic: scheduleTopic(post),
-                goal: String(post.takeaway || d.goal || "").slice(0, 160),
-                related_leak: post.related_leak,
-              };
-            });
-            next.deliverables = {
-              ...(existing || base),
-              posts: finalPosts,
-              schedule: { ...(existing?.schedule || base.schedule), days },
-              quality: merged.manifest,
-            };
-            meta.posts = { ai_kept: merged.ai_kept, replaced: posts.length, passed: merged.ok };
+          const res = await repairOneScan(sb as unknown as SB, id, body.force === true);
+          if (res.skipped) skipped++;
+          else {
+            repaired++;
+            repairedIds.push(id);
+            if (res.needs_review) { needsReview++; reviewIds.push(id); }
           }
-
-          if (!nq.ok) {
-            const fixed = repairReportNarrative(next);
-            meta.narrative = {
-              repairs: fixed.repairs,
-              passed: fixed.ok,
-              before: nq.manifest,
-              after: fixed.manifest,
-            };
-            next.content_quality = { ...fixed.manifest, repairs: fixed.repairs.slice(0, 40) };
-          }
-          next.content_quality_repair = meta;
-
-          const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", id);
-          if (upErr) throw upErr;
-
-          await fetch(`${SUPABASE_URL}/functions/v1/golden-report-library`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, "x-internal-key": SVC },
-            body: JSON.stringify({ action: "archive_scan", scan_id: id, provision: false }),
-          }).catch(() => undefined);
-
-          repaired++;
-          repairedIds.push(id);
         } catch (e) {
           errors.push(`${id}: ${(e as Error).message.slice(0, 140)}`);
         }
       }
 
       return json({
-        ok: true, processed: scans.length, repaired, skipped,
+        ok: true, processed: pageCount, repaired, skipped,
+        needs_review: needsReview, needs_review_ids: reviewIds,
         repaired_ids: repairedIds.slice(0, 50), errors: errors.slice(0, 5),
-        cursor: scans.length ? String(scans[scans.length - 1].id) : null,
-        done: scans.length < batch,
+        page_size: limit,
+        cursor: only.length ? null : lastId,
+        done: only.length ? true : pageCount < limit,
       });
     }
+
 
     return json({ error: "Unknown action" }, 400);
 
