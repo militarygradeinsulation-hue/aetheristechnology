@@ -143,6 +143,16 @@ const SHORT_FIELD_FILLER = new Set([
   "is", "are", "this", "that", "with", "now", "today", "right", "get", "one", "so", "can", "will",
 ]);
 
+/**
+ * A raw URL may only appear as an explicit CTA destination. Hooks and bodies
+ * must name the company instead. Reports carry no allow_url_in_copy flag, so
+ * any http(s) URL in hook or body is a defect.
+ */
+export function hasUrlInCopy(post: PostLike): boolean {
+  if ((post as { allow_url_in_copy?: boolean }).allow_url_in_copy === true) return false;
+  return /https?:\/\//i.test(`${post.hook ?? ""} ${post.body ?? ""}`);
+}
+
 export function shortFieldKey(s: unknown): string {
   const all = tokens(s);
   if (!all.length) return "";
@@ -235,6 +245,10 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
     if (hits.length) {
       banned += hits.length;
       issues.push({ code: "banned_phrase", a: i, detail: hits.join(", ") });
+      good = false;
+    }
+    if (hasUrlInCopy(p)) {
+      issues.push({ code: "url_in_copy", a: i, detail: "raw URL in hook or body" });
       good = false;
     }
 
