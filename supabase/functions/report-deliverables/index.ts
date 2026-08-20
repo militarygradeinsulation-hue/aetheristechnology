@@ -347,6 +347,143 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
   };
 }
 
+/* ──────────────────── compact audit + single scan repair ──────────────── */
+
+/** Bounded compact page. Never selects the full report payload. */
+async function fetchCompactPage(sb: SB, cursor: string | null, limit: number): Promise<CompactQualityRow[]> {
+  const { data, error } = await sb.rpc("golden_report_quality_page", {
+    _cursor: cursor,
+    _limit: limit,
+  });
+  if (error) throw error;
+  return (data || []) as unknown as CompactQualityRow[];
+}
+
+async function archiveScan(scanId: string) {
+  await fetch(`${SUPABASE_URL}/functions/v1/golden-report-library`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, "x-internal-key": SVC },
+    body: JSON.stringify({ action: "archive_scan", scan_id: scanId, provision: false }),
+  }).catch(() => undefined);
+}
+
+/**
+ * Repair exactly ONE scan. The full report is loaded here and nowhere else, and
+ * it goes out of scope as soon as the row is written.
+ * Protected values (overall_leakage, financial_ledger, evidence_ledger,
+ * compiled_findings, top_leaks, chapter evidence/citations/confidence,
+ * annual_low/high, cost_basis, finding ids) are never written.
+ */
+async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
+  skipped: boolean; needs_review: boolean; reasons: string[];
+}> {
+  const { data: scan, error } = await sb.from("forensic_scans")
+    .select("id, report, company_name, target_url")
+    .eq("id", scanId).maybeSingle();
+  if (error) throw error;
+  if (!scan) return { skipped: true, needs_review: false, reasons: ["not_found"] };
+
+  const report = (scan.report || {}) as Record<string, unknown>;
+  const existing = report.deliverables as ReportDeliverables | undefined;
+  const posts = Array.isArray(existing?.posts) ? existing!.posts : [];
+
+  const postsOk = posts.length >= 12 &&
+    !posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`)) &&
+    postsPassGate(posts);
+  const conceptCount = existing?.imagery?.concepts?.length ?? 0;
+  const dayCount = existing?.schedule?.days?.length ?? 0;
+  const countsOk = conceptCount >= TARGET_IMAGERY && posts.length >= 12 && dayCount >= 30;
+  const nq = narrativeQuality(report);
+
+  if (postsOk && countsOk && nq.ok && !force) {
+    return { skipped: true, needs_review: false, reasons: [] };
+  }
+
+  const next: Record<string, unknown> = { ...report };
+  const meta: Record<string, unknown> = { repaired_at: new Date().toISOString(), version: 2 };
+  const reasons: string[] = [];
+
+  if (!postsOk || !countsOk || force) {
+    const base = buildFallbackDeliverables({
+      company: String(scan.company_name || ""),
+      url: String(scan.target_url || ""),
+      report,
+      brand: (existing?.brand as Record<string, unknown>) || null,
+    });
+    const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+    const merged = qualifyPosts(keep, base.posts);
+    const finalPosts = merged.posts;
+
+    // Imagery: only ever topped up, never replaced. Generated assets survive.
+    const concepts = Array.isArray(existing?.imagery?.concepts) && existing!.imagery.concepts.length
+      ? topUpConcepts(existing!.imagery.concepts, base.imagery.concepts)
+      : base.imagery.concepts;
+
+    const baseDays = dayCount >= 30 ? existing!.schedule.days : base.schedule.days;
+    const days = baseDays.map((d, i) => {
+      const post = finalPosts[i % finalPosts.length];
+      return {
+        ...d,
+        post_id: d.post_id ? post.id : d.post_id,
+        topic: scheduleTopic(post),
+        goal: String(post.takeaway || d.goal || "").slice(0, 160),
+        related_leak: post.related_leak,
+      };
+    });
+
+    next.deliverables = {
+      ...(existing || base),
+      posts: finalPosts,
+      imagery: {
+        ...(existing?.imagery || base.imagery),
+        concepts,
+        prompts: concepts.map((c) => ({ title: c.title, prompt: c.prompt })),
+      },
+      schedule: { ...(existing?.schedule || base.schedule), days },
+      quality: merged.manifest,
+    };
+    meta.posts = { ai_kept: merged.ai_kept, previous: posts.length, passed: merged.ok };
+    if (!merged.ok) reasons.push("posts_gate_not_met");
+  }
+
+  if (!nq.ok || force) {
+    const fixed = repairReportNarrative(next);
+    meta.narrative = {
+      repairs: fixed.repairs.length,
+      passed: fixed.ok,
+      before: nq.manifest,
+      after: fixed.manifest,
+    };
+    next.content_quality = {
+      ...fixed.manifest,
+      repairs: fixed.repairs.slice(0, 40),
+      needs_review: !fixed.ok,
+    };
+    if (!fixed.ok) reasons.push("narrative_not_repairable_from_own_evidence");
+  } else {
+    next.content_quality = { ...nq.manifest, needs_review: false };
+  }
+
+  // A report may only stay "compiled" when its narrative is clean.
+  if (reasons.includes("narrative_not_repairable_from_own_evidence")) {
+    const compiler = (next.compiler || {}) as Record<string, unknown>;
+    if (String(compiler.state || next.compiler_state || "").toLowerCase() === "compiled") {
+      next.compiler = { ...compiler, state: "needs_review", quality_reason: reasons.join(", ") };
+      if (typeof next.compiler_state === "string") next.compiler_state = "needs_review";
+    }
+    (next.content_quality as Record<string, unknown>).needs_review_reasons = reasons;
+  }
+  meta.reasons = reasons;
+  next.content_quality_repair = meta;
+
+  const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", scanId);
+  if (upErr) throw upErr;
+
+  await archiveScan(scanId);
+  return { skipped: false, needs_review: reasons.length > 0, reasons };
+}
+
+
 /* ─────────────────────────────── handler ─────────────────────────────── */
 
 serve(async (req) => {
