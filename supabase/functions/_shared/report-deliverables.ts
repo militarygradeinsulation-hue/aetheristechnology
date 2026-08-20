@@ -295,11 +295,11 @@ export function buildFallbackDeliverables(input: {
   report?: Record<string, unknown> | null;
   brand?: Record<string, unknown> | null;
 }): ReportDeliverables {
-  const name = clean(input.company) || clean(input.url) || "this company";
+  const name = safeBusinessName(input.company, input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);
   const palette = paletteOf(input.brand);
-  const site = clean(input.url);
+  const site = safeSiteUrl(input.url);
 
   const conceptSpecs: Array<{ title: string; purpose: string; channel: string; ratio: string; dims: string; hero?: boolean }> = [
     { title: `${name} hero statement`, purpose: "Homepage hero that states what the company does and who it serves in one look.", channel: "Website hero", ratio: "16:9", dims: "1920x1080", hero: true },
