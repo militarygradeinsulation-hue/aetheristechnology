@@ -51,7 +51,7 @@ function compactRow(i: number, overrides: Partial<CompactQualityRow> = {}): Comp
 describe("compact quality audit pagination", () => {
   it("clamps any requested page size to the RPC ceiling", () => {
     expect(clampPage(500)).toBe(MAX_AUDIT_PAGE);
-    expect(clampPage(0)).toBe(1);
+    expect(clampPage(0)).toBe(15); // falsy falls back to the default page size
     expect(clampPage(undefined)).toBeLessThanOrEqual(MAX_AUDIT_PAGE);
   });
 
@@ -76,7 +76,8 @@ describe("compact quality audit pagination", () => {
     expect(totals.processed).toBe(TOTAL);
     expect(maxRequestedLimit).toBeLessThanOrEqual(MAX_AUDIT_PAGE);
     expect(maxLive).toBeLessThanOrEqual(15);
-    expect(totals.pages).toBe(Math.ceil(TOTAL / 15));
+    // exact multiple: one extra empty page terminates the sweep
+    expect(totals.pages).toBe(Math.ceil(TOTAL / 15) + 1);
     expect(totals.clean).toBe(TOTAL);
     expect(totals.needs_repair).toBe(0);
     expect(totals.offenders.length).toBe(0);
