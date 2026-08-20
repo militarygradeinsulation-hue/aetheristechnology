@@ -411,7 +411,15 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
       brand: (existing?.brand as Record<string, unknown>) || null,
     });
     const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
-    const merged = qualifyPosts(keep, base.posts);
+    // Reserve family guarantees 12 even when the report's own evidence forces
+    // primary posts out of the set (raw URLs in source sentences, thin chapters).
+    const reserve = reserveFor({
+      company: String(scan.company_name || ""),
+      url: String(scan.target_url || ""),
+      report,
+      base,
+    });
+    const merged = qualifyPosts(keep, base.posts, reserve);
     const finalPosts = merged.posts;
 
     // Imagery: only ever topped up, never replaced. Generated assets survive.
