@@ -15,7 +15,7 @@
 // Nothing here prices anything, recalculates leakage or invents proof.
 
 import { stripDashes } from "./no-dashes.ts";
-import { writeAllPosts, type PostEvidence } from "./report-post-writers.ts";
+import { writeAllPosts, writeReservePosts, type PostEvidence } from "./report-post-writers.ts";
 import {
   validatePostSet,
   normalizeText,
@@ -114,6 +114,24 @@ function clean(s: unknown): string {
   return stripDashes(String(s ?? "").replace(/\s+/g, " ").trim());
 }
 
+const URL_TLDS = "com|net|org|io|co|us|tech|ai|biz|info|dev|app|shop|store|edu|gov|uk|ca|de";
+
+/**
+ * Report evidence sentences frequently quote raw URLs ("redirects to
+ * https://example.com/challenge"). Post hooks and bodies may never carry a raw
+ * URL, so any evidence sentence handed to a writer is de-linked first. Nothing
+ * else about the sentence changes: no facts, no numbers, no findings.
+ */
+export function scrubUrls(value: unknown, label = "the site"): string {
+  let t = clean(value)
+    .replace(/https?:\/\/[^\s)\]]+/gi, label)
+    .replace(/\bwww\.[^\s)\]]+/gi, label)
+    .replace(new RegExp(`\\b[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.(?:${URL_TLDS})\\b(?:\\/[^\\s)\\]]*)?`, "gi"), label);
+  const esc = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  t = t.replace(new RegExp(`\\b(${esc})(?:[\\s,]+\\1\\b)+`, "gi"), label);
+  return clean(t);
+}
+
 /**
  * Some scans carry pasted prose (an email body, a chat reply) in company_name
  * or target_url. Echoing that into every post makes all twelve posts read the
@@ -163,7 +181,7 @@ export function safeSiteUrl(url: unknown): string {
 
 function titleOf(leak: unknown, i: number): string {
   const l = (leak || {}) as Record<string, unknown>;
-  const name = clean(l.name || l.title || l.leak || "");
+  const name = scrubUrls(l.name || l.title || l.leak || "");
   return name || `Priority finding ${i + 1}`;
 }
 
@@ -192,7 +210,7 @@ function chapterActions(report: Record<string, unknown> | null | undefined): str
     for (const key of ["this_week", "this_month", "this_quarter"]) {
       const arr = Array.isArray(wtd[key]) ? (wtd[key] as unknown[]) : [];
       for (const a of arr) {
-        const v = clean(a);
+        const v = scrubUrls(a);
         if (v && v.length > 12 && !/re run the scan/i.test(v)) out.push(v);
       }
     }
@@ -228,7 +246,7 @@ export function buildEvidencePool(
 
   const add = (leak: string, raw: unknown) => {
     for (const s of String(raw ?? "").split(/(?<=[.!?])\s+/)) {
-      const v = clean(s);
+      const v = scrubUrls(s);
       if (v.length < 40 || v.length > 320) continue;
       const key = normalizeText(v);
       if (!key || seen.has(key)) continue;
