@@ -6,6 +6,7 @@ import {
   MAX_AUDIT_PAGE,
   type CompactQualityRow,
 } from "../../supabase/functions/_shared/quality-audit.ts";
+import { buildFallbackDeliverables } from "../../supabase/functions/_shared/report-deliverables.ts";
 
 /**
  * Regression guard: the historical sweep must stream COMPACT rows in bounded
@@ -13,26 +14,40 @@ import {
  */
 
 const goodBody = (n: number) =>
-  `Finding ${n} shows a specific break in the buying path that the team can see in the report evidence for chapter ${n}. ` +
-  `The consequence for a buyer ${n} is a slower decision and a longer wait before anyone answers a real question about scope ${n}. ` +
-  `The operator fix is a single owner, a named tool and a weekly check that proves the number moved for step ${n} of the pipeline.`;
+  `Finding ${n} shows a break in the buying path that the report evidence records for chapter ${n}.`;
+
+/** Production-shaped posts: the 12 distinct deterministic archetypes. */
+function realPosts(i: number) {
+  const d = buildFallbackDeliverables({
+    company: `Company ${i}`,
+    url: `https://example-${i}.com`,
+    report: {
+      top_leaks: [
+        { title: "Unclear positioning", description: "The homepage headline names an industry but never an outcome." },
+        { title: "Slow follow up", description: "Contact form enquiries receive no acknowledgement of any kind." },
+        { title: "No proof", description: "There is no case evidence on the public site for a buyer to check." },
+      ],
+      chapters: [
+        { no: 1, title: "Positioning", what_we_found: "Four pages carry one headline and no named buyer.", what_to_do: [{ action: "Rewrite the hero around one buyer and one outcome." }] },
+        { no: 2, title: "Follow up", what_we_found: "Enquiries sit unanswered past the first business day.", what_to_do: [{ action: "Route form fills to an owner with a one hour reply rule." }] },
+      ],
+    },
+    brand: null,
+  });
+  return d.posts.map((p) => ({ hook: p.hook, body: p.body, cta: p.cta }));
+}
 
 function compactRow(i: number, overrides: Partial<CompactQualityRow> = {}): CompactQualityRow {
-  const posts = Array.from({ length: 12 }, (_, k) => ({
-    hook: `Hook ${i}-${k} on finding ${k}`,
-    body: goodBody(i * 100 + k),
-    cta: `Ask for the chapter ${k} teardown ${i}`,
-  }));
   return {
     id: `id-${String(i).padStart(6, "0")}`,
     company_name: `Company ${i}`,
     target_url: `https://example-${i}.com`,
-    posts,
+    posts: realPosts(i),
     narrative: {
-      executive_summary: `Company ${i} loses buyers between the first click and the first reply because nobody owns the handoff step.`,
+      executive_summary: `Company ${i} loses buyers between the first click and the first reply because nobody owns the handoff step today.`,
       chapters: [
-        { no: 1, title: "Positioning", verdict: `Chapter one verdict for company ${i} names the missing outcome on the homepage headline today.` },
-        { no: 2, title: "Follow up", verdict: `Chapter two verdict for company ${i} records the unanswered enquiries collected during the scan window.` },
+        { no: 1, title: "Positioning", verdict: `Four pages carry a single headline and never name the buyer who is meant to act on it.` },
+        { no: 2, title: "Follow up", verdict: `Enquiries collected during the scan window sat past a full business day with no acknowledgement at all.` },
       ],
     },
     content_quality: { validation_version: 2 },
@@ -101,10 +116,9 @@ describe("compact quality audit pagination", () => {
   it("flags banned filler, short counts and duplicated narrative from the compact row only", () => {
     const banned = assessCompactRow(
       compactRow(1, {
-        posts: Array.from({ length: 12 }, (_, k) => ({
-          hook: `Hook ${k}`,
-          body: `We looked at how Acme shows up online and found a gap around follow up ${k}. ${goodBody(k)}`,
-          cta: `Book the teardown ${k}`,
+        posts: realPosts(1).map((p, k) => ({
+          ...p,
+          body: `We looked at how Acme shows up online and found a gap around follow up ${k}. ${p.body}`,
         })),
       }),
     );
