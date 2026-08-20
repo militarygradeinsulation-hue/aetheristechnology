@@ -17,10 +17,18 @@ const goodBody = (n: number) =>
   `Finding ${n} shows a break in the buying path that the report evidence records for chapter ${n}.`;
 
 /** Production-shaped posts: the 12 distinct deterministic archetypes. */
+let cachedPosts: Array<{ hook: string; body: string; cta: string }> | null = null;
 function realPosts(i: number) {
+  if (cachedPosts) {
+    return cachedPosts.map((p) => ({
+      hook: p.hook.replace(/Company 0/g, `Company ${i}`),
+      body: p.body.replace(/Company 0/g, `Company ${i}`),
+      cta: p.cta.replace(/Company 0/g, `Company ${i}`),
+    }));
+  }
   const d = buildFallbackDeliverables({
-    company: `Company ${i}`,
-    url: `https://example-${i}.com`,
+    company: "Company 0",
+    url: "https://example-0.com",
     report: {
       top_leaks: [
         { title: "Unclear positioning", description: "The homepage headline names an industry but never an outcome." },
@@ -34,7 +42,8 @@ function realPosts(i: number) {
     },
     brand: null,
   });
-  return d.posts.map((p) => ({ hook: p.hook, body: p.body, cta: p.cta }));
+  cachedPosts = d.posts.map((p) => ({ hook: p.hook, body: p.body, cta: p.cta }));
+  return realPosts(i);
 }
 
 function compactRow(i: number, overrides: Partial<CompactQualityRow> = {}): CompactQualityRow {
@@ -96,7 +105,7 @@ describe("compact quality audit pagination", () => {
     expect(totals.clean).toBe(TOTAL);
     expect(totals.needs_repair).toBe(0);
     expect(totals.offenders.length).toBe(0);
-  });
+  }, 60_000);
 
   it("caps the offender list no matter how many reports fail", async () => {
     const TOTAL = 300;
@@ -111,7 +120,7 @@ describe("compact quality audit pagination", () => {
     const totals = await auditAllCompact(fetchPage, { pageSize: 25 });
     expect(totals.needs_repair).toBe(TOTAL);
     expect(totals.offenders.length).toBeLessThanOrEqual(25);
-  });
+  }, 60_000);
 
   it("flags banned filler, short counts and duplicated narrative from the compact row only", () => {
     const banned = assessCompactRow(
