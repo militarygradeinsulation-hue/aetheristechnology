@@ -28,6 +28,13 @@ import {
 } from "../_shared/report-deliverables.ts";
 import { validatePostSet, hasBannedPhrase, issuesToPrompt } from "../_shared/content-uniqueness.ts";
 import { narrativeQuality, repairReportNarrative } from "../_shared/narrative-repair.ts";
+import {
+  assessCompactRow,
+  clampPage,
+  emptyTotals,
+  foldAssessment,
+  type CompactQualityRow,
+} from "../_shared/quality-audit.ts";
 
 
 const corsHeaders = {
