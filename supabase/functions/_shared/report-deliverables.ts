@@ -15,7 +15,7 @@
 // Nothing here prices anything, recalculates leakage or invents proof.
 
 import { stripDashes } from "./no-dashes.ts";
-import { writeAllPosts, type PostEvidence } from "./report-post-writers.ts";
+import { writeAllPosts, writeReservePosts, type PostEvidence } from "./report-post-writers.ts";
 import {
   validatePostSet,
   normalizeText,
@@ -114,6 +114,24 @@ function clean(s: unknown): string {
   return stripDashes(String(s ?? "").replace(/\s+/g, " ").trim());
 }
 
+const URL_TLDS = "com|net|org|io|co|us|tech|ai|biz|info|dev|app|shop|store|edu|gov|uk|ca|de";
+
+/**
+ * Report evidence sentences frequently quote raw URLs ("redirects to
+ * https://example.com/challenge"). Post hooks and bodies may never carry a raw
+ * URL, so any evidence sentence handed to a writer is de-linked first. Nothing
+ * else about the sentence changes: no facts, no numbers, no findings.
+ */
+export function scrubUrls(value: unknown, label = "the site"): string {
+  let t = clean(value)
+    .replace(/https?:\/\/[^\s)\]]+/gi, label)
+    .replace(/\bwww\.[^\s)\]]+/gi, label)
+    .replace(new RegExp(`\\b[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.(?:${URL_TLDS})\\b(?:\\/[^\\s)\\]]*)?`, "gi"), label);
+  const esc = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  t = t.replace(new RegExp(`\\b(${esc})(?:[\\s,]+\\1\\b)+`, "gi"), label);
+  return clean(t);
+}
+
 /**
  * Some scans carry pasted prose (an email body, a chat reply) in company_name
  * or target_url. Echoing that into every post makes all twelve posts read the
@@ -163,7 +181,7 @@ export function safeSiteUrl(url: unknown): string {
 
 function titleOf(leak: unknown, i: number): string {
   const l = (leak || {}) as Record<string, unknown>;
-  const name = clean(l.name || l.title || l.leak || "");
+  const name = scrubUrls(l.name || l.title || l.leak || "");
   return name || `Priority finding ${i + 1}`;
 }
 
@@ -192,7 +210,7 @@ function chapterActions(report: Record<string, unknown> | null | undefined): str
     for (const key of ["this_week", "this_month", "this_quarter"]) {
       const arr = Array.isArray(wtd[key]) ? (wtd[key] as unknown[]) : [];
       for (const a of arr) {
-        const v = clean(a);
+        const v = scrubUrls(a);
         if (v && v.length > 12 && !/re run the scan/i.test(v)) out.push(v);
       }
     }
@@ -228,7 +246,7 @@ export function buildEvidencePool(
 
   const add = (leak: string, raw: unknown) => {
     for (const s of String(raw ?? "").split(/(?<=[.!?])\s+/)) {
-      const v = clean(s);
+      const v = scrubUrls(s);
       if (v.length < 40 || v.length > 320) continue;
       const key = normalizeText(v);
       if (!key || seen.has(key)) continue;
@@ -346,7 +364,7 @@ export function buildFallbackDeliverables(input: {
   const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
   const written = writeAllPosts(name, site, evidence);
 
-  const posts: DeliverablePost[] = written.map((w, i) => ({
+  const primary: DeliverablePost[] = written.map((w, i) => ({
     id: `post-${String(i + 1).padStart(2, "0")}`,
     platform: PLATFORM_CYCLE[i % PLATFORM_CYCLE.length],
     hook: w.hook,
@@ -358,6 +376,12 @@ export function buildFallbackDeliverables(input: {
     role: w.role,
     takeaway: w.takeaway,
   }));
+
+  // A report may not ship fewer than 12 posts. When its own evidence forces a
+  // primary post out of the set (raw URL in the source sentence, duplicated
+  // finding), the reserve family refills from a different editorial angle.
+  const reserve = buildReservePosts({ name, site, evidence, concepts });
+  const posts = qualifyPosts(primary, reserve).posts;
 
   const days: ScheduleEntry[] = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
     const post = posts[i % posts.length];
@@ -402,6 +426,29 @@ export function buildFallbackDeliverables(input: {
     generation_state: "fallback",
     generated_at: new Date().toISOString(),
   };
+}
+
+
+/**
+ * Stable signature of everything a quality repair is allowed to change:
+ * deliverable copy and chapter narrative prose. Financial fields, evidence and
+ * findings are deliberately excluded. Used to make repair idempotent: when a
+ * report is already at its repairable floor the write is skipped entirely.
+ */
+export function repairSignature(report: Record<string, unknown> | null | undefined): string {
+  const d = (report?.deliverables || {}) as Record<string, unknown>;
+  const posts = Array.isArray(d.posts) ? (d.posts as DeliverablePost[]) : [];
+  const concepts = Array.isArray((d.imagery as Record<string, unknown>)?.concepts)
+    ? ((d.imagery as Record<string, unknown>).concepts as ImageryConcept[]) : [];
+  const days = Array.isArray((d.schedule as Record<string, unknown>)?.days)
+    ? ((d.schedule as Record<string, unknown>).days as ScheduleEntry[]) : [];
+  const chapters = Array.isArray(report?.chapters) ? (report!.chapters as Record<string, unknown>[]) : [];
+  return JSON.stringify({
+    p: posts.map((x) => [x.hook, x.body, x.cta, x.related_leak]),
+    i: concepts.map((x) => [x.title, x.prompt]),
+    s: days.map((x) => [x.topic, x.goal, x.post_id]),
+    n: chapters.map((ch) => [ch.what_we_found, ch.verdict, ch.why_its_leaking, ch.what_its_costing]),
+  });
 }
 
 /* ─────────────────────── AI enrichment normalisation ────────────────── */
@@ -473,9 +520,46 @@ export type PostQualityResult = {
  * Repetitive filler is never shipped: a candidate that fails the gate is
  * dropped, not patched.
  */
+export function buildReservePosts(input: {
+  name: string;
+  site: string;
+  evidence: PostEvidence[];
+  concepts: ImageryConcept[];
+}): DeliverablePost[] {
+  const rotated = input.evidence.map((_, i) => input.evidence[(i + 5) % input.evidence.length]);
+  return writeReservePosts(input.name, input.site, rotated).map((w, i) => ({
+    id: `post-r${String(i + 1).padStart(2, "0")}`,
+    platform: PLATFORM_CYCLE[(i + 2) % PLATFORM_CYCLE.length],
+    hook: w.hook,
+    body: w.body,
+    cta: w.cta,
+    visual: clean(`${w.visual} Pairs with: ${input.concepts[i % input.concepts.length].title}.`),
+    related_leak: rotated[i % rotated.length].leak,
+    status: "ready" as const,
+    role: w.role,
+    takeaway: w.takeaway,
+  }));
+}
+
+/** Rebuild the deterministic reserve set for an existing report. */
+export function reserveFor(input: {
+  company: string;
+  url: string;
+  report?: Record<string, unknown> | null;
+  base: ReportDeliverables;
+}): DeliverablePost[] {
+  const name = safeBusinessName(input.company, input.url);
+  const site = safeSiteUrl(input.url);
+  const leaks = leakList(input.report);
+  const actions = chapterActions(input.report);
+  const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
+  return buildReservePosts({ name, site, evidence, concepts: input.base.imagery.concepts });
+}
+
 export function qualifyPosts(
   candidates: DeliverablePost[],
   deterministic: DeliverablePost[],
+  reserve: DeliverablePost[] = [],
 ): PostQualityResult {
   const kept: DeliverablePost[] = [];
   const tryAdd = (p: DeliverablePost) => {
@@ -491,6 +575,7 @@ export function qualifyPosts(
   let aiKept = 0;
   for (const p of candidates) if (tryAdd(p)) aiKept++;
   for (const p of deterministic) tryAdd(p);
+  if (kept.length < POST_COUNT) for (const p of reserve) tryAdd(p);
 
   const final = kept.slice(0, POST_COUNT).map((p, i) => ({
     ...p,

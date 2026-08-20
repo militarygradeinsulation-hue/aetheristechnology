@@ -14,6 +14,9 @@ import {
   postsPassGate,
   shapeAiPosts,
   safeBusinessName,
+  scrubUrls,
+  reserveFor,
+  repairSignature,
 } from "../../supabase/functions/_shared/report-deliverables.ts";
 
 const report = {
@@ -274,5 +277,86 @@ describe("raw URLs never appear in post prose", () => {
 
   it("passes the deterministic post set", () => {
     for (const p of built.posts) expect(hasUrlInCopy(p)).toBe(false);
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────
+ * REGRESSION: the 65 short reports.
+ * Their evidence sentences quote raw URLs ("redirects to
+ * https://pwap.com/challenge"). Every deterministic post inherited the URL,
+ * the gate dropped it as url_in_copy, and top-up had nothing left to give,
+ * so the repair persisted 3 to 11 posts instead of 12.
+ * ──────────────────────────────────────────────────────────────────────── */
+describe("url heavy evidence still ships twelve posts", () => {
+  const urlReport = {
+    executive_summary:
+      "The primary domain https://pwap.com redirects every visitor to https://pwap.com/challenge before any content loads.",
+    top_leaks: [
+      { title: "Blocked access", description: "pwap.com redirects to https://pwap.com/challenge and no verification control is present on that page." },
+      { title: "Indexing loss", description: "Crawlers reaching www.pwap.com receive the challenge page at https://pwap.com/challenge instead of content." },
+    ],
+    chapters: [
+      {
+        title: "Site autopsy",
+        what_we_found: "The primary domain, pwap.com, redirects to a verification page at https://pwap.com/challenge with no way to complete it.",
+        verdict: "The site at https://pwap.com is actively blocking legitimate visitors from every page beyond the challenge.",
+        what_to_do: { this_week: ["Disable the geoblocking redirect to pwap.com/challenge immediately and verify direct access to pwap.com"] },
+      },
+    ],
+  };
+
+  const urlBuilt = buildFallbackDeliverables({ company: "PWAP", url: "https://pwap.com", report: urlReport });
+
+  it("scrubs URLs out of evidence rather than shipping them", () => {
+    expect(scrubUrls("redirects to https://pwap.com/challenge from www.pwap.com")).not.toMatch(/https?:\/\/|www\.|pwap\.com/);
+  });
+
+  it("builds exactly twelve URL free posts", () => {
+    expect(urlBuilt.posts).toHaveLength(12);
+    for (const p of urlBuilt.posts) expect(hasUrlInCopy(p)).toBe(false);
+  });
+
+  it("passes the full uniqueness gate", () => {
+    expect(postsPassGate(urlBuilt.posts)).toBe(true);
+  });
+
+  it("refills to twelve when most stored posts are dropped", () => {
+    const poisoned = urlBuilt.posts.slice(0, 3).map((p, i) => ({
+      ...p,
+      hook: `Read the full finding at https://pwap.com/report/${i}`,
+    }));
+    const reserve = reserveFor({ company: "PWAP", url: "https://pwap.com", report: urlReport, base: urlBuilt });
+    const merged = qualifyPosts(poisoned, urlBuilt.posts, reserve);
+    expect(merged.posts).toHaveLength(12);
+    expect(merged.ok).toBe(true);
+    for (const p of merged.posts) expect(hasUrlInCopy(p)).toBe(false);
+  });
+
+  it("reserve posts are distinct from the primary family", () => {
+    const reserve = reserveFor({ company: "PWAP", url: "https://pwap.com", report: urlReport, base: urlBuilt });
+    expect(reserve).toHaveLength(12);
+    const all = [...urlBuilt.posts, ...reserve];
+    expect(validatePostSet(all, 24).qualifiedIndexes.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it("never falls back to a machine identifier as the business name", () => {
+    for (const p of urlBuilt.posts) expect(`${p.hook} ${p.body}`).not.toMatch(/pwap\.com/i);
+  });
+});
+
+describe("repair is idempotent", () => {
+  const r1 = { deliverables: built, chapters: [{ what_we_found: "A", verdict: "B" }] };
+  it("produces an identical signature for unchanged content", () => {
+    expect(repairSignature(r1)).toBe(repairSignature(JSON.parse(JSON.stringify(r1))));
+  });
+  it("changes when post copy changes", () => {
+    const r2 = JSON.parse(JSON.stringify(r1));
+    r2.deliverables.posts[0].hook = "Different hook entirely.";
+    expect(repairSignature(r2)).not.toBe(repairSignature(r1));
+  });
+  it("ignores financial fields", () => {
+    const r2 = JSON.parse(JSON.stringify(r1));
+    r2.overall_leakage = { annual_low: 1, annual_high: 2 };
+    expect(repairSignature(r2)).toBe(repairSignature(r1));
   });
 });

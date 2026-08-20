@@ -21,6 +21,8 @@ import {
   deliverablesComplete,
   topUpConcepts,
   qualifyPosts,
+  reserveFor,
+  repairSignature,
   postsPassGate,
   scheduleTopic,
   TARGET_IMAGERY,
@@ -411,7 +413,15 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
       brand: (existing?.brand as Record<string, unknown>) || null,
     });
     const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
-    const merged = qualifyPosts(keep, base.posts);
+    // Reserve family guarantees 12 even when the report's own evidence forces
+    // primary posts out of the set (raw URLs in source sentences, thin chapters).
+    const reserve = reserveFor({
+      company: String(scan.company_name || ""),
+      url: String(scan.target_url || ""),
+      report,
+      base,
+    });
+    const merged = qualifyPosts(keep, base.posts, reserve);
     const finalPosts = merged.posts;
 
     // Imagery: only ever topped up, never replaced. Generated assets survive.
@@ -475,6 +485,12 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
   }
   meta.reasons = reasons;
   next.content_quality_repair = meta;
+
+  // Idempotency: a report already sitting at its repairable floor is not
+  // rewritten, so a second sweep changes zero rows.
+  if (!force && repairSignature(next) === repairSignature(report)) {
+    return { skipped: true, needs_review: reasons.length > 0, reasons };
+  }
 
   const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", scanId);
   if (upErr) throw upErr;
