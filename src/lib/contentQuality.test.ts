@@ -40,7 +40,7 @@ const report = {
 
 const built = buildFallbackDeliverables({
   company: "Northline Mechanical",
-  site: "northline.example",
+  url: "https://northline.example",
   report: report as never,
 });
 
@@ -99,7 +99,7 @@ describe("evidence pool", () => {
   it("sparse evidence still produces a passing post set", () => {
     const sparse = buildFallbackDeliverables({
       company: "Solo Trades",
-      site: "solo.example",
+      url: "https://solo.example",
       report: { top_leaks: [{ title: "One leak" }] } as never,
     });
     expect(validatePostSet(sparse.posts, 12).ok).toBe(true);
