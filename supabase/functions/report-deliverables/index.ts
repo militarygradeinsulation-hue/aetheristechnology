@@ -290,7 +290,7 @@ serve(async (req) => {
     if (action === "enrich") {
       const scanId = String(body.scan_id ?? "");
       if (!scanId) return json({ error: "scan_id required" }, 400);
-      const res = await enrichScan(sb, scanId, { force: body.force === true, images: body.images !== false });
+      const res = await enrichScan(sb as unknown as SB, scanId, { force: body.force === true, images: body.images !== false });
       return json({ ok: true, ...res });
     }
 
@@ -319,7 +319,7 @@ serve(async (req) => {
           const existing = report.deliverables as ReportDeliverables | undefined;
           if (deliverablesComplete(existing) && !body.force) { ok++; continue; }
           if (withAi) {
-            await enrichScan(sb, id, { force: body.force === true, images: body.images === true });
+            await enrichScan(sb as unknown as SB, id, { force: body.force === true, images: body.images === true });
           } else {
             report.deliverables = normalizeDeliverables(
               buildFallbackDeliverables({
@@ -488,8 +488,9 @@ serve(async (req) => {
         const gate = validatePostSet(posts, Math.min(12, posts.length || 12));
         const hasBanned = posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
         const nq = narrativeQuality(report);
-        const eDup = gate.issues.some((i) => i.code === "exact_duplicate");
-        const nDup = gate.issues.some((i) => i.code === "near_duplicate" || i.code === "repeated_sentence" || i.code === "repeated_field");
+        const codes = gate.issues.map((i) => String(i.code));
+        const eDup = codes.includes("exact_duplicate");
+        const nDup = codes.some((c) => ["near_duplicate", "repeated_sentence", "duplicate_hook", "duplicate_cta", "shared_opening"].includes(c));
         if (hasBanned) banned++;
         if (eDup) exactDupPosts++;
         if (nDup) nearDupPosts++;
