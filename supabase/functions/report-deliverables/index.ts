@@ -20,9 +20,15 @@ import {
   normalizeDeliverables,
   deliverablesComplete,
   topUpConcepts,
+  qualifyPosts,
+  postsPassGate,
+  scheduleTopic,
   TARGET_IMAGERY,
   type ReportDeliverables,
 } from "../_shared/report-deliverables.ts";
+import { validatePostSet, hasBannedPhrase } from "../_shared/content-uniqueness.ts";
+import { narrativeQuality, repairReportNarrative } from "../_shared/narrative-repair.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
