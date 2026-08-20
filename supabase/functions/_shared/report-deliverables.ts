@@ -154,6 +154,69 @@ function isoDay(offset: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * One private evidence bundle per post. Observations are pulled from the report
+ * (chapter findings, verdicts, leak descriptions) and each concrete sentence is
+ * handed to exactly one post, so no two posts argue from the same fact.
+ */
+export function buildEvidencePool(
+  report: Record<string, unknown> | null | undefined,
+  leaks: string[],
+  actions: string[],
+  count: number,
+): PostEvidence[] {
+  const seen = new Set<string>();
+  const details: Array<{ leak: string; detail: string }> = [];
+
+  const add = (leak: string, raw: unknown) => {
+    for (const s of String(raw ?? "").split(/(?<=[.!?])\s+/)) {
+      const v = clean(s);
+      if (v.length < 40 || v.length > 320) continue;
+      const key = normalizeText(v);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      details.push({ leak, detail: v });
+      return; // one sentence per source field keeps the pool broad, not deep
+    }
+  };
+
+  const rawLeaks = Array.isArray(report?.top_leaks) ? (report!.top_leaks as Record<string, unknown>[]) : [];
+  rawLeaks.forEach((l, i) => {
+    const name = titleOf(l, i);
+    add(name, l.description || l.detail || l.evidence || l.why || l.summary);
+  });
+
+  const chapters = Array.isArray(report?.chapters) ? (report!.chapters as Record<string, unknown>[]) : [];
+  for (const field of ["what_we_found", "verdict", "why_its_leaking"]) {
+    chapters.forEach((ch, i) => {
+      add(clean(ch.title || ch.slug) || leaks[i % leaks.length], ch[field]);
+    });
+  }
+  add(leaks[0], report?.executive_summary);
+
+  const out: PostEvidence[] = [];
+  for (let i = 0; i < count; i++) {
+    const d = details[i % Math.max(1, details.length)];
+    const leak = d?.leak || leaks[i % leaks.length];
+    // Sparse evidence: derive a different buyer implication per post rather
+    // than repeating the same sentence. The action still differentiates them.
+    const detail = d?.detail ||
+      `the review flagged ${leak.toLowerCase()} as an unresolved gap on the public surface`;
+    const action = actions[i % Math.max(1, actions.length)] ||
+      `assign an owner to ${leak.toLowerCase()} and correct it this week`;
+    out.push({ leak, detail, action });
+  }
+  return out;
+}
+
+/** Short calendar line. Never the post body. */
+function scheduleTopic(post: DeliverablePost): string {
+  const t = clean(post.hook).replace(/^["“]|["”]$/g, "");
+  const short = t.length > 95 ? `${t.slice(0, 92).replace(/\s+\S*$/, "")}…` : t;
+  return clean(`${post.related_leak}: ${short}`);
+}
+
+
 /* ───────────────────────── deterministic fallback ───────────────────── */
 
 export function buildFallbackDeliverables(input: {
