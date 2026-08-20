@@ -1136,6 +1136,28 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     repairs.push("overall_leakage: removed unsupported total from a generic/template report");
   }
 
+  // ── content uniqueness gate ────────────────────────────────────────────
+  // Narrative-only. One deterministic repair pass, then a hard re-check.
+  // No financial, evidence, citation or confidence field is read or written.
+  let quality = validateReportNarrative(report as Record<string, unknown>);
+  let narrativeRepairs: unknown[] = [];
+  if (!quality.ok) {
+    const fixed = repairReportNarrative(report as Record<string, unknown>);
+    narrativeRepairs = fixed.repairs;
+    quality = validateReportNarrative(report as Record<string, unknown>);
+    repairs.push(`narrative: rewrote ${fixed.repairs.length} duplicated narrative field(s)`);
+  }
+  if (!quality.ok) {
+    violations.push(
+      `content_quality: ${quality.offendingPaths.length} narrative section(s) still duplicate earlier prose`,
+    );
+  }
+  report.content_quality = {
+    ...quality.manifest,
+    offending_paths: quality.offendingPaths.slice(0, 20),
+    repairs: narrativeRepairs.slice(0, 40),
+  };
+
   const blocking = violations;
   const ok = blocking.length === 0;
   const state: GoldenReportState = ok
@@ -1143,6 +1165,7 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     : generic.regeneration_required
       ? "regeneration_required"
       : "needs_review";
+
 
   report.report_consistency = consistency;
   report.evidence_ledger = ledger;
