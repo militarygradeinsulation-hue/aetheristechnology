@@ -16,6 +16,7 @@ import {
   safeBusinessName,
   scrubUrls,
   reserveFor,
+  repairSignature,
 } from "../../supabase/functions/_shared/report-deliverables.ts";
 
 const report = {
@@ -340,5 +341,22 @@ describe("url heavy evidence still ships twelve posts", () => {
 
   it("never falls back to a machine identifier as the business name", () => {
     for (const p of urlBuilt.posts) expect(`${p.hook} ${p.body}`).not.toMatch(/pwap\.com/i);
+  });
+});
+
+describe("repair is idempotent", () => {
+  const r1 = { deliverables: built, chapters: [{ what_we_found: "A", verdict: "B" }] };
+  it("produces an identical signature for unchanged content", () => {
+    expect(repairSignature(r1)).toBe(repairSignature(JSON.parse(JSON.stringify(r1))));
+  });
+  it("changes when post copy changes", () => {
+    const r2 = JSON.parse(JSON.stringify(r1));
+    r2.deliverables.posts[0].hook = "Different hook entirely.";
+    expect(repairSignature(r2)).not.toBe(repairSignature(r1));
+  });
+  it("ignores financial fields", () => {
+    const r2 = JSON.parse(JSON.stringify(r1));
+    r2.overall_leakage = { annual_low: 1, annual_high: 2 };
+    expect(repairSignature(r2)).toBe(repairSignature(r1));
   });
 });
