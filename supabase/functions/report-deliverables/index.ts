@@ -26,7 +26,7 @@ import {
   TARGET_IMAGERY,
   type ReportDeliverables,
 } from "../_shared/report-deliverables.ts";
-import { validatePostSet, hasBannedPhrase } from "../_shared/content-uniqueness.ts";
+import { validatePostSet, hasBannedPhrase, issuesToPrompt } from "../_shared/content-uniqueness.ts";
 import { narrativeQuality, repairReportNarrative } from "../_shared/narrative-repair.ts";
 
 
@@ -108,9 +108,23 @@ Include 6 concepts. Every prompt must be usable as is.`;
 
   const postsPrompt = `${ctx}
 
-Write 12 READY TO PUBLISH posts for this company. Each maps to a real finding.
+Write 12 READY TO PUBLISH posts for this company. Each maps to a DIFFERENT real finding or a different implication of one.
+
+EDITORIAL MIX (one post each, never label the role in the copy):
+executive observation, buyer problem, myth correction, evidence insight, process explanation,
+practical checklist, objection response, founder or operator perspective, before and after,
+proof and credibility, offer education, direct next step.
+
+UNIQUENESS RULES (a breach fails the whole set):
+- Never reuse an evidence sentence or the same factual bundle in two posts. One finding may appear twice only if the buyer implication and the action are genuinely different.
+- No two posts may share their first four words, their hook, their CTA or any sentence of nine words or more.
+- Vary length, cadence and sentence shape between posts.
+- Use the company name. Do not print the raw URL except as a CTA destination.
+- Every post carries one concrete detail traceable to the evidence above. Invent nothing: no statistics, customers, outcomes or third party validation.
+- BANNED openings and phrases: "We looked at how", "shows up online", "found a gap around", "Nothing dramatic", "here is the thing", "in today's market". Do not paraphrase them either.
+
 Return JSON:
-{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<80 to 150 words of plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence of visual direction>", "related_leak": "<the finding it maps to>" } ] }
+{ "posts": [ { "platform": "<LinkedIn|X|Instagram|Facebook|Email>", "hook": "<one scroll stopping line>", "body": "<80 to 150 words of plain sentences>", "cta": "<one short specific action>", "visual": "<one sentence of visual direction>", "takeaway": "<one actionable line>", "related_leak": "<the finding it maps to>" } ] }
 Exactly 12 posts. Mix the platforms.`;
 
   const schedulePrompt = `${ctx}
@@ -138,10 +152,43 @@ Exactly 30 entries, day 1 through 30, no gaps.`;
   const postsVal = ok(posts) as Record<string, unknown> | null;
   const schedVal = ok(schedule) as Record<string, unknown> | null;
 
+  // One targeted correction pass. The model is told exactly which pairs failed
+  // and why, then asked to rewrite only those posts.
+  let postList = Array.isArray(postsVal?.posts) ? (postsVal!.posts as Record<string, unknown>[]) : [];
+  if (postList.length) {
+    const gate = validatePostSet(
+      postList.map((p) => ({
+        hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? ""),
+      })),
+      Math.min(12, postList.length),
+    );
+    if (!gate.ok) {
+      try {
+        const fix = await call(
+          `${postsPrompt}
+
+YOUR PREVIOUS ATTEMPT FAILED THE UNIQUENESS GATE. Rewrite the whole set, fixing exactly these problems:
+${issuesToPrompt(gate.issues, postList.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })))}`,
+          4000,
+        ) as Record<string, unknown>;
+        const retry = Array.isArray(fix?.posts) ? (fix.posts as Record<string, unknown>[]) : [];
+        if (retry.length) {
+          const g2 = validatePostSet(
+            retry.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })),
+            Math.min(12, retry.length),
+          );
+          if (g2.qualifiedIndexes.length > gate.qualifiedIndexes.length) postList = retry;
+        }
+      } catch (e) {
+        failures.push(`posts_correction: ${String((e as Error).message).slice(0, 120)}`);
+      }
+    }
+  }
+
   return {
     ai: stripDashesDeep({
       imagery: ok(imagery) || {},
-      posts: Array.isArray(postsVal?.posts) ? postsVal!.posts : [],
+      posts: postList,
       schedule: schedVal || {},
     }) as Record<string, unknown>,
     failures,
@@ -235,6 +282,25 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
     failures = [String((e as Error).message).slice(0, 200)];
     deliverables = { ...base, generation_state: "degraded", enriched_at: new Date().toISOString() };
   }
+  // Final uniqueness gate: qualified AI posts first, distinct deterministic
+  // archetypes fill the rest. Repetitive filler never ships.
+  const gated = qualifyPosts(deliverables.posts, base.posts);
+  deliverables.posts = gated.posts;
+  deliverables.quality = gated.manifest;
+  deliverables.schedule = {
+    ...deliverables.schedule,
+    days: deliverables.schedule.days.map((d, i) => {
+      const post = gated.posts[i % gated.posts.length];
+      return {
+        ...d,
+        post_id: d.post_id ? post.id : d.post_id,
+        topic: d.topic && d.topic.length <= 160 && d.topic !== post.body ? d.topic : scheduleTopic(post),
+        related_leak: post.related_leak,
+      };
+    }),
+  };
+  if (!gated.ok) deliverables.generation_state = "degraded";
+
   deliverables.brand = (existing?.brand as Record<string, unknown>) || deliverables.brand || null;
   deliverables.enrichment_error = failures.length ? failures.join(" | ").slice(0, 400) : null;
 
