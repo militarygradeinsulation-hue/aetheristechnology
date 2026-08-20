@@ -219,3 +219,47 @@ describe("degenerate scan inputs", () => {
     expect(new Set(details).size).toBe(12);
   });
 });
+
+describe("exact duplication has no length floor", () => {
+  const base = built.posts.slice(0, 2);
+  it("rejects a repeated CTA that differs only by an acronym", () => {
+    const a = { ...base[0], cta: "Request a technical audit" };
+    const b = { ...base[1], cta: "Request a technical SEO audit" };
+    const res = validatePostSet([a, b], 2);
+    expect(res.issues.some((i) => i.code === "duplicate_cta")).toBe(true);
+    expect(res.ok).toBe(false);
+  });
+
+  it("rejects a very short identical CTA", () => {
+    const a = { ...base[0], cta: "Call us" };
+    const b = { ...base[1], cta: "Call us" };
+    expect(validatePostSet([a, b], 2).issues.some((i) => i.code === "duplicate_cta")).toBe(true);
+  });
+
+  it("rejects repeated hooks that differ only by filler words", () => {
+    const a = { ...base[0], hook: "Check your domain status now" };
+    const b = { ...base[1], hook: "Check your domain DNS status now" };
+    expect(validatePostSet([a, b], 2).issues.some((i) => i.code === "duplicate_hook")).toBe(true);
+  });
+
+  it("keeps genuinely different CTAs", () => {
+    const a = { ...base[0], cta: "Book a rendering review" };
+    const b = { ...base[1], cta: "Download the crawl checklist" };
+    expect(validatePostSet([a, b], 2).issues.some((i) => i.code === "duplicate_cta")).toBe(false);
+  });
+});
+
+describe("safeBusinessName rejects machine identifiers", () => {
+  it("never returns a raw URL, domain, email or path", () => {
+    expect(safeBusinessName("https://aetheris.technology/", "https://aetheris.technology/")).toBe("Aetheris");
+    expect(safeBusinessName("www.aetheris.technology", "https://aetheris.technology/")).toBe("Aetheris");
+    expect(safeBusinessName("aetheris.technology", "https://aetheris.technology/")).toBe("Aetheris");
+    expect(safeBusinessName("joseph@aetheris.technology", "https://aetheris.technology/")).toBe("Aetheris");
+    expect(safeBusinessName("/brands/franchise", "https://aetheris.technology/")).toBe("Aetheris");
+    expect(safeBusinessName(null, "https://aetheris.technology/")).toBe("Aetheris");
+  });
+
+  it("still keeps a real brand label", () => {
+    expect(safeBusinessName("Aetheris Technology", "https://aetheris.technology/")).toBe("Aetheris Technology");
+  });
+});
