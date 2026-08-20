@@ -12,6 +12,7 @@ import {
   qualifyPosts,
   postsPassGate,
   shapeAiPosts,
+  safeBusinessName,
 } from "../../supabase/functions/_shared/report-deliverables.ts";
 
 const report = {
@@ -181,5 +182,40 @@ describe("narrative gate", () => {
     ]);
     expect(res.ok).toBe(true);
     expect(res.manifest.validation_version).toBe(UNIQUENESS_VERSION);
+  });
+});
+
+describe("degenerate scan inputs", () => {
+  const prose =
+    "Absolutely! I'd be happy to provide more information first. We work with hundreds of franchise concepts across a wide range of industries and help individuals find opportunities.";
+
+  it("never echoes pasted prose as the business name", () => {
+    expect(safeBusinessName(null, "https://entrepreneuroptions.com/brands/")).toBe("Entrepreneuroptions");
+    expect(safeBusinessName(prose, prose)).toBe("this company");
+    expect(safeBusinessName("Acme Roofing", "https://acme.com")).toBe("Acme Roofing");
+  });
+
+  it("produces 12 qualified posts from a report with zero leaks and zero chapters", () => {
+    const d = buildFallbackDeliverables({
+      company: prose,
+      url: prose,
+      report: { top_leaks: [], chapters: [], executive_summary: "" },
+      brand: null,
+    });
+    const q = qualifyPosts([], d.posts);
+    expect(q.posts.length).toBe(12);
+    expect(q.ok).toBe(true);
+    expect(q.issues).toEqual([]);
+  });
+
+  it("hands each report sentence to exactly one post and derives distinct angles after", () => {
+    const pool = buildEvidencePool(
+      { top_leaks: [{ title: "Slow follow up", description: "Enquiries submitted through the contact form receive no acknowledgement at all." }], chapters: [] },
+      ["Slow follow up", "Search visibility", "Message consistency", "Website conversion clarity"],
+      [],
+      12,
+    );
+    const details = pool.map((p) => p.detail);
+    expect(new Set(details).size).toBe(12);
   });
 });

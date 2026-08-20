@@ -114,6 +114,40 @@ function clean(s: unknown): string {
   return stripDashes(String(s ?? "").replace(/\s+/g, " ").trim());
 }
 
+/**
+ * Some scans carry pasted prose (an email body, a chat reply) in company_name
+ * or target_url. Echoing that into every post makes all twelve posts read the
+ * same. Reduce any such value to a usable business label or drop it.
+ */
+export function safeBusinessName(company: unknown, url: unknown): string {
+  const isProse = (v: string) => !v || v.length > 70 || v.split(" ").length > 7 || /[.!?]\s/.test(v);
+  const c = clean(company);
+  if (!isProse(c)) return c;
+  const host = hostLabel(url);
+  if (host) return host;
+  return "this company";
+}
+
+/** A clean host label, or "" when the value is not a usable URL. */
+export function hostLabel(url: unknown): string {
+  const raw = clean(url);
+  const m = raw.match(/https?:\/\/([^\s/?#]+)/i) || raw.match(/^([a-z0-9-]+(?:\.[a-z0-9-]+)+)/i);
+  if (!m) return "";
+  const host = m[1].replace(/^www\./i, "");
+  if (!host.includes(".") || host.length > 60) return "";
+  const label = host.split(".")[0];
+  return label.length >= 2 ? label.charAt(0).toUpperCase() + label.slice(1) : host;
+}
+
+/** Public site string for copy. Empty when the stored value is not a URL. */
+export function safeSiteUrl(url: unknown): string {
+  const raw = clean(url);
+  const m = raw.match(/https?:\/\/[^\s]+/i);
+  const candidate = m ? m[0] : raw;
+  if (!/^[^\s]+$/.test(candidate) || !candidate.includes(".") || candidate.length > 90) return "";
+  return candidate;
+}
+
 function titleOf(leak: unknown, i: number): string {
   const l = (leak || {}) as Record<string, unknown>;
   const name = clean(l.name || l.title || l.leak || "");
@@ -207,18 +241,42 @@ export function buildEvidencePool(
 
   const out: PostEvidence[] = [];
   for (let i = 0; i < count; i++) {
-    const d = details[i % Math.max(1, details.length)];
+    // A report sentence is handed to exactly ONE post. Once the pool is spent,
+    // later posts get a distinct derived angle instead of a repeated sentence.
+    const d = i < details.length ? details[i] : null;
     const leak = d?.leak || leaks[i % leaks.length];
-    // Sparse evidence: derive a different buyer implication per post rather
-    // than repeating the same sentence. The action still differentiates them.
-    const detail = d?.detail ||
-      `the review flagged ${leak.toLowerCase()} as an unresolved gap on the public surface`;
+    const detail = d?.detail || sparseAngle(i, leak);
     const action = actions[i % Math.max(1, actions.length)] ||
       `assign an owner to ${leak.toLowerCase()} and correct it this week`;
     out.push({ leak, detail, action });
   }
   return out;
 }
+
+/**
+ * Distinct derived observations for reports with thin evidence. Each line is a
+ * different buyer implication of the same finding, never the same sentence with
+ * a swapped noun, and none of them invent a statistic, customer or outcome.
+ */
+const SPARSE_ANGLES: Array<(leak: string) => string> = [
+  (l) => `the review recorded ${l.toLowerCase()} as an open item on the public surface, with no owner named against it`,
+  (l) => `a buyer checking ${l.toLowerCase()} has to guess, because nothing on the page answers the question for them`,
+  (l) => `nobody is measuring ${l.toLowerCase()} today, so a slip in it would go unnoticed until revenue moves`,
+  (l) => `the fix for ${l.toLowerCase()} is process work, not a rebuild, and it belongs to one person on one calendar`,
+  (l) => `${l.toLowerCase()} is the kind of gap that costs nothing to leave open and quietly compounds every month`,
+  (l) => `every enquiry that touches ${l.toLowerCase()} takes longer to convert than one that never does`,
+  (l) => `the team can verify ${l.toLowerCase()} themselves in an afternoon with the pages already published`,
+  (l) => `${l.toLowerCase()} was visible from outside the business, which means buyers have already seen it`,
+  (l) => `there is no written standard for ${l.toLowerCase()}, so the result changes with whoever is on shift`,
+  (l) => `closing ${l.toLowerCase()} removes a reason for a qualified buyer to stall the decision`,
+  (l) => `${l.toLowerCase()} is upstream of the numbers the leadership team already reviews each week`,
+  (l) => `after ${l.toLowerCase()} is handled, the next check is whether the change actually shows in the pipeline`,
+];
+
+function sparseAngle(i: number, leak: string): string {
+  return SPARSE_ANGLES[i % SPARSE_ANGLES.length](leak);
+}
+
 
 /** Short calendar line. Never the post body. */
 export
@@ -237,11 +295,11 @@ export function buildFallbackDeliverables(input: {
   report?: Record<string, unknown> | null;
   brand?: Record<string, unknown> | null;
 }): ReportDeliverables {
-  const name = clean(input.company) || clean(input.url) || "this company";
+  const name = safeBusinessName(input.company, input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);
   const palette = paletteOf(input.brand);
-  const site = clean(input.url);
+  const site = safeSiteUrl(input.url);
 
   const conceptSpecs: Array<{ title: string; purpose: string; channel: string; ratio: string; dims: string; hero?: boolean }> = [
     { title: `${name} hero statement`, purpose: "Homepage hero that states what the company does and who it serves in one look.", channel: "Website hero", ratio: "16:9", dims: "1920x1080", hero: true },
