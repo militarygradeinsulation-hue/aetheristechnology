@@ -216,6 +216,8 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
   const bodies = posts.map((p) => normalizeText(p.body));
   const hooks = posts.map((p) => normalizeText(p.hook));
   const ctas = posts.map((p) => normalizeText(p.cta));
+  const hookKeys = posts.map((p) => shortFieldKey(p.hook));
+  const ctaKeys = posts.map((p) => shortFieldKey(p.cta));
   const opens = posts.map((p) => openingPrefix(p.body));
 
   posts.forEach((p, i) => {
@@ -236,13 +238,26 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
       good = false;
     }
 
-    for (const j of qualified) {
+    // Exact duplication is checked against EVERY earlier post, qualified or
+    // not, and at any non-empty normalized length. No length floor applies.
+    for (let j = 0; j < i; j++) {
       if (bodies[i] && bodies[i] === bodies[j]) {
         exact++;
         issues.push({ code: "exact_duplicate", a: i, b: j, detail: "identical body" });
         good = false;
-        break;
+      } else if (hooks[i] && (hooks[i] === hooks[j] || (hookKeys[i] && hookKeys[i] === hookKeys[j]))) {
+        exact++;
+        issues.push({ code: "duplicate_hook", a: i, b: j, detail: "identical hook" });
+        good = false;
+      } else if (ctas[i] && (ctas[i] === ctas[j] || (ctaKeys[i] && ctaKeys[i] === ctaKeys[j]))) {
+        exact++;
+        issues.push({ code: "duplicate_cta", a: i, b: j, detail: "identical cta" });
+        good = false;
       }
+      if (!good) break;
+    }
+
+    for (const j of good ? qualified : []) {
       const s = similarity(p.body, posts[j].body);
       if (s >= THRESHOLDS.postBody) {
         near++;
@@ -250,16 +265,17 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
         good = false;
         break;
       }
-      if (hooks[i] && (hooks[i] === hooks[j] || similarity(p.hook, posts[j].hook) >= THRESHOLDS.shortField)) {
+      if (hooks[i] && similarity(p.hook, posts[j].hook) >= THRESHOLDS.shortField) {
         issues.push({ code: "duplicate_hook", a: i, b: j, detail: "hook repeats" });
         good = false;
         break;
       }
-      if (ctas[i] && (ctas[i] === ctas[j] || similarity(p.cta, posts[j].cta) >= THRESHOLDS.shortField)) {
+      if (ctas[i] && similarity(p.cta, posts[j].cta) >= THRESHOLDS.shortField) {
         issues.push({ code: "duplicate_cta", a: i, b: j, detail: "cta repeats" });
         good = false;
         break;
       }
+
       if (opens[i] && opens[i] === opens[j]) {
         issues.push({ code: "shared_opening", a: i, b: j, detail: `opening "${opens[i]}"` });
         good = false;
