@@ -15,6 +15,14 @@
 // Nothing here prices anything, recalculates leakage or invents proof.
 
 import { stripDashes } from "./no-dashes.ts";
+import { writeAllPosts, type PostEvidence } from "./report-post-writers.ts";
+import {
+  validatePostSet,
+  normalizeText,
+  hasBannedPhrase,
+  type QualityManifest,
+} from "./content-uniqueness.ts";
+
 
 export const MIN_IMAGERY = 4;
 /** Every stored report must carry at least this many imagery concepts. */
