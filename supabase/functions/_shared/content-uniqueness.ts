@@ -132,6 +132,24 @@ export function openingPrefix(text: unknown, words = THRESHOLDS.openingPrefixWor
   return tokens(text).slice(0, words).join(" ");
 }
 
+/**
+ * Exact duplication key for short fields (hook, cta). There is NO minimum
+ * length: any non-empty normalized value participates. Filler words and short
+ * acronyms are dropped so "Request a technical audit" and "Request a technical
+ * SEO audit" resolve to the same key and are rejected as an exact duplicate.
+ */
+const SHORT_FIELD_FILLER = new Set([
+  "a", "an", "the", "to", "for", "your", "you", "our", "we", "us", "and", "or", "of", "on", "in", "it",
+  "is", "are", "this", "that", "with", "now", "today", "right", "get", "one", "so", "can", "will",
+]);
+
+export function shortFieldKey(s: unknown): string {
+  const all = tokens(s);
+  if (!all.length) return "";
+  const core = all.filter((w) => w.length > 3 && !SHORT_FIELD_FILLER.has(w));
+  return (core.length ? core : all).join(" ");
+}
+
 /* ───────────────────────────── post gate ─────────────────────────────── */
 
 export type PostLike = {
