@@ -218,6 +218,7 @@ export function buildEvidencePool(
 }
 
 /** Short calendar line. Never the post body. */
+export
 function scheduleTopic(post: DeliverablePost): string {
   const t = clean(post.hook).replace(/^["“]|["”]$/g, "");
   const short = t.length > 95 ? `${t.slice(0, 92).replace(/\s+\S*$/, "")}…` : t;
