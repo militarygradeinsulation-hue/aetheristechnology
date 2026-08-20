@@ -458,7 +458,160 @@ serve(async (req) => {
       });
     }
 
+    /**
+     * READ ONLY content quality audit: banned filler, exact duplicate posts,
+     * near duplicate posts and duplicated long-form narrative across sections.
+     */
+    if (action === "audit_quality") {
+      const batch = Math.max(1, Math.min(200, Number(body.batch) || 100));
+      const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
+      let q = sb.from("forensic_scans").select("id, report")
+        .eq("status", "completed").not("report", "is", null)
+        .order("id", { ascending: true }).limit(batch);
+      if (cursor) q = q.gt("id", cursor);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const list = (rows || []) as Array<Record<string, unknown>>;
+
+      let banned = 0, exactDupPosts = 0, nearDupPosts = 0, dupNarrative = 0, clean = 0;
+      const offenders: string[] = [];
+      for (const r of list) {
+        const report = (r.report || {}) as Record<string, unknown>;
+        const d = report.deliverables as ReportDeliverables | undefined;
+        const posts = Array.isArray(d?.posts) ? d!.posts : [];
+        const gate = validatePostSet(posts, Math.min(12, posts.length || 12));
+        const hasBanned = posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+        const nq = narrativeQuality(report);
+        const eDup = gate.issues.some((i) => i.code === "exact_duplicate");
+        const nDup = gate.issues.some((i) => i.code === "near_duplicate" || i.code === "repeated_sentence" || i.code === "repeated_field");
+        if (hasBanned) banned++;
+        if (eDup) exactDupPosts++;
+        if (nDup) nearDupPosts++;
+        if (!nq.ok) dupNarrative++;
+        if (!hasBanned && !eDup && !nDup && nq.ok) clean++;
+        else if (offenders.length < 20) offenders.push(String(r.id));
+      }
+
+      return json({
+        ok: true, processed: list.length,
+        banned_filler: banned, exact_duplicate_posts: exactDupPosts,
+        near_duplicate_posts: nearDupPosts, duplicated_narrative: dupNarrative,
+        clean, offenders,
+        cursor: list.length ? String(list[list.length - 1].id) : null,
+        done: list.length < batch,
+      });
+    }
+
+    /**
+     * Idempotent, paginated content quality repair.
+     *  - Posts are growth deliverables, so failing sets are rebuilt from
+     *    qualified AI posts merged with distinct deterministic archetypes.
+     *  - Narrative repair rewrites ONLY duplicated narrative fields.
+     *  - Brand, imagery assets, findings, evidence, citations, confidence and
+     *    every dollar field are read but never written.
+     */
+    if (action === "repair_quality") {
+      const batch = Math.max(1, Math.min(50, Number(body.batch) || 20));
+      const cursor: string | null = typeof body.cursor === "string" && body.cursor ? body.cursor : null;
+      const only: string[] = Array.isArray(body.scan_ids) ? body.scan_ids.map(String) : [];
+
+      let q = sb.from("forensic_scans")
+        .select("id, report, company_name, target_url")
+        .eq("status", "completed").not("report", "is", null)
+        .order("id", { ascending: true }).limit(batch);
+      if (only.length) q = q.in("id", only);
+      else if (cursor) q = q.gt("id", cursor);
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const scans = (rows || []) as Array<Record<string, unknown>>;
+
+      let repaired = 0, skipped = 0;
+      const repairedIds: string[] = [];
+      const errors: string[] = [];
+
+      for (const s of scans) {
+        const id = String(s.id);
+        try {
+          const report = (s.report || {}) as Record<string, unknown>;
+          const existing = report.deliverables as ReportDeliverables | undefined;
+          const posts = Array.isArray(existing?.posts) ? existing!.posts : [];
+          const postsOk = posts.length >= 12 &&
+            !posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`)) &&
+            postsPassGate(posts);
+          const nq = narrativeQuality(report);
+          if (postsOk && nq.ok && !body.force) { skipped++; continue; }
+
+          const next: Record<string, unknown> = { ...report };
+          const meta: Record<string, unknown> = { repaired_at: new Date().toISOString() };
+
+          if (!postsOk || body.force) {
+            const base = buildFallbackDeliverables({
+              company: String(s.company_name || ""),
+              url: String(s.target_url || ""),
+              report,
+              brand: (existing?.brand as Record<string, unknown>) || null,
+            });
+            const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+            const merged = qualifyPosts(keep, base.posts);
+            const finalPosts = merged.posts;
+            const baseDays = existing?.schedule?.days?.length ? existing.schedule.days : base.schedule.days;
+            const days = baseDays.map((d, i) => {
+              const post = finalPosts[i % finalPosts.length];
+              return {
+                ...d,
+                post_id: d.post_id ? post.id : d.post_id,
+                topic: scheduleTopic(post),
+                goal: String(post.takeaway || d.goal || "").slice(0, 160),
+                related_leak: post.related_leak,
+              };
+            });
+            next.deliverables = {
+              ...(existing || base),
+              posts: finalPosts,
+              schedule: { ...(existing?.schedule || base.schedule), days },
+              quality: merged.manifest,
+            };
+            meta.posts = { ai_kept: merged.ai_kept, replaced: posts.length, passed: merged.ok };
+          }
+
+          if (!nq.ok) {
+            const fixed = repairReportNarrative(next);
+            meta.narrative = {
+              repairs: fixed.repairs,
+              passed: fixed.ok,
+              before: nq.manifest,
+              after: fixed.manifest,
+            };
+            next.content_quality = { ...fixed.manifest, repairs: fixed.repairs.slice(0, 40) };
+          }
+          next.content_quality_repair = meta;
+
+          const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", id);
+          if (upErr) throw upErr;
+
+          await fetch(`${SUPABASE_URL}/functions/v1/golden-report-library`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, "x-internal-key": SVC },
+            body: JSON.stringify({ action: "archive_scan", scan_id: id, provision: false }),
+          }).catch(() => undefined);
+
+          repaired++;
+          repairedIds.push(id);
+        } catch (e) {
+          errors.push(`${id}: ${(e as Error).message.slice(0, 140)}`);
+        }
+      }
+
+      return json({
+        ok: true, processed: scans.length, repaired, skipped,
+        repaired_ids: repairedIds.slice(0, 50), errors: errors.slice(0, 5),
+        cursor: scans.length ? String(scans[scans.length - 1].id) : null,
+        done: scans.length < batch,
+      });
+    }
+
     return json({ error: "Unknown action" }, 400);
+
   } catch (e) {
     console.error("report-deliverables error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
