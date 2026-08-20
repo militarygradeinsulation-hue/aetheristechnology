@@ -181,6 +181,7 @@ export type QualityIssue = {
     | "duplicate_cta"
     | "repeated_sentence"
     | "shared_opening"
+    | "url_in_copy"
     | "too_short"
     | "missing_field"
     | "count";
