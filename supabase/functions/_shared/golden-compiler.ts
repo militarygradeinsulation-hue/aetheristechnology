@@ -14,7 +14,10 @@
 // Universal by construction: no company, url, account, rep or scan-id branch.
 // ═══════════════════════════════════════════════════════════════════════════
 
+import { repairReportNarrative } from "./narrative-repair.ts";
+import { validateReportNarrative } from "./content-uniqueness.ts";
 import {
+
   buildFinancialLedger,
   computeGoldenLeakage,
   formatUsdRangeAscii,
