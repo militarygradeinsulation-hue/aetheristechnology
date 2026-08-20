@@ -51,6 +51,7 @@ export type RowAssessment = {
   exact_duplicate_posts: boolean;
   near_duplicate_posts: boolean;
   duplicated_narrative: boolean;
+  url_in_copy: boolean;
   short_counts: boolean;
   compiled: boolean;
   posts: number;
@@ -84,6 +85,7 @@ export function assessCompactRow(row: CompactQualityRow): RowAssessment {
   const exact = codes.includes("exact_duplicate") || row.flag_dup_posts;
   const near = codes.some((c) => NEAR_CODES.includes(c));
   const dupNarrative = !nq.ok;
+  const urlInCopy = codes.includes("url_in_copy");
 
   const shortCounts =
     row.imagery_count < TARGET_IMAGERY || row.posts_count < POST_COUNT || row.schedule_count < SCHEDULE_DAYS;
@@ -97,6 +99,7 @@ export function assessCompactRow(row: CompactQualityRow): RowAssessment {
   if (exact) reasons.push("exact_duplicate_posts");
   if (near) reasons.push("near_duplicate_posts");
   if (dupNarrative) reasons.push("duplicated_narrative");
+  if (urlInCopy) reasons.push("url_in_copy");
   if (shortCounts) reasons.push("deliverable_counts_below_guarantee");
   if (posts.length < POST_COUNT) reasons.push("post_count");
 
@@ -108,6 +111,7 @@ export function assessCompactRow(row: CompactQualityRow): RowAssessment {
     exact_duplicate_posts: exact,
     near_duplicate_posts: near,
     duplicated_narrative: dupNarrative,
+    url_in_copy: urlInCopy,
     short_counts: shortCounts,
     compiled: String(row.compiler_state || "").toLowerCase() === "compiled",
     posts: row.posts_count,
@@ -123,6 +127,7 @@ export type AuditTotals = {
   exact_duplicate_posts: number;
   near_duplicate_posts: number;
   duplicated_narrative: number;
+  url_in_copy: number;
   compiled_with_duplicated_narrative: number;
   below_guarantee: number;
   clean: number;
@@ -137,6 +142,7 @@ export function emptyTotals(): AuditTotals {
     exact_duplicate_posts: 0,
     near_duplicate_posts: 0,
     duplicated_narrative: 0,
+    url_in_copy: 0,
     compiled_with_duplicated_narrative: 0,
     below_guarantee: 0,
     clean: 0,
@@ -151,6 +157,7 @@ export function foldAssessment(t: AuditTotals, a: RowAssessment, offenderCap = 2
   if (a.exact_duplicate_posts) t.exact_duplicate_posts++;
   if (a.near_duplicate_posts) t.near_duplicate_posts++;
   if (a.duplicated_narrative) t.duplicated_narrative++;
+  if (a.url_in_copy) t.url_in_copy++;
   if (a.duplicated_narrative && a.compiled) t.compiled_with_duplicated_narrative++;
   if (a.short_counts) t.below_guarantee++;
   if (a.needs_repair) {

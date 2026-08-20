@@ -132,6 +132,34 @@ export function openingPrefix(text: unknown, words = THRESHOLDS.openingPrefixWor
   return tokens(text).slice(0, words).join(" ");
 }
 
+/**
+ * Exact duplication key for short fields (hook, cta). There is NO minimum
+ * length: any non-empty normalized value participates. Filler words and short
+ * acronyms are dropped so "Request a technical audit" and "Request a technical
+ * SEO audit" resolve to the same key and are rejected as an exact duplicate.
+ */
+const SHORT_FIELD_FILLER = new Set([
+  "a", "an", "the", "to", "for", "your", "you", "our", "we", "us", "and", "or", "of", "on", "in", "it",
+  "is", "are", "this", "that", "with", "now", "today", "right", "get", "one", "so", "can", "will",
+]);
+
+/**
+ * A raw URL may only appear as an explicit CTA destination. Hooks and bodies
+ * must name the company instead. Reports carry no allow_url_in_copy flag, so
+ * any http(s) URL in hook or body is a defect.
+ */
+export function hasUrlInCopy(post: PostLike): boolean {
+  if ((post as { allow_url_in_copy?: boolean }).allow_url_in_copy === true) return false;
+  return /https?:\/\//i.test(`${post.hook ?? ""} ${post.body ?? ""}`);
+}
+
+export function shortFieldKey(s: unknown): string {
+  const all = tokens(s);
+  if (!all.length) return "";
+  const core = all.filter((w) => w.length > 3 && !SHORT_FIELD_FILLER.has(w));
+  return (core.length ? core : all).join(" ");
+}
+
 /* ───────────────────────────── post gate ─────────────────────────────── */
 
 export type PostLike = {
@@ -198,6 +226,8 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
   const bodies = posts.map((p) => normalizeText(p.body));
   const hooks = posts.map((p) => normalizeText(p.hook));
   const ctas = posts.map((p) => normalizeText(p.cta));
+  const hookKeys = posts.map((p) => shortFieldKey(p.hook));
+  const ctaKeys = posts.map((p) => shortFieldKey(p.cta));
   const opens = posts.map((p) => openingPrefix(p.body));
 
   posts.forEach((p, i) => {
@@ -217,14 +247,31 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
       issues.push({ code: "banned_phrase", a: i, detail: hits.join(", ") });
       good = false;
     }
+    if (hasUrlInCopy(p)) {
+      issues.push({ code: "url_in_copy", a: i, detail: "raw URL in hook or body" });
+      good = false;
+    }
 
-    for (const j of qualified) {
+    // Exact duplication is checked against EVERY earlier post, qualified or
+    // not, and at any non-empty normalized length. No length floor applies.
+    for (let j = 0; j < i; j++) {
       if (bodies[i] && bodies[i] === bodies[j]) {
         exact++;
         issues.push({ code: "exact_duplicate", a: i, b: j, detail: "identical body" });
         good = false;
-        break;
+      } else if (hooks[i] && (hooks[i] === hooks[j] || (hookKeys[i] && hookKeys[i] === hookKeys[j]))) {
+        exact++;
+        issues.push({ code: "duplicate_hook", a: i, b: j, detail: "identical hook" });
+        good = false;
+      } else if (ctas[i] && (ctas[i] === ctas[j] || (ctaKeys[i] && ctaKeys[i] === ctaKeys[j]))) {
+        exact++;
+        issues.push({ code: "duplicate_cta", a: i, b: j, detail: "identical cta" });
+        good = false;
       }
+      if (!good) break;
+    }
+
+    for (const j of good ? qualified : []) {
       const s = similarity(p.body, posts[j].body);
       if (s >= THRESHOLDS.postBody) {
         near++;
@@ -232,16 +279,17 @@ export function validatePostSet(posts: PostLike[], required = 12): PostGateResul
         good = false;
         break;
       }
-      if (hooks[i] && (hooks[i] === hooks[j] || similarity(p.hook, posts[j].hook) >= THRESHOLDS.shortField)) {
+      if (hooks[i] && similarity(p.hook, posts[j].hook) >= THRESHOLDS.shortField) {
         issues.push({ code: "duplicate_hook", a: i, b: j, detail: "hook repeats" });
         good = false;
         break;
       }
-      if (ctas[i] && (ctas[i] === ctas[j] || similarity(p.cta, posts[j].cta) >= THRESHOLDS.shortField)) {
+      if (ctas[i] && similarity(p.cta, posts[j].cta) >= THRESHOLDS.shortField) {
         issues.push({ code: "duplicate_cta", a: i, b: j, detail: "cta repeats" });
         good = false;
         break;
       }
+
       if (opens[i] && opens[i] === opens[j]) {
         issues.push({ code: "shared_opening", a: i, b: j, detail: `opening "${opens[i]}"` });
         good = false;

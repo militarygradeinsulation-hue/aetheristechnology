@@ -119,11 +119,24 @@ function clean(s: unknown): string {
  * or target_url. Echoing that into every post makes all twelve posts read the
  * same. Reduce any such value to a usable business label or drop it.
  */
+/** A URL, bare domain, email address or path is never a business name. */
+export function isMachineIdentifier(v: string): boolean {
+  if (!v) return false;
+  const s = v.trim();
+  return (
+    /^https?:\/\//i.test(s) ||
+    /^www\./i.test(s) ||
+    /\S+@\S+\.\S+/.test(s) ||
+    /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(s) ||
+    /\//.test(s)
+  );
+}
+
 export function safeBusinessName(company: unknown, url: unknown): string {
   const isProse = (v: string) => !v || v.length > 70 || v.split(" ").length > 7 || /[.!?]\s/.test(v);
   const c = clean(company);
-  if (!isProse(c)) return c;
-  const host = hostLabel(url);
+  if (!isProse(c) && !isMachineIdentifier(c)) return c;
+  const host = hostLabel(url) || hostLabel(c);
   if (host) return host;
   return "this company";
 }
