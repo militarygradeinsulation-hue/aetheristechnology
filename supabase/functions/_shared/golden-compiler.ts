@@ -194,7 +194,9 @@ export type CompilerViolationCode =
   | "benchmark_math_total"
   | "leak_missing_evidence_link"
   | "insufficient_company_evidence"
-  | "fully_generic_flagged";
+  | "fully_generic_flagged"
+  // content uniqueness gate
+  | "duplicated_narrative";
 
 export type CompilerViolation = {
   code: CompilerViolationCode;
@@ -1148,9 +1150,11 @@ export function compileGoldenReport(input: CompileInput): CompiledGoldenReport {
     repairs.push(`narrative: rewrote ${fixed.repairs.length} duplicated narrative field(s)`);
   }
   if (!quality.ok) {
-    violations.push(
-      `content_quality: ${quality.offendingPaths.length} narrative section(s) still duplicate earlier prose`,
-    );
+    violations.push({
+      code: "duplicated_narrative",
+      location: quality.offendingPaths.slice(0, 5).join(", ") || "narrative",
+      detail: `${quality.offendingPaths.length} narrative section(s) still duplicate earlier prose after one repair pass`,
+    });
   }
   report.content_quality = {
     ...quality.manifest,
