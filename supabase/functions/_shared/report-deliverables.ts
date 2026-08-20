@@ -428,6 +428,29 @@ export function buildFallbackDeliverables(input: {
   };
 }
 
+
+/**
+ * Stable signature of everything a quality repair is allowed to change:
+ * deliverable copy and chapter narrative prose. Financial fields, evidence and
+ * findings are deliberately excluded. Used to make repair idempotent: when a
+ * report is already at its repairable floor the write is skipped entirely.
+ */
+export function repairSignature(report: Record<string, unknown> | null | undefined): string {
+  const d = (report?.deliverables || {}) as Record<string, unknown>;
+  const posts = Array.isArray(d.posts) ? (d.posts as DeliverablePost[]) : [];
+  const concepts = Array.isArray((d.imagery as Record<string, unknown>)?.concepts)
+    ? ((d.imagery as Record<string, unknown>).concepts as ImageryConcept[]) : [];
+  const days = Array.isArray((d.schedule as Record<string, unknown>)?.days)
+    ? ((d.schedule as Record<string, unknown>).days as ScheduleEntry[]) : [];
+  const chapters = Array.isArray(report?.chapters) ? (report!.chapters as Record<string, unknown>[]) : [];
+  return JSON.stringify({
+    p: posts.map((x) => [x.hook, x.body, x.cta, x.related_leak]),
+    i: concepts.map((x) => [x.title, x.prompt]),
+    s: days.map((x) => [x.topic, x.goal, x.post_id]),
+    n: chapters.map((ch) => [ch.what_we_found, ch.verdict, ch.why_its_leaking, ch.what_its_costing]),
+  });
+}
+
 /* ─────────────────────── AI enrichment normalisation ────────────────── */
 
 function validConcepts(raw: unknown, base: ImageryConcept[]): ImageryConcept[] | null {

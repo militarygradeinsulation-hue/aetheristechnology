@@ -22,6 +22,7 @@ import {
   topUpConcepts,
   qualifyPosts,
   reserveFor,
+  repairSignature,
   postsPassGate,
   scheduleTopic,
   TARGET_IMAGERY,
@@ -484,6 +485,12 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
   }
   meta.reasons = reasons;
   next.content_quality_repair = meta;
+
+  // Idempotency: a report already sitting at its repairable floor is not
+  // rewritten, so a second sweep changes zero rows.
+  if (!force && repairSignature(next) === repairSignature(report)) {
+    return { skipped: true, needs_review: reasons.length > 0, reasons };
+  }
 
   const { error: upErr } = await sb.from("forensic_scans").update({ report: next }).eq("id", scanId);
   if (upErr) throw upErr;
