@@ -364,7 +364,7 @@ export function buildFallbackDeliverables(input: {
   const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
   const written = writeAllPosts(name, site, evidence);
 
-  const posts: DeliverablePost[] = written.map((w, i) => ({
+  const primary: DeliverablePost[] = written.map((w, i) => ({
     id: `post-${String(i + 1).padStart(2, "0")}`,
     platform: PLATFORM_CYCLE[i % PLATFORM_CYCLE.length],
     hook: w.hook,
@@ -376,6 +376,12 @@ export function buildFallbackDeliverables(input: {
     role: w.role,
     takeaway: w.takeaway,
   }));
+
+  // A report may not ship fewer than 12 posts. When its own evidence forces a
+  // primary post out of the set (raw URL in the source sentence, duplicated
+  // finding), the reserve family refills from a different editorial angle.
+  const reserve = buildReservePosts({ name, site, evidence, concepts });
+  const posts = qualifyPosts(primary, reserve).posts;
 
   const days: ScheduleEntry[] = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
     const post = posts[i % posts.length];
@@ -491,9 +497,46 @@ export type PostQualityResult = {
  * Repetitive filler is never shipped: a candidate that fails the gate is
  * dropped, not patched.
  */
+export function buildReservePosts(input: {
+  name: string;
+  site: string;
+  evidence: PostEvidence[];
+  concepts: ImageryConcept[];
+}): DeliverablePost[] {
+  const rotated = input.evidence.map((_, i) => input.evidence[(i + 5) % input.evidence.length]);
+  return writeReservePosts(input.name, input.site, rotated).map((w, i) => ({
+    id: `post-r${String(i + 1).padStart(2, "0")}`,
+    platform: PLATFORM_CYCLE[(i + 2) % PLATFORM_CYCLE.length],
+    hook: w.hook,
+    body: w.body,
+    cta: w.cta,
+    visual: clean(`${w.visual} Pairs with: ${input.concepts[i % input.concepts.length].title}.`),
+    related_leak: rotated[i % rotated.length].leak,
+    status: "ready" as const,
+    role: w.role,
+    takeaway: w.takeaway,
+  }));
+}
+
+/** Rebuild the deterministic reserve set for an existing report. */
+export function reserveFor(input: {
+  company: string;
+  url: string;
+  report?: Record<string, unknown> | null;
+  base: ReportDeliverables;
+}): DeliverablePost[] {
+  const name = safeBusinessName(input.company, input.url);
+  const site = safeSiteUrl(input.url);
+  const leaks = leakList(input.report);
+  const actions = chapterActions(input.report);
+  const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
+  return buildReservePosts({ name, site, evidence, concepts: input.base.imagery.concepts });
+}
+
 export function qualifyPosts(
   candidates: DeliverablePost[],
   deterministic: DeliverablePost[],
+  reserve: DeliverablePost[] = [],
 ): PostQualityResult {
   const kept: DeliverablePost[] = [];
   const tryAdd = (p: DeliverablePost) => {
@@ -509,6 +552,7 @@ export function qualifyPosts(
   let aiKept = 0;
   for (const p of candidates) if (tryAdd(p)) aiKept++;
   for (const p of deterministic) tryAdd(p);
+  if (kept.length < POST_COUNT) for (const p of reserve) tryAdd(p);
 
   const final = kept.slice(0, POST_COUNT).map((p, i) => ({
     ...p,
