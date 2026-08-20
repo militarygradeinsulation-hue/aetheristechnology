@@ -241,18 +241,42 @@ export function buildEvidencePool(
 
   const out: PostEvidence[] = [];
   for (let i = 0; i < count; i++) {
-    const d = details[i % Math.max(1, details.length)];
+    // A report sentence is handed to exactly ONE post. Once the pool is spent,
+    // later posts get a distinct derived angle instead of a repeated sentence.
+    const d = i < details.length ? details[i] : null;
     const leak = d?.leak || leaks[i % leaks.length];
-    // Sparse evidence: derive a different buyer implication per post rather
-    // than repeating the same sentence. The action still differentiates them.
-    const detail = d?.detail ||
-      `the review flagged ${leak.toLowerCase()} as an unresolved gap on the public surface`;
+    const detail = d?.detail || sparseAngle(i, leak);
     const action = actions[i % Math.max(1, actions.length)] ||
       `assign an owner to ${leak.toLowerCase()} and correct it this week`;
     out.push({ leak, detail, action });
   }
   return out;
 }
+
+/**
+ * Distinct derived observations for reports with thin evidence. Each line is a
+ * different buyer implication of the same finding, never the same sentence with
+ * a swapped noun, and none of them invent a statistic, customer or outcome.
+ */
+const SPARSE_ANGLES: Array<(leak: string) => string> = [
+  (l) => `the review recorded ${l.toLowerCase()} as an open item on the public surface, with no owner named against it`,
+  (l) => `a buyer checking ${l.toLowerCase()} has to guess, because nothing on the page answers the question for them`,
+  (l) => `nobody is measuring ${l.toLowerCase()} today, so a slip in it would go unnoticed until revenue moves`,
+  (l) => `the fix for ${l.toLowerCase()} is process work, not a rebuild, and it belongs to one person on one calendar`,
+  (l) => `${l.toLowerCase()} is the kind of gap that costs nothing to leave open and quietly compounds every month`,
+  (l) => `every enquiry that touches ${l.toLowerCase()} takes longer to convert than one that never does`,
+  (l) => `the team can verify ${l.toLowerCase()} themselves in an afternoon with the pages already published`,
+  (l) => `${l.toLowerCase()} was visible from outside the business, which means buyers have already seen it`,
+  (l) => `there is no written standard for ${l.toLowerCase()}, so the result changes with whoever is on shift`,
+  (l) => `closing ${l.toLowerCase()} removes a reason for a qualified buyer to stall the decision`,
+  (l) => `${l.toLowerCase()} is upstream of the numbers the leadership team already reviews each week`,
+  (l) => `after ${l.toLowerCase()} is handled, the next check is whether the change actually shows in the pipeline`,
+];
+
+function sparseAngle(i: number, leak: string): string {
+  return SPARSE_ANGLES[i % SPARSE_ANGLES.length](leak);
+}
+
 
 /** Short calendar line. Never the post body. */
 export
