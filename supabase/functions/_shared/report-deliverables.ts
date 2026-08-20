@@ -98,7 +98,10 @@ export type ReportDeliverables = {
   generated_at: string;
   enriched_at?: string | null;
   enrichment_error?: string | null;
+  /** Content uniqueness manifest for the shipped post set. */
+  quality?: QualityManifest | null;
 };
+
 
 /* ─────────────────────────────── helpers ─────────────────────────────── */
 
