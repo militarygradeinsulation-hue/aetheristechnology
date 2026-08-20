@@ -192,27 +192,21 @@ export function buildFallbackDeliverables(input: {
     ),
   }));
 
-  const posts: DeliverablePost[] = Array.from({ length: POST_COUNT }, (_, i) => {
-    const leak = leaks[i % leaks.length];
-    const action = actions[i % Math.max(1, actions.length)] || `Fix ${leak.toLowerCase()} on the site this week.`;
-    const platform = PLATFORM_CYCLE[i % PLATFORM_CYCLE.length];
-    return {
-      id: `post-${String(i + 1).padStart(2, "0")}`,
-      platform,
-      hook: clean(`${leak} is costing ${name} attention it already paid for.`),
-      body: clean(
-        `We looked at how ${name} shows up online and found a gap around ${leak.toLowerCase()}. ` +
-        `Nothing dramatic, just a place where a buyer has to work harder than they should. ` +
-        `Here is the practical correction: ${action} ` +
-        `That single change makes the next visitor's decision easier, and easier decisions turn into more conversations. ` +
-        `If you run a business and you are not sure where your own version of this gap sits, start by walking your own site as a first time buyer.`,
-      ),
-      cta: clean(actions.length ? `Ask us what ${leak.toLowerCase()} is costing you.` : "Reply and we will walk your site with you."),
-      visual: clean(`${concepts[i % concepts.length].title}. ${concepts[i % concepts.length].channel} format.`),
-      related_leak: leak,
-      status: "ready",
-    };
-  });
+  const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
+  const written = writeAllPosts(name, site, evidence);
+
+  const posts: DeliverablePost[] = written.map((w, i) => ({
+    id: `post-${String(i + 1).padStart(2, "0")}`,
+    platform: PLATFORM_CYCLE[i % PLATFORM_CYCLE.length],
+    hook: w.hook,
+    body: w.body,
+    cta: w.cta,
+    visual: clean(`${w.visual} Pairs with: ${concepts[i % concepts.length].title}.`),
+    related_leak: evidence[i % evidence.length].leak,
+    status: "ready",
+    role: w.role,
+    takeaway: w.takeaway,
+  }));
 
   const days: ScheduleEntry[] = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
     const post = posts[i % posts.length];
@@ -226,14 +220,15 @@ export function buildFallbackDeliverables(input: {
       platform: usesPost ? post.platform : (contentType === "email" ? "Email" : "Short video"),
       time: TIME_CYCLE[i % TIME_CYCLE.length],
       purpose: PURPOSE_CYCLE[i % PURPOSE_CYCLE.length],
-      topic: clean(post.hook),
+      topic: scheduleTopic(post),
       visual: post.visual,
-      goal: clean(`Move buyers past ${post.related_leak.toLowerCase()} and into a conversation.`),
+      goal: clean(post.takeaway || `Move buyers past ${post.related_leak.toLowerCase()}.`),
       owner: usesPost ? "Marketing" : "Owner",
       status: "planned",
       related_leak: post.related_leak,
     };
   });
+
 
   return {
     imagery: {
