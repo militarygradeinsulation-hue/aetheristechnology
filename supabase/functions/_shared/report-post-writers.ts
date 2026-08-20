@@ -258,3 +258,178 @@ export function writeAllPosts(name: string, site: string, evidence: PostEvidence
     writePost(role, { name, site, index: i, ev: evidence[i % Math.max(1, evidence.length)] }),
   );
 }
+
+/* ───────────────────── reserve family (second twelve) ────────────────── */
+//
+// When a report's own evidence forces primary posts to be dropped (raw URLs in
+// the source sentence, duplicated findings, thin chapters), the set must still
+// ship twelve substantive posts. These twelve writers are a genuinely separate
+// editorial family: different openings, different argument shapes, different
+// calls to action. They are refill, never padding, and each one still argues
+// from its own evidence anchor.
+
+const RESERVE_WRITERS: Array<(x: WriterContext) => Omit<WrittenPost, "role">> = [
+  ({ name, ev }) => ({
+    hook: c(`A quiet cost hides inside ${lower(ev.leak)} at ${name}.`),
+    body: c(
+      `Costs that announce themselves get fixed. This one does not announce itself, which is exactly why it survives quarter after quarter.
+The record reads: ${frag(ev.detail)}.
+Nobody wakes up to an alert about that. It shows up later as a softer month with no obvious explanation.
+What closes it: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Put a number on your quietest cost this quarter.`,
+    visual: "Flat line chart with one small unlabelled dip.",
+    takeaway: `Silent costs need a scheduled review, not an alert.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Ask a stranger, not your team.`,
+    body: c(
+      `Internal review always flatters the business, because everyone reviewing it already knows the answer.
+Hand a stranger the same surface and the picture changes. That is how this surfaced at ${name}: ${frag(ev.detail)}.
+Nobody inside had to be wrong for that to be true. They were simply too close to see it.
+The correction is small and specific: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Get one outsider to review your front door this month.`,
+    visual: "Two viewers looking at the same screen from opposite sides.",
+    takeaway: `Familiarity is the most expensive bias in the building.`,
+  }),
+  ({ name, ev }) => ({
+    hook: c(`The cheapest week to fix ${lower(ev.leak)} was last year.`),
+    body: c(
+      `Every month this stays open, the repair gets slightly more expensive, because more of the business gets built on top of it.
+At ${name} the finding stands as ${frag(ev.detail)}.
+That is not a crisis. It is compound interest, charged in missed enquiries rather than dollars on a statement.
+The move on file is ${lower(frag(ev.action))}, and it costs the same today as it will cost after you argue about it.`,
+    ),
+    cta: `Schedule the repair before you schedule the debate.`,
+    visual: "Rising step chart with the first step circled.",
+    takeaway: `Delay is the only line item that grows on its own.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Read your own page out loud.`,
+    body: c(
+      `Try it once. Read the page a buyer lands on out loud, at normal speed, and stop wherever you have to explain something.
+Every stop is a place the buyer had no one to ask. That is the mechanism behind what the review logged at ${name}: ${frag(ev.detail)}.
+The page does not have to be clever. It has to answer the question in the order the question arrives.
+Start here: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Read one page aloud today and mark every stop.`,
+    visual: "Page mock with three highlighted pause markers.",
+    takeaway: `Wherever you explain, the page failed.`,
+  }),
+  ({ name, ev }) => ({
+    hook: c(`What ${name} says and what a buyer receives are two different things.`),
+    body: c(
+      `A business describes itself from the inside. A buyer experiences it from the outside, with no context and no patience.
+The distance between those two views is where the finding sits: ${frag(ev.detail)}.
+Closing that distance is not marketing. It is accuracy.
+The step recorded against it: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Compare your claim against your buyer's actual first minute.`,
+    visual: "Two panels, claim on one side, experience on the other.",
+    takeaway: `Measure the gap between claim and experience.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Small defect, wide blast radius.`,
+    body: c(
+      `Findings are rarely isolated. One unclear surface bends everything downstream of it, including the leads your team judges as low quality.
+The entry from ${name} reads: ${frag(ev.detail)}.
+Sales then works harder on enquiries that arrived confused, and the confusion gets blamed on the market.
+Repair upstream instead: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Trace one bad lead back to the page that produced it.`,
+    visual: "Single crack spreading across a pane.",
+    takeaway: `Lead quality is usually a page problem.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Nobody is coming to tell you.`,
+    body: c(
+      `Buyers do not file complaints about friction. They pick the option that asked less of them and never mention it.
+So a finding like the one at ${name} can run for years without a single piece of feedback: ${frag(ev.detail)}.
+Absence of complaints is not evidence of health. It is the expected symptom.
+The prescribed action: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Stop waiting for feedback and go look yourself.`,
+    visual: "Empty inbox with one unread item.",
+    takeaway: `No complaints is not a signal of health.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Thirty minutes, one owner, done.`,
+    body: c(
+      `Some findings need a project. This one needs a calendar slot and a decision.
+At ${name}, the item is ${frag(ev.detail)}.
+Block half an hour, put a single name on it, and finish it in that window rather than adding it to a roadmap where it will age.
+The instruction is already written: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Book the half hour now while it is still small.`,
+    visual: "Single calendar block with a name on it.",
+    takeaway: `Small fixes die on roadmaps.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Where the review stopped guessing.`,
+    body: c(
+      `An opinion says a business could communicate better. A finding says what was observed, where, and what it costs to leave alone.
+This is the observed version for ${name}: ${frag(ev.detail)}.
+No persona exercise produced that. It came from looking at the same surface a buyer sees.
+Which is why the next move can be this concrete: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Demand observations, not adjectives, from any review you buy.`,
+    visual: "Magnifier over a single line of copy.",
+    takeaway: `Observation beats opinion every time.`,
+  }),
+  ({ name, ev }) => ({
+    hook: c(`If nothing changes, here is what continues.`),
+    body: c(
+      `Forecasting is easy when the mechanism is already running.
+Leave ${lower(ev.leak)} exactly as it is at ${name} and the same thing keeps happening: ${frag(ev.detail)}.
+Same buyers, same hesitation, same unexplained gap between traffic and enquiries.
+The alternative is one decision: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Choose the version of next quarter you actually want.`,
+    visual: "Two forked paths, one unchanged, one corrected.",
+    takeaway: `Doing nothing is also a forecast.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `The order of repairs matters more than the list.`,
+    body: c(
+      `Every business already has a list. Lists do not fix anything, sequence does.
+For ${name} this item earns an early slot because of what was recorded: ${frag(ev.detail)}.
+Handled first, it makes the later work measurable, since you can finally tell whether a change moved anything.
+Its instruction stands as ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Reorder your fix list by leverage, not by effort.`,
+    visual: "Ordered list with the top row highlighted.",
+    takeaway: `Sequence beats volume on any fix list.`,
+  }),
+  ({ name, ev }) => ({
+    hook: `Count enquiries before and after. That is the whole test.`,
+    body: c(
+      `Proof does not require analytics maturity. It requires a count taken twice.
+Take the finding at ${name}: ${frag(ev.detail)}.
+Record enquiries for the week before the change and the week after, under the same conditions, and let the difference argue for itself.
+Make the change first: ${lower(frag(ev.action))}.`,
+    ),
+    cta: `Start counting this week so the next change can be judged.`,
+    visual: "Two tally marks side by side, one larger.",
+    takeaway: `Two counts beat one dashboard.`,
+  }),
+];
+
+/**
+ * The reserve twelve. Same evidence discipline, different editorial family.
+ * Used only to refill a set that lost primary posts to the quality gate.
+ */
+export function writeReservePosts(name: string, site: string, evidence: PostEvidence[]): WrittenPost[] {
+  return RESERVE_WRITERS.map((w, i) => {
+    const ev = evidence[i % Math.max(1, evidence.length)];
+    const out = w({ name, site, index: i, ev });
+    return {
+      role: POST_ROLES[i % POST_ROLES.length],
+      ...out,
+      hook: c(out.hook),
+      body: c(out.body),
+      cta: c(out.cta),
+    };
+  });
+}
+
