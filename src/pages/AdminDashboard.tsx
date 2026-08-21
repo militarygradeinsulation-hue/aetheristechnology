@@ -83,6 +83,7 @@ const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompany
 const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
 const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
 const AdminLinkedInPublisher = lazy(() => import('@/components/admin/AdminLinkedInPublisher'));
+const AdminSubstackPanel = lazy(() => import('@/components/admin/AdminSubstackPanel'));
 const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedInComments'));
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
 const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
