@@ -250,6 +250,62 @@ export default function AetherisNexusPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ─── Server side sync ───────────────────────────────────────────────────
+  // Threads are mirrored to the database whenever the visitor has a portal or
+  // admin session, so a browser reset can never wipe history again.
+  const [synced, setSynced] = useState(false);
+  const pushedRef = useRef<Map<string, number>>(new Map());
+  const pushTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!canSyncNexus()) { setSynced(true); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const remote = await fetchRemoteThreads();
+        const local = loadThreads();
+        const merged = mergeThreads(local as SyncThread[], remote) as Thread[];
+        if (cancelled) return;
+        saveThreads(merged);
+        setThreads(merged);
+        for (const t of remote) pushedRef.current.set(t.id, t.updatedAt ?? 0);
+        // One time upload of anything that only existed in this browser.
+        const remoteIds = new Set(remote.map((t) => t.id));
+        const localOnly = (local as SyncThread[]).filter(
+          (t) => !remoteIds.has(t.id) && (t.messages?.length ?? 0) > 0,
+        );
+        if (localOnly.length > 0) {
+          await importThreads(localOnly);
+          for (const t of localOnly) pushedRef.current.set(t.id, t.updatedAt ?? 0);
+        }
+      } catch (e) {
+        console.warn("[nexus] thread sync unavailable", e);
+      } finally {
+        if (!cancelled) setSynced(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!synced || !canSyncNexus()) return;
+    if (pushTimerRef.current) window.clearTimeout(pushTimerRef.current);
+    pushTimerRef.current = window.setTimeout(() => {
+      const dirty = threads.filter(
+        (t) => t.messages.length > 0 && (pushedRef.current.get(t.id) ?? -1) !== t.updatedAt,
+      );
+      for (const t of dirty) {
+        pushedRef.current.set(t.id, t.updatedAt);
+        pushThread(t as SyncThread).catch((e) => {
+          pushedRef.current.delete(t.id);
+          console.warn("[nexus] thread save failed", e);
+        });
+      }
+    }, 1200);
+    return () => { if (pushTimerRef.current) window.clearTimeout(pushTimerRef.current); };
+  }, [threads, synced]);
+
   // Initial thread bootstrap (idempotent, no useEffect surprises)
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -291,6 +347,8 @@ export default function AetherisNexusPage() {
   }, [navigate]);
 
   const deleteThread = useCallback((id: string) => {
+    if (canSyncNexus()) deleteRemoteThread(id).catch(() => {});
+    pushedRef.current.delete(id);
     setThreads((prev) => {
       const next = prev.filter((t) => t.id !== id);
       saveThreads(next);
@@ -300,6 +358,7 @@ export default function AetherisNexusPage() {
       }
       return next;
     });
+
   }, [threadId, navigate]);
 
   // Auto-scroll

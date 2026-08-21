@@ -270,3 +270,9 @@ verify_jwt = false
 
 [functions.linkedin-scheduler]
 verify_jwt = false
+
+[functions.nexus-threads]
+verify_jwt = false
+
+[functions.substack-draft]
+verify_jwt = false
