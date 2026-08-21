@@ -313,7 +313,7 @@ serve(async (req) => {
 
       // Scope by matching archive rows first (also enforces rep scoping).
       let aq = sb.from("golden_report_archive")
-        .select("id, company_id, scan_id, report_state, is_valid, report_source, rep_code, annual_low, annual_high, finding_count, root_cause_count, grade, score, completed_at, executive_summary, target_url, report_version");
+        .select("id, company_id, scan_id, report_state, is_valid, report_source, rep_code, annual_low, annual_high, finding_count, root_cause_count, grade, score, completed_at, executive_summary, target_url, raw_company_name, report_version");
       aq = scoped(aq as never) as never;
       if (source) aq = aq.eq("report_source", source);
       if (state) aq = aq.eq("report_state", state);
