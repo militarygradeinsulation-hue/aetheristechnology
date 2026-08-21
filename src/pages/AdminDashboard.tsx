@@ -83,6 +83,7 @@ const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompany
 const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
 const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
 const AdminLinkedInPublisher = lazy(() => import('@/components/admin/AdminLinkedInPublisher'));
+const AdminSubstackPanel = lazy(() => import('@/components/admin/AdminSubstackPanel'));
 const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedInComments'));
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
 const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
@@ -593,12 +594,14 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="components"><Sparkles className="w-4 h-4 mr-1.5" />Component Studio</TabsTrigger>
             <TabsTrigger value="linkedin"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Publisher</TabsTrigger>
             <TabsTrigger value="linkedin_comments"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Comments</TabsTrigger>
+            <TabsTrigger value="substack"><FileText className="w-4 h-4 mr-1.5" />Substack</TabsTrigger>
           </TabsList>
           <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
           <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
           <TabsContent value="components" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminComponentStudioPanel /></Suspense></TabsContent>
           <TabsContent value="linkedin" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInPublisher /></Suspense></TabsContent>
           <TabsContent value="linkedin_comments" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInComments /></Suspense></TabsContent>
+          <TabsContent value="substack" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminSubstackPanel /></Suspense></TabsContent>
         </Tabs>
       );
       case 'documents': return <AdminDocumentsPanel />;

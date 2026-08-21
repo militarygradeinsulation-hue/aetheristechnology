@@ -5483,6 +5483,48 @@ export type Database = {
         }
         Relationships: []
       }
+      nexus_threads: {
+        Row: {
+          client_updated_at: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          message_count: number
+          messages: Json
+          owner_code: string
+          owner_role: string
+          thread_key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_updated_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          message_count?: number
+          messages?: Json
+          owner_code: string
+          owner_role?: string
+          thread_key: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          client_updated_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          message_count?: number
+          messages?: Json
+          owner_code?: string
+          owner_role?: string
+          thread_key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       obsidian_waitlist: {
         Row: {
           company: string | null
@@ -8456,6 +8498,66 @@ export type Database = {
           system_id?: string | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      substack_drafts: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          email_to: string | null
+          emailed_at: string | null
+          id: string
+          image_url: string | null
+          published_at: string | null
+          published_url: string | null
+          scheduled_for: string | null
+          source_kind: string
+          source_post_id: string | null
+          source_urn: string | null
+          status: string
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          email_to?: string | null
+          emailed_at?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_for?: string | null
+          source_kind?: string
+          source_post_id?: string | null
+          source_urn?: string | null
+          status?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          email_to?: string | null
+          emailed_at?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          published_url?: string | null
+          scheduled_for?: string | null
+          source_kind?: string
+          source_post_id?: string | null
+          source_urn?: string | null
+          status?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
