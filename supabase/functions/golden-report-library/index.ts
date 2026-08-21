@@ -323,11 +323,18 @@ serve(async (req) => {
       if (aerr) throw aerr;
       let rows = (archives || []) as Record<string, unknown>[];
 
-      // Company lookup
-      const companyIds = [...new Set(rows.map((r) => String(r.company_id)))];
-      let cq = sb.from("golden_report_companies").select("*").in("id", companyIds.slice(0, 1000));
-      const { data: companiesData } = await cq;
-      const companies = new Map((companiesData || []).map((c) => [String((c as Record<string, unknown>).id), c as Record<string, unknown>]));
+      // Company lookup (chunked — there can be thousands of distinct companies)
+      const companyIds = [...new Set(rows.map((r) => String(r.company_id)).filter((id) => id && id !== "null"))];
+      const companies = new Map<string, Record<string, unknown>>();
+      for (let i = 0; i < companyIds.length; i += 300) {
+        const { data: companiesData, error: cerr } = await sb.from("golden_report_companies")
+          .select("*").in("id", companyIds.slice(i, i + 300));
+        if (cerr) throw cerr;
+        for (const c of (companiesData || []) as Record<string, unknown>[]) {
+          companies.set(String(c.id), c);
+        }
+      }
+
 
       if (search) {
         const needle = search.toLowerCase();
