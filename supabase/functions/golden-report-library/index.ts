@@ -313,7 +313,7 @@ serve(async (req) => {
 
       // Scope by matching archive rows first (also enforces rep scoping).
       let aq = sb.from("golden_report_archive")
-        .select("id, company_id, scan_id, report_state, is_valid, report_source, rep_code, annual_low, annual_high, finding_count, root_cause_count, grade, score, completed_at, executive_summary, target_url, report_version");
+        .select("id, company_id, scan_id, report_state, is_valid, report_source, rep_code, annual_low, annual_high, finding_count, root_cause_count, grade, score, completed_at, executive_summary, target_url, raw_company_name, report_version");
       aq = scoped(aq as never) as never;
       if (source) aq = aq.eq("report_source", source);
       if (state) aq = aq.eq("report_state", state);
@@ -323,11 +323,18 @@ serve(async (req) => {
       if (aerr) throw aerr;
       let rows = (archives || []) as Record<string, unknown>[];
 
-      // Company lookup
-      const companyIds = [...new Set(rows.map((r) => String(r.company_id)))];
-      let cq = sb.from("golden_report_companies").select("*").in("id", companyIds.slice(0, 1000));
-      const { data: companiesData } = await cq;
-      const companies = new Map((companiesData || []).map((c) => [String((c as Record<string, unknown>).id), c as Record<string, unknown>]));
+      // Company lookup (chunked — there can be thousands of distinct companies)
+      const companyIds = [...new Set(rows.map((r) => String(r.company_id)).filter((id) => id && id !== "null"))];
+      const companies = new Map<string, Record<string, unknown>>();
+      for (let i = 0; i < companyIds.length; i += 300) {
+        const { data: companiesData, error: cerr } = await sb.from("golden_report_companies")
+          .select("*").in("id", companyIds.slice(i, i + 300));
+        if (cerr) throw cerr;
+        for (const c of (companiesData || []) as Record<string, unknown>[]) {
+          companies.set(String(c.id), c);
+        }
+      }
+
 
       if (search) {
         const needle = search.toLowerCase();
@@ -379,10 +386,23 @@ serve(async (req) => {
         const c = companies.get(cid) || {};
         const sorted = [...reps].sort((a, b) => String(b.completed_at ?? "").localeCompare(String(a.completed_at ?? "")));
         const newest = sorted[0];
+        // Fallback name from the newest archive row so a missing company record
+        // never renders as "Unknown business".
+        const fallbackName = (() => {
+          const raw = String(newest?.raw_company_name ?? "").trim();
+          if (raw) return raw;
+          const url = String(newest?.target_url ?? "").trim();
+          if (!url) return "Unknown business";
+          try {
+            const host = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.replace(/^www\./, "");
+            return host || "Unknown business";
+          } catch { return url; }
+        })();
         return {
           company: {
             id: cid,
-            display_name: c.display_name ?? "Unknown business",
+            display_name: c.display_name ?? fallbackName,
+
             primary_domain: c.primary_domain ?? null,
             website_url: c.website_url ?? null,
             business_summary: c.business_summary ?? null,
