@@ -10,6 +10,10 @@ import ReactMarkdown from "react-markdown";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PublicToolLock } from "@/components/PublicToolLock";
+import {
+  canSyncNexus, fetchRemoteThreads, pushThread, importThreads, deleteRemoteThread,
+  mergeThreads, type SyncThread,
+} from "@/lib/nexusThreads";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
