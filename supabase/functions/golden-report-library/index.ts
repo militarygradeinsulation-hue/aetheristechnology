@@ -386,10 +386,23 @@ serve(async (req) => {
         const c = companies.get(cid) || {};
         const sorted = [...reps].sort((a, b) => String(b.completed_at ?? "").localeCompare(String(a.completed_at ?? "")));
         const newest = sorted[0];
+        // Fallback name from the newest archive row so a missing company record
+        // never renders as "Unknown business".
+        const fallbackName = (() => {
+          const raw = String(newest?.raw_company_name ?? "").trim();
+          if (raw) return raw;
+          const url = String(newest?.target_url ?? "").trim();
+          if (!url) return "Unknown business";
+          try {
+            const host = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.replace(/^www\./, "");
+            return host || "Unknown business";
+          } catch { return url; }
+        })();
         return {
           company: {
             id: cid,
-            display_name: c.display_name ?? "Unknown business",
+            display_name: c.display_name ?? fallbackName,
+
             primary_domain: c.primary_domain ?? null,
             website_url: c.website_url ?? null,
             business_summary: c.business_summary ?? null,
