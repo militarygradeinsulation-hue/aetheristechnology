@@ -600,6 +600,7 @@ const AdminDashboard: React.FC = () => {
           <TabsContent value="components" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminComponentStudioPanel /></Suspense></TabsContent>
           <TabsContent value="linkedin" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInPublisher /></Suspense></TabsContent>
           <TabsContent value="linkedin_comments" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminLinkedInComments /></Suspense></TabsContent>
+          <TabsContent value="substack" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminSubstackPanel /></Suspense></TabsContent>
         </Tabs>
       );
       case 'documents': return <AdminDocumentsPanel />;
