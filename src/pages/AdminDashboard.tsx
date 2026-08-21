@@ -593,6 +593,7 @@ const AdminDashboard: React.FC = () => {
             <TabsTrigger value="components"><Sparkles className="w-4 h-4 mr-1.5" />Component Studio</TabsTrigger>
             <TabsTrigger value="linkedin"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Publisher</TabsTrigger>
             <TabsTrigger value="linkedin_comments"><Megaphone className="w-4 h-4 mr-1.5" />LinkedIn Comments</TabsTrigger>
+            <TabsTrigger value="substack"><FileText className="w-4 h-4 mr-1.5" />Substack</TabsTrigger>
           </TabsList>
           <TabsContent value="video" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminCreationStudio /></Suspense></TabsContent>
           <TabsContent value="image" className="mt-4"><Suspense fallback={<PanelFallback />}><AdminImageStudio /></Suspense></TabsContent>
