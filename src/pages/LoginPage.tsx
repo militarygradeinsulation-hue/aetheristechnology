@@ -20,12 +20,15 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const returnTo = resolveReturnTo(typeof window !== 'undefined' ? window.location.search : '', '/');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate('/');
+      toast({ title: 'Signed in' });
+      navigate(returnTo, { replace: true });
     } catch (err: any) {
       toast({ title: 'Login failed', description: err.message, variant: 'destructive' });
     } finally {
