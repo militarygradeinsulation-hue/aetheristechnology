@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getAdminToken } from '@/lib/adminAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -70,7 +71,11 @@ export const RetargetingPanel: React.FC = () => {
   const downloadEmailList = async () => {
     setDownloading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('export-retargeting-audience');
+      const adminToken = getAdminToken();
+      if (!adminToken) throw new Error('Admin session expired. Sign in again.');
+      const { data, error } = await supabase.functions.invoke('export-retargeting-audience', {
+        headers: { 'x-admin-token': adminToken },
+      });
       if (error) throw error;
       const blob = new Blob([data as string], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
@@ -85,6 +90,7 @@ export const RetargetingPanel: React.FC = () => {
       setDownloading(false);
     }
   };
+
 
   if (loading) return <div className="glass p-6 rounded-xl text-muted-foreground">Loading…</div>;
 
