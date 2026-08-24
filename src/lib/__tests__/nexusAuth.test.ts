@@ -1,4 +1,17 @@
-// @vitest-environment jsdom
+class MemStorage {
+  private m = new Map<string, string>();
+  getItem(k: string) { return this.m.has(k) ? this.m.get(k)! : null; }
+  setItem(k: string, v: string) { this.m.set(k, String(v)); }
+  removeItem(k: string) { this.m.delete(k); }
+  clear() { this.m.clear(); }
+  key(i: number) { return [...this.m.keys()][i] ?? null; }
+  get length() { return this.m.size; }
+}
+const g = globalThis as Record<string, unknown>;
+g.localStorage = new MemStorage();
+g.sessionStorage = new MemStorage();
+g.window = { localStorage: g.localStorage, sessionStorage: g.sessionStorage, location: { origin: "https://aetheris.technology", pathname: "/aetheris-ai", search: "", hash: "" } };
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   sanitizeReturnTo, resolveReturnTo, storeReturnTo, takeReturnTo, loginUrlFor, currentReturnTo,
