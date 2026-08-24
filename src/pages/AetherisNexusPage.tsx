@@ -10,6 +10,7 @@ import ReactMarkdown from "react-markdown";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PublicToolLock } from "@/components/PublicToolLock";
+import { NexusAccountBar } from "@/components/nexus/NexusAccountBar";
 import {
   canSyncNexus, fetchRemoteThreads, pushThread, importThreads, deleteRemoteThread,
   mergeThreads, type SyncThread,
