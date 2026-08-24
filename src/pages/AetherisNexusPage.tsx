@@ -10,6 +10,7 @@ import ReactMarkdown from "react-markdown";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PublicToolLock } from "@/components/PublicToolLock";
+import { NexusAccountBar } from "@/components/nexus/NexusAccountBar";
 import {
   canSyncNexus, fetchRemoteThreads, pushThread, importThreads, deleteRemoteThread,
   mergeThreads, type SyncThread,
@@ -310,18 +311,21 @@ export default function AetherisNexusPage() {
     return () => { if (pushTimerRef.current) window.clearTimeout(pushTimerRef.current); };
   }, [threads, synced]);
 
-  // Initial thread bootstrap (idempotent, no useEffect surprises)
+  // Initial thread bootstrap (idempotent, no useEffect surprises).
+  // Any report/company context in the query string and hash is carried over so
+  // deep links (and post auth returns) never lose their Nexus context.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!threadId) {
+      const ctx = `${window.location.search}${window.location.hash}`;
       const existing = loadThreads();
       if (existing.length > 0) {
-        navigate(`/aetheris-ai/${existing[0].id}`, { replace: true });
+        navigate(`/aetheris-ai/${existing[0].id}${ctx}`, { replace: true });
       } else {
         const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
         saveThreads([t]);
         setThreads([t]);
-        navigate(`/aetheris-ai/${t.id}`, { replace: true });
+        navigate(`/aetheris-ai/${t.id}${ctx}`, { replace: true });
       }
     }
   }, [threadId, navigate]);
@@ -697,20 +701,7 @@ export default function AetherisNexusPage() {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate("/login")}
-              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-              title="Sign in or create an account"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => navigate("/rep-portal")}
-              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-              title="Sign in with your Rep ID"
-            >
-              Rep ID
-            </button>
+            <NexusAccountBar />
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
