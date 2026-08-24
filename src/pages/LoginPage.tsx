@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { lovable } from '@/integrations/lovable';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { resolveReturnTo, absoluteReturnUrl } from '@/lib/nexusReturn';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
