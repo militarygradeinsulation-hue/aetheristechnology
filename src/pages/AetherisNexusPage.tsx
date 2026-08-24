@@ -697,20 +697,7 @@ export default function AetherisNexusPage() {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => navigate("/login")}
-              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-              title="Sign in or create an account"
-            >
-              Sign in
-            </button>
-            <button
-              onClick={() => navigate("/rep-portal")}
-              className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
-              title="Sign in with your Rep ID"
-            >
-              Rep ID
-            </button>
+            <NexusAccountBar />
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-zinc-300 hover:text-amber-300 text-xs transition"
