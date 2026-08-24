@@ -311,18 +311,21 @@ export default function AetherisNexusPage() {
     return () => { if (pushTimerRef.current) window.clearTimeout(pushTimerRef.current); };
   }, [threads, synced]);
 
-  // Initial thread bootstrap (idempotent, no useEffect surprises)
+  // Initial thread bootstrap (idempotent, no useEffect surprises).
+  // Any report/company context in the query string and hash is carried over so
+  // deep links (and post auth returns) never lose their Nexus context.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!threadId) {
+      const ctx = `${window.location.search}${window.location.hash}`;
       const existing = loadThreads();
       if (existing.length > 0) {
-        navigate(`/aetheris-ai/${existing[0].id}`, { replace: true });
+        navigate(`/aetheris-ai/${existing[0].id}${ctx}`, { replace: true });
       } else {
         const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
         saveThreads([t]);
         setThreads([t]);
-        navigate(`/aetheris-ai/${t.id}`, { replace: true });
+        navigate(`/aetheris-ai/${t.id}${ctx}`, { replace: true });
       }
     }
   }, [threadId, navigate]);
