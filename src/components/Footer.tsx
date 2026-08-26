@@ -14,9 +14,17 @@ export const Footer: React.FC = () => {
             <img src="/aetheris-logo.png" alt="Aetheris AI Logo" className="w-14 h-14 object-contain" />
             <span className="text-sm text-muted-foreground">© {currentYear} Aetheris · Chaos Theory Forensics</span>
           </div>
-          <p className="font-case text-[10px] uppercase tracking-widest text-amber/80 text-center md:text-right">
-            Chaos Theory Forensics · Real Findings · No Sugar
-          </p>
+          <div className="flex flex-col items-center md:items-end gap-1">
+            <Link
+              to="/digital-you"
+              className="font-case text-[10px] uppercase tracking-widest text-muted-foreground hover:text-amber transition-colors"
+            >
+              Digital You · White Paper
+            </Link>
+            <p className="font-case text-[10px] uppercase tracking-widest text-amber/80 text-center md:text-right">
+              Chaos Theory Forensics · Real Findings · No Sugar
+            </p>
+          </div>
         </div>
       </div>
     </footer>
