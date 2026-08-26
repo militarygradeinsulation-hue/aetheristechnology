@@ -350,7 +350,7 @@ const DigitalYouPage: React.FC = () => {
             <p className="font-case text-[10px] uppercase tracking-[0.28em] text-amber mb-6">
               White Paper · Aetheris Technology · Case File DY 01
             </p>
-            <h1 className="font-serif text-5xl md:text-7xl font-semibold leading-[0.95] tracking-tight mb-6">
+            <h1 className="font-forensic text-5xl md:text-7xl font-semibold leading-[0.95] tracking-tight mb-6">
               Digital <span className="text-crimson italic">You</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
@@ -398,7 +398,7 @@ const DigitalYouPage: React.FC = () => {
               </p>
             </div>
             <blockquote className="mt-10 border-l-2 border-crimson pl-5">
-              <p className="font-serif italic text-2xl md:text-3xl leading-snug">
+              <p className="font-forensic italic text-2xl md:text-3xl leading-snug">
                 Do not teach AI a workflow. Teach it you.
               </p>
             </blockquote>
@@ -411,7 +411,7 @@ const DigitalYouPage: React.FC = () => {
             <section key={s.no} id={`s${s.no}`} className="scroll-mt-24">
               <div className="flex items-baseline gap-4 mb-4">
                 <span className="font-case text-[11px] text-crimson tracking-[0.2em]">{s.no}</span>
-                <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight">{s.title}</h2>
+                <h2 className="font-forensic text-3xl md:text-4xl font-semibold tracking-tight">{s.title}</h2>
               </div>
 
               {s.lede && <p className="text-lg md:text-xl leading-relaxed mb-6">{s.lede}</p>}
@@ -459,7 +459,7 @@ const DigitalYouPage: React.FC = () => {
 
               {s.pull && (
                 <blockquote className="mt-8 border-l-2 border-amber pl-5">
-                  <p className="font-serif italic text-xl md:text-2xl leading-snug">{s.pull}</p>
+                  <p className="font-forensic italic text-xl md:text-2xl leading-snug">{s.pull}</p>
                 </blockquote>
               )}
             </section>
@@ -470,7 +470,7 @@ const DigitalYouPage: React.FC = () => {
         <section className="border-t border-border/60 bg-muted/20">
           <div className="container mx-auto max-w-3xl px-4 py-16 text-center">
             <p className="font-case text-[10px] uppercase tracking-[0.24em] text-crimson mb-4">End of White Paper</p>
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold mb-4">
+            <h2 className="font-forensic text-3xl md:text-4xl font-semibold mb-4">
               The most valuable operating knowledge in the company is the person running it.
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-8">
