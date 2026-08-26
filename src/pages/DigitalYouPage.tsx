@@ -140,7 +140,6 @@ const SECTIONS: Section[] = [
       'The system notices a person keeps rewriting "Thank you for reaching out" into "Appreciate you reaching out." It does not silently mutate itself. It asks.',
     ],
     pull: 'Digital You learned: you prefer conversational gratitude over formal openings. Add this to Communication DNA?',
-    body2: true as unknown as never,
   },
   {
     no: '09',
@@ -496,7 +495,7 @@ const DigitalYouPage: React.FC = () => {
       </article>
 
       <Footer />
-      <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </>
   );
 };
