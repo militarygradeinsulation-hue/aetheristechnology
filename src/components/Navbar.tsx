@@ -50,6 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
     { label: 'Case Studies', href: '/case-studies' },
     { label: 'Blog', href: '/blog' },
     { label: 'Free Business Guides', href: '/resources' },
+    { label: 'Digital You', href: '/digital-you' },
     { label: 'News', href: '/news' },
     { label: 'Careers', href: '/careers', accent: true },
   ];
