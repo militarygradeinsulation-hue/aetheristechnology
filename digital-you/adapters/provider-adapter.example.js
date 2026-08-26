@@ -24,8 +24,10 @@
  *   <script src="adapters/provider-adapter.example.js"></script>
  *   <script>
  *     window.DigitalYouProviderAdapter = createRemoteProviderAdapter({
- *       baseUrl: "https://your-server.example.com/api/digital-you",
- *       name: "Aetheris Backend"
+ *       baseUrl: "https://your-server.example.com",
+ *       name: "Aetheris Backend",
+ *       // server/provider-server.example.js requires this on every request — see its header.
+ *       fetchOptions: { headers: { Authorization: "Bearer <your DIGITAL_YOU_TOKEN>" } }
  *     });
  *     EssenceEngine.mount(document.getElementById("app"));
  *   </script>

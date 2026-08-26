@@ -176,7 +176,6 @@
       outcome: p.outcome || "", recordedAt: now()
     };
     db.proofs.unshift(rec);
-    db.proofs = db.proofs.slice(0, 300);
     return rec;
   }
 
@@ -1124,9 +1123,30 @@
       reader.onload = function () {
         try {
           var imported = JSON.parse(reader.result);
-          if (!imported || !imported.core || !imported.instances) { toast("That file doesn't look like a Digital You export."); return; }
-          db = imported;
-          if (!db.settings) db.settings = { activeInstanceId: db.instances[0].id, storageMode: "local" };
+          if (!imported || typeof imported !== "object" || !imported.core || !Array.isArray(imported.instances) || !imported.instances.length) {
+            toast("That file doesn't look like a Digital You export.");
+            return;
+          }
+          // Merge onto a fresh seed rather than swapping wholesale, so an older or partial
+          // export (missing an array the engine has since added) degrades instead of crashing.
+          var base = seedDb();
+          db = {
+            core: Object.assign({}, base.core, imported.core),
+            instances: imported.instances,
+            settings: imported.settings || { activeInstanceId: imported.instances[0].id, storageMode: "local" },
+            memory: Array.isArray(imported.memory) ? imported.memory : base.memory,
+            thoughtRules: Array.isArray(imported.thoughtRules) ? imported.thoughtRules : base.thoughtRules,
+            goals: Array.isArray(imported.goals) ? imported.goals : base.goals,
+            tasks: Array.isArray(imported.tasks) ? imported.tasks : base.tasks,
+            decisions: Array.isArray(imported.decisions) ? imported.decisions : base.decisions,
+            ideas: Array.isArray(imported.ideas) ? imported.ideas : base.ideas,
+            corrections: Array.isArray(imported.corrections) ? imported.corrections : base.corrections,
+            proofs: Array.isArray(imported.proofs) ? imported.proofs : base.proofs,
+            connectedSnapshots: Array.isArray(imported.connectedSnapshots) ? imported.connectedSnapshots : base.connectedSnapshots
+          };
+          if (!db.settings.activeInstanceId || !db.instances.some(function (i) { return i.id === db.settings.activeInstanceId; })) {
+            db.settings.activeInstanceId = db.instances[0].id;
+          }
           addProof({ actor: "Human", action: "Imported Digital You legacy", reason: file.name, evidence: [], confidence: 1, outcome: "" });
           persistAndRender();
           toast("Digital You imported.");

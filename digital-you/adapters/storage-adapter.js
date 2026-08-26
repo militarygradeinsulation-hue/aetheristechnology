@@ -54,15 +54,22 @@
     var identityId = opts.identityId || "default";
     var fetchOpts = opts.fetchOptions || {};
 
+    // The engine currently only ever persists one logical key (essence_engine_db_v1), but the
+    // adapter contract is load(key)/save(key, value) — honor it by namespacing the resource
+    // path per key, so a future second key doesn't silently co-mingle with this one.
+    function resourceUrl(key) {
+      return baseUrl + "/identities/" + encodeURIComponent(identityId) + "/" + encodeURIComponent(key);
+    }
+
     return {
       name: "Remote (" + baseUrl + ")",
-      load: function () {
-        return fetch(baseUrl + "/identities/" + encodeURIComponent(identityId), Object.assign({ method: "GET" }, fetchOpts))
+      load: function (key) {
+        return fetch(resourceUrl(key), Object.assign({ method: "GET" }, fetchOpts))
           .then(function (res) { return res.ok ? res.json() : null; })
           .catch(function () { return null; });
       },
-      save: function (_key, value) {
-        return fetch(baseUrl + "/identities/" + encodeURIComponent(identityId), Object.assign({
+      save: function (key, value) {
+        return fetch(resourceUrl(key), Object.assign({
           method: "PUT",
           headers: Object.assign({ "Content-Type": "application/json" }, fetchOpts.headers || {}),
           body: JSON.stringify(value)
@@ -74,25 +81,42 @@
   }
 
   // Direct-to-Supabase example (requires the supabase-js client to already be loaded as
-  // `window.supabase` — see https://supabase.com/docs/reference/javascript). Table names match
-  // ../schema.sql. This is the shape you'd use if the browser talks to Supabase directly under
-  // Row Level Security, instead of going through your own REST server.
+  // `window.supabase` — see https://supabase.com/docs/reference/javascript). Stores the engine's
+  // whole JSON document in digital_identities.snapshot (see ../schema.sql — that column is a
+  // deliberate escape hatch for adapters like this one; the rest of the schema is normalized
+  // for a backend that reads/writes the individual tables instead). This is the shape you'd use
+  // if the browser talks to Supabase directly under Row Level Security, instead of going
+  // through your own REST server.
   function createSupabaseStorageAdapter(opts) {
     opts = opts || {};
     var client = opts.client || global.supabase;
     var identityId = opts.identityId;
     if (!client) throw new Error("createSupabaseStorageAdapter requires a Supabase client (opts.client or window.supabase).");
+    if (!identityId) throw new Error("createSupabaseStorageAdapter requires opts.identityId (the digital_identities row's UUID).");
 
     return {
       name: "Supabase",
-      load: function () {
-        return client.from("digital_identities").select("*").eq("id", identityId).single()
-          .then(function (r) { return r.data ? r.data.snapshot : null; });
+      // snapshot is keyed by `key` so multiple logical documents can share one identity row.
+      load: function (key) {
+        return client.from("digital_identities").select("snapshot").eq("id", identityId).single()
+          .then(function (r) {
+            if (r.error) { console.error("[Supabase storage] load failed:", r.error.message); return null; }
+            return r.data && r.data.snapshot ? (r.data.snapshot[key] || null) : null;
+          });
       },
-      save: function (_key, value) {
-        return client.from("digital_identities")
-          .upsert({ id: identityId, snapshot: value, updated_at: new Date().toISOString() })
-          .then(function (r) { return !r.error; });
+      save: function (key, value) {
+        return client.from("digital_identities").select("snapshot").eq("id", identityId).single()
+          .then(function (r) {
+            var snapshot = (r.data && r.data.snapshot) || {};
+            snapshot[key] = value;
+            return client.from("digital_identities")
+              .update({ snapshot: snapshot, updated_at: new Date().toISOString() })
+              .eq("id", identityId);
+          })
+          .then(function (r) {
+            if (r.error) { console.error("[Supabase storage] save failed:", r.error.message); return false; }
+            return true;
+          });
       }
     };
   }

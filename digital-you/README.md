@@ -93,23 +93,28 @@ needs authenticated server-side services and this prototype doesn't put secrets 
 <script src="adapters/provider-adapter.example.js"></script>
 <script src="adapters/storage-adapter.js"></script>
 <script>
+  const authHeaders = { headers: { Authorization: "Bearer <your DIGITAL_YOU_TOKEN>" } };
   window.DigitalYouProviderAdapter = createRemoteProviderAdapter({
     baseUrl: "https://your-server.example.com",
-    name: "Aetheris Backend"
+    name: "Aetheris Backend",
+    fetchOptions: authHeaders
   });
   window.DigitalYouStorageAdapter = createRemoteStorageAdapter({
     baseUrl: "https://your-server.example.com/api/digital-you",
-    identityId: "the-signed-in-user's-identity-id"
+    identityId: "the-signed-in-user's-identity-id",
+    fetchOptions: authHeaders
   });
   EssenceEngine.mount(document.getElementById("app"));
 </script>
 ```
 
-Run the reference server:
+Run the reference server — it refuses to start without both `ALLOWED_ORIGIN` and
+`DIGITAL_YOU_TOKEN` set, since it's the thing holding your real API key:
 
 ```bash
 npm install @anthropic-ai/sdk zod
-ANTHROPIC_API_KEY=sk-ant-... node server/provider-server.example.js
+ANTHROPIC_API_KEY=sk-ant-... ALLOWED_ORIGIN=http://localhost:5173 DIGITAL_YOU_TOKEN=<random-secret> \
+  node server/provider-server.example.js
 ```
 
 Apply the schema to a Postgres/Supabase project:

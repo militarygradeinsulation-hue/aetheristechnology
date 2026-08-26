@@ -7,12 +7,18 @@
  *
  * Run it:
  *   npm install @anthropic-ai/sdk zod
- *   ANTHROPIC_API_KEY=sk-ant-... node --experimental-vm-modules server/provider-server.example.js
+ *   ANTHROPIC_API_KEY=sk-ant-... ALLOWED_ORIGIN=http://localhost:5173 DIGITAL_YOU_TOKEN=<random-secret> \
+ *     node --experimental-vm-modules server/provider-server.example.js
  *   (ESM: either rename to provider-server.example.mjs, or add "type": "module" to package.json)
+ *
+ * ALLOWED_ORIGIN and DIGITAL_YOU_TOKEN are both required — this server holds a paid API key, so
+ * it refuses to start wide open. Every route (except the OPTIONS preflight) checks the request's
+ * Origin against ALLOWED_ORIGIN and requires `Authorization: Bearer <DIGITAL_YOU_TOKEN>`.
  *
  * Then in the browser:
  *   window.DigitalYouProviderAdapter = createRemoteProviderAdapter({
- *     baseUrl: "http://localhost:8787", name: "Aetheris Backend"
+ *     baseUrl: "http://localhost:8787", name: "Aetheris Backend",
+ *     fetchOptions: { headers: { Authorization: "Bearer <the same DIGITAL_YOU_TOKEN>" } }
  *   });
  *
  * Endpoints: POST /chat, /decompose-goal, /evaluate-decision, /test-voice — the exact shape
@@ -25,6 +31,17 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 const PORT = process.env.PORT || 8787;
 const MODEL = "claude-opus-5";
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
+const AUTH_TOKEN = process.env.DIGITAL_YOU_TOKEN;
+
+if (!ALLOWED_ORIGIN || !AUTH_TOKEN) {
+  console.error(
+    "Refusing to start: this server holds a paid API key, so ALLOWED_ORIGIN and " +
+    "DIGITAL_YOU_TOKEN are both required (not optional hardening). Set them and re-run — see " +
+    "the file header for an example."
+  );
+  process.exit(1);
+}
 
 // Reads ANTHROPIC_API_KEY (or an `ant auth login` profile) from the server's own environment.
 const client = new Anthropic();
@@ -37,6 +54,13 @@ const EvaluationSchema = z.object({
   recommendation: z.string(),
   confidence: z.number().min(0).max(1),
   reasoningTrace: z.array(z.object({ type: z.string(), label: z.string(), score: z.number() }))
+});
+
+const ChatSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string().max(8000)
+  })).min(1).max(40)
 });
 
 function readJson(req) {
@@ -58,7 +82,7 @@ function send(res, status, body) {
 
 const routes = {
   "POST /chat": async (body) => {
-    var messages = Array.isArray(body.messages) ? body.messages : [];
+    var messages = ChatSchema.parse(body).messages;
     var response = await client.messages.create({
       model: MODEL,
       max_tokens: 4096,
@@ -128,10 +152,19 @@ const routes = {
 };
 
 const server = http.createServer(function (req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // tighten to your real origin in production
+  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+  res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
+
+  // This server exists to hold a real API key — reject any origin other than the configured
+  // one, and require the shared bearer token, before running any handler (including 404s, so
+  // an unauthenticated caller can't probe which routes exist).
+  var origin = req.headers.origin;
+  if (origin && origin !== ALLOWED_ORIGIN) { send(res, 403, { error: "Origin not allowed" }); return; }
+  var authHeader = req.headers.authorization || "";
+  if (authHeader !== "Bearer " + AUTH_TOKEN) { send(res, 401, { error: "Unauthorized" }); return; }
 
   var key = req.method + " " + (req.url || "").split("?")[0];
   var handler = routes[key];
@@ -140,7 +173,10 @@ const server = http.createServer(function (req, res) {
   readJson(req)
     .then(handler)
     .then((result) => send(res, 200, result))
-    .catch((err) => send(res, 500, { error: err.message }));
+    .catch((err) => {
+      var status = err instanceof z.ZodError ? 400 : 500;
+      send(res, status, { error: err.message });
+    });
 });
 
 server.listen(PORT, function () {

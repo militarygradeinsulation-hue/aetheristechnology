@@ -29,6 +29,11 @@ create table if not exists digital_identities (
   voice_base_url  text default '',                   -- your own backend, never a raw provider key
   active_instance_id uuid,                            -- fk added after specialized_instances exists
   storage_mode    text not null default 'local' check (storage_mode in ('local','remote')),
+  -- Whole-document escape hatch, keyed by storage-adapter key (e.g. "essence_engine_db_v1"):
+  -- adapters/storage-adapter.js's createSupabaseStorageAdapter reads/writes this column so the
+  -- browser can persist the engine's single JSON document without decomposing it. A backend
+  -- that reads/writes the normalized tables below instead can ignore this column entirely.
+  snapshot        jsonb not null default '{}',
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
