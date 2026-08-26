@@ -115,6 +115,7 @@ const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
 const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
+const DigitalYouPage = lazy(() => import("./pages/DigitalYouPage"));
 const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage"));
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
@@ -301,6 +302,7 @@ const App = () => (
                       <Route path="/operator-app" element={<OperatorAppPage />} />
                       {/* AI Authority Playbook — Tier-1 pillars + Tier-2 question articles + glossary */}
                       <Route path="/glossary" element={<GlossaryPage />} />
+                      <Route path="/digital-you" element={<DigitalYouPage />} />
                       <Route path="/revenue-forensics" element={<AuthorityArticlePage />} />
                       <Route path="/revenue-leak" element={<AuthorityArticlePage />} />
                       <Route path="/revenue-score" element={<AuthorityArticlePage />} />
