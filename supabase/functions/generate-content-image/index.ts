@@ -74,15 +74,26 @@ The image MUST be a literal visual depiction of the subject above. Do not substi
 RENDERING STYLE — depict the subject above using this visual language:
 ${STYLES[styleKey]}
 
-${BRAND_PALETTE}
+${styleKey === "editorial_cartoon" ? `PALETTE — do not deviate:
+  • Cream / off-white newsprint paper background (never charcoal, never black, never white-clinical)
+  • Charcoal-black pen ink for all linework and hatching
+  • Warm amber-gold #E8A33D as the single spot color for emphasis
+  • Crimson #C8102E only for leak / bleed / alert signals
+  • No neon, no pastel, no rainbow gradients, no digital airbrush shading` : BRAND_PALETTE}
 
 COMPOSITION RULES:
   • The subject above is mandatory. If the subject mentions a CRM, render a CRM. If it mentions a pipeline, render a pipeline. If it mentions a dollar figure, stamp it visibly. If it mentions a manila folder, draw a manila folder.
-  • No human faces with recognizable features. No real people. No celebrities.
+  • No celebrities, no recognizable real people.
+${styleKey === "editorial_cartoon"
+  ? `  • Hand-lettered short uppercase labels on scene objects are encouraged. One short italic serif caption along the bottom edge is allowed. No paragraphs.
+  • Include the small amber "Aetheris AI Studio" watermark in the bottom-right corner.
+  • Premium editorial feel — looks commissioned for The Economist or the Wall Street Journal op-ed page.
+  • Aspect ratio square or landscape panel with a thin ink border. Hand-drawn, never photoreal.`
+  : `  • No human faces with recognizable features. No real people.
   • No on-image headlines, captions, or paragraphs. Tiny mono labels are OK and encouraged when they reinforce the subject.
   • No logos, no brand marks, no watermarks (we add the Aetheris watermark separately).
   • Premium editorial feel — looks like it was commissioned for The Economist or Bloomberg Businessweek.
-  • Aspect ratio square. High contrast. Cinematic.`;
+  • Aspect ratio square. High contrast. Cinematic.`}`;
 
     const callModel = async (model: string, promptText: string) => {
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
