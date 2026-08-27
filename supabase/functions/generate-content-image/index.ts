@@ -49,7 +49,7 @@ serve(async (req) => {
       case_file: `Forensic CASE FILE document mockup. Manila folder texture aged to charcoal, "CASE #" stamp in amber JetBrains Mono, redaction bars, paperclip shadow, a single crimson signature line bleeding at the bottom edge. Flat-lay overhead view. Cinematic shadow.`,
       autopsy_diagram: `Anatomical/forensic autopsy diagram of a business process. Bone-white linework on charcoal, amber annotation arrows pointing to "leak points" with mono labels. One specific leak point dripping crimson. Style of a vintage medical chart crossed with a sales-ops flowchart.`,
       blueprint: `Architectural blueprint of a CRM pipeline. Dark charcoal paper, amber gridlines and measurement marks, isometric pipeline stages drawn in thin bone lines. One stage outlined in crimson with a dashed "BREACH" callout in mono.`,
-      editorial_cartoon: `Editorial op-ed illustration in the style of a New Yorker or Economist political cartoon. Bold black ink linework with heavy crosshatching and stippling on a warm bone/charcoal paper texture, amber spot color used sparingly for emphasis. Depict the subject as objects, symbols, or anonymous silhouetted figures (NO faces, NO recognizable people) — exaggerated, satirical, metaphorical. A single small crimson element acts as the focal "leak" signal (a drip, a slash, a stamp). Newspaper print feel, slight halftone grain. Never cute, never whimsical, never cartoony-children's-book — sharp editorial commentary only.`,
+      editorial_cartoon: `Editorial op-ed newspaper cartoon, hand-inked single-panel political-cartoon illustration in the style of a New Yorker / Wall Street Journal editorial cartoonist. Bold confident black pen-and-ink linework with slightly imperfect human-drawn contours, cross-hatching and stippling for all shading (absolutely no gradients, no airbrush, no 3D render), cream/off-white newsprint paper background with visible paper tooth and light halftone grain, charcoal-black ink, one warm amber-gold spot color (#E8A33D) for emphasis, sparing crimson (#C8102E) only for a leak, alert or bleed signal. Satirical, exaggerated character proportions, expressive faces of anonymous everyman business characters. Hand-lettered labels on the objects in the scene (short uppercase words on pipes, bags, machines, signs) are encouraged when they sharpen the metaphor, plus an optional short italic serif caption line along the bottom edge. Clear single visual metaphor, generous negative space, witty and sharp. Small amber serif watermark "Aetheris AI Studio" in the bottom-right corner.`,
       data_macro: `Extreme macro photography aesthetic of data on a screen. Dark CRT glow, amber monospaced terminal text on charcoal, one row highlighted with a thin crimson underline. Shallow depth of field, film grain, subtle scan lines.`,
       noir_object: `Moody noir still-life. Single business object (filing cabinet, ledger, magnifying glass, broken pipeline gauge) on charcoal surface under a hard amber side-light. Long shadow. A trickle of crimson liquid pooling near the base. Cinematic, restrained.`,
       isometric: `Clean isometric vector illustration. Charcoal background, amber and bone geometric shapes representing the business system. One node rendered in crimson with a subtle "leak" emission. Flat shading, sharp edges, generous negative space.`,
@@ -74,15 +74,26 @@ The image MUST be a literal visual depiction of the subject above. Do not substi
 RENDERING STYLE — depict the subject above using this visual language:
 ${STYLES[styleKey]}
 
-${BRAND_PALETTE}
+${styleKey === "editorial_cartoon" ? `PALETTE — do not deviate:
+  • Cream / off-white newsprint paper background (never charcoal, never black, never white-clinical)
+  • Charcoal-black pen ink for all linework and hatching
+  • Warm amber-gold #E8A33D as the single spot color for emphasis
+  • Crimson #C8102E only for leak / bleed / alert signals
+  • No neon, no pastel, no rainbow gradients, no digital airbrush shading` : BRAND_PALETTE}
 
 COMPOSITION RULES:
   • The subject above is mandatory. If the subject mentions a CRM, render a CRM. If it mentions a pipeline, render a pipeline. If it mentions a dollar figure, stamp it visibly. If it mentions a manila folder, draw a manila folder.
-  • No human faces with recognizable features. No real people. No celebrities.
+  • No celebrities, no recognizable real people.
+${styleKey === "editorial_cartoon"
+  ? `  • Hand-lettered short uppercase labels on scene objects are encouraged. One short italic serif caption along the bottom edge is allowed. No paragraphs.
+  • Include the small amber "Aetheris AI Studio" watermark in the bottom-right corner.
+  • Premium editorial feel — looks commissioned for The Economist or the Wall Street Journal op-ed page.
+  • Aspect ratio square or landscape panel with a thin ink border. Hand-drawn, never photoreal.`
+  : `  • No human faces with recognizable features. No real people.
   • No on-image headlines, captions, or paragraphs. Tiny mono labels are OK and encouraged when they reinforce the subject.
   • No logos, no brand marks, no watermarks (we add the Aetheris watermark separately).
   • Premium editorial feel — looks like it was commissioned for The Economist or Bloomberg Businessweek.
-  • Aspect ratio square. High contrast. Cinematic.`;
+  • Aspect ratio square. High contrast. Cinematic.`}`;
 
     const callModel = async (model: string, promptText: string) => {
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
