@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
+import { PostImageGenerator } from '@/components/admin/PostImageGenerator';
 import {
   Shuffle, Sparkles, Copy, Check, Download, Save, RefreshCw, Loader2, AlertTriangle, Wand2,
 } from 'lucide-react';
@@ -19,6 +20,19 @@ import {
 } from '@/lib/randomPost';
 
 const MAX_RECENT = 8;
+
+/** Turn the finished post into a single visual gag brief for the editorial cartoon style. */
+export function cartoonPromptFromPost(title: string, body: string): string {
+  const firstLine = (title || body || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '';
+  const hook = firstLine.replace(/^["'“”]+|["'“”]+$/g, '').slice(0, 180);
+  const rest = (body || '').replace(/\s+/g, ' ').trim().slice(0, 400);
+  return [
+    `A funny single panel editorial cartoon that visualizes this business pain: "${hook}".`,
+    'Exaggerated everyman business characters, one clear comedic metaphor, hand lettered uppercase labels on the objects in the scene,',
+    `and a short italic caption along the bottom edge reading: "${hook}".`,
+    rest ? `Context for the gag: ${rest}` : '',
+  ].filter(Boolean).join(' ');
+}
 
 export const RandomPostGenerator: React.FC = () => {
   const { toast } = useToast();
@@ -38,6 +52,7 @@ export const RandomPostGenerator: React.FC = () => {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
   const recentRef = useRef<string[]>([]);
   const usedAngles = useRef<string[]>([]);
   const hydrated = useRef(false);
@@ -299,6 +314,19 @@ export const RandomPostGenerator: React.FC = () => {
             onChange={(e) => { setBodyText(e.target.value); setMeta(m => m ? { ...m, words: countWords(e.target.value) } : m); }}
             className="min-h-[320px] font-sans text-sm leading-relaxed"
           />
+
+          <div className="pt-1">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
+              Editorial cartoon for this post
+            </div>
+            <PostImageGenerator
+              prompt={cartoonPromptFromPost(title, bodyText)}
+              editablePrompt
+              defaultStyle="editorial_cartoon"
+              existingImageUrl={imageUrl}
+              onImageGenerated={setImageUrl}
+            />
+          </div>
         </div>
       )}
     </div>
