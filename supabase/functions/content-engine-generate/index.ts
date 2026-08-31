@@ -474,7 +474,76 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       return json({ posts: inserted, generated: inserted?.length || 0, failures });
     }
 
+    // ---- random post generator ----
+    if (action === "random_post") {
+      let v;
+      try {
+        v = validateRandomPost(body);
+      } catch (e) {
+        return json({ error: e instanceof Error ? e.message : "Invalid request" }, 400);
+      }
+
+      const { data: strategy } = await supabase
+        .from("content_engine_strategy").select("*").limit(1).maybeSingle();
+
+      const voiceReference = String((strategy as any)?.voice_reference || "").trim();
+      const hasBrandVoice = voiceReference.length > 40;
+      const system = randomPostSystemPrompt({
+        businessDescription: String((strategy as any)?.business_description || "an operator led consulting business"),
+        niche: String((strategy as any)?.niche || "general business"),
+        targetBuyer: String((strategy as any)?.target_buyer || "owners and operators"),
+        voiceReference,
+        ctaLink: String((strategy as any)?.cta_link || ""),
+        hasBrandVoice,
+      });
+
+      const wantsTitle = v.targetWords >= 700;
+      const model = v.targetWords >= 700 ? SCRIPT_MODEL : PLAN_MODEL;
+
+      let result = await callAI(model, system, randomPostUserPrompt(v, wantsTitle), RANDOM_POST_TOOL);
+      let bodyText = String(result?.body || "").trim();
+      if (!bodyText) return json({ error: "The model returned an empty post. Try again." }, 502);
+
+      // Enforce the requested length. Expand or tighten, never truncate.
+      const band = toleranceBand(v.targetWords);
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const words = countWords(bodyText);
+        if (words >= band.min && words <= band.max) break;
+        const fix = await callAI(
+          model,
+          system,
+          `${randomPostUserPrompt(v, wantsTitle)}\n\nCURRENT DRAFT:\n${bodyText}\n\n${lengthFixPrompt(words, v.targetWords, words < band.min)}`,
+          RANDOM_POST_TOOL,
+        );
+        const next = String(fix?.body || "").trim();
+        if (!next) break;
+        // Never accept a shorter result when we asked for expansion.
+        if (words < band.min && countWords(next) < words) continue;
+        bodyText = next;
+        if (fix?.title) result = { ...result, title: fix.title };
+      }
+
+      const finalWords = countWords(bodyText);
+      return json({
+        post: {
+          title: wantsTitle ? String(result?.title || "").trim() : "",
+          body: bodyText,
+          topic: String(result?.topic || v.topic || "").trim(),
+          words: finalWords,
+          target_words: v.targetWords,
+          within_tolerance: finalWords >= band.min && finalWords <= band.max,
+          platform: v.platform,
+          mode: v.mode,
+          preset: v.preset,
+          angle: v.angle,
+          seed: v.seed,
+          brand_voice: hasBrandVoice,
+        },
+      });
+    }
+
     return json({ error: "Unknown action" }, 400);
+
   } catch (e) {
     console.error("content-engine-generate error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
