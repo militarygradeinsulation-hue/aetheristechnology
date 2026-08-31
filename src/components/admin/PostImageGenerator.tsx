@@ -18,6 +18,8 @@ interface Props {
   editablePrompt?: boolean;
   /** When true, route generation through the rep portal-image-studio (saves to rep's library, uses portal token). */
   repMode?: boolean;
+  /** Preselected style key. */
+  defaultStyle?: string;
 }
 
 export const STYLE_OPTIONS = [
@@ -42,12 +44,24 @@ export const PostImageGenerator: React.FC<Props> = ({
   compact = false,
   editablePrompt = false,
   repMode = false,
+  defaultStyle,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
-  const [style, setStyle] = useState<StyleKey>(editablePrompt ? 'free' : 'case_file');
+  const [style, setStyle] = useState<StyleKey>(
+    (defaultStyle as StyleKey) || (editablePrompt ? 'free' : 'case_file'),
+  );
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(prompt);
+  const lastPrompt = React.useRef(prompt);
+
+  // Keep the editable prompt in sync when the parent supplies a fresh subject.
+  React.useEffect(() => {
+    if (prompt !== lastPrompt.current) {
+      lastPrompt.current = prompt;
+      setCustomPrompt(prompt);
+    }
+  }, [prompt]);
 
   const generate = async () => {
     setGenerating(true);
