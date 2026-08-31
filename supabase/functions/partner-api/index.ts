@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       return json({
         scan_id: out.scan_id,
         status: "queued",
-        status_url: `${url.origin}/functions/v1/partner-api/scan?id=${out.scan_id}`,
+        status_url: `${SUPABASE_URL}/functions/v1/partner-api/scan?id=${out.scan_id}`,
         report_url: `${site}/golden-report/run?scan=${out.scan_id}`,
         embed_url: `${site}/golden-report/run?scan=${out.scan_id}&embed=1`,
       }, 202);
