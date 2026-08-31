@@ -573,6 +573,7 @@ export const ContentEngine: React.FC = () => {
             {([
               { id: 'calendar', label: 'Calendar', Icon: Calendar },
               { id: 'generator', label: 'Generator', Icon: Sparkles },
+              { id: 'random', label: 'Random Post', Icon: Shuffle },
               { id: 'studio', label: 'Post Studio', Icon: PenLine },
               { id: 'linkedin', label: 'LinkedIn Publisher', Icon: Megaphone },
               { id: 'email', label: 'Email', Icon: Mail },
