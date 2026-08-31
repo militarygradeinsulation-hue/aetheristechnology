@@ -136,6 +136,12 @@ describe('randomness and duplicate protection', () => {
 });
 
 describe('draft persistence', () => {
+  const store: Record<string, string> = {};
+  const localStorage = {
+    getItem: (k: string) => (k in store ? store[k] : null),
+    setItem: (k: string, v: string) => { store[k] = v; },
+    clear: () => { for (const k of Object.keys(store)) delete store[k]; },
+  };
   beforeEach(() => localStorage.clear());
   it('round trips selections and output', () => {
     const draft = {
