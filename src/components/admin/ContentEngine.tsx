@@ -626,6 +626,11 @@ export const ContentEngine: React.FC = () => {
         <GeneratorView strategy={strategy} onGenerate={handleGenerate} generating={generating} postsCount={posts.length} />
       )}
 
+      {view === 'random' && (
+        <RandomPostGenerator />
+      )}
+
+
       {view === 'studio' && (
         <LinkedInPostStudio />
       )}
