@@ -13,11 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Calendar, Sparkles, Settings, ChevronLeft, ChevronRight, Copy, Check, Trash2,
   RefreshCw, X, Edit3, Download, Save, RotateCw, CalendarDays, CopyPlus, Clock, Zap, Loader2,
-  PenLine, Mail, Hash, TrendingUp, Target, Building2, Smartphone, Megaphone, Image as ImageIcon,
+  PenLine, Mail, Hash, Shuffle, TrendingUp, Target, Building2, Smartphone, Megaphone, Image as ImageIcon,
 } from 'lucide-react';
 import { PostImageGenerator } from './PostImageGenerator';
 import LinkedInPostStudio from './LinkedInPostStudio';
 import AdminLinkedInPublisher from './AdminLinkedInPublisher';
+import { RandomPostGenerator } from './RandomPostGenerator';
 import { OutreachEmailCreator } from '@/components/OutreachEmailCreator';
 import { saveToAdminLibrary } from '@/lib/adminLibrary';
 
