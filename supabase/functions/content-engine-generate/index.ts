@@ -5,6 +5,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { FORENSIC_BLUEPRINT_PROMPT, AETHERIS_FORENSIC_OPERATOR_VOICE } from "../_shared/contentBlueprint.ts";
 import { NO_DASH_PROMPT_RULE, stripDashesDeep } from "../_shared/no-dashes.ts";
+import {
+  validateRandomPost, randomPostSystemPrompt, randomPostUserPrompt,
+  RANDOM_POST_TOOL, lengthFixPrompt, countWords, toleranceBand,
+} from "../_shared/random-post.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
