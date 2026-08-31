@@ -5728,6 +5728,77 @@ export type Database = {
           },
         ]
       }
+      partner_api_keys: {
+        Row: {
+          created_at: string
+          daily_scan_limit: number
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          label: string | null
+          last_used_at: string | null
+          partner_name: string
+          partner_slug: string
+        }
+        Insert: {
+          created_at?: string
+          daily_scan_limit?: number
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          label?: string | null
+          last_used_at?: string | null
+          partner_name: string
+          partner_slug: string
+        }
+        Update: {
+          created_at?: string
+          daily_scan_limit?: number
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          label?: string | null
+          last_used_at?: string | null
+          partner_name?: string
+          partner_slug?: string
+        }
+        Relationships: []
+      }
+      partner_api_scans: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          partner_key_id: string
+          scan_id: string
+          target_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          partner_key_id: string
+          scan_id: string
+          target_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          partner_key_id?: string
+          scan_id?: string
+          target_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_api_scans_partner_key_id_fkey"
+            columns: ["partner_key_id"]
+            isOneToOne: false
+            referencedRelation: "partner_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pattern_results: {
         Row: {
           account_id: string
