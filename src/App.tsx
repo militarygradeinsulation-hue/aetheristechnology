@@ -211,6 +211,8 @@ const App = () => (
                       <Route path="/gift" element={<Navigate to="/reciprocation" replace />} />
                       <Route path="/golden-report" element={<GoldenReportPage />} />
                       <Route path="/golden-report/run" element={<GoldenReportEmbedPage />} />
+                      <Route path="/partners/api" element={<PartnerApiPage />} />
+
                       <Route path="/golden" element={<GoldenLanderPage />} />
                       <Route path="/business-diagnostic" element={<DiagnosticQuizPage />} />
                       <Route path="/careers" element={<CareersPage />} />
