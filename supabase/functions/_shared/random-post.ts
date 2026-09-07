@@ -29,6 +29,8 @@ export interface ValidatedRandomPost {
   angle: string;
   seed: string;
   avoid: string[];
+  /** Optional approved message pack brief (Zero Burden and future packs). */
+  brief: string;
 }
 
 export function validateRandomPost(body: Record<string, unknown>): ValidatedRandomPost {
@@ -57,6 +59,7 @@ export function validateRandomPost(body: Record<string, unknown>): ValidatedRand
     angle: String(body.angle ?? "").trim().slice(0, 300),
     seed: String(body.seed ?? "").trim().slice(0, 64),
     avoid: Array.isArray(body.avoid) ? body.avoid.slice(0, 6).map((a) => String(a).slice(0, 600)) : [],
+    brief: String(body.brief ?? "").trim().slice(0, 6000),
   };
 }
 
@@ -116,6 +119,7 @@ ${wantsTitle
   ? "Return a title and a body organised into paragraphs, with subheads where the length warrants them."
   : "Return an empty title and a body with no subheads."}
 
+${v.brief ? `APPROVED MESSAGE PACK. Every claim below is pre approved. Use this wording and meaning. Do not invent stronger claims, do not strip the qualification, and do not turn scoped claims into absolutes:\n${v.brief}\n` : ""}
 ${v.avoid.length ? `DO NOT REPEAT these recent generations in idea, hook, or structure:\n${v.avoid.map((a, i) => `${i + 1}. ${a.slice(0, 300)}`).join("\n")}` : ""}`;
 }
 
