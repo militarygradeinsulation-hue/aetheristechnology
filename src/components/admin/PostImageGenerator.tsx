@@ -6,6 +6,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { getPortalToken } from '@/lib/portalAuth';
+import { AETHERIS_VINTAGE_DETECTIVE, ASPECT_OPTIONS, getVisualStyle } from '@/lib/visualStyles';
+
 
 interface Props {
   prompt: string;
