@@ -146,34 +146,66 @@ export const PostImageGenerator: React.FC<Props> = ({
   const currentStyle = STYLE_OPTIONS.find(s => s.key === style)!;
 
   const StylePicker = (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setStylePickerOpen(o => !o)}
-        className={`w-full flex items-center justify-between gap-1 rounded-md border border-border bg-background/50 px-2 ${compact ? 'h-7 text-[10px]' : 'h-8 text-xs'} text-muted-foreground hover:text-foreground hover:border-amber/40 transition-colors`}
-      >
-        <span className="font-mono uppercase tracking-wider truncate">
-          <span className="text-amber">style:</span> {currentStyle.label}
-        </span>
-        <ChevronDown className={`shrink-0 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} transition-transform ${stylePickerOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {stylePickerOpen && (
-        <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-xl">
-          {STYLE_OPTIONS.map(opt => (
+    <div className="space-y-1.5">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setStylePickerOpen(o => !o)}
+          className={`w-full flex items-center justify-between gap-1 rounded-md border border-border bg-background/50 px-2 ${compact ? 'h-7 text-[10px]' : 'h-8 text-xs'} text-muted-foreground hover:text-foreground hover:border-amber/40 transition-colors`}
+        >
+          <span className="font-mono uppercase tracking-wider truncate">
+            <span className="text-amber">style:</span> {currentStyle.label}
+          </span>
+          <ChevronDown className={`shrink-0 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} transition-transform ${stylePickerOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {stylePickerOpen && (
+          <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-xl">
+            {STYLE_OPTIONS.map(opt => {
+              const preset = getVisualStyle(opt.key);
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => pickStyle(opt.key)}
+                  className={`w-full text-left px-2.5 py-2 border-b border-border/40 last:border-b-0 hover:bg-amber/15 cursor-pointer transition-colors ${style === opt.key ? 'bg-amber/20' : ''}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {preset && (
+                      <img
+                        src={preset.previews[0]}
+                        alt={`${opt.label} style preview`}
+                        loading="lazy"
+                        className="w-10 h-12 object-cover rounded-sm border border-border shrink-0"
+                      />
+                    )}
+                    <span className="min-w-0">
+                      <span className={`block font-bold ${compact ? 'text-[11px]' : 'text-sm'} text-foreground`}>{opt.label}</span>
+                      <span className="block text-[10px] text-foreground/85 leading-tight mt-0.5">{opt.desc}</span>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {isDetective && (
+        <div className="flex flex-wrap gap-1">
+          {ASPECT_OPTIONS.map(a => (
             <button
-              key={opt.key}
+              key={a.id}
               type="button"
-              onClick={() => { setStyle(opt.key); setStylePickerOpen(false); }}
-              className={`w-full text-left px-2.5 py-2 border-b border-border/40 last:border-b-0 hover:bg-amber/15 cursor-pointer transition-colors ${style === opt.key ? 'bg-amber/20' : ''}`}
+              onClick={() => { setAspect(a.id); onStyleChange?.(style, a.id); }}
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider transition-colors ${aspect === a.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:text-foreground'}`}
             >
-              <div className={`font-bold ${compact ? 'text-[11px]' : 'text-sm'} text-foreground`}>{opt.label}</div>
-              <div className="text-[10px] text-foreground/85 leading-tight mt-0.5">{opt.desc}</div>
+              {a.label}
             </button>
           ))}
         </div>
       )}
     </div>
   );
+
 
   if (compact) {
     return (
