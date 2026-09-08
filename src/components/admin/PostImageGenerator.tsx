@@ -53,15 +53,30 @@ export const PostImageGenerator: React.FC<Props> = ({
   editablePrompt = false,
   repMode = false,
   defaultStyle,
+  copyPack,
+  defaultAspect,
+  onStyleChange,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
   const [style, setStyle] = useState<StyleKey>(
     (defaultStyle as StyleKey) || (editablePrompt ? 'free' : 'case_file'),
   );
+  const [aspect, setAspect] = useState<string>(defaultAspect || '1:1');
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(prompt);
   const lastPrompt = React.useRef(prompt);
+  const isDetective = style === AETHERIS_VINTAGE_DETECTIVE;
+
+  // Follow the parent when it switches preset (for example the post style picker).
+  React.useEffect(() => {
+    if (defaultStyle && defaultStyle !== style) setStyle(defaultStyle as StyleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultStyle]);
+
+  React.useEffect(() => {
+    if (defaultAspect) setAspect(defaultAspect);
+  }, [defaultAspect]);
 
   // Keep the editable prompt in sync when the parent supplies a fresh subject.
   React.useEffect(() => {
@@ -70,6 +85,15 @@ export const PostImageGenerator: React.FC<Props> = ({
       setCustomPrompt(prompt);
     }
   }, [prompt]);
+
+  const pickStyle = (key: StyleKey) => {
+    setStyle(key);
+    setStylePickerOpen(false);
+    const preset = getVisualStyle(key);
+    const nextAspect = preset ? preset.recommendedAspect : aspect;
+    if (preset) setAspect(nextAspect);
+    onStyleChange?.(key, nextAspect);
+  };
 
   const generate = async () => {
     setGenerating(true);
@@ -80,7 +104,12 @@ export const PostImageGenerator: React.FC<Props> = ({
       if (repMode) {
         const token = getPortalToken();
         const { data, error } = await supabase.functions.invoke('portal-image-studio', {
-          body: { action: 'generate', prompt: finalPrompt, aetheris_style: style !== 'free' },
+          body: {
+            action: 'generate',
+            prompt: finalPrompt,
+            aetheris_style: !isDetective && style !== 'free',
+            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: copyPack } : {}),
+          },
           headers: token ? { 'x-portal-token': token } : {},
         });
         if (error) throw error;
@@ -89,7 +118,13 @@ export const PostImageGenerator: React.FC<Props> = ({
       } else {
         const token = getAdminToken();
         const { data, error } = await supabase.functions.invoke('generate-content-image', {
-          body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
+          body: {
+            prompt: finalPrompt,
+            library_item_id: libraryItemId,
+            post_index: postIndex,
+            style,
+            ...(isDetective ? { aspect_ratio: aspect, copy: copyPack } : {}),
+          },
           headers: token ? { 'x-admin-token': token } : {},
         });
         if (error) throw error;
@@ -106,6 +141,7 @@ export const PostImageGenerator: React.FC<Props> = ({
       setGenerating(false);
     }
   };
+
 
   const currentStyle = STYLE_OPTIONS.find(s => s.key === style)!;
 
