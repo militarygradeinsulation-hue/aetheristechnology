@@ -1,6 +1,11 @@
 // Rep / Partner image studio. Same capabilities as admin-image-studio but
 // scoped to the authenticated rep (via portal token) and stored in
 // rep_image_studio.
+import {
+  AETHERIS_VINTAGE_DETECTIVE,
+  resolveAspect,
+  vintageDetectivePrompt,
+} from "../_shared/visual-style-presets.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
@@ -131,8 +136,8 @@ serve(async (req) => {
         ...(requestedProvider ? [requestedProvider] : []),
         ...["flux", "leonardo", "openai"].filter((p) => p !== requestedProvider),
       ];
-      const imgWidth = infographic ? 832 : 1024;
-      const imgHeight = infographic ? 1216 : 1024;
+      const imgWidth = isDetective ? detectiveAspect.width : infographic ? 832 : 1024;
+      const imgHeight = isDetective ? detectiveAspect.height : infographic ? 1216 : 1024;
 
       let gen: any;
       let providerUsed = "";
