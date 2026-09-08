@@ -6,6 +6,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { getAdminToken } from '@/lib/adminAuth';
 import { getPortalToken } from '@/lib/portalAuth';
+import { AETHERIS_VINTAGE_DETECTIVE, ASPECT_OPTIONS, getVisualStyle } from '@/lib/visualStyles';
+
 
 interface Props {
   prompt: string;
@@ -20,6 +22,12 @@ interface Props {
   repMode?: boolean;
   /** Preselected style key. */
   defaultStyle?: string;
+  /** Exact copy to typeset, used by layout presets such as Aetheris Vintage Detective. */
+  copyPack?: Record<string, string>;
+  /** Recommended aspect ratio for the current preset. A user pick always wins. */
+  defaultAspect?: string;
+  /** Notified whenever the operator changes style or ratio, so the parent can persist it. */
+  onStyleChange?: (style: string, aspect: string) => void;
 }
 
 export const STYLE_OPTIONS = [
@@ -31,9 +39,11 @@ export const STYLE_OPTIONS = [
   { key: 'data_macro',        label: 'Data Macro',        desc: 'CRT terminal close-up · scan lines' },
   { key: 'noir_object',       label: 'Noir Object',       desc: 'Single object · hard amber light · long shadow' },
   { key: 'isometric',         label: 'Isometric',         desc: 'Clean vector · geometric · negative space' },
+  { key: AETHERIS_VINTAGE_DETECTIVE, label: 'Aetheris Vintage Detective', desc: 'Editorial print ad · warm paper · condensed headline · noir robot detective' },
 ] as const;
 
 type StyleKey = typeof STYLE_OPTIONS[number]['key'];
+
 
 export const PostImageGenerator: React.FC<Props> = ({
   prompt,
@@ -45,15 +55,30 @@ export const PostImageGenerator: React.FC<Props> = ({
   editablePrompt = false,
   repMode = false,
   defaultStyle,
+  copyPack,
+  defaultAspect,
+  onStyleChange,
 }) => {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState(existingImageUrl || '');
   const [style, setStyle] = useState<StyleKey>(
     (defaultStyle as StyleKey) || (editablePrompt ? 'free' : 'case_file'),
   );
+  const [aspect, setAspect] = useState<string>(defaultAspect || '1:1');
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(prompt);
   const lastPrompt = React.useRef(prompt);
+  const isDetective = style === AETHERIS_VINTAGE_DETECTIVE;
+
+  // Follow the parent when it switches preset (for example the post style picker).
+  React.useEffect(() => {
+    if (defaultStyle && defaultStyle !== style) setStyle(defaultStyle as StyleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultStyle]);
+
+  React.useEffect(() => {
+    if (defaultAspect) setAspect(defaultAspect);
+  }, [defaultAspect]);
 
   // Keep the editable prompt in sync when the parent supplies a fresh subject.
   React.useEffect(() => {
@@ -62,6 +87,15 @@ export const PostImageGenerator: React.FC<Props> = ({
       setCustomPrompt(prompt);
     }
   }, [prompt]);
+
+  const pickStyle = (key: StyleKey) => {
+    setStyle(key);
+    setStylePickerOpen(false);
+    const preset = getVisualStyle(key);
+    const nextAspect = preset ? preset.recommendedAspect : aspect;
+    if (preset) setAspect(nextAspect);
+    onStyleChange?.(key, nextAspect);
+  };
 
   const generate = async () => {
     setGenerating(true);
@@ -72,7 +106,12 @@ export const PostImageGenerator: React.FC<Props> = ({
       if (repMode) {
         const token = getPortalToken();
         const { data, error } = await supabase.functions.invoke('portal-image-studio', {
-          body: { action: 'generate', prompt: finalPrompt, aetheris_style: style !== 'free' },
+          body: {
+            action: 'generate',
+            prompt: finalPrompt,
+            aetheris_style: !isDetective && style !== 'free',
+            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: copyPack } : {}),
+          },
           headers: token ? { 'x-portal-token': token } : {},
         });
         if (error) throw error;
@@ -81,7 +120,13 @@ export const PostImageGenerator: React.FC<Props> = ({
       } else {
         const token = getAdminToken();
         const { data, error } = await supabase.functions.invoke('generate-content-image', {
-          body: { prompt: finalPrompt, library_item_id: libraryItemId, post_index: postIndex, style },
+          body: {
+            prompt: finalPrompt,
+            library_item_id: libraryItemId,
+            post_index: postIndex,
+            style,
+            ...(isDetective ? { aspect_ratio: aspect, copy: copyPack } : {}),
+          },
           headers: token ? { 'x-admin-token': token } : {},
         });
         if (error) throw error;
@@ -99,37 +144,70 @@ export const PostImageGenerator: React.FC<Props> = ({
     }
   };
 
+
   const currentStyle = STYLE_OPTIONS.find(s => s.key === style)!;
 
   const StylePicker = (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setStylePickerOpen(o => !o)}
-        className={`w-full flex items-center justify-between gap-1 rounded-md border border-border bg-background/50 px-2 ${compact ? 'h-7 text-[10px]' : 'h-8 text-xs'} text-muted-foreground hover:text-foreground hover:border-amber/40 transition-colors`}
-      >
-        <span className="font-mono uppercase tracking-wider truncate">
-          <span className="text-amber">style:</span> {currentStyle.label}
-        </span>
-        <ChevronDown className={`shrink-0 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} transition-transform ${stylePickerOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {stylePickerOpen && (
-        <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-xl">
-          {STYLE_OPTIONS.map(opt => (
+    <div className="space-y-1.5">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setStylePickerOpen(o => !o)}
+          className={`w-full flex items-center justify-between gap-1 rounded-md border border-border bg-background/50 px-2 ${compact ? 'h-7 text-[10px]' : 'h-8 text-xs'} text-muted-foreground hover:text-foreground hover:border-amber/40 transition-colors`}
+        >
+          <span className="font-mono uppercase tracking-wider truncate">
+            <span className="text-amber">style:</span> {currentStyle.label}
+          </span>
+          <ChevronDown className={`shrink-0 ${compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} transition-transform ${stylePickerOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {stylePickerOpen && (
+          <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-border bg-background shadow-xl">
+            {STYLE_OPTIONS.map(opt => {
+              const preset = getVisualStyle(opt.key);
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => pickStyle(opt.key)}
+                  className={`w-full text-left px-2.5 py-2 border-b border-border/40 last:border-b-0 hover:bg-amber/15 cursor-pointer transition-colors ${style === opt.key ? 'bg-amber/20' : ''}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {preset && (
+                      <img
+                        src={preset.previews[0]}
+                        alt={`${opt.label} style preview`}
+                        loading="lazy"
+                        className="w-10 h-12 object-cover rounded-sm border border-border shrink-0"
+                      />
+                    )}
+                    <span className="min-w-0">
+                      <span className={`block font-bold ${compact ? 'text-[11px]' : 'text-sm'} text-foreground`}>{opt.label}</span>
+                      <span className="block text-[10px] text-foreground/85 leading-tight mt-0.5">{opt.desc}</span>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {isDetective && (
+        <div className="flex flex-wrap gap-1">
+          {ASPECT_OPTIONS.map(a => (
             <button
-              key={opt.key}
+              key={a.id}
               type="button"
-              onClick={() => { setStyle(opt.key); setStylePickerOpen(false); }}
-              className={`w-full text-left px-2.5 py-2 border-b border-border/40 last:border-b-0 hover:bg-amber/15 cursor-pointer transition-colors ${style === opt.key ? 'bg-amber/20' : ''}`}
+              onClick={() => { setAspect(a.id); onStyleChange?.(style, a.id); }}
+              className={`px-1.5 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider transition-colors ${aspect === a.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:text-foreground'}`}
             >
-              <div className={`font-bold ${compact ? 'text-[11px]' : 'text-sm'} text-foreground`}>{opt.label}</div>
-              <div className="text-[10px] text-foreground/85 leading-tight mt-0.5">{opt.desc}</div>
+              {a.label}
             </button>
           ))}
         </div>
       )}
     </div>
   );
+
 
   if (compact) {
     return (

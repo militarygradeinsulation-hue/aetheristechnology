@@ -542,6 +542,8 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
           angle: v.angle,
           seed: v.seed,
           brand_voice: hasBrandVoice,
+          style_preset: v.stylePreset || null,
+
         },
       });
     }

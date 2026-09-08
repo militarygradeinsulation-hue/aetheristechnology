@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {
+  AETHERIS_VINTAGE_DETECTIVE, ASPECT_OPTIONS, getVisualStyle,
+} from '@/lib/visualStyles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -100,6 +103,7 @@ export const AdminImageStudio: React.FC = () => {
   const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
   const [bannerBusy, setBannerBusy] = useState(false);
   const [packBusy, setPackBusy] = useState(false);
+  const [detectiveAspect, setDetectiveAspect] = useState(getVisualStyle(AETHERIS_VINTAGE_DETECTIVE)!.recommendedAspect);
   const [packProgress, setPackProgress] = useState<{ done: number; total: number } | null>(null);
 
   const LOGO_URL = 'https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/content-images/brand/aetheris-badge.png';
@@ -247,7 +251,7 @@ WATERMARK: "aetheris.technology"`;
 
   useEffect(() => { load(); }, []);
 
-  const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean } = {}) => {
+  const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean; stylePreset?: string } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
@@ -257,10 +261,11 @@ WATERMARK: "aetheris.technology"`;
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         cartoon_style: !!opts.cartoon,
+        ...(opts.stylePreset ? { style_preset: opts.stylePreset, aspect_ratio: detectiveAspect } : {}),
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: editTarget ? 'Image edited' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
+      toast({ title: editTarget ? 'Image edited' : opts.stylePreset ? 'Vintage Detective image generated' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
       load();
@@ -396,6 +401,15 @@ WATERMARK: "aetheris.technology"`;
                   {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
                   Editorial Cartoon
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => generate({ stylePreset: AETHERIS_VINTAGE_DETECTIVE })}
+                  disabled={busy || !prompt.trim()}
+                  className="flex-1 min-w-[220px] border-amber/40 text-amber hover:bg-amber/10"
+                >
+                  {busy ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  Aetheris Vintage Detective
+                </Button>
               </>
             )}
             <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
@@ -407,6 +421,39 @@ WATERMARK: "aetheris.technology"`;
             />
           </div>
         </div>
+
+        {!editTarget && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border/50 pt-3">
+            <div className="flex gap-2">
+              {getVisualStyle(AETHERIS_VINTAGE_DETECTIVE)!.previews.map((src) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt="Aetheris Vintage Detective style reference"
+                  loading="lazy"
+                  className="w-16 h-20 object-cover rounded border border-border"
+                />
+              ))}
+            </div>
+            <div className="min-w-[180px] flex-1">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
+                Vintage Detective ratio
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ASPECT_OPTIONS.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setDetectiveAspect(a.id)}
+                    className={`px-2 py-0.5 rounded border text-[11px] font-mono uppercase tracking-wider transition-colors ${detectiveAspect === a.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* LinkedIn Banner Creator */}

@@ -1,6 +1,11 @@
 // Rep / Partner image studio. Same capabilities as admin-image-studio but
 // scoped to the authenticated rep (via portal token) and stored in
 // rep_image_studio.
+import {
+  AETHERIS_VINTAGE_DETECTIVE,
+  resolveAspect,
+  vintageDetectivePrompt,
+} from "../_shared/visual-style-presets.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
@@ -100,14 +105,24 @@ serve(async (req) => {
       const CARTOON_PROMPT = (subject: string) => `Editorial op-ed newspaper cartoon, hand-inked single-panel political-cartoon illustration in the style of a New Yorker / Wall Street Journal editorial cartoonist. Subject: ${subject}. Bold confident black pen-and-ink linework with slightly imperfect human-drawn contours, cross-hatching and stippling for all shading (absolutely no gradients, no airbrush), cream/off-white newsprint paper background with visible paper tooth, charcoal-black ink, one warm amber-gold spot color (#E8A33D) for emphasis, tiny sparing crimson (#C8102E) only for an alert or leak signal. Satirical, slightly exaggerated character proportions. Clear single visual metaphor, generous negative space, witty and sharp. Small amber monospace watermark "Aetheris AI Studio" in the bottom-right corner.`;
       const CARTOON_NEGATIVE = "3d render, photorealistic, photograph, cgi, pixar, disney, anime, manga, chibi, cute, glossy, neon, digital painting, airbrush, smooth gradients, plastic, blurry, watermark clutter, extra limbs, deformed hands, gibberish text, speech bubbles";
 
+      const stylePreset = typeof body.style_preset === "string" ? body.style_preset : "";
+      const isDetective = stylePreset === AETHERIS_VINTAGE_DETECTIVE;
+      const detectiveAspect = resolveAspect(body.aspect_ratio, "4:5");
+
       let finalPrompt = rawPrompt;
-      if (aetherisStyle) {
+      if (isDetective) {
+        finalPrompt = vintageDetectivePrompt(rawPrompt, {
+          copy: body.copy && typeof body.copy === "object" ? body.copy as Record<string, string> : undefined,
+          aspect: detectiveAspect.ratioKey,
+        });
+      } else if (aetherisStyle) {
         finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}${infographic ? `\n\n${INFOGRAPHIC_SUFFIX} ${rawPrompt}` : ""}`;
       } else if (infographic) {
         finalPrompt = `${INFOGRAPHIC_SUFFIX} ${rawPrompt}`;
       } else if (cartoon) {
         finalPrompt = CARTOON_PROMPT(rawPrompt);
       }
+
       if (action === "edit" && sourceImageUrl) {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
@@ -121,8 +136,8 @@ serve(async (req) => {
         ...(requestedProvider ? [requestedProvider] : []),
         ...["flux", "leonardo", "openai"].filter((p) => p !== requestedProvider),
       ];
-      const imgWidth = infographic ? 832 : 1024;
-      const imgHeight = infographic ? 1216 : 1024;
+      const imgWidth = isDetective ? detectiveAspect.width : infographic ? 832 : 1024;
+      const imgHeight = isDetective ? detectiveAspect.height : infographic ? 1216 : 1024;
 
       let gen: any;
       let providerUsed = "";
