@@ -58,6 +58,8 @@ export interface DetectiveAdCopy {
 /** Readable-on-a-phone guidance. Never used to cut a sentence in half. */
 export const COPY_LENGTH_GUIDANCE = {
   headline: 70,
+  /** Absolute ceiling before we look for a shorter whole sentence. */
+  headlineMax: 95,
   body: 220,
   kicker: 60,
 } as const;
@@ -103,7 +105,14 @@ export function detectiveBriefFromPost(title: string, body: string): {
   const sentences = splitSentences(body);
   const titleClean = (title || '').replace(QUOTES, '');
 
-  const headlineSource = titleClean || bestFit(sentences, COPY_LENGTH_GUIDANCE.headline) || sentences[0] || '';
+  // The opening sentence is the natural headline. Only look further when it is
+  // far too long to set as display type — never cut it.
+  const opener = sentences[0] || '';
+  const headlineSource =
+    titleClean ||
+    (opener && opener.length <= COPY_LENGTH_GUIDANCE.headlineMax
+      ? opener
+      : bestFit(sentences, COPY_LENGTH_GUIDANCE.headline) || opener);
   const headline = headlineSource.toUpperCase();
 
   const used = new Set([headlineSource.toLowerCase()]);
