@@ -20,6 +20,12 @@ interface Props {
   repMode?: boolean;
   /** Preselected style key. */
   defaultStyle?: string;
+  /** Exact copy to typeset, used by layout presets such as Aetheris Vintage Detective. */
+  copyPack?: Record<string, string>;
+  /** Recommended aspect ratio for the current preset. A user pick always wins. */
+  defaultAspect?: string;
+  /** Notified whenever the operator changes style or ratio, so the parent can persist it. */
+  onStyleChange?: (style: string, aspect: string) => void;
 }
 
 export const STYLE_OPTIONS = [
@@ -31,9 +37,11 @@ export const STYLE_OPTIONS = [
   { key: 'data_macro',        label: 'Data Macro',        desc: 'CRT terminal close-up · scan lines' },
   { key: 'noir_object',       label: 'Noir Object',       desc: 'Single object · hard amber light · long shadow' },
   { key: 'isometric',         label: 'Isometric',         desc: 'Clean vector · geometric · negative space' },
+  { key: AETHERIS_VINTAGE_DETECTIVE, label: 'Aetheris Vintage Detective', desc: 'Editorial print ad · warm paper · condensed headline · noir robot detective' },
 ] as const;
 
 type StyleKey = typeof STYLE_OPTIONS[number]['key'];
+
 
 export const PostImageGenerator: React.FC<Props> = ({
   prompt,
