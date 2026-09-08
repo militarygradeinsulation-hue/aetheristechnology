@@ -265,6 +265,21 @@ WATERMARK: "aetheris.technology"`;
 
   useEffect(() => { load(); }, []);
 
+  /** Restore preset, ratio and ad copy from a saved image so an edit keeps them. */
+  const hydrateEdit = (img: StudioImage) => {
+    setEditTarget(img);
+    const md = (img.metadata || {}) as Record<string, any>;
+    const preset = typeof md.style_preset === 'string' ? md.style_preset : null;
+    setEditStylePreset(preset);
+    if (preset === AETHERIS_VINTAGE_DETECTIVE) {
+      if (typeof md.aspect_ratio === 'string') setDetectiveAspect(md.aspect_ratio);
+      const c = (md.copy || {}) as Record<string, any>;
+      setAdHeadline(typeof c.headline === 'string' ? c.headline : '');
+      setAdBody(typeof c.body === 'string' ? c.body : '');
+      setAdKicker(typeof c.kicker === 'string' ? c.kicker : '');
+    }
+  };
+
   const detectiveCopy = () => {
     const headline = adHeadline.trim();
     const bodyLine = adBody.trim();
@@ -483,6 +498,35 @@ WATERMARK: "aetheris.technology"`;
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {(!editTarget || editStylePreset === AETHERIS_VINTAGE_DETECTIVE) && (
+          <div className="rounded-md border border-amber/25 bg-amber/5 p-3 space-y-2">
+            <div className="text-[10px] uppercase tracking-widest font-mono text-amber">
+              Vintage Detective ad copy — optional
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Leave every field blank for a text-free image. Fill them in to typeset a real ad; the words are rendered
+              exactly as written and nothing is invented.
+            </p>
+            <Input value={adHeadline} onChange={e => setAdHeadline(e.target.value)} placeholder="Headline" className="h-9 text-sm" />
+            <Textarea value={adBody} onChange={e => setAdBody(e.target.value)} rows={2} placeholder="Supporting text" className="text-sm resize-none" />
+            <Input value={adKicker} onChange={e => setAdKicker(e.target.value)} placeholder="Closing line (optional)" className="h-9 text-sm" />
+            {(adHeadline || adBody || adKicker) && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-mono text-amber/80">
+                  AETHERIS TECHNOLOGY lockup + AETHERIS.TECHNOLOGY footer are added in ad mode.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setAdHeadline(''); setAdBody(''); setAdKicker(''); }}
+                  className="text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground"
+                >
+                  Clear copy
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
