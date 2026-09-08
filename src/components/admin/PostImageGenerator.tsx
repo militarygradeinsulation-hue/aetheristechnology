@@ -136,7 +136,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             action: 'generate',
             prompt: finalPrompt,
             aetheris_style: !isDetective && style !== 'free',
-            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: copyPack } : {}),
+            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: effectiveCopy } : {}),
           },
           headers: token ? { 'x-portal-token': token } : {},
         });
@@ -151,7 +151,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             library_item_id: libraryItemId,
             post_index: postIndex,
             style,
-            ...(isDetective ? { aspect_ratio: aspect, copy: copyPack } : {}),
+            ...(isDetective ? { aspect_ratio: aspect, copy: effectiveCopy } : {}),
           },
           headers: token ? { 'x-admin-token': token } : {},
         });
@@ -223,7 +223,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             <button
               key={a.id}
               type="button"
-              onClick={() => { setAspect(a.id); onStyleChange?.(style, a.id); }}
+              onClick={() => { aspectPinned.current = true; setAspect(a.id); onStyleChange?.(style, a.id); }}
               className={`px-1.5 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider transition-colors ${aspect === a.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:text-foreground'}`}
             >
               {a.label}
