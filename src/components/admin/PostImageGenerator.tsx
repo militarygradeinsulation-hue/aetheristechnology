@@ -65,10 +65,35 @@ export const PostImageGenerator: React.FC<Props> = ({
     (defaultStyle as StyleKey) || (editablePrompt ? 'free' : 'case_file'),
   );
   const [aspect, setAspect] = useState<string>(defaultAspect || '1:1');
+  // Once the operator picks a ratio by hand it is never reset by a style click.
+  const aspectPinned = React.useRef(false);
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(prompt);
   const lastPrompt = React.useRef(prompt);
   const isDetective = style === AETHERIS_VINTAGE_DETECTIVE;
+
+  // Editable ad copy — seeded from the extracted brief, never mutating the post.
+  const [adCopy, setAdCopy] = useState({
+    headline: copyPack?.headline || '',
+    body: copyPack?.body || '',
+    kicker: copyPack?.kicker || '',
+  });
+  const copySig = `${copyPack?.headline || ''}|${copyPack?.body || ''}|${copyPack?.kicker || ''}`;
+  const lastCopySig = React.useRef(copySig);
+  React.useEffect(() => {
+    if (copySig !== lastCopySig.current) {
+      lastCopySig.current = copySig;
+      setAdCopy({
+        headline: copyPack?.headline || '',
+        body: copyPack?.body || '',
+        kicker: copyPack?.kicker || '',
+      });
+    }
+  }, [copySig, copyPack]);
+
+  const effectiveCopy = copyPack
+    ? { ...copyPack, headline: adCopy.headline, body: adCopy.body, kicker: adCopy.kicker }
+    : undefined;
 
   // Follow the parent when it switches preset (for example the post style picker).
   React.useEffect(() => {
@@ -77,7 +102,7 @@ export const PostImageGenerator: React.FC<Props> = ({
   }, [defaultStyle]);
 
   React.useEffect(() => {
-    if (defaultAspect) setAspect(defaultAspect);
+    if (defaultAspect && !aspectPinned.current) setAspect(defaultAspect);
   }, [defaultAspect]);
 
   // Keep the editable prompt in sync when the parent supplies a fresh subject.
@@ -92,8 +117,9 @@ export const PostImageGenerator: React.FC<Props> = ({
     setStyle(key);
     setStylePickerOpen(false);
     const preset = getVisualStyle(key);
-    const nextAspect = preset ? preset.recommendedAspect : aspect;
-    if (preset) setAspect(nextAspect);
+    // A hand-picked ratio wins; only suggest the recommended one otherwise.
+    const nextAspect = preset && !aspectPinned.current ? preset.recommendedAspect : aspect;
+    if (nextAspect !== aspect) setAspect(nextAspect);
     onStyleChange?.(key, nextAspect);
   };
 
@@ -110,7 +136,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             action: 'generate',
             prompt: finalPrompt,
             aetheris_style: !isDetective && style !== 'free',
-            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: copyPack } : {}),
+            ...(isDetective ? { style_preset: style, aspect_ratio: aspect, copy: effectiveCopy } : {}),
           },
           headers: token ? { 'x-portal-token': token } : {},
         });
@@ -125,7 +151,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             library_item_id: libraryItemId,
             post_index: postIndex,
             style,
-            ...(isDetective ? { aspect_ratio: aspect, copy: copyPack } : {}),
+            ...(isDetective ? { aspect_ratio: aspect, copy: effectiveCopy } : {}),
           },
           headers: token ? { 'x-admin-token': token } : {},
         });
@@ -197,7 +223,7 @@ export const PostImageGenerator: React.FC<Props> = ({
             <button
               key={a.id}
               type="button"
-              onClick={() => { setAspect(a.id); onStyleChange?.(style, a.id); }}
+              onClick={() => { aspectPinned.current = true; setAspect(a.id); onStyleChange?.(style, a.id); }}
               className={`px-1.5 py-0.5 rounded border text-[10px] font-mono uppercase tracking-wider transition-colors ${aspect === a.id ? 'border-amber text-amber bg-amber/10' : 'border-border text-muted-foreground hover:text-foreground'}`}
             >
               {a.label}
@@ -205,8 +231,38 @@ export const PostImageGenerator: React.FC<Props> = ({
           ))}
         </div>
       )}
+      {isDetective && copyPack && (
+        <div className="space-y-1 rounded-md border border-amber/25 bg-amber/5 p-2">
+          <div className="text-[10px] uppercase tracking-widest font-mono text-amber">
+            Ad copy on the image (edit before generating)
+          </div>
+          <input
+            value={adCopy.headline}
+            onChange={(e) => setAdCopy(c => ({ ...c, headline: e.target.value }))}
+            placeholder="Headline"
+            className="w-full h-7 rounded border border-border bg-background px-2 text-[11px]"
+          />
+          <Textarea
+            value={adCopy.body}
+            onChange={(e) => setAdCopy(c => ({ ...c, body: e.target.value }))}
+            rows={2}
+            placeholder="Short supporting explanation"
+            className="text-[11px] resize-none"
+          />
+          <input
+            value={adCopy.kicker}
+            onChange={(e) => setAdCopy(c => ({ ...c, kicker: e.target.value }))}
+            placeholder="Closing line (optional)"
+            className="w-full h-7 rounded border border-border bg-background px-2 text-[11px]"
+          />
+          <div className="text-[9px] text-muted-foreground font-mono">
+            Typeset exactly as written. Editing here never changes the post.
+          </div>
+        </div>
+      )}
     </div>
   );
+
 
 
   if (compact) {

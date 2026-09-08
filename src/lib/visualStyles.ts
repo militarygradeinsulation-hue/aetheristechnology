@@ -47,24 +47,93 @@ export function isVisualStyleId(id: unknown): id is string {
   return typeof id === 'string' && VISUAL_STYLE_PRESETS.some((s) => s.id === id);
 }
 
+export interface DetectiveAdCopy extends Record<string, string> {
+  brand: string;
+  headline: string;
+  body: string;
+  kicker: string;
+  footer: string;
+}
+
+/** Readable-on-a-phone guidance. Never used to cut a sentence in half. */
+export const COPY_LENGTH_GUIDANCE = {
+  headline: 70,
+  /** Absolute ceiling before we look for a shorter whole sentence. */
+  headlineMax: 95,
+  body: 220,
+  kicker: 60,
+} as const;
+
+const QUOTES = /^["'“”‘’\s]+|["'“”‘’\s]+$/g;
+
+/** Split a block of text into whole sentences / whole lines, never mid-word. */
+export function splitSentences(text: string): string[] {
+  const out: string[] = [];
+  for (const line of (text || '').split('\n')) {
+    const clean = line.replace(QUOTES, '');
+    if (!clean) continue;
+    const parts = clean.match(/[^.!?]+[.!?]*(\s+|$)/g) || [clean];
+    for (const p of parts) {
+      const s = p.trim();
+      if (s) out.push(s);
+    }
+  }
+  return out;
+}
+
+const AETHERIS_HINT = /aetheris|the system|shared (company )?knowledge|context/i;
+
+/** Pick the first whole sentence that fits, else the shortest available one. */
+function bestFit(candidates: string[], max: number): string {
+  const fits = candidates.filter((s) => s.length <= max);
+  if (fits.length) return fits[0];
+  if (!candidates.length) return '';
+  return [...candidates].sort((a, b) => a.length - b.length)[0];
+}
+
 /**
- * Turn a finished post into the scene brief plus the exact copy the Vintage
- * Detective layout should typeset. The post text is never paraphrased.
+ * Turn a finished post into the scene brief plus the ad copy the Vintage
+ * Detective layout should typeset. Source wording is preserved verbatim:
+ * whole sentences are selected, never sliced at a character boundary. The
+ * operator can edit the result before generating; the original post is
+ * untouched.
  */
 export function detectiveBriefFromPost(title: string, body: string): {
   subject: string;
-  copy: { brand: string; headline: string; body: string; kicker: string; footer: string };
+  copy: DetectiveAdCopy;
 } {
-  const lines = (body || '').split('\n').map((l) => l.trim()).filter(Boolean);
-  const raw = (title || lines[0] || '').replace(/^["'“”]+|["'“”]+$/g, '');
-  const headline = raw.slice(0, 70).toUpperCase();
-  const supporting = (lines.find((l) => l !== raw) || '').slice(0, 180);
-  const kicker = (lines[lines.length - 1] || '').slice(0, 60).toUpperCase();
+  const sentences = splitSentences(body);
+  const titleClean = (title || '').replace(QUOTES, '');
+
+  // The opening sentence is the natural headline. Only look further when it is
+  // far too long to set as display type — never cut it.
+  const opener = sentences[0] || '';
+  const headlineSource =
+    titleClean ||
+    (opener && opener.length <= COPY_LENGTH_GUIDANCE.headlineMax
+      ? opener
+      : bestFit(sentences, COPY_LENGTH_GUIDANCE.headline) || opener);
+  const headline = headlineSource.toUpperCase();
+
+  const used = new Set([headlineSource.toLowerCase()]);
+  const remaining = sentences.filter((s) => !used.has(s.toLowerCase()));
+
+  // Prefer a sentence that carries the Aetheris explanation — that is the
+  // depth the ad needs — otherwise the first remaining whole sentence.
+  const explanation =
+    remaining.find((s) => AETHERIS_HINT.test(s) && s.length <= COPY_LENGTH_GUIDANCE.body) ||
+    bestFit(remaining, COPY_LENGTH_GUIDANCE.body);
+
+  const kickerPool = remaining.filter((s) => s.toLowerCase() !== (explanation || '').toLowerCase());
+  const lastFirst = [...kickerPool].reverse();
+  const kickerSource =
+    lastFirst.find((s) => s.length <= COPY_LENGTH_GUIDANCE.kicker) || '';
+  const kicker = kickerSource.toUpperCase();
 
   const subject = [
     'A single page editorial advertisement for Aetheris Technology.',
     'Show the vintage humanoid detective inside an old office or corridor scene that visualises this business tension:',
-    `"${(raw || supporting).slice(0, 180)}".`,
+    `"${headlineSource || explanation}".`,
     'Choose a fresh camera angle, pose and crop, with the typography occupying its own clean area of the page.',
   ].join(' ');
 
@@ -73,7 +142,7 @@ export function detectiveBriefFromPost(title: string, body: string): {
     copy: {
       brand: 'AETHERIS TECHNOLOGY',
       headline,
-      body: supporting,
+      body: explanation && explanation.toLowerCase() !== headlineSource.toLowerCase() ? explanation : '',
       kicker: kicker && kicker !== headline ? kicker : '',
       footer: 'AETHERIS.TECHNOLOGY',
     },

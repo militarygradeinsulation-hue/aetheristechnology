@@ -94,7 +94,9 @@ ${CHARACTER}
 ${LAYOUT}
 ${hasCopy
     ? `${copyBlock(copy)}\n${TEXT_HYGIENE}`
-    : `IMAGE ONLY: do not render advertising copy, headlines, captions or logos. Compose it as a full bleed editorial photograph in the palette and character above, leaving deliberate negative space where type could later sit.`}
+    : `TEXT POLICY — no advertising copy was supplied:
+  Render only the text the PRIMARY SUBJECT above explicitly asks for, spelled exactly as it is written there, and nothing else. Never invent headlines, captions, taglines, slogans, logos, case numbers or microtext of your own.
+  If the subject asks for no text, the page carries no legible text at all: compose it as a full bleed editorial photograph in the palette and character above, leaving deliberate negative space where type could later sit.`}
 
 Overall: looks like a commissioned print page from an independent design annual. Photographic halftone realism, cinematic noir lighting, restrained ink and one gold accent. No cigarettes, no weapons.`;
 }

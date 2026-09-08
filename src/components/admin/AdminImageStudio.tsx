@@ -18,6 +18,7 @@ interface StudioImage {
   source: 'generated' | 'uploaded' | 'edited' | string;
   model: string | null;
   created_at: string;
+  metadata?: Record<string, any> | null;
 }
 
 const MODELS = [
@@ -103,7 +104,20 @@ export const AdminImageStudio: React.FC = () => {
   const [bannerBg, setBannerBg] = useState<'network' | 'matrix' | 'blueprint' | 'noir' | 'case_file'>('network');
   const [bannerBusy, setBannerBusy] = useState(false);
   const [packBusy, setPackBusy] = useState(false);
-  const [detectiveAspect, setDetectiveAspect] = useState(getVisualStyle(AETHERIS_VINTAGE_DETECTIVE)!.recommendedAspect);
+  const RECOMMENDED_ASPECT = getVisualStyle(AETHERIS_VINTAGE_DETECTIVE)!.recommendedAspect;
+  const ASPECT_STORE = 'aetheris.studio.detectiveAspect';
+  const [detectiveAspect, setDetectiveAspect] = useState<string>(() => {
+    try { return sessionStorage.getItem(ASPECT_STORE) || RECOMMENDED_ASPECT; } catch { return RECOMMENDED_ASPECT; }
+  });
+  useEffect(() => {
+    try { sessionStorage.setItem(ASPECT_STORE, detectiveAspect); } catch { /* session storage unavailable */ }
+  }, [detectiveAspect]);
+  // Optional exact ad copy for the Vintage Detective preset. Empty = image only.
+  const [adHeadline, setAdHeadline] = useState('');
+  const [adBody, setAdBody] = useState('');
+  const [adKicker, setAdKicker] = useState('');
+  // Preset carried by the image currently being edited (legacy rows have none).
+  const [editStylePreset, setEditStylePreset] = useState<string | null>(null);
   const [packProgress, setPackProgress] = useState<{ done: number; total: number } | null>(null);
 
   const LOGO_URL = 'https://ihdjpxhcaiaixmqxyqoe.supabase.co/storage/v1/object/public/content-images/brand/aetheris-badge.png';
@@ -251,23 +265,55 @@ WATERMARK: "aetheris.technology"`;
 
   useEffect(() => { load(); }, []);
 
+  /** Restore preset, ratio and ad copy from a saved image so an edit keeps them. */
+  const hydrateEdit = (img: StudioImage) => {
+    setEditTarget(img);
+    const md = (img.metadata || {}) as Record<string, any>;
+    const preset = typeof md.style_preset === 'string' ? md.style_preset : null;
+    setEditStylePreset(preset);
+    if (preset === AETHERIS_VINTAGE_DETECTIVE) {
+      if (typeof md.aspect_ratio === 'string') setDetectiveAspect(md.aspect_ratio);
+      const c = (md.copy || {}) as Record<string, any>;
+      setAdHeadline(typeof c.headline === 'string' ? c.headline : '');
+      setAdBody(typeof c.body === 'string' ? c.body : '');
+      setAdKicker(typeof c.kicker === 'string' ? c.kicker : '');
+    }
+  };
+
+  const detectiveCopy = () => {
+    const headline = adHeadline.trim();
+    const bodyLine = adBody.trim();
+    const kicker = adKicker.trim();
+    if (!headline && !bodyLine && !kicker) return undefined;
+    return {
+      brand: 'AETHERIS TECHNOLOGY',
+      headline: headline.toUpperCase(),
+      body: bodyLine,
+      kicker: kicker.toUpperCase(),
+      footer: 'AETHERIS.TECHNOLOGY',
+    };
+  };
+
   const generate = async (opts: { aetherisStyle?: boolean; cartoon?: boolean; stylePreset?: string } = {}) => {
     if (!prompt.trim()) { toast({ title: 'Enter a prompt' }); return; }
     setBusy(true);
     try {
+      const stylePreset = opts.stylePreset || (editTarget ? editStylePreset : null);
+      const copy = stylePreset === AETHERIS_VINTAGE_DETECTIVE ? detectiveCopy() : undefined;
       const { data, error } = await invoke({
         action: editTarget ? 'edit' : 'generate',
         prompt, model, provider,
         source_image_url: editTarget?.url,
         aetheris_style: !!opts.aetherisStyle,
         cartoon_style: !!opts.cartoon,
-        ...(opts.stylePreset ? { style_preset: opts.stylePreset, aspect_ratio: detectiveAspect } : {}),
+        ...(stylePreset ? { style_preset: stylePreset, aspect_ratio: detectiveAspect, ...(copy ? { copy } : {}) } : {}),
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast({ title: editTarget ? 'Image edited' : opts.stylePreset ? 'Vintage Detective image generated' : opts.aetherisStyle ? 'Image generated in Aetheris style' : opts.cartoon ? 'Editorial cartoon generated' : 'Image generated' });
       setPrompt('');
       setEditTarget(null);
+      setEditStylePreset(null);
       load();
     } catch (e: any) {
       toast({ title: 'Generation failed', description: e.message, variant: 'destructive' });
@@ -342,7 +388,7 @@ WATERMARK: "aetheris.technology"`;
               <div className="font-bold text-foreground">Editing this image</div>
               <div className="line-clamp-1">{editTarget.prompt}</div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setEditTarget(null)}>Cancel</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setEditTarget(null); setEditStylePreset(null); }}>Cancel</Button>
           </div>
         )}
 
@@ -452,6 +498,35 @@ WATERMARK: "aetheris.technology"`;
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {(!editTarget || editStylePreset === AETHERIS_VINTAGE_DETECTIVE) && (
+          <div className="rounded-md border border-amber/25 bg-amber/5 p-3 space-y-2">
+            <div className="text-[10px] uppercase tracking-widest font-mono text-amber">
+              Vintage Detective ad copy — optional
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Leave every field blank for a text-free image. Fill them in to typeset a real ad; the words are rendered
+              exactly as written and nothing is invented.
+            </p>
+            <Input value={adHeadline} onChange={e => setAdHeadline(e.target.value)} placeholder="Headline" className="h-9 text-sm" />
+            <Textarea value={adBody} onChange={e => setAdBody(e.target.value)} rows={2} placeholder="Supporting text" className="text-sm resize-none" />
+            <Input value={adKicker} onChange={e => setAdKicker(e.target.value)} placeholder="Closing line (optional)" className="h-9 text-sm" />
+            {(adHeadline || adBody || adKicker) && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-mono text-amber/80">
+                  AETHERIS TECHNOLOGY lockup + AETHERIS.TECHNOLOGY footer are added in ad mode.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setAdHeadline(''); setAdBody(''); setAdKicker(''); }}
+                  className="text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground"
+                >
+                  Clear copy
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -605,7 +680,7 @@ WATERMARK: "aetheris.technology"`;
                   <Button size="sm" variant="outline" onClick={() => setPreview(img)}>
                     <Maximize2 className="w-3.5 h-3.5" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setEditTarget(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <Button size="sm" variant="outline" onClick={() => { hydrateEdit(img); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
                     <Wand2 className="w-3.5 h-3.5 mr-1" /> Edit
                   </Button>
                   <Button size="sm" variant="outline" className="border-amber/60 text-amber" onClick={() => setAnimateTarget(img)}>
