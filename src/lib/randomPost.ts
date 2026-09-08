@@ -213,6 +213,10 @@ export interface RandomPostDraft {
   body: string;
   words: number;
   savedAt: string;
+  /** Selected visual/copy style preset id, e.g. aetheris-vintage-detective. */
+  visualStyle?: string;
+  /** Selected image aspect ratio for the handoff to the image generator. */
+  aspect?: string;
 }
 
 export function serializeDraft(d: RandomPostDraft): string {
@@ -232,8 +236,11 @@ export function parseDraft(raw: string | null): RandomPostDraft | null {
       title: String(d.title || ''),
       body: String(d.body || ''),
       words: countWords(String(d.body || '')),
+      visualStyle: d.visualStyle ? String(d.visualStyle) : undefined,
+      aspect: d.aspect ? String(d.aspect) : undefined,
     };
   } catch {
     return null;
   }
 }
+
