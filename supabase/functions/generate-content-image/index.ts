@@ -43,6 +43,9 @@ serve(async (req) => {
       });
       return await renderAndStore(detectivePrompt, {
         prompt: String(prompt), library_item_id, post_index, style,
+        style_preset: AETHERIS_VINTAGE_DETECTIVE,
+        aspect_ratio: typeof aspect_ratio === "string" ? aspect_ratio : "4:5",
+        copy: copy && typeof copy === "object" ? copy : null,
       });
     }
 
@@ -114,7 +117,10 @@ ${styleKey === "editorial_cartoon"
 
     async function renderAndStore(
       finalPrompt: string,
-      meta: { prompt: string; library_item_id?: string; post_index?: number; style?: string },
+      meta: {
+        prompt: string; library_item_id?: string; post_index?: number; style?: string;
+        style_preset?: string; aspect_ratio?: string; copy?: Record<string, unknown> | null;
+      },
     ): Promise<Response> {
       const callModel = async (model: string, promptText: string) => {
         return await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -210,7 +216,11 @@ ${styleKey === "editorial_cartoon"
             from: "generate-content-image",
             library_item_id: meta.library_item_id ?? null,
             post_index: meta.post_index ?? null,
+            // Legacy field kept as-is; canonical preset fields added alongside.
             style: meta.style ?? null,
+            style_preset: meta.style_preset ?? null,
+            aspect_ratio: meta.aspect_ratio ?? null,
+            copy: meta.copy ?? null,
           },
         });
       } catch (logErr) {

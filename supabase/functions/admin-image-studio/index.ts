@@ -108,10 +108,14 @@ serve(async (req) => {
       const isDetective = stylePreset === AETHERIS_VINTAGE_DETECTIVE;
       const aspect = resolveAspect(body.aspect_ratio, isDetective ? "4:5" : "1:1");
 
+      const detectiveCopy = isDetective && body.copy && typeof body.copy === "object"
+        ? body.copy as Record<string, string>
+        : undefined;
+
       let finalPrompt = rawPrompt;
       if (isDetective) {
         finalPrompt = vintageDetectivePrompt(rawPrompt, {
-          copy: body.copy && typeof body.copy === "object" ? body.copy as Record<string, string> : undefined,
+          copy: detectiveCopy,
           aspect: aspect.ratioKey,
         });
       } else if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
@@ -213,6 +217,7 @@ serve(async (req) => {
           cartoon_style: cartoon,
           style_preset: stylePreset || null,
           aspect_ratio: aspect.ratioKey,
+          copy: detectiveCopy ?? null,
 
         },
       }).select().single();
