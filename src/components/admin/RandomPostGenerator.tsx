@@ -18,6 +18,9 @@ import {
   withinTolerance, wantsTitle,
   type LengthPresetId, type PlatformId, type TopicModeId,
 } from '@/lib/randomPost';
+import {
+  AETHERIS_VINTAGE_DETECTIVE, ASPECT_OPTIONS, detectiveBriefFromPost, getVisualStyle,
+} from '@/lib/visualStyles';
 
 const MAX_RECENT = 8;
 
@@ -53,6 +56,10 @@ export const RandomPostGenerator: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [visualStyle, setVisualStyle] = useState<string>('editorial_cartoon');
+  const [aspect, setAspect] = useState<string>('1:1');
+  const detectivePreset = getVisualStyle(AETHERIS_VINTAGE_DETECTIVE)!;
+  const isDetective = visualStyle === AETHERIS_VINTAGE_DETECTIVE;
   const recentRef = useRef<string[]>([]);
   const usedAngles = useRef<string[]>([]);
   const hydrated = useRef(false);
@@ -64,6 +71,8 @@ export const RandomPostGenerator: React.FC = () => {
       setPlatform(d.platform); setMode(d.mode); setPreset(d.preset);
       setCustomWords(d.customWords); setTopic(d.topic); setTone(d.tone);
       setTitle(d.title); setBodyText(d.body);
+      if (d.visualStyle) setVisualStyle(d.visualStyle);
+      if (d.aspect) setAspect(d.aspect);
       if (d.body) setMeta({ words: countWords(d.body), target: d.words || countWords(d.body), ok: true, angle: '', brandVoice: false });
     }
     hydrated.current = true;
@@ -76,9 +85,10 @@ export const RandomPostGenerator: React.FC = () => {
       localStorage.setItem(RANDOM_POST_DRAFT_KEY, serializeDraft({
         platform, mode, preset, customWords, topic, tone, title,
         body: bodyText, words: meta?.target || countWords(bodyText), savedAt: new Date().toISOString(),
+        visualStyle, aspect,
       }));
     } catch { /* storage unavailable */ }
-  }, [platform, mode, preset, customWords, topic, tone, title, bodyText, meta]);
+  }, [platform, mode, preset, customWords, topic, tone, title, bodyText, meta, visualStyle, aspect]);
 
   const onPlatform = (p: PlatformId) => {
     setPlatform(p);
@@ -117,6 +127,7 @@ export const RandomPostGenerator: React.FC = () => {
             platform, mode: effMode, preset, customWords,
             topic: effMode === 'custom' ? topic.trim() : topic.trim(),
             tone, angle, seed: makeSeed(),
+            style_preset: visualStyle,
             avoid: recentRef.current.slice(0, 4),
           },
           headers: token ? { 'x-admin-token': token } : undefined,
@@ -148,7 +159,7 @@ export const RandomPostGenerator: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [platform, mode, preset, customWords, topic, tone]);
+  }, [platform, mode, preset, customWords, topic, tone, visualStyle]);
 
   const fullText = title ? `${title}\n\n${bodyText}` : bodyText;
 
@@ -171,7 +182,7 @@ export const RandomPostGenerator: React.FC = () => {
     const ok = await saveToolRun({
       tool_type: 'random_post',
       title: title || `Random ${platform} post (${meta?.words || countWords(bodyText)} words)`,
-      input_data: { platform, mode, preset, customWords, topic, tone, angle: meta?.angle },
+      input_data: { platform, mode, preset, customWords, topic, tone, angle: meta?.angle, style_preset: visualStyle, aspect_ratio: aspect },
       output_data: { title, body: bodyText, words: meta?.words },
     });
     setSaving(false);
@@ -249,6 +260,42 @@ export const RandomPostGenerator: React.FC = () => {
           )}
         </Section>
 
+        {/* Visual + copy style */}
+        <Section label="Style">
+          <div className="flex flex-wrap gap-2">
+            <Chip active={visualStyle === 'editorial_cartoon'} onClick={() => { setVisualStyle('editorial_cartoon'); setAspect('1:1'); }}>
+              Editorial Cartoon
+            </Chip>
+            <Chip
+              active={isDetective}
+              onClick={() => { setVisualStyle(AETHERIS_VINTAGE_DETECTIVE); setAspect(detectivePreset.recommendedAspect); }}
+            >
+              {detectivePreset.label}
+            </Chip>
+          </div>
+          {isDetective && (
+            <div className="mt-3 space-y-2">
+              <div className="text-[11px] text-muted-foreground">{detectivePreset.desc}</div>
+              <div className="flex gap-2">
+                {detectivePreset.previews.map((src) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt="Aetheris Vintage Detective style reference"
+                    loading="lazy"
+                    className="w-24 h-30 object-cover rounded border border-border"
+                  />
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {ASPECT_OPTIONS.map((a) => (
+                  <Chip key={a.id} active={aspect === a.id} onClick={() => setAspect(a.id)}>{a.label}</Chip>
+                ))}
+              </div>
+            </div>
+          )}
+        </Section>
+
         {/* Tone */}
         <Section label="Tone (optional)">
           <div className="flex flex-wrap gap-2">
@@ -317,12 +364,15 @@ export const RandomPostGenerator: React.FC = () => {
 
           <div className="pt-1">
             <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-2">
-              Editorial cartoon for this post
+              {isDetective ? `${detectivePreset.label} image for this post` : 'Editorial cartoon for this post'}
             </div>
             <PostImageGenerator
-              prompt={cartoonPromptFromPost(title, bodyText)}
+              prompt={isDetective ? detectiveBriefFromPost(title, bodyText).subject : cartoonPromptFromPost(title, bodyText)}
               editablePrompt
-              defaultStyle="editorial_cartoon"
+              defaultStyle={visualStyle}
+              defaultAspect={aspect}
+              copyPack={isDetective ? detectiveBriefFromPost(title, bodyText).copy : undefined}
+              onStyleChange={(s2, a2) => { setVisualStyle(s2); setAspect(a2); }}
               existingImageUrl={imageUrl}
               onImageGenerated={setImageUrl}
             />
