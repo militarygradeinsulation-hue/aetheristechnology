@@ -4,6 +4,7 @@ import {
   ASPECT_OPTIONS,
   VISUAL_STYLE_PRESETS,
   detectiveBriefFromPost,
+  splitSentences,
   getVisualStyle,
   isVisualStyleId,
 } from './visualStyles';
@@ -51,28 +52,61 @@ describe('detectiveBriefFromPost', () => {
   const body = [
     'You connect the tools, explain the business and turn every report into instructions.',
     'That is work, too.',
+    'Aetheris carries shared company knowledge into analysis, sales messages and content, so each task starts with context.',
     'Let the system learn the business.',
   ].join('\n');
 
-  it('derives an uppercase headline from the supplied copy without paraphrasing', () => {
+  it('keeps whole sentences and never clips characters', () => {
     const { copy } = detectiveBriefFromPost(title, body);
-    expect(copy.headline).toBe(title.slice(0, 70).toUpperCase());
+    expect(copy.headline).toBe(title.toUpperCase());
     expect(copy.brand).toBe('AETHERIS TECHNOLOGY');
     expect(copy.footer).toBe('AETHERIS.TECHNOLOGY');
     expect(body).toContain(copy.body);
+    expect(copy.body.endsWith('.')).toBe(true);
+    expect(copy.body).not.toMatch(/\w$/);
   });
 
-  it('falls back to the first body line when there is no title', () => {
+  it('prefers the Aetheris explanation for the supporting line', () => {
+    const { copy } = detectiveBriefFromPost(title, body);
+    expect(copy.body).toContain('Aetheris carries shared company knowledge');
+  });
+
+  it('falls back to a whole first sentence when there is no title', () => {
     const { copy, subject } = detectiveBriefFromPost('', body);
     expect(copy.headline).toBe(
-      'You connect the tools, explain the business and turn every report into instructions.'
-        .slice(0, 70).toUpperCase(),
+      'You connect the tools, explain the business and turn every report into instructions.'.toUpperCase(),
     );
+    expect(copy.headline).not.toBe(copy.body.toUpperCase());
     expect(subject).toContain('vintage humanoid detective');
   });
 
-  it('never repeats the headline as the kicker', () => {
+  it('never repeats the headline as body or kicker', () => {
     const { copy } = detectiveBriefFromPost('One line only.', 'One line only.');
     expect(copy.kicker).toBe('');
+    expect(copy.body).toBe('');
+  });
+
+  it('handles a long-form post without a repeated opener', () => {
+    const long = Array.from({ length: 12 }, (_, i) => `Sentence number ${i} about operations.`).join(' ');
+    const { copy } = detectiveBriefFromPost('THE REPORT FOUND THE PROBLEM. WHO MOVES IT FORWARD?', long);
+    expect(copy.body).not.toBe('');
+    expect(copy.body.toUpperCase()).not.toBe(copy.headline);
+    expect(copy.kicker).not.toBe(copy.headline);
+    expect(long).toContain(copy.body);
+  });
+
+  it('handles a terse 40-word post', () => {
+    const short = 'Your website promises it. Does your business deliver it? Aetheris checks the promise against the workflow. Book the audit.';
+    const { copy } = detectiveBriefFromPost('', short);
+    expect(copy.headline).toBe('YOUR WEBSITE PROMISES IT.');
+    expect(short).toContain(copy.body);
+    expect(copy.kicker).toBe('BOOK THE AUDIT.');
+  });
+});
+
+describe('splitSentences', () => {
+  it('splits on sentence ends and lines without losing words', () => {
+    const parts = splitSentences('One thing. Another thing!\nThird line');
+    expect(parts).toEqual(['One thing.', 'Another thing!', 'Third line']);
   });
 });
