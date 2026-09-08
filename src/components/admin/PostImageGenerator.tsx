@@ -65,10 +65,35 @@ export const PostImageGenerator: React.FC<Props> = ({
     (defaultStyle as StyleKey) || (editablePrompt ? 'free' : 'case_file'),
   );
   const [aspect, setAspect] = useState<string>(defaultAspect || '1:1');
+  // Once the operator picks a ratio by hand it is never reset by a style click.
+  const aspectPinned = React.useRef(false);
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(prompt);
   const lastPrompt = React.useRef(prompt);
   const isDetective = style === AETHERIS_VINTAGE_DETECTIVE;
+
+  // Editable ad copy — seeded from the extracted brief, never mutating the post.
+  const [adCopy, setAdCopy] = useState({
+    headline: copyPack?.headline || '',
+    body: copyPack?.body || '',
+    kicker: copyPack?.kicker || '',
+  });
+  const copySig = `${copyPack?.headline || ''}|${copyPack?.body || ''}|${copyPack?.kicker || ''}`;
+  const lastCopySig = React.useRef(copySig);
+  React.useEffect(() => {
+    if (copySig !== lastCopySig.current) {
+      lastCopySig.current = copySig;
+      setAdCopy({
+        headline: copyPack?.headline || '',
+        body: copyPack?.body || '',
+        kicker: copyPack?.kicker || '',
+      });
+    }
+  }, [copySig, copyPack]);
+
+  const effectiveCopy = copyPack
+    ? { ...copyPack, headline: adCopy.headline, body: adCopy.body, kicker: adCopy.kicker }
+    : undefined;
 
   // Follow the parent when it switches preset (for example the post style picker).
   React.useEffect(() => {
