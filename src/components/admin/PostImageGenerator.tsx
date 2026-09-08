@@ -102,7 +102,7 @@ export const PostImageGenerator: React.FC<Props> = ({
   }, [defaultStyle]);
 
   React.useEffect(() => {
-    if (defaultAspect) setAspect(defaultAspect);
+    if (defaultAspect && !aspectPinned.current) setAspect(defaultAspect);
   }, [defaultAspect]);
 
   // Keep the editable prompt in sync when the parent supplies a fresh subject.
