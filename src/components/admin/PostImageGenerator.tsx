@@ -117,8 +117,9 @@ export const PostImageGenerator: React.FC<Props> = ({
     setStyle(key);
     setStylePickerOpen(false);
     const preset = getVisualStyle(key);
-    const nextAspect = preset ? preset.recommendedAspect : aspect;
-    if (preset) setAspect(nextAspect);
+    // A hand-picked ratio wins; only suggest the recommended one otherwise.
+    const nextAspect = preset && !aspectPinned.current ? preset.recommendedAspect : aspect;
+    if (nextAspect !== aspect) setAspect(nextAspect);
     onStyleChange?.(key, nextAspect);
   };
 
