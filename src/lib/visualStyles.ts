@@ -47,7 +47,7 @@ export function isVisualStyleId(id: unknown): id is string {
   return typeof id === 'string' && VISUAL_STYLE_PRESETS.some((s) => s.id === id);
 }
 
-export interface DetectiveAdCopy {
+export interface DetectiveAdCopy extends Record<string, string> {
   brand: string;
   headline: string;
   body: string;
