@@ -231,8 +231,38 @@ export const PostImageGenerator: React.FC<Props> = ({
           ))}
         </div>
       )}
+      {isDetective && copyPack && (
+        <div className="space-y-1 rounded-md border border-amber/25 bg-amber/5 p-2">
+          <div className="text-[10px] uppercase tracking-widest font-mono text-amber">
+            Ad copy on the image (edit before generating)
+          </div>
+          <input
+            value={adCopy.headline}
+            onChange={(e) => setAdCopy(c => ({ ...c, headline: e.target.value }))}
+            placeholder="Headline"
+            className="w-full h-7 rounded border border-border bg-background px-2 text-[11px]"
+          />
+          <Textarea
+            value={adCopy.body}
+            onChange={(e) => setAdCopy(c => ({ ...c, body: e.target.value }))}
+            rows={2}
+            placeholder="Short supporting explanation"
+            className="text-[11px] resize-none"
+          />
+          <input
+            value={adCopy.kicker}
+            onChange={(e) => setAdCopy(c => ({ ...c, kicker: e.target.value }))}
+            placeholder="Closing line (optional)"
+            className="w-full h-7 rounded border border-border bg-background px-2 text-[11px]"
+          />
+          <div className="text-[9px] text-muted-foreground font-mono">
+            Typeset exactly as written. Editing here never changes the post.
+          </div>
+        </div>
+      )}
     </div>
   );
+
 
 
   if (compact) {
