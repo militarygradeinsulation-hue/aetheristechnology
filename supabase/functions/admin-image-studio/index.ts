@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import {
+  AETHERIS_VINTAGE_DETECTIVE,
+  resolveAspect,
+  vintageDetectivePrompt,
+  VINTAGE_DETECTIVE_NEGATIVE,
+} from "../_shared/visual-style-presets.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,12 +103,23 @@ serve(async (req) => {
       const CARTOON_PROMPT = (subject: string) => `Editorial op-ed newspaper cartoon, hand-inked single-panel political-cartoon illustration in the style of a New Yorker / Wall Street Journal editorial cartoonist. Subject: ${subject}. Bold confident black pen-and-ink linework with slightly imperfect human-drawn contours, cross-hatching and stippling for all shading (absolutely no gradients, no airbrush), cream/off-white newsprint paper background with visible paper tooth, charcoal-black ink, one warm amber-gold spot color (#E8A33D) for emphasis, tiny sparing crimson (#C8102E) only for an alert or leak signal. Satirical, slightly exaggerated character proportions. Clear single visual metaphor, generous negative space, witty and sharp. Small amber monospace watermark "Aetheris AI Studio" in the bottom-right corner.`;
       const CARTOON_NEGATIVE = "3d render, photorealistic, photograph, cgi, pixar, disney, anime, manga, chibi, cute, glossy, neon, digital painting, airbrush, smooth gradients, plastic, blurry, watermark clutter, extra limbs, deformed hands, gibberish text, speech bubbles";
 
+      // Named visual style presets (shared with every other studio).
+      const stylePreset = typeof body.style_preset === "string" ? body.style_preset : "";
+      const isDetective = stylePreset === AETHERIS_VINTAGE_DETECTIVE;
+      const aspect = resolveAspect(body.aspect_ratio, isDetective ? "4:5" : "1:1");
+
       let finalPrompt = rawPrompt;
-      if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
+      if (isDetective) {
+        finalPrompt = vintageDetectivePrompt(rawPrompt, {
+          copy: body.copy && typeof body.copy === "object" ? body.copy as Record<string, string> : undefined,
+          aspect: aspect.ratioKey,
+        });
+      } else if (aetherisStyle) finalPrompt = `${AETHERIS_STYLE_SUFFIX} ${rawPrompt}`;
       else if (cartoon) finalPrompt = CARTOON_PROMPT(rawPrompt);
       if (action === "edit" && sourceImageUrl) {
         finalPrompt = `Edit the referenced image. ${finalPrompt}\n\nReference image URL: ${sourceImageUrl}`;
       }
+
 
       // Provider chain: cheapest-first (FLUX/Hugging Face -> Leonardo -> OpenAI).
       // An explicitly requested provider is tried first; the rest run as
@@ -131,9 +148,9 @@ serve(async (req) => {
             const out = await hf.generateImage({
               prompt: finalPrompt,
               apiKey: HF_TOKEN,
-              negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-              width: 1024,
-              height: 1024,
+              negativePrompt: isDetective ? VINTAGE_DETECTIVE_NEGATIVE : cartoon ? CARTOON_NEGATIVE : undefined,
+              width: aspect.width,
+              height: aspect.height,
             });
             gen = { ...out, generationId: null };
             providerUsed = out.provider;
@@ -145,9 +162,9 @@ serve(async (req) => {
               apiKey: LEONARDO_API_KEY,
               modelId: cartoon ? LEONARDO_ILLUSTRATION_MODEL_ID : model,
               presetStyle: cartoon ? "ILLUSTRATION" : undefined,
-              negativePrompt: cartoon ? CARTOON_NEGATIVE : undefined,
-              width: 1024,
-              height: 1024,
+              negativePrompt: isDetective ? VINTAGE_DETECTIVE_NEGATIVE : cartoon ? CARTOON_NEGATIVE : undefined,
+              width: aspect.width,
+              height: aspect.height,
             });
             providerUsed = "leonardo";
             modelLabel = `leonardo:${gen.modelId}`;
@@ -157,9 +174,10 @@ serve(async (req) => {
             const out = await oa.generateImage({
               prompt: finalPrompt,
               apiKey: OPENAI_API_KEY,
-              width: 1024,
-              height: 1024,
+              width: aspect.width,
+              height: aspect.height,
             });
+
             gen = { ...out, generationId: null };
             providerUsed = "openai";
             modelLabel = `openai:${out.modelId}`;
@@ -193,6 +211,9 @@ serve(async (req) => {
           ...(action === "edit" ? { source_image_url: sourceImageUrl } : {}),
           aetheris_style: aetherisStyle,
           cartoon_style: cartoon,
+          style_preset: stylePreset || null,
+          aspect_ratio: aspect.ratioKey,
+
         },
       }).select().single();
       if (insErr) throw insErr;
