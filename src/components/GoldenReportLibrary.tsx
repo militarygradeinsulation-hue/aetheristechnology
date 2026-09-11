@@ -58,16 +58,23 @@ function ValidityBadge({ valid, state }: { valid: boolean; state: string | null 
 
 /* ───────────────────────── blueprint panel ───────────────────────── */
 
+// Portal (rep / partner) sessions pass their portal token to every library
+// call; admin surfaces leave this null and the shared client falls back to the
+// admin PIN token. Backend scoping stays the source of truth.
+const LibraryTokenCtx = React.createContext<string | null>(null);
+const useLibraryToken = () => React.useContext(LibraryTokenCtx);
+
 const BlueprintPanel: React.FC<{ archive: ArchiveRow; blueprints: BlueprintRow[]; onRefresh: () => void }> = ({
   archive, blueprints, onRefresh,
 }) => {
   const [busy, setBusy] = useState(false);
+  const portalToken = useLibraryToken();
   const latest = blueprints[0] || null;
 
   const run = async (force: boolean) => {
     setBusy(true);
     try {
-      const res = await generateBlueprint(archive.scan_id, force);
+      const res = await generateBlueprint(archive.scan_id, force, portalToken);
       toast({
         title: res.reused ? 'Existing blueprint reused' : 'Blueprint generated',
         description: res.blueprint?.validation_passed ? 'Validation passed.' : 'Saved with validation notes — review before build.',
@@ -173,14 +180,14 @@ const BlueprintPanel: React.FC<{ archive: ArchiveRow; blueprints: BlueprintRow[]
               onClick={() => downloadTextFile(`${slug}-vibe-prompt.txt`, latest.master_prompt || '')}>
               <Download className="mr-1 h-3.5 w-3.5" /> Prompt .txt
             </Button>
-            {latest.approval_state !== 'approved' ? (
+            {!portalToken && (latest.approval_state !== 'approved' ? (
               <Button size="sm" variant="ghost" className="text-emerald-300" disabled={!latest.validation_passed}
                 onClick={() => approve('approved')}>
                 <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Approve for build
               </Button>
             ) : (
               <Button size="sm" variant="ghost" onClick={() => approve('draft')}>Revoke approval</Button>
-            )}
+            ))}
           </div>
 
           {latest.output_markdown && (
@@ -247,14 +254,15 @@ const CompanySystemPanel: React.FC<{ scanId: string; eligible: boolean }> = ({ s
 
 const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId, onBack }) => {
   const [loading, setLoading] = useState(true);
+  const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setData(await getReport(scanId)); }
+    try { setData(await getReport(scanId, portalToken)); }
     catch (e) { toast({ title: 'Failed to load report', description: (e as Error).message, variant: 'destructive' }); }
     finally { setLoading(false); }
-  }, [scanId]);
+  }, [scanId, portalToken]);
   useEffect(() => { load(); }, [load]);
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
@@ -298,7 +306,7 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
 
       <BlueprintPanel archive={archive} blueprints={blueprints} onRefresh={load} />
 
-      <CompanySystemPanel scanId={archive.scan_id} eligible={archive.is_valid} />
+      {!portalToken && <CompanySystemPanel scanId={archive.scan_id} eligible={archive.is_valid} />}
 
       <div className="rounded-xl border border-border bg-card/40 p-4">
         <h4 className="mb-3 flex items-center gap-2 font-display text-sm font-bold text-foreground">
@@ -335,17 +343,18 @@ const CompanyDetail: React.FC<{ companyId: string; onBack: () => void; onOpenRep
   companyId, onBack, onOpenReport,
 }) => {
   const [loading, setLoading] = useState(true);
+  const portalToken = useLibraryToken();
   const [data, setData] = useState<{ company: LibraryCompany; reports: ArchiveRow[]; blueprints: BlueprintRow[] } | null>(null);
 
   useEffect(() => {
     let live = true;
     setLoading(true);
-    getCompany(companyId)
+    getCompany(companyId, portalToken)
       .then(d => { if (live) setData(d); })
       .catch(e => toast({ title: 'Failed to load company', description: (e as Error).message, variant: 'destructive' }))
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [companyId]);
+  }, [companyId, portalToken]);
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
   if (!data) return <div className="p-6 text-sm text-muted-foreground">Company not found.</div>;
@@ -395,7 +404,12 @@ const CompanyDetail: React.FC<{ companyId: string; onBack: () => void; onOpenRep
 
 /* ───────────────────────── main library ───────────────────────── */
 
-export const GoldenReportLibrary: React.FC = () => {
+export interface GoldenReportLibraryProps {
+  /** Rep / partner portal session token. Omitted on admin surfaces. */
+  portalToken?: string | null;
+}
+
+export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portalToken = null }) => {
   const [items, setItems] = useState<LibraryCard[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -421,15 +435,15 @@ export const GoldenReportLibrary: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await listCompanies({ search: debounced, source, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT });
+      const res = await listCompanies({ search: debounced, source, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT }, portalToken);
       setItems(res.items); setTotal(res.total);
     } catch (e) {
       setError((e as Error).message);
     } finally { setLoading(false); }
-  }, [debounced, source, state, blueprint, sort, page]);
+  }, [debounced, source, state, blueprint, sort, page, portalToken]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { getLibraryStats().then(setStats).catch(() => {}); }, []);
+  useEffect(() => { if (!portalToken) getLibraryStats().then(setStats).catch(() => {}); }, [portalToken]);
 
   const runBackfill = async () => {
     setBackfilling(true);
@@ -476,10 +490,19 @@ export const GoldenReportLibrary: React.FC = () => {
 
   const pages = useMemo(() => Math.max(1, Math.ceil(total / LIMIT)), [total]);
 
-  if (scanId) return <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />;
-  if (companyId) return <CompanyDetail companyId={companyId} onBack={() => setCompanyId(null)} onOpenReport={setScanId} />;
+  if (scanId) return (
+    <LibraryTokenCtx.Provider value={portalToken}>
+      <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />
+    </LibraryTokenCtx.Provider>
+  );
+  if (companyId) return (
+    <LibraryTokenCtx.Provider value={portalToken}>
+      <CompanyDetail companyId={companyId} onBack={() => setCompanyId(null)} onOpenReport={setScanId} />
+    </LibraryTokenCtx.Provider>
+  );
 
   return (
+    <LibraryTokenCtx.Provider value={portalToken}>
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -487,21 +510,29 @@ export const GoldenReportLibrary: React.FC = () => {
             <Database className="h-5 w-5 text-amber" /> Golden Report Library
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stats ? `${stats.total_companies} businesses · ${stats.total_archived} of ${stats.total_scans} reports archived` : 'Loading index…'}
+            {portalToken
+              ? `${total} businesses in your reports`
+              : stats
+                ? `${stats.total_companies} businesses · ${stats.total_archived} of ${stats.total_scans} reports archived`
+                : 'Loading index…'}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`mr-1 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button size="sm" onClick={runBackfill} disabled={backfilling}>
-            {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
-            Archive historical reports
-          </Button>
-          <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
-            {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
-            Draft 5 company systems
-          </Button>
+          {!portalToken && (
+            <>
+              <Button size="sm" onClick={runBackfill} disabled={backfilling}>
+                {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
+                Archive historical reports
+              </Button>
+              <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
+                {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
+                Draft 5 company systems
+              </Button>
+            </>
+          )}
         </div>
       </div>
       {backfillMsg && <p className="font-mono text-[11px] text-amber">{backfillMsg}</p>}
@@ -581,6 +612,7 @@ export const GoldenReportLibrary: React.FC = () => {
         </>
       )}
     </div>
+    </LibraryTokenCtx.Provider>
   );
 };
 
