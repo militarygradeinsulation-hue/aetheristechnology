@@ -343,17 +343,18 @@ const CompanyDetail: React.FC<{ companyId: string; onBack: () => void; onOpenRep
   companyId, onBack, onOpenReport,
 }) => {
   const [loading, setLoading] = useState(true);
+  const portalToken = useLibraryToken();
   const [data, setData] = useState<{ company: LibraryCompany; reports: ArchiveRow[]; blueprints: BlueprintRow[] } | null>(null);
 
   useEffect(() => {
     let live = true;
     setLoading(true);
-    getCompany(companyId)
+    getCompany(companyId, portalToken)
       .then(d => { if (live) setData(d); })
       .catch(e => toast({ title: 'Failed to load company', description: (e as Error).message, variant: 'destructive' }))
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [companyId]);
+  }, [companyId, portalToken]);
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
   if (!data) return <div className="p-6 text-sm text-muted-foreground">Company not found.</div>;
