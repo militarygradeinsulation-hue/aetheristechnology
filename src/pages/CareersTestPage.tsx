@@ -11,14 +11,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Timer, CheckCircle2, XCircle, Copy, BookOpen, AlertTriangle, Lock, DollarSign } from 'lucide-react';
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
-import { getStripe, getStripeEnvironment } from '@/lib/stripe';
-import { useSearchParams } from 'react-router-dom';
+import { Loader2, Timer, CheckCircle2, XCircle, Copy, BookOpen, AlertTriangle } from 'lucide-react';
 
 type Choice = { id: string; text: string };
 type Question = { id: string; question: string; choices: Choice[] };
-type Phase = 'pay' | 'checkout' | 'verifying' | 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
+type Phase = 'intro' | 'identify' | 'apply' | 'in_test' | 'graded' | 'finalizing' | 'done';
 
 const STUDY_LINKS = [
   { href: '/', label: 'Home, positioning & hook' },
@@ -27,15 +24,10 @@ const STUDY_LINKS = [
   { href: '/careers', label: 'Careers (commission structure)' },
 ];
 
-const PAID_LS_KEY = 'aetheris_careers_test_paid';
-
 const CareersTestPage = () => {
   const [contactOpen, setContactOpen] = useState(false);
-  const [phase, setPhase] = useState<Phase>('pay');
-  const [paidEmail, setPaidEmail] = useState<string | null>(null);
-  const [paidSessionId, setPaidSessionId] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>('intro');
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
-  const [payerEmail, setPayerEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -47,72 +39,6 @@ const CareersTestPage = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [appNotes, setAppNotes] = useState('');
   const tickRef = useRef<number | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // On mount: check for prior paid state in localStorage, or a session_id in the URL (return from Stripe).
-  useEffect(() => {
-    const sessionFromUrl = searchParams.get('session_id');
-    if (sessionFromUrl) {
-      setPhase('verifying');
-      verifyPayment(sessionFromUrl);
-      return;
-    }
-    try {
-      const raw = localStorage.getItem(PAID_LS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { email?: string; ts?: number; session_id?: string };
-        // Treat as valid for 30 days
-        if (parsed?.ts && Date.now() - parsed.ts < 1000 * 60 * 60 * 24 * 30 && parsed?.session_id) {
-          setPaidEmail(parsed.email || null);
-          setPaidSessionId(parsed.session_id);
-          if (parsed.email) {
-            setForm(f => ({ ...f, email: parsed.email! }));
-          }
-          setPhase('intro');
-        }
-      }
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const verifyPayment = async (sessionId: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-careers-test-payment', {
-        body: { session_id: sessionId, environment: getStripeEnvironment() },
-      });
-      if (error) throw new Error(error.message);
-      if (!(data as any)?.paid) throw new Error('Payment not confirmed');
-      const email = (data as any).email as string | undefined;
-      localStorage.setItem(PAID_LS_KEY, JSON.stringify({ email, ts: Date.now(), session_id: sessionId }));
-      setPaidEmail(email || null);
-      setPaidSessionId(sessionId);
-      if (email) setForm(f => ({ ...f, email }));
-      // Clean session_id from URL
-      searchParams.delete('session_id');
-      setSearchParams(searchParams, { replace: true });
-      toast({ title: 'Payment confirmed', description: 'Your $40 test access is unlocked.' });
-      setPhase('intro');
-    } catch (e) {
-      toast({ title: 'Could not verify payment', description: e instanceof Error ? e.message : '', variant: 'destructive' });
-      setPhase('pay');
-    }
-  };
-
-  const fetchClientSecret = async (): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      body: {
-        priceId: 'careers_test_fee_v2',
-        customerEmail: payerEmail || undefined,
-        returnUrl: `${window.location.origin}/careers/test?session_id={CHECKOUT_SESSION_ID}`,
-        environment: getStripeEnvironment(),
-        metadata: { purpose: 'careers_test_fee' },
-      },
-    });
-    if (error || !(data as any)?.clientSecret) {
-      throw new Error(error?.message || 'Failed to create checkout session');
-    }
-    return (data as any).clientSecret;
-  };
 
   useEffect(() => {
     if (phase === 'in_test') {
@@ -142,11 +68,6 @@ const CareersTestPage = () => {
     if (!form.name.trim() || !form.email.trim()) {
       toast({ title: 'Name and email required', variant: 'destructive' }); return;
     }
-    if (!paidSessionId) {
-      toast({ title: 'Payment required', description: 'The $40 access fee is required to take the test.', variant: 'destructive' });
-      setPhase('pay');
-      return;
-    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('careers-test', {
@@ -155,8 +76,6 @@ const CareersTestPage = () => {
           name: form.name.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
-          payment_session_id: paidSessionId,
-          environment: getStripeEnvironment(),
         },
       });
       if (error) throw new Error(error.message);
@@ -230,98 +149,17 @@ const CareersTestPage = () => {
 
   return (
     <div className="relative min-h-screen">
-      <SEOHead title="Careers Test, Aetheris AI" description="Pay the $40 access fee and take the qualifying knowledge test for the Aetheris sales rep role." path="/careers/test" />
+      <SEOHead title="Careers Test, Aetheris AI" description="Take the free qualifying knowledge test for the Aetheris sales rep role." path="/careers/test" />
       <Background />
       <div className="relative z-10">
         <Navbar onContactClick={() => setContactOpen(true)} />
         <div className="pt-24 pb-32 px-4 max-w-3xl mx-auto">
 
-          {phase === 'pay' && (
-            <Card className="bg-card/60 backdrop-blur border-amber/40 forensic-tile">
-              <CardHeader>
-                <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-amber">
-                  <Lock className="w-3.5 h-3.5" /> Step 1 of 3 · Test Access Fee
-                </div>
-                <CardTitle className="font-display text-3xl mt-2">Pay $40 to unlock the test</CardTitle>
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  We get a lot of curious clicks. The $40 access fee filters out tire-kickers and confirms you're serious enough to read the site and take a real test.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-sm space-y-2">
-                  <div className="flex items-start gap-2">
-                    <DollarSign className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                    <span><strong className="text-foreground">Credited toward your 1099.</strong> If you're hired, the $40 is recorded as a business expense against your 1099 contractor income — your money, just routed through the test gate first.</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
-                    <span><strong className="text-foreground">Non-refundable.</strong> Pay it, take the test, give it your best shot. Pass or fail, the fee proves commitment.</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Email for receipt (we'll prefill your application with this)</Label>
-                  <Input
-                    type="email"
-                    value={payerEmail}
-                    onChange={e => setPayerEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    maxLength={255}
-                  />
-                </div>
-                <Button
-                  size="lg"
-                  className="w-full bg-amber text-background hover:bg-amber/90"
-                  onClick={() => {
-                    if (!payerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail.trim())) {
-                      toast({ title: 'Valid email required', variant: 'destructive' });
-                      return;
-                    }
-                    setPhase('checkout');
-                  }}
-                >
-                  Continue to payment — $40 →
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Secure checkout by Stripe. No exceptions, no comp codes.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {phase === 'checkout' && (
-            <div className="space-y-4">
-              <Card className="bg-card/60 backdrop-blur border-border/50">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-display text-lg">Careers Test Access — $40</p>
-                    <p className="text-xs text-muted-foreground">Paying as {payerEmail}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setPhase('pay')}>Change</Button>
-                </CardContent>
-              </Card>
-              <div id="checkout" className="rounded-xl overflow-hidden">
-                <EmbeddedCheckoutProvider stripe={getStripe()} options={{ fetchClientSecret }}>
-                  <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
-              </div>
-            </div>
-          )}
-
-          {phase === 'verifying' && (
-            <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardContent className="p-8 text-center space-y-3">
-                <Loader2 className="w-10 h-10 text-amber mx-auto animate-spin" />
-                <h2 className="font-display text-2xl">Confirming your payment…</h2>
-                <p className="text-sm text-muted-foreground">One moment while we unlock the test.</p>
-              </CardContent>
-            </Card>
-          )}
-
           {phase === 'intro' && (
             <Card className="bg-card/60 backdrop-blur border-border/50 forensic-tile">
               <CardHeader>
                 <div className="flex items-center gap-2 font-mono uppercase text-[10px] tracking-[0.3em] text-emerald-400">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Access fee paid · Step 2 of 3
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Free to take · Step 1 of 2
                 </div>
                 <CardTitle className="font-display text-3xl mt-2">Sales Rep Knowledge Test</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -351,7 +189,7 @@ const CareersTestPage = () => {
 
           {phase === 'identify' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">
-              <CardHeader><CardTitle className="font-display text-2xl">Step 2 of 3 — Who are you?</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="font-display text-2xl">Step 1 of 2 — Who are you?</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div><Label>Full name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} maxLength={100} /></div>
@@ -380,7 +218,7 @@ const CareersTestPage = () => {
           {phase === 'apply' && (
             <Card className="bg-card/60 backdrop-blur border-amber/40">
               <CardHeader>
-                <CardTitle className="font-display text-2xl">Step 3 of 3 — Submit your application</CardTitle>
+                <CardTitle className="font-display text-2xl">Step 2 of 2 — Submit your application</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
                   Upload your resume and write your 150-word pitch. Once you submit, the <strong>50-minute test</strong> unlocks.
                 </p>
@@ -479,7 +317,7 @@ const CareersTestPage = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>Score: <strong>{result.score_pct}%</strong> ({result.correct}/{result.total}). Pass mark: 80%.</p>
-                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it. (Your $40 access fee covers all retries.)</p>
+                <p className="text-sm text-muted-foreground">You can try again, up to 5 attempts per day. Re-read the site first; the questions test what's actually on it. </p>
                 <Button variant="outline" onClick={() => { setPhase('intro'); setResult(null); setAnswers({}); setNotes(''); }}>Go back to intro</Button>
               </CardContent>
             </Card>
