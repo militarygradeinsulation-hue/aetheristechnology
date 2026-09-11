@@ -93,6 +93,7 @@ const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
+const HomePage = lazy(() => import("./pages/Home"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
@@ -185,7 +186,7 @@ const App = () => (
 
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
-                      <Route path="/" element={<LeakLanderPage />} />
+                      <Route path="/" element={<HomePage />} />
                       <Route path="/book" element={<BookRedirect />} />
                       <Route path="/case-intake" element={<Navigate to="/book" replace />} />
                       <Route path="/booking" element={<Navigate to="/book" replace />} />
