@@ -404,7 +404,12 @@ const CompanyDetail: React.FC<{ companyId: string; onBack: () => void; onOpenRep
 
 /* ───────────────────────── main library ───────────────────────── */
 
-export const GoldenReportLibrary: React.FC = () => {
+export interface GoldenReportLibraryProps {
+  /** Rep / partner portal session token. Omitted on admin surfaces. */
+  portalToken?: string | null;
+}
+
+export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portalToken = null }) => {
   const [items, setItems] = useState<LibraryCard[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
