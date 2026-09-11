@@ -254,11 +254,12 @@ const CompanySystemPanel: React.FC<{ scanId: string; eligible: boolean }> = ({ s
 
 const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId, onBack }) => {
   const [loading, setLoading] = useState(true);
+  const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setData(await getReport(scanId)); }
+    try { setData(await getReport(scanId, portalToken)); }
     catch (e) { toast({ title: 'Failed to load report', description: (e as Error).message, variant: 'destructive' }); }
     finally { setLoading(false); }
   }, [scanId]);
