@@ -430,15 +430,15 @@ export const GoldenReportLibrary: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await listCompanies({ search: debounced, source, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT });
+      const res = await listCompanies({ search: debounced, source, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT }, portalToken);
       setItems(res.items); setTotal(res.total);
     } catch (e) {
       setError((e as Error).message);
     } finally { setLoading(false); }
-  }, [debounced, source, state, blueprint, sort, page]);
+  }, [debounced, source, state, blueprint, sort, page, portalToken]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { getLibraryStats().then(setStats).catch(() => {}); }, []);
+  useEffect(() => { if (!portalToken) getLibraryStats().then(setStats).catch(() => {}); }, [portalToken]);
 
   const runBackfill = async () => {
     setBackfilling(true);
