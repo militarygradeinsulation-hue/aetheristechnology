@@ -58,16 +58,23 @@ function ValidityBadge({ valid, state }: { valid: boolean; state: string | null 
 
 /* ───────────────────────── blueprint panel ───────────────────────── */
 
+// Portal (rep / partner) sessions pass their portal token to every library
+// call; admin surfaces leave this null and the shared client falls back to the
+// admin PIN token. Backend scoping stays the source of truth.
+const LibraryTokenCtx = React.createContext<string | null>(null);
+const useLibraryToken = () => React.useContext(LibraryTokenCtx);
+
 const BlueprintPanel: React.FC<{ archive: ArchiveRow; blueprints: BlueprintRow[]; onRefresh: () => void }> = ({
   archive, blueprints, onRefresh,
 }) => {
   const [busy, setBusy] = useState(false);
+  const portalToken = useLibraryToken();
   const latest = blueprints[0] || null;
 
   const run = async (force: boolean) => {
     setBusy(true);
     try {
-      const res = await generateBlueprint(archive.scan_id, force);
+      const res = await generateBlueprint(archive.scan_id, force, portalToken);
       toast({
         title: res.reused ? 'Existing blueprint reused' : 'Blueprint generated',
         description: res.blueprint?.validation_passed ? 'Validation passed.' : 'Saved with validation notes — review before build.',
