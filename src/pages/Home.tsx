@@ -63,7 +63,7 @@ const Home = () => {
       <SEOHead
         title="Chaos Theory Forensics Operator | Aetheris"
         description="We scan your company for its biggest weaknesses using tools that don't exist anywhere, then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it."
-        path="/home"
+        path="/"
         keywords="business forensics, revenue leak audit, True Cost Forensics, Indianapolis, operator"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         speakable={['h1']}
