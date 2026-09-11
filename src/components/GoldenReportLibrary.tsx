@@ -262,7 +262,7 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
     try { setData(await getReport(scanId, portalToken)); }
     catch (e) { toast({ title: 'Failed to load report', description: (e as Error).message, variant: 'destructive' }); }
     finally { setLoading(false); }
-  }, [scanId]);
+  }, [scanId, portalToken]);
   useEffect(() => { load(); }, [load]);
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
