@@ -13,10 +13,11 @@ import {
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { RepImageStudio } from '@/components/portal/RepImageStudio';
+import { GoldenReportLibrary } from '@/components/GoldenReportLibrary';
 import { RepCreationStudio } from '@/components/portal/RepCreationStudio';
 import { REP_PRODUCTS, TIER_RATES, fmtUsd, repCentsForProduct } from '@/lib/repProducts';
 import revenueForensicsBreakdown from '@/assets/revenue-forensics-breakdown.png';
-import { FileText, Search, LayoutGrid } from 'lucide-react';
+import { FileText, Search, LayoutGrid, Database } from 'lucide-react';
 import { LeadsBoard } from '@/components/portal/LeadsBoard';
 import { ForecastCenter } from '@/components/portal/ForecastCenter';
 import { PortalPlaybook } from '@/components/portal/PortalPlaybook';
@@ -111,7 +112,7 @@ import { DialerPanel } from '@/components/portal/DialerPanel';
 import { Phone as PhoneIcon } from 'lucide-react';
 
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas' | 'execdesk';
+type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas' | 'execdesk' | 'goldenlibrary';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -631,6 +632,7 @@ const PortalPage: React.FC = () => {
     { id: 'linkedin', label: 'Set Up LinkedIn', icon: <Linkedin className="w-4 h-4" />, iconCmp: Linkedin },
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen, adminOrPartnerOnly: true },
     { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket, adminOrPartnerOnly: true },
+    { id: 'goldenlibrary', label: 'Golden Report Library', icon: <Database className="w-4 h-4" />, iconCmp: Database },
     { id: 'execdesk', label: 'Executive Desk', icon: <ShieldCheck className="w-4 h-4" />, iconCmp: ShieldCheck },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
@@ -804,6 +806,7 @@ const PortalPage: React.FC = () => {
       case 'workspace': return <WorkspaceTab />;
       case 'ideas': return <IdeaRoom isAdmin={false} />;
       case 'execdesk': return <ExecutiveDesk />;
+      case 'goldenlibrary': return <GoldenReportLibrary portalToken={getPortalToken()} />;
       case 'sharedws': return <SharedWorkspace me="braden" />;
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
