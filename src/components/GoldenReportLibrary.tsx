@@ -490,10 +490,19 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
 
   const pages = useMemo(() => Math.max(1, Math.ceil(total / LIMIT)), [total]);
 
-  if (scanId) return <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />;
-  if (companyId) return <CompanyDetail companyId={companyId} onBack={() => setCompanyId(null)} onOpenReport={setScanId} />;
+  if (scanId) return (
+    <LibraryTokenCtx.Provider value={portalToken}>
+      <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />
+    </LibraryTokenCtx.Provider>
+  );
+  if (companyId) return (
+    <LibraryTokenCtx.Provider value={portalToken}>
+      <CompanyDetail companyId={companyId} onBack={() => setCompanyId(null)} onOpenReport={setScanId} />
+    </LibraryTokenCtx.Provider>
+  );
 
   return (
+    <LibraryTokenCtx.Provider value={portalToken}>
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
