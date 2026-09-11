@@ -183,6 +183,33 @@ const Home = () => {
 
           <PublicChaosScan />
 
+          {/* Careers */}
+          <section id="careers" className="px-4 pb-14 scroll-mt-24">
+            <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
+                Careers · Now hiring
+              </div>
+              <h2 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
+                Think you can sell this? <span className="text-amber">Prove it.</span>
+              </h2>
+              <p className="text-sm md:text-base text-foreground/80 mb-5 max-w-2xl">
+                Commission-first sales roles for operators who can read a room and close. Study the site, pass the knowledge test, send your resume. No fee, no gatekeepers.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to="/careers" className="w-full sm:w-auto">
+                  <Button className="bg-amber text-background hover:bg-amber/90 font-bold w-full">
+                    See the role <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+                <Link to="/careers/test" className="w-full sm:w-auto">
+                  <span className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-amber/40 px-4 py-2 text-sm text-amber hover:bg-amber/10 font-semibold">
+                    Take the qualifying test
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </section>
+
 
 
           <section id="book" className="relative px-4 pt-4 pb-16 scroll-mt-24">

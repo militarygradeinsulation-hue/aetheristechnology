@@ -468,21 +468,9 @@ serve(async (req) => {
       if (!email || !name) return json({ error: "Name and email required" }, 400);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email" }, 400);
 
-      // ---- REQUIRED: paid Stripe checkout session for the careers test fee ----
-      const paymentSessionId = String(body.payment_session_id || "").trim();
-      const rawEnv = String(body.environment || "sandbox");
-      const env: StripeEnv = rawEnv === "live" ? "live" : "sandbox";
-      if (!paymentSessionId) {
-        return json({ error: "Payment required. Please complete the $40 access fee to take the test." }, 402);
-      }
-      const pay = await verifyCareersPayment(paymentSessionId, env);
-      if (!pay.ok) {
-        return json({ error: pay.error || "Payment could not be verified." }, 402);
-      }
-      // Tie the payment to the candidate email — no sharing a paid session across accounts.
-      if (pay.email && pay.email !== email) {
-        return json({ error: `This payment was made by ${pay.email}. Use the same email to take the test.` }, 403);
-      }
+      // No access fee. The test is free to take.
+
+
 
       // Only count *submitted* attempts toward the daily limit so abandoned/lost
       // sessions and quick mis-clicks don't lock candidates out.
