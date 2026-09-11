@@ -180,14 +180,14 @@ const BlueprintPanel: React.FC<{ archive: ArchiveRow; blueprints: BlueprintRow[]
               onClick={() => downloadTextFile(`${slug}-vibe-prompt.txt`, latest.master_prompt || '')}>
               <Download className="mr-1 h-3.5 w-3.5" /> Prompt .txt
             </Button>
-            {latest.approval_state !== 'approved' ? (
+            {!portalToken && (latest.approval_state !== 'approved' ? (
               <Button size="sm" variant="ghost" className="text-emerald-300" disabled={!latest.validation_passed}
                 onClick={() => approve('approved')}>
                 <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Approve for build
               </Button>
             ) : (
               <Button size="sm" variant="ghost" onClick={() => approve('draft')}>Revoke approval</Button>
-            )}
+            ))}
           </div>
 
           {latest.output_markdown && (
