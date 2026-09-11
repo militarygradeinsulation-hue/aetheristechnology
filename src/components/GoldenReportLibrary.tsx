@@ -612,6 +612,7 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
         </>
       )}
     </div>
+    </LibraryTokenCtx.Provider>
   );
 };
 
