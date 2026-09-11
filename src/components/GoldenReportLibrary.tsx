@@ -510,21 +510,29 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
             <Database className="h-5 w-5 text-amber" /> Golden Report Library
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stats ? `${stats.total_companies} businesses · ${stats.total_archived} of ${stats.total_scans} reports archived` : 'Loading index…'}
+            {portalToken
+              ? `${total} businesses in your reports`
+              : stats
+                ? `${stats.total_companies} businesses · ${stats.total_archived} of ${stats.total_scans} reports archived`
+                : 'Loading index…'}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`mr-1 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button size="sm" onClick={runBackfill} disabled={backfilling}>
-            {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
-            Archive historical reports
-          </Button>
-          <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
-            {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
-            Draft 5 company systems
-          </Button>
+          {!portalToken && (
+            <>
+              <Button size="sm" onClick={runBackfill} disabled={backfilling}>
+                {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
+                Archive historical reports
+              </Button>
+              <Button size="sm" variant="outline" onClick={runSystemBatch} disabled={sysBatching}>
+                {sysBatching ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Network className="mr-1 h-4 w-4" />}
+                Draft 5 company systems
+              </Button>
+            </>
+          )}
         </div>
       </div>
       {backfillMsg && <p className="font-mono text-[11px] text-amber">{backfillMsg}</p>}
