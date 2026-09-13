@@ -24,20 +24,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogoTap = (e: React.MouseEvent) => {
-    // Always intercept: navigating on the 1st/2nd tap would remount the navbar
-    // and reset the counter, so the 3-tap staff shortcut could never fire.
-    e.preventDefault();
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
     if (tapCountRef.current >= 3) {
+      e.preventDefault();
       tapCountRef.current = 0;
       navigate('/staff');
       return;
     }
     tapTimerRef.current = setTimeout(() => {
       tapCountRef.current = 0;
-      navigate('/home');
-    }, 500);
+    }, 600);
   };
 
   useEffect(() => {
