@@ -511,11 +511,12 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
           </h2>
           <p className="text-xs text-muted-foreground">
             {portalToken
-              ? `${total} businesses in your reports`
+              ? `${total} businesses in the library`
               : stats
                 ? `${stats.total_companies} businesses · ${stats.total_archived} of ${stats.total_scans} reports archived`
                 : 'Loading index…'}
           </p>
+
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
