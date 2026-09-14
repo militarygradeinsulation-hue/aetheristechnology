@@ -189,27 +189,18 @@ serve(async (req) => {
 
     if (!isAdmin && !portal && !internal) return json({ error: "Unauthorized" }, 401);
 
-    // Tenant scope. Admin/internal are global. Every other portal role is
-    // pinned to explicit owner codes; an untieable token reads nothing.
+    // Read scope. Admin/internal are global. Valid rep and partner portal
+    // sessions also read the full library (shared company intelligence);
+    // write/maintenance actions below stay admin/internal only.
     const globalScope = isAdmin || internal;
     let scopeCodes: string[] | null = null; // null => global
     if (!globalScope) {
       if (!portal) return json({ error: "Unauthorized" }, 401);
-      if (portal.role === "rep") {
-        scopeCodes = [portal.code];
-      } else if (portal.role === "partner") {
-        const { data: self } = await sb.from("rep_codes").select("team_name").eq("code", portal.code).maybeSingle();
-        const team = (self as { team_name?: string | null } | null)?.team_name || null;
-        let codes = [portal.code];
-        if (team) {
-          const { data: mates } = await sb.from("rep_codes").select("code").eq("team_name", team);
-          codes = codes.concat(((mates || []) as Array<{ code: string }>).map((r) => r.code));
-        }
-        scopeCodes = [...new Set(codes)];
-      } else {
+      if (portal.role !== "rep" && portal.role !== "partner") {
         scopeCodes = [];
       }
     }
+
     const scoped = <T extends { in: (c: string, v: string[]) => T }>(q: T): T =>
       scopeCodes === null ? q : q.in("rep_code", scopeCodes.length ? scopeCodes : ["\u0000none"]);
 
