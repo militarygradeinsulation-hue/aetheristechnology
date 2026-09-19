@@ -277,6 +277,10 @@ const LeakLanderPage: React.FC = () => {
       <section id="case-studies" className="border-t border-border/60 py-20 px-6">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>// Case files</SectionLabel>
+          <p className="mb-8 max-w-3xl text-base text-muted-foreground">
+            We sign NDAs to keep our clients private and their data safe. But you can read their
+            stories and situations. We will give you the same courtesy when we partner with you.
+          </p>
           <RealCaseStudiesSection />
         </div>
       </section>
