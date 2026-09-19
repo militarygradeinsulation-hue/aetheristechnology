@@ -878,7 +878,7 @@ const AdminDashboard: React.FC = () => {
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
                 { name: 'Forensics & Tools', keys: ['systems', 'goldenlibrary', 'easymode', 'briefings', 'tools'] },
-                { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
+                { name: 'Internal', keys: ['team', 'workspace', 'portal', 'command'] },
               ];
               const visibleSet = new Set(visibleTabs);
               const categorized = new Set(CATEGORIES.flatMap(c => c.keys));
