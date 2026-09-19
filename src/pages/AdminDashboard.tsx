@@ -226,7 +226,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved) return saved as any;
@@ -279,9 +279,10 @@ const AdminDashboard: React.FC = () => {
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'ideas', label: 'Idea Room', icon: Lightbulb },
     { key: 'toolleads', label: 'Tool Leads', icon: Wrench },
+    { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -609,6 +610,36 @@ const AdminDashboard: React.FC = () => {
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'goldenlibrary': return <GoldenReportLibrary />;
+      case 'command': return (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
+                <Activity className="w-6 h-6 text-amber" /> Command Center
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">Aetheris Command — live operator console</p>
+            </div>
+            <a
+              href="https://aetheriscommand.lovable.app/command"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-amber px-4 py-2 text-sm font-semibold text-background hover:bg-amber/90"
+            >
+              Open in new tab
+            </a>
+          </div>
+          <div className="rounded-xl overflow-hidden border border-amber/30 bg-background/40">
+            <iframe
+              src="https://aetheriscommand.lovable.app/command"
+              title="Aetheris Command"
+              className="w-full h-[78vh] border-0"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            If the embedded view stays blank, that site blocks embedding — use “Open in new tab”.
+          </p>
+        </div>
+      );
       
       case 'library': return <ContentCalendar viewMode={libraryViewMode} onViewModeChange={setLibraryViewMode} />;
       case 'engine': return (
@@ -847,7 +878,7 @@ const AdminDashboard: React.FC = () => {
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
                 { name: 'Forensics & Tools', keys: ['systems', 'goldenlibrary', 'easymode', 'briefings', 'tools'] },
-                { name: 'Internal', keys: ['team', 'workspace', 'portal'] },
+                { name: 'Internal', keys: ['team', 'workspace', 'portal', 'command'] },
               ];
               const visibleSet = new Set(visibleTabs);
               const categorized = new Set(CATEGORIES.flatMap(c => c.keys));
