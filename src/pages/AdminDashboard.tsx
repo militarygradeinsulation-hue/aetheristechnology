@@ -279,6 +279,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'workspace', label: 'Workspace', icon: Handshake },
     { key: 'ideas', label: 'Idea Room', icon: Lightbulb },
     { key: 'toolleads', label: 'Tool Leads', icon: Wrench },
+    { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
   const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary']; // newly added tabs auto-show even if user has saved prefs
