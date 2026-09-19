@@ -94,6 +94,10 @@ const LeakLanderPage: React.FC = () => {
         }
         description="Experts in making companies visible AND making brand AI be as human as you are."
       >
+        <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
+          You&rsquo;re losing revenue. We find why and fix it.
+        </p>
+
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
             to="/golden-report"
