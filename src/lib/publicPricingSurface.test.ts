@@ -60,3 +60,33 @@ describe("public marketing surfaces carry no purchase paths", () => {
     expect(src).not.toMatch(/checkout/i);
   });
 });
+
+describe("methodology reader carries no legacy pricing framing", () => {
+  it("suggested questions and intro are value-first", () => {
+    const src = read("src/components/lander/MethodologyAI.tsx");
+    expect(src).not.toMatch(/What do I get for free\?/);
+    expect(src).not.toMatch(/the six levels/i);
+    expect(src).not.toMatch(/pricing/i);
+    for (const q of [
+      "Where could revenue be leaking?",
+      "How do you verify the cause?",
+      "What happens after a leak is found?",
+      "How does Aetheris earn the ongoing partnership?",
+    ]) {
+      expect(src).toContain(q);
+    }
+  });
+
+  it("methodology chat redacts legacy fees and forbids quoting prices", () => {
+    const src = read("supabase/functions/methodology-chat/index.ts");
+    expect(src).toMatch(/redactPricing\(METHODOLOGY_DOC\)/);
+    expect(src).toMatch(/COMMERCIAL POLICY/);
+    expect(src).not.toMatch(/Quote exact tier names and dollar figures/);
+  });
+
+  it("landing page does not link the legacy methodology PDF", () => {
+    const src = read("src/pages/LeakLanderPage.tsx");
+    expect(src).not.toMatch(/aetheris-methodology\.pdf/);
+    expect(src).not.toMatch(/methodologyPdf/);
+  });
+});
