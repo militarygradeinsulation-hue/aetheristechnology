@@ -369,14 +369,14 @@ const ResourcesPage = () => {
                   How to create your <span className="text-amber">Custom Playbook</span>
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  Every playbook above is free. Custom playbooks are built by our Strategic Business AI from one of 100+ topics, tailored to your business, and delivered as a 20+ page PDF. <span className="text-amber font-semibold">$29 each.</span>
+                  Every playbook above is free. Custom playbooks are built by our Strategic Business AI from one of 100+ topics, tailored to your business, and delivered as a 20+ page PDF.
                 </p>
                 <ol className="space-y-4 mb-6">
                   {[
                     { t: 'Browse or search topics', d: 'Use the topic library below. Filter by pillar (Operations, Marketing, Sales, Leadership, AI) or search by keyword to find the angle that matches the leak you want to seal.' },
                     { t: 'Open a topic card', d: 'You will see the pillar, the sub-topics covered, and exactly what the deliverable includes (proprietary frameworks, KPIs, ROI models, real case metrics).' },
                     { t: 'Sign in and click "Generate & Buy"', d: 'You need a free account so the playbook is saved to your library and can be re-downloaded later. Sign in or create one in 10 seconds.' },
-                    { t: 'Complete checkout. $29 one-time', d: 'Secure Stripe checkout. No subscription. The playbook generates immediately after payment, no waiting on a human.' },
+                    { t: 'Complete secure checkout', d: 'One-time payment, no subscription. The playbook generates immediately after payment, no waiting on a human.' },
                     { t: 'Download your PDF', d: 'You will be returned to a download page and the playbook lands in your library at /portal. Re-download anytime. Use it. Hand it to your team. Sell the rebuild internally.' },
                   ].map((step, i) => (
                     <li key={i} className="flex gap-4">
