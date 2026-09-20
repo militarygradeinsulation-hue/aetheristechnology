@@ -808,6 +808,36 @@ const PortalPage: React.FC = () => {
       case 'ideas': return <IdeaRoom isAdmin={false} />;
       case 'execdesk': return <ExecutiveDesk />;
       case 'goldenlibrary': return <GoldenReportLibrary portalToken={getPortalToken()} />;
+      case 'command': return (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
+                <Activity className="w-6 h-6 text-amber" /> Command Center
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">Aetheris Command — live operator console</p>
+            </div>
+            <a
+              href="https://aetheriscommand.lovable.app/command"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-amber px-4 py-2 text-sm font-semibold text-background hover:bg-amber/90"
+            >
+              Open in new tab
+            </a>
+          </div>
+          <div className="rounded-xl overflow-hidden border border-amber/30 bg-background/40">
+            <iframe
+              src="https://aetheriscommand.lovable.app/command"
+              title="Aetheris Command"
+              className="w-full h-[78vh] border-0"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            If the embedded view stays blank, that site blocks embedding — use “Open in new tab”.
+          </p>
+        </div>
+      );
       case 'sharedws': return <SharedWorkspace me="braden" />;
       case 'interviews': return <InterviewsPanel me="braden" />;
       case 'art': return <RepImageStudio />;
