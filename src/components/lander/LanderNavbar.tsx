@@ -5,9 +5,9 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { name: "Packages", to: "/#pricing" },
+  { name: "How We Work", to: "/services" },
   { name: "Case Studies", to: "/#case-studies" },
-  { name: "Leak Audit", to: "/#pricing" },
+  { name: "Leak Audit", to: "/leak-audit" },
   { name: "Golden Report", to: "/golden-report" },
   { name: "Partners", to: "/partners" },
 ];
