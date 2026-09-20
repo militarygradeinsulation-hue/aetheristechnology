@@ -166,7 +166,7 @@ export const BlogList: React.FC = () => {
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Our 21-Day Revenue Diagnostic tears apart your marketing, AI, and CRM
-            systems, and rebuilds them to actually generate revenue. Investment: $5,000-$10,000.
+            systems, and rebuilds them to actually generate revenue. Scope and terms are agreed together after the first conversation.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a

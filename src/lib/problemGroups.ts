@@ -87,7 +87,7 @@ export const problemGroups: ProblemGroup[] = [
     symptom: "Every consultant sells you a deck. Nobody puts a dollar number on anything, and nobody touches the work.",
     image: expertBurnCartoon.url,
     tools: [
-      { thumbnail: diagnosticThumb, title: '21-Day Revenue Diagnostic ($23,500 flat)', solves: 'Flat fee. Operator-led. A written leak ledger with a dollar amount on every wound — credit applies to any engagement.', path: '/leak-audit' },
+      { thumbnail: diagnosticThumb, title: 'Revenue Leak Audit', solves: 'Operator-led. A written leak ledger with a dollar amount on every wound, evidence you can check.', path: '/leak-audit' },
       { thumbnail: strategicQuestionsThumb, title: 'Strategic Question Engine', solves: "Asks the questions a real operator would, before you write another check to a 'strategist.'", path: '/strategic-questions' },
     ],
   },
@@ -115,7 +115,7 @@ export const problemGroups: ProblemGroup[] = [
     symptom: "The work isn't the problem anymore — the carrying it is. You can't remember the last Saturday you didn't check email.",
     image: burnoutCartoon.url,
     tools: [
-      { thumbnail: diagnosticThumb, title: '21-Day Revenue Diagnostic ($23,500 flat)', solves: 'Hand the audit to an operator. Get a written ledger back. Stop being the smartest person in your own room.', path: '/leak-audit' },
+      { thumbnail: diagnosticThumb, title: 'Revenue Leak Audit', solves: 'Hand the audit to an operator. Get a written ledger back. Stop being the smartest person in your own room.', path: '/leak-audit' },
       { thumbnail: frictionAuditThumb, title: 'Friction Vocabulary Audit', solves: 'Strips the words on your site that quietly invite tire-kickers into your inbox.', path: '/friction-audit' },
     ],
   },

@@ -19,6 +19,7 @@ import { Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ChaosScanReport } from '@/components/ChaosScanReport';
 import { scanResultToChaos } from '@/lib/toolChaosAdapters';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 interface Gap {
   category: string;
@@ -244,10 +245,11 @@ const RevenueBanner = ({ gaps }: { gaps: Gap[] }) => {
 
 const VISIBLE_GAPS = 2;
 
+// Paid report tiers still exist on the backend (portal/staff can unlock them),
+// but the public /scan page no longer displays prices or a self-serve buy flow.
 const tierCards = [
   {
     name: 'Full Report',
-    price: '$49',
     priceId: 'scan_full_report_once',
     tier: 'full_report',
     features: ['All gaps unlocked', 'Revenue leak estimates', 'Strategic roadmap', 'ROI projections', 'Competitive brief PDF'],
@@ -255,7 +257,6 @@ const tierCards = [
   },
   {
     name: 'Strategy Blueprint',
-    price: '$299',
     priceId: 'scan_strategy_blueprint_once',
     tier: 'strategy_blueprint',
     features: ['Everything in Full Report', 'CRM implementation plan', 'System blueprint', 'Content calendar', 'Fix-it action items + specs'],
@@ -520,41 +521,27 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                       We found {result.gaps.length - VISIBLE_GAPS} more issues. Unlock the full diagnostic with revenue estimates and a strategic roadmap.
                     </p>
 
-                    {/* Tier Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg mb-6">
-                      {tierCards.map((tier) => (
-                        <div
-                          key={tier.name}
-                          className={`rounded-xl border p-5 flex flex-col ${
-                            tier.highlight
-                              ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                              : 'border-border bg-card/80 backdrop-blur-sm'
-                          }`}
-                        >
-                          {tier.highlight && (
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Most Popular</span>
-                          )}
-                          <p className="text-lg font-bold text-foreground">{tier.name}</p>
-                          <p className="text-2xl font-bold text-foreground mt-1">{tier.price}</p>
-                          <ul className="mt-3 mb-4 space-y-1.5 flex-1">
-                            {tier.features.map((f, i) => (
-                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <CheckCircle className="w-3 h-3 text-primary mt-0.5 shrink-0" />
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                          <Button
-                            onClick={() => handleTierSelect(tier.priceId)}
-                            className={tier.highlight ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : ''}
-                            variant={tier.highlight ? 'default' : 'outline'}
-                            size="sm"
-                          >
-                            <ArrowRight className="w-4 h-4 mr-1" />
-                            Get {tier.name}
-                          </Button>
-                        </div>
-                      ))}
+                    {/* What's included once the findings are unlocked */}
+                    <div className="w-full max-w-lg mb-6 rounded-xl border border-border bg-card/80 backdrop-blur-sm p-5">
+                      <ul className="space-y-1.5">
+                        {['All gaps unlocked', 'Revenue leak estimates', 'Strategic roadmap', 'ROI projections', 'Competitive brief PDF'].map((f, i) => (
+                          <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                            <CheckCircle className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg mb-6">
+                      <Button onClick={onContactClick} size="lg" className="flex-1 gap-2">
+                        <ArrowRight className="w-4 h-4" /> Talk With Aetheris
+                      </Button>
+                      <Button asChild variant="outline" size="lg" className="flex-1 gap-2">
+                        <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                          Schedule a Working Session
+                        </a>
+                      </Button>
                     </div>
 
                     <p className="text-xs italic text-muted-foreground text-center max-w-sm">

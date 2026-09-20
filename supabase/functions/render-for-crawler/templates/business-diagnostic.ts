@@ -25,7 +25,7 @@ export async function renderBusinessDiagnostic(
     { question: "How long does the diagnostic take?", answer: "About 8–12 minutes. 20 questions across five categories: sales motion, lead handling, operations, fulfillment, and tooling." },
     { question: "What do I get at the end?", answer: "A scored report identifying which of the five leak categories are bleeding revenue, with category-level severity and recommended next steps. Optional PDF download." },
     { question: "Is the diagnostic free?", answer: "Yes — completely free, no login required. Email is optional and only used to send a copy of the report." },
-    { question: "Is this the same as the Forensic Diagnostic?", answer: "No. The free diagnostic is a self-administered scan that surfaces likely leak categories. The Forensic Diagnostic ($23,500 flat) is operator-led: 21 days of hands-on inspection, interviews, and a full leak ledger with dollar-quantified findings." },
+    { question: "Is this the same as the Forensic Diagnostic?", answer: "No. The free diagnostic is a self-administered scan that surfaces likely leak categories. The Forensic Diagnostic is operator-led: 21 days of hands-on inspection, interviews, and a full leak ledger with dollar-quantified findings. Terms are set after a conversation and a look at your data." },
     { question: "Who should take this?", answer: "Operators of $1M–$50M businesses who suspect revenue is leaking but can't name where. Especially useful if close rates are slipping, ops feel chaotic, or marketing spend isn't converting." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
@@ -49,8 +49,7 @@ export async function renderBusinessDiagnostic(
         name: "Aetheris Business Diagnostic",
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        url: `${SITE_URL}${path}`,
+                url: `${SITE_URL}${path}`,
       },
     ],
   });
@@ -86,7 +85,7 @@ export async function renderBusinessDiagnostic(
 
       <section>
         <h2>What this is NOT</h2>
-        <p>This is a directional self-scan, not a forensic engagement. If you want an operator inside your business naming leaks in dollars and closing them, that's the <strong>Forensic Diagnostic</strong> — $23,500 flat, 21 days, full leak ledger. Fee applies toward any subsequent engagement.</p>
+        <p>This is a directional self-scan, not a forensic engagement. If you want an operator inside your business naming leaks in dollars and closing them, that's the <strong>Forensic Diagnostic</strong> — 21 days, full leak ledger, terms set after a conversation and scope.</p>
       </section>
 
       ${renderFaqSection(faqs)}

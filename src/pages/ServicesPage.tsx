@@ -7,6 +7,14 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import {
+  CTA,
+  ENGAGEMENT_STAGES,
+  ENGAGEMENT_STAGES_HEADLINE,
+  ENGAGEMENT_STAGES_INTRO,
+  FOUNDER_TRUST,
+  EXPECTATION_NOTE,
+} from '@/lib/engagementModel';
 
 const ServicesPage: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
@@ -14,8 +22,8 @@ const ServicesPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Services, 21-Day Diagnostic + Active Case | Aetheris"
-        description="Two offers. The 21-Day Revenue Diagnostic (fixed fee) and the Active Case ($15K/mo, Diagnostic clients only) — the open forensic engagement that stays live until the leaks are sealed."
+        title="Services, Diagnostic + Active Case | Aetheris"
+        description="Two stages. The 21-Day Revenue Diagnostic and the Active Case, the continuing engagement that stays live until the leaks are sealed and the partnership is earned."
         path="/services"
         keywords="revenue diagnostic, active case engagement, manufacturing CRM forensics"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Services', path: '/services' }]}
@@ -27,22 +35,21 @@ const ServicesPage: React.FC = () => {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
-                Two offers. That's it.
+                Two stages. Earned, not sold.
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05]">
-                Diagnose, then implement.
+                Diagnose, then earn the right to fix it.
               </h1>
               <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-                We don't sell à la carte. You start with the Diagnostic. If you want us to fix what we find, we open an Active Case — your forensic engagement stays open until the leaks are sealed.
+                We don't sell à la carte. You start with the Diagnostic. If the findings are worth acting on, we open an Active Case — a continuing partnership whose terms we agree on openly once the value is clear.
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
               <div className="forensic-tile rounded-sm border border-amber/40 p-7 flex flex-col">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 1 · Sales-led</div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Stage 1 · Investigate</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">21-Day Revenue Diagnostic</h2>
-                <div className="font-forensic text-5xl font-bold text-foreground mt-4">Fixed fee</div>
-                <p className="text-xs text-muted-foreground mt-1">Fixed fee. One-time. Nothing else required to read the report.</p>
+                <p className="text-xs text-muted-foreground mt-4">A one-time, scoped engagement. Terms are agreed up front — nothing else required to read the report.</p>
                 <ul className="space-y-2 mt-5 text-sm text-foreground/85 flex-1">
                   {[
                     'Map every leak in CRM, sales follow-up, and lead flow',
@@ -55,19 +62,15 @@ const ServicesPage: React.FC = () => {
                 </ul>
                 <Link to="/diagnostic" className="mt-6">
                   <Button className="w-full bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
-                    Book my Diagnostic — fixed fee <ArrowRight className="w-4 h-4 ml-2" />
+                    {CTA.primary} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
-                <p className="text-[10px] text-center text-muted-foreground mt-2 font-mono uppercase tracking-widest">
-                  Findings guaranteed to exceed 3x the fee · or refunded
-                </p>
               </div>
 
               <div className="forensic-tile rounded-sm border border-border/60 p-7 flex flex-col">
-                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Step 2 · Diagnostic clients only</div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-1">Stage 2 · Earned Partnership</div>
                 <h2 className="font-forensic text-2xl font-bold text-foreground">Active Case</h2>
-                <div className="font-forensic text-5xl font-bold text-foreground mt-4">$20,000<span className="text-xl text-muted-foreground"> /mo</span></div>
-                <p className="text-xs text-muted-foreground mt-1">3-month minimum. Case stays open until leaks are sealed.</p>
+                <p className="text-xs text-muted-foreground mt-4">Opened only for Diagnostic clients, once the value is proven. Case stays open until leaks are sealed; economics are agreed openly at that point.</p>
                 <ul className="space-y-2 mt-5 text-sm text-foreground/85 flex-1">
                   {[
                     'We execute the prioritized fixes ourselves',
@@ -81,16 +84,37 @@ const ServicesPage: React.FC = () => {
                 </ul>
                 <Link to="/implementation" className="mt-6">
                   <Button variant="outline" className="w-full glass-hover border-amber/40 text-amber font-bold">
-                    Seal the leaks — see the case <ArrowRight className="w-4 h-4 ml-2" />
+                    {CTA.secondary} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
               </div>
             </div>
 
             <div className="mt-12 text-center forensic-tile rounded-sm border border-amber/30 p-6">
-              <p className="text-foreground font-semibold">Methodology goes to every prospect before pricing.</p>
+              <p className="text-foreground font-semibold">Methodology goes to every prospect before we discuss terms.</p>
               <Link to="/methodology" className="text-amber font-semibold hover:underline">Read it →</Link>
             </div>
+
+            <section className="mt-16 text-center">
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">How the relationship works</div>
+              <h2 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">{ENGAGEMENT_STAGES_HEADLINE}</h2>
+              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">{ENGAGEMENT_STAGES_INTRO}</p>
+              <div className="grid md:grid-cols-5 gap-4 mt-8 text-left">
+                {ENGAGEMENT_STAGES.map((stage) => (
+                  <div key={stage.n} className="forensic-tile rounded-sm border border-border/60 p-4">
+                    <div className="font-mono text-[10px] text-amber">{stage.n}</div>
+                    <div className="font-forensic font-bold text-foreground mt-1">{stage.title}</div>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{stage.line}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 md:p-8">
+              <p className="text-foreground/90 italic leading-relaxed">"{FOUNDER_TRUST.quote}"</p>
+              <p className="text-xs text-muted-foreground mt-3 font-mono uppercase tracking-widest">{FOUNDER_TRUST.attribution}</p>
+              <p className="text-xs text-muted-foreground mt-4">{EXPECTATION_NOTE}</p>
+            </section>
 
             {/* Referral bonuses */}
             <section className="mt-16">
@@ -108,57 +132,40 @@ const ServicesPage: React.FC = () => {
 
               <div className="grid md:grid-cols-3 gap-5">
                 <div className="forensic-tile rounded-sm border border-amber/40 p-6">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 1 · Diagnostic close</div>
-                  <div className="font-forensic text-4xl font-bold text-foreground">$2,000</div>
-                  <p className="text-xs text-muted-foreground mt-1">Per signed 21-Day Diagnostic (fixed fee)</p>
-                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
-                    Paid within 7 days of the diagnostic invoice clearing. One flat fee, every time, no scaling math.
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">When a Diagnostic closes</div>
+                  <p className="text-sm text-foreground/80 mt-2 leading-relaxed">
+                    A reward is paid once the Diagnostic is signed and underway. We settle the details in a direct conversation, not a rate card.
                   </p>
                 </div>
 
                 <div className="forensic-tile rounded-sm border border-amber/40 p-6">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 2 · Active Case override</div>
-                  <div className="font-forensic text-4xl font-bold text-foreground">$1,500<span className="text-lg text-muted-foreground"> /mo</span></div>
-                  <p className="text-xs text-muted-foreground mt-1">Every month the client's case stays open ($15K/mo)</p>
-                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
-                    Recurring override for the full life of the engagement. A single referral whose case stays open 12 months pays $18,000 on top of the Diagnostic bonus.
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">While an Active Case stays open</div>
+                  <p className="text-sm text-foreground/80 mt-2 leading-relaxed">
+                    Referrers whose introduction leads to an ongoing engagement continue to be recognized for as long as that case stays open.
                   </p>
                 </div>
 
                 <div className="forensic-tile rounded-sm border border-border/60 p-6">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Tier 3 · Warm intro bonus</div>
-                  <div className="font-forensic text-4xl font-bold text-foreground">$500</div>
-                  <p className="text-xs text-muted-foreground mt-1">Per qualified discovery call we book</p>
-                  <p className="text-sm text-foreground/80 mt-4 leading-relaxed">
-                    Paid the moment a referred prospect shows up to the 30-minute call, even if they don't ultimately sign. Stacks with Tier 1 and Tier 2.
+                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">For a qualified conversation</div>
+                  <p className="text-sm text-foreground/80 mt-2 leading-relaxed">
+                    Even if a referral doesn't sign, showing up to a real discovery call is worth something to us — and we say so directly, prospect by prospect.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 forensic-tile rounded-sm border border-border/60 p-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">The math on one good referral</div>
-                    <p className="text-sm text-foreground/85 leading-relaxed">
-                      Intro bonus + Diagnostic close + 6-month Active Case override =
-                      <span className="text-amber font-bold"> $11,500</span> from a single warm introduction. Twelve months with the case open pushes it past <span className="text-amber font-bold">$20,500</span>.
-                    </p>
-                  </div>
-                  <div>
-                    <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Who qualifies</div>
-                    <p className="text-sm text-foreground/85 leading-relaxed">
-                      US-based specialty manufacturer, $5M-$25M revenue, decision-maker on the call. We confirm fit on the discovery call before the bonus clock starts.
-                    </p>
-                  </div>
-                </div>
+                <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Who qualifies</div>
+                <p className="text-sm text-foreground/85 leading-relaxed">
+                  US-based specialty manufacturer, $5M-$25M revenue, decision-maker on the call. We confirm fit on the discovery call, then talk openly about what your introduction is worth.
+                </p>
               </div>
 
               <div className="mt-6 text-center">
                 <Button onClick={() => setContactOpen(true)} size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(217,169,58,0.35)]">
-                  Send us a warm intro — get $500 the day they show up <ArrowRight className="w-4 h-4 ml-2" />
+                  {CTA.talk} about a referral <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
-                  Reps and partners on the internal program follow the fixed-dollar split in the rep portal, this public bonus is for outside referrers.
+                  Reps and partners on the internal program follow the terms in the rep portal; this is for outside referrers.
                 </p>
               </div>
             </section>

@@ -58,7 +58,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Demonstrate",
     amountCents: 0,
     cadence: "free",
-    priceLabel: "$0",
+    priceLabel: "Free",
     timeline: "about 6 minutes · no call",
     headline:
       "We scan one page of your site live and show you one thing that is costing you money.",
@@ -80,8 +80,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Monitor",
     amountCents: 250000,
     cadence: "monthly",
-    priceLabel: "$2,500/mo",
-    timeline: "live in minutes · no activation fee · no minimum term",
+    priceLabel: "Monthly, agreed together",
+    timeline: "live in minutes · no minimum term",
     headline:
       "Your Golden Report stops being a document and becomes a living company operating workspace, rescanned and rewritten every month.",
     useCase:
@@ -105,7 +105,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     ],
     stripeLookupKey: "golden_report_intelligence_monthly",
     checkout: true,
-    ctaLabel: "Start for $2,500/mo",
+    ctaLabel: "Talk With Aetheris",
     ctaHref: "/golden-report-intelligence",
   },
   {
@@ -114,7 +114,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Diagnose",
     amountCents: 750000,
     cadence: "one-time",
-    priceLabel: "$7,500",
+    priceLabel: "Scoped in conversation",
     timeline: "about a week",
     headline:
       "Three instruments run together to name what is actually wrong. Any one alone gives you a symptom. Together they give you a diagnosis.",
@@ -128,7 +128,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
       "Written findings memo — a verdict you can hand to your team, not a checklist",
       "30-minute walkthrough with the operator who ran it",
     ],
-    credit: "Full $7,500 credits toward any higher tier",
+    credit: "Credits in full toward any later stage",
     ctaLabel: "Talk to an operator",
     ctaHref: "/book",
   },
@@ -138,7 +138,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Arm",
     amountCents: 1000000,
     cadence: "one-time",
-    priceLabel: "$10,000",
+    priceLabel: "Scoped in conversation",
     timeline: "about two weeks",
     headline:
       "Signal Pack tells you what is broken. Revenue Pack gives your team the words to fix it, built from your leaks and not from a template.",
@@ -161,7 +161,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Operate",
     amountCents: 1500000,
     cadence: "one-time",
-    priceLabel: "$15,000",
+    priceLabel: "Scoped in conversation",
     timeline: "about 3 weeks",
     headline:
       "You stop receiving reports and start running the instruments yourself. This is where you own the loop.",
@@ -187,7 +187,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Investigate",
     amountCents: 2350000,
     cadence: "one-time",
-    priceLabel: "$23,500",
+    priceLabel: "Scoped in conversation",
     timeline: "21 days · fit call required",
     headline:
       "Everything above analyzes your public surface. This is the only tier where an operator works inside your business, with your CRM, pipeline, and internal data connected. Estimated loss becomes measured loss.",
@@ -197,7 +197,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     inherits: "Everything in Operator Suite",
     adds: [
       "21 days of operator time inside your ops, sales, and marketing",
-      "The Golden Report, internally calibrated — the same case file you can subscribe to at $2,500/mo, except here the economics are validated against your CRM, pipeline, and internal numbers instead of public evidence and stated assumptions, and an operator signs off on the judgment",
+      "The Golden Report, internally calibrated — the same case file as the monthly workspace, except here the economics are validated against your CRM, pipeline, and internal numbers instead of public evidence and stated assumptions, and an operator signs off on the judgment",
       "Quantified leak ledger — a dollar figure next to every finding, ranked by exposure",
       "Account intelligence on your own pipeline — the forensic method pointed outward at your target accounts",
       "Automation readiness scoring — where AI actually pays, and where it is theater",
@@ -214,7 +214,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     verb: "Sustain",
     amountCents: 2000000,
     cadence: "monthly",
-    priceLabel: "$20,000/mo",
+    priceLabel: "Continuing partnership",
     timeline: "3-month minimum · requires a completed Diagnostic",
     headline:
       "We stop advising and start running it. Every month we show you what got recovered and what is left.",

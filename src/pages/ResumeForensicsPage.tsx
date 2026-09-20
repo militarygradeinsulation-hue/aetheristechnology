@@ -47,10 +47,12 @@ type Analysis = {
   recommendation?: string;
 };
 
+// Scan packs still exist for checkout/back-end purposes, but the public page
+// no longer displays prices as a purchase ladder.
 const PACKS = [
-  { id: 'resume_scan_1', label: '1 Scan', price: '$20', perScan: '$20/scan', credits: 1, highlight: false },
-  { id: 'resume_scan_5', label: '5-Pack', price: '$80', perScan: '$16/scan · save $20', credits: 5, highlight: true },
-  { id: 'resume_scan_10', label: '10-Pack', price: '$150', perScan: '$15/scan · save $50', credits: 10, highlight: false },
+  { id: 'resume_scan_1', label: '1 Scan', credits: 1, highlight: false },
+  { id: 'resume_scan_5', label: '5-Pack', credits: 5, highlight: true },
+  { id: 'resume_scan_10', label: '10-Pack', credits: 10, highlight: false },
 ];
 
 export default function ResumeForensicsPage() {
@@ -146,8 +148,8 @@ export default function ResumeForensicsPage() {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Resume Forensics, $20 AI Culture-Fit Scan | Aetheris"
-        description="Live AI tool. Paste any company URL, upload a resume, get a forensic culture-fit score in 90 seconds. $20 per scan. No account required."
+        title="Resume Forensics, AI Culture-Fit Scan | Aetheris"
+        description="Live AI tool. Paste any company URL, upload a resume, get a forensic culture-fit score in 90 seconds. No account required."
         path="/resume-forensics"
         keywords="resume analysis, AI culture fit, hiring tool, resume screener, candidate evaluation"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Resume Forensics', path: '/resume-forensics' }]}
@@ -167,7 +169,7 @@ export default function ResumeForensicsPage() {
                 Hire wrong, your business <span className="text-crimson">starts leaking</span>.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-                Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score. <span className="text-amber font-semibold">$20 per scan.</span>
+                Run any resume against any company in 90 seconds. Multi-page company scan, role-context analysis, blunt fit score.
               </p>
             </div>
 
@@ -214,8 +216,9 @@ export default function ResumeForensicsPage() {
                       </div>
                     )}
                     <div className="font-forensic text-xl font-bold mb-1">{p.label}</div>
-                    <div className="text-3xl font-bold text-amber mb-1">{p.price}</div>
-                    <div className="font-case text-xs text-muted-foreground mb-4">{p.perScan}</div>
+                    <div className="font-case text-xs text-muted-foreground mb-4">
+                      {p.credits} {p.credits === 1 ? 'scan' : 'scans'}
+                    </div>
                     <Button
                       onClick={() => {
                         if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -227,7 +230,7 @@ export default function ResumeForensicsPage() {
                       className="mt-auto"
                       variant={p.highlight ? 'default' : 'outline'}
                     >
-                      Buy {p.credits} {p.credits === 1 ? 'scan' : 'scans'}
+                      Get {p.credits} {p.credits === 1 ? 'scan' : 'scans'}
                     </Button>
                   </div>
                 ))}
@@ -426,7 +429,7 @@ export default function ResumeForensicsPage() {
                     Scan another resume
                   </Button>
                   <Button variant="outline" onClick={() => setCheckoutPriceId('resume_scan_5')}>
-                    Buy more scans
+                    Get more scans
                   </Button>
                 </div>
               </section>

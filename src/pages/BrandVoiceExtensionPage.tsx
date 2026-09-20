@@ -32,7 +32,7 @@ export default function BrandVoiceExtensionPage() {
       <SEOHead
         path="/brand-voice-extension"
         title="Brand Voice Chrome Extension — Post & Comment as Your Brand"
-        description="One-time $60. Scans your site, remembers your URL, colors, and tone, then drafts posts and comments as your brand on LinkedIn, X, Reddit, and any text field."
+        description="Scans your site, remembers your URL, colors, and tone, then drafts posts and comments as your brand on LinkedIn, X, Reddit, and any text field."
       />
       <main className="min-h-screen bg-background text-foreground py-16 md:py-20 px-4">
         <div className="max-w-4xl mx-auto space-y-14">
@@ -40,7 +40,7 @@ export default function BrandVoiceExtensionPage() {
           {/* Hero */}
           <header>
             <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-3">
-              § Chaos Ecosystem · Brand Voice Extension · $60 lifetime
+              § Chaos Ecosystem · Brand Voice Extension
             </div>
             <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.05]">
               Post and comment <span className="text-amber">as your brand</span>.<br/>
@@ -78,7 +78,7 @@ export default function BrandVoiceExtensionPage() {
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">Get your activation code</div>
-                <h2 className="font-forensic text-2xl font-bold">$60 · one-time · lifetime</h2>
+                <h2 className="font-forensic text-2xl font-bold">One-time setup, lifetime access</h2>
               </div>
               <div className="flex items-center gap-2 text-xs text-foreground/60">
                 <Sparkles className="w-3.5 h-3.5 text-amber" />
@@ -114,7 +114,7 @@ export default function BrandVoiceExtensionPage() {
                   onClick={() => setShowCheckout(true)}
                   className="sm:col-span-2 mt-2 rounded-sm bg-amber text-background font-mono uppercase tracking-widest text-xs py-3 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition"
                 >
-                  Buy — $60 lifetime
+                  Get My Activation Code
                 </button>
               </div>
             ) : (

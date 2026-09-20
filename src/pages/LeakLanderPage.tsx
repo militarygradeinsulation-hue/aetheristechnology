@@ -7,7 +7,16 @@ import { LanderNavbar } from "@/components/lander/LanderNavbar";
 import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
 import { CaseFilePreview } from "@/components/lander/CaseFilePreview";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
-import { TierLadder } from "@/components/TierLadder";
+import {
+  CORE_PROMISE,
+  HERO_SUPPORT,
+  CTA,
+  ENGAGEMENT_STAGES,
+  ENGAGEMENT_STAGES_HEADLINE,
+  ENGAGEMENT_STAGES_INTRO,
+  FOUNDER_TRUST,
+  EXPECTATION_NOTE,
+} from "@/lib/engagementModel";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
 import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
@@ -37,7 +46,7 @@ const STEPS = [
     t: "Recover and Scale",
     d: "We build the system and plan to recover the money and grow.",
     href: BOOK_MEETING_URL,
-    cta: "Book the operator",
+    cta: "Schedule a Working Session",
     external: true,
   },
 ];
@@ -94,8 +103,11 @@ const LeakLanderPage: React.FC = () => {
         }
         description="Experts in making companies visible AND making brand AI be as human as you are."
       >
-        <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
-          You&rsquo;re losing revenue. We find why and fix it.
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
+          {CORE_PROMISE}
+        </h1>
+        <p className="mt-3 max-w-2xl text-base text-muted-foreground leading-relaxed">
+          {HERO_SUPPORT}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
@@ -103,17 +115,18 @@ const LeakLanderPage: React.FC = () => {
             to="/golden-report"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
-            Start free scan <ArrowRight className="h-4 w-4" />
+            {CTA.primary} <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href={BOOK_MEETING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#how-it-works"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
           >
-            <Calendar className="h-4 w-4" /> Book 30 minutes
+            {CTA.secondary} <ArrowRight className="h-4 w-4" />
           </a>
         </div>
+        <p className="max-w-2xl pt-1 text-xs text-muted-foreground/80 leading-relaxed">
+          {EXPECTATION_NOTE}
+        </p>
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
@@ -285,11 +298,55 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="border-t border-border/60 py-20 px-6">
+      {/* How we work */}
+      <section id="how-we-work" className="border-t border-border/60 py-20 px-6">
         <div className="mx-auto max-w-6xl">
-          <SectionLabel>// Engagement ladder</SectionLabel>
-          <TierLadder />
+          <SectionLabel>// How we work</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
+            {ENGAGEMENT_STAGES_HEADLINE}
+          </h2>
+          <p className="mt-4 max-w-2xl text-muted-foreground leading-relaxed">
+            {ENGAGEMENT_STAGES_INTRO}
+          </p>
+
+          <div className="mt-10 grid gap-px bg-border/60 sm:grid-cols-2 lg:grid-cols-5 rounded-xl overflow-hidden border border-border/60">
+            {ENGAGEMENT_STAGES.map((s) => (
+              <div key={s.n} className="bg-background p-6 flex flex-col">
+                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/70">
+                  {s.n}
+                </span>
+                <h3 className="mt-3 text-lg font-bold">{s.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.line}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+            <blockquote className="border-l-2 border-amber/60 pl-5">
+              <p className="text-lg leading-relaxed text-foreground/90">
+                &ldquo;{FOUNDER_TRUST.quote}&rdquo;
+              </p>
+              <footer className="mt-4 font-case text-[10px] uppercase tracking-[0.28em] text-amber">
+                {FOUNDER_TRUST.attribution}
+              </footer>
+            </blockquote>
+
+            <div className="rounded-xl border border-border/60 p-6">
+              <p className="text-sm text-muted-foreground leading-relaxed">{FOUNDER_TRUST.short}</p>
+              <p className="mt-4 font-semibold text-foreground">{FOUNDER_TRUST.punch}</p>
+              <p className="mt-4 text-xs text-muted-foreground/80 leading-relaxed">
+                {EXPECTATION_NOTE}
+              </p>
+              <a
+                href={BOOK_MEETING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-amber/40 px-6 font-case text-[11px] font-bold uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
+              >
+                <Calendar className="h-4 w-4" /> {CTA.session}
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -298,7 +355,7 @@ const LeakLanderPage: React.FC = () => {
         <div className="mx-auto max-w-2xl text-center">
           <SectionLabel>// Case intake</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-            Book the operator directly.
+            Talk with Aetheris directly.
           </h2>
           <p className="mt-4 text-muted-foreground">
             30 minutes. No pitch deck. We look at your business and I tell you where the money is
@@ -310,7 +367,7 @@ const LeakLanderPage: React.FC = () => {
             rel="noopener noreferrer"
             className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
-            <Calendar className="h-4 w-4" /> aetheris.technology/book
+            <Calendar className="h-4 w-4" /> {CTA.session}
           </a>
         </div>
       </section>

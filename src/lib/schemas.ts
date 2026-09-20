@@ -92,8 +92,6 @@ export const serviceSchema = (
   name: string,
   description: string,
   options: {
-    price?: string;
-    priceCurrency?: string;
     serviceType?: string;
     areaServed?: string | string[];
   } = {}
@@ -107,14 +105,6 @@ export const serviceSchema = (
   areaServed: Array.isArray(options.areaServed)
     ? options.areaServed.map(a => ({ '@type': 'Place', name: a }))
     : { '@type': 'Country', name: options.areaServed || 'United States' },
-  ...(options.price && {
-    offers: {
-      '@type': 'Offer',
-      price: options.price,
-      priceCurrency: options.priceCurrency || 'USD',
-      availability: 'https://schema.org/InStock',
-    },
-  }),
 });
 
 export interface ArticleData {
@@ -178,11 +168,6 @@ export const softwareAppSchema = (
   url: `${SITE_URL}${url}`,
   applicationCategory: category,
   operatingSystem: 'Web',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
 });
 
 // Combine multiple schemas into a single @graph

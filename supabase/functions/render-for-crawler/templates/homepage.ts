@@ -18,14 +18,14 @@ export async function renderHomepage(
   const override = await fetchSeoOverride(supabaseUrl, serviceRoleKey, path);
 
   const title = override?.title || "Business is chaos. Chaos always has cause. | Aetheris — Chaos Theory Forensics";
-  const description = override?.description || "Aetheris practices Chaos Theory Forensics. We fix any problem in any department or team, lift ROI and close losses by 30% on average — or it costs you nothing. Guaranteed. Indianapolis-based.";
-  const keywords = override?.keywords || "chaos theory forensics, business forensics, fix any business problem, 30% ROI lift consulting, no cost guarantee consulting, revenue leak audit, operational diagnostics Indianapolis, business autopsy, department fix";
+  const description = override?.description || "Aetheris practices Chaos Theory Forensics. We investigate why you're losing revenue, prove the cause with evidence, and fix the highest-value problem first. Indianapolis-based.";
+  const keywords = override?.keywords || "chaos theory forensics, business forensics, fix any business problem, revenue leak audit, operational diagnostics Indianapolis, business autopsy, department fix";
 
   const defaultFaqs = [
     { question: "What is Chaos Theory Forensics?", answer: "Chaos Theory Forensics is Aetheris's practice: business is chaos, and chaos always has a cause. We investigate established businesses, trace the damage back to where it begins, and remove it at the source — not the symptom." },
     { question: "What kinds of problems can Aetheris fix?", answer: "Any problem in any department or team — sales, marketing, operations, fulfillment, follow-up, hiring, tooling, cash flow. If there's a business unit bleeding money, time, or trust, we find the cause and remove it." },
-    { question: "What results do clients see?", answer: "Our fix automatically lifts ROI and closes losses by 30% on average. One short conversation is often enough to identify massive changes waiting to happen inside your business." },
-    { question: "What is the guarantee?", answer: "If we can't find or fix a problem, there is NO COST — guaranteed. You only pay when we've located the cause and removed it." },
+    { question: "What results do clients see?", answer: "Every fix is tied to a proven leak and measured against the baseline we captured before touching anything. One short conversation is often enough to surface where the biggest changes are waiting inside your business." },
+    { question: "What happens if you don't find a leak worth fixing?", answer: "We tell you plainly and you keep the findings. We do not promise a result before we've investigated, and terms for any further work are only discussed once the cause is proven." },
     { question: "How do I get started?", answer: "Book one small conversation. Call (317) 376-2110, email aetheris.technology@outlook.com, or start the free self-scan at aetheris.technology/leak-audit." },
   ];
   const faqs = override?.faqs?.length ? override.faqs : defaultFaqs;
@@ -59,7 +59,7 @@ export async function renderHomepage(
     <main>
       <header>
         <h1>Business is chaos. Chaos always has cause.</h1>
-        <p class="tldr"><strong>TL;DR:</strong> One small conversation with Aetheris could unlock massive changes in your business. We practice Chaos Theory Forensics: we investigate established businesses, trace the damage back to where it begins, and remove it at the source. We fix any problem in any department or team — and our fix automatically lifts ROI and closes losses by 30% on average. If we can't find or fix a problem, there is NO COST. Guaranteed.</p>
+        <p class="tldr"><strong>TL;DR:</strong> You're losing revenue. We find why — and fix it. We practice Chaos Theory Forensics: we investigate established businesses, trace the damage back to where it begins, prove the cause with evidence, and fix the highest-value problem first. Only after that do we agree on what a continuing partnership looks like, and what's fair.</p>
       </header>
 
       <section>
@@ -85,8 +85,8 @@ export async function renderHomepage(
         <h2>How operators engage</h2>
         <ul>
           <li><strong>Free Self-Scan</strong> — Run The Leak Audit on your own business in ~10 minutes. <a href="${SITE_URL}/leak-audit">Start at /leak-audit</a>.</li>
-          <li><strong>Forensic Diagnostic — $23,500 flat</strong> — Operator-led 14-day deep audit. Full leak ledger delivered. Fee applies toward any engagement.</li>
-          <li><strong>Engagement</strong> — We close the leaks. Scoped per engagement, no ongoing-billing roulette.</li>
+          <li><strong>Forensic Diagnostic</strong> — Operator-led 14-day deep audit. Full leak ledger delivered. Terms are set after a conversation and scope, not off a rate card.</li>
+          <li><strong>Engagement</strong> — We close the leaks. Scoped per engagement, no ongoing-billing roulette. A continuing partnership is only discussed once the cause is proven and the highest-value fix is underway.</li>
         </ul>
       </section>
 

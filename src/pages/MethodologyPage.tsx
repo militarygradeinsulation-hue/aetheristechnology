@@ -45,9 +45,9 @@ const SECTION_IMAGES: Record<number, { image: string; alt: string; summary: stri
   },
   5: {
     image: INFOGRAPHICS.methodologyDeliverables,
-    alt: 'Stack of forensic deliverables: a 24-page leak map report, a CSV source data appendix, a fixed-fee quote',
-    summary: 'Written report (15-30 pages), source-data appendix, 60-minute readout, and a fixed-fee quote for implementation. Fixed fee, 21 calendar days, CRM-agnostic.',
-    humanWhy: "At the end of 21 days you don't get a slide deck and a hug. You get a sealed report you can hand to anyone, a number to act on, and a fixed quote if you want me to fix it. No mystery invoices. No 'let's chat about phase two.'",
+    alt: 'Stack of forensic deliverables: a 24-page leak map report, a CSV source data appendix, a scoped proposal',
+    summary: 'Written report (15-30 pages), source-data appendix, 60-minute readout, and a scoped proposal for implementation. 21 calendar days, CRM-agnostic.',
+    humanWhy: "At the end of 21 days you don't get a slide deck and a hug. You get a sealed report you can hand to anyone, a number to act on, and clear terms if you want me to fix it. No mystery invoices. No 'let's chat about phase two.'",
   },
 };
 
@@ -96,8 +96,8 @@ const SECTIONS = [
       '• Written report (15-30 pages): leak map, prioritized fixes, ROI projections, implementation roadmap.',
       '• Source-data appendix: every CSV and query used.',
       '• 60-minute readout call with you and up to two of your team.',
-      '• A fixed-fee quote for implementation if you choose to proceed.',
-      'Fixed fee, quoted up front. Timeline: 21 calendar days from kickoff. CRM-agnostic.',
+      '• A scoped proposal for next steps if you choose to proceed.',
+      'Terms agreed up front. Timeline: 21 calendar days from kickoff. CRM-agnostic.',
     ],
   },
 ];
@@ -108,7 +108,7 @@ const MethodologyPage: React.FC = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Revenue Diagnostic Methodology, Aetheris"
-        description="How Aetheris defines, measures, and attributes revenue leaks for specialty manufacturers. Sent to every prospect before pricing."
+        description="How Aetheris defines, measures, and attributes revenue leaks for specialty manufacturers. Sent to every prospect before any conversation about terms."
         path="/methodology"
         keywords="revenue diagnostic methodology, manufacturing revenue audit, CRM data audit, sales attribution"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Methodology', path: '/methodology' }]}
@@ -196,7 +196,7 @@ const MethodologyPage: React.FC = () => {
 
             <div className="mt-12 forensic-tile rounded-sm border border-amber/30 p-6 text-center">
               <p className="text-foreground font-semibold">Ready to see this run on your numbers?</p>
-              <p className="text-sm text-muted-foreground mt-1">21 days. fixed fee. Specialty manufacturers, $5M-$25M.</p>
+              <p className="text-sm text-muted-foreground mt-1">21 days, terms agreed up front. Specialty manufacturers, $5M-$25M.</p>
               <a
                 href="/book"
                 target="_blank"
