@@ -5,11 +5,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Lock, Copy, Check, Brain, AlertTriangle, Users, TrendingUp, Briefcase, Target, DollarSign, Heart, Rocket, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 const PHASES = [
   { label: 'Analyzing your business profile...', target: 20 },
@@ -39,7 +39,6 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
   const [unlocked, setUnlocked] = useState(adminMode);
-  const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const togglePressure = (area: string) => {
@@ -215,23 +214,13 @@ export const StrategicQuestionEngine: React.FC<{ adminMode?: boolean }> = ({ adm
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Question Map</h3>
               <p className="text-muted-foreground mb-4">Get all 8 categories, urgency rankings, "Questions You're Probably Not Asking," leadership discussion prompts, and workshop templates.</p>
-              <p className="text-3xl font-bold text-amber mb-4">$79</p>
-              <Button onClick={() => setShowCheckout(true)} className="bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Unlock Now</Button>
+              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="inline-block rounded-md bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Talk With Aetheris</a>
             </div>
           )}
         </div>
       )}
 
       {/* Checkout Modal */}
-      {showCheckout && !adminMode && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
-            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>
-            <h3 className="text-xl font-bold mb-4">Complete Purchase</h3>
-            <StripeEmbeddedCheckout priceId="strategic_question_engine_once" returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=tool_purchase`} metadata={{ tool_type: 'strategic_questions' }} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
