@@ -20,7 +20,7 @@ const TERMS: Term[] = [
   { slug: 'revenue-score', term: 'Revenue Score', definition: 'A 0-100 forensic grade summarizing the leak state of a business. Issued only by Aetheris. The public standard for the category.' },
   { slug: 'leak-register', term: 'Leak Register', definition: 'The living, versioned forensic document that tracks every named leak, the evidence behind it, the fix deployed, and revenue recovered.' },
   { slug: 'case-file', term: 'Case File', definition: 'The written record of an open or closed engagement. Includes Revenue Score history, Leak Register, fix actions, and recovery measurements.' },
-  { slug: 'active-case', term: 'Active Case', definition: 'An open forensic engagement after the Diagnostic where Aetheris executes prioritized fixes. $20,000/month, three-month minimum, Diagnostic clients only. Cases get opened and closed — never "retainers."' },
+  { slug: 'active-case', term: 'Active Case', definition: 'An open forensic engagement after the Diagnostic where Aetheris executes prioritized fixes. Diagnostic clients only, with scope and terms agreed together before work begins. Cases get opened and closed — never "retainers."' },
   { slug: 'live-dom-scanner', term: 'Live DOM Scanner', definition: 'The proprietary browser-based scanner that reads the rendered version of a business — including JavaScript-loaded content — to detect leaks in real time.' },
   { slug: 'competitor-teardown', term: 'Competitor Teardown', definition: 'Pointing the Live DOM Scanner at a rival URL to surface their Revenue Score and named leaks. One of the five structural moats.' },
   { slug: 'industry-leak-report', term: 'Industry Leak Report', definition: 'Aetheris\'s annual proprietary research aggregating anonymized scan data by industry. The citation magnet for the category.' },
@@ -30,7 +30,7 @@ const TERMS: Term[] = [
   { slug: 'leak-categories', term: 'Leak Categories', definition: 'The seven forensic categories every leak falls into: Lead Capture, Tracking, Trust, Follow-Up, Performance, Messaging, Systems.' },
   { slug: 'severity', term: 'Severity (1-5)', definition: 'A per-leak rating calculated from impact × frequency × evidence confidence. Severity 5 is critical (named, frequent, certain). Severity 1 is observable but low-impact.' },
   { slug: 'dollarize', term: 'Dollarize', definition: 'The forensic act of attaching a specific dollar impact to a leak using a visible calculation method. Distinguishes Chaos Theory Forensics from opinion-based audits.' },
-  { slug: 'fix-path', term: 'Fix Path', definition: 'The specific remediation mapped to a leak — either a one-time tool from the marketplace ($39+) or an operator-led work track inside an Active Case.' },
+  { slug: 'fix-path', term: 'Fix Path', definition: 'The specific remediation mapped to a leak — either a self-serve tool run or an operator-led work track inside an Active Case.' },
   { slug: 'operator', term: 'Operator', definition: 'The product. Aetheris does not sell tools individually on the public site — the operator (Joseph Toney) is the engagement. Tools are the by-product.' },
 ];
 
