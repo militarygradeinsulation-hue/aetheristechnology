@@ -9,7 +9,7 @@ import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
@@ -332,7 +332,7 @@ const LeakAuditPage = () => {
           Pick the depth. Each rung includes everything below it.
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-          Instruments are never sold separately. Start free, then talk to an operator about the right tier.
+          There is no cart to fill. Start free, then talk to an operator about the right depth for your case.
         </p>
       </div>
 
@@ -348,24 +348,16 @@ const LeakAuditPage = () => {
                   : 'border-border/60'
             }`}
           >
-            {/* Price block */}
+            {/* Depth block (no public pricing — scope is agreed in conversation) */}
             <div className="col-span-12 md:col-span-2 flex md:flex-col md:items-start items-baseline gap-2 md:gap-0.5 md:border-r md:border-border/40 md:pr-3">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                <div className={`font-forensic text-lg font-bold leading-none ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
                   {tier.name}
                 </div>
                 {tier.badge && (
                   <span className={`font-case text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
                     {tier.badge}
                   </span>
-                )}
-              </div>
-              <div className="flex items-baseline gap-1">
-                <div className={`font-forensic text-2xl font-bold leading-none ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
-                  {tier.price}
-                </div>
-                {tier.cadence.startsWith('/month') && (
-                  <span className="text-[10px] text-muted-foreground">/mo</span>
                 )}
               </div>
               <div className="font-case text-[9px] uppercase tracking-wider text-muted-foreground">
@@ -409,7 +401,7 @@ const LeakAuditPage = () => {
                   variant={tier.highlight ? 'default' : 'outline'}
                 >
                   <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                    <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+                    <ArrowRight className="w-3.5 h-3.5 mr-1.5" />
                     {tier.cta}
                   </a>
                 </Button>
@@ -422,7 +414,7 @@ const LeakAuditPage = () => {
 
 
       <p className="text-center text-xs text-muted-foreground italic pt-2">
-        Every paid tier credits toward the next. The 21-Day Diagnostic is the gate to the $20K/mo Active Case Retainer.
+        Every engagement credits toward the next. The 21-Day Diagnostic is the gate to the Active Case Retainer.
       </p>
 
     </div>
@@ -759,7 +751,7 @@ const LeakAuditPage = () => {
                     Next Step
                   </div>
                   <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Signal Pack — $7,500
+                    The Signal Pack
                   </h3>
                   <p className="text-muted-foreground max-w-xl mx-auto">
                     The Leak Audit was self-reported. The Signal Pack is the operator-led diagnosis:

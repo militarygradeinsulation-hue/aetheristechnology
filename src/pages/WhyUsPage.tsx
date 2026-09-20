@@ -13,9 +13,9 @@ const WhyUsPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="Why Aetheris. Chaos Theory Forensics, Not Consulting"
-        description="Why owner-led businesses choose Aetheris over traditional consultants: forensic proof over strategy decks, fixed fees, fixed-fee 21-Day Revenue Diagnostic credited toward the Retainer."
+        description="Why owner-led businesses choose Aetheris over traditional consultants: forensic proof over strategy decks, and a partnership that has to earn the right to continue."
         path="/why-us"
-        keywords="why aetheris, business forensics vs consulting, revenue leak audit Indianapolis, operator-led diagnostic, fixed-fee consulting"
+        keywords="why aetheris, business forensics vs consulting, revenue leak audit Indianapolis, operator-led diagnostic"
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Why Us', path: '/why-us' },

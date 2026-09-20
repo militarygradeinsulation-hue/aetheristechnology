@@ -33,7 +33,7 @@ const LOCATIONS: Record<LocationKey, LocationConfig> = {
     fullName: 'Indianapolis, Indiana',
     metaTitle: 'Chaos Theory Forensics in Indianapolis | Aetheris',
     metaDescription:
-      'Indianapolis Chaos Theory Forensics Operator. Find revenue leaks in your Indianapolis business. Free Leak Audit, fixed-fee 21-Day Revenue Diagnostic, fixed-fee 21-Day Revenue Diagnostic.',
+      'Indianapolis Chaos Theory Forensics Operator. Find revenue leaks in your Indianapolis business. Free Leak Audit and 21-Day Revenue Diagnostic.',
     h1: 'Chaos Theory Forensics in Indianapolis',
     intro:
       'Aetheris is an Indianapolis-based Chaos Theory Forensics Operator. We expose revenue leaks Indianapolis owners can\'t see from the inside. broken systems, dropped follow-ups, vocabulary friction, brand contradictions. then rebuild the broken systems causing them.',
@@ -75,7 +75,6 @@ const LocationPage: React.FC = () => {
         url: pageUrl,
         telephone: '+1-317-376-2110',
         email: 'aetheris.technology@outlook.com',
-        priceRange: '$0 - $25,000+',
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Downtown Indianapolis',
@@ -157,7 +156,7 @@ const LocationPage: React.FC = () => {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/diagnostic">Book the fixed-fee 21-Day Revenue Diagnostic</Link>
+                <Link to="/diagnostic">Book the 21-Day Revenue Diagnostic</Link>
               </Button>
             </div>
 
@@ -166,10 +165,10 @@ const LocationPage: React.FC = () => {
                 What an Aetheris engagement looks like in {config.geoName}
               </h2>
               <ol className="space-y-3 text-foreground/85 leading-relaxed">
-                <li><strong className="text-amber">1. Free Leak Audit ($0).</strong> 14-question self-scan. PDF case file with an estimated annual leak in dollars.</li>
-                <li><strong className="text-amber">2. 21-Day Revenue Diagnostic (fixed-fee).</strong> Operator-led walk-through with Joseph Toney. Flagged leak list, prioritization, rebuild order. Fee applied 1:1 toward any engagement.</li>
-                <li><strong className="text-amber">3. 21-Day Revenue Diagnostic (fixed-fee).</strong> Full forensic breakdown of workflow inefficiencies, disconnected systems, and automation opportunities. Guaranteed.</li>
-                <li><strong className="text-amber">4. Active Case ($15K/mo).</strong> 3-month minimum. The forensic case stays open while we execute the prioritized fixes. Available only to Diagnostic clients.</li>
+                <li><strong className="text-amber">1. Free Leak Audit.</strong> 14-question self-scan. PDF case file with an estimated annual leak in dollars.</li>
+                <li><strong className="text-amber">2. 21-Day Revenue Diagnostic.</strong> Operator-led walk-through with Joseph Toney. Flagged leak list, prioritization, rebuild order.</li>
+                <li><strong className="text-amber">3. 21-Day Revenue Diagnostic.</strong> Full forensic breakdown of workflow inefficiencies, disconnected systems, and automation opportunities.</li>
+                <li><strong className="text-amber">4. Active Case.</strong> The forensic case stays open while we execute the prioritized fixes. Available only to Diagnostic clients, once the value is proven, with terms agreed openly.</li>
               </ol>
             </section>
 

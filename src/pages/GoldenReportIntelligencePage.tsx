@@ -8,22 +8,30 @@ import { Button } from "@/components/ui/button";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useAuth } from "@/contexts/AuthContext";
 import { AETHERIS_TIERS } from "@/lib/aetherisTiers";
+import { CTA } from "@/lib/engagementModel";
+import { BOOK_MEETING_URL } from "@/lib/links";
 
 /**
- * Public offer page for the Golden Report Intelligence subscription
- * ($2,500/mo, Stripe lookup key golden_report_intelligence_monthly).
- * Copy and price come from the tier ladder source of truth so this page can
- * never drift from the rest of the site.
+ * Public page for the Golden Report Intelligence workspace.
+ * Stripe checkout (lookup key golden_report_intelligence_monthly) only renders
+ * when a visitor explicitly opts in via ?checkout=1 — the default public view
+ * leads to a human conversation instead of a price.
+ * Copy comes from the tier ladder source of truth so this page can never
+ * drift from the rest of the site.
  */
 export default function GoldenReportIntelligencePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const explicitCheckout = useMemo(
+    () => new URLSearchParams(window.location.search).get("checkout") === "1",
+    []
+  );
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const tier = useMemo(() => AETHERIS_TIERS.find(t => t.id === "intelligence")!, []);
 
   const startCheckout = () => {
     if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent("/golden-report-intelligence")}`);
+      navigate(`/login?redirect=${encodeURIComponent("/golden-report-intelligence?checkout=1")}`);
       return;
     }
     setCheckoutOpen(true);
@@ -32,8 +40,8 @@ export default function GoldenReportIntelligencePage() {
   return (
     <>
       <SEOHead
-        title="Golden Report Intelligence | $2,500/mo Living Forensic Workspace"
-        description="A living Golden Report workspace and Report AI for one company. Monthly rescan, leak register, tasks, forecasting and refreshed content. $2,500 per month."
+        title="Golden Report Intelligence | Living Forensic Workspace"
+        description="A living Golden Report workspace and Report AI for one company. Monthly rescan, leak register, tasks, forecasting and refreshed content."
         path="/golden-report-intelligence"
       />
       <Navbar onContactClick={() => {}} />
@@ -50,13 +58,25 @@ export default function GoldenReportIntelligencePage() {
           </p>
 
           <div className="mt-6 flex flex-wrap items-end gap-4">
-            <div className="font-forensic text-4xl font-bold">{tier.priceLabel}</div>
             <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground pb-1.5">
               {tier.timeline}
             </div>
           </div>
 
-          {!checkoutOpen && (
+          {!explicitCheckout && !checkoutOpen && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+                <Button className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                  {CTA.session} <ArrowRight className="w-4 h-4 ml-1.5" />
+                </Button>
+              </a>
+              <Button asChild variant="outline">
+                <Link to="/scan">Run the free scan first</Link>
+              </Button>
+            </div>
+          )}
+
+          {explicitCheckout && !checkoutOpen && (
             <div className="mt-6 flex flex-wrap gap-3">
               <Button
                 onClick={startCheckout}
@@ -70,7 +90,7 @@ export default function GoldenReportIntelligencePage() {
               </Button>
             </div>
           )}
-          {!user && !loading && (
+          {explicitCheckout && !user && !loading && (
             <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
               <Lock className="w-3 h-3" /> You will sign in first so the workspace is attached to your account.
             </p>

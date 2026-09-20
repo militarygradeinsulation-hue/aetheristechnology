@@ -16,8 +16,8 @@ const CatalogPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Operator-Led Bundles | Aetheris Chaos Theory Forensics"
-        description="The Aetheris ladder: Signal Pack $7,500, Revenue Pack $10,000, Operator Suite $15,000, 21-Day Diagnostic $23,500, Active Case $20,000 per month."
+        title="Operator-Led Engagements | Aetheris Chaos Theory Forensics"
+        description="The Aetheris relationship: meet, investigate, fix, recover, and earn the partnership. An operator finds where revenue is leaking and helps fix it."
         path="/catalog"
         keywords="business forensics bundles, operator-led consulting, revenue diagnostic, leak audit packages, Indianapolis"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Bundles', path: '/catalog' }]}
@@ -32,7 +32,7 @@ const CatalogPage: React.FC = () => {
               <div className="inline-flex items-center gap-3 mb-6">
                 <div className="h-px w-8 bg-amber" />
                 <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
-                  Select your engagement
+                  How the relationship begins
                 </span>
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold text-foreground leading-[1.05] mb-5">

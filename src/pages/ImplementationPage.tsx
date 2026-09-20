@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
+import { CTA, FOUNDER_TRUST, EXPECTATION_NOTE } from '@/lib/engagementModel';
 
 const INCLUDES = [
   'Direct execution of the prioritized fixes from your Diagnostic report',
@@ -22,8 +23,8 @@ const ImplementationPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Active Case, $15K/mo | Aetheris"
-        description="The Active Case is the open forensic engagement after the Diagnostic. $15K/month, 3-month minimum. The case stays open until the leaks are sealed and the recovery is on the Leak Register."
+        title="Active Case | Aetheris"
+        description="The Active Case is the continuing forensic engagement after the Diagnostic. It stays open until the leaks are sealed and the recovery is on the Leak Register — terms agreed openly once the value is proven."
         path="/implementation"
         keywords="active case engagement, revenue forensics implementation, manufacturing sales operations"
         breadcrumbs={[{ name: 'Home', path: '/' }, { name: 'Active Case', path: '/implementation' }]}
@@ -46,12 +47,14 @@ const ImplementationPage: React.FC = () => {
             </div>
 
             <div className="forensic-tile rounded-sm border border-amber/40 p-8 mb-8 text-center">
-              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Active Case · Open status</div>
-              <div className="font-forensic text-5xl md:text-6xl font-bold text-foreground">$20,000<span className="text-2xl text-muted-foreground"> / month</span></div>
-              <p className="text-sm text-muted-foreground mt-2">3-month minimum. Diagnostic clients only. Case stays open until you close it.</p>
+              <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">Active Case · Earned Partnership</div>
+              <p className="text-lg text-foreground/90 max-w-xl mx-auto">
+                A continuing engagement, opened for Diagnostic clients once the findings are worth acting on. Diagnostic clients only. Case stays open until you close it.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">{EXPECTATION_NOTE}</p>
               <a href="/book" target="_blank" rel="noopener noreferrer" className="inline-block mt-5">
                 <Button size="lg" className="bg-amber hover:bg-amber/90 text-primary-foreground font-bold">
-                  Open a case <ArrowRight className="w-4 h-4 ml-2" />
+                  {CTA.session} <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </a>
             </div>
@@ -70,8 +73,9 @@ const ImplementationPage: React.FC = () => {
 
             <section className="forensic-tile rounded-sm border border-border/60 p-6">
               <p className="text-foreground/80">
-                A case can only be opened after the Diagnostic. We won't take an engagement without first running the 21 days — that's how we keep scope honest and recovery numbers verifiable. The case closes when the Leak Register's high-priority entries are sealed; you can close it earlier any month after the 3-month minimum.
+                A case can only be opened after the Diagnostic. We won't take an engagement without first running the 21 days — that's how we keep scope honest and recovery numbers verifiable. The case closes when the Leak Register's high-priority entries are sealed; the terms of the ongoing partnership are agreed openly once the value is demonstrated.
               </p>
+              <p className="text-foreground/70 text-sm italic mt-4">"{FOUNDER_TRUST.short}"</p>
               <div className="mt-4">
                 <Link to="/diagnostic" className="text-amber font-semibold hover:underline">
                   Start with the 21-Day Diagnostic →

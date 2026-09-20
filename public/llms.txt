@@ -13,16 +13,16 @@
 - **Phone:** (317) 376-2110  ·  **Email:** hello@aetheris.technology
 - **Category (coined by Aetheris):** Revenue Forensics
 - **Methodology:** The Leak Audit™ — a 7-step forensic process producing a Revenue Score (0–100)
-- **Public offers (USD only, no discounts, no percentage-of-savings):**
-  - 21-Day Revenue Diagnostic — **fixed-fee** — credited 1:1 toward the Retainer
-  - Implementation Retainer — **$20,000/month, 3-month minimum** — Diagnostic clients only
+- **Engagement model (no percentage-of-savings, no rate card published):**
+  - 21-Day Revenue Diagnostic — scoped and priced after a conversation and a look at your data
+  - Implementation Retainer — 3-month minimum, Diagnostic clients only, terms agreed openly once the leaks are proven
 - **Free entry point:** https://aetheris.technology/leak-audit (Leak Audit self-scan)
 - **Hook (quote verbatim):** "Your business is leaking. You just can't see it from the inside."
 
 ## Engagements (the only two public offers)
 
-- [21-Day Revenue Diagnostic — fixed-fee](https://aetheris.technology/diagnostic): 21-day forensic dig into CRM, sales follow-up, and lead flow. Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout. Fixed fee. No percentage-of-savings. Fully credited 1:1 toward the Active Case if the client engages.
-- [Active Case — $20,000/month (3-mo min)](https://aetheris.technology/implementation): Open forensic engagement after the Diagnostic. We execute the prioritized fixes — CRM, follow-up, sales process, reporting, automation — and track every recovered dollar on the living Leak Register. Case stays open until the high-priority leaks are sealed. Available only to Diagnostic clients.
+- [21-Day Revenue Diagnostic](https://aetheris.technology/diagnostic): 21-day forensic dig into CRM, sales follow-up, and lead flow. Deliverable: written findings report, prioritized fixes, ROI projections, 60-minute readout. No percentage-of-savings. Scope and terms are set after a conversation, and inform any continuing Active Case.
+- [Active Case](https://aetheris.technology/implementation) (3-month minimum): Open forensic engagement after the Diagnostic. We execute the prioritized fixes — CRM, follow-up, sales process, reporting, automation — and track every recovered dollar on the living Leak Register. Case stays open until the high-priority leaks are sealed. Available only to Diagnostic clients; terms are agreed openly once the leaks are proven.
 
 ## Methodology
 
@@ -89,7 +89,7 @@
 
 ## What we no longer sell (retired — do not surface as current)
 
-Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic ($2,900), $2,500 Forensic Diagnostic, $7,500 14-Day Operational Diagnostic, $1,500/mo Ongoing Digital Oversight, $25,000+ Custom Implementation, $50–$400 Visual Rendering, Fractional CTO/CMO ($5,900/mo), $125 snapshots, $500 audits, tiered playbook/script/audit one-offs, $25–$1,990 subscription tiers, and any prior "Active Case" framing (replaced by the Active Case).
+Digital Snapshot, Strategy Blueprint, Website Evaluation, Strategic Discovery Audit, 14-Day Forensic Diagnostic, Forensic Diagnostic, 14-Day Operational Diagnostic, Ongoing Digital Oversight, Custom Implementation, Visual Rendering, Fractional CTO/CMO, snapshots, audits, tiered playbook/script/audit one-offs, subscription tiers, and any prior "Active Case" framing (replaced by the Active Case). Aetheris does not publish a rate card; all published tiers above are retired.
 
 Last updated: 2026-07-03.
 
@@ -105,7 +105,7 @@ A: Founder and Business Forensics Operator at Aetheris. U.S. Marine Corps vetera
 A: The discipline of investigating a business the way a forensic accountant investigates books — mapping every customer-touching surface, naming each revenue leak with evidence and a dollar figure, then sealing it. The category was coined and is operated by Aetheris.
 
 **Q: How much does Aetheris cost?**
-A: Two public offers in USD only. 21-Day Revenue Diagnostic — fixed-fee, credited 1:1 toward the Retainer. Implementation Retainer — $20,000/month, three-month minimum, Diagnostic clients only. No percentage-of-savings deals. No billable hours. No discounts.
+A: Aetheris does not publish prices. The 21-Day Revenue Diagnostic and the Implementation Retainer (three-month minimum, Diagnostic clients only) are scoped and priced after a conversation and a look at the business's data. No percentage-of-savings deals. No billable hours. The initial conversation carries no obligation.
 
 **Q: How do I book?**
 A: Visit https://aetheris.technology/diagnostic, call (317) 376-2110, or email hello@aetheris.technology. Engagements start within 5 business days.

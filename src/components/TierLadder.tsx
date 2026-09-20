@@ -21,8 +21,9 @@ export const TierLadder: React.FC<{ compact?: boolean; id?: string }> = ({ compa
       </h2>
       {!compact && (
         <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl leading-relaxed">
-          Tools sold separately are a hardware store. Bundled into tiers and run by an operator,
-          they become a method. Each rung includes everything below it.
+          These are stages of a working relationship, not plans on a shelf. Each stage includes
+          everything below it, and we only move up when the last stage earned it. Scope and terms
+          are agreed together, in a conversation.
         </p>
       )}
     </div>
@@ -66,14 +67,8 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
       </div>
 
       <h3 className="font-forensic text-xl font-bold leading-tight">{t.name}</h3>
-      <div className="font-forensic text-3xl font-bold mt-1 mb-2">
-        {t.priceLabel}
-        {t.cadence === "one-time" && (
-          <span className="text-xs font-normal text-muted-foreground ml-2 font-mono">one-time</span>
-        )}
-      </div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
-        {t.timeline}
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2 mb-3">
+        {stripPrices(t.timeline)}
       </div>
 
       <p className="text-sm text-foreground/80 leading-relaxed mb-3">{t.headline}</p>

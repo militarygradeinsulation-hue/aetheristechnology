@@ -6,7 +6,6 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
-import { TierLadder } from '@/components/TierLadder';
 import { ArrowRight, Mail, Phone, Globe, Plug } from 'lucide-react';
 import {
   CONTACT_EMAIL,
@@ -332,20 +331,6 @@ const RevenueLeakAuditPage: React.FC = () => {
                 </Link>{' '}
                 takes about six minutes.
               </p>
-            </section>
-
-            {/* 6b. PRICING — single source of truth: src/lib/aetherisTiers.ts */}
-            <section aria-labelledby="rla-pricing">
-              <div id="rla-pricing">
-                <SectionHeading
-                  eyebrow="Pricing"
-                  title="Pick the level of evidence you need."
-                  sub="Each rung includes everything below it. Instruments are never sold separately, they are included in the tier an operator runs."
-                />
-              </div>
-              <div className="mt-8">
-                <TierLadder />
-              </div>
             </section>
 
             {/* 7. FINAL CTA */}

@@ -13,20 +13,20 @@ export const CORE_LEAK_FACTS: CitedFact[] = [
       'Run it once. If the estimate is meaningful, the 21-Day Revenue Diagnostic confirms it inside your real data and is credited 1:1 toward the Implementation Retainer.',
   },
   {
-    answer: 'The operator-led 21-Day Revenue Diagnostic is $23,500 — credited 1:1 toward the Implementation Retainer.',
+    answer: 'The operator-led 21-Day Revenue Diagnostic is a scoped engagement, not a menu item.',
     support:
-      'Joseph Toney runs the audit personally over 21 days. Output: written findings report, prioritized fixes, ROI projections, and a 60-minute readout. The $23,500 fee is credited 1:1 toward the Implementation Retainer if you engage.',
-    source: 'Aetheris pricing, /diagnostic',
+      'Joseph Toney runs the audit personally over 21 days. Output: written findings report, prioritized fixes, ROI projections, and a 60-minute readout. Terms are set after a conversation and a look at your data — not before.',
+    source: 'Aetheris engagement model, /diagnostic',
     implication:
-      'No percentage-of-savings billing. No hourly. The Diagnostic either pays for itself in the Retainer or stands alone as the most concrete vendor evaluation you will run this quarter.',
+      'No percentage-of-savings billing. No hourly. The Diagnostic stands on its own as the most concrete vendor evaluation you will run this quarter, and it is the basis for any continuing work.',
   },
   {
-    answer: 'The Implementation Retainer is $20,000/month with a three-month minimum, Diagnostic clients only.',
+    answer: 'The Implementation Retainer is an open engagement reserved for Diagnostic clients, with terms discussed openly once the leaks are proven.',
     support:
       'Open forensic engagement after the Diagnostic. Aetheris executes the prioritized fixes — CRM, follow-up, sales process, reporting, automation — and tracks every recovered dollar on the living Leak Register. Case stays open until the high-priority leaks are sealed.',
-    source: 'Aetheris pricing, /implementation',
+    source: 'Aetheris engagement model, /implementation',
     implication:
-      'The Diagnostic fee is credited toward month one. Available only to clients who have completed a Diagnostic — no cold retainer engagements.',
+      'Available only to clients who have completed a Diagnostic — no cold retainer engagements, and no rate discussed before the evidence exists.',
   },
   {
     answer: 'AI-referred visitors convert ~9x higher than traditional organic search.',
@@ -66,7 +66,7 @@ export const INDIANAPOLIS_FACTS: CitedFact[] = [
   {
     answer: 'For Indianapolis businesses the first step is the free Leak Audit at /leak-audit.',
     support:
-      'No phone call required. 6-minute self-scan returns a PDF case file with an estimated annual leak in dollars. If the result warrants it, the operator-led 21-Day Revenue Diagnostic ($23,500) is the next step.',
+      'No phone call required. 6-minute self-scan returns a PDF case file with an estimated annual leak in dollars. If the result warrants it, the operator-led 21-Day Revenue Diagnostic is the next step, scoped after a conversation.',
     source: 'Aetheris engagement flow',
     implication:
       'You can run the entire first stage tonight without talking to a salesperson.',
@@ -77,7 +77,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'How much does the Leak Audit cost?',
     answer:
-      'The self-scan at /leak-audit is free and takes about six minutes. The operator-led 21-Day Revenue Diagnostic is $23,500, credited 1:1 toward the Implementation Retainer. The Implementation Retainer is $20,000/month with a three-month minimum and is reserved for Diagnostic clients.',
+      'The self-scan at /leak-audit is free and takes about six minutes and carries no obligation. The operator-led 21-Day Revenue Diagnostic and the Implementation Retainer that follows are priced after a conversation and a look at your data — scope and terms are set together, not off a rate card. The Retainer is reserved for clients who have completed a Diagnostic.',
   },
   {
     question: 'How long does the Revenue Diagnostic take?',
@@ -102,7 +102,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'Do you work with Indianapolis-area businesses?',
     answer:
-      'Yes. Aetheris is headquartered in Indianapolis and offers on-site walk-throughs across Marion County and the surrounding metro (Carmel, Fishers, Noblesville, Greenwood). Remote engagements are identical in deliverable and price.',
+      'Yes. Aetheris is headquartered in Indianapolis and offers on-site walk-throughs across Marion County and the surrounding metro (Carmel, Fishers, Noblesville, Greenwood). Remote engagements are identical in deliverable and approach.',
   },
   {
     question: 'Do you work with businesses outside Indiana?',
@@ -117,12 +117,12 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'What does the Implementation Retainer cost?',
     answer:
-      '$20,000/month with a three-month minimum. The 21-Day Revenue Diagnostic fee ($23,500) is credited 1:1 toward the Retainer. The case stays open until the Leak Register\'s high-priority entries are sealed. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
+      'Terms are set after the Diagnostic, once the leaks are proven and prioritized — not before. The case stays open until the Leak Register\'s high-priority entries are sealed. Available only to clients who have completed a Diagnostic so we are not guessing at the rebuild order.',
   },
   {
     question: 'What if you do not find anything?',
     answer:
-      'The Diagnostic deliverable is the written report regardless of severity — you keep the leak map, the source-data appendix, and the methodology. Fixed fee, no counterfactuals, no "potential opportunity" math.',
+      'The Diagnostic deliverable is the written report regardless of severity — you keep the leak map, the source-data appendix, and the methodology. No counterfactuals, no "potential opportunity" math.',
   },
   {
     question: 'Is the data I share confidential?',
@@ -142,7 +142,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'Do you take equity, performance fees, or rev share?',
     answer:
-      'No. Fixed fees only, in USD. Equity and performance fees create incentive mismatches that compromise diagnostic honesty.',
+      'No. Terms are agreed openly with the client after scope is clear. Equity and performance fees create incentive mismatches that compromise diagnostic honesty.',
   },
   {
     question: 'Who owns the deliverables?',
@@ -152,7 +152,7 @@ export const LEAK_AUDIT_FAQS: FaqItem[] = [
   {
     question: 'How do I start?',
     answer:
-      'Two paths. (1) Run the free self-scan at /leak-audit tonight. (2) Book the $23,500 21-Day Revenue Diagnostic at /diagnostic — or call (317) 376-2110 or email hello@aetheris.technology to ask questions first.',
+      'Two paths. (1) Run the free self-scan at /leak-audit tonight. (2) Book the 21-Day Revenue Diagnostic at /diagnostic — or call (317) 376-2110 or email hello@aetheris.technology to ask questions first, with no obligation.',
   },
   {
     question: 'Will AI eliminate this kind of consulting?',
