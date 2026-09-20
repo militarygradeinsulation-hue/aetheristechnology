@@ -68,7 +68,7 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
 
       <h3 className="font-forensic text-xl font-bold leading-tight">{t.name}</h3>
       <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2 mb-3">
-        {stripPrices(t.timeline)}
+        {t.timeline}
       </div>
 
       <p className="text-sm text-foreground/80 leading-relaxed mb-3">{t.headline}</p>
