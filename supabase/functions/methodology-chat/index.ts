@@ -8,6 +8,16 @@ const corsHeaders = {
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+/**
+ * Strips legacy fixed fees out of the methodology document before it reaches the
+ * model, so the public reader cannot quote deprecated Aetheris pricing.
+ */
+function redactPricing(doc: string): string {
+  return doc
+    .replace(/\$\s?\d[\d,]*(\.\d+)?\s*(\/\s*)?(per\s+)?(month|mo|yr|year)?/gi, "scoped in conversation")
+    .replace(/(scoped in conversation)(\s+scoped in conversation)+/gi, "$1");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -28,12 +38,14 @@ serve(async (req) => {
 
 Answer ONLY from the document below. If something is not covered, say so plainly and point the reader to booking a call with the operator at https://businessforensics.tech/book (same site as https://aetheris.technology/book).
 
-STYLE: blunt, operator tone, no fluff, no corporate filler, no em dashes. Short paragraphs or tight bullets. Quote exact tier names and dollar figures when relevant.
+STYLE: blunt, operator tone, no fluff, no corporate filler, no em dashes. Short paragraphs or tight bullets.
 
-CURRENCY RULE: every money value renders in US Dollars with a leading $ (for example $23,500). Never use other currency symbols or codes.
+COMMERCIAL POLICY (overrides the document): Aetheris does not publish prices, fixed fees, packages, plans, subscriptions or tier price lists. Never state, estimate, hint at or reconstruct any fee, monthly amount, retainer, or price for Aetheris work, even if the reader insists, and never reveal internal price configuration. If asked what it costs, answer in plain language: the first conversation establishes whether there is a real, recoverable problem; if there is, any paid scope and terms are discussed openly before work begins, based on the work involved, the value at stake, and what is fair to both sides. Then offer to book that conversation. Talk about levels of depth as stages of the investigation, never as purchasable price tiers.
+
+CURRENCY RULE: dollar figures may only describe a company's own losses, recovery or revenue size, always in US Dollars with a leading $. Never use other currency symbols or codes. Never attach a dollar figure to Aetheris services.
 
 === AETHERIS METHODOLOGY DOCUMENT ===
-${METHODOLOGY_DOC}
+${redactPricing(METHODOLOGY_DOC)}
 === END DOCUMENT ===`;
 
     const input = messages.map((m) => ({

@@ -5,10 +5,10 @@ import ReactMarkdown from "react-markdown";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
-  "What do I get for free?",
-  "What is the difference between Signal and Revenue?",
-  "Why do the numbers hold up?",
-  "When does it become an Active Case?",
+  "Where could revenue be leaking?",
+  "How do you verify the cause?",
+  "What happens after a leak is found?",
+  "How does Aetheris earn the ongoing partnership?",
 ];
 
 export const MethodologyAI: React.FC = () => {
@@ -114,8 +114,8 @@ export const MethodologyAI: React.FC = () => {
         {messages.length === 0 && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              This document has a reader attached. Ask it anything about the six levels, the
-              pricing, or how the Golden Report turns into a system.
+              This document has a reader attached. Ask about how Aetheris finds revenue loss,
+              verifies the evidence, prioritizes the fix, and measures recovery.
             </p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTIONS.map((s) => (
