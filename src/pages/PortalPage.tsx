@@ -633,6 +633,7 @@ const PortalPage: React.FC = () => {
     { id: 'playbook', label: 'Playbook', icon: <BookOpen className="w-4 h-4" />, iconCmp: BookOpen, adminOrPartnerOnly: true },
     { id: 'sprint', label: '90-Day Sprint', icon: <Rocket className="w-4 h-4" />, iconCmp: Rocket, adminOrPartnerOnly: true },
     { id: 'goldenlibrary', label: 'Golden Report Library', icon: <Database className="w-4 h-4" />, iconCmp: Database },
+    { id: 'command', label: 'Command Center', icon: <Activity className="w-4 h-4" />, iconCmp: Activity },
     { id: 'execdesk', label: 'Executive Desk', icon: <ShieldCheck className="w-4 h-4" />, iconCmp: ShieldCheck },
     { id: 'sharedws', label: 'Shared with Joseph', icon: <Users className="w-4 h-4" />, iconCmp: Users },
     { id: 'team', label: 'Team Chat', icon: <MessageSquare className="w-4 h-4" />, iconCmp: MessageSquare, badge: unreadChat },
