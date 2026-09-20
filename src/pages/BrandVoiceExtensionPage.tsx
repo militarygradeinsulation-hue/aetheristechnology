@@ -1,18 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { BOOK_MEETING_URL } from "@/lib/links";
 import { Download, KeyRound, Scan, Sparkles, MessageSquare, Chrome } from "lucide-react";
 
 const EXT_ZIP = "/aetheris-brand-voice-extension.zip";
 
 export default function BrandVoiceExtensionPage() {
-  const [email, setEmail] = useState("");
-  const [url, setUrl] = useState("");
-  const [showCheckout, setShowCheckout] = useState(false);
 
   useEffect(() => { document.title = "Brand Voice Chrome Extension · Aetheris"; }, []);
-
-  const canBuy = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && /^https?:\/\//i.test(url);
 
   const download = () => {
     fetch(EXT_ZIP)
@@ -73,63 +68,22 @@ export default function BrandVoiceExtensionPage() {
             ))}
           </section>
 
-          {/* Buy flow */}
-          <section id="buy" className="rounded-sm border border-border/60 bg-background/60 p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-              <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">Get your activation code</div>
-                <h2 className="font-forensic text-2xl font-bold">One-time setup, lifetime access</h2>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-foreground/60">
-                <Sparkles className="w-3.5 h-3.5 text-amber" />
-                <span>Includes brand scan + memory refresh anytime.</span>
-              </div>
-            </div>
-
-            {!showCheckout ? (
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono text-[10px] uppercase tracking-widest text-foreground/60 mb-1">Your website</label>
-                  <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://yourbrand.com"
-                    className="w-full rounded-sm border border-border/60 bg-background px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block font-mono text-[10px] uppercase tracking-widest text-foreground/60 mb-1">Email for the code</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@yourbrand.com"
-                    className="w-full rounded-sm border border-border/60 bg-background px-3 py-2 text-sm"
-                  />
-                </div>
-                <button
-                  type="button"
-                  disabled={!canBuy}
-                  onClick={() => setShowCheckout(true)}
-                  className="sm:col-span-2 mt-2 rounded-sm bg-amber text-background font-mono uppercase tracking-widest text-xs py-3 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition"
-                >
-                  Get My Activation Code
-                </button>
-              </div>
-            ) : (
-              <div className="rounded-sm overflow-hidden">
-                <StripeEmbeddedCheckout
-                  priceId="brand_voice_extension"
-                  customerEmail={email}
-                  metadata={{ shop: "extension", brand_url: url, plan: "extension" }}
-                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&kind=brand-voice-extension`}
-                />
-                <button className="text-xs text-foreground/60 underline mt-3" onClick={() => setShowCheckout(false)}>
-                  ← back
-                </button>
-              </div>
-            )}
+          {/* Next step */}
+          <section id="access" className="rounded-sm border border-border/60 bg-background/60 p-6 md:p-8">
+            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber mb-1">Get your activation code</div>
+            <h2 className="font-forensic text-2xl font-bold">One conversation, then your code</h2>
+            <p className="mt-3 text-sm text-foreground/75 max-w-2xl leading-relaxed">
+              Tell us your site and what you want the extension to sound like. We scan the brand, issue your
+              activation code, and agree any terms together before anything starts.
+            </p>
+            <a
+              href={BOOK_MEETING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-5 rounded-sm bg-amber text-background font-mono uppercase tracking-widest text-xs px-5 py-3 hover:brightness-110 transition"
+            >
+              Talk With Aetheris
+            </a>
           </section>
 
           {/* Install */}

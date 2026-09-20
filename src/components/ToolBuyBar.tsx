@@ -8,9 +8,9 @@ import { BOOK_MEETING_URL } from "@/lib/links";
 
 /**
  * Sticky bottom bar shown on public tool pages. Every visitor gets 3 free
- * runs; after that they either buy the tool at its listed price, or book a
+ * runs; after that they book a
  * session. Hidden entirely on operator-only tools and on Golden Report
- * (which is only ever included in the $23,500 Full Leak Investigation).
+ * (which is only ever included in the Full Leak Investigation).
  */
 export function ToolBuyBar() {
   const { pathname } = useLocation();

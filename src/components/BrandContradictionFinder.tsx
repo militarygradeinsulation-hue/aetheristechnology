@@ -5,7 +5,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Lock, Copy, Check, Globe, AlertTriangle, Shield, X, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
@@ -13,6 +12,7 @@ import { isPortalSession } from '@/lib/portalWorkspace';
 import { useActiveLeadAutofill } from '@/lib/activeLead';
 import { ChaosScanReport } from '@/components/ChaosScanReport';
 import { contradictionsToChaos } from '@/lib/toolChaosAdapters';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 const PHASES = [
   { label: 'Scraping your website...', target: 15 },
@@ -33,7 +33,6 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
   const [unlocked, setUnlocked] = useState(adminMode);
-  const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   useActiveLeadAutofill('brand-contradictions', (lead) => {
     if (lead.website) setForm(p => ({ ...p, url: p.url || lead.website! }));
@@ -178,22 +177,12 @@ export const BrandContradictionFinder: React.FC<{ adminMode?: boolean }> = ({ ad
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full Contradiction Report</h3>
               <p className="text-muted-foreground mb-4">Get all contradictions, emotional impact analysis, before/after positioning, priority fixes, and hidden strengths.</p>
-              <p className="text-3xl font-bold text-amber mb-4">$99</p>
-              <Button onClick={() => setShowCheckout(true)} className="bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Unlock Now</Button>
+              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="inline-block rounded-md bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Talk With Aetheris</a>
             </div>
           )}
         </div>
       )}
 
-      {showCheckout && !adminMode && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
-            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>
-            <h3 className="text-xl font-bold mb-4">Complete Purchase</h3>
-            <StripeEmbeddedCheckout priceId="brand_contradiction_finder_once" returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=tool_purchase`} metadata={{ tool_type: 'brand_contradictions' }} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SHOP_TOOLS, findTool } from "@/lib/tool-shop-catalog";
 import { AETHERIS_TIERS, tierForTool, tierBadgeForTool } from "@/lib/aetherisTiers";
 import { BOOK_MEETING_URL } from "@/lib/links";
-import { Sparkles, ShoppingCart, CalendarClock, X, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, CalendarClock, X, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -173,7 +173,7 @@ export function EasyModeRecommender() {
                         <Link to={`/try/${tool.id}`}><Sparkles className="w-3 h-3 mr-1" /> Try free</Link>
                       </Button>
                       <Button size="sm" onClick={() => openBuyOne(tool.id)} className="flex-1 bg-amber text-background hover:bg-amber/90 text-xs h-8 font-semibold">
-                        <ShoppingCart className="w-3 h-3 mr-1" /> Which tier
+                        <CalendarClock className="w-3 h-3 mr-1" /> Which tier
                       </Button>
                     </div>
                   </div>
@@ -205,7 +205,7 @@ export function EasyModeRecommender() {
                     </a>
                   </Button>
                   <Button size="sm" onClick={openBuyAll} className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                    <ShoppingCart className="w-3.5 h-3.5 mr-1.5" /> See what's included
+                    <CalendarClock className="w-3.5 h-3.5 mr-1.5" /> See what's included
                   </Button>
                 </div>
               </div>

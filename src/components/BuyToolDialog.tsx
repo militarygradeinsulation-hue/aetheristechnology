@@ -36,7 +36,7 @@ export function BuyToolDialog({ open, onOpenChange, preselectedToolIds = [] }: B
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-forensic text-2xl">
-            {requiredTier.name} — {requiredTier.priceLabel}
+            {requiredTier.name}
           </DialogTitle>
           <DialogDescription>
             {tools.length === 1

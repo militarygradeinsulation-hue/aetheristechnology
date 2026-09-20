@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
-import { X, Sparkles, ShoppingCart } from "lucide-react";
+import { X, Sparkles, CalendarClock } from "lucide-react";
 import { useChaosPhysics, DEFAULT_TUNING } from "@/hooks/useChaosPhysics";
 import { SHOP_TOOLS, formatToolPrice } from "@/lib/tool-shop-catalog";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
@@ -468,9 +468,9 @@ const LeakMindMap: React.FC<LeakMindMapProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setBuyToolId(t.id); }}
                             className="inline-flex items-center gap-1 rounded-sm bg-amber text-background px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest font-bold hover:bg-amber/90"
-                            title={`Subscribe ${priceLabel}`}
+                            title={`Which tier includes this: ${priceLabel}`}
                           >
-                            <ShoppingCart className="w-2.5 h-2.5" /> {priceLabel}
+                            <CalendarClock className="w-2.5 h-2.5" /> {priceLabel}
                           </button>
                         </span>
                       </li>

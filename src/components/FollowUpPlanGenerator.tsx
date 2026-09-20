@@ -5,11 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Lock, Copy, Check, Mail, Phone, MessageSquare, Linkedin, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
 import { toast } from '@/hooks/use-toast';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { QuickDownloadBar } from './QuickDownloadBar';
 import { isPortalSession } from '@/lib/portalWorkspace';
+import { BOOK_MEETING_URL } from '@/lib/links';
 
 const PHASES = [
   { label: 'Analyzing your sales cycle...', target: 25 },
@@ -39,7 +39,6 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
   const [phaseLabel, setPhaseLabel] = useState('');
   const [result, setResult] = useState<any>(null);
   const [unlocked, setUnlocked] = useState(adminMode);
-  const [showCheckout, setShowCheckout] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleGenerate = async () => {
@@ -165,22 +164,12 @@ export const FollowUpPlanGenerator: React.FC<{ adminMode?: boolean }> = ({ admin
               <Lock className="w-8 h-8 text-amber mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground font-display mb-2">Unlock Full 14-Day System</h3>
               <p className="text-muted-foreground mb-4">Get all 14 days of templates, objection responses, and multi-channel cadences.</p>
-              <p className="text-3xl font-bold text-amber mb-4">$49</p>
-              <Button onClick={() => setShowCheckout(true)} className="bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Unlock Now</Button>
+              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer" className="inline-block rounded-md bg-amber hover:bg-amber/90 text-background font-bold px-10 py-3 text-lg">Talk With Aetheris</a>
             </div>
           )}
         </div>
       )}
 
-      {showCheckout && !adminMode && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
-            <Button variant="ghost" size="icon" className="absolute top-3 right-3" onClick={() => setShowCheckout(false)}><X className="w-5 h-5" /></Button>
-            <h3 className="text-xl font-bold mb-4">Complete Purchase</h3>
-            <StripeEmbeddedCheckout priceId="follow_up_plan_once" returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=tool_purchase`} metadata={{ tool_type: 'follow_up_plan' }} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

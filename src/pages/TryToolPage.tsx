@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Sparkles, ShoppingCart, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound, Download, FileText, AlertTriangle, Target, Wrench, TrendingUp, ClipboardList } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles, CalendarClock, RefreshCw, Printer, ShieldCheck, Copy, Rocket, ChevronUp, ChevronDown, KeyRound, Download, FileText, AlertTriangle, Target, Wrench, TrendingUp, ClipboardList } from "lucide-react";
 import { downloadTryToolPdf } from "@/lib/generateTryToolPdf";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
@@ -689,7 +689,7 @@ export default function TryToolPage() {
                             <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-amber/70">
                               § 01 · Tier Access
                             </div>
-                            <div className="font-mono text-[9px] text-amber/50">USD</div>
+
                           </div>
                           <div>
                             <div className="flex items-baseline gap-2">
@@ -701,8 +701,8 @@ export default function TryToolPage() {
                             </div>
                           </div>
                           <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-amber border-t border-amber/15">
-                            <ShoppingCart className="w-3 h-3" />
-                            <span>Buy now</span>
+                            <CalendarClock className="w-3 h-3" />
+                            <span>Talk With Aetheris</span>
                             <span className="ml-auto text-amber/60 group-hover:translate-x-1 transition-transform">→</span>
                           </div>
                         </button>
@@ -721,12 +721,11 @@ export default function TryToolPage() {
                             </div>
                           </div>
                           <div>
-                            <div className="flex items-baseline gap-2">
-                              <div className="font-forensic text-3xl font-bold text-foreground leading-none">$100</div>
-                              <div className="text-[11px] text-muted-foreground">one-time</div>
+                            <div className="font-forensic text-xl font-bold text-foreground leading-none">
+                              Operator License
                             </div>
                             <div className="text-xs text-foreground/75 leading-snug mt-2">
-                              Sell the entire ecosystem under your own rep code. Instant activation.
+                              Introduce Aetheris under your own rep code. Eligibility and terms are discussed together.
                             </div>
                           </div>
                           <div className="mt-auto pt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-crimson border-t border-crimson/15">
@@ -754,7 +753,7 @@ export default function TryToolPage() {
                   onClick={() => setBuyOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-sm bg-amber text-background px-3 py-2 text-xs font-mono uppercase tracking-widest font-bold hover:bg-amber/90 whitespace-nowrap"
                 >
-                  <ShoppingCart className="w-3 h-3" /> {tierBadgeForTool(toolId)}
+                  <CalendarClock className="w-3 h-3" /> Talk With Aetheris
                 </button>
               </div>
             )}

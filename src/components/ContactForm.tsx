@@ -12,7 +12,7 @@ const SERVICE_OPTIONS = [
   'Outdated digital presence',
   'CRM systems audit',
   'Operational diagnostic',
-  'Strategic Discovery Audit ($500)',
+  'Strategic Discovery Audit',
   "Not sure yet, let's talk",
 ];
 
@@ -150,7 +150,7 @@ export const ContactForm: React.FC = () => {
           </select>
           {isAnalyticsPackage && (
             <div className="mt-3 rounded-lg border border-amber/25 bg-amber/[0.04] p-4">
-              <p className="text-sm font-semibold text-amber mb-2">Strategic Discovery Audit, $500</p>
+              <p className="text-sm font-semibold text-amber mb-2">Strategic Discovery Audit</p>
               <p className="text-sm text-muted-foreground mb-2">A foundational diagnostic engagement. We map your full digital footprint, marketing spend, and CRM operations to surface where revenue is leaking before any custom work begins.</p>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4 list-disc">
                 <li>Website &amp; social presence analysis</li>

@@ -5,24 +5,20 @@ import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Lock, DollarSign, CheckCircle2, Copy, ShieldCheck, Rocket } from 'lucide-react';
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
-import { getStripe, getStripeEnvironment } from '@/lib/stripe';
+import { getStripeEnvironment } from '@/lib/stripe';
 import { useSearchParams } from 'react-router-dom';
 
-type Phase = 'pitch' | 'checkout' | 'verifying' | 'granted';
+type Phase = 'pitch' | 'verifying' | 'granted';
 
 const LS_KEY = 'aetheris_instant_license';
 
 export default function CareersLicensePage() {
   const [contactOpen, setContactOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('pitch');
-  const [payerEmail, setPayerEmail] = useState('');
   const [payerName, setPayerName] = useState('');
   const [repCode, setRepCode] = useState<string | null>(null);
   const [grantedEmail, setGrantedEmail] = useState<string | null>(null);
@@ -65,22 +61,6 @@ export default function CareersLicensePage() {
       toast({ title: 'Could not verify payment', description: e instanceof Error ? e.message : '', variant: 'destructive' });
       setPhase('pitch');
     }
-  };
-
-  const fetchClientSecret = async (): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      body: {
-        priceId: 'careers_instant_license_v2',
-        customerEmail: payerEmail || undefined,
-        returnUrl: `${window.location.origin}/careers/license?session_id={CHECKOUT_SESSION_ID}`,
-        environment: getStripeEnvironment(),
-        metadata: { purpose: 'careers_instant_license', rep_name: payerName },
-      },
-    });
-    if (error || !(data as any)?.clientSecret) {
-      throw new Error(error?.message || 'Failed to create checkout session');
-    }
-    return (data as any).clientSecret;
   };
 
   const copyCode = () => {
@@ -127,7 +107,7 @@ export default function CareersLicensePage() {
                         <span className="font-mono text-amber text-sm">15% of collected</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-1">
-                        Example: $3,525 on a $23,500 paid diagnostic. One-time per client.
+                        15% of the collected diagnostic fee. One-time per client.
                       </p>
                     </div>
                     <div className="rounded-lg border border-amber/30 bg-background/40 p-4">
@@ -145,7 +125,7 @@ export default function CareersLicensePage() {
                         <span className="font-mono text-amber text-sm">10% of net collected</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-1">
-                        Example: $2,500 on a $25,000 implementation. First implementation only, per client.
+                        10% of the net collected implementation revenue. First implementation only, per client.
                       </p>
                     </div>
                     <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-4">
@@ -154,7 +134,7 @@ export default function CareersLicensePage() {
                         <span className="font-mono text-emerald-400 text-sm">20% on first 3</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-1">
-                        Founding Strategic Scouts receive 20% ($4,700 on $23,500) on their first three qualified paid diagnostics.
+                        Founding Strategic Scouts receive 20% of collected revenue on their first three qualified paid diagnostics.
                       </p>
                     </div>
                   </div>
@@ -164,8 +144,8 @@ export default function CareersLicensePage() {
                 <div className="rounded-xl border border-crimson/40 bg-crimson/5 p-4">
                   <p className="font-mono uppercase text-[10px] tracking-[0.3em] text-crimson mb-2">First-year worked example</p>
                   <p className="text-sm text-foreground leading-relaxed">
-                    $23,500 diagnostic + $20,000/mo Active Case × 12 months + $25,000 implementation =
-                    <span className="font-mono text-amber font-semibold"> $30,025 total Scout compensation</span> on $288,500 of client revenue (10.4% effective).
+                    A diagnostic, twelve paid months of an Active Case, and a first implementation stack together into roughly
+                    <span className="font-mono text-amber font-semibold"> a 10% effective share</span> of everything Aetheris collects from that client in year one.
                   </p>
                 </div>
 
@@ -249,25 +229,6 @@ export default function CareersLicensePage() {
             </Card>
           )}
 
-
-          {phase === 'checkout' && (
-            <div className="space-y-4">
-              <Card className="bg-card/60 backdrop-blur border-border/50">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-display text-lg">Instant Rep License — $500</p>
-                    <p className="text-xs text-muted-foreground">Paying as {payerEmail}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setPhase('pitch')}>Change</Button>
-                </CardContent>
-              </Card>
-              <div id="checkout" className="rounded-xl overflow-hidden">
-                <EmbeddedCheckoutProvider stripe={getStripe()} options={{ fetchClientSecret }}>
-                  <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
-              </div>
-            </div>
-          )}
 
           {phase === 'verifying' && (
             <Card className="bg-card/60 backdrop-blur border-border/50">

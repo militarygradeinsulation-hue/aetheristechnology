@@ -109,11 +109,11 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   ];
 
   const services: MindMapNodeData[] = [
-    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "$0",         icon: Search,     onClick: () => navigate("/leak-audit"),
+    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "Free",       icon: Search,     onClick: () => navigate("/leak-audit"),
       connections: ["60-second self-scan", "No email required", "Sting is the point"] },
-    { id: "audit",    label: "The Leak Audit",    sublabel: "$2,500",     icon: Microscope, onClick: onBookAudit,
-      connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Fee credits 1:1 to the fix"] },
-    { id: "impl",     label: "Implementation",    sublabel: "$15K / mo",  icon: Wrench,     onClick: onBookAudit,
+    { id: "audit",    label: "The Leak Audit",    sublabel: "Operator-led", icon: Microscope, onClick: onBookAudit,
+      connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Scoped with you before work begins"] },
+    { id: "impl",     label: "Implementation",    sublabel: "Scoped together", icon: Wrench,     onClick: onBookAudit,
       connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
     { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/careers"),
       connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
@@ -134,7 +134,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   const hubByTab: Record<TabId, { eyebrow: string; title: React.ReactNode; subtitle: string }> = {
     all:      { eyebrow: "One business",      title: <>The Leak<br/>Ecosystem</>, subtitle: "Every map at once" },
     symptoms: { eyebrow: "Every business",    title: <>Revenue<br/>Leaks</>,      subtitle: "The Leak Audit™" },
-    steps:    { eyebrow: "7-step protocol",   title: <>The Leak<br/>Audit</>,     subtitle: "$2,500 flat" },
+    steps:    { eyebrow: "7-step protocol",   title: <>The Leak<br/>Audit</>,     subtitle: "Operator-led" },
     systems:  { eyebrow: "Ambient layer",     title: <>The System<br/>Stack</>,   subtitle: "Runs quiet 24/7" },
     services: { eyebrow: "Three doors",       title: <>Case<br/>Openings</>,      subtitle: "One methodology" },
   };
