@@ -1,47 +1,30 @@
-import React, { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Check, Lock, ShieldCheck, X } from "lucide-react";
+import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Check, ShieldCheck, X } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
-import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { useAuth } from "@/contexts/AuthContext";
 import { AETHERIS_TIERS } from "@/lib/aetherisTiers";
-import { CTA } from "@/lib/engagementModel";
+import { CTA, EXPECTATION_NOTE } from "@/lib/engagementModel";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
 /**
  * Public page for the Golden Report Intelligence workspace.
- * Stripe checkout (lookup key golden_report_intelligence_monthly) only renders
- * when a visitor explicitly opts in via ?checkout=1 — the default public view
- * leads to a human conversation instead of a price.
+ * This page is consultative only: there is no public checkout, no price and no
+ * cart. The internal tier config (including its Stripe lookup key) stays
+ * untouched for internal/admin use, but is never rendered as a purchase here.
  * Copy comes from the tier ladder source of truth so this page can never
  * drift from the rest of the site.
  */
 export default function GoldenReportIntelligencePage() {
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const explicitCheckout = useMemo(
-    () => new URLSearchParams(window.location.search).get("checkout") === "1",
-    []
-  );
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const tier = useMemo(() => AETHERIS_TIERS.find(t => t.id === "intelligence")!, []);
-
-  const startCheckout = () => {
-    if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent("/golden-report-intelligence?checkout=1")}`);
-      return;
-    }
-    setCheckoutOpen(true);
-  };
 
   return (
     <>
       <SEOHead
         title="Golden Report Intelligence | Living Forensic Workspace"
-        description="A living Golden Report workspace and Report AI for one company. Monthly rescan, leak register, tasks, forecasting and refreshed content."
+        description="A living Golden Report workspace and Report AI for one company: rescans, leak register, tasks, forecasting and refreshed content, scoped in conversation."
         path="/golden-report-intelligence"
       />
       <Navbar onContactClick={() => {}} />
@@ -63,42 +46,20 @@ export default function GoldenReportIntelligencePage() {
             </div>
           </div>
 
-          {!explicitCheckout && !checkoutOpen && (
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                <Button className="bg-amber text-background hover:bg-amber/90 font-semibold">
-                  {CTA.session} <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Button>
-              </a>
-              <Button asChild variant="outline">
-                <Link to="/scan">Run the free scan first</Link>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
+              <Button className="bg-amber text-background hover:bg-amber/90 font-semibold">
+                {CTA.session} <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
-            </div>
-          )}
-
-          {explicitCheckout && !checkoutOpen && (
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button
-                onClick={startCheckout}
-                disabled={loading}
-                className="bg-amber text-background hover:bg-amber/90 font-semibold"
-              >
-                {tier.ctaLabel} <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/scan">Run the free scan first</Link>
-              </Button>
-            </div>
-          )}
-          {explicitCheckout && !user && !loading && (
-            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
-              <Lock className="w-3 h-3" /> You will sign in first so the workspace is attached to your account.
-            </p>
-          )}
+            </a>
+            <Button asChild variant="outline">
+              <Link to="/scan">Run the free scan first</Link>
+            </Button>
+          </div>
 
           <div className="grid gap-6 md:grid-cols-2 mt-12">
             <section className="forensic-tile rounded-sm border border-amber/30 p-6">
-              <h2 className="font-forensic text-xl font-bold mb-4">What you get every month</h2>
+              <h2 className="font-forensic text-xl font-bold mb-4">What we can establish together</h2>
               <ul className="space-y-2.5">
                 {tier.adds.map(a => (
                   <li key={a} className="text-sm text-foreground/85 flex gap-2 leading-snug">
@@ -121,7 +82,7 @@ export default function GoldenReportIntelligencePage() {
               </ul>
               <p className="text-xs text-muted-foreground mt-5 flex items-start gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber" />
-                Cancel any time from your billing portal. Access stays live through the period you paid for.
+                {EXPECTATION_NOTE}
               </p>
             </section>
           </div>
@@ -131,18 +92,6 @@ export default function GoldenReportIntelligencePage() {
             <p className="text-sm text-foreground/90 leading-relaxed">{tier.outcome}</p>
             <p className="text-xs text-muted-foreground mt-2 italic">For you if: {tier.useCase}</p>
           </section>
-
-          {checkoutOpen && (
-            <section className="mt-12">
-              <h2 className="font-forensic text-2xl font-bold mb-4">Start your subscription</h2>
-              <StripeEmbeddedCheckout
-                priceId={tier.stripeLookupKey!}
-                customerEmail={user?.email || undefined}
-                returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
-                metadata={{ plan_id: tier.id }}
-              />
-            </section>
-          )}
         </div>
       </main>
       <Footer />
