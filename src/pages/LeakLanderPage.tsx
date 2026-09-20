@@ -146,16 +146,12 @@ const LeakLanderPage: React.FC = () => {
 
           <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr] md:items-start text-left">
             <div className="flex flex-col items-center md:items-start gap-4">
-              <a
-                href={methodologyPdf.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open The Aetheris Methodology PDF"
+              <div
                 className="group block h-[290px] w-[210px] shrink-0"
                 style={{ perspective: 1200 }}
               >
                 <div
-                  className="relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)] transition-transform duration-300 group-hover:-translate-y-1"
+                  className="relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)]"
                   style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
                 >
                   <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
@@ -180,20 +176,25 @@ const LeakLanderPage: React.FC = () => {
                       <p className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
                         Field document
                       </p>
-                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors group-hover:bg-amber/10">
-                        Open PDF
+                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber/80">
+                        Being reissued
                       </span>
                     </div>
                   </div>
                 </div>
-              </a>
+              </div>
 
+              <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-[210px]">
+                The field document is being reissued. Ask the reader anything, or talk it through
+                with us directly.
+              </p>
               <a
-                href={methodologyPdf.url}
-                download="Aetheris-Methodology.pdf"
+                href={BOOK_MEETING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border px-6 font-case text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
               >
-                Download PDF
+                Talk With Aetheris
               </a>
             </div>
 
