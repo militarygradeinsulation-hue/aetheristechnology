@@ -395,7 +395,7 @@ export const ChaosMindMap: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">§ Extension · $60 lifetime</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber">§ Extension · Lifetime access</span>
               <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm border border-crimson/50 text-crimson">New</span>
             </div>
             <div className="font-forensic text-lg md:text-xl font-bold leading-tight">
