@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BuyToolDialog } from "@/components/BuyToolDialog";
 import { SHOP_TOOLS, formatToolPrice, type ShopPlan } from "@/lib/tool-shop-catalog";
 import { TierLadder } from "@/components/TierLadder";
-import { Sparkles, ShoppingCart, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
+import { Sparkles, CalendarClock, Cpu, Check, ArrowRight, Trophy, Users, KeyRound } from "lucide-react";
 import { ToolThumbnail } from "@/components/ToolThumbnail";
 import { TechSolutionsAccessBar, useTechAccess, isToolUnlockedByAccess } from "@/components/TechSolutionsAccessBar";
 import { EasyModeRecommender } from "@/components/EasyModeRecommender";
@@ -236,7 +236,7 @@ const TechSolutionsPage: React.FC = () => {
                       onClick={() => openBuy("single", [t.id])}
                       className="flex-1 bg-amber text-background hover:bg-amber/90 font-semibold"
                     >
-                      <ShoppingCart className="w-3 h-3 mr-1" /> Which tier
+                      <CalendarClock className="w-3 h-3 mr-1" /> Which tier
                     </Button>
                   </div>
                   <Link
@@ -396,7 +396,7 @@ const TechSolutionsPage: React.FC = () => {
             <p className="text-sm text-muted-foreground">
               Same rules as the Try surface: sandbox runs are free, nothing is saved, each run is
               independent. Continuous access with persistent memory comes with your Aetheris tier,
-              starting at Signal Pack. There is no standalone tool purchase.
+              starting at Signal Pack. Nothing here is sold on its own.
             </p>
           </div>
         </main>

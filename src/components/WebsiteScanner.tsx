@@ -9,7 +9,6 @@ import { useTrackEvent } from '@/hooks/useTrackEvent';
 import { generatePreviewPdf, generateFullReport, type FullReport } from '@/lib/generateScanReport';
 import { LeakChart } from '@/components/LeakChart';
 import { useAuth } from '@/contexts/AuthContext';
-import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { saveToolRun } from '@/lib/toolSaveHelper';
 import { isPortalSession } from '@/lib/portalWorkspace';
 import { hasValidAdminToken } from '@/lib/adminAuth';
@@ -273,7 +272,6 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
   const [scanPhase, setScanPhase] = useState(0);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState('');
-  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [purchasedTier, setPurchasedTier] = useState<string | null>(null);
   const { trackEvent } = useTrackEvent();
   const { user } = useAuth();
@@ -363,14 +361,6 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
     }
   };
 
-  const handleTierSelect = (priceId: string) => {
-    if (!user) {
-      window.location.href = `/login?redirect=${encodeURIComponent('/scan')}`;
-      return;
-    }
-    setCheckoutPriceId(priceId);
-  };
-
   const isUnlocked = staffUnlock || !!purchasedTier;
 
   return (
@@ -408,39 +398,6 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
         {error && (
           <div className="text-center text-destructive text-sm mb-6">{error}</div>
         )}
-
-        {/* Checkout Modal */}
-        <AnimatePresence>
-          {checkoutPriceId && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
-            >
-              <div className="bg-card border border-border rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto relative">
-                <button
-                  onClick={() => setCheckoutPriceId(null)}
-                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground text-lg"
-                >
-                  ✕
-                </button>
-                <h3 className="text-xl font-bold text-foreground mb-4">Complete Purchase</h3>
-                <StripeEmbeddedCheckout
-                  priceId={checkoutPriceId}
-                  customerEmail={user?.email || undefined}
-                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=scan_report&scan_url=${encodeURIComponent(url)}`}
-                  metadata={{
-                    scan_type: 'report',
-                    scan_url: url,
-                    user_id: user?.id || '',
-                    tier: tierCards.find(t => t.priceId === checkoutPriceId)?.tier || '',
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Loading Progress Bar */}
         <AnimatePresence>

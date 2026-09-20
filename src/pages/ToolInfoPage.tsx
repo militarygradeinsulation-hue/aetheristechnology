@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, ShoppingCart, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CalendarClock, Sparkles, ExternalLink } from "lucide-react";
 import { Background } from "@/components/Background";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -76,7 +76,7 @@ const ToolInfoPage: React.FC = () => {
                   onClick={() => openBuy("single")}
                   className="bg-amber text-background hover:bg-amber/90 font-semibold"
                 >
-                  <ShoppingCart className="w-4 h-4 mr-1.5" /> {tierBadgeForTool(tool.id)}
+                  <CalendarClock className="w-4 h-4 mr-1.5" /> {tierBadgeForTool(tool.id)}
                 </Button>
                 {tool.route && tool.route !== `/try/${tool.id}` && (
                   <Button asChild variant="ghost" className="text-amber hover:bg-amber/5">
