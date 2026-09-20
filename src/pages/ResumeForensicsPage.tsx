@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { BOOK_MEETING_URL } from '@/lib/links';
 import { ContactModal } from '@/components/ContactModal';
-import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -60,7 +60,6 @@ export default function ResumeForensicsPage() {
   const [email, setEmail] = useState('');
   const [credits, setCredits] = useState<number | null>(null);
   const [checkingCredits, setCheckingCredits] = useState(false);
-  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
 
   const [companyUrl, setCompanyUrl] = useState('');
   const [brief, setBrief] = useState<Brief | null>(null);
@@ -196,44 +195,21 @@ export default function ResumeForensicsPage() {
                     <span className={`font-bold text-lg ${credits > 0 ? 'text-amber' : 'text-crimson'}`}>{credits}</span>
                   </div>
                   {credits === 0 && (
-                    <Badge variant="outline" className="border-crimson text-crimson">No credits, buy a pack below</Badge>
+                    <Badge variant="outline" className="border-crimson text-crimson">No scans left — talk with Aetheris for more</Badge>
                   )}
                 </div>
               )}
             </section>
 
-            {/* PACKS, always visible */}
+            {/* Next step, no purchase */}
             <section className="mb-6">
-              <div className="grid md:grid-cols-3 gap-4">
-                {PACKS.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`forensic-tile rounded-sm border p-5 flex flex-col ${p.highlight ? 'border-amber' : 'border-amber/20'}`}
-                  >
-                    {p.highlight && (
-                      <div className="font-case text-[9px] uppercase tracking-widest text-amber mb-2">
-                        Most popular
-                      </div>
-                    )}
-                    <div className="font-forensic text-xl font-bold mb-1">{p.label}</div>
-                    <div className="font-case text-xs text-muted-foreground mb-4">
-                      {p.credits} {p.credits === 1 ? 'scan' : 'scans'}
-                    </div>
-                    <Button
-                      onClick={() => {
-                        if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-                          toast.error('Enter your email above first');
-                          return;
-                        }
-                        setCheckoutPriceId(p.id);
-                      }}
-                      className="mt-auto"
-                      variant={p.highlight ? 'default' : 'outline'}
-                    >
-                      Get {p.credits} {p.credits === 1 ? 'scan' : 'scans'}
-                    </Button>
-                  </div>
-                ))}
+              <div className="forensic-tile rounded-sm border border-amber/30 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="font-case text-sm text-foreground/80">
+                  Need more scans, or a hiring process that stops leaking good candidates? We work that out in a conversation.
+                </p>
+                <Button asChild className="shrink-0">
+                  <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">Talk With Aetheris</a>
+                </Button>
               </div>
             </section>
 
@@ -335,7 +311,7 @@ export default function ResumeForensicsPage() {
                 </Button>
               </div>
               {credits === 0 && (
-                <div className="mt-3 text-sm text-crimson font-case">No credits remaining, buy a pack above.</div>
+                <div className="mt-3 text-sm text-crimson font-case">No scans remaining. Talk with Aetheris to keep going.</div>
               )}
             </section>
 
@@ -428,8 +404,8 @@ export default function ResumeForensicsPage() {
                   <Button variant="outline" onClick={() => { setAnalysis(null); setResumeFile(null); }}>
                     Scan another resume
                   </Button>
-                  <Button variant="outline" onClick={() => setCheckoutPriceId('resume_scan_5')}>
-                    Get more scans
+                  <Button asChild variant="outline">
+                    <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">Talk With Aetheris</a>
                   </Button>
                 </div>
               </section>
@@ -438,22 +414,6 @@ export default function ResumeForensicsPage() {
         </main>
         <Footer />
       </div>
-
-      <Dialog open={!!checkoutPriceId} onOpenChange={(o) => !o && setCheckoutPriceId(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Resume Forensics, Buy scan credits</DialogTitle>
-          </DialogHeader>
-          {checkoutPriceId && (
-            <StripeEmbeddedCheckout
-              priceId={checkoutPriceId}
-              customerEmail={email}
-              returnUrl={`${window.location.origin}/resume-forensics?session_id={CHECKOUT_SESSION_ID}&purchased=1`}
-              metadata={{ priceId: checkoutPriceId, product_name: 'Resume Forensics scans' }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
