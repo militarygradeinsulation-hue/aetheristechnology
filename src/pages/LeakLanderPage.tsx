@@ -24,7 +24,6 @@ import { MethodologyAI } from "@/components/lander/MethodologyAI";
 
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
-import methodologyPdf from "@/assets/aetheris-methodology.pdf.asset.json";
 
 const STEPS = [
   {
