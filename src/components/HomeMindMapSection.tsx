@@ -109,11 +109,11 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   ];
 
   const services: MindMapNodeData[] = [
-    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "$0",         icon: Search,     onClick: () => navigate("/leak-audit"),
+    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "Free",       icon: Search,     onClick: () => navigate("/leak-audit"),
       connections: ["60-second self-scan", "No email required", "Sting is the point"] },
-    { id: "audit",    label: "The Leak Audit",    sublabel: "$2,500",     icon: Microscope, onClick: onBookAudit,
-      connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Fee credits 1:1 to the fix"] },
-    { id: "impl",     label: "Implementation",    sublabel: "$15K / mo",  icon: Wrench,     onClick: onBookAudit,
+    { id: "audit",    label: "The Leak Audit",    sublabel: "Operator-led", icon: Microscope, onClick: onBookAudit,
+      connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Scoped with you before work begins"] },
+    { id: "impl",     label: "Implementation",    sublabel: "Scoped together", icon: Wrench,     onClick: onBookAudit,
       connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
     { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/careers"),
       connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
