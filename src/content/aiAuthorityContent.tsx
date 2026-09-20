@@ -230,7 +230,7 @@ export const PILLAR_ARTICLES: AuthorityArticle[] = [
           <thead><tr><th>Dimension</th><th>Marketing Agency</th><th>Chaos Theory Forensics</th></tr></thead>
           <tbody>
             <tr><td>Scope</td><td>Channel + creative production</td><td>Operational + conversion forensics</td></tr>
-            <tr><td>Pricing model</td><td>Typically $5-15K/mo indefinite</td><td>$18.5K flat Diagnostic + optional 3-mo Active Case</td></tr>
+            <tr><td>Commercial model</td><td>Ongoing retainer, open ended</td><td>Diagnose first, then agree scope and terms on the value recovered</td></tr>
             <tr><td>Deliverable</td><td>Campaigns, content, channel reports</td><td>Revenue Score + Leak Register + fixes</td></tr>
             <tr><td>Timeframe</td><td>Ongoing</td><td>Defined start and close</td></tr>
             <tr><td>Best when</td><td>Need awareness or new creative</td><td>Activity exists but is leaking</td></tr>

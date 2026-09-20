@@ -21,8 +21,8 @@ const CaseStudiesPage: React.FC = () => {
       answer: 'Same deliverable shape across industries: leak map, dollar-quantified leaks, prioritized fixes, ROI projections, and a sealed report. The leak patterns differ by industry, that is what these case studies document.',
     },
     {
-      question: 'How much is the Leak Audit?',
-      answer: 'fixed fee, operator-led. Applied 1:1 toward any engagement that follows.',
+      question: 'What does it cost?',
+      answer: 'The first conversation establishes whether there is a real, recoverable problem. If there is, scope and terms are agreed openly before any work begins, based on the work, the value at stake, and what is fair to both sides.',
     },
     {
       question: 'How fast do you find the first leak?',
@@ -70,7 +70,7 @@ const CaseStudiesPage: React.FC = () => {
               Sample preliminary dossiers and 50 sourced, verified case files. Every study mirrors the leak-audit methodology: name the leak, trace the cause, quantify the damage, and recover the money.
             </p>
             <p className="text-base md:text-lg text-amber max-w-3xl mx-auto mb-8 font-case uppercase tracking-widest">
-              One offer closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit — a fixed fee.</span>
+              One method closes every leak on this page: <span className="text-foreground font-bold">The Leak Audit.</span>
             </p>
           </div>
         </section>
@@ -90,7 +90,7 @@ const CaseStudiesPage: React.FC = () => {
               The methodology travels.
             </h2>
             <p className="text-foreground/85 text-lg mb-8">
-              If revenue moves through systems and people, there are leaks. One fixed fee. Applied 1:1 toward engagement.
+              If revenue moves through systems and people, there are leaks. We find them first, then agree on what happens next.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
