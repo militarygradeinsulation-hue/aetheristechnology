@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, TrendingUp, BookOpen, FileText, Shield, BarChart3, Video, Sparkles, LogIn } from 'lucide-react';
+import { Search, TrendingUp, BookOpen, FileText, Shield, BarChart3, Video, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { StripeEmbeddedCheckout } from '@/components/StripeEmbeddedCheckout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,7 +63,6 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
   const [search, setSearch] = useState('');
   const [activePillar, setActivePillar] = useState<string>('All');
   const [selectedTopic, setSelectedTopic] = useState<typeof TOPIC_POOL[0] | null>(null);
-  const [showCheckout, setShowCheckout] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -83,11 +81,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
   }, [search, activePillar, existingSet]);
 
   const handleBuy = () => {
-    if (!user) {
-      navigate('/login?redirect=/resources');
-      return;
-    }
-    setShowCheckout(true);
+    navigate('/book');
   };
 
   return (
@@ -98,7 +92,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
             Build Your Own <span className="text-amber glow-text">Playbook</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Pick a topic. <span className="text-amber font-semibold">OUR Strategic Business AI</span> generates a comprehensive 20+ page strategic playbook, custom frameworks, data, and action plans. <span className="text-amber font-semibold">$29 each.</span>
+            Pick a topic. <span className="text-amber font-semibold">OUR Strategic Business AI</span> generates a comprehensive 20+ page strategic playbook, custom frameworks, data, and action plans.
           </p>
         </div>
 
@@ -161,7 +155,7 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
         )}
 
         {/* Topic Detail Modal */}
-        <Dialog open={!!selectedTopic && !showCheckout} onOpenChange={(o) => !o && setSelectedTopic(null)}>
+        <Dialog open={!!selectedTopic} onOpenChange={(o) => !o && setSelectedTopic(null)}>
           <DialogContent className="glass border-border max-w-lg">
             {selectedTopic && (
               <>
@@ -197,17 +191,8 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
                     size="lg"
                     onClick={handleBuy}
                   >
-                    {user ? (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Generate & Buy, $25
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="w-4 h-4" />
-                        Sign In to Purchase
-                      </>
-                    )}
+                    <Sparkles className="w-4 h-4" />
+                    Talk With Aetheris
                   </Button>
                 </div>
               </>
@@ -215,29 +200,6 @@ export const PlaybookTopicBrowser: React.FC<PlaybookTopicBrowserProps> = ({ exis
           </DialogContent>
         </Dialog>
 
-        {/* Checkout Modal */}
-        <Dialog open={showCheckout} onOpenChange={(o) => { if (!o) { setShowCheckout(false); setSelectedTopic(null); } }}>
-          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto border-border">
-            <DialogHeader>
-              <DialogTitle className="text-foreground font-display">Complete Your Purchase</DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {selectedTopic?.title}
-              </DialogDescription>
-            </DialogHeader>
-            {selectedTopic && user && (
-              <StripeEmbeddedCheckout
-                priceId="custom_playbook_once"
-                customerEmail={user.email || undefined}
-                returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}&type=playbook&topic=${encodeURIComponent(selectedTopic.title)}`}
-                metadata={{
-                  playbook_topic: selectedTopic.title,
-                  playbook_topic_data: JSON.stringify(selectedTopic),
-                  user_id: user.id,
-                }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </section>
   );
