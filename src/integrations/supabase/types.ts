@@ -9498,6 +9498,16 @@ export type Database = {
           webinar_id: string
         }[]
       }
+      get_active_retargeting_settings: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          google_ads_id: string
+          linkedin_partner_id: string
+          meta_pixel_id: string
+          rb2b_script_id: string
+        }[]
+      }
       get_avg_deal_size: { Args: { _account_id: string }; Returns: number }
       get_careers_positions: { Args: never; Returns: Json }
       get_deliverables_by_session: {
