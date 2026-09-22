@@ -631,9 +631,6 @@ export const ContentEngine: React.FC = () => {
         <RandomPostGenerator />
       )}
 
-      {view === 'zeroburden' && (
-        <ZeroBurdenPack />
-      )}
 
 
 
