@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
-import { ZeroBurdenSection } from '@/components/ZeroBurdenSection';
 
 const SITE = 'https://aetheris.technology';
 
@@ -467,7 +466,6 @@ const DigitalYouPage: React.FC = () => {
           ))}
         </div>
 
-        <ZeroBurdenSection onContactClick={() => setContactOpen(true)} />
 
         {/* Close */}
         <section className="border-t border-border/60 bg-muted/20">

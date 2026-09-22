@@ -113,7 +113,22 @@ serve(async (req) => {
     let totalInserted = 0;
     const breakdown: Record<string, number> = {};
 
-    for (const industry of INDUSTRIES) {
+    // The full sweep can exceed the edge runtime limit (504), which used to kill the run
+    // mid-way. Work through the industries from a stored cursor and stop before the limit,
+    // so each invocation persists its results and the next one continues where this left off.
+    const CURSOR_KEY = 'scrape_leads_cron_cursor';
+    const startedAt = Date.now();
+    const DEADLINE_MS = 110_000;
+    const { data: cursorRow } = await supabase.from('admin_kv').select('value').eq('key', CURSOR_KEY).maybeSingle();
+    let cursor = Number((cursorRow as { value?: unknown } | null)?.value) || 0;
+    if (!Number.isFinite(cursor) || cursor < 0 || cursor >= INDUSTRIES.length) cursor = 0;
+
+    const order = INDUSTRIES.slice(cursor).concat(INDUSTRIES.slice(0, cursor));
+    let processed = 0;
+
+    for (const industry of order) {
+      if (Date.now() - startedAt > DEADLINE_MS) break;
+      processed += 1;
       try {
         const results = await firecrawlSearch(`${industry} companies Indianapolis Indiana`, firecrawlKey, 12);
         if (!results.length) { breakdown[industry] = 0; continue; }
@@ -164,7 +179,10 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, inserted: totalInserted, breakdown }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const nextCursor = (cursor + processed) % INDUSTRIES.length;
+    await supabase.from('admin_kv').upsert({ key: CURSOR_KEY, value: nextCursor }, { onConflict: 'key' });
+
+    return new Response(JSON.stringify({ ok: true, inserted: totalInserted, breakdown, processed, nextCursor }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("admin-scrape-leads-cron error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Server error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

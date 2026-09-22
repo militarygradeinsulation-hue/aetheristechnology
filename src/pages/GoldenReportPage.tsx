@@ -51,7 +51,7 @@ const GoldenReportPage: React.FC = () => {
                 evidence you can search or ask questions of.
               </p>
               <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.2em] text-amber/80 max-w-2xl mx-auto">
-                $3,500 deliverable · included in the $23,500 Full Leak Investigation · not sold standalone
+                Evidence first · produced inside a working engagement · no plan to pick, no cart to fill
               </p>
             </div>
             {hasSharedScan ? (

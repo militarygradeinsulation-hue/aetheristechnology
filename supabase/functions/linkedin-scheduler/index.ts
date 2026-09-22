@@ -97,10 +97,18 @@ Deno.serve(async (req) => {
           ? `${e.label} ${e.status}: ${e.details.slice(0, 300)}`
           : (e as Error).message;
         console.error('[linkedin-scheduler] publish failed', post.id, details);
+        // An expired/invalid LinkedIn connection is an auth problem, not a bad post:
+        // keep the post queued so it publishes automatically once LinkedIn is reconnected.
+        const authProblem = e instanceof LinkedInError
+          && (e.status === 401 || /EXPIRED_ACCESS_TOKEN|REVOKED_ACCESS_TOKEN/i.test(e.details));
         await supabase.from('content_engine_posts').update({
-          linkedin_status: 'failed',
+          linkedin_status: authProblem ? 'queued' : 'failed',
           linkedin_error: details,
         }).eq('id', post.id);
+        if (authProblem) {
+          results.push({ id: post.id, error: details, requeued: true });
+          break; // every remaining post would fail the same way this run
+        }
         results.push({ id: post.id, error: details });
       }
     }

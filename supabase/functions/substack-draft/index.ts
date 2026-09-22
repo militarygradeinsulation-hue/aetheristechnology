@@ -122,12 +122,17 @@ Deno.serve(async (req) => {
 
   try {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const ok = await verifyAdminToken(getAdminTokenFromRequest(req), serviceKey);
-    if (!ok) return json({ error: "Unauthorized" }, 401);
-
     const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", serviceKey);
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action ?? "list");
+
+    // The scheduled sweep is invoked by cron with no admin session. It only emails drafts
+    // whose own scheduled time has passed, to their own stored address, and marks them sent,
+    // so it is idempotent and exposes no data. Every other action still needs the admin token.
+    if (action !== "run_scheduled") {
+      const ok = await verifyAdminToken(getAdminTokenFromRequest(req), serviceKey);
+      if (!ok) return json({ error: "Unauthorized" }, 401);
+    }
 
     // ---------------- source posts to expand ----------------
     if (action === "sources") {
