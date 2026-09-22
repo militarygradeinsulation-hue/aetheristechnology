@@ -74,11 +74,8 @@ export const RetargetingPixel = () => {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data } = await supabase
-        .from('retargeting_settings')
-        .select('linkedin_partner_id, meta_pixel_id, rb2b_script_id, enabled')
-        .eq('id', 1)
-        .maybeSingle();
+      const { data: rows } = await supabase.rpc('get_active_retargeting_settings');
+      const data = Array.isArray(rows) ? rows[0] : null;
       if (!mounted || !data || !data.enabled) return;
 
       settingsRef.current = {
