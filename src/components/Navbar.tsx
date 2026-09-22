@@ -13,6 +13,9 @@ interface NavbarProps {
 
 type NavItem = { label: string; href: string; kind?: 'case'; accent?: boolean; blood?: boolean };
 
+// Module-level so the triple-tap staff shortcut survives Navbar remounts on navigation.
+const logoTapState = { current: 0 };
+
 export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   const { trackEvent } = useTrackEvent();
   const navigate = useNavigate();
   const location = useLocation();
-  const tapCountRef = useRef(0);
+  const tapCountRef = logoTapState;
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogoTap = (e: React.MouseEvent) => {
