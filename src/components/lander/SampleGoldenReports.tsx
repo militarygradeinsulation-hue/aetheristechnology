@@ -262,7 +262,7 @@ const BookCard = ({ report, index, total, progress, config }: BookCardProps) => 
               onPointerDownCapture={(e) => e.stopPropagation()}
               className="relative z-[60] mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
             >
-              <FileText className="h-3 w-3" /> Open PDF <ExternalLink className="h-2.5 w-2.5" />
+              <FileText className="h-3 w-3" /> {report.pdf ? "Open PDF" : "Open report"} <ExternalLink className="h-2.5 w-2.5" />
             </a>
           </div>
         </div>
