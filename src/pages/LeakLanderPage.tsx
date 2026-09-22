@@ -100,7 +100,7 @@ const LeakLanderPage: React.FC = () => {
           />
 
         }
-        description="Experts in making companies visible AND making brand AI be as human as you are."
+        description=""
       >
         <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
           {CORE_PROMISE}
