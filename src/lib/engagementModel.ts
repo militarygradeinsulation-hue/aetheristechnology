@@ -71,7 +71,7 @@ export const FOUNDER_TRUST = {
   short:
     "You will not be charged simply for asking questions. Whether or not we work together, I will answer honestly and help you understand what I see. If there is no clear case for Aetheris to create value, there is no pressure to manufacture one.",
   punch: "No pressure. No mystery invoice. No paid relationship until there is a clear reason for one.",
-  attribution: "Dean \u00b7 Founder, Aetheris Technology",
+  attribution: "Joseph \u00b7 Founder, Aetheris Technology",
 } as const;
 
 /** Calm expectation note to place near conversion points. */
