@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790117001557,
+      "tag": "0000_restrict_retargeting_settings_public_read",
+      "breakpoints": true
+    }
+  ]
+}
