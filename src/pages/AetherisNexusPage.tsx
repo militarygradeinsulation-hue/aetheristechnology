@@ -33,6 +33,7 @@ async function getUserAuthHeader(): Promise<string> {
 
 const STORAGE_KEY = "aetheris-nexus-threads-v1";
 const NEXUS_IDENTITY_KEY = "aetheris-nexus-identity-v1";
+const ARCHITECT_NEXUS_SIGNATURE = "Joseph- MS, BA, IBM\nCEO of Aetheris.Technology";
 
 type NexusIdentity = "default" | "the-architect";
 
@@ -60,6 +61,7 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
+  identity?: NexusIdentity;
   attachments?: Attachment[];
   tools?: ToolEvent[];
   images?: string[]; // generated image data URLs (already watermarked)
@@ -506,7 +508,7 @@ export default function AetherisNexusPage() {
 
 
     const assistantMsg: ChatMessage = {
-      id: uid(), role: "assistant", content: "", tools: [], images: [], createdAt: now(),
+      id: uid(), role: "assistant", content: "", tools: [], images: [], identity: activeThreadLocal.identity || loadNexusIdentity(), createdAt: now(),
     };
 
     updateThread(activeThreadLocal.id, (t) => ({
@@ -769,7 +771,7 @@ export default function AetherisNexusPage() {
           ) : (
             <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6 space-y-6">
               {messages.map((m) => (
-                <MessageBubble key={m.id} msg={m} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} onUseSuggestion={(p) => { if (!streaming && threadId) runImageGen(p, threadId); }} />
+                <MessageBubble key={m.id} msg={m} isStreaming={streaming && m.id === messages[messages.length - 1]?.id} copyId={copyId} onCopy={copyMessage} onDownloadImage={downloadImage} onUseSuggestion={(p) => { if (!streaming && threadId) runImageGen(p, threadId); }} />
               ))}
               {streaming && (
                 <div className="flex items-center gap-2 text-zinc-500 text-sm px-2">
@@ -870,8 +872,8 @@ export default function AetherisNexusPage() {
 }
 
 // ─── Message Bubble ───────────────────────────────────────────────────────
-function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }: {
-  msg: ChatMessage; copyId: string | null;
+function MessageBubble({ msg, isStreaming, copyId, onCopy, onDownloadImage, onUseSuggestion }: {
+  msg: ChatMessage; isStreaming: boolean; copyId: string | null;
   onCopy: (id: string, text: string) => void;
   onDownloadImage: (url: string, idx: number) => void;
   onUseSuggestion?: (prompt: string) => void;
@@ -899,6 +901,7 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }
       </div>
     );
   }
+  const showArchitectSignature = msg.identity === "the-architect" && !!msg.content.trim() && !isStreaming && !/^(_?Error:|_?Chat failed:|_?Nexus could not complete)/i.test(msg.content.trim());
   return (
     <div className="group flex gap-3 animate-fade-in">
       <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center ring-1 ring-amber-500/40 shadow-[0_0_18px_-2px_rgba(245,158,11,0.5)]">
@@ -913,6 +916,11 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }
         {msg.content && (
           <div className="prose prose-invert prose-sm max-w-none prose-headings:text-zinc-100 prose-strong:text-amber-400 prose-a:text-amber-400">
             <ReactMarkdown>{msg.content}</ReactMarkdown>
+          </div>
+        )}
+        {showArchitectSignature && (
+          <div className="mt-4 border-t border-border pt-3 font-mono text-xs leading-relaxed text-muted-foreground whitespace-pre-line">
+            {ARCHITECT_NEXUS_SIGNATURE}
           </div>
         )}
         {msg.images && msg.images.length > 0 && (
@@ -952,7 +960,7 @@ function MessageBubble({ msg, copyId, onCopy, onDownloadImage, onUseSuggestion }
         )}
         {msg.content && (
           <div className="opacity-0 group-hover:opacity-100 transition mt-2">
-            <button onClick={() => onCopy(msg.id, msg.content)} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1">
+            <button onClick={() => onCopy(msg.id, msg.content + (showArchitectSignature ? `\n\n${ARCHITECT_NEXUS_SIGNATURE}` : ""))} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1">
               {copyId === msg.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
             </button>
           </div>
