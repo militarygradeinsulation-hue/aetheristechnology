@@ -15,6 +15,7 @@ type SourceType = 'idea' | 'blog' | 'playbook';
 // supabase/functions/_shared/contentPersonas.ts. Keep in sync.
 const PERSONAS: { value: string; label: string }[] = [
   { value: 'none', label: 'No persona (default Aetheris forensic voice)' },
+  { value: 'the-architect', label: 'The Architect — evidence first, trace the handoff, build the practical way forward' },
   { value: 'alex-hormozi', label: 'Alex Hormozi — offer-stacked, list-driven, blunt money math' },
   { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
   { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
