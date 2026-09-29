@@ -240,10 +240,11 @@ Deno.serve(async (req) => {
           const includeTools = useTools && !isFinalRound;
           let res: Response | null = null;
           let lastErr = "";
+          let retryDelayMs = 0;
           const attempts = 3;
           for (let attemptIndex = 0; attemptIndex < attempts; attemptIndex++) {
             if (attemptIndex > 0) {
-              await new Promise((resolve) => setTimeout(resolve, 500 * (2 ** (attemptIndex - 1)) + Math.floor(Math.random() * 250)));
+              await new Promise((resolve) => setTimeout(resolve, Math.max(retryDelayMs, 500 * (2 ** (attemptIndex - 1))) + Math.floor(Math.random() * 250)));
             }
             try {
               const attempt = await fetch(AI_URL, {
@@ -270,6 +271,8 @@ Deno.serve(async (req) => {
               try { safeMessage = JSON.parse(rawError)?.message || JSON.parse(rawError)?.error?.message || safeMessage; } catch {}
               lastErr = safeMessage || `AI request failed with status ${attempt.status}`;
               const retryable = attempt.status === 429 || attempt.status >= 500;
+              const retryAfter = Number(attempt.headers.get("Retry-After"));
+              retryDelayMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 0;
               console.warn(`[nexus] ${MODEL} failed with ${attempt.status}`);
               if (!retryable) break;
             } catch (e) {
