@@ -5,12 +5,14 @@ import {
   AETHERIS_VINTAGE_DETECTIVE,
   VINTAGE_DETECTIVE_COPY_DIRECTION,
 } from "./visual-style-presets.ts";
+import { THE_ARCHITECT_ID, architectIdentityPrompt } from "./architect-identity.ts";
 
 export const PRESET_WORDS: Record<string, number> = {
   micro: 40, short: 100, social: 200, expanded: 400, article: 750, substack: 1200, deep: 2000, custom: 0,
 };
 export const PLATFORM_IDS = ["general", "linkedin", "facebook", "instagram", "x", "blog", "substack"];
 export const MODE_IDS = ["brand", "industry", "story", "educational", "contrarian", "custom"];
+export const IDENTITY_IDS = ["default", THE_ARCHITECT_ID];
 export const CUSTOM_MIN_WORDS = 40;
 export const CUSTOM_MAX_WORDS = 3000;
 export const LENGTH_TOLERANCE = 0.10;
@@ -38,6 +40,7 @@ export interface ValidatedRandomPost {
   brief: string;
   /** Selected visual style preset id. Only recognised ids steer the copy. */
   stylePreset: string;
+  identity: string;
 }
 
 export function validateRandomPost(body: Record<string, unknown>): ValidatedRandomPost {
@@ -68,6 +71,7 @@ export function validateRandomPost(body: Record<string, unknown>): ValidatedRand
     avoid: Array.isArray(body.avoid) ? body.avoid.slice(0, 6).map((a) => String(a).slice(0, 600)) : [],
     brief: String(body.brief ?? "").trim().slice(0, 6000),
     stylePreset: String(body.style_preset ?? "").trim().slice(0, 64),
+    identity: IDENTITY_IDS.includes(String(body.identity ?? "")) ? String(body.identity) : "default",
   };
 }
 
@@ -119,6 +123,7 @@ ${v.topic ? `TOPIC: ${v.topic}` : ""}
 CONTENT ANGLE FOR THIS RUN (use it, do not name it): ${v.angle || "your choice, pick an unexpected one"}
 RANDOM SEED (forces a different treatment each run): ${v.seed}
 ${v.tone ? `TONE: ${v.tone}` : ""}
+${architectIdentityPrompt(v.identity)}
 
 PLATFORM: ${PLATFORM_GUIDE[v.platform]}
 

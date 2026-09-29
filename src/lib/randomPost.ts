@@ -54,6 +54,17 @@ export const TONES = [
   'Forensic Operator', 'Direct', 'Analytical', 'Warm', 'Punchy', 'Story Driven', 'Executive',
 ] as const;
 
+export const WRITING_IDENTITIES = [
+  { id: 'default', label: 'Standard Aetheris', description: 'Use the current Aetheris voice and saved brand direction.' },
+  { id: 'the-architect', label: 'The Architect', description: 'Connect the evidence, expose the handoff, and build a practical way forward.' },
+] as const;
+
+export type WritingIdentityId = typeof WRITING_IDENTITIES[number]['id'];
+
+export function isValidWritingIdentity(value: unknown): value is WritingIdentityId {
+  return typeof value === 'string' && WRITING_IDENTITIES.some((identity) => identity.id === value);
+}
+
 /** Substack always defaults to the long form target, other lengths remain selectable. */
 export function defaultPresetForPlatform(platform: PlatformId): LengthPresetId {
   return platform === 'substack' ? 'substack' : 'social';
@@ -171,6 +182,7 @@ export interface RandomPostRequest {
   angle?: string;
   seed?: string;
   avoid?: string[];
+  identity?: WritingIdentityId;
 }
 
 export interface ValidatedRequest extends RandomPostRequest {
@@ -196,6 +208,7 @@ export function validateRequest(body: Partial<RandomPostRequest>): ValidatedRequ
     angle: (body.angle || '').toString().trim().slice(0, 300),
     seed: (body.seed || '').toString().trim().slice(0, 64),
     avoid: Array.isArray(body.avoid) ? body.avoid.slice(0, 6).map((a) => String(a).slice(0, 600)) : [],
+    identity: isValidWritingIdentity(body.identity) ? body.identity : 'default',
   };
 }
 
@@ -217,6 +230,8 @@ export interface RandomPostDraft {
   visualStyle?: string;
   /** Selected image aspect ratio for the handoff to the image generator. */
   aspect?: string;
+  /** Selected writing identity. Missing on legacy drafts means the standard voice. */
+  identity?: WritingIdentityId;
 }
 
 export function serializeDraft(d: RandomPostDraft): string {
@@ -238,6 +253,7 @@ export function parseDraft(raw: string | null): RandomPostDraft | null {
       words: countWords(String(d.body || '')),
       visualStyle: d.visualStyle ? String(d.visualStyle) : undefined,
       aspect: d.aspect ? String(d.aspect) : undefined,
+      identity: isValidWritingIdentity(d.identity) ? d.identity : 'default',
     };
   } catch {
     return null;

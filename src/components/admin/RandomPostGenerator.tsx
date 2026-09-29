@@ -12,11 +12,11 @@ import {
   Shuffle, Sparkles, Copy, Check, Download, Save, RefreshCw, Loader2, AlertTriangle, Wand2,
 } from 'lucide-react';
 import {
-  LENGTH_PRESETS, PLATFORMS, TOPIC_MODES, TONES, CUSTOM_MIN_WORDS, CUSTOM_MAX_WORDS,
+  LENGTH_PRESETS, PLATFORMS, TOPIC_MODES, TONES, WRITING_IDENTITIES, CUSTOM_MIN_WORDS, CUSTOM_MAX_WORDS,
   RANDOM_POST_DRAFT_KEY, clampCustomWords, countWords, defaultPresetForPlatform, fingerprint,
   isDuplicate, makeSeed, parseDraft, pickAngle, resolveTargetWords, serializeDraft, toleranceBand,
   withinTolerance, wantsTitle,
-  type LengthPresetId, type PlatformId, type TopicModeId,
+  type LengthPresetId, type PlatformId, type TopicModeId, type WritingIdentityId,
 } from '@/lib/randomPost';
 import {
   AETHERIS_VINTAGE_DETECTIVE, ASPECT_OPTIONS, detectiveBriefFromPost, getVisualStyle,
@@ -46,6 +46,7 @@ export const RandomPostGenerator: React.FC = () => {
   const [customWords, setCustomWords] = useState(500);
   const [topic, setTopic] = useState('');
   const [tone, setTone] = useState('');
+  const [identity, setIdentity] = useState<WritingIdentityId>('default');
 
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
@@ -70,6 +71,7 @@ export const RandomPostGenerator: React.FC = () => {
     if (d) {
       setPlatform(d.platform); setMode(d.mode); setPreset(d.preset);
       setCustomWords(d.customWords); setTopic(d.topic); setTone(d.tone);
+      setIdentity(d.identity || 'default');
       setTitle(d.title); setBodyText(d.body);
       if (d.visualStyle) setVisualStyle(d.visualStyle);
       if (d.aspect) setAspect(d.aspect);
@@ -85,10 +87,10 @@ export const RandomPostGenerator: React.FC = () => {
       localStorage.setItem(RANDOM_POST_DRAFT_KEY, serializeDraft({
         platform, mode, preset, customWords, topic, tone, title,
         body: bodyText, words: meta?.target || countWords(bodyText), savedAt: new Date().toISOString(),
-        visualStyle, aspect,
+        visualStyle, aspect, identity,
       }));
     } catch { /* storage unavailable */ }
-  }, [platform, mode, preset, customWords, topic, tone, title, bodyText, meta, visualStyle, aspect]);
+  }, [platform, mode, preset, customWords, topic, tone, title, bodyText, meta, visualStyle, aspect, identity]);
 
   const onPlatform = (p: PlatformId) => {
     setPlatform(p);
@@ -127,6 +129,7 @@ export const RandomPostGenerator: React.FC = () => {
             platform, mode: effMode, preset, customWords,
             topic: effMode === 'custom' ? topic.trim() : topic.trim(),
             tone, angle, seed: makeSeed(),
+            identity,
             style_preset: visualStyle,
             avoid: recentRef.current.slice(0, 4),
           },
@@ -159,7 +162,7 @@ export const RandomPostGenerator: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [platform, mode, preset, customWords, topic, tone, visualStyle]);
+  }, [platform, mode, preset, customWords, topic, tone, visualStyle, identity]);
 
   const fullText = title ? `${title}\n\n${bodyText}` : bodyText;
 
@@ -182,7 +185,7 @@ export const RandomPostGenerator: React.FC = () => {
     const ok = await saveToolRun({
       tool_type: 'random_post',
       title: title || `Random ${platform} post (${meta?.words || countWords(bodyText)} words)`,
-      input_data: { platform, mode, preset, customWords, topic, tone, angle: meta?.angle, style_preset: visualStyle, aspect_ratio: aspect },
+      input_data: { platform, mode, preset, customWords, topic, tone, identity, angle: meta?.angle, style_preset: visualStyle, aspect_ratio: aspect },
       output_data: { title, body: bodyText, words: meta?.words },
     });
     setSaving(false);
@@ -294,6 +297,18 @@ export const RandomPostGenerator: React.FC = () => {
               </div>
             </div>
           )}
+        </Section>
+
+        {/* Tone */}
+        <Section label="Identity">
+          <div className="flex flex-wrap gap-2">
+            {WRITING_IDENTITIES.map((item) => (
+              <Chip key={item.id} active={identity === item.id} onClick={() => setIdentity(item.id)}>{item.label}</Chip>
+            ))}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-2">
+            {WRITING_IDENTITIES.find((item) => item.id === identity)?.description}
+          </div>
         </Section>
 
         {/* Tone */}
