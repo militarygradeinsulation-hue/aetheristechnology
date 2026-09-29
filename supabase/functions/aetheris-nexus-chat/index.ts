@@ -197,7 +197,12 @@ Deno.serve(async (req) => {
         : (Array.isArray(message.content) ? message.content.map((part: any) => {
             if (part?.type === "text") return { type: "input_text", text: String(part.text || "") };
             if (part?.type === "image_url") return { type: "input_image", image_url: part.image_url?.url };
-            return { type: "input_text", text: `[Attached file: ${String(part?.file?.filename || "document")}]` };
+            if (part?.type === "file") return {
+              type: "input_file",
+              filename: String(part.file?.filename || "document"),
+              file_data: part.file?.file_data,
+            };
+            return { type: "input_text", text: String(part?.text || "") };
           }) : [{ type: "input_text", text: String(message.content || "") }]),
     })),
   ];
