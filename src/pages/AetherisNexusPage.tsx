@@ -849,7 +849,7 @@ export default function AetherisNexusPage() {
                 <span>Identity</span>
                 <select
                   aria-label="Nexus identity"
-                  value={activeThread?.identity || "default"}
+                  value={activeThread?.identity || loadNexusIdentity()}
                   onChange={(event) => setActiveIdentity(event.target.value === "the-architect" ? "the-architect" : "default")}
                   className="rounded border border-white/10 bg-zinc-950 px-2 py-1 text-zinc-300 outline-none focus:border-amber-500/60"
                 >
