@@ -4,8 +4,11 @@
 // Mirrors the PERSONAS / PERSONA_DIRECTIVES / PERSONA_VARIATIONS
 // defined in src/components/admin/LinkedInPostStudio.tsx.
 
+import { THE_ARCHITECT_ID, THE_ARCHITECT_PROMPT } from './architect-identity.ts';
+
 export const PERSONAS = [
   { value: 'none', label: 'No persona (default voice)' },
+  { value: 'the-architect', label: 'The Architect — evidence first, trace the handoff, build the practical way forward' },
   { value: 'alex-hormozi', label: 'Alex Hormozi — offer-stacked, list-driven, blunt money math' },
   { value: 'machiavellian', label: 'Machiavellian — strategic, calculating, power-aware' },
   { value: 'elon-musk', label: 'Elon Musk — terse, first-principles, dry tech bravado' },
