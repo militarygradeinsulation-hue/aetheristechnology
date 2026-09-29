@@ -421,6 +421,14 @@ const PERSONA_VARIATIONS: Record<string, {
     rhythmTwists: ['one sentence per line for the entire post', 'one numbered list of 3 to 5 parallel bullets, every bullet starting with the same word (numbered only, never dashed)', 'one explicit money math line (numbers, arrows, equals signs OK)', 'zero adjectives in the bullets, verbs and nouns only', 'no emojis, no hashtags, no "DM me", and absolutely no dash characters anywhere (no —, no -, no -)'],
     lenses: ['the upstream problem the reader is avoiding by working on the downstream one', 'the boring volume nobody wants to do', 'the offer / lead / skill / volume axis under the tactic question', 'the math the reader is refusing to do out loud', 'the lazy shortcut everyone is buying instead of doing the reps'],
   },
+  'the-architect': {
+    moods: ['evidence-first calm', 'operator focus', 'plain-spoken conviction', 'patient diagnostic attention'],
+    openers: ['open with the specific tension in the source, stated flat', 'open with the handoff where accountability goes unclear', 'open with what the reader assumed versus what the evidence shows', 'open with the business consequence before any explanation'],
+    pivots: ['separate what is demonstrated from what is suspected, then say what would confirm it', 'name who owns the next step and what information reaches them', 'reduce the fix to the simplest complete version that solves the primary problem', 'connect the problem to one defined outcome, owner, and next action'],
+    closers: ['close with one clear recommendation and the way to verify progress', 'close with the owner and the next action', 'close with the measurement that proves it worked', 'close flat, on the practical way forward'],
+    rhythmTwists: ['one short verdict sentence on its own line', 'one plain-language translation of a complicated system', 'one numbered sequence of the working order (observe, connect, verify, prioritize, build, measure) where the source supports it', 'no emojis, no hashtags, and absolutely no dash characters anywhere (no —, no –, no -)'],
+    lenses: ['the handoff where responsibility becomes unclear', 'the gap between what the process claims and what it does', 'the evidence the reader is not looking at yet', 'the smallest complete fix with an outsized payoff'],
+  },
   machiavellian: {
     moods: ['cold patience', 'amused detachment', 'quiet contempt', 'surgical calm', 'predatory stillness'],
     openers: ['name who actually benefits before describing the situation', 'open with the gap between stated motive and real motive', 'open with what the powerful never say out loud', 'open by reframing a "problem" as a position being defended'],
