@@ -32,6 +32,17 @@ async function getUserAuthHeader(): Promise<string> {
 }
 
 const STORAGE_KEY = "aetheris-nexus-threads-v1";
+const NEXUS_IDENTITY_KEY = "aetheris-nexus-identity-v1";
+
+type NexusIdentity = "default" | "the-architect";
+
+function loadNexusIdentity(): NexusIdentity {
+  try {
+    return localStorage.getItem(NEXUS_IDENTITY_KEY) === "the-architect" ? "the-architect" : "default";
+  } catch {
+    return "default";
+  }
+}
 
 type Attachment = {
   name: string;
@@ -62,6 +73,7 @@ type Thread = {
   title: string;
   updatedAt: number;
   messages: ChatMessage[];
+  identity?: NexusIdentity;
 };
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -122,6 +134,7 @@ async function applyWatermark(imgDataUrl: string): Promise<string> {
 // ─── Streaming chat call ──────────────────────────────────────────────────
 async function streamChat(
   messages: ChatMessage[],
+  identity: NexusIdentity,
   onEvent: (evt: any) => void,
   signal: AbortSignal,
 ) {
@@ -154,7 +167,7 @@ async function streamChat(
       Authorization: authHeader,
       apikey: ANON_KEY,
     },
-    body: JSON.stringify({ messages: apiMessages }),
+    body: JSON.stringify({ messages: apiMessages, identity }),
   });
   if (!res.ok || !res.body) {
     throw new Error(`Chat failed: ${res.status} ${await res.text().catch(() => "")}`);
@@ -322,7 +335,7 @@ export default function AetherisNexusPage() {
       if (existing.length > 0) {
         navigate(`/aetheris-ai/${existing[0].id}${ctx}`, { replace: true });
       } else {
-        const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
+        const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [], identity: loadNexusIdentity() };
         saveThreads([t]);
         setThreads([t]);
         navigate(`/aetheris-ai/${t.id}${ctx}`, { replace: true });
@@ -344,7 +357,7 @@ export default function AetherisNexusPage() {
   }, []);
 
   const createThread = useCallback(() => {
-    const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
+    const t: Thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [], identity: loadNexusIdentity() };
     setThreads((prev) => {
       const next = [t, ...prev];
       saveThreads(next);
@@ -353,6 +366,12 @@ export default function AetherisNexusPage() {
     navigate(`/aetheris-ai/${t.id}`);
     setSidebarOpen(false);
   }, [navigate]);
+
+  const setActiveIdentity = useCallback((identity: NexusIdentity) => {
+    try { localStorage.setItem(NEXUS_IDENTITY_KEY, identity); } catch {}
+    if (!activeThread) return;
+    updateThread(activeThread.id, (thread) => ({ ...thread, identity, updatedAt: now() }));
+  }, [activeThread, updateThread]);
 
   const deleteThread = useCallback((id: string) => {
     if (canSyncNexus()) deleteRemoteThread(id).catch(() => {});
@@ -454,7 +473,7 @@ export default function AetherisNexusPage() {
     // now so Send is never a silent no-op.
     let thread = activeThread;
     if (!thread) {
-      thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [] };
+      thread = { id: uid(), title: "New conversation", updatedAt: now(), messages: [], identity: loadNexusIdentity() };
       setThreads((prev) => {
         const next = [thread!, ...prev.filter((t) => t.id !== thread!.id)];
         saveThreads(next);
@@ -506,7 +525,7 @@ export default function AetherisNexusPage() {
     const baseMessages: ChatMessage[] = [...activeThreadLocal.messages, userMsg];
 
     try {
-      await streamChat(baseMessages, (evt) => {
+      await streamChat(baseMessages, activeThreadLocal.identity || loadNexusIdentity(), (evt) => {
         if (evt.type === "delta") {
           updateThread(activeThreadLocal.id, (t) => ({
             ...t,
@@ -826,6 +845,18 @@ export default function AetherisNexusPage() {
             <div className="text-[10px] text-zinc-600 text-center mt-2 tracking-wide">
               Aetheris Nexus can search the web, scan companies, and generate watermarked imagery. Verify critical outputs.
             </div>
+              <div className="mt-2 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500">
+                <span>Identity</span>
+                <select
+                  aria-label="Nexus identity"
+                  value={activeThread?.identity || "default"}
+                  onChange={(event) => setActiveIdentity(event.target.value === "the-architect" ? "the-architect" : "default")}
+                  className="rounded border border-white/10 bg-zinc-950 px-2 py-1 text-zinc-300 outline-none focus:border-amber-500/60"
+                >
+                  <option value="default">Standard Aetheris</option>
+                  <option value="the-architect">The Architect</option>
+                </select>
+              </div>
           </div>
         </div>
       </main>

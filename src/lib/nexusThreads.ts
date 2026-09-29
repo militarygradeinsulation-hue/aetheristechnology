@@ -13,6 +13,7 @@ export type SyncThread = {
   title: string;
   updatedAt: number;
   messages: unknown[];
+  identity?: 'default' | 'the-architect';
 };
 
 function authHeaders(): Record<string, string> | null {
