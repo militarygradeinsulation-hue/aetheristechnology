@@ -16,10 +16,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-// Live Gemini generation — every script written fresh in Aetheris voice, no canned phrases.
-const PLAN_MODEL = "google/gemini-2.5-flash";
-const SCRIPT_MODEL = "google/gemini-2.5-pro";
+const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/responses";
+const CONTENT_MODEL = "openai/gpt-6-astra";
 
 const AETHERIS_SIGNATURE = "Joseph ~AI Architect MS, BA, IBM AI Certified Aetheris.Technology";
 const signCaption = (cap: unknown): string => {
@@ -112,34 +110,79 @@ async function callAI(model: string, system: string, user: string, tool: any) {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) throw new Error("LOVABLE_API_KEY missing");
 
-  const res = await fetch(LOVABLE_AI_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      tools: [tool],
-      tool_choice: { type: "function", function: { name: tool.function.name } },
-    }),
-  });
+  const responseTool = {
+    type: "function",
+    name: tool.function.name,
+    description: tool.function.description,
+    strict: true,
+    parameters: tool.function.parameters,
+  };
+  let retryDelayMs = 0;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      const jitter = Math.floor(Math.random() * 250);
+      await new Promise((resolve) => setTimeout(resolve, Math.max(retryDelayMs, 500 * (2 ** (attempt - 1))) + jitter));
+    }
+    const res = await fetch(LOVABLE_AI_URL, {
+      method: "POST",
+      headers: {
+        "Lovable-API-Key": key,
+        "X-Lovable-AIG-SDK": "fetch",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        input: [
+          { role: "system", content: [{ type: "input_text", text: system }] },
+          { role: "user", content: [{ type: "input_text", text: user }] },
+        ],
+        tools: [responseTool],
+        tool_choice: { type: "function", name: responseTool.name },
+        stream: true,
+        store: false,
+        reasoning: { effort: "medium", summary: "auto" },
+        include: ["reasoning.encrypted_content"],
+      }),
+    });
 
-  if (!res.ok) {
-    if (res.status === 429) throw new Error("Rate limited. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted. Top up in workspace settings.");
-    const t = await res.text();
-    throw new Error(`AI gateway ${res.status}: ${t.slice(0, 200)}`);
+    if (!res.ok || !res.body) {
+      const raw = await res.text().catch(() => "");
+      let safeMessage = raw.slice(0, 240);
+      try { safeMessage = JSON.parse(raw)?.message || JSON.parse(raw)?.error?.message || safeMessage; } catch {}
+      if (res.status !== 429 && res.status < 500) throw new Error(safeMessage || `AI gateway ${res.status}`);
+      const retryAfter = Number(res.headers.get("Retry-After"));
+      retryDelayMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 0;
+      if (attempt === 2) throw new Error(safeMessage || "AI is temporarily unavailable. Try again shortly.");
+      continue;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let functionArguments = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        let event: any;
+        try { event = JSON.parse(payload); } catch { continue; }
+        if (event.type === "response.function_call_arguments.delta") functionArguments += String(event.delta || "");
+        if (event.type === "response.output_item.done" && event.item?.type === "function_call") {
+          functionArguments = String(event.item.arguments || functionArguments);
+        }
+        if (event.type === "error") throw new Error(event.error?.message || event.message || "AI generation failed");
+      }
+    }
+    if (!functionArguments) throw new Error("AI did not return usable structured content.");
+    return stripDashesDeep(JSON.parse(functionArguments));
   }
-
-  const data = await res.json();
-  const call = data?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!call?.function?.arguments) throw new Error("No tool call returned");
-  return stripDashesDeep(JSON.parse(call.function.arguments));
+  throw new Error("AI is temporarily unavailable. Try again shortly.");
 }
 
 const PLAN_TOOL = {
@@ -340,7 +383,7 @@ serve(async (req) => {
       if (serr || !strategy) throw serr || new Error("Strategy missing");
 
       const result = await callAI(
-        SCRIPT_MODEL,
+        CONTENT_MODEL,
         systemPrompt(strategy as Strategy),
         scriptUserPrompt(strategy as Strategy, {
           format: post.format,
@@ -426,7 +469,7 @@ ${directionBlock || `Topic angles must be DIVERSE. Mine the full landscape of ${
 
 ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the same angle twice.` : ""}`;
 
-      const plan = await callAI(PLAN_MODEL, systemPrompt(strategy as Strategy), planUserPrompt, PLAN_TOOL);
+      const plan = await callAI(CONTENT_MODEL, systemPrompt(strategy as Strategy), planUserPrompt, PLAN_TOOL);
       if (!plan?.slots?.length) throw new Error("Planner returned no slots");
 
       const scriptDirection = directionBlock
@@ -436,7 +479,7 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       const scriptResults = await Promise.all(plan.slots.map(async (planSlot: any, i: number) => {
         try {
           const r = await callAI(
-            SCRIPT_MODEL,
+            CONTENT_MODEL,
             systemPrompt(strategy as Strategy),
             scriptUserPrompt(strategy as Strategy, planSlot) + scriptDirection,
             SCRIPT_TOOL,
@@ -502,7 +545,7 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       });
 
       const wantsTitle = v.targetWords >= 700;
-      const model = v.targetWords >= 700 ? SCRIPT_MODEL : PLAN_MODEL;
+      const model = CONTENT_MODEL;
 
       let result = await callAI(model, system, randomPostUserPrompt(v, wantsTitle), RANDOM_POST_TOOL);
       let bodyText = String(result?.body || "").trim();

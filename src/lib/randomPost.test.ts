@@ -3,7 +3,7 @@ import {
   LENGTH_PRESETS, PLATFORMS, TOPIC_MODES, CUSTOM_MIN_WORDS, CUSTOM_MAX_WORDS,
   RANDOM_POST_DRAFT_KEY, clampCustomWords, countWords, defaultPresetForPlatform, fingerprint,
   isDuplicate, makeSeed, parseDraft, pickAngle, resolveTargetWords, serializeDraft, toleranceBand,
-  validateRequest, withinTolerance, wantsTitle, CONTENT_ANGLES,
+  validateRequest, withinTolerance, wantsTitle, CONTENT_ANGLES, WRITING_IDENTITIES, isValidWritingIdentity,
 } from './randomPost';
 
 describe('length presets', () => {
@@ -78,6 +78,12 @@ describe('request validation', () => {
     expect(() => validateRequest({ platform: 'myspace' as never, mode: 'brand', preset: 'short' })).toThrow(/platform/i);
     expect(() => validateRequest({ platform: 'general', mode: 'vibes' as never, preset: 'short' })).toThrow(/mode/i);
   });
+  it('accepts The Architect and defaults unknown identities safely', () => {
+    expect(WRITING_IDENTITIES.some((identity) => identity.id === 'the-architect')).toBe(true);
+    expect(isValidWritingIdentity('the-architect')).toBe(true);
+    expect(validateRequest({ platform: 'general', mode: 'brand', preset: 'short', identity: 'the-architect' }).identity).toBe('the-architect');
+    expect(validateRequest({ platform: 'general', mode: 'brand', preset: 'short', identity: 'unknown' as never }).identity).toBe('default');
+  });
   it('caps the avoid list', () => {
     const v = validateRequest({ platform: 'general', mode: 'brand', preset: 'short', avoid: Array(20).fill('x') });
     expect(v.avoid!.length).toBe(6);
@@ -148,6 +154,7 @@ describe('draft persistence', () => {
       platform: 'substack' as const, mode: 'story' as const, preset: 'substack' as const,
       customWords: 500, topic: 't', tone: 'Direct', title: 'Title',
       body: 'one two three', words: 1200, savedAt: new Date().toISOString(),
+      identity: 'the-architect' as const,
     };
     localStorage.setItem(RANDOM_POST_DRAFT_KEY, serializeDraft(draft));
     const back = parseDraft(localStorage.getItem(RANDOM_POST_DRAFT_KEY));
@@ -155,6 +162,7 @@ describe('draft persistence', () => {
     expect(back?.preset).toBe('substack');
     expect(back?.body).toBe('one two three');
     expect(back?.words).toBe(3);
+    expect(back?.identity).toBe('the-architect');
   });
   it('returns null for corrupt or unknown drafts', () => {
     expect(parseDraft('not json')).toBeNull();

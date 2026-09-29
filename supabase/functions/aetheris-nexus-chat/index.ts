@@ -5,6 +5,7 @@
 
 import { INFLUENCE_BLUEPRINT_COMPACT, RECIPROCITY_OPENING_RULE } from "../_shared/influenceBlueprint.ts";
 import { sanitizedGoldenReport } from "../_shared/golden-money-sanitizer.ts";
+import { architectIdentityPrompt } from "../_shared/architect-identity.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +17,8 @@ const corsHeaders = {
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_URL = "https://ai.gateway.lovable.dev/v1/responses";
+const MODEL = "openai/gpt-6-astra";
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -63,32 +65,32 @@ ${RECIPROCITY_OPENING_RULE}`;
 const TOOLS = [
   {
     type: "function",
-    function: {
-      name: "web_search",
-      description: "Search the live web. Use for current events, prices, news, people, or any fresh info.",
-      parameters: {
+    name: "web_search",
+    description: "Search the live web. Use for current events, prices, news, people, or any fresh info.",
+    strict: true,
+    parameters: {
         type: "object",
         required: ["query"],
+        additionalProperties: false,
         properties: {
           query: { type: "string", description: "Search query" },
         },
       },
-    },
   },
   {
     type: "function",
-    function: {
-      name: "scan_company",
-      description: "Run a full forensic scan on a company website. Returns leak findings, opportunities, risk scores, brand analysis. Use when the user asks to analyze, scan, audit, look into, or consult on a company.",
-      parameters: {
+    name: "scan_company",
+    description: "Run a full forensic scan on a company website. Returns leak findings, opportunities, risk scores, brand analysis. Use when the user asks to analyze, scan, audit, look into, or consult on a company.",
+    strict: true,
+    parameters: {
         type: "object",
-        required: ["url"],
+        required: ["url", "company"],
+        additionalProperties: false,
         properties: {
           url: { type: "string", description: "Company website URL (e.g. https://example.com)" },
-          company: { type: "string", description: "Optional company name" },
+          company: { type: ["string", "null"], description: "Company name when known, otherwise null" },
         },
       },
-    },
   },
 ];
 
@@ -168,7 +170,7 @@ Deno.serve(async (req) => {
   if (!LOVABLE_API_KEY) return json({ error: "Missing LOVABLE_API_KEY" }, 500);
 
 
-  let body: { messages?: any[]; model?: string; useSearch?: boolean };
+  let body: { messages?: any[]; useSearch?: boolean; identity?: string };
   try {
     body = await req.json();
   } catch {
@@ -178,18 +180,31 @@ Deno.serve(async (req) => {
   const incoming = Array.isArray(body.messages) ? body.messages : [];
   if (incoming.length === 0) return json({ error: "messages required" }, 400);
 
-  const model = body.model || "google/gemini-2.5-flash";
   const adminToken = req.headers.get("x-admin-token") || undefined;
 
-  // Build message list with system prompt
-  const messages: any[] = [
-    { role: "system", content: SYSTEM_PROMPT },
+  const identityPrompt = architectIdentityPrompt(body.identity);
+  const input: any[] = [
+    { role: "system", content: [{ type: "input_text", text: SYSTEM_PROMPT }] },
+    ...(identityPrompt ? [{ role: "system", content: [{ type: "input_text", text: identityPrompt }] }] : []),
     {
       role: "system",
-      content:
-        "GOLDEN REPORT MONEY LOCK. Any scan report you are shown has already been rendered from the canonical Financial Leak Ledger. You may quote a dollar figure ONLY if it appears verbatim in that sanitized report, and only in the same scope it appears in (a chapter figure stays in that chapter, the report total stays a report total). You must never add, sum, average, extrapolate, annualize, discount or otherwise derive a new dollar amount, and never invent one. If a number is not in the report, say it is not modeled. USD only.",
+      content: [{ type: "input_text", text: "GOLDEN REPORT MONEY LOCK. Any scan report you are shown has already been rendered from the canonical Financial Leak Ledger. You may quote a dollar figure ONLY if it appears verbatim in that sanitized report, and only in the same scope it appears in. You must never add, sum, average, extrapolate, annualize, discount or otherwise derive a new dollar amount, and never invent one. If a number is not in the report, say it is not modeled. USD only." }],
     },
-    ...incoming,
+    ...incoming.map((message) => ({
+      role: message.role,
+      content: typeof message.content === "string"
+        ? [{ type: message.role === "assistant" ? "output_text" : "input_text", text: message.content }]
+        : (Array.isArray(message.content) ? message.content.map((part: any) => {
+            if (part?.type === "text") return { type: "input_text", text: String(part.text || "") };
+            if (part?.type === "image_url") return { type: "input_image", image_url: part.image_url?.url };
+            if (part?.type === "file") return {
+              type: "input_file",
+              filename: String(part.file?.filename || "document"),
+              file_data: part.file?.file_data,
+            };
+            return { type: "input_text", text: String(part?.text || "") };
+          }) : [{ type: "input_text", text: String(message.content || "") }]),
+    })),
   ];
 
   // Gate tools by intent. Attaching tools on every call forces the model to
@@ -228,40 +243,47 @@ Deno.serve(async (req) => {
         for (let round = 0; round < maxRounds; round++) {
           const isFinalRound = round === maxRounds - 1;
           const includeTools = useTools && !isFinalRound;
-          // Use streaming on every call so the user sees tokens immediately.
-          // Nexus must never hard-fail on a single model: walk a fallback chain
-          // (requested model -> flash -> lite -> gpt-5-mini) whenever the
-          // gateway answers with an error (rate limit, overload, bad model).
-          const modelChain = [...new Set([
-            model,
-            "google/gemini-2.5-flash",
-            "google/gemini-2.5-flash-lite",
-            "openai/gpt-5-mini",
-          ])];
-
           let res: Response | null = null;
           let lastErr = "";
-          for (const m of modelChain) {
+          let retryDelayMs = 0;
+          const attempts = 3;
+          for (let attemptIndex = 0; attemptIndex < attempts; attemptIndex++) {
+            if (attemptIndex > 0) {
+              await new Promise((resolve) => setTimeout(resolve, Math.max(retryDelayMs, 500 * (2 ** (attemptIndex - 1))) + Math.floor(Math.random() * 250)));
+            }
             try {
               const attempt = await fetch(AI_URL, {
                 method: "POST",
+                signal: req.signal,
                 headers: {
-                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Lovable-API-Key": LOVABLE_API_KEY,
+                  "X-Lovable-AIG-SDK": "fetch",
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  model: m,
-                  messages,
+                  model: MODEL,
+                  input,
                   ...(includeTools ? { tools: enabledTools } : {}),
                   stream: true,
+                  store: false,
+                  reasoning: { effort: "medium", summary: "auto" },
+                  include: ["reasoning.encrypted_content"],
                 }),
               });
               if (attempt.ok && attempt.body) { res = attempt; break; }
-              lastErr = `Gateway ${attempt.status}: ${(await attempt.text().catch(() => "")).slice(0, 200)}`;
-              console.warn(`[nexus] model ${m} failed — ${lastErr}`);
+              const rawError = await attempt.text().catch(() => "");
+              let safeMessage = rawError.slice(0, 240);
+              try { safeMessage = JSON.parse(rawError)?.message || JSON.parse(rawError)?.error?.message || safeMessage; } catch {}
+              lastErr = safeMessage || `AI request failed with status ${attempt.status}`;
+              const retryable = attempt.status === 429 || attempt.status >= 500;
+              const retryAfter = Number(attempt.headers.get("Retry-After"));
+              retryDelayMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 0;
+              console.warn(`[nexus] ${MODEL} failed with ${attempt.status}`);
+              if (!retryable) break;
             } catch (e) {
+              if (req.signal.aborted) throw e;
               lastErr = String(e);
-              console.warn(`[nexus] model ${m} threw — ${lastErr}`);
+              console.warn(`[nexus] ${MODEL} request failed`);
             }
           }
 
@@ -271,7 +293,7 @@ Deno.serve(async (req) => {
               send({ type: "message_start" });
               send({
                 type: "delta",
-                text: "Nexus is temporarily rate-limited upstream. Re-send your message in a few seconds — nothing was lost.",
+                text: lastErr || "Nexus could not complete this request.",
               });
               send({ type: "done" });
             } else {
@@ -282,13 +304,14 @@ Deno.serve(async (req) => {
           }
 
 
-          // Parse SSE deltas, accumulating tool calls and streaming text.
+          // Parse Responses SSE, preserving output items for stateless tool continuation.
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buf = "";
           let started = false;
           let finalContent = "";
-          const toolCallsAcc: any[] = []; // index -> { id, function:{name, arguments} }
+          const outputItems: any[] = [];
+          const toolCallsAcc: any[] = [];
 
           outer: while (true) {
             const { done, value } = await reader.read();
@@ -303,26 +326,21 @@ Deno.serve(async (req) => {
               if (payload === "[DONE]") break outer;
               let evt: any;
               try { evt = JSON.parse(payload); } catch { continue; }
-              const delta = evt.choices?.[0]?.delta;
-              if (!delta) continue;
-              if (typeof delta.content === "string" && delta.content.length > 0) {
+              if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") {
                 if (!started) { send({ type: "message_start" }); started = true; }
-                finalContent += delta.content;
-                send({ type: "delta", text: delta.content });
+                finalContent += evt.delta;
+                send({ type: "delta", text: evt.delta });
               }
-              if (Array.isArray(delta.tool_calls)) {
-                for (const tc of delta.tool_calls) {
-                  const idx = tc.index ?? 0;
-                  if (!toolCallsAcc[idx]) {
-                    toolCallsAcc[idx] = { id: tc.id || `call_${idx}`, type: "function", function: { name: "", arguments: "" } };
-                  }
-                  if (tc.id) toolCallsAcc[idx].id = tc.id;
-                  if (tc.function?.name) toolCallsAcc[idx].function.name = tc.function.name;
-                  if (tc.function?.arguments) toolCallsAcc[idx].function.arguments += tc.function.arguments;
-                }
+              if (evt.type === "response.output_item.done" && evt.item) outputItems.push(evt.item);
+              if (evt.type === "response.completed" && Array.isArray(evt.response?.output) && outputItems.length === 0) {
+                outputItems.push(...evt.response.output);
+              }
+              if (evt.type === "error") {
+                throw new Error(evt.error?.message || evt.message || "AI stream failed");
               }
             }
           }
+          toolCallsAcc.push(...outputItems.filter((item) => item?.type === "function_call"));
 
           // If model produced text and no tool calls → done.
           if (toolCallsAcc.length === 0) {
@@ -341,29 +359,29 @@ Deno.serve(async (req) => {
           }
 
           // Append assistant tool-call message and execute tools.
-          messages.push({ role: "assistant", content: finalContent || null, tool_calls: toolCallsAcc });
+          input.push(...outputItems);
 
           for (const tc of toolCallsAcc) {
-            const name = tc.function?.name;
+            const name = tc.name;
             let args: any = {};
-            try { args = JSON.parse(tc.function?.arguments || "{}"); } catch {}
+            try { args = JSON.parse(tc.arguments || "{}"); } catch {}
             send({ type: "tool_start", name, args });
 
             let result: any;
             if (name === "web_search") {
               result = await webSearch(args.query || "");
             } else if (name === "scan_company") {
-              result = await scanCompany(args.url, args.company, adminToken);
+              result = await scanCompany(args.url, args.company || undefined, adminToken);
             } else {
               result = { error: `Unknown tool ${name}` };
             }
 
             send({ type: "tool_result", name, result });
 
-            messages.push({
-              role: "tool",
-              tool_call_id: tc.id,
-              content: JSON.stringify(result).slice(0, 50000),
+            input.push({
+              type: "function_call_output",
+              call_id: tc.call_id,
+              output: JSON.stringify(result).slice(0, 50000),
             });
           }
         }
