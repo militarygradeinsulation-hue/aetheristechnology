@@ -407,6 +407,7 @@ export function buildFallbackDeliverables(input: {
 
 
   return {
+    brand: input.brand || null,
     imagery: {
       visual_style: clean(`Editorial and grounded. Real work, real people, generous space. Palette: ${palette}.`),
       subjects: concepts.slice(0, 5).map((c) => c.title),

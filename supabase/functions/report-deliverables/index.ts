@@ -24,6 +24,7 @@ import {
   reserveFor,
   repairSignature,
   postsPassGate,
+  isCompanyVoicePost,
   scheduleTopic,
   TARGET_IMAGERY,
   type ReportDeliverables,
@@ -55,8 +56,8 @@ type SB = ReturnType<typeof createClient>;
 
 /* ─────────────────────────────── AI calls ─────────────────────────────── */
 
-const VOICE = `You write for Aetheris, a business forensics operator.
-Blunt, concrete, operator grade. No agency filler, no invented statistics, no fabricated awards or client names.
+const VOICE = `You create growth assets for the scanned company. When writing social posts, speak AS THAT COMPANY to its own customers, never as Aetheris or an outside investigator talking about the company.
+No invented statistics, services, customers, outcomes, awards, or claims.
 USD only for any money value. Never state or imply a dollar figure that is not already in the provided findings.
 ${NO_DASH_PROMPT_RULE}
 Return ONLY valid JSON in the exact shape requested.`;
@@ -117,7 +118,7 @@ Include 6 concepts. Every prompt must be usable as is.`;
 
   const postsPrompt = `${ctx}
 
-Write 12 READY TO PUBLISH posts for this company. Each maps to a DIFFERENT real finding or a different implication of one.
+Write 12 READY TO PUBLISH posts AS ${company || url} for its own social channels. These are posts the scanned company can publish to its customers, not Aetheris writing about the company. The scan findings are PRIVATE editorial guidance: use them to improve clarity and choose topics, never publish criticisms of the scanned company or imply it conducted a forensic review. Use its observed positioning and brand voice where supplied; when the offer or audience is unverified, use a modest invitation rather than inventing services. CTAs must lead to the scanned company, never to Aetheris, a diagnostic, or another business. Each post should take a distinct customer-facing angle.
 
 EDITORIAL MIX (one post each, never label the role in the copy):
 executive observation, buyer problem, myth correction, evidence insight, process explanation,
@@ -129,7 +130,7 @@ UNIQUENESS RULES (a breach fails the whole set):
 - No two posts may share their first four words, their hook, their CTA or any sentence of nine words or more.
 - Vary length, cadence and sentence shape between posts.
 - Use the company name. Do not print the raw URL except as a CTA destination.
-- Every post carries one concrete detail traceable to the evidence above. Invent nothing: no statistics, customers, outcomes or third party validation.
+- Every factual claim must be traceable to supplied public company context. Findings about the company's own gaps must remain private and never be portrayed as customer proof. Invent nothing: no statistics, customers, outcomes or third party validation.
 - BANNED openings and phrases: "We looked at how", "shows up online", "found a gap around", "Nothing dramatic", "here is the thing", "in today's market". Do not paraphrase them either.
 
 Return JSON:
@@ -171,12 +172,12 @@ Exactly 30 entries, day 1 through 30, no gaps.`;
       })),
       Math.min(12, postList.length),
     );
-    if (!gate.ok) {
+    if (!gate.ok || postList.some((p) => !isCompanyVoicePost(p))) {
       try {
         const fix = await call(
           `${postsPrompt}
 
-YOUR PREVIOUS ATTEMPT FAILED THE UNIQUENESS GATE. Rewrite the whole set, fixing exactly these problems:
+ YOUR PREVIOUS ATTEMPT FAILED THE POST GATE. Rewrite the whole set in the scanned company's own customer-facing voice (never Aetheris or scan commentary), fixing these problems:
 ${issuesToPrompt(gate.issues, postList.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })))}`,
           4000,
         ) as Record<string, unknown>;
@@ -186,7 +187,7 @@ ${issuesToPrompt(gate.issues, postList.map((p) => ({ hook: String(p.hook ?? ""),
             retry.map((p) => ({ hook: String(p.hook ?? ""), body: String(p.body ?? ""), cta: String(p.cta ?? "") })),
             Math.min(12, retry.length),
           );
-          if (g2.qualifiedIndexes.length > gate.qualifiedIndexes.length) postList = retry;
+          if (retry.every(isCompanyVoicePost) && g2.qualifiedIndexes.length > gate.qualifiedIndexes.length) postList = retry;
         }
       } catch (e) {
         failures.push(`posts_correction: ${String((e as Error).message).slice(0, 120)}`);
@@ -412,7 +413,7 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
       report,
       brand: (existing?.brand as Record<string, unknown>) || null,
     });
-    const keep = posts.filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+    const keep = posts.filter((p) => isCompanyVoicePost(p) && !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
     // Reserve family guarantees 12 even when the report's own evidence forces
     // primary posts out of the set (raw URLs in source sentences, thin chapters).
     const reserve = reserveFor({
