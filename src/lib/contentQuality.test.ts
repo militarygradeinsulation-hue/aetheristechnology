@@ -78,6 +78,12 @@ describe("deterministic post set", () => {
     expect(postsPassGate(own.posts)).toBe(true);
   });
 
+  it("uses the target domain when company_name is only contact metadata", () => {
+    const own = buildFallbackDeliverables({ company: "Contact Person", url: "https://northline.example", report: report as never });
+    expect(own.posts.some((p) => p.body.includes("We are Northline."))).toBe(true);
+    expect(own.posts.every((p) => !`${p.hook} ${p.body} ${p.cta}`.includes("Contact Person"))).toBe(true);
+  });
+
   it("rejects posts that advertise a scan instead of the company's offer", () => {
     const old = { ...built.posts[0], body: "The forensic review of this company found a leak in its contact form.", cta: "Ask Aetheris for a diagnostic." };
     expect(isCompanyVoicePost(old)).toBe(false);
