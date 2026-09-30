@@ -272,7 +272,7 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
         existing as unknown as Record<string, unknown>,
       );
 
-  const alreadyEnriched = deliverables.generation_state === "ready" && !!deliverables.enriched_at;
+  const alreadyEnriched = deliverables.generation_state === "ready" && !!deliverables.enriched_at && postsPassGate(deliverables.posts);
   if (alreadyEnriched && !opts.force) {
     // Still persist if the report had no deliverables block at all.
     if (!existing) {
@@ -282,7 +282,7 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
     return { scan_id: scanId, skipped: "already_enriched", state: deliverables.generation_state };
   }
 
-  const base = deliverablesComplete(existing) && !opts.force
+  const base = deliverablesComplete(existing) && postsPassGate(deliverables.posts) && !opts.force
     ? deliverables
     : buildFallbackDeliverables({ company, url, report, brand: (existing?.brand as Record<string, unknown>) || null });
 
@@ -547,7 +547,7 @@ serve(async (req) => {
         try {
           const report = (s.report || {}) as Record<string, unknown>;
           const existing = report.deliverables as ReportDeliverables | undefined;
-          if (deliverablesComplete(existing) && !body.force) { ok++; continue; }
+          if (deliverablesComplete(existing) && postsPassGate(existing.posts) && !body.force) { ok++; continue; }
           if (withAi) {
             await enrichScan(sb as unknown as SB, id, { force: body.force === true, images: body.images === true });
           } else {
