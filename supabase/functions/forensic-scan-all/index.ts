@@ -21,7 +21,7 @@ import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
 import { verifyPortalToken } from "../_shared/portal-token.ts";
 import { resolveScanOrigin } from "../_shared/golden-report-source.ts";
-import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
+import { buildFallbackDeliverables, isCompanyVoicePost } from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -130,6 +130,11 @@ async function generateBrandKit(id: string, brand: Brand): Promise<Record<string
         if (m) { try { parsed = JSON.parse(m[0]); } catch { /* ignore */ } }
       }
       const pack = clampSocialPack(parsed);
+      for (const post of Object.values(pack)) {
+        if (post.copy && !isCompanyVoicePost({ hook: "", body: post.copy, cta: "" })) {
+          throw new Error("The generated post speaks as an outside reviewer instead of the scanned company.");
+        }
+      }
       await setBrandKitStage(id, "social", "done");
       return pack;
     })(),
