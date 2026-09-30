@@ -390,7 +390,7 @@ async function repairOneScan(sb: SB, scanId: string, force = false): Promise<{
   const existing = report.deliverables as ReportDeliverables | undefined;
   const posts = Array.isArray(existing?.posts) ? existing!.posts : [];
 
-  const postsOk = posts.length >= 12 &&
+  const postsOk = posts.length >= 12 && posts.every(isCompanyVoicePost) &&
     !posts.some((p) => hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`)) &&
     postsPassGate(posts);
   const conceptCount = existing?.imagery?.concepts?.length ?? 0;

@@ -114,7 +114,7 @@ function clampSocialPack(raw: unknown): SocialPack {
 async function generateBrandKit(id: string, brand: Brand): Promise<Record<string, unknown>> {
   const brandName = brand.name || brand.sourceURL;
   const brief = `Company: ${brandName}. Positioning: ${brand.description || "unknown"}. Goal: build brand awareness, drive qualified inbound, and convert warm leads.`;
-  const system = `You are a senior brand designer, copywriter, and content strategist. Match the brand's tone from its palette + positioning. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
+  const system = `You are a senior brand designer, copywriter, and content strategist creating publishable content AS the scanned company for its own customers. Match the company's observed positioning and tone. Never mention Aetheris, a scan, or an outside review in its posts. Never invent services, proof, results or pricing. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
 
   const [messageRes, calendarRes, imageRes, socialRes] = await Promise.allSettled([
     (async () => { await setBrandKitStage(id, "message", "running"); const md = await aiChat(system, ONE_PAGER_PROMPT(brief), { max_tokens: 1200 }); await setBrandKitStage(id, "message", "done"); return md; })(),
