@@ -31,6 +31,7 @@ export function DnaHelix({ segments, className, onAnchors, tilt = 90 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const segRef = useRef(segments);
   const anchorsRef = useRef(onAnchors);
+  const redrawRef = useRef<() => void>(() => {});
   segRef.current = segments;
   anchorsRef.current = onAnchors;
 
@@ -75,6 +76,23 @@ export function DnaHelix({ segments, className, onAnchors, tilt = 90 }: Props) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       build();
     };
+
+    // fillStyle strings cached per color with alpha quantized, so the particle loop allocates nothing
+    const ALPHA_STEPS = 24;
+    const fillCache = new Map<string, string[]>();
+    const fillFor = (rgb: string, alpha: number) => {
+      let steps = fillCache.get(rgb);
+      if (!steps) {
+        steps = Array.from({ length: ALPHA_STEPS + 1 }, (_, i) => `rgba(${rgb},${(i / ALPHA_STEPS).toFixed(3)})`);
+        fillCache.set(rgb, steps);
+      }
+      return steps[Math.max(0, Math.min(ALPHA_STEPS, Math.round(alpha * ALPHA_STEPS)))];
+    };
+    const BASE_TINTS = 8;
+    const baseRgb = Array.from({ length: BASE_TINTS + 1 }, (_, i) => {
+      const d = i / BASE_TINTS;
+      return `${Math.round(200 + d * 40)},${Math.round(210 + d * 35)},255`;
+    });
 
     const segFor = (t: number) => {
       for (const s of segRef.current) if (t >= s.from && t <= s.to) return s;
@@ -145,8 +163,8 @@ export function DnaHelix({ segments, className, onAnchors, tilt = 90 }: Props) {
         const alpha = (0.18 + depth * 0.7) * flicker;
         const size = p.size * (0.6 + depth * 0.8);
         ctx.fillStyle = seg
-          ? `rgba(${seg.color},${Math.min(1, alpha + 0.2)})`
-          : `rgba(${Math.round(200 + depth * 40)},${Math.round(210 + depth * 35)},255,${alpha})`;
+          ? fillFor(seg.color, Math.min(1, alpha + 0.2))
+          : fillFor(baseRgb[Math.round(depth * BASE_TINTS)], alpha);
         ctx.fillRect(x, y, size, size);
       }
 
@@ -169,6 +187,11 @@ export function DnaHelix({ segments, className, onAnchors, tilt = 90 }: Props) {
 
     resize();
     raf = requestAnimationFrame(draw);
+    // With reduced motion only one frame is drawn, so changed segments need an explicit redraw
+    redrawRef.current = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(draw);
+    };
     const ro = new ResizeObserver(() => {
       resize();
       if (reduced) raf = requestAnimationFrame(draw);
@@ -177,8 +200,13 @@ export function DnaHelix({ segments, className, onAnchors, tilt = 90 }: Props) {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      redrawRef.current = () => {};
     };
   }, [tilt]);
+
+  useEffect(() => {
+    redrawRef.current();
+  }, [segments]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }

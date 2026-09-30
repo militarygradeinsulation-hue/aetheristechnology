@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Activity,
@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { DnaHelix, type HelixSegment } from "@/components/genome/DnaHelix";
+import { SEOHead } from "@/components/SEOHead";
 
 /* ------------------------------------------------------------------ */
 /* Data — the "specimen" is a sample business scan, labelled as a demo */
@@ -309,12 +310,13 @@ export default function BusinessGenomePage() {
     [lab],
   );
 
-  useEffect(() => {
-    document.title = "Business Genome Map | Aetheris";
-  }, []);
-
   return (
     <div className="gx-root">
+      <SEOHead
+        title="Business Genome Map: See Where Your Business Leaks"
+        description="We map every system that touches revenue, from lead flow and sales to operations and brand, and show where time, leads and money leak."
+        path="/genome"
+      />
       <style>{CSS}</style>
       <div className="gx-bg" aria-hidden="true" />
 
