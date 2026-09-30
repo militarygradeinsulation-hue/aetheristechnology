@@ -16,6 +16,27 @@
 // watermark are unchanged.
 
 import jsPDF from "jspdf";
+import { buildBusinessXray, XRAY_EDGE_LABEL, XRAY_STATUS_LABEL } from "@/lib/businessXray";
+
+/** Static Business X-Ray summary for the PDF. Reads existing report data only. */
+export function buildXraySection(report: unknown): Section | null {
+  const x = buildBusinessXray(report);
+  if (!x.nodes.length) return null;
+  const blocks: Section["blocks"] = [];
+  if (x.preliminary) {
+    blocks.push({ kind: "callout", tone: "amber", label: "Preliminary", text: "Built from a public scan. The journey is inferred, not a verified org chart. Internal steps stay unknown until confirmed. No findings is not proof of health." });
+  }
+  blocks.push({
+    kind: "table",
+    label: "Operational map",
+    columns: ["Step", "Status", "Findings", "Evidence confidence"],
+    widths: [45, 60, 25, 40],
+    rows: x.nodes.map((n) => [n.label, XRAY_STATUS_LABEL[n.status], String(n.findings.length), n.evidence_confidence]),
+  });
+  blocks.push({ kind: "bullets", label: "Relationships", items: x.edges.map((e) => `${e.label}: ${XRAY_EDGE_LABEL[e.basis]}`) });
+  blocks.push({ kind: "paragraph", text: "Legend. Red: confirmed breakdown. Amber: needs investigation. Green: verified corrected against a baseline. Gray: unknown. Solid line: verified. Dashed: inferred. Dotted gray: unknown. Exposure figures are the report's existing ledger entries and are not added again here." });
+  return { id: "business-xray", title: "Business X-Ray", kicker: "Operational map", newPage: true, indexed: false, blocks };
+}
 import { GOLDEN_LEAKAGE_LABEL, type OverallLeakage } from "@/lib/goldenLeakage";
 import { MONEY_CATEGORY_LABEL, MONEY_TAXONOMY_LEGEND } from "@/lib/goldenMoneyTaxonomy";
 
