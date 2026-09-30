@@ -562,7 +562,7 @@ export function reserveFor(input: {
 /** A public company post must not read as Aetheris reviewing or selling to that company. */
 export function isCompanyVoicePost(post: Pick<DeliverablePost, "hook" | "body" | "cta">): boolean {
   const text = `${post.hook} ${post.body} ${post.cta}`;
-  return !/\b(?:aetheris|forensic (?:scan|diagnostic|report|review)|our (?:scan|findings|case file)|we (?:scanned|audited|reviewed|found a leak)|the (?:scan|report|findings file) (?:found|shows|recorded|lists))\b/i.test(text);
+  return !/\b(?:aetheris|forensic (?:scan|diagnostic|report|review)|our (?:scan|findings|case file)|we (?:scanned|audited|reviewed|found a leak)|the (?:scan|report|findings file) (?:found|shows|recorded|lists)|(?:the|our|your) (?:forensic )?review (?:of|found|recorded)|ask for (?:the|a) (?:forensic )?diagnostic|\b(?:at|for|from) [\w\s]{2,70} (?:the )?(?:review|findings file)\b)\b/i.test(text);
 }
 
 export function qualifyPosts(
