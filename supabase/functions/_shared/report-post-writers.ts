@@ -85,7 +85,7 @@ const WRITERS: Record<PostRole, (x: WriterContext) => Draft> = {
   offer_education: (x) => ({
     hook: "There is no one-size-fits-all first question.",
     body: `Some people want to understand the process. Some want to know if we are a fit. Some are weighing several possible directions. All of those are good reasons to reach out. ${brandLine(x)} Tell us which part matters most to you and we can begin there.`,
-    cta: invite(x), visual: "A clear branded invitation to get in touch.", takeaway: "Let the customer set the first question.",
+    cta: "Choose the question you want to ask us first.", visual: "A clear branded invitation to get in touch.", takeaway: "Let the customer set the first question.",
   }),
   direct_next_step: (x) => ({
     hook: "Start with one honest question.",
@@ -123,6 +123,20 @@ export function writeReservePosts(name: string, site: string, evidence: PostEvid
       ["Talk to us about the real situation.", `A useful discussion does not need buzzwords. ${b} Tell us what is happening and what you need to know next.`],
     ] as const;
     const [hook, body] = themes[i];
-    return { role, hook: c(hook), body: c(body), cta: c(i % 2 ? "Ask us a direct question." : "Tell us what you need to know."), visual: "Use the scanned company's visual identity.", takeaway: "Invite a useful conversation." };
+    const followups = [
+      "If there is a particular detail you would like us to clarify, tell us what it is. A direct question makes the next conversation more useful for both of us.",
+      "Tell us what you have already explored and what you still need to understand. We can take the conversation from there without jumping to conclusions.",
+      "Share the context behind your question when you reach out. It helps us respond to your actual situation instead of sending a generic answer.",
+      "You can tell us which part feels uncertain. We will focus the conversation on that point and explain what we know and what still needs checking.",
+    ];
+    const ctas = [
+      "Tell us what you hope to accomplish.", "Ask us what a good first step looks like.",
+      "Share the details behind your question.", "Send us the part you want explained.",
+      "Ask us for a practical answer.", "Tell us what is driving your decision.",
+      "Reach out with your starting point.", "Ask us about the next step.",
+      "Tell us what has been unclear.", "Share what you need to decide.",
+      "Ask us what still needs confirming.", "Start a conversation with us.",
+    ];
+    return { role, hook: c(hook), body: c(`${body} ${followups[i % followups.length]}`), cta: c(ctas[i]), visual: "Use the scanned company's visual identity.", takeaway: "Invite a useful conversation." };
   });
 }
