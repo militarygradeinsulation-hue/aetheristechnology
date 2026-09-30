@@ -159,7 +159,7 @@ export function GoldenGrowthAssets({
   // Older saved scans may have investigator-voice posts. Replace only their
   // displayed post set; leave the canonical saved report and numbers untouched.
   const storedPosts = d!.posts || [];
-  const posts = storedPosts.some((p) => !isCompanyVoicePost(p)) && report
+  const posts = storedPosts.some((p) => !isCompanyVoicePost({ hook: p.hook || "", body: p.body || "", cta: p.cta || "" })) && report
     ? buildFallbackDeliverables({
         company,
         url: targetUrl || company,
