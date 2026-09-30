@@ -326,7 +326,7 @@ export function buildFallbackDeliverables(input: {
   report?: Record<string, unknown> | null;
   brand?: Record<string, unknown> | null;
 }): ReportDeliverables {
-  const name = safeBusinessName(input.company, input.url);
+  const name = safeBusinessName(input.brand?.name || "", input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);
   const palette = paletteOf(input.brand);
@@ -362,7 +362,8 @@ export function buildFallbackDeliverables(input: {
   }));
 
   const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
-  const written = writeAllPosts(name, site, evidence);
+  const positioning = clean(input.brand?.description);
+  const written = writeAllPosts(name, site, evidence, positioning);
 
   const primary: DeliverablePost[] = written.map((w, i) => ({
     id: `post-${String(i + 1).padStart(2, "0")}`,
@@ -380,7 +381,7 @@ export function buildFallbackDeliverables(input: {
   // A report may not ship fewer than 12 posts. When its own evidence forces a
   // primary post out of the set (raw URL in the source sentence, duplicated
   // finding), the reserve family refills from a different editorial angle.
-  const reserve = buildReservePosts({ name, site, evidence, concepts });
+  const reserve = buildReservePosts({ name, site, evidence, concepts, positioning });
   const posts = qualifyPosts(primary, reserve).posts;
 
   const days: ScheduleEntry[] = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
@@ -406,6 +407,7 @@ export function buildFallbackDeliverables(input: {
 
 
   return {
+    brand: input.brand || null,
     imagery: {
       visual_style: clean(`Editorial and grounded. Real work, real people, generous space. Palette: ${palette}.`),
       subjects: concepts.slice(0, 5).map((c) => c.title),
@@ -525,9 +527,10 @@ export function buildReservePosts(input: {
   site: string;
   evidence: PostEvidence[];
   concepts: ImageryConcept[];
+  positioning?: string;
 }): DeliverablePost[] {
   const rotated = input.evidence.map((_, i) => input.evidence[(i + 5) % input.evidence.length]);
-  return writeReservePosts(input.name, input.site, rotated).map((w, i) => ({
+  return writeReservePosts(input.name, input.site, rotated, input.positioning).map((w, i) => ({
     id: `post-r${String(i + 1).padStart(2, "0")}`,
     platform: PLATFORM_CYCLE[(i + 2) % PLATFORM_CYCLE.length],
     hook: w.hook,
@@ -548,12 +551,18 @@ export function reserveFor(input: {
   report?: Record<string, unknown> | null;
   base: ReportDeliverables;
 }): DeliverablePost[] {
-  const name = safeBusinessName(input.company, input.url);
+  const name = safeBusinessName(input.base.brand?.name || "", input.url);
   const site = safeSiteUrl(input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);
   const evidence = buildEvidencePool(input.report, leaks, actions, POST_COUNT);
-  return buildReservePosts({ name, site, evidence, concepts: input.base.imagery.concepts });
+  return buildReservePosts({ name, site, evidence, concepts: input.base.imagery.concepts, positioning: clean(input.base.brand?.description) });
+}
+
+/** A public company post must not read as Aetheris reviewing or selling to that company. */
+export function isCompanyVoicePost(post: Pick<DeliverablePost, "hook" | "body" | "cta">): boolean {
+  const text = `${post.hook} ${post.body} ${post.cta}`;
+  return !/\b(?:aetheris|forensic (?:scan|diagnostic|report|review)|our (?:scan|findings|case file)|we (?:scanned|audited|reviewed|found a leak)|the (?:scan|report|findings file) (?:found|shows|recorded|lists)|(?:the|our|your) (?:forensic )?review (?:of|found|recorded)|ask for (?:the|a) (?:forensic )?diagnostic|(?:at|for|from) [\w\s]{2,70} (?:the )?(?:review|findings file))\b/i.test(text);
 }
 
 export function qualifyPosts(
@@ -564,6 +573,7 @@ export function qualifyPosts(
   const kept: DeliverablePost[] = [];
   const tryAdd = (p: DeliverablePost) => {
     if (kept.length >= POST_COUNT) return false;
+    if (!isCompanyVoicePost(p)) return false;
     const res = validatePostSet([...kept, p], kept.length + 1);
     if (res.qualifiedIndexes.length === kept.length + 1) {
       kept.push(p);
@@ -587,7 +597,7 @@ export function qualifyPosts(
 
 /** Legacy entry point used by normalizeDeliverables. */
 function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | null {
-  const shaped = shapeAiPosts(raw, base).filter((p) => !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
+  const shaped = shapeAiPosts(raw, base).filter((p) => isCompanyVoicePost(p) && !hasBannedPhrase(`${p.hook} ${p.body} ${p.cta}`));
   if (!shaped.length) return null;
   const { posts, ok, ai_kept } = qualifyPosts(shaped, base);
   if (!ok || ai_kept === 0) return ai_kept > 0 && posts.length === POST_COUNT ? posts : null;
@@ -598,7 +608,7 @@ function validPosts(raw: unknown, base: DeliverablePost[]): DeliverablePost[] | 
 export function postsPassGate(posts: unknown): boolean {
   const arr = Array.isArray(posts) ? (posts as DeliverablePost[]) : [];
   if (arr.length < POST_COUNT) return false;
-  return validatePostSet(arr.slice(0, POST_COUNT), POST_COUNT).ok;
+  return arr.slice(0, POST_COUNT).every(isCompanyVoicePost) && validatePostSet(arr.slice(0, POST_COUNT), POST_COUNT).ok;
 }
 
 

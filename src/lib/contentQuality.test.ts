@@ -17,6 +17,7 @@ import {
   scrubUrls,
   reserveFor,
   repairSignature,
+  isCompanyVoicePost,
 } from "../../supabase/functions/_shared/report-deliverables.ts";
 
 const report = {
@@ -63,6 +64,32 @@ describe("banned filler", () => {
 });
 
 describe("deterministic post set", () => {
+  it("writes for the scanned company, not as Aetheris reviewing it", () => {
+    const own = buildFallbackDeliverables({
+      company: "Contact Person",
+      url: "https://northline.example",
+      brand: { name: "Northline Mechanical", description: "Northline Mechanical serves local homeowners." },
+      report: report as never,
+    });
+    expect(own.posts).toHaveLength(12);
+    expect(own.posts.every(isCompanyVoicePost)).toBe(true);
+    expect(own.posts.some((p) => p.body.includes("Northline Mechanical serves local homeowners."))).toBe(true);
+    expect(own.posts.every((p) => !`${p.hook} ${p.body} ${p.cta}`.includes("Contact Person"))).toBe(true);
+    expect(postsPassGate(own.posts)).toBe(true);
+  });
+
+  it("uses the target domain when company_name is only contact metadata", () => {
+    const own = buildFallbackDeliverables({ company: "Contact Person", url: "https://northline.example", report: report as never });
+    expect(own.posts.some((p) => p.body.includes("We are Northline."))).toBe(true);
+    expect(own.posts.every((p) => !`${p.hook} ${p.body} ${p.cta}`.includes("Contact Person"))).toBe(true);
+  });
+
+  it("rejects posts that advertise a scan instead of the company's offer", () => {
+    const old = { ...built.posts[0], body: "The forensic review of this company found a leak in its contact form.", cta: "Ask Aetheris for a diagnostic." };
+    expect(isCompanyVoicePost(old)).toBe(false);
+    expect(qualifyPosts([old], built.posts).ai_kept).toBe(0);
+    expect(postsPassGate([old, ...built.posts.slice(1)])).toBe(false);
+  });
   it("produces exactly 12 posts that pass the gate", () => {
     expect(built.posts).toHaveLength(12);
     const res = validatePostSet(built.posts, 12);

@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Copy, Check, Palette, Image as ImageIcon, MessageSquareQuote, CalendarDays } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { buildFallbackDeliverables, isCompanyVoicePost } from "@/lib/reportDeliverables";
 
 export type GoldenDeliverables = {
   brand?: {
@@ -126,9 +127,13 @@ const Bullets = ({ title, items, tone = "amber" }: { title: string; items?: stri
 export function GoldenGrowthAssets({
   deliverables,
   company,
+  report,
+  targetUrl,
 }: {
   deliverables?: GoldenDeliverables | null;
   company: string;
+  report?: Record<string, unknown> | null;
+  targetUrl?: string;
 }) {
   const d = deliverables || null;
   const has = !!d && (!!d.brand || !!d.imagery || !!d.posts?.length || !!d.schedule?.days?.length);
@@ -151,7 +156,17 @@ export function GoldenGrowthAssets({
 
   const brand = d!.brand;
   const imagery = d!.imagery;
-  const posts = d!.posts || [];
+  // Older saved scans may have investigator-voice posts. Replace only their
+  // displayed post set; leave the canonical saved report and numbers untouched.
+  const storedPosts = d!.posts || [];
+  const posts = storedPosts.some((p) => !isCompanyVoicePost({ hook: p.hook || "", body: p.body || "", cta: p.cta || "" })) && report
+    ? buildFallbackDeliverables({
+        company,
+        url: targetUrl || company,
+        report,
+        brand: d?.brand as Record<string, unknown> | null,
+      }).posts
+    : storedPosts;
   const days = d!.schedule?.days || [];
   const concepts: ImageryConcept[] = imagery?.concepts?.length
     ? imagery.concepts

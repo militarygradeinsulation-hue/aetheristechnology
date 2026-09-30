@@ -42,6 +42,8 @@ Produce ONE ready-to-post social post per platform, PERFECTLY on-brand:
 - tiktok: caption ≤ 140 chars, energetic/hook-first, 3–5 trend-relevant hashtags.
 
 Rules for ALL platforms:
+- Write AS the scanned brand speaking to its own audience. These are its ready-to-publish posts, not Aetheris commenting on the brand or describing a scan.
+- Use only the observed company positioning. Never invent an offer, result, review, client, price or guarantee. Direct readers to this brand, not Aetheris.
 - Voice must match the brand's positioning + palette (formal vs playful, technical vs mass-market — infer from BRAND block).
 - No em-dashes as filler. No "In today's fast-paced world". No emoji spam (0–2 max where appropriate to brand tone).
 - Return ONLY the JSON object with keys linkedin, x, instagram, facebook, tiktok.

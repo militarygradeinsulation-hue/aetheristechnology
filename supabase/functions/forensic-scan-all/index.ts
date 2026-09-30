@@ -21,7 +21,7 @@ import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
 import { verifyPortalToken } from "../_shared/portal-token.ts";
 import { resolveScanOrigin } from "../_shared/golden-report-source.ts";
-import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
+import { buildFallbackDeliverables, isCompanyVoicePost } from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,7 +114,7 @@ function clampSocialPack(raw: unknown): SocialPack {
 async function generateBrandKit(id: string, brand: Brand): Promise<Record<string, unknown>> {
   const brandName = brand.name || brand.sourceURL;
   const brief = `Company: ${brandName}. Positioning: ${brand.description || "unknown"}. Goal: build brand awareness, drive qualified inbound, and convert warm leads.`;
-  const system = `You are a senior brand designer, copywriter, and content strategist. Match the brand's tone from its palette + positioning. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
+  const system = `You are a senior brand designer, copywriter, and content strategist creating publishable content AS the scanned company for its own customers. Match the company's observed positioning and tone. Never mention Aetheris, a scan, or an outside review in its posts. Never invent services, proof, results or pricing. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
 
   const [messageRes, calendarRes, imageRes, socialRes] = await Promise.allSettled([
     (async () => { await setBrandKitStage(id, "message", "running"); const md = await aiChat(system, ONE_PAGER_PROMPT(brief), { max_tokens: 1200 }); await setBrandKitStage(id, "message", "done"); return md; })(),
@@ -130,6 +130,11 @@ async function generateBrandKit(id: string, brand: Brand): Promise<Record<string
         if (m) { try { parsed = JSON.parse(m[0]); } catch { /* ignore */ } }
       }
       const pack = clampSocialPack(parsed);
+      for (const post of Object.values(pack)) {
+        if (post.copy && !isCompanyVoicePost({ hook: "", body: post.copy, cta: "" })) {
+          throw new Error("The generated post speaks as an outside reviewer instead of the scanned company.");
+        }
+      }
       await setBrandKitStage(id, "social", "done");
       return pack;
     })(),
