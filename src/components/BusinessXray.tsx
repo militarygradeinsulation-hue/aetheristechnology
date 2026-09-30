@@ -14,7 +14,7 @@ type View = "operates" | "breaks" | "correct";
 const STATUS_CLASS: Record<XrayNodeStatus, string> = {
   breakdown: "border-crimson text-crimson bg-crimson/10",
   investigate: "border-amber text-amber bg-amber/10",
-  corrected: "border-primary text-primary bg-primary/10",
+  corrected: "border-verified text-verified bg-verified/10",
   unknown: "border-muted-foreground/40 text-muted-foreground bg-muted/20",
 };
 
