@@ -128,6 +128,14 @@ export function writeReservePosts(name: string, site: string, evidence: PostEvid
       "Tell us what you have already explored and what you still need to understand. We can take the conversation from there without jumping to conclusions.",
       "Share the context behind your question when you reach out. It helps us respond to your actual situation instead of sending a generic answer.",
       "You can tell us which part feels uncertain. We will focus the conversation on that point and explain what we know and what still needs checking.",
+      "If you have a particular deadline, let us know at the outset. That context helps keep the discussion focused on what is practical for you.",
+      "Tell us which tradeoffs matter most before anyone suggests a direction. A better answer takes your priorities into account.",
+      "You can begin with a single concern and add the details as we talk. There is no need to prepare a polished presentation first.",
+      "We can discuss what is known and which questions still need answers. That distinction matters when you are deciding what to do next.",
+      "Explain where the uncertainty started. We will listen to the specifics before assuming that a familiar solution is the right one.",
+      "Let us know what a useful outcome would look like from your perspective. It gives the conversation a real point of reference.",
+      "Bring the questions that did not fit into the usual form. They may be the most important part of the decision you are making.",
+      "We can start from your circumstances rather than a standard sales script. Tell us which detail you want to unpack first.",
     ];
     const ctas = [
       "Tell us what you hope to accomplish.", "Ask us what a good first step looks like.",
