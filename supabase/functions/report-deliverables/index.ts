@@ -83,6 +83,7 @@ async function call(prompt: string, maxTokens: number): Promise<Record<string, u
 }
 
 function context(company: string, url: string, report: Record<string, unknown>) {
+  const brand = ((report.deliverables as Record<string, unknown> | undefined)?.brand || {}) as Record<string, unknown>;
   const leaks = Array.isArray(report.top_leaks) ? report.top_leaks.slice(0, 6) : [];
   const chapters = Array.isArray(report.chapters) ? report.chapters as Record<string, unknown>[] : [];
   const evidence = chapters.slice(0, 14).map((c) => ({
@@ -90,8 +91,10 @@ function context(company: string, url: string, report: Record<string, unknown>) 
     verdict: String(c.verdict || "").slice(0, 300),
     found: String(c.what_we_found || "").slice(0, 500),
   }));
-  return `COMPANY: ${company || url}
+  return `COMPANY: ${String(brand.name || company || url).slice(0, 180)}
 WEBSITE: ${url}
+OBSERVED BRAND DESCRIPTION: ${String(brand.description || "Not available; do not invent products or services.").slice(0, 600)}
+BRAND COLORS: ${JSON.stringify(brand.colors || []).slice(0, 400)}
 EXECUTIVE SUMMARY: ${String(report.executive_summary || "").slice(0, 1500)}
 TOP FINDINGS: ${JSON.stringify(leaks).slice(0, 2500)}
 CHAPTER EVIDENCE: ${JSON.stringify(evidence).slice(0, 9000)}
@@ -118,7 +121,7 @@ Include 6 concepts. Every prompt must be usable as is.`;
 
   const postsPrompt = `${ctx}
 
-Write 12 READY TO PUBLISH posts AS ${company || url} for its own social channels. These are posts the scanned company can publish to its customers, not Aetheris writing about the company. The scan findings are PRIVATE editorial guidance: use them to improve clarity and choose topics, never publish criticisms of the scanned company or imply it conducted a forensic review. Use its observed positioning and brand voice where supplied; when the offer or audience is unverified, use a modest invitation rather than inventing services. CTAs must lead to the scanned company, never to Aetheris, a diagnostic, or another business. Each post should take a distinct customer-facing angle.
+Write 12 READY TO PUBLISH posts AS the company named in COMPANY above for its own social channels. These are posts the scanned company can publish to its customers, not Aetheris writing about the company. The scan findings are PRIVATE editorial guidance: use them to improve clarity and choose topics, never publish criticisms of the scanned company or imply it conducted a forensic review. Use its observed positioning and brand voice where supplied; when the offer or audience is unverified, use a modest invitation rather than inventing services. CTAs must lead to the scanned company, never to Aetheris, a diagnostic, or another business. Each post should take a distinct customer-facing angle.
 
 EDITORIAL MIX (one post each, never label the role in the copy):
 executive observation, buyer problem, myth correction, evidence insight, process explanation,
