@@ -33,7 +33,18 @@ export function buildXraySection(report: unknown): Section | null {
     widths: [45, 60, 25, 40],
     rows: x.nodes.map((n) => [n.label, XRAY_STATUS_LABEL[n.status], String(n.findings.length), n.evidence_confidence]),
   });
-  blocks.push({ kind: "bullets", label: "Relationships", items: x.edges.map((e) => `${e.label}: ${XRAY_EDGE_LABEL[e.basis]}`) });
+  blocks.push({ kind: "bullets", label: "Relationships", items: x.edges.map((e) => `${e.label}: ${XRAY_EDGE_LABEL[e.basis]}${e.friction ? " (friction present)" : ""}`) });
+  const order = [...x.ranked, ...x.nodes.map((n) => n.id).filter((id) => !x.ranked.includes(id))];
+  blocks.push({
+    kind: "bullets",
+    label: "Stage by stage, strongest break first",
+    items: order.map((id) => {
+      const n = x.nodes.find((y) => y.id === id)!;
+      const act = n.recommended_actions[0] ? ` Next step: ${n.recommended_actions[0]}` : "";
+      return `${n.label} (${XRAY_STATUS_LABEL[n.status].split(".")[0]}): ${n.summary}${act}`;
+    }),
+  });
+  if (x.unmapped.length) blocks.push({ kind: "paragraph", text: `${x.unmapped.length} finding(s) did not map to a stage and remain in their original chapters.` });
   blocks.push({ kind: "paragraph", text: "Legend. Red: confirmed breakdown. Amber: needs investigation. Green: verified corrected against a baseline. Gray: unknown. Solid line: verified. Dashed: inferred. Dotted gray: unknown. Exposure figures are the report's existing ledger entries and are not added again here." });
   return { id: "business-xray", title: "Business X-Ray", kicker: "Operational map", newPage: true, indexed: false, blocks };
 }
