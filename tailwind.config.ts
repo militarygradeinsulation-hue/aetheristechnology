@@ -71,6 +71,7 @@ export default {
           DEFAULT: "hsl(var(--amber-glow))",
           glow: "hsl(var(--amber-glow))",
         },
+        verified: "hsl(var(--verified))",
         crimson: {
           DEFAULT: "hsl(var(--crimson))",
           deep: "hsl(var(--crimson-deep))",

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, ScanLine, FileDown, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { downloadForensicGoldenPdf, type ForensicReport, type Chapter } from "@/lib/generateForensicGoldenPdf";
+import { BusinessXray } from "@/components/BusinessXray";
 import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationKit";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
@@ -514,6 +515,9 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
 
             {/* Canonical Top 10 — reads the Financial Leak Ledger, never its own math. */}
             <GoldenTopLeaks report={report as never} />
+
+            {/* Additive Business X-Ray: reads existing findings only; failure never blocks the report. */}
+            <BusinessXray report={report} />
 
 
             <GoldenGrowthAssets

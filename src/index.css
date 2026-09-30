@@ -47,6 +47,7 @@
     /* Forensic accent — oxidized red, used sparingly for leak callouts & case files */
     --crimson: 0 73% 41%;
     --crimson-deep: 0 70% 28%;
+    --verified: 145 55% 40%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(36 90% 55%), hsl(40 85% 70%));
