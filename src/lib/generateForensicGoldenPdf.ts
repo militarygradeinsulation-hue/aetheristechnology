@@ -630,6 +630,14 @@ export function generateForensicGoldenPdf(opts: {
     if (sectionPages[s.id] == null) sectionPages[s.id] = cur.page;
   }
 
+  // ── BUSINESS X-RAY (additive appendix) ──
+  // Appended after every existing section; never alters them. Any failure is
+  // swallowed so the PDF always completes.
+  try {
+    const xs = buildXraySection(report);
+    if (xs) drawSection(doc, cur, xs, askUrl);
+  } catch { /* X-Ray is optional */ }
+
   // Back-fill index page numbers + internal links.
   for (const row of indexRows) {
     const target = sectionPages[row.id];
