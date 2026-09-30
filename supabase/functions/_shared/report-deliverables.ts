@@ -326,7 +326,7 @@ export function buildFallbackDeliverables(input: {
   report?: Record<string, unknown> | null;
   brand?: Record<string, unknown> | null;
 }): ReportDeliverables {
-  const name = safeBusinessName(input.brand?.name || input.company, input.url);
+  const name = safeBusinessName(input.brand?.name || "", input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);
   const palette = paletteOf(input.brand);
@@ -551,7 +551,7 @@ export function reserveFor(input: {
   report?: Record<string, unknown> | null;
   base: ReportDeliverables;
 }): DeliverablePost[] {
-  const name = safeBusinessName(input.base.brand?.name || input.company, input.url);
+  const name = safeBusinessName(input.base.brand?.name || "", input.url);
   const site = safeSiteUrl(input.url);
   const leaks = leakList(input.report);
   const actions = chapterActions(input.report);

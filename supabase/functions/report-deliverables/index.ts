@@ -26,6 +26,7 @@ import {
   postsPassGate,
   isCompanyVoicePost,
   scheduleTopic,
+  safeBusinessName,
   TARGET_IMAGERY,
   type ReportDeliverables,
 } from "../_shared/report-deliverables.ts";
@@ -91,7 +92,7 @@ function context(company: string, url: string, report: Record<string, unknown>) 
     verdict: String(c.verdict || "").slice(0, 300),
     found: String(c.what_we_found || "").slice(0, 500),
   }));
-  return `COMPANY: ${String(brand.name || company || url).slice(0, 180)}
+  return `COMPANY: ${safeBusinessName(brand.name || "", url)}
 WEBSITE: ${url}
 OBSERVED BRAND DESCRIPTION: ${String(brand.description || "Not available; do not invent products or services.").slice(0, 600)}
 BRAND COLORS: ${JSON.stringify(brand.colors || []).slice(0, 400)}
