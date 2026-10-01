@@ -13,6 +13,8 @@ describe("random post writing identity", () => {
     const standard = validateRandomPost({ ...base, identity: "default" });
     expect(randomPostUserPrompt(architect, false)).toContain("THE ARCHITECT");
     expect(randomPostUserPrompt(architect, false)).toContain("observe, connect, verify, prioritize, build, measure");
+    expect(randomPostUserPrompt(architect, false)).toContain("POST GENERATION CONTEXT");
+    expect(randomPostUserPrompt(architect, false)).toContain("selected business, topic, platform, tone, and requested length");
     expect(randomPostUserPrompt(standard, false)).not.toContain("THE ARCHITECT");
   });
 
