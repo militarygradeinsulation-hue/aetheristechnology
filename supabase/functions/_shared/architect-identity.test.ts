@@ -5,6 +5,7 @@ import {
   architectIdentityPrompt,
   buildArchitectIdentityPolicy,
 } from "./architect-identity";
+import personaSource from "./architect-persona-source.json";
 
 describe("The Architect identity", () => {
   it("uses a stable id and an evidence disciplined operating prompt", () => {
@@ -42,5 +43,12 @@ describe("The Architect identity", () => {
     expect(post).toContain("map only the useful parts");
     expect(post).toContain("state the relevant limit");
     expect(post).toContain("return to practical action");
+  });
+
+  it("preserves the complete model agnostic source specification server side", () => {
+    expect(personaSource.schema_version).toBe("1.0.0");
+    expect(personaSource.persona_id).toBe("joseph_toney_the_architect");
+    expect(Object.keys(personaSource.knowledge_domains)).toHaveLength(7);
+    expect(JSON.stringify(personaSource).length).toBeGreaterThan(30000);
   });
 });

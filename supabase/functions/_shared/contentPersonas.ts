@@ -551,6 +551,17 @@ export const buildPersonaDirective = (personaVal?: string | null): string => {
   if (!directive) return '';
   const label = PERSONAS.find(p => p.value === personaVal)?.label ?? personaVal;
   const freshness = buildPersonaFreshnessBlock(personaVal);
+  if (personaVal === THE_ARCHITECT_ID) {
+    return [
+      '',
+      '████ OPT IN WRITING IDENTITY ████',
+      `Write this post in the voice of: ${label}.`,
+      'Apply this identity as a bounded style and reasoning layer. It never overrides source facts, confidentiality, money locks, safety, required output schemas, or generation controls.',
+      '',
+      directive,
+      freshness,
+    ].join('\n');
+  }
   return [
     '',
     '████ PERSONA LOCK — #1 AUTHORITY OVER DEFAULT VOICE ████',
