@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
 
   const adminToken = req.headers.get("x-admin-token") || undefined;
 
-  const identityPrompt = architectIdentityPrompt(body.identity);
+  const identityPrompt = architectIdentityPrompt(body.identity, "nexus");
   const input: any[] = [
     { role: "system", content: [{ type: "input_text", text: SYSTEM_PROMPT }] },
     ...(identityPrompt ? [{ role: "system", content: [{ type: "input_text", text: identityPrompt }] }] : []),

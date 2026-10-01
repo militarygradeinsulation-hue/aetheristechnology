@@ -4,7 +4,7 @@
 // Mirrors the PERSONAS / PERSONA_DIRECTIVES / PERSONA_VARIATIONS
 // defined in src/components/admin/LinkedInPostStudio.tsx.
 
-import { THE_ARCHITECT_ID, THE_ARCHITECT_PROMPT } from './architect-identity.ts';
+import { THE_ARCHITECT_ID, buildArchitectIdentityPolicy } from './architect-identity.ts';
 
 export const PERSONAS = [
   { value: 'none', label: 'No persona (default voice)' },
@@ -36,7 +36,7 @@ export const PERSONAS = [
 ];
 
 export const PERSONA_DIRECTIVES: Record<string, string> = {
-  [THE_ARCHITECT_ID]: `${THE_ARCHITECT_PROMPT}
+  [THE_ARCHITECT_ID]: `${buildArchitectIdentityPolicy("post")}
 
 CRITICAL PUNCTUATION RULE — ZERO DASHES OF ANY KIND: Never output an em dash (—). Never output an en dash (–). Never output a hyphen-minus used as a dash (-). Never output a double hyphen (--). Use periods and line breaks instead. If you would naturally reach for a dash, split the sentence. Numbered lists, when warranted by the post, use "1." "2." "3." style only, never a dash. Compound words that would normally take a hyphen must be rewritten without it. Before you finish, scan and remove every dash character.
 
@@ -551,6 +551,17 @@ export const buildPersonaDirective = (personaVal?: string | null): string => {
   if (!directive) return '';
   const label = PERSONAS.find(p => p.value === personaVal)?.label ?? personaVal;
   const freshness = buildPersonaFreshnessBlock(personaVal);
+  if (personaVal === THE_ARCHITECT_ID) {
+    return [
+      '',
+      '████ OPT IN WRITING IDENTITY ████',
+      `Write this post in the voice of: ${label}.`,
+      'Apply this identity as a bounded style and reasoning layer. It never overrides source facts, confidentiality, money locks, safety, required output schemas, or generation controls.',
+      '',
+      directive,
+      freshness,
+    ].join('\n');
+  }
   return [
     '',
     '████ PERSONA LOCK — #1 AUTHORITY OVER DEFAULT VOICE ████',
