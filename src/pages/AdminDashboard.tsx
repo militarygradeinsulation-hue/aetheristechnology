@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook } from 'lucide-react';
 const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
@@ -88,6 +88,9 @@ const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedI
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
 const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
 const SocialSchedulerPanel = lazy(() => import('@/components/admin/SocialSchedulerPanel').then(m => ({ default: m.SocialSchedulerPanel })));
+const AdminXPublisher = lazy(() => import('@/components/admin/AdminXPublisher'));
+const AdminFacebookPublisher = lazy(() => import('@/components/admin/AdminFacebookPublisher'));
+const AdminSocialQueuePanel = lazy(() => import('@/components/admin/AdminSocialQueuePanel'));
 const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel').then(m => ({ default: m.HubSpotBlogPanel })));
 const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
 const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
@@ -105,7 +108,7 @@ const PanelFallback = () => (
   </div>
 );
 
-type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
+type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'x_publisher' | 'facebook_publisher' | 'social_queue' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
@@ -138,6 +141,9 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'detective', label: 'Detective Mode', description: 'Drop a website + business. Auto-runs scan, RDAP, scrape, enrichment. Walks the detective monologue, picks the best angle, writes the opener.', icon: FileSearch, category: 'forensics' },
   { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4-5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
   { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
+  { key: 'x_publisher', label: 'X (Twitter) Publisher', description: 'Connect an X account with native OAuth2 and post directly — no third-party aggregator.', icon: Twitter, category: 'content' },
+  { key: 'facebook_publisher', label: 'Facebook & Instagram Publisher', description: 'Connect a Facebook Page (and its linked Instagram Business account) with native OAuth and post directly.', icon: Facebook, category: 'content' },
+  { key: 'social_queue', label: 'Browser-Agent Post Queue', description: 'Queue posts for a browser-controlling agent to publish manually and report back — no developer API keys needed.', icon: Inbox, category: 'content' },
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
   { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
   { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
@@ -1329,6 +1335,9 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
         {activeTool === 'playbook' && <PlaybookCreator />}
         {activeTool === 'social_scheduler' && <SocialSchedulerPanel />}
+        {activeTool === 'x_publisher' && <Suspense fallback={<PanelFallback />}><AdminXPublisher /></Suspense>}
+        {activeTool === 'facebook_publisher' && <Suspense fallback={<PanelFallback />}><AdminFacebookPublisher /></Suspense>}
+        {activeTool === 'social_queue' && <Suspense fallback={<PanelFallback />}><AdminSocialQueuePanel /></Suspense>}
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
         {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}
