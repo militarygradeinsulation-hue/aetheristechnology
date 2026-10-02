@@ -213,12 +213,17 @@ export const AdminQuotingPos: React.FC = () => {
       };
     });
   };
-  const addCustom = () => setDraft((d) => d.lines.length >= QUOTE_LIMITS.lines ? d : ({
-    ...d, lines: [...d.lines, {
-      id: uid(), catalogName: null, name: '', cadence: 'one_time', quantity: 1, listPriceCents: null,
-      unitPriceCents: null, discount: { type: 'none', value: 0 }, scope: '',
-    }],
-  }));
+  const addCustom = () => {
+    if (draft.lines.length >= QUOTE_LIMITS.lines) return;
+    const id = uid();
+    setExpandedLines((s) => new Set(s).add(id)); // custom lines open immediately: they need a name and price
+    setDraft((d) => ({
+      ...d, lines: [...d.lines, {
+        id, catalogName: null, name: '', cadence: 'one_time', quantity: 1, listPriceCents: null,
+        unitPriceCents: null, discount: { type: 'none', value: 0 }, scope: '',
+      }],
+    }));
+  };
   const clearCart = () => {
     if (!draft.lines.length) return;
     if (window.confirm(`Remove all ${draft.lines.length} line items from this quote? Client details and SOW text stay.`)) {
