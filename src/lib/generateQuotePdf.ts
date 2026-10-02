@@ -60,7 +60,10 @@ export function buildQuotePdf(q: QuoteDraft): jsPDF {
     const lh = size * 0.42;
     for (const raw of sanitize(text).split('\n')) {
       const lines = doc.splitTextToSize(raw || ' ', width) as string[];
-      for (const ln of lines) { ensure(lh + 1); doc.text(ln, x, y); y += lh; }
+      for (const ln of lines) {
+        if (y + lh + 1 > BOTTOM) { newPage(); doc.setFont('helvetica', opts.bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(...(opts.color ?? INK)); }
+        doc.text(ln, x, y); y += lh;
+      }
     }
   };
 
@@ -90,14 +93,14 @@ export function buildQuotePdf(q: QuoteDraft): jsPDF {
     doc.setFont('helvetica', 'bold'); doc.setTextColor(...MUTED); doc.text(k.toUpperCase(), x, y);
     doc.setFont('helvetica', 'normal'); doc.setTextColor(...INK); doc.text(sanitize(v), x, y + 4.5);
   });
-  y += 10;
+  y += 14;
   void startY;
 
   if (q.sow.title) { ensure(10); para(q.sow.title, { size: 15, bold: true }); y += 2; }
 
   // Pricing table
   sectionTitle('Itemized pricing');
-  const cols = { name: M, cad: M + 78, qty: M + 100, unit: M + 128, disc: M + 153, net: W - M };
+  const cols = { name: M, cad: M + 76, qty: M + 96, unit: M + 108, disc: M + 133, net: W - M };
   const th = () => {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...MUTED);
     doc.text('SERVICE', cols.name, y); doc.text('CADENCE', cols.cad, y); doc.text('QTY', cols.qty, y);
@@ -109,7 +112,7 @@ export function buildQuotePdf(q: QuoteDraft): jsPDF {
   q.lines.forEach((l, i) => {
     const r = totals.lines[i];
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
-    const nameLines = doc.splitTextToSize(sanitize(l.name), 74) as string[];
+    const nameLines = doc.splitTextToSize(sanitize(l.name), 72) as string[];
     const rowH = nameLines.length * 3.8 + (r.listGrossCents !== null && r.overrideDeltaCents !== 0 ? 4 : 0) + 2;
     if (y + rowH > BOTTOM) { newPage(); th(); }
     doc.setTextColor(...INK);
