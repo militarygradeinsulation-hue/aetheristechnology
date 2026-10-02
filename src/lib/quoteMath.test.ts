@@ -83,3 +83,35 @@ describe('quote math', () => {
     expect(pdf.getNumberOfPages()).toBeGreaterThan(2);
   });
 });
+
+describe('quote PDF/export guards', () => {
+  const base = () => ({ ...emptyDraft(), client: { company: 'Acme', contact: 'Ann', email: '', phone: '', address: '' } });
+  it('rejects invalid or missing prices instead of rendering $0', () => {
+    expect(() => buildQuotePdf({ ...base(), lines: [line({ unitPriceCents: null })] })).toThrow(/Fix before exporting/);
+    expect(() => buildQuotePdf({ ...base(), lines: [line({ unitPriceCents: NaN })] })).toThrow();
+  });
+  it('stamps DRAFT unless issued, and issue requires client company/contact', () => {
+    const d = { ...base(), lines: [line({})] };
+    const txt = (doc: any) => (doc.output() as string);
+    expect(txt(buildQuotePdf(d))).toContain('DRAFT - NOT ISSUED');
+    expect(txt(buildQuotePdf({ ...d, status: 'issued' }, { issued: true }))).not.toContain('DRAFT - NOT ISSUED');
+    expect(() => buildQuotePdf({ ...d, status: 'issued', client: { ...d.client, contact: '' } }, { issued: true })).toThrow(/contact/);
+  });
+  it('prints entered signature dates and keeps long company names inside the page', () => {
+    const d = { ...base(), client: { ...base().client, company: 'A Very Long Legal Company Name Holdings International Incorporated LLC '.repeat(3) },
+      signatures: { clientDate: '2026-10-01', providerDate: '' },
+      lines: Array.from({ length: 12 }, (_, i) => line({ name: `Svc ${i}`, scope: 'Long scope text. '.repeat(40) })) };
+    for (let pad = 0; pad < 30; pad++) {
+      const doc = buildQuotePdf({ ...d, sow: { ...d.sow, notes: 'x\n'.repeat(pad * 3) } });
+      expect(doc.output()).toContain('October 1, 2026');
+    }
+  });
+  it('merges snapshots without refreshing existing entries', async () => {
+    const { mergeSnapshot } = await import('./quoteDocument');
+    const cat = catalogFromRepProducts();
+    const old = [{ name: cat[0].name, listPriceCents: 1, cadence: 'one_time' as const, description: 'old', capturedAt: 'x' }];
+    const m = mergeSnapshot(old, [line({ catalogName: cat[0].name }), line({ catalogName: cat[1].name })], cat);
+    expect(m[0]).toEqual(old[0]);
+    expect(m.map((e) => e.name)).toEqual([cat[0].name, cat[1].name]);
+  });
+});

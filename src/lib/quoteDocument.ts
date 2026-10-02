@@ -26,6 +26,20 @@ export interface QuoteSow {
   notes: string;
 }
 
+export interface QuoteSignatures {
+  /** Actual signing dates (ISO yyyy-mm-dd). Blank unless the admin enters a real date. */
+  clientDate: string;
+  providerDate: string;
+}
+
+export interface CatalogSnapshotEntry {
+  name: string;
+  listPriceCents: number | null;
+  cadence: QuoteCadence;
+  description: string;
+  capturedAt: string;
+}
+
 export interface QuoteDraft {
   id: string | null;
   quoteNumber: string;
@@ -39,10 +53,28 @@ export interface QuoteDraft {
   quoteDiscount: QuoteDiscount;
   quoteDiscountCadence: QuoteCadence;
   sow: QuoteSow;
+  signatures: QuoteSignatures;
+  /** Catalog prices/descriptions captured when each service was first added. Never refreshed. */
+  catalogSnapshot: CatalogSnapshotEntry[];
   createdAt?: string | null;
   updatedAt?: string | null;
   createdBy?: string | null;
 }
+
+/** Field limits enforced identically in the UI and on the server. */
+export const QUOTE_LIMITS = {
+  lines: 200,
+  scope: 8000,
+  text: 8000,
+  title: 300,
+  name: 300,
+  company: 200,
+  contact: 200,
+  email: 200,
+  phone: 60,
+  address: 600,
+  quoteNumber: 60,
+} as const;
 
 export interface CatalogItem {
   key: string;
@@ -95,14 +127,40 @@ export function emptyDraft(): QuoteDraft {
       assumptions: '',
       notes: '',
     },
+    signatures: { clientDate: '', providerDate: '' },
+    catalogSnapshot: [],
   };
 }
 
-export function snapshotFor(lines: QuoteLineInput[], catalog: CatalogItem[]) {
+export function snapshotFor(lines: QuoteLineInput[], catalog: CatalogItem[]): CatalogSnapshotEntry[] {
+  return mergeSnapshot([], lines, catalog);
+}
+
+/** Keeps every existing snapshot entry untouched; adds entries only for catalog services not yet captured. */
+export function mergeSnapshot(existing: CatalogSnapshotEntry[], lines: QuoteLineInput[], catalog: CatalogItem[]): CatalogSnapshotEntry[] {
+  const out = [...(existing || [])];
+  const have = new Set(out.map((e) => e.name));
   const names = new Set(lines.map((l) => l.catalogName).filter(Boolean) as string[]);
-  return catalog
-    .filter((c) => names.has(c.name))
-    .map((c) => ({ name: c.name, listPriceCents: c.priceCents, cadence: c.cadence, description: c.description, capturedAt: new Date().toISOString() }));
+  for (const c of catalog) {
+    if (names.has(c.name) && !have.has(c.name)) {
+      out.push({ name: c.name, listPriceCents: c.priceCents, cadence: c.cadence, description: c.description, capturedAt: new Date().toISOString() });
+      have.add(c.name);
+    }
+  }
+  return out;
+}
+
+/** Problems that block preview/download/print/issue. Empty = exportable. */
+export function exportProblems(q: QuoteDraft, totalsErrors: string[], forIssue = false): string[] {
+  const errs = [...totalsErrors];
+  if (forIssue) {
+    if (!q.client.company.trim()) errs.push('Client legal / company name is required before issuing.');
+    if (!q.client.contact.trim()) errs.push('Client contact name is required before issuing.');
+  }
+  for (const [k, v] of [['Client date signed', q.signatures?.clientDate], ['Aetheris date signed', q.signatures?.providerDate]] as const) {
+    if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) errs.push(`${k} is not a valid date.`);
+  }
+  return errs;
 }
 
 export function fmtDate(iso: string | null | undefined): string {

@@ -25,24 +25,62 @@ function newQuoteNumber() {
   return `AET-Q-${ymd}-${rnd}`;
 }
 
-function sanitizeDiscount(d: any): QuoteDiscount {
-  const type = d?.type === "percent" || d?.type === "amount" ? d.type : "none";
-  return { type, value: Number(d?.value) || 0 };
+class Invalid extends Error {}
+const LIMITS = { lines: 200, scope: 8000, text: 8000, title: 300, name: 300, company: 200, contact: 200, email: 200, phone: 60, address: 600, quoteNumber: 60 };
+
+// Strict: rejects over-limit text instead of truncating, so saved content always equals what was shown.
+function txt(v: unknown, max: number, label: string): string {
+  if (v === undefined || v === null) return "";
+  if (typeof v !== "string") throw new Invalid(`${label} must be text.`);
+  if (v.length > max) throw new Invalid(`${label} is too long (${v.length}/${max} characters).`);
+  return v;
+}
+function optDate(v: unknown, label: string): string | null {
+  if (v === undefined || v === null || v === "") return null;
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  throw new Invalid(`${label} is not a valid date.`);
+}
+
+function sanitizeDiscount(d: any, label: string): QuoteDiscount {
+  if (d === undefined || d === null) return { type: "none", value: 0 };
+  const type = d.type;
+  if (type === "none") return { type, value: 0 };
+  if (type !== "percent" && type !== "amount") throw new Invalid(`${label}: unknown discount type.`);
+  const value = typeof d.value === "number" ? d.value : NaN;
+  if (!Number.isFinite(value) || value < 0) throw new Invalid(`${label}: discount value is not a valid number.`);
+  if (type === "amount" && !Number.isInteger(value)) throw new Invalid(`${label}: discount amount must be whole cents.`);
+  if (type === "percent" && value > 100) throw new Invalid(`${label}: percent must be between 0 and 100.`);
+  return { type, value };
 }
 
 function sanitizeLines(raw: unknown): QuoteLineInput[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.slice(0, 200).map((l: any, i: number) => ({
-    id: str(l?.id, 64) || `line-${i}`,
-    catalogName: typeof l?.catalogName === "string" ? l.catalogName.slice(0, 300) : null,
-    name: str(l?.name, 300),
-    cadence: (CADENCES as string[]).includes(l?.cadence) ? l.cadence : "one_time",
-    quantity: Number(l?.quantity),
-    listPriceCents: l?.listPriceCents === null || l?.listPriceCents === undefined ? null : Number(l.listPriceCents),
-    unitPriceCents: l?.unitPriceCents === null || l?.unitPriceCents === undefined ? null : Number(l.unitPriceCents),
-    discount: sanitizeDiscount(l?.discount),
-    scope: str(l?.scope, 8000),
-  }));
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw new Invalid("Lines must be a list.");
+  if (raw.length > LIMITS.lines) throw new Invalid(`A quote can have at most ${LIMITS.lines} lines (got ${raw.length}).`);
+  return raw.map((l: any, i: number) => {
+    const label = `Line ${i + 1}`;
+    const num = (v: unknown) => (v === null || v === undefined ? null : typeof v === "number" ? v : NaN);
+    return {
+      id: txt(l?.id, 64, `${label} id`) || `line-${i}`,
+      catalogName: l?.catalogName == null ? null : txt(l.catalogName, LIMITS.name, `${label} catalog name`),
+      name: txt(l?.name, LIMITS.name, `${label} name`),
+      cadence: (CADENCES as string[]).includes(l?.cadence) ? l.cadence : (() => { throw new Invalid(`${label}: invalid cadence.`); })(),
+      quantity: typeof l?.quantity === "number" ? l.quantity : NaN,
+      listPriceCents: num(l?.listPriceCents),
+      unitPriceCents: num(l?.unitPriceCents),
+      discount: sanitizeDiscount(l?.discount, `${label} discount`),
+      scope: txt(l?.scope, LIMITS.scope, `${label} scope`),
+    } as QuoteLineInput;
+  });
+}
+
+function mergeSnapshots(existing: unknown, incoming: unknown): unknown[] {
+  const out: any[] = Array.isArray(existing) ? [...existing] : [];
+  const have = new Set(out.map((e) => e?.name));
+  for (const e of Array.isArray(incoming) ? incoming : []) {
+    if (e && typeof e.name === "string" && !have.has(e.name)) { out.push(e); have.add(e.name); }
+  }
+  return out.slice(0, LIMITS.lines * 2);
 }
 
 Deno.serve(async (req) => {
@@ -82,42 +120,69 @@ Deno.serve(async (req) => {
 
     if (action === "save" || action === "duplicate") {
       const p = body?.quote ?? {};
-      const lines = sanitizeLines(p.lines);
-      const quoteDiscount = sanitizeDiscount(p.quoteDiscount);
-      const quoteDiscountCadence: QuoteCadence = (CADENCES as string[]).includes(p.quoteDiscountCadence) ? p.quoteDiscountCadence : "one_time";
-      const totals = computeQuote(lines, quoteDiscount, quoteDiscountCadence);
+      let lines: QuoteLineInput[], quoteDiscount: QuoteDiscount, payload: any, email: string, quoteDate: string;
       const status = p.status === "issued" ? "issued" : "draft";
-      if (status === "issued" && !totals.valid) {
-        return json({ error: `Fix before issuing: ${totals.errors.slice(0, 3).join(" ")}` }, 400);
+      try {
+        lines = sanitizeLines(p.lines);
+        quoteDiscount = sanitizeDiscount(p.quoteDiscount, "Quote discount");
+        const client = p.client ?? {};
+        email = txt(client.email, LIMITS.email, "Client email").trim();
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Invalid("Client email is not valid.");
+        quoteDate = optDate(p.quoteDate, "Quote date") ?? new Date().toISOString().slice(0, 10);
+        const sow = p.sow ?? {};
+        payload = {
+          client: {
+            company: txt(client.company, LIMITS.company, "Client company"), contact: txt(client.contact, LIMITS.contact, "Client contact"), email,
+            phone: txt(client.phone, LIMITS.phone, "Client phone"), address: txt(client.address, LIMITS.address, "Client address"),
+          },
+          quoteDate,
+          validUntil: optDate(p.validUntil, "Valid until"),
+          projectStart: optDate(p.projectStart, "Project start"),
+          projectEnd: optDate(p.projectEnd, "Project end"),
+          lines,
+          quoteDiscount,
+          quoteDiscountCadence: (CADENCES as string[]).includes(p.quoteDiscountCadence) ? p.quoteDiscountCadence : "one_time",
+          sow: {
+            title: txt(sow.title, LIMITS.title, "SOW title"), objectives: txt(sow.objectives, LIMITS.text, "Objectives"),
+            exclusions: txt(sow.exclusions, LIMITS.text, "Exclusions"), timeline: txt(sow.timeline, LIMITS.text, "Timeline"),
+            responsibilities: txt(sow.responsibilities, LIMITS.text, "Responsibilities"), paymentTerms: txt(sow.paymentTerms, LIMITS.text, "Payment terms"),
+            assumptions: txt(sow.assumptions, LIMITS.text, "Assumptions"), notes: txt(sow.notes, LIMITS.text, "Notes"),
+          },
+          signatures: action === "duplicate" ? { clientDate: "", providerDate: "" } : {
+            clientDate: optDate(p.signatures?.clientDate, "Client date signed") ?? "",
+            providerDate: optDate(p.signatures?.providerDate, "Aetheris date signed") ?? "",
+          },
+        };
+        txt(p.quoteNumber, LIMITS.quoteNumber, "Quote number");
+      } catch (e) {
+        if (e instanceof Invalid) return json({ error: e.message }, 400);
+        throw e;
       }
-      const client = p.client ?? {};
-      const email = str(client.email, 200).trim();
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Client email is not valid." }, 400);
-      const quoteDate = dateOrNull(p.quoteDate) ?? new Date().toISOString().slice(0, 10);
-
-      const payload = {
-        client: {
-          company: str(client.company, 200), contact: str(client.contact, 200), email,
-          phone: str(client.phone, 60), address: str(client.address, 600),
-        },
-        quoteDate,
-        validUntil: dateOrNull(p.validUntil),
-        projectStart: dateOrNull(p.projectStart),
-        projectEnd: dateOrNull(p.projectEnd),
-        lines,
-        quoteDiscount,
-        quoteDiscountCadence,
-        sow: {
-          title: str(p.sow?.title, 300), objectives: str(p.sow?.objectives, 8000),
-          exclusions: str(p.sow?.exclusions, 8000), timeline: str(p.sow?.timeline, 8000),
-          responsibilities: str(p.sow?.responsibilities, 8000), paymentTerms: str(p.sow?.paymentTerms, 8000),
-          assumptions: str(p.sow?.assumptions, 8000), notes: str(p.sow?.notes, 8000),
-        },
-      };
-      const snapshot = Array.isArray(p.catalogSnapshot) ? p.catalogSnapshot.slice(0, 200) : [];
+      const quoteDiscountCadence: QuoteCadence = payload.quoteDiscountCadence;
+      const totals = computeQuote(lines, quoteDiscount, quoteDiscountCadence);
+      if (status === "issued" && action === "save") {
+        if (!totals.valid) return json({ error: `Fix before issuing: ${totals.errors.slice(0, 3).join(" ")}` }, 400);
+        if (!payload.client.company.trim() || !payload.client.contact.trim()) {
+          return json({ error: "Client company and contact name are required before issuing." }, 400);
+        }
+      }
       const isDup = action === "duplicate";
       const id = isDup ? null : (str(p.id, 64) || null);
       let quoteNumber = isDup ? newQuoteNumber() : (str(p.quoteNumber, 60).trim() || newQuoteNumber());
+      // Snapshots: existing entries on a saved quote are never replaced; only new services are appended.
+      let snapshot: unknown[];
+      if (id) {
+        const { data: cur, error: curErr } = await sb.from("admin_quotes").select("catalog_snapshot").eq("id", id).maybeSingle();
+        if (curErr) throw curErr;
+        if (!cur) return json({ error: "Quote not found" }, 404);
+        snapshot = mergeSnapshots(cur.catalog_snapshot, p.catalogSnapshot);
+      } else if (isDup) {
+        const srcId = str(p.id, 64);
+        const { data: src } = srcId ? await sb.from("admin_quotes").select("catalog_snapshot").eq("id", srcId).maybeSingle() : { data: null };
+        snapshot = mergeSnapshots(src?.catalog_snapshot, p.catalogSnapshot);
+      } else {
+        snapshot = mergeSnapshots([], p.catalogSnapshot);
+      }
 
       const row = {
         quote_number: quoteNumber,
