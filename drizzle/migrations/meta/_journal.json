@@ -8,6 +8,13 @@
       "when": 1790117001557,
       "tag": "0000_restrict_retargeting_settings_public_read",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790940034931,
+      "tag": "0001_create_admin_quotes",
+      "breakpoints": true
     }
   ]
 }

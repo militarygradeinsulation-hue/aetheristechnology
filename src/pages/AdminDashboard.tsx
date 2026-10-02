@@ -47,6 +47,7 @@ const SEOOptimizer = lazy(() => import('@/components/admin/SEOOptimizer').then(m
 const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').then(m => ({ default: m.AdminAssistant })));
 const AdminLiveTrafficBar = lazy(() => import('@/components/admin/AdminLiveTrafficBar').then(m => ({ default: m.AdminLiveTrafficBar })));
 const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
+const AdminQuotingPos = lazy(() => import('@/components/admin/AdminQuotingPos').then(m => ({ default: m.AdminQuotingPos })));
 const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
 const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
 const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
@@ -656,7 +657,7 @@ const AdminDashboard: React.FC = () => {
       );
       case 'crm': return <AdminCrm />;
       
-      case 'commissions': return <CommissionStructurePanel />;
+      case 'commissions': return <div className="space-y-6"><AdminQuotingPos /><CommissionStructurePanel /></div>;
       case 'catalog': return <ServicesPricing />;
       case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
