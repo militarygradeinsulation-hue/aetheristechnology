@@ -143,7 +143,7 @@ export const AdminQuotingPos: React.FC = () => {
   const [restored] = useState(() => !!retained.draft && JSON.stringify(retained.draft) !== retained.savedJson);
   // Loading/saving replaces state wholesale; every user edit goes through setDraft,
   // which demotes an issued SOW to draft until it is explicitly reissued.
-  const loadDraft = (d: QuoteDraft) => { setDraftRaw(d); setSavedJson(JSON.stringify(d)); };
+  const loadDraft = (d: QuoteDraft) => { setDraftRaw(d); setSavedJson(JSON.stringify(d)); setExpandedLines(new Set()); };
   const setDraft = (u: QuoteDraft | ((d: QuoteDraft) => QuoteDraft)) =>
     setDraftRaw((d) => { const n = typeof u === 'function' ? u(d) : u; return n.status === 'issued' ? { ...n, status: 'draft' } : n; });
   const [saving, setSaving] = useState(false);
