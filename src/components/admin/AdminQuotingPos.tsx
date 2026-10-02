@@ -15,7 +15,7 @@ import {
   type QuoteCadence, type QuoteLineInput, type DiscountType, type QuoteDiscount,
 } from '@/lib/quoteMath';
 import {
-  catalogFromRepProducts, emptyDraft, snapshotFor, usd, fmtDate, type QuoteDraft, type CatalogItem,
+  catalogFromRepProducts, emptyDraft, mergeSnapshot, exportProblems, usd, fmtDate, QUOTE_LIMITS, type QuoteDraft, type CatalogItem,
 } from '@/lib/quoteDocument';
 import { buildQuotePdf, quotePdfFilename } from '@/lib/generateQuotePdf';
 import {
@@ -63,6 +63,8 @@ function rowToDraft(row: any): QuoteDraft {
     quoteDiscount: p.quoteDiscount || { type: 'none', value: 0 },
     quoteDiscountCadence: p.quoteDiscountCadence || 'one_time',
     sow: { ...base.sow, ...(p.sow || {}) },
+    signatures: { clientDate: p.signatures?.clientDate || '', providerDate: p.signatures?.providerDate || '' },
+    catalogSnapshot: Array.isArray(row.catalog_snapshot) ? row.catalog_snapshot : [],
     createdAt: row.created_at, updatedAt: row.updated_at, createdBy: row.created_by,
   };
 }
@@ -79,7 +81,13 @@ const parseDisc = (type: DiscountType, text: string): QuoteDiscount => {
 
 const DiscountEditor: React.FC<{ value: QuoteDiscount; onChange: (d: QuoteDiscount) => void; label: string }> = ({ value, onChange, label }) => {
   const [text, setText] = useState(discText(value));
-  useEffect(() => { setText(discText(value)); }, [value.type]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Resync when the value changes from outside (open/new/duplicate) but keep
+  // in-progress typing like "12." that already parses to the same value.
+  useEffect(() => {
+    const local = parseDisc(value.type, text);
+    const same = local.type === value.type && (Object.is(local.value, value.value) || (Number.isNaN(local.value) && Number.isNaN(value.value)));
+    if (!same) setText(discText(value));
+  }, [value.type, value.value]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="flex gap-2 items-center">
       <Select value={value.type} onValueChange={(t) => { setText(''); onChange(parseDisc(t as DiscountType, '')); }}>
@@ -100,9 +108,14 @@ const DiscountEditor: React.FC<{ value: QuoteDiscount; onChange: (d: QuoteDiscou
 };
 
 const PriceInput: React.FC<{ cents: number | null; onChange: (c: number | null) => void; label: string }> = ({ cents, onChange, label }) => {
-  const [text, setText] = useState(centsToDollarString(cents));
+  const safe = (c: number | null) => (c === null || !Number.isInteger(c) ? '' : centsToDollarString(c));
+  const [text, setText] = useState(safe(cents));
   const [bad, setBad] = useState(false);
-  useEffect(() => { if (dollarsToCents(text) !== cents) setText(centsToDollarString(cents)); }, [cents]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (cents !== null && !Number.isInteger(cents)) return; // invalid typing in progress: keep what the user typed
+    const local = text.trim() === '' ? null : dollarsToCents(text);
+    if (local !== cents) { setText(safe(cents)); setBad(false); }
+  }, [cents]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="relative">
       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
@@ -117,13 +130,22 @@ const PriceInput: React.FC<{ cents: number | null; onChange: (c: number | null) 
   );
 };
 
+// Survives Admin tab switches (which unmount this panel) for the life of the page.
+const retained: { draft: QuoteDraft | null; savedJson: string | null } = { draft: null, savedJson: null };
+
 export const AdminQuotingPos: React.FC = () => {
   const { toast } = useToast();
   const catalog = useMemo(() => catalogFromRepProducts(), []);
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState<'all' | CatalogItem['group']>('all');
-  const [draft, setDraft] = useState<QuoteDraft>(emptyDraft);
-  const [savedJson, setSavedJson] = useState(() => JSON.stringify(emptyDraft()));
+  const [draft, setDraftRaw] = useState<QuoteDraft>(() => retained.draft ?? emptyDraft());
+  const [savedJson, setSavedJson] = useState(() => retained.savedJson ?? JSON.stringify(emptyDraft()));
+  const [restored] = useState(() => !!retained.draft && JSON.stringify(retained.draft) !== retained.savedJson);
+  // Loading/saving replaces state wholesale; every user edit goes through setDraft,
+  // which demotes an issued SOW to draft until it is explicitly reissued.
+  const loadDraft = (d: QuoteDraft) => { setDraftRaw(d); setSavedJson(JSON.stringify(d)); };
+  const setDraft = (u: QuoteDraft | ((d: QuoteDraft) => QuoteDraft)) =>
+    setDraftRaw((d) => { const n = typeof u === 'function' ? u(d) : u; return n.status === 'issued' ? { ...n, status: 'draft' } : n; });
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState<QuoteRow[]>([]);
   const [historySearch, setHistorySearch] = useState('');
@@ -133,6 +155,14 @@ export const AdminQuotingPos: React.FC = () => {
 
   const dirty = JSON.stringify(draft) !== savedJson;
   const totals = useMemo(() => computeQuote(draft.lines, draft.quoteDiscount, draft.quoteDiscountCadence), [draft]);
+  const isIssued = draft.status === 'issued' && !dirty;
+  const exportErrs = useMemo(() => exportProblems(draft, totals.errors, isIssued), [draft, totals, isIssued]);
+  const issueErrs = useMemo(() => exportProblems(draft, totals.errors, true), [draft, totals]);
+
+  useEffect(() => { retained.draft = draft; retained.savedJson = savedJson; }, [draft, savedJson]);
+  useEffect(() => {
+    if (restored) toast({ title: 'Unsaved quote restored', description: 'Your unsaved quote was kept while you used other tabs.' });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!dirty) return;
@@ -165,6 +195,7 @@ export const AdminQuotingPos: React.FC = () => {
       if (existing && Number.isInteger(existing.quantity) && existing.quantity < 1000) {
         return { ...d, lines: d.lines.map((l) => (l.id === existing.id ? { ...l, quantity: l.quantity + 1 } : l)) };
       }
+      if (d.lines.length >= QUOTE_LIMITS.lines) { toast({ title: `A quote can have at most ${QUOTE_LIMITS.lines} lines`, variant: 'destructive' }); return d; }
       return {
         ...d, lines: [...d.lines, {
           id: uid(), catalogName: c.name, name: c.name, cadence: c.cadence, quantity: 1,
@@ -174,7 +205,7 @@ export const AdminQuotingPos: React.FC = () => {
       };
     });
   };
-  const addCustom = () => setDraft((d) => ({
+  const addCustom = () => setDraft((d) => d.lines.length >= QUOTE_LIMITS.lines ? d : ({
     ...d, lines: [...d.lines, {
       id: uid(), catalogName: null, name: '', cadence: 'one_time', quantity: 1, listPriceCents: null,
       unitPriceCents: null, discount: { type: 'none', value: 0 }, scope: '',
@@ -188,15 +219,19 @@ export const AdminQuotingPos: React.FC = () => {
   };
   const confirmDiscard = () => !dirty || window.confirm('You have unsaved changes. Discard them?');
 
-  const newQuote = () => { if (!confirmDiscard()) return; const e = emptyDraft(); setDraft(e); setSavedJson(JSON.stringify(e)); };
+  const newQuote = () => { if (!confirmDiscard()) return; loadDraft(emptyDraft()); };
 
   const save = async (status: 'draft' | 'issued') => {
+    if (status === 'issued' && issueErrs.length) {
+      toast({ title: 'Cannot issue yet', description: issueErrs.slice(0, 3).join(' '), variant: 'destructive' });
+      return;
+    }
     setSaving(true);
     try {
-      const body = { ...draft, status, catalogSnapshot: snapshotFor(draft.lines, catalog) };
+      const body = { ...draft, status, catalogSnapshot: mergeSnapshot(draft.catalogSnapshot, draft.lines, catalog) };
       const d = await call('save', { quote: body });
       const nd = rowToDraft(d.quote);
-      setDraft(nd); setSavedJson(JSON.stringify(nd));
+      loadDraft(nd);
       toast({ title: status === 'issued' ? 'SOW issued and saved' : 'Draft saved', description: `Quote ${nd.quoteNumber}` });
       loadHistory();
     } catch (e) {
@@ -206,7 +241,7 @@ export const AdminQuotingPos: React.FC = () => {
 
   const open = async (id: string) => {
     if (!confirmDiscard()) return;
-    try { const d = await call('get', { id }); const nd = rowToDraft(d.quote); setDraft(nd); setSavedJson(JSON.stringify(nd)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    try { const d = await call('get', { id }); const nd = rowToDraft(d.quote); loadDraft(nd); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     catch (e) { toast({ title: 'Could not open quote', description: (e as Error).message, variant: 'destructive' }); }
   };
   const duplicate = async (id: string) => {
@@ -214,19 +249,19 @@ export const AdminQuotingPos: React.FC = () => {
     try {
       const g = await call('get', { id });
       const src = rowToDraft(g.quote);
-      const d = await call('duplicate', { quote: { ...src, catalogSnapshot: g.quote.catalog_snapshot } });
-      const nd = rowToDraft(d.quote); setDraft(nd); setSavedJson(JSON.stringify(nd));
+      const d = await call('duplicate', { quote: { ...src, signatures: { clientDate: '', providerDate: '' } } });
+      const nd = rowToDraft(d.quote); loadDraft(nd);
       toast({ title: 'Duplicated as new draft', description: `Quote ${nd.quoteNumber}` });
       loadHistory();
     } catch (e) { toast({ title: 'Duplicate failed', description: (e as Error).message, variant: 'destructive' }); }
   };
 
   const pdfBlobUrl = () => {
-    const doc = buildQuotePdf(draft);
+    const doc = buildQuotePdf(draft, { issued: isIssued });
     return URL.createObjectURL(doc.output('blob'));
   };
   const download = () => {
-    try { const doc = buildQuotePdf(draft); doc.save(quotePdfFilename(draft)); }
+    try { const doc = buildQuotePdf(draft, { issued: isIssued }); doc.save(quotePdfFilename(draft)); }
     catch (e) { toast({ title: 'PDF export failed', description: (e as Error).message, variant: 'destructive' }); }
   };
   const preview = () => {
@@ -246,12 +281,13 @@ export const AdminQuotingPos: React.FC = () => {
     <div className="space-y-1">
       <Label className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{label}</Label>
       <Input value={value} onChange={(e) => onChange(e.target.value)} {...props} />
+      {props.maxLength && value.length >= props.maxLength && <p className="text-[10px] text-destructive">Limit {props.maxLength} characters reached.</p>}
     </div>
   );
   const area = (label: string, key: keyof QuoteDraft['sow'], rows = 3) => (
     <div className="space-y-1">
       <Label className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <Textarea rows={rows} value={draft.sow[key]} onChange={(e) => update({ sow: { ...draft.sow, [key]: e.target.value } })} />
+      <Textarea rows={rows} maxLength={QUOTE_LIMITS.text} value={draft.sow[key]} onChange={(e) => update({ sow: { ...draft.sow, [key]: e.target.value } })} />
     </div>
   );
 
@@ -263,7 +299,7 @@ export const AdminQuotingPos: React.FC = () => {
         </CardTitle>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="font-mono text-[10px] uppercase border-amber/40 text-amber">
-            {draft.id ? `${draft.quoteNumber} · ${draft.status}` : 'New quote'}
+            {draft.id ? `${draft.quoteNumber} · ${isIssued ? 'issued' : 'draft'}` : 'New quote'}
           </Badge>
           {dirty && <Badge variant="outline" className="font-mono text-[10px] uppercase">Unsaved changes</Badge>}
           <Button size="sm" variant="outline" onClick={newQuote}><FilePlus2 className="w-4 h-4 mr-1" />New</Button>
@@ -311,7 +347,7 @@ export const AdminQuotingPos: React.FC = () => {
               ))}
               {!filtered.length && <p className="text-sm text-muted-foreground py-6 text-center">No services match.</p>}
             </div>
-            <Button variant="outline" className="w-full" onClick={addCustom}><Plus className="w-4 h-4 mr-1" />Add custom service line</Button>
+            <Button variant="outline" className="w-full" onClick={addCustom} disabled={draft.lines.length >= QUOTE_LIMITS.lines}><Plus className="w-4 h-4 mr-1" />Add custom service line</Button>
           </section>
 
           {/* Cart */}
@@ -328,7 +364,7 @@ export const AdminQuotingPos: React.FC = () => {
               return (
                 <div key={l.id} className="rounded-lg border border-border/60 bg-card/30 p-3 space-y-3">
                   <div className="flex gap-2 items-start">
-                    <Input value={l.name} placeholder="Service name" aria-label="Service name" className="font-semibold"
+                    <Input value={l.name} maxLength={QUOTE_LIMITS.name} placeholder="Service name" aria-label="Service name" className="font-semibold"
                       onChange={(e) => updateLine(l.id, { name: e.target.value })} />
                     <Button size="icon" variant="ghost" aria-label={`Remove ${l.name || 'line'}`} onClick={() => setDraft((d) => ({ ...d, lines: d.lines.filter((x) => x.id !== l.id) }))}>
                       <Trash2 className="w-4 h-4" />
@@ -366,7 +402,8 @@ export const AdminQuotingPos: React.FC = () => {
                   {r.errors.length > 0 && <ul className="text-xs text-destructive space-y-0.5">{r.errors.map((e) => <li key={e}>{e}</li>)}</ul>}
                   <div className="space-y-1">
                     <Label className="text-[10px] font-mono uppercase text-muted-foreground">Included scope / deliverables</Label>
-                    <Textarea rows={3} value={l.scope} onChange={(e) => updateLine(l.id, { scope: e.target.value })} />
+                    <Textarea rows={3} maxLength={QUOTE_LIMITS.scope} value={l.scope} onChange={(e) => updateLine(l.id, { scope: e.target.value })} />
+                    <p className={`text-[10px] font-mono ${l.scope.length >= QUOTE_LIMITS.scope ? 'text-destructive' : 'text-muted-foreground'}`}>{l.scope.length}/{QUOTE_LIMITS.scope}</p>
                   </div>
                 </div>
               );
@@ -414,20 +451,20 @@ export const AdminQuotingPos: React.FC = () => {
         <section className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
             <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Client</h3>
-            {field('Legal / company name', draft.client.company, (v) => update({ client: { ...draft.client, company: v } }))}
-            {field('Contact name', draft.client.contact, (v) => update({ client: { ...draft.client, contact: v } }))}
+            {field('Legal / company name (required to issue)', draft.client.company, (v) => update({ client: { ...draft.client, company: v } }), { maxLength: QUOTE_LIMITS.company })}
+            {field('Contact name (required to issue)', draft.client.contact, (v) => update({ client: { ...draft.client, contact: v } }), { maxLength: QUOTE_LIMITS.contact })}
             <div className="grid grid-cols-2 gap-3">
-              {field('Email', draft.client.email, (v) => update({ client: { ...draft.client, email: v } }), { type: 'email' })}
-              {field('Phone', draft.client.phone, (v) => update({ client: { ...draft.client, phone: v } }), { type: 'tel' })}
+              {field('Email', draft.client.email, (v) => update({ client: { ...draft.client, email: v } }), { type: 'email', maxLength: QUOTE_LIMITS.email })}
+              {field('Phone', draft.client.phone, (v) => update({ client: { ...draft.client, phone: v } }), { type: 'tel', maxLength: QUOTE_LIMITS.phone })}
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Address</Label>
-              <Textarea rows={2} value={draft.client.address} onChange={(e) => update({ client: { ...draft.client, address: e.target.value } })} />
+              <Textarea rows={2} maxLength={QUOTE_LIMITS.address} value={draft.client.address} onChange={(e) => update({ client: { ...draft.client, address: e.target.value } })} />
             </div>
           </div>
           <div className="space-y-3">
             <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Quote details · Provider: Aetheris Technology</h3>
-            {field('Quote number (auto if blank)', draft.quoteNumber, (v) => update({ quoteNumber: v }), { placeholder: 'Assigned on save' })}
+            {field('Quote number (auto if blank)', draft.quoteNumber, (v) => update({ quoteNumber: v }), { placeholder: 'Assigned on save', maxLength: QUOTE_LIMITS.quoteNumber })}
             <div className="grid grid-cols-2 gap-3">
               {field('Quote date', draft.quoteDate, (v) => update({ quoteDate: v }), { type: 'date' })}
               {field('Valid until', draft.validUntil ?? '', (v) => update({ validUntil: v || null }), { type: 'date' })}
@@ -443,7 +480,7 @@ export const AdminQuotingPos: React.FC = () => {
         {/* SOW */}
         <section className="space-y-3">
           <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Statement of work</h3>
-          {field('SOW title', draft.sow.title, (v) => update({ sow: { ...draft.sow, title: v } }))}
+          {field('SOW title', draft.sow.title, (v) => update({ sow: { ...draft.sow, title: v } }), { maxLength: QUOTE_LIMITS.title })}
           <div className="grid gap-3 md:grid-cols-2">
             {area('Objectives', 'objectives')}
             {area('Exclusions', 'exclusions')}
@@ -455,13 +492,25 @@ export const AdminQuotingPos: React.FC = () => {
           {area('Notes', 'notes', 2)}
         </section>
 
+        {/* Signature dates */}
+        <section className="space-y-2">
+          <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Date signed (optional)</h3>
+          <p className="text-[11px] text-muted-foreground">Leave blank until a party has actually signed. Blank dates print as empty lines.</p>
+          <div className="grid grid-cols-2 gap-3 max-w-md">
+            {field('Client date signed', draft.signatures.clientDate, (v) => update({ signatures: { ...draft.signatures, clientDate: v } }), { type: 'date' })}
+            {field('Aetheris date signed', draft.signatures.providerDate, (v) => update({ signatures: { ...draft.signatures, providerDate: v } }), { type: 'date' })}
+          </div>
+        </section>
+
         {/* Actions */}
         <div className="flex flex-wrap gap-2 sticky bottom-0 bg-background/95 backdrop-blur py-3 border-t border-border/40 z-10">
           <Button onClick={() => save('draft')} disabled={saving}>{saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}Save draft</Button>
-          <Button variant="outline" onClick={() => save('issued')} disabled={saving || !totals.valid} title={totals.valid ? '' : 'Fix the highlighted issues first'}>Save as issued SOW</Button>
-          <Button variant="outline" onClick={preview} disabled={!draft.lines.length}><Eye className="w-4 h-4 mr-1" />Preview</Button>
-          <Button variant="outline" onClick={download} disabled={!draft.lines.length}><FileDown className="w-4 h-4 mr-1" />Download PDF</Button>
-          <Button variant="outline" onClick={print} disabled={!draft.lines.length}><Printer className="w-4 h-4 mr-1" />Print</Button>
+          <Button variant="outline" onClick={() => save('issued')} disabled={saving || issueErrs.length > 0} title={issueErrs.join(' ')}>{draft.status === 'issued' || (draft.id && savedJson.includes('"status":"issued"')) ? 'Reissue SOW' : 'Save as issued SOW'}</Button>
+          <Button variant="outline" onClick={preview} disabled={exportErrs.length > 0} title={exportErrs.join(' ')}><Eye className="w-4 h-4 mr-1" />Preview</Button>
+          <Button variant="outline" onClick={download} disabled={exportErrs.length > 0} title={exportErrs.join(' ')}><FileDown className="w-4 h-4 mr-1" />Download PDF</Button>
+          <Button variant="outline" onClick={print} disabled={exportErrs.length > 0} title={exportErrs.join(' ')}><Printer className="w-4 h-4 mr-1" />Print</Button>
+          {exportErrs.length > 0 && <p className="w-full text-xs text-destructive">Export disabled: {exportErrs.slice(0, 2).join(' ')}</p>}
+          {!exportErrs.length && issueErrs.length > 0 && <p className="w-full text-xs text-muted-foreground">PDFs export as DRAFT. To issue: {issueErrs.slice(0, 2).join(' ')}</p>}
         </div>
         <iframe ref={printFrame} title="Print quote" className="hidden" />
 
