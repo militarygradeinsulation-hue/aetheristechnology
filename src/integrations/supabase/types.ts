@@ -393,6 +393,66 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_quotes: {
+        Row: {
+          catalog_snapshot: Json
+          client_company: string | null
+          client_contact: string | null
+          client_email: string | null
+          created_at: string
+          created_by: string
+          duplicated_from: string | null
+          id: string
+          payload: Json
+          quote_date: string
+          quote_number: string
+          sow_title: string | null
+          status: string
+          totals: Json
+          updated_at: string
+          updated_by: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          catalog_snapshot?: Json
+          client_company?: string | null
+          client_contact?: string | null
+          client_email?: string | null
+          created_at?: string
+          created_by?: string
+          duplicated_from?: string | null
+          id?: string
+          payload?: Json
+          quote_date?: string
+          quote_number: string
+          sow_title?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+          updated_by?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          catalog_snapshot?: Json
+          client_company?: string | null
+          client_contact?: string | null
+          client_email?: string | null
+          created_at?: string
+          created_by?: string
+          duplicated_from?: string | null
+          id?: string
+          payload?: Json
+          quote_date?: string
+          quote_number?: string
+          sow_title?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+          updated_by?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
