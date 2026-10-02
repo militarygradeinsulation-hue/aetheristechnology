@@ -367,55 +367,72 @@ export const AdminQuotingPos: React.FC = () => {
             {!draft.lines.length && (
               <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">Click a service to add it.</div>
             )}
-            {draft.lines.map((l, i) => {
-              const r = totals.lines[i];
-              return (
-                <div key={l.id} className="rounded-lg border border-border/60 bg-card/30 p-3 space-y-3">
-                  <div className="flex gap-2 items-start">
-                    <Input value={l.name} maxLength={QUOTE_LIMITS.name} placeholder="Service name" aria-label="Service name" className="font-semibold"
-                      onChange={(e) => updateLine(l.id, { name: e.target.value })} />
-                    <Button size="icon" variant="ghost" aria-label={`Remove ${l.name || 'line'}`} onClick={() => setDraft((d) => ({ ...d, lines: d.lines.filter((x) => x.id !== l.id) }))}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-3 items-end">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-mono uppercase text-muted-foreground">Qty</Label>
-                      <Input type="number" min={1} max={1000} step={1} className="h-9 w-20" aria-label="Quantity"
-                        value={Number.isFinite(l.quantity) ? l.quantity : ''}
-                        onChange={(e) => updateLine(l.id, { quantity: e.target.value === '' ? NaN : Number(e.target.value) })} />
+            <div className="max-h-[420px] overflow-y-auto space-y-2 pr-1">
+              {draft.lines.map((l, i) => {
+                const r = totals.lines[i];
+                const open = expandedLines.has(l.id);
+                return (
+                  <div key={l.id} className="rounded-lg border border-border/60 bg-card/30">
+                    <div className="flex items-center gap-2 pl-2 pr-1 py-1.5">
+                      <button type="button" onClick={() => toggleLine(l.id)} aria-expanded={open}
+                        className="flex-1 flex items-center gap-2 min-w-0 text-left rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-amber">
+                        <ChevronDown className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+                        <span className="text-sm font-semibold text-foreground truncate">{l.name || 'Untitled service'}</span>
+                        {Number.isFinite(l.quantity) && l.quantity !== 1 && <span className="font-mono text-[10px] text-muted-foreground shrink-0">×{l.quantity}</span>}
+                        {r.errors.length > 0 && <Badge variant="outline" className="text-[9px] font-mono uppercase border-destructive/60 text-destructive shrink-0">Needs price</Badge>}
+                        <span className="ml-auto font-mono text-sm text-amber whitespace-nowrap">{usd(r.netCents)}{CADENCE_SUFFIX[l.cadence]}</span>
+                      </button>
+                      <Button size="icon" variant="ghost" aria-label={`Remove ${l.name || 'line'}`} onClick={() => setDraft((d) => ({ ...d, lines: d.lines.filter((x) => x.id !== l.id) }))}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-mono uppercase text-muted-foreground">Unit price</Label>
-                      <PriceInput cents={l.unitPriceCents} label="Unit price" onChange={(c) => updateLine(l.id, { unitPriceCents: c })} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-mono uppercase text-muted-foreground">Cadence</Label>
-                      <Select value={l.cadence} disabled={!!l.catalogName} onValueChange={(v) => updateLine(l.id, { cadence: v as QuoteCadence })}>
-                        <SelectTrigger className="h-9 w-[120px]" aria-label="Cadence"><SelectValue /></SelectTrigger>
-                        <SelectContent>{CADENCES.map((c) => <SelectItem key={c} value={c}>{CADENCE_LABEL[c]}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-mono uppercase text-muted-foreground">Line discount</Label>
-                      <DiscountEditor label="Line discount" value={l.discount} onChange={(d) => updateLine(l.id, { discount: d })} />
-                    </div>
+                    {open && (
+                      <div className="p-3 pt-0 space-y-3">
+                        <div className="flex gap-2 items-start">
+                          <Input value={l.name} maxLength={QUOTE_LIMITS.name} placeholder="Service name" aria-label="Service name" className="font-semibold"
+                            onChange={(e) => updateLine(l.id, { name: e.target.value })} />
+                        </div>
+                        <div className="flex flex-wrap gap-3 items-end">
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-mono uppercase text-muted-foreground">Qty</Label>
+                            <Input type="number" min={1} max={1000} step={1} className="h-9 w-20" aria-label="Quantity"
+                              value={Number.isFinite(l.quantity) ? l.quantity : ''}
+                              onChange={(e) => updateLine(l.id, { quantity: e.target.value === '' ? NaN : Number(e.target.value) })} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-mono uppercase text-muted-foreground">Unit price</Label>
+                            <PriceInput cents={l.unitPriceCents} label="Unit price" onChange={(c) => updateLine(l.id, { unitPriceCents: c })} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-mono uppercase text-muted-foreground">Cadence</Label>
+                            <Select value={l.cadence} disabled={!!l.catalogName} onValueChange={(v) => updateLine(l.id, { cadence: v as QuoteCadence })}>
+                              <SelectTrigger className="h-9 w-[120px]" aria-label="Cadence"><SelectValue /></SelectTrigger>
+                              <SelectContent>{CADENCES.map((c) => <SelectItem key={c} value={c}>{CADENCE_LABEL[c]}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-mono uppercase text-muted-foreground">Line discount</Label>
+                            <DiscountEditor label="Line discount" value={l.discount} onChange={(d) => updateLine(l.id, { discount: d })} />
+                          </div>
+                        </div>
+                        <div className="text-xs font-mono flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                          {l.listPriceCents !== null && <span>List {usd(l.listPriceCents)}{CADENCE_SUFFIX[l.cadence]}</span>}
+                          {r.overrideDeltaCents !== 0 && <span className="text-amber">Override {r.overrideDeltaCents > 0 ? '+' : '-'}{usd(Math.abs(r.overrideDeltaCents))}</span>}
+                          {r.discountCents > 0 && <span>Discount -{usd(r.discountCents)}</span>}
+                          <span className="text-foreground">Line total {usd(r.netCents)}{CADENCE_SUFFIX[l.cadence]}</span>
+                        </div>
+                        {r.errors.length > 0 && <ul className="text-xs text-destructive space-y-0.5">{r.errors.map((e) => <li key={e}>{e}</li>)}</ul>}
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-mono uppercase text-muted-foreground">Included scope / deliverables</Label>
+                          <Textarea rows={3} maxLength={QUOTE_LIMITS.scope} value={l.scope} onChange={(e) => updateLine(l.id, { scope: e.target.value })} />
+                          <p className={`text-[10px] font-mono ${l.scope.length >= QUOTE_LIMITS.scope ? 'text-destructive' : 'text-muted-foreground'}`}>{l.scope.length}/{QUOTE_LIMITS.scope}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs font-mono flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
-                    {l.listPriceCents !== null && <span>List {usd(l.listPriceCents)}{CADENCE_SUFFIX[l.cadence]}</span>}
-                    {r.overrideDeltaCents !== 0 && <span className="text-amber">Override {r.overrideDeltaCents > 0 ? '+' : '-'}{usd(Math.abs(r.overrideDeltaCents))}</span>}
-                    {r.discountCents > 0 && <span>Discount -{usd(r.discountCents)}</span>}
-                    <span className="text-foreground">Line total {usd(r.netCents)}{CADENCE_SUFFIX[l.cadence]}</span>
-                  </div>
-                  {r.errors.length > 0 && <ul className="text-xs text-destructive space-y-0.5">{r.errors.map((e) => <li key={e}>{e}</li>)}</ul>}
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-mono uppercase text-muted-foreground">Included scope / deliverables</Label>
-                    <Textarea rows={3} maxLength={QUOTE_LIMITS.scope} value={l.scope} onChange={(e) => updateLine(l.id, { scope: e.target.value })} />
-                    <p className={`text-[10px] font-mono ${l.scope.length >= QUOTE_LIMITS.scope ? 'text-destructive' : 'text-muted-foreground'}`}>{l.scope.length}/{QUOTE_LIMITS.scope}</p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
 
             {/* Totals */}
             <div className="rounded-lg border border-amber/40 bg-amber/5 p-4 space-y-3">
