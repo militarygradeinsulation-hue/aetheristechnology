@@ -4,7 +4,7 @@
 import jsPDF from 'jspdf';
 import { sanitize } from '@/lib/briefPdfStyle';
 import { computeQuote, CADENCES, CADENCE_LABEL, CADENCE_SUFFIX } from '@/lib/quoteMath';
-import { PROVIDER, fmtDate, usd, type QuoteDraft } from '@/lib/quoteDocument';
+import { PROVIDER, fmtDate, usd, exportProblems, type QuoteDraft } from '@/lib/quoteDocument';
 
 const INK: [number, number, number] = [17, 19, 23];
 const GOLD: [number, number, number] = [196, 140, 42];
@@ -13,9 +13,21 @@ const RULE: [number, number, number] = [210, 205, 195];
 const W = 210, H = 297, M = 16, CW = W - 2 * M;
 const TOP = 34, BOTTOM = H - 20;
 
-export function buildQuotePdf(q: QuoteDraft): jsPDF {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+export class QuotePdfError extends Error {
+  constructor(public problems: string[]) { super(`Fix before exporting: ${problems.slice(0, 3).join(' ')}`); }
+}
+
+/**
+ * Builds the PDF. Throws QuotePdfError if totals are invalid (never renders a
+ * missing/invalid price as $0). `issued` must be true only for a saved, unmodified
+ * issued SOW; everything else is stamped DRAFT.
+ */
+export function buildQuotePdf(q: QuoteDraft, opts: { issued?: boolean } = {}): jsPDF {
   const totals = computeQuote(q.lines, q.quoteDiscount, q.quoteDiscountCadence);
+  const isIssued = !!opts.issued && q.status === 'issued';
+  const problems = exportProblems(q, totals.errors, isIssued);
+  if (problems.length) throw new QuotePdfError(problems);
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   let y = TOP;
 
   const header = () => {
@@ -30,9 +42,13 @@ export function buildQuotePdf(q: QuoteDraft): jsPDF {
     doc.setTextColor(230, 225, 210);
     doc.text('QUOTE & STATEMENT OF WORK', M, 17);
     doc.text(sanitize(`Quote ${q.quoteNumber || '(unsaved)'}`), W - M, 11, { align: 'right' });
-    doc.text(sanitize(`Issued ${fmtDate(q.quoteDate)}`), W - M, 17, { align: 'right' });
+    doc.text(sanitize(`${isIssued ? 'Issued' : 'Draft dated'} ${fmtDate(q.quoteDate)}`), W - M, 17, { align: 'right' });
     doc.setFillColor(...GOLD);
     doc.rect(0, 24, W, 0.8, 'F');
+    if (!isIssued) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...GOLD);
+      doc.text('DRAFT - NOT ISSUED', W / 2, 14, { align: 'center' });
+    }
   };
   const newPage = () => { doc.addPage(); header(); y = TOP; };
   const ensure = (h: number) => { if (y + h > BOTTOM) newPage(); };
@@ -176,26 +192,39 @@ export function buildQuotePdf(q: QuoteDraft): jsPDF {
   ];
   for (const [t, v] of blocks) { if (v && v.trim()) { sectionTitle(t); para(v); } }
 
-  // Signatures
-  ensure(70);
+  // Signatures — measure the whole block so it never splits or reaches the footer.
+  const partyLabel = (name: string) => doc.splitTextToSize(sanitize(name.toUpperCase()), colW) as string[];
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+  const clientLabel = partyLabel(`Client: ${q.client.company || 'Client'}`);
+  const provLabel = partyLabel(PROVIDER.name);
+  const labelH = Math.max(clientLabel.length, provLabel.length) * 3.6;
+  const ROW = 12;
+  const sigBlockH = 14 /* section title */ + 8 /* paragraph */ + 8 + labelH + 10 + 4 * ROW + 2;
+  if (y + sigBlockH > BOTTOM) newPage();
   sectionTitle('Acceptance');
   para('By signing below, both parties agree to the scope, pricing and terms in this quote and statement of work.', { size: 8.5, color: MUTED });
   y += 8;
-  const sig = (x: number, party: string) => {
+  const sig = (x: number, label: string[], date: string) => {
     let yy = y;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text(sanitize(party.toUpperCase()), x, yy); yy += 12;
-    for (const label of ['Signature', 'Printed name', 'Title', 'Date signed']) {
+    label.forEach((ln, k) => doc.text(ln, x, yy + k * 3.6));
+    yy += labelH + 10;
+    for (const f of ['Signature', 'Printed name', 'Title', 'Date signed']) {
+      if (f === 'Date signed' && date) {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...INK);
+        doc.text(sanitize(fmtDate(date)), x + 1, yy - 1.5);
+      }
       doc.setDrawColor(...INK); doc.setLineWidth(0.3); doc.line(x, yy, x + colW, yy);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...MUTED);
-      doc.text(label, x, yy + 3.5);
-      yy += 12;
+      doc.text(f, x, yy + 3.5);
+      yy += ROW;
     }
     return yy;
   };
-  const a = sig(M, `Client: ${q.client.company || 'Client'}`);
-  const b = sig(M + colW + 8, PROVIDER.name);
+  const a = sig(M, clientLabel, q.signatures?.clientDate || '');
+  const b = sig(M + colW + 8, provLabel, q.signatures?.providerDate || '');
   y = Math.max(a, b);
+  if (y > BOTTOM + 4) throw new Error('Signature block overflowed the page.');
 
   // Footers
   const n = doc.getNumberOfPages();
