@@ -19,7 +19,7 @@ import {
 } from '@/lib/quoteDocument';
 import { buildQuotePdf, quotePdfFilename } from '@/lib/generateQuotePdf';
 import {
-  Search, Plus, Trash2, Save, FileDown, Printer, Eye, Copy, FolderOpen, Loader2, ShoppingCart, X, FilePlus2,
+  Search, Plus, Trash2, Save, FileDown, Printer, Eye, Copy, FolderOpen, Loader2, ShoppingCart, X, FilePlus2, ChevronDown,
 } from 'lucide-react';
 
 async function call(action: string, payload: Record<string, unknown> = {}) {
@@ -184,6 +184,14 @@ export const AdminQuotingPos: React.FC = () => {
     return catalog.filter((c) => (group === 'all' || c.group === group) &&
       (!s || c.name.toLowerCase().includes(s) || c.description.toLowerCase().includes(s)));
   }, [catalog, search, group]);
+
+  // Cart lines render as compact name+price rows; full editing fields open on click.
+  const [expandedLines, setExpandedLines] = useState<Set<string>>(new Set());
+  const toggleLine = useCallback((id: string) => setExpandedLines((s) => {
+    const next = new Set(s);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  }), []);
 
   const update = (patch: Partial<QuoteDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const updateLine = (id: string, patch: Partial<QuoteLineInput>) =>
