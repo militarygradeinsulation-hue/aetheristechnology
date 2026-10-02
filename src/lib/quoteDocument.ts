@@ -26,6 +26,20 @@ export interface QuoteSow {
   notes: string;
 }
 
+export interface QuoteSignatures {
+  /** Actual signing dates (ISO yyyy-mm-dd). Blank unless the admin enters a real date. */
+  clientDate: string;
+  providerDate: string;
+}
+
+export interface CatalogSnapshotEntry {
+  name: string;
+  listPriceCents: number | null;
+  cadence: QuoteCadence;
+  description: string;
+  capturedAt: string;
+}
+
 export interface QuoteDraft {
   id: string | null;
   quoteNumber: string;
@@ -39,10 +53,28 @@ export interface QuoteDraft {
   quoteDiscount: QuoteDiscount;
   quoteDiscountCadence: QuoteCadence;
   sow: QuoteSow;
+  signatures: QuoteSignatures;
+  /** Catalog prices/descriptions captured when each service was first added. Never refreshed. */
+  catalogSnapshot: CatalogSnapshotEntry[];
   createdAt?: string | null;
   updatedAt?: string | null;
   createdBy?: string | null;
 }
+
+/** Field limits enforced identically in the UI and on the server. */
+export const QUOTE_LIMITS = {
+  lines: 200,
+  scope: 8000,
+  text: 8000,
+  title: 300,
+  name: 300,
+  company: 200,
+  contact: 200,
+  email: 200,
+  phone: 60,
+  address: 600,
+  quoteNumber: 60,
+} as const;
 
 export interface CatalogItem {
   key: string;
