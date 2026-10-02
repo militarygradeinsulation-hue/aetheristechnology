@@ -127,14 +127,40 @@ export function emptyDraft(): QuoteDraft {
       assumptions: '',
       notes: '',
     },
+    signatures: { clientDate: '', providerDate: '' },
+    catalogSnapshot: [],
   };
 }
 
-export function snapshotFor(lines: QuoteLineInput[], catalog: CatalogItem[]) {
+export function snapshotFor(lines: QuoteLineInput[], catalog: CatalogItem[]): CatalogSnapshotEntry[] {
+  return mergeSnapshot([], lines, catalog);
+}
+
+/** Keeps every existing snapshot entry untouched; adds entries only for catalog services not yet captured. */
+export function mergeSnapshot(existing: CatalogSnapshotEntry[], lines: QuoteLineInput[], catalog: CatalogItem[]): CatalogSnapshotEntry[] {
+  const out = [...(existing || [])];
+  const have = new Set(out.map((e) => e.name));
   const names = new Set(lines.map((l) => l.catalogName).filter(Boolean) as string[]);
-  return catalog
-    .filter((c) => names.has(c.name))
-    .map((c) => ({ name: c.name, listPriceCents: c.priceCents, cadence: c.cadence, description: c.description, capturedAt: new Date().toISOString() }));
+  for (const c of catalog) {
+    if (names.has(c.name) && !have.has(c.name)) {
+      out.push({ name: c.name, listPriceCents: c.priceCents, cadence: c.cadence, description: c.description, capturedAt: new Date().toISOString() });
+      have.add(c.name);
+    }
+  }
+  return out;
+}
+
+/** Problems that block preview/download/print/issue. Empty = exportable. */
+export function exportProblems(q: QuoteDraft, totalsErrors: string[], forIssue = false): string[] {
+  const errs = [...totalsErrors];
+  if (forIssue) {
+    if (!q.client.company.trim()) errs.push('Client legal / company name is required before issuing.');
+    if (!q.client.contact.trim()) errs.push('Client contact name is required before issuing.');
+  }
+  for (const [k, v] of [['Client date signed', q.signatures?.clientDate], ['Aetheris date signed', q.signatures?.providerDate]] as const) {
+    if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) errs.push(`${k} is not a valid date.`);
+  }
+  return errs;
 }
 
 export function fmtDate(iso: string | null | undefined): string {
