@@ -12,7 +12,7 @@
 export const CORE_PROMISE = "You're losing revenue. We find why\u2014and fix it.";
 
 export const HERO_SUPPORT =
-  "Aetheris investigates the gaps between your website, sales process, follow-up, systems, and customer experience\u2014then helps correct the problems costing you money.";
+  "Joseph Toney, Strategic Architect. I increase your monthly ROI without leads, marketing, sales, and subscriptions by simply fixing your COE (cost of existing).";
 
 /** Consistent, human CTA wording used everywhere a visitor can act. */
 export const CTA = {
