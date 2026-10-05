@@ -1544,13 +1544,14 @@ Deno.serve(async (req) => {
         } catch { return ""; }
       })();
       if (host) {
-        const { data: prior } = await sb
+        const { data: prior, error: priorErr } = await sb
           .from("forensic_scans")
           .select("id, target_url, created_at")
           .eq("status", "completed")
           .ilike("target_url", `%${host}%`)
           .order("created_at", { ascending: false })
           .limit(25);
+        console.log("reuse lookup", host, priorErr?.message, (prior || []).length);
         const match = (prior || []).find((p: { target_url: string | null }) => {
           try {
             const t = String(p.target_url || "");
