@@ -28,7 +28,7 @@
 
 Drip and background automation must never create a Golden Report. Golden Reports are deliberate and manual only, through the existing server-side authorized path in `forensic-scan-all` (admin, service role, or the allowlisted runner portal codes).
 
-The `Golden Report credit guard` GitHub workflow enforces this statically, and `CODEOWNERS` requires owner review for the protected paths.
+The `Golden Report credit guard` GitHub workflow enforces this statically. `CODEOWNERS` marks the protected paths for `@militarygradeinsulation-hue` review; making that review mandatory requires a GitHub branch protection or ruleset rule.
 
 ## Re-enable checklist
 
