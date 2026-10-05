@@ -1533,6 +1533,39 @@ Deno.serve(async (req) => {
       body,
     });
 
+    // Reuse: if this company (same normalized domain) already has a completed
+    // Golden Report, hand back that report instead of running a new one.
+    // Only admins may force a fresh run with force_new: true.
+    const forceNew = body.force_new === true && (adminAuthenticated || serviceRoleCaller);
+    if (!forceNew) {
+      const host = (() => {
+        try {
+          return new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.toLowerCase().replace(/^www\./, "");
+        } catch { return ""; }
+      })();
+      if (host) {
+        const { data: prior, error: priorErr } = await sb
+          .from("forensic_scans")
+          .select("id, target_url, created_at")
+          .eq("status", "completed")
+          .ilike("target_url", `%${host}%`)
+          .order("created_at", { ascending: false })
+          .limit(25);
+        console.log("reuse lookup", host, priorErr?.message, (prior || []).length);
+        const match = (prior || []).find((p: { target_url: string | null }) => {
+          try {
+            const t = String(p.target_url || "");
+            return new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`).hostname.toLowerCase().replace(/^www\./, "") === host;
+          } catch { return false; }
+        });
+        if (match) {
+          return new Response(JSON.stringify({ scan_id: match.id, reused: true }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
+
     const { data: row, error } = await sb.from("forensic_scans").insert({
       target_url: url,
       company_name: company || null,
