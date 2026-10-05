@@ -9,19 +9,26 @@ import { useStaffUnlock } from "@/hooks/useStaffUnlock";
 import { ACCESS_KEY } from "@/components/TechSolutionsAccessBar";
 import { ScrollText } from "lucide-react";
 import { trackGoldenReportEvent } from "@/lib/goldenReportTracking";
+import { supabase } from "@/integrations/supabase/client";
+import { setAdminToken } from "@/lib/adminAuth";
 
 const GoldenReportPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const staffUnlocked = useStaffUnlock();
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
-  const tryCode = () => {
-    if (code.trim() === "9822") {
+  const tryCode = async () => {
+    // The code is checked by the server's admin PIN login; a valid code
+    // grants a real admin session (unlimited Golden Report runs).
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-pin-login", { body: { pin: code.trim() } });
+      if (error || !data?.ok || !data?.token) throw new Error("invalid");
+      setAdminToken(data.token);
       try {
         localStorage.setItem(ACCESS_KEY, JSON.stringify({ plan: "staff", unlockedAll: true, code: "STAFF" }));
       } catch { /* ignore */ }
       window.dispatchEvent(new Event("tech-access-changed"));
-    } else {
+    } catch {
       setCodeError("That code isn't valid. Connect with us to get a Golden Report.");
     }
   };
