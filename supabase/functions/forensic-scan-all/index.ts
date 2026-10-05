@@ -1533,6 +1533,17 @@ Deno.serve(async (req) => {
       body,
     });
 
+    // Only Joseph (admin login or portal 163675), Dean (482917) and Braden
+    // (963169) may run Golden Reports. Internal automation is still allowed.
+    const GOLDEN_REPORT_RUNNER_CODES = new Set(["163675", "482917", "963169"]);
+    const portalAllowed = !!portalClaims && GOLDEN_REPORT_RUNNER_CODES.has(String(portalClaims.code).trim());
+    if (!adminAuthenticated && !serviceRoleCaller && !portalAllowed) {
+      return new Response(
+        JSON.stringify({ error: "Golden Reports are run by the Aetheris team. Connect with us to get one." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Reuse: if this company (same normalized domain) already has a completed
     // Golden Report, hand back that report instead of running a new one.
     // Only admins may force a fresh run with force_new: true.
