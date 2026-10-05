@@ -1,0 +1,5 @@
+/supabase/functions/generate-drip-batch/ @militarygradeinsulation-hue
+/supabase/functions/process-drip/ @militarygradeinsulation-hue
+/supabase/functions/forensic-scan-all/ @militarygradeinsulation-hue
+/.github/workflows/golden-report-credit-guard.yml @militarygradeinsulation-hue
+/.github/scripts/golden-report-credit-guard.mjs @militarygradeinsulation-hue
