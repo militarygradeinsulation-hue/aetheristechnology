@@ -213,18 +213,8 @@ serve(async (req) => {
         cancelledEmails += skippedRows?.length || 0;
       }
 
-      // Auto-generate replacements: one new prospect per bounced one
-      try {
-        const genRes = await supabase.functions.invoke("generate-drip-batch", {
-          body: { batchSize: bouncedProspectIds.length },
-        });
-        if (!genRes.error && genRes.data?.processed) {
-          replacementsGenerated = genRes.data.processed;
-        }
-        console.log(`Auto-replaced ${bouncedProspectIds.length} bounced prospects: generated ${replacementsGenerated} replacements`);
-      } catch (genErr) {
-        console.error("Auto-replacement generation failed:", genErr);
-      }
+      // Auto-replacement of bounced prospects is permanently disabled: it used to
+      // invoke generate-drip-batch, which created new Golden Reports.
     }
 
     const bounceInfo = bouncedProspectIds.length > 0
