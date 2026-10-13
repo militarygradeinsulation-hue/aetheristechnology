@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChaosMindMap } from '@/components/ChaosMindMap';
 import { HomeToolShopGrid } from '@/components/HomeToolShopGrid';
+import { PackageTiers } from '@/components/PackageTiers';
 
 import { supabase } from '@/integrations/supabase/client';
 import { captureToolLead } from '@/lib/toolLeadCapture';
@@ -128,6 +129,9 @@ const Home = () => {
               </p>
             </div>
           </section>
+
+          {/* Tier ladder — real prices back on the page */}
+          <PackageTiers />
 
           {/* Public sandbox — try every ecosystem tool, nothing saved */}
           <section id="chaos-ecosystem-try" className="px-4 pb-6 scroll-mt-24">
