@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { AETHERIS_TIERS, type AetherisTier } from "@/lib/aetherisTiers";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
+/** Tier amounts are stored in cents and shown as whole US dollars. */
+const fmtUsd = (cents: number) =>
+  `$${(cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+
 /**
  * The public Aetheris ladder: Free -> Signal -> Revenue -> Operator Suite ->
  * 21-Day Diagnostic -> Active Case Retainer. Single source of truth lives in
@@ -67,8 +71,23 @@ export const TierCard: React.FC<{ tier: AetherisTier; step: number; compact?: bo
       </div>
 
       <h3 className="font-forensic text-xl font-bold leading-tight">{t.name}</h3>
-      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2 mb-3">
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-2 mb-1">
         {t.timeline}
+      </div>
+
+      <div className="flex items-baseline gap-2 mb-3">
+        <span
+          className={`font-forensic text-2xl font-bold ${
+            crimson ? "text-crimson" : "text-foreground"
+          }`}
+        >
+          {t.amountCents === 0 ? "Free" : fmtUsd(t.amountCents)}
+        </span>
+        {t.amountCents > 0 && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {t.cadence === "monthly" ? "/ month" : "one-time"}
+          </span>
+        )}
       </div>
 
       <p className="text-sm text-foreground/80 leading-relaxed mb-3">{t.headline}</p>
