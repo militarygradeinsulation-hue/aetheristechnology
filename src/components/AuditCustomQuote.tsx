@@ -11,6 +11,7 @@ type Props = {
   recommendations?: AuditRecommendation[];
   company?: string;
   repeated?: boolean;
+  localOnly?: boolean;
 };
 const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
@@ -19,7 +20,7 @@ const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFr
  * no false summing of monthly and one-time line items.
  */
 export function AuditCustomQuote({
-  options = AUDIT_OPTIONS, recommendations = [], company, repeated,
+  options = AUDIT_OPTIONS, recommendations = [], company, repeated, localOnly,
 }: Props) {
   const [selected, setSelected] = useState<string[]>(() => recommendations.map(r => r.id));
   const recommended = useMemo(() => new Map(recommendations.map(r => [r.id, r])), [recommendations]);
@@ -60,7 +61,7 @@ export function AuditCustomQuote({
         {recommendations.length > 0 && (
           <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="h-4 w-4 text-amber" />
-            {repeated ? "Previous company baseline reused" : "Based on your first company assessment"}
+            {localOnly ? "Unsaved local recommendation preview" : repeated ? "Previous company baseline reused" : "Based on your first saved company assessment"}
           </p>
         )}
       </div>
@@ -118,6 +119,11 @@ export function AuditCustomQuote({
             aria-disabled={cart.items.length === 0}>
             Request a tailored scope <ArrowRight className="h-4 w-4" />
           </a>
+          {cart.items.length > 0 && (
+            <Link to="/book" className="inline-flex min-h-11 items-center text-sm font-semibold text-amber underline underline-offset-4">
+              Or schedule a scope discussion
+            </Link>
+          )}
           {recommendations.length === 0 && <Link className="text-sm text-amber underline" to="/leak-audit/self-scan">Take the free company audit</Link>}
         </div>
       </div>

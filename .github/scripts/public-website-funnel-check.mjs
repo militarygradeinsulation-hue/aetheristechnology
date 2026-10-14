@@ -88,4 +88,35 @@ for (const match of allTiers) {
 }
 assert.match(tierList, /ctaHref: "\/leak-audit\/self-scan"/);
 
+// New company-specific assessment must still serve useful self-reported results
+// when a Supabase edge function or database migration has not been deployed.
+assert.match(selfScan, /evaluateCompanyAudit\(answers\)/);
+assert.match(selfScan, /localOnly: true/);
+assert.match(selfScan, /Preview only — not saved to Aetheris/);
+assert.match(selfScan, /No private scan was requested from this local preview/);
+assert.match(read("src/components/AuditCustomQuote.tsx"), /Or schedule a scope discussion/);
+
+const auditBackend = read("supabase/functions/company-leak-audit/index.ts");
+const costCap = read("supabase/migrations/20261014233500_private_golden_daily_cap_hardening.sql");
+assert.match(auditBackend, /if \(runtime\?\.waitUntil\) runtime\.waitUntil\(dispatch\)/);
+assert.match(auditBackend, /claim_private_company_golden/);
+assert.match(costCap, /'dispatching', 'queued', 'reused', 'failed'/);
+assert.match(costCap, /pg_advisory_xact_lock/);
+
+// Structured data must not promise fees, results or services at old prices.
+const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+  .map(m => JSON.parse(m[1]));
+const org = jsonLd.find(s => Array.isArray(s["@type"]) && s["@type"].includes("Organization"));
+const faq = jsonLd.find(s => s["@type"] === "FAQPage");
+const howTo = jsonLd.find(s => s["@type"] === "HowTo");
+assert.equal(org.name, "Aetheris Technology");
+assert.equal(org.hasOfferCatalog, undefined);
+assert.equal(org.priceRange, undefined);
+assert.ok(!/written guarantee|18,500|15,000\/month/i.test(org.description));
+assert.equal(howTo.tool[0].url, "https://aetheris.technology/leak-audit/self-scan");
+const costs = faq.mainEntity.find(q => q.name === "How much does Aetheris cost?");
+assert.match(costs.acceptedAnswer.text, /\$23,500 one-time/);
+assert.match(costs.acceptedAnswer.text, /\$20,000\/month/);
+assert.doesNotMatch(html, /\$18,500 flat|\$15,000\/month, 3-month minimum/);
+
 console.log("Public funnel and SEO regression checks passed.");
