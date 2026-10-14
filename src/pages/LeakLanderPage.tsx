@@ -8,7 +8,6 @@ import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
 import { CaseFilePreview } from "@/components/lander/CaseFilePreview";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import {
-  CORE_PROMISE,
   HERO_SUPPORT,
   CTA,
   ENGAGEMENT_STAGES,
@@ -84,6 +83,7 @@ const LeakLanderPage: React.FC = () => {
 
       <AnomalousMatterHero
         eyebrow="Revenue Leak Audit"
+        titleAs="div"
         title={
           <img
             src={aetherisWordmark.url}
@@ -103,8 +103,8 @@ const LeakLanderPage: React.FC = () => {
         }
         description=""
       >
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
-          {CORE_PROMISE}
+        <h1 className="max-w-3xl text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
+          I study the entire company as one connected system, tracing how every department, role, handoff, and decision either creates ROI or quietly destroys it.
         </h1>
         <p className="mt-3 max-w-2xl text-base text-muted-foreground leading-relaxed">
           {HERO_SUPPORT}
