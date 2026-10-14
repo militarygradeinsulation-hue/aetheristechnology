@@ -51,8 +51,8 @@ export function PricingTimeline() {
 
         <div className="relative mt-7 h-12">
           <div className="absolute inset-x-2 top-1/2 h-[2px] bg-border" aria-hidden="true" />
-          <div className="absolute left-2 top-1/2 h-[2px] bg-amber transition-all"
-            aria-hidden="true" style={{ width: `calc((100% - 16px) * ${index / last})` }} />
+          <div className="absolute inset-x-2 top-1/2 h-[2px] origin-left bg-amber transition-transform"
+            aria-hidden="true" style={{ transform: `scaleX(${index / last})` }} />
           <div className="pointer-events-none absolute inset-x-2 top-1/2 flex -translate-y-1/2 justify-between" aria-hidden="true">
             {AETHERIS_TIERS.map((t, i) => (
               <span key={t.id} className={i === index
