@@ -88,6 +88,7 @@ const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboarding
 const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
 const GoldenReportIntelligencePage = lazy(() => import("./pages/GoldenReportIntelligencePage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
+const IndianapolisLeadPage = lazy(() => import("./pages/IndianapolisLeadPage"));
 import { VERTICAL_BY_SLUG } from "@/config/verticals";
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
@@ -298,6 +299,8 @@ const App = () => (
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                       <Route path="/indianapolis" element={<LocationPage />} />
+                      <Route path="/indianapolis/contractor-follow-up" element={<IndianapolisLeadPage />} />
+                      <Route path="/indianapolis/service-business-lead-tracking" element={<IndianapolisLeadPage />} />
                       <Route path="/indiana" element={<LocationPage />} />
                       <Route path="/extension" element={<ExtensionPage />} />
                       <Route path="/brand-voice-extension" element={<BrandVoiceExtensionPage />} />

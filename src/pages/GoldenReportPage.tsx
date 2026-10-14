@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Background } from "@/components/Background";
 import { LanderNavbar } from "@/components/lander/LanderNavbar";
 import { Footer } from "@/components/Footer";
@@ -45,8 +46,8 @@ const GoldenReportPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Golden Report — One URL, Full Forensic Case File | Aetheris"
-        description="Free tool. Drop one URL. Aetheris runs site crawl, brand contradictions, friction, SEO, and pipeline signals — then synthesizes a 14-chapter Golden Report you can download as a Smart PDF."
+        title="Golden Report | Operator-Led Business Forensics"
+        description="The Golden Report is an operator-led forensic case file. Arrange a review with Aetheris, or start with the free 14-question Leak Check."
         path="/golden-report"
         keywords="golden report, forensic scan, business forensics, revenue leak audit, aetheris"
         breadcrumbs={[
@@ -61,7 +62,7 @@ const GoldenReportPage: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-1 font-case text-[7px] uppercase tracking-[0.18em] text-amber mb-4 px-1.5 py-0.5 rounded-full border border-amber/30 bg-amber/10">
-                <ScrollText className="w-2 h-2" /> Free · 14-ch case file
+                <ScrollText className="w-2 h-2" /> Operator-led · 14-ch case file
               </div>
               <h1 className="font-forensic text-4xl md:text-6xl font-bold leading-[1.1]">
                 The <span className="text-amber italic">Golden</span> Report
@@ -91,6 +92,9 @@ const GoldenReportPage: React.FC = () => {
                     Talk With Aetheris
                   </button>
                 </div>
+                <Link to="/leak-audit/self-scan" className="mb-6 inline-block text-sm text-amber underline underline-offset-4">
+                  Prefer to start free? Take the 14-question Leak Check.
+                </Link>
                 <form
                   onSubmit={(e) => { e.preventDefault(); tryCode(); }}
                   className="flex gap-2 items-center justify-center"

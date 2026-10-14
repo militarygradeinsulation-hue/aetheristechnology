@@ -76,4 +76,4 @@ export const FOUNDER_TRUST = {
 
 /** Calm expectation note to place near conversion points. */
 export const EXPECTATION_NOTE =
-  "The initial conversation is not a promise of free implementation or guaranteed recovery. Any paid work, scope, and terms are agreed before work begins.";
+  "The initial conversation carries no fee and does not promise implementation or recovered revenue. Any recovery-based fee conditions and any separately priced services are agreed in writing before work begins.";
