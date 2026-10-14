@@ -32,13 +32,13 @@ interface SEOHeadProps {
 }
 
 const SITE_URL = 'https://aetheris.technology';
-const SITE_NAME = 'Aetheris AI';
+const SITE_NAME = 'Aetheris Technology';
 const OG_IMAGE = `${SITE_URL}/aetheris-logo.png`;
-const DEFAULT_IMAGE_ALT = 'Aetheris AI, Indianapolis AI Consulting & Automation';
+const DEFAULT_IMAGE_ALT = 'Aetheris Technology, Revenue and Operational Forensics';
 
 const MAX_TITLE = 60;
 const MAX_DESC = 155;
-const SUFFIX = ' | Aetheris AI';
+const SUFFIX = ' | Aetheris Technology';
 
 const truncate = (s: string, max: number) => {
   if (!s) return s;
@@ -48,12 +48,10 @@ const truncate = (s: string, max: number) => {
   return (lastSpace > max - 25 ? cut.slice(0, lastSpace) : cut).trimEnd() + '…';
 };
 
+// Preserve the subject and brand even when page copy or an SEO override is long.
 const finalizeTitle = (title: string): string => {
-  const base = truncate(title, MAX_TITLE);
-  const hasBrand = /aetheris/i.test(base);
-  if (hasBrand) return base;
-  if (base.length + SUFFIX.length <= MAX_TITLE) return base + SUFFIX;
-  return base;
+  const base = title.trim().replace(/\s*[|–—-]\s*Aetheris(?:\s+(?:Technology|AI))?\s*$/i, '').trim();
+  return truncate(base || 'Business Forensics', MAX_TITLE - SUFFIX.length) + SUFFIX;
 };
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
