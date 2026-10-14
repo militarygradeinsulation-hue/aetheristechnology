@@ -11,6 +11,12 @@ on:
       - "src/components/lander/LanderNavbar.tsx"
       - "src/components/SEOHead.tsx"
       - "src/components/PricingTimeline.tsx"
+      - "src/components/AuditCustomQuote.tsx"
+      - "src/lib/companyAuditOffers.test.ts"
+      - "supabase/functions/company-leak-audit/**"
+      - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/forensic-scan-all/**"
+      - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
       - "src/lib/aetherisTiers.ts"
       - "src/App.tsx"
       - "index.html"
@@ -24,6 +30,12 @@ on:
       - "src/pages/**"
       - "src/components/SEOHead.tsx"
       - "src/components/PricingTimeline.tsx"
+      - "src/components/AuditCustomQuote.tsx"
+      - "src/lib/companyAuditOffers.test.ts"
+      - "supabase/functions/company-leak-audit/**"
+      - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/forensic-scan-all/**"
+      - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
       - "src/lib/aetherisTiers.ts"
       - "src/components/lander/LanderNavbar.tsx"
       - "src/App.tsx"
@@ -49,5 +61,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install exact locked dependencies
         run: bun install --frozen-lockfile
+      - name: Test deterministic company audit, price catalog and privacy
+        run: bunx vitest run src/lib/companyAuditOffers.test.ts
       - name: Verify website production build
         run: bun run build
