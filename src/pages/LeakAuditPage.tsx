@@ -470,11 +470,11 @@ const LeakAuditPage = () => {
       <SEOHead
         title="The Leak Audit™ — Free Business Forensics Self-Scan | Aetheris"
         description="Run the free 14-point Leak Audit. Find where your business is bleeding revenue across lead capture, follow-up, operations, and trust. Estimated annual leak in $."
-        path="/leak-audit"
+        path="/leak-audit/self-scan"
         keywords="business leak audit, revenue leak assessment, business forensics audit, sales leak finder, operational diagnostic, AI consulting Indianapolis"
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: 'The Leak Audit', path: '/leak-audit' },
+          { name: 'Free Leak Check', path: '/leak-audit/self-scan' },
         ]}
       />
       <Background />
