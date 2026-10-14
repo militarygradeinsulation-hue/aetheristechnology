@@ -4,19 +4,17 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
-import { CaseFileCard } from '@/components/CaseFileCard';
 import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AuditCustomQuote } from '@/components/AuditCustomQuote';
 import { normalizePublicCompanyUrl, type AuditOption, type AuditRecommendation } from '../../supabase/functions/_shared/company-audit-offers';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
-import { BOOK_MEETING_URL } from '@/lib/links';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -135,7 +133,7 @@ const LeakAuditPage = () => {
     <div className="relative min-h-screen">
       <SEOHead
         title="The Leak Audit™ — Free Business Forensics Self-Scan | Aetheris"
-        description="Run the free 14-point Leak Audit. Find where your business is bleeding revenue across lead capture, follow-up, operations, and trust. Estimated annual leak in $."
+        description="Enter your company's website and complete a free 14-question assessment. See consistent recommended fixes and choose individual Aetheris services with transparent estimated prices."
         path="/leak-audit/self-scan"
         keywords="business leak audit, revenue leak assessment, business forensics audit, sales leak finder, operational diagnostic, AI consulting Indianapolis"
         breadcrumbs={[
@@ -169,14 +167,36 @@ const LeakAuditPage = () => {
                     The Leak Audit<sup className="text-2xl text-amber">™</sup>
                   </h1>
                   <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                    14 questions. We name where your business is leaking and put a real annual dollar figure on it.
-                    PDF case file, downloadable when you're done.
+                    Enter your company website and answer 14 operational questions. See the
+                    gaps your answers suggest, practical solutions, and individual prices.
+                    A full Golden Report is prepared privately for the Aetheris team.
                   </p>
                 </div>
 
                 
 
                 <div id="leak-audit-start" className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5 scroll-mt-28">
+                  <div>
+                    <Label htmlFor="audit-website" className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Company website <span className="text-amber">*</span>
+                    </Label>
+                    <Input
+                      id="audit-website"
+                      type="url"
+                      inputMode="url"
+                      autoComplete="url"
+                      placeholder="https://yourcompany.com"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      className="mt-2"
+                      required
+                    />
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                      Your domain identifies a single company baseline. Repeat submissions for the same
+                      company use the original recommendation set. The full forensic report remains
+                      in our private internal library and is not included with the free results.
+                    </p>
+                  </div>
                   <div>
                     <Label className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
                       Annual Revenue Band
@@ -197,7 +217,7 @@ const LeakAuditPage = () => {
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2 italic">
-                      Used to scale the leak estimate. Stays private.
+                      Context for our internal analysis. We do not invent a verified dollar loss from these answers.
                     </p>
                   </div>
 
@@ -211,22 +231,9 @@ const LeakAuditPage = () => {
                   </Button>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <CaseFileCard
-                    caseNumber={47}
-                    businessType="$4M services firm"
-                    leakFound="Inbound dying in one Gmail inbox."
-                    amountBled="$380K / yr"
-                  />
-                  <CaseFileCard
-                    caseNumber={62}
-                    businessType="Regional B2B SaaS"
-                    leakFound="73% of quotes never followed up after Day 3."
-                    amountBled="$610K / yr"
-                  />
-                </div>
-              </div>
             )}
+
+            {/* QUESTIONS */}            )}
 
             {/* QUESTIONS */}
             {step === 'questions' && (
@@ -308,143 +315,96 @@ const LeakAuditPage = () => {
             )}
 
             {/* EMAIL GATE */}
-            {step === 'gate' && result && (
+            {step === 'gate' && allAnswered && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 font-case text-[10px] uppercase tracking-widest text-crimson mb-3 px-3 py-1 border border-crimson/40 rounded-sm">
-                    <AlertTriangle className="w-3 h-3" />
-                    Findings Ready
+                  <div className="inline-flex justify-center gap-2 rounded-full border border-amber/40 px-3 py-1 font-case text-xs uppercase tracking-widest text-amber">
+                    <ShieldCheck className="h-4 w-4" /> Your company assessment
                   </div>
-                  <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground mb-3">
-                    The audit found leaks.
+                  <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
+                    View your fixes and individual prices.
                   </h2>
-                  <p className="text-muted-foreground text-lg">
-                    Drop your email — your case file PDF downloads now and a copy hits your inbox.
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    This is based on your self-reported answers, not a verified ROI claim.
+                    Your Golden Report is retained privately by Aetheris and is not emailed or downloaded.
                   </p>
                 </div>
-
-                <div className="glass rounded-lg border border-crimson/40 p-6 text-center">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-                    Estimated Annual Leak
-                  </div>
-                  <div className="font-forensic text-5xl md:text-6xl font-bold text-crimson mb-2">
-                    ${result.estimatedAnnualLeak.toLocaleString()}
-                  </div>
-                  <div className="font-case text-xs uppercase tracking-widest text-muted-foreground">
-                    Severity: <span className="text-crimson">{result.severity}</span> · Score: {result.totalScore}/{result.maxScore}
-                  </div>
-                </div>
-
-                <div className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
+                <div className="glass space-y-4 rounded-lg border border-amber/35 p-6">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="name" className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Name
-                      </Label>
-                      <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="mt-1" />
+                      <Label htmlFor="name">Your name</Label>
+                      <Input id="name" value={name} onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name" className="mt-1" />
                     </div>
                     <div>
-                      <Label htmlFor="company" className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                        Company
-                      </Label>
-                      <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="mt-1" />
+                      <Label htmlFor="company">Company name</Label>
+                      <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)}
+                        placeholder="Company name" className="mt-1" />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="email" className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Email <span className="text-crimson">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      className="mt-1"
-                      required
-                    />
+                    <Label htmlFor="email">Email <span className="text-amber">*</span></Label>
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@company.com" className="mt-1" required />
                   </div>
-                  <Button
-                    onClick={handleSubmitGate}
-                    disabled={submitting}
-                    size="lg"
-                    className="w-full bg-amber text-primary-foreground hover:bg-amber/90"
-                  >
-                    {submitting ? 'Generating case file…' : (
-                      <>
-                        <Download className="mr-2 w-4 h-4" />
-                        Download My Leak Audit
-                      </>
-                    )}
+                  <Button size="lg" onClick={handleSubmitGate} disabled={submitting}
+                    className="w-full bg-amber text-background">
+                    {submitting ? "Saving your company baseline..." : "See My Fixes and Pricing"}
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <p className="text-xs text-center text-muted-foreground italic">
-                    No spam. We send the report once. Unsubscribe anytime.
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Your answers and contact details are saved for internal assessment follow-up.
+                    No automatic purchase or payment occurs.
                   </p>
                 </div>
               </div>
             )}
 
             {/* RESULT */}
-            {step === 'result' && result && (
+            {step === 'result' && personalized && (
               <div className="space-y-8">
                 <div className="text-center">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-3">
-                    Case File Sealed
-                  </div>
-                  <h2 className="font-forensic text-3xl md:text-5xl font-bold text-foreground mb-3">
-                    Your audit is downloaded.
+                  <p className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
+                    Company assessment · {personalized.domain}
+                  </p>
+                  <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
+                    What needs attention. What fixes it.
                   </h2>
-                  <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                    The PDF is in your downloads. Here's the headline finding — and the next step.
+                  <p className="mt-4 leading-relaxed text-muted-foreground">
+                    {personalized.repeated
+                      ? "This company has already been assessed. The original baseline has been reused instead of changing your recommendations with each submission."
+                      : "These are directional gaps suggested by the company's answers. They are not proof of a verified website issue or actual lost revenue."}
                   </p>
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  {result.categories.map((c) => (
-                    <CaseFileCard
-                      key={c.key}
-                      caseNumber={c.key.toUpperCase()}
-                      businessType={c.label}
-                      leakFound={c.diagnosis}
-                      amountBled={`${c.pct}% sealed`}
-                      status={c.pct >= 75 ? 'SEALED' : 'ACTIVE'}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  {personalized.recommendations.length ? personalized.recommendations.map((finding, i) => (
+                    <div key={finding.id} className="glass rounded-lg border border-border/60 p-5">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-amber">
+                        Priority {String(i + 1).padStart(2, '0')} · Self-reported gap
+                      </p>
+                      <h3 className="mt-2 font-forensic text-xl font-bold">{finding.problem}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                        <strong className="text-foreground">Recommended fix:</strong> {finding.fix}
+                      </p>
+                      <p className="mt-2 text-xs text-muted-foreground">{finding.reason}</p>
+                    </div>
+                  )) : (
+                    <div className="rounded-lg border border-border/60 p-6 text-sm text-muted-foreground">
+                      Your responses didn't indicate a major gap under our screening thresholds.
+                      You can still choose specific services below or request a deeper review.
+                    </div>
+                  )}
                 </div>
-
-                <div className="glass rounded-lg border border-amber/40 p-8 text-center space-y-4">
-                  <div className="font-case text-[10px] uppercase tracking-widest text-amber">
-                    Next Step
-                  </div>
-                  <h3 className="font-forensic text-3xl md:text-4xl font-bold text-foreground">
-                    The Signal Pack
-                  </h3>
-                  <p className="text-muted-foreground max-w-xl mx-auto">
-                    The Leak Audit was self-reported. The Signal Pack is the operator-led diagnosis:
-                    the full website forensic pass, brand contradictions, friction audit, and a written
-                    findings memo.
-                    <strong className="text-foreground"> Credits in full toward any higher tier.</strong>
-                  </p>
-                  <Button asChild size="lg" className="bg-amber text-primary-foreground hover:bg-amber/90">
-                    <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                      Talk to an operator
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </a>
-                  </Button>
-                  <div className="pt-2">
-                    <a
-                      href="/book"
-                      className="text-sm text-muted-foreground hover:text-amber transition-colors inline-flex items-center gap-1"
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      Or book a 15-min walkthrough first
-                    </a>
-                  </div>
-                </div>
-
-                {/* Full pricing ladder — Ways to run the audit */}
-                
-
+                <AuditCustomQuote key={personalized.domain}
+                  options={personalized.options}
+                  recommendations={personalized.recommendations}
+                  company={personalized.company}
+                  repeated={personalized.repeated}
+                />
+                <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                  Your full Golden Report is retained in the Aetheris admin library for
+                  internal review and is not available through this public page.
+                </p>
               </div>
             )}
           </div>
