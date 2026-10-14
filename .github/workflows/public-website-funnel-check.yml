@@ -1,0 +1,44 @@
+name: Public website funnel and SEO guard
+
+on:
+  pull_request:
+    paths:
+      - "src/pages/LeakLanderPage.tsx"
+      - "src/pages/LeakAuditPage.tsx"
+      - "src/pages/GoldenReportPage.tsx"
+      - "src/pages/GoldenLanderPage.tsx"
+      - "src/pages/IndianapolisLeadPage.tsx"
+      - "src/components/lander/LanderNavbar.tsx"
+      - "src/components/SEOHead.tsx"
+      - "src/App.tsx"
+      - "index.html"
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - ".github/scripts/public-website-funnel-check.mjs"
+      - ".github/workflows/public-website-funnel-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/pages/**"
+      - "src/components/SEOHead.tsx"
+      - "src/components/lander/LanderNavbar.tsx"
+      - "src/App.tsx"
+      - "index.html"
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - ".github/scripts/public-website-funnel-check.mjs"
+      - ".github/workflows/public-website-funnel-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify public landing, free assessment, search metadata and local pages
+        run: node .github/scripts/public-website-funnel-check.mjs
