@@ -28,8 +28,7 @@ import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
 import { ToolBuyBar } from "@/components/ToolBuyBar";
 
 
-// Eager: home + 404 (always needed)
-import Home from "./pages/Home";
+// Eager: 404 and booking redirect; the primary homepage is route-lazy.
 import NotFound from "./pages/NotFound";
 import BookRedirect from "./pages/BookRedirect";
 
@@ -94,7 +93,7 @@ const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
-const HomePage = lazy(() => import("./pages/Home"));
+const StopGuessingPage = lazy(() => import("./pages/StopGuessingPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
@@ -191,7 +190,8 @@ const App = () => (
                       <Route path="/book" element={<BookRedirect />} />
                       <Route path="/case-intake" element={<Navigate to="/book" replace />} />
                       <Route path="/booking" element={<Navigate to="/book" replace />} />
-                      <Route path="/home" element={<HomePage />} />
+                      <Route path="/home" element={<Navigate to="/" replace />} />
+                      <Route path="/stop-guessing" element={<StopGuessingPage />} />
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/bundles" element={<Navigate to="/diagnostic" replace />} />

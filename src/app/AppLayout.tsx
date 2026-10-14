@@ -59,7 +59,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       <aside className="hidden md:flex w-64 flex-col border-r border-border bg-card/40 backdrop-blur">
         <div className="px-6 py-5 border-b border-border space-y-3">
           <Link
-            to="/home"
+            to="/"
             className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg bg-amber/10 hover:bg-amber/20 border border-amber/30 text-amber text-sm font-semibold transition-colors"
           >
             <Home className="h-4 w-4" />
@@ -101,7 +101,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             </Link>
             <div className="flex items-center gap-1">
               <Link
-                to="/home"
+                to="/"
                 className="flex items-center gap-1.5 px-3 h-9 rounded-md bg-amber/10 border border-amber/30 text-amber text-xs font-semibold active:bg-amber/20"
               >
                 <Home className="h-3.5 w-3.5" />

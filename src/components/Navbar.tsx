@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
   }, []);
 
   const navItems: NavItem[] = [
-    { label: 'Home', href: '/home', blood: true },
+    { label: 'Home', href: '/', blood: true },
     { label: 'Leak Audit', href: '/leak-audit', kind: 'case' },
     { label: 'Aetheris Universe', href: '/aetheris-universe', accent: true },
     { label: 'Case Studies', href: '/case-studies' },
@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onContactClick }) => {
             })}
           </div>
 
-          <Link to="/home" className="flex items-center shrink-0 ml-auto" onClick={handleLogoTap} aria-label="Aetheris home">
+          <Link to="/" className="flex items-center shrink-0 ml-auto" onClick={handleLogoTap} aria-label="Aetheris home">
             <img src="/aetheris-logo.png" alt="Aetheris" className="h-12 w-auto object-contain rounded-full" />
           </Link>
 

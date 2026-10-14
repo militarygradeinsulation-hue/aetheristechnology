@@ -21,6 +21,9 @@ import { PricingTimeline } from "@/components/PricingTimeline";
 import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
 
+// Reuse the original interactive chaos-physics graph without bloating the initial hero.
+const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSection"));
+
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 
@@ -156,6 +159,31 @@ const LeakLanderPage: React.FC = () => {
       {/* Interactive investment line */}
       <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
         <PricingTimeline />
+      </section>
+
+      {/* Restored interactive Chaos Theory graph from the existing site code. */}
+      <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// Chaos theory in business</SectionLabel>
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="max-w-3xl">
+              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+                A single failure rarely <span className="text-amber">stays in one department.</span>
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                This is the original interactive chaos-physics network map: drag a node, follow the
+                ripples, and switch between symptoms, handoffs, systems, and service pathways.
+                Connections illustrate potential dependencies, not proven losses for your business.
+              </p>
+            </div>
+            <Link to="/stop-guessing" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-amber/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-amber transition hover:bg-amber/10">
+              Explore the original Leak Check page <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <React.Suspense fallback={<div role="status" className="mt-8 rounded-xl border border-amber/20 bg-card/40 p-8 text-sm text-muted-foreground">Loading interactive chaos map…</div>}>
+            <HomeMindMapSection />
+          </React.Suspense>
+        </div>
       </section>
 
       {/* The Aetheris Methodology */}

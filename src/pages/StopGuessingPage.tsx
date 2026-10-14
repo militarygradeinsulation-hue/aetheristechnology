@@ -18,7 +18,7 @@ import { captureToolLead } from '@/lib/toolLeadCapture';
 import { toast } from 'sonner';
 
 
-const Home = () => {
+const StopGuessingPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [unlocking, setUnlocking] = useState(false);
@@ -62,9 +62,9 @@ const Home = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Chaos Theory Forensics Operator | Aetheris"
+        title="Stop Guessing. Start Understanding. | Aetheris"
         description="We scan your company for its biggest weaknesses using tools that don't exist anywhere, then fix them so you don't have to. Tell us your biggest issue and let's see if we can fix it."
-        path="/home"
+        path="/stop-guessing"
         keywords="business forensics, revenue leak audit, True Cost Forensics, Indianapolis, operator"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
         speakable={['h1']}
@@ -74,14 +74,17 @@ const Home = () => {
         <Navbar onContactClick={() => setIsContactModalOpen(true)} />
         <main>
           <h1 className="sr-only px-4 pt-28 md:pt-36 pb-6 max-w-6xl mx-auto">
-            Stop Guessing. Start Understanding. We break down exactly how businesses waste money on AI,
+            Stop Guessing. Start Understanding. We show how systems, follow-up, and marketing can create waste,
             marketing, and disconnected systems, with real numbers, real costs, and real solutions.
           </h1>
 
-          {/* Anti-AI banner lives on LeakLanderPage (route "/"). This page is unrouted. */}
+          {/* Standalone educational page; the real Aetheris homepage stays at /. */}
 
 
-          <section className="px-4 pt-10 pb-6 max-w-5xl mx-auto text-center">
+          <section className="px-4 pt-28 md:pt-32 pb-6 max-w-5xl mx-auto text-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber hover:underline mb-6">
+              ← Back to Aetheris home
+            </Link>
             <h2 className="font-forensic text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] tracking-tight">
               Stop Guessing. <span className="text-amber italic">Start Understanding.</span>
             </h2>
@@ -92,11 +95,11 @@ const Home = () => {
             </div>
           </section>
 
-          {/* One offer · The Leak Check */}
+          {/* Educational explainer and free directional assessment. */}
           <section id="the-leak-audit" className="px-4 pb-10 scroll-mt-24">
             <div className="max-w-4xl mx-auto forensic-tile rounded-sm border border-amber/40 p-6 md:p-8 relative overflow-hidden">
               <div className="absolute top-3 right-3 font-case text-[9px] uppercase tracking-widest text-crimson border border-crimson/40 px-2 py-0.5 rounded-sm bg-crimson/5">
-                Active case · limited slots this month
+                Free · self-assessment
               </div>
               <div className="font-case text-[10px] uppercase tracking-widest text-amber mb-2">
                 Step 1 · Free
@@ -105,13 +108,15 @@ const Home = () => {
                 The Leak Check — <span className="text-crimson">free.</span>
               </h2>
               <p className="text-sm md:text-base text-foreground/80 mb-6 max-w-2xl">
-                Most growth-stage businesses are bleeding <span className="text-crimson font-bold">$40k–$180k/yr</span> in silent leaks. Five minutes, no card, no gate on the scan — we open a case file and hand you a written report with real dollar estimates on every leak we find.
+                Disconnected systems, missed follow-ups, and unclear handoffs can cost time and opportunity.
+                Start with a free 14-question self-assessment for directional recommendations and individual
+                service estimates. Real losses require verification; this check does not calculate a proven dollar loss.
               </p>
 
               <ChaosMindMap />
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link to="/leak-audit" className="w-full sm:w-auto">
+                <Link to="/leak-audit/self-scan" className="w-full sm:w-auto">
                   <Button className="bg-amber text-background hover:bg-amber/90 font-bold w-full shadow-[0_0_25px_rgba(217,169,58,0.35)]">
                     Get Your Free Leak Check <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
@@ -125,7 +130,7 @@ const Home = () => {
                 </button>
               </div>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Free · Written report · No card, no pitch
+                Free · 14-question self-check · Directional results
               </p>
             </div>
           </section>
@@ -153,10 +158,11 @@ const Home = () => {
                 <Grid3x3 className="w-3 h-3" /> The full toolset
               </div>
               <h3 className="font-forensic text-2xl md:text-3xl font-bold leading-tight mb-2">
-                Want every forensic tool we use? <span className="text-amber">Free.</span>
+                Explore the Aetheris tools. <span className="text-amber">Start here.</span>
               </h3>
               <p className="text-sm md:text-base text-foreground/80 mb-5">
-                One email unlocks the whole vault — scanners, diagnostics, report generators, closer kits, the same weapons we bill fixed-fee/session with. <span className="text-amber font-semibold">No card. No password. No spam.</span> You'll be inside in 3 seconds.
+                Explore available tools and demonstrations. Some services and full diagnostics require a separate
+                engagement. Submit your email to request access to the tool workspace.
               </p>
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row gap-2">
                 <Input
@@ -180,7 +186,7 @@ const Home = () => {
                 </Button>
               </form>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-foreground/50">
-                Instant access · Every tool · Unsubscribe anytime
+                Access to available tools · Paid services scoped separately
               </p>
             </div>
           </section>
@@ -247,4 +253,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default StopGuessingPage;

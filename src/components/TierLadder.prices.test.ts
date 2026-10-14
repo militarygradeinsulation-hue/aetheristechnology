@@ -15,9 +15,11 @@ describe("priced tier ladder on the home page", () => {
     expect(src).toMatch(/one-time/);
   });
 
-  it("the home page includes the priced tier ladder", () => {
-    const src = read("src/pages/Home.tsx");
-    expect(src).toMatch(/import \{ PackageTiers \} from '@\/components\/PackageTiers'/);
-    expect(src).toMatch(/<PackageTiers \/>/);
+  it("the canonical homepage has interactive tier pricing, while the explainer preserves its ladder", () => {
+    const home = read("src/pages/LeakLanderPage.tsx");
+    expect(home).toMatch(/<PricingTimeline \/>/);
+    const explainer = read("src/pages/StopGuessingPage.tsx");
+    expect(explainer).toMatch(/import \{ PackageTiers \} from '@\/components\/PackageTiers'/);
+    expect(explainer).toMatch(/<PackageTiers \/>/);
   });
 });
