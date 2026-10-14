@@ -192,6 +192,11 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Interactive investment line */}
+      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
+        <PricingTimeline />
+      </section>
+
       {/* The Aetheris Methodology */}
       <section id="methodology" className="border-t border-border/60 py-16 px-6">
         <div className="mx-auto max-w-5xl text-center">
@@ -415,11 +420,6 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Interactive investment line */}
-      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
-        <PricingTimeline />
       </section>
 
       {/* Intake */}
