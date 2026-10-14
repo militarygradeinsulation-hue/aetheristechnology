@@ -28,15 +28,15 @@ import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 const STEPS = [
   {
     n: "01",
-    t: "Free Scan",
-    d: "I run a forensic scan on your company. No cost, no pitch.",
-    href: "/golden-report",
-    cta: "Start the free scan",
+    t: "Free Leak Check",
+    d: "Answer 14 questions about lead capture, follow-up, and operations. Get a directional PDF at no cost.",
+    href: "/leak-audit/self-scan",
+    cta: "Start the free leak check",
   },
   {
     n: "02",
-    t: "Find the Leaks",
-    d: "I show you exactly where the money is leaving, in writing.",
+    t: "Review the Findings",
+    d: "See what the check can flag and where a deeper, evidence-backed investigation begins.",
     href: "/leak-audit",
     cta: "See what we look for",
   },
@@ -112,7 +112,7 @@ const LeakLanderPage: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
-            to="/golden-report"
+            to="/leak-audit/self-scan"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
             {CTA.primary} <ArrowRight className="h-4 w-4" />
@@ -175,15 +175,13 @@ const LeakLanderPage: React.FC = () => {
             We focus on fixing those problems first and measuring what actually improves.
           </p>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-foreground/90">
-            For recovery-based engagements, we earn a small, agreed portion of the ROI
-            we can verify you've recovered. If we can't identify a qualifying issue
-            or deliver the agreed result, you owe no recovery-based fee.
-            <strong className="font-bold text-foreground"> Guaranteed.</strong>
+            In qualifying recovery-based engagements, our fee is tied to a defined share of
+            verified recovered value. The qualifying result, measurement method, and
+            conditions for any waived recovery fee are agreed in writing before work starts.
           </p>
           <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-            The guarantee applies to qualifying recovery-based engagements. Any separate
-            fixed-fee services, recovery calculations, and payment terms are defined in
-            writing before work begins.
+            Recovery isn't guaranteed. The free self-check is directional, not proof of lost
+            revenue. Separately scoped fixed-fee services have their own written terms.
           </p>
           <Link
             to="/#prices"
