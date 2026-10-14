@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ArrowRight, ShieldCheck } from "lucide-react";
 import {
-  AUDIT_OPTIONS, quoteAuditSelection,
+  AUDIT_OPTIONS,
   type AuditOption, type AuditRecommendation,
 } from "../../supabase/functions/_shared/company-audit-offers";
 
