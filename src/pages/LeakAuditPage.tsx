@@ -12,7 +12,10 @@ import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AuditCustomQuote } from '@/components/AuditCustomQuote';
-import { normalizePublicCompanyUrl, type AuditOption, type AuditRecommendation } from '../../supabase/functions/_shared/company-audit-offers';
+import {
+  AUDIT_OPTIONS, evaluateCompanyAudit, normalizePublicCompanyUrl,
+  type AuditOption, type AuditRecommendation,
+} from '../../supabase/functions/_shared/company-audit-offers';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 
@@ -68,13 +71,22 @@ const SCALE = [
 ];
 
 type Step = 'intake' | 'questions' | 'gate' | 'result';
+type PersonalizedAudit = {
+  company: string;
+  domain: string;
+  repeated: boolean;
+  recommendations: AuditRecommendation[];
+  options: AuditOption[];
+  // A local preview is never described as a saved company baseline or queued scan.
+  localOnly?: boolean;
+};
 
 const LeakAuditPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [step, setStep] = useState<Step>('intake');
   const [revenueBand, setRevenueBand] = useState<string>('');
   const [website, setWebsite] = useState('');
-  const [personalized, setPersonalized] = useState<{ company: string; domain: string; repeated: boolean; recommendations: AuditRecommendation[]; options: AuditOption[] } | null>(null);
+  const [personalized, setPersonalized] = useState<PersonalizedAudit | null>(null);
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
@@ -118,12 +130,37 @@ const LeakAuditPage = () => {
       if (error || !Array.isArray(data?.recommendations) || !Array.isArray(data?.options)) {
         throw new Error((data as { error?: string } | null)?.error || error?.message || 'Unable to save assessment.');
       }
-      setPersonalized(data);
+      setPersonalized({
+        company: data.company,
+        domain: data.domain,
+        repeated: data.repeated === true,
+        recommendations: data.recommendations,
+        options: data.options,
+        localOnly: false,
+      });
       setStep('result');
       toast.success('Your company recommendations and individual prices are ready.');
     } catch (err) {
-      console.error('Company Leak Check failed', err);
-      toast.error(err instanceof Error ? err.message : 'Could not complete your company assessment. Try again.');
+      // The newer server endpoint and database migration may not yet be deployed.
+      // Preserve a useful, deterministic no-cost result without making a scan,
+      // saving personal data, or claiming this is the canonical company baseline.
+      console.error('Company Leak Check backend unavailable', err);
+      try {
+        const target = normalizePublicCompanyUrl(website);
+        setPersonalized({
+          company: company.trim() || target.domain,
+          domain: target.domain,
+          repeated: false,
+          recommendations: evaluateCompanyAudit(answers),
+          options: AUDIT_OPTIONS,
+          localOnly: true,
+        });
+        setStep('result');
+        toast.warning('The assessment service is unavailable. Showing a local preview; your details were not confirmed saved.');
+      } catch (fallbackError) {
+        console.error('Company Leak Check fallback failed', fallbackError);
+        toast.error('Could not prepare your results. Try again or contact Aetheris.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -351,7 +388,8 @@ const LeakAuditPage = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Your answers and contact details are saved for internal assessment follow-up.
+                    We attempt to securely save your answers and contact details for follow-up.
+                    If our assessment service is unavailable, you'll still see an unsaved local preview.
                     No automatic purchase or payment occurs.
                   </p>
                 </div>
@@ -361,17 +399,35 @@ const LeakAuditPage = () => {
             {/* RESULT */}
             {step === 'result' && personalized && (
               <div className="space-y-8">
+                {personalized.localOnly && (
+                  <div role="status" className="rounded-lg border border-amber/60 bg-amber/10 p-5 text-sm leading-relaxed">
+                    <p className="font-semibold text-foreground">Preview only — not saved to Aetheris</p>
+                    <p className="mt-2 text-muted-foreground">
+                      Our assessment service couldn't confirm your submission. These suggestions were calculated
+                      locally from your answers. No private Golden Report was queued, and this is not an archived
+                      company baseline. You can still select services below and request a tailored review.
+                    </p>
+                    <a
+                      href={"mailto:aetheris.technology@outlook.com?subject=" + encodeURIComponent("Leak Check review for " + personalized.domain)}
+                      className="mt-3 inline-block font-semibold text-amber underline underline-offset-4"
+                    >
+                      Request an operator review by email
+                    </a>
+                  </div>
+                )}
                 <div className="text-center">
                   <p className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
-                    Company assessment · {personalized.domain}
+                    {personalized.localOnly ? "Local preview" : "Company assessment"} · {personalized.domain}
                   </p>
                   <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
                     What needs attention. What fixes it.
                   </h2>
                   <p className="mt-4 leading-relaxed text-muted-foreground">
-                    {personalized.repeated
-                      ? "This company has already been assessed. The original baseline has been reused instead of changing your recommendations with each submission."
-                      : "These are directional gaps suggested by the company's answers. They are not proof of a verified website issue or actual lost revenue."}
+                    {personalized.localOnly
+                      ? "This is a local preview from your answers. Recommendations and prices haven't been saved to a company record."
+                      : personalized.repeated
+                        ? "This company has already been assessed. The original baseline has been reused instead of changing your recommendations with each submission."
+                        : "These are directional gaps suggested by the company's answers. They are not proof of a verified website issue or actual lost revenue."}
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -400,8 +456,9 @@ const LeakAuditPage = () => {
                   repeated={personalized.repeated}
                 />
                 <p className="text-center text-xs leading-relaxed text-muted-foreground">
-                  A separate, capacity-limited Golden Report is generated for the Aetheris team.
-                  When complete, it is archived privately, not delivered through this public page.
+                  {personalized.localOnly
+                    ? "No private scan was requested from this local preview. An operator can discuss a full Golden Report separately."
+                    : "A separate internal Golden Report may be queued, subject to capacity and system availability. It isn't delivered through this page."}
                 </p>
               </div>
             )}
