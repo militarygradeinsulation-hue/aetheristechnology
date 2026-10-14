@@ -127,7 +127,13 @@ Deno.serve(async (req) => {
     // JSON. The existing Golden scanner stores a full case file in the private
     // forensic_scans table and automatically archives it in Golden Library.
     if (companyCase.scan_status === "pending") {
-      await queuePrivateGolden(companyCase.id, companyUrl.domain, companyUrl.url, companyCase.company_name);
+      // The private Golden dispatch is optional work, not part of giving visitors
+      // their own deterministic results. Never block the response for up to 20s
+      // on a costed scan dispatch or claim that dispatch completion is guaranteed.
+      const dispatch = queuePrivateGolden(companyCase.id, companyUrl.domain, companyUrl.url, companyCase.company_name);
+      const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (job: Promise<unknown>) => void } }).EdgeRuntime;
+      if (runtime?.waitUntil) runtime.waitUntil(dispatch);
+      else await dispatch;
     }
     return json({
       company: companyCase.company_name, domain: companyUrl.domain,
