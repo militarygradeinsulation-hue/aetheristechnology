@@ -8,7 +8,6 @@ import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
 import { CaseFilePreview } from "@/components/lander/CaseFilePreview";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import {
-  HERO_SUPPORT,
   CTA,
   ENGAGEMENT_STAGES,
   ENGAGEMENT_STAGES_HEADLINE,
@@ -24,40 +23,6 @@ import { MethodologyAI } from "@/components/lander/MethodologyAI";
 
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
-
-const STEPS = [
-  {
-    n: "01",
-    t: "Free Leak Check",
-    d: "Answer 14 questions about lead capture, follow-up, and operations. Get a directional PDF at no cost.",
-    href: "/leak-audit/self-scan",
-    cta: "Start the free leak check",
-  },
-  {
-    n: "02",
-    t: "Review the Findings",
-    d: "See what the check can flag and where a deeper, evidence-backed investigation begins.",
-    href: "/leak-audit",
-    cta: "See what we look for",
-  },
-  {
-    n: "03",
-    t: "Recover and Scale",
-    d: "We build the system and plan to recover the money and grow.",
-    href: BOOK_MEETING_URL,
-    cta: "Schedule a Working Session",
-    external: true,
-  },
-];
-
-const FINDINGS = [
-  { t: "Conversion drop-off", d: "Where visitors quit before they ever reach you." },
-  { t: "Brand contradictions", d: "Claims on your site that argue with each other." },
-  { t: "Follow-up failure", d: "Leads that go cold because nobody closed the loop." },
-  { t: "Vocabulary friction", d: "Language your buyer does not use, so they bounce." },
-  { t: "CRM data decay", d: "Pipelines built on records nobody trusts." },
-  { t: "Operational waste", d: "Manual work that quietly eats your margin." },
-];
 
 const SIGNALS = [
   { k: "Named leaks", v: "Every finding tied to evidence on your own site." },
@@ -106,10 +71,6 @@ const LeakLanderPage: React.FC = () => {
         <h1 className="max-w-3xl text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
           I study the entire company as one connected system, tracing how every department, role, handoff, and decision either creates ROI or quietly destroys it.
         </h1>
-        <p className="mt-3 max-w-2xl text-base text-muted-foreground leading-relaxed">
-          {HERO_SUPPORT}
-        </p>
-
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
             to="/leak-audit/self-scan"
@@ -118,7 +79,7 @@ const LeakLanderPage: React.FC = () => {
             {CTA.primary} <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="#how-it-works"
+            href="#how-we-work"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
           >
             {CTA.secondary} <ArrowRight className="h-4 w-4" />
@@ -295,66 +256,6 @@ const LeakLanderPage: React.FC = () => {
           </div>
 
           <CaseFilePreview />
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="border-t border-border/60 py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// How it works</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-10">Three steps.</h2>
-          <div className="grid gap-px bg-border/60 md:grid-cols-3 rounded-xl overflow-hidden border border-border/60">
-            {STEPS.map((s) => (
-              <div key={s.n} className="bg-background p-8 flex flex-col">
-                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/70">
-                  Step {s.n}
-                </span>
-                <h3 className="mt-3 text-xl font-bold">{s.t}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-1">{s.d}</p>
-                {s.external ? (
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-1.5 font-case text-[11px] uppercase tracking-widest text-amber hover:gap-2.5 transition-all"
-                  >
-                    {s.cta} <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                ) : (
-                  <Link
-                    to={s.href}
-                    className="mt-6 inline-flex items-center gap-1.5 font-case text-[11px] uppercase tracking-widest text-amber hover:gap-2.5 transition-all"
-                  >
-                    {s.cta} <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* What we find */}
-      <section id="what-we-find" className="border-t border-border/60 py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// What we find</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-10">
-            The leaks that never show up in your P&amp;L.
-          </h2>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {FINDINGS.map((f) => (
-              <div key={f.t} className="border-t border-border pt-5">
-                <h3 className="text-base font-bold">{f.t}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.d}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-10 text-sm leading-relaxed text-muted-foreground">
-            For Indianapolis contractors and service companies:
-            {" "}<Link to="/indianapolis/contractor-follow-up" className="text-amber underline underline-offset-4">find quote follow-up gaps</Link>
-            {" "}or{" "}
-            <Link to="/indianapolis/service-business-lead-tracking" className="text-amber underline underline-offset-4">track leads across calls, texts, and social messages</Link>.
-          </p>
         </div>
       </section>
 
