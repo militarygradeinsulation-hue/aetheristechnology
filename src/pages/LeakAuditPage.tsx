@@ -230,10 +230,8 @@ const LeakAuditPage = () => {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
-
+              </div>
             )}
-
-            {/* QUESTIONS */}            )}
 
             {/* QUESTIONS */}
             {step === 'questions' && (
