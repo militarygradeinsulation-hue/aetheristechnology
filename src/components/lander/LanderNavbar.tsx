@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { name: "What We Do", to: "/#what-we-do" },
   { name: "Pricing", to: "/#prices" },
   { name: "Case Studies", to: "/#case-studies" },
-  { name: "Leak Audit", to: "/leak-audit" },
+  { name: "Free Leak Check", to: "/leak-audit/self-scan" },
   { name: "Golden Report", to: "/golden-report" },
   { name: "Partners", to: "/partners" },
 ];
@@ -115,8 +115,8 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
             <Link to="/portal" className={cn(pillBase, "border border-border text-muted-foreground hover:text-foreground hover:border-amber/40")}>
               Client Portal
             </Link>
-            <Link to="/golden-report" className={cn(pillBase, "bg-amber text-primary-foreground shadow-[0_0_15px_hsl(var(--amber-glow)/0.4)] hover:brightness-110")}>
-              Start Free Scan
+            <Link to="/leak-audit/self-scan" className={cn(pillBase, "bg-amber text-primary-foreground shadow-[0_0_15px_hsl(var(--amber-glow)/0.4)] hover:brightness-110")}>
+              Free Leak Check
             </Link>
           </div>
         </motion.nav>
@@ -173,7 +173,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                     Client Portal
                   </Link>
                   <Link to="/golden-report" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
-                    Start Free Scan
+                    Free Leak Check
                   </Link>
                 </div>
               </motion.div>
