@@ -127,6 +127,7 @@ const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
+const BusinessGenomePage = lazy(() => import("./pages/BusinessGenomePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -253,6 +254,7 @@ const App = () => (
                       ))}
                       <Route path="/crm-demo" element={<CrmDemoPage />} />
                       <Route path="/capabilities" element={<CapabilitiesPage />} />
+                      <Route path="/genome" element={<BusinessGenomePage />} />
                       <Route path="/leak-audit" element={<RevenueLeakAuditPage />} />
                       <Route path="/leak-audit/self-scan" element={<LeakAuditPage />} />
                       <Route path="/partners" element={<PartnersPage />} />
