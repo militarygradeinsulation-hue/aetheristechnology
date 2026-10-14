@@ -1465,8 +1465,14 @@ Deno.serve(async (req) => {
       if (!id) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       const { data, error } = await sb.from("forensic_scans").select("*").eq("id", id).single();
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      // Origin/creator identity is admin-only — never expose it on public reads.
+      // Private intake cases must never be accessible through the shared report
+      // link/GET endpoint, even to someone who obtains a scan UUID.
       const adminOk = await verifyAdminToken(req.headers.get("x-admin-token"), SUPABASE_SERVICE_ROLE_KEY).catch(() => false);
+      if (data.private_intake === true && !adminOk) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const payload: Record<string, unknown> = { ...(data as Record<string, unknown>) };
       if (!adminOk) {
         for (const k of ["creator_user_id", "creator_name", "creator_email", "creator_profile_id", "portal_source", "lead_name", "lead_email", "lead_phone", "source_notified_at"]) {
@@ -1582,6 +1588,9 @@ Deno.serve(async (req) => {
       company_name: company || null,
       hubspot_account_id: accountId,
       status: "queued",
+      // Only an authenticated internal service-role call can flag a report as
+      // permanently private. Never trust the flag on unauthenticated input.
+      private_intake: serviceRoleCaller && body.private_intake === true,
       stage_status: { queued: { state: "done", at: new Date().toISOString() } },
       ...origin,
     }).select("id").single();

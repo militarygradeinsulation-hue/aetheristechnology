@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { AETHERIS_TIERS } from "@/lib/aetherisTiers";
+import { AuditCustomQuote } from "@/components/AuditCustomQuote";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
 const usd = (cents: number) => cents === 0
@@ -131,6 +132,9 @@ export function PricingTimeline() {
           </div>}
           {selected.credit && <p className="mt-4 text-xs font-semibold text-amber">{selected.credit}</p>}
         </div>
+      </div>
+      <div className="mt-10" id="individual-pricing">
+        <AuditCustomQuote />
       </div>
       <p className="mt-5 max-w-4xl text-xs leading-relaxed text-muted-foreground">
         Each price is for its own level, not a running total. One-time and monthly charges
