@@ -18,7 +18,7 @@ import {
 } from "@/lib/engagementModel";
 import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
-import PackageTiers from "@/components/PackageTiers";
+import { PricingTimeline } from "@/components/PricingTimeline";
 import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
 
@@ -190,6 +190,11 @@ const LeakLanderPage: React.FC = () => {
             View pricing <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      </section>
+
+      {/* Interactive investment line */}
+      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
+        <PricingTimeline />
       </section>
 
       {/* The Aetheris Methodology */}
@@ -415,11 +420,6 @@ const LeakLanderPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Prices */}
-      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
-        <PackageTiers />
       </section>
 
       {/* Intake */}
