@@ -13,6 +13,8 @@ on:
       - "src/components/PricingTimeline.tsx"
       - "src/components/AuditCustomQuote.tsx"
       - "src/lib/companyAuditOffers.test.ts"
+      - "src/lib/pricingTimelineServices.ts"
+      - "src/lib/pricingTimelineServices.test.ts"
       - "supabase/functions/company-leak-audit/**"
       - "supabase/functions/_shared/company-audit-offers.ts"
       - "supabase/functions/forensic-scan-all/**"
@@ -32,6 +34,8 @@ on:
       - "src/components/PricingTimeline.tsx"
       - "src/components/AuditCustomQuote.tsx"
       - "src/lib/companyAuditOffers.test.ts"
+      - "src/lib/pricingTimelineServices.ts"
+      - "src/lib/pricingTimelineServices.test.ts"
       - "supabase/functions/company-leak-audit/**"
       - "supabase/functions/_shared/company-audit-offers.ts"
       - "supabase/functions/forensic-scan-all/**"
@@ -62,6 +66,6 @@ jobs:
       - name: Install exact locked dependencies
         run: bun install --frozen-lockfile
       - name: Test deterministic company audit, price catalog and privacy
-        run: bunx vitest run src/lib/companyAuditOffers.test.ts
+        run: bunx vitest run src/lib/companyAuditOffers.test.ts src/lib/pricingTimelineServices.test.ts
       - name: Verify website production build
         run: bun run build

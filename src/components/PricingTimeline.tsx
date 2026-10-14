@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { AETHERIS_TIERS } from "@/lib/aetherisTiers";
+import { compareTierPrices, individualServiceIdsAtTier, individualServicesAtTier, TIMELINE_SERVICE_STEPS } from "@/lib/pricingTimelineServices";
+import { quoteAuditSelection } from "../../supabase/functions/_shared/company-audit-offers";
 import { AuditCustomQuote } from "@/components/AuditCustomQuote";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
-const usd = (cents: number) => cents === 0
-  ? "Free"
-  : "$" + (cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const dollars = (cents: number) =>
+  "$" + (cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const usd = (cents: number) => cents === 0 ? "Free" : dollars(cents);
 
 const cadenceLabel = (cadence: string) => cadence === "monthly"
   ? "/month" : cadence === "one-time" ? "one-time" : "no charge";
@@ -15,9 +17,25 @@ const cadenceLabel = (cadence: string) => cadence === "monthly"
 /** A single selectable timeline, driven by the same data as TierLadder. */
 export function PricingTimeline() {
   const [index, setIndex] = useState(0);
+  const [priorIndex, setPriorIndex] = useState<number | null>(null);
+  const [serviceSelection, setServiceSelection] = useState<string[]>([]);
   const selected = AETHERIS_TIERS[index];
   const last = AETHERIS_TIERS.length - 1;
-  const setLevel = (next: number) => setIndex(Math.min(last, Math.max(0, next)));
+  const prior = priorIndex === null ? null : AETHERIS_TIERS[priorIndex];
+  const comparison = prior ? compareTierPrices(prior.id, selected.id) : null;
+  const visibleServices = individualServicesAtTier(selected.id);
+  const individualEstimate = quoteAuditSelection(serviceSelection);
+  const newAtTier = new Set(TIMELINE_SERVICE_STEPS[selected.id]);
+
+  const setLevel = (next: number) => {
+    const target = Math.min(last, Math.max(0, Math.round(next)));
+    if (target === index) return;
+    setPriorIndex(index);
+    // One source of truth for the summary and the selected individual services.
+    // As the dot moves back, higher-level choices disappear and are subtracted.
+    setServiceSelection(individualServiceIdsAtTier(AETHERIS_TIERS[target].id));
+    setIndex(target);
+  };
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -27,7 +45,8 @@ export function PricingTimeline() {
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
         Move the amber dot left or right, use the up and down arrows, or tap a greyed-out
-        level. The price and everything included will update below.
+        level. The package price, relevant individual services and their separate totals
+        update immediately. Moving backward removes the higher-level choices.
       </p>
 
       <div className="mt-8 rounded-xl border border-amber/25 bg-card/50 p-4 sm:p-7">
@@ -86,6 +105,59 @@ export function PricingTimeline() {
           </div>
         </div>
         <p className="mt-1 text-xs text-muted-foreground sm:hidden">Swipe sideways to view all seven stages.</p>
+        <div className="mt-5 flex flex-wrap items-start justify-between gap-4 border-t border-border/50 pt-4" aria-live="polite" aria-atomic="true">
+          <div>
+            <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">Current tier price</p>
+            <p className="mt-1 font-forensic text-2xl font-bold text-amber">
+              {usd(selected.amountCents)}{selected.cadence === "monthly" ? "/mo" : selected.cadence === "one-time" ? " one-time" : ""}
+            </p>
+          </div>
+          <div className="max-w-sm text-sm text-muted-foreground">
+            {prior && comparison?.comparable ? (
+              <p>
+                <span className="font-semibold text-foreground">Last move:</span>{" "}
+                {comparison.differenceCents === 0
+                  ? "No package price change."
+                  : `${comparison.differenceCents > 0 ? "+" : "−"}${usd(Math.abs(comparison.differenceCents))}${selected.cadence === "monthly" ? "/mo" : " one-time"}`}
+              </p>
+            ) : prior ? (
+              <p>
+                <span className="font-semibold text-foreground">Billing type changed:</span>{" "}
+                {usd(prior.amountCents)} {cadenceLabel(prior.cadence)} → {usd(selected.amountCents)} {cadenceLabel(selected.cadence)}.
+                Monthly and one-time prices are not directly subtracted.
+              </p>
+            ) : (
+              <p>Slide the dot to see exactly how pricing and service choices change at each level.</p>
+            )}
+            <p className="mt-2 text-xs">
+              {serviceSelection.length} of {visibleServices.length} individual service choices selected ·
+              estimate {dollars(individualEstimate.oneTimeCents)} one-time and{" "}
+              {dollars(individualEstimate.monthlyCents)}/mo, separately.
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 border-t border-border/50 pt-4" aria-label="Services linked to current price level">
+          <p className="font-case text-[10px] uppercase tracking-widest text-amber">
+            Relevant individual services at this level
+          </p>
+          {visibleServices.length ? (
+            <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
+              {visibleServices.map(service => (
+                <span key={service.id} className={`rounded-full border px-3 py-1.5 text-xs ${newAtTier.has(service.id)
+                  ? "border-amber/50 bg-amber/10 text-amber"
+                  : "border-border/70 text-muted-foreground"}`}>
+                  {service.name} · {dollars(service.priceCents)}{service.cadence === "monthly" ? "/mo" : ""}
+                  {serviceSelection.includes(service.id) ? " ✓" : " · unselected"}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">Free self-check; individual paid services appear at the next price level.</p>
+          )}
+          <a href="#individual-pricing" className="mt-4 inline-flex text-sm font-semibold text-amber underline underline-offset-4">
+            Adjust the individual service choices below
+          </a>
+        </div>
       </div>
 
       <div className="mt-5 grid gap-8 rounded-xl border border-amber/30 bg-card/60 p-6 sm:p-8 lg:grid-cols-2">
@@ -133,13 +205,18 @@ export function PricingTimeline() {
           {selected.credit && <p className="mt-4 text-xs font-semibold text-amber">{selected.credit}</p>}
         </div>
       </div>
-      <div className="mt-10" id="individual-pricing">
-        <AuditCustomQuote />
+      <div className="mt-10 scroll-mt-28" id="individual-pricing">
+        <AuditCustomQuote
+          timelineTierId={selected.id}
+          selectedIds={serviceSelection}
+          onSelectedIdsChange={setServiceSelection}
+        />
       </div>
       <p className="mt-5 max-w-4xl text-xs leading-relaxed text-muted-foreground">
-        Each price is for its own level, not a running total. One-time and monthly charges
-        are not directly comparable. Exact scope, eligibility, payment and any recovery-based
-        terms are agreed in writing; outcomes are not guaranteed.
+        The tier price is independent of the standalone service comparison below it.
+        Selecting individual services builds an alternative scope request, not charges added
+        to an already-scoped tier. One-time and monthly amounts remain separate. Exact scope,
+        eligibility, payment and any recovery-based terms are agreed in writing; outcomes are not guaranteed.
       </p>
     </div>
   );
