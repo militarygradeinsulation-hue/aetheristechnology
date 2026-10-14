@@ -16,6 +16,8 @@ type Props = {
   localOnly?: boolean;
   /** Homepage only: show progressive choices associated with this pricing level. */
   timelineTierId?: TierId;
+  selectedIds?: string[];
+  onSelectedIdsChange?: (next: string[]) => void;
 };
 const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
@@ -24,13 +26,15 @@ const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFr
  * no false summing of monthly and one-time line items.
  */
 export function AuditCustomQuote({
-  options = AUDIT_OPTIONS, recommendations = [], company, repeated, localOnly, timelineTierId,
+  options = AUDIT_OPTIONS, recommendations = [], company, repeated, localOnly,
+  timelineTierId, selectedIds, onSelectedIdsChange,
 }: Props) {
-  // Homepage timeline starts with all services relevant to that price level.
-  // PricingTimeline keys the component by tier, so sliding resets this list
-  // and its totals to the newly visible items (no ghost charges).
-  const [selected, setSelected] = useState<string[]>(() =>
+  // Assessment results maintain a standalone editable selection. The homepage
+  // timeline controls its own selection so the slider totals and checkboxes
+  // always use the same cents-based calculation.
+  const [localSelected, setLocalSelected] = useState<string[]>(() =>
     timelineTierId ? individualServiceIdsAtTier(timelineTierId) : recommendations.map(r => r.id));
+  const selected = selectedIds ?? localSelected;
   const recommended = useMemo(() => new Map(recommendations.map(r => [r.id, r])), [recommendations]);
   const listedOptions = useMemo(() => {
     const allowed = new Set(timelineTierId
@@ -51,8 +55,11 @@ export function AuditCustomQuote({
       monthlyCents: items.filter(x => x.cadence === "monthly").reduce((a, x) => a + x.priceCents, 0),
     };
   }, [selected, listedOptions]);
-  const toggle = (id: string) => setSelected(prev =>
-    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggle = (id: string) => {
+    const next = selected.includes(id) ? selected.filter(x => x !== id) : [...selected, id];
+    if (onSelectedIdsChange && selectedIds !== undefined) onSelectedIdsChange(next);
+    else setLocalSelected(next);
+  };
 
   const mailBody = [
     "Company: " + (company || "To be confirmed"),
