@@ -14,15 +14,17 @@ type TabId = "all" | "symptoms" | "steps" | "systems" | "services";
 
 const TABS: { id: TabId; label: string; blurb: string }[] = [
   { id: "all",      label: "The whole ecosystem", blurb: "Every leak, every step, every system, every door — one map." },
-  { id: "symptoms", label: "Where it leaks",   blurb: "Seven categories. Every business has at least four active right now." },
+  { id: "symptoms", label: "Where it leaks",   blurb: "Seven common friction categories. Explore which ones connect in your business." },
   { id: "steps",    label: "The 7-step audit", blurb: "How we trace the leak from symptom to dollar figure." },
   { id: "systems",  label: "The system stack", blurb: "The AI + tooling layer that runs quiet in the background." },
-  { id: "services", label: "The offer map",    blurb: "Three doors in. One methodology behind all of them." },
+  { id: "services", label: "The offer map",    blurb: "See the pathways from a free check to scoped operator work." },
 ];
 
-export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBookAudit }) => {
-  const [tab, setTab] = useState<TabId>("all");
+export const HomeMindMapSection: React.FC<{ onBookAudit?: () => void }> = ({ onBookAudit }) => {
+  // Start with seven visible symptom nodes and let visitors expand into the full system.
+  const [tab, setTab] = useState<TabId>("symptoms");
   const navigate = useNavigate();
+  const openBook = () => onBookAudit ? onBookAudit() : navigate("/book");
 
   const symptoms: MindMapNodeData[] = [
     { id: "vocab",     label: "Vocabulary Friction",  sublabel: "Words that kill deals", icon: MessageSquare,
@@ -98,7 +100,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
       connections: ["Ties CRM, forms, and comms", "Triggers on real events", "One record, one truth"] },
     { id: "ctoguy",    label: "CTOguy AI",       sublabel: "Analysis brain",    icon: Brain,
       connections: ["Reads scans and CRMs", "Flags patterns humans miss", "Drafts findings on demand"] },
-    { id: "ghost",     label: "Ghost Analyst",   sublabel: "Silent monitoring", icon: Eye,
+    { id: "ghost",     label: "Monitoring Signals", sublabel: "Conditional alerts", icon: Eye,
       connections: ["Passive listener across systems", "Watches SLA breach", "Signals only when action is due"] },
     { id: "bridge",    label: "Data Bridge",     sublabel: "Integrations",      icon: Cable,
       connections: ["Two-way syncs", "Custom webhooks", "Legacy-to-modern glue"] },
@@ -109,13 +111,13 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
   ];
 
   const services: MindMapNodeData[] = [
-    { id: "prescan",  label: "Free Pre-Scan",     sublabel: "Free",       icon: Search,     onClick: () => navigate("/leak-audit"),
-      connections: ["60-second self-scan", "No email required", "Sting is the point"] },
-    { id: "audit",    label: "The Leak Audit",    sublabel: "Operator-led", icon: Microscope, onClick: onBookAudit,
+    { id: "prescan",  label: "Free Leak Check",    sublabel: "Free",       icon: Search,     onClick: () => navigate("/leak-audit/self-scan"),
+      connections: ["14-question self-assessment", "Directional recommendations", "Service estimates, not verified dollar loss"] },
+    { id: "audit",    label: "The Leak Audit",    sublabel: "Operator-led", icon: Microscope, onClick: openBook,
       connections: ["Operator-led forensic workup", "Every leak with a dollar figure", "Scoped with you before work begins"] },
-    { id: "impl",     label: "Implementation",    sublabel: "Scoped together", icon: Wrench,     onClick: onBookAudit,
+    { id: "impl",     label: "Implementation",    sublabel: "Scoped together", icon: Wrench,     onClick: openBook,
       connections: ["3-month minimum", "Audit clients only", "Accountable to audit numbers"] },
-    { id: "industry", label: "Industry Case Files", sublabel: "20+ verticals", icon: Building2, onClick: () => navigate("/careers"),
+    { id: "industry", label: "Industry Case Files", sublabel: "Examples", icon: Building2, onClick: () => navigate("/case-studies"),
       connections: ["Sealed cases by sector", "Common leaks per industry", "Benchmark ranges"] },
     { id: "field",    label: "Blog",       sublabel: "Live cases", icon: Newspaper,  onClick: () => navigate("/blog"),
       connections: ["Weekly operator dispatches", "Real leaks, real fixes", "No fluff"] },
@@ -136,7 +138,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
     symptoms: { eyebrow: "Every business",    title: <>Revenue<br/>Leaks</>,      subtitle: "The Leak Audit™" },
     steps:    { eyebrow: "7-step protocol",   title: <>The Leak<br/>Audit</>,     subtitle: "Operator-led" },
     systems:  { eyebrow: "Ambient layer",     title: <>The System<br/>Stack</>,   subtitle: "Runs quiet 24/7" },
-    services: { eyebrow: "Three doors",       title: <>Case<br/>Openings</>,      subtitle: "One methodology" },
+    services: { eyebrow: "Ways to work",      title: <>Case<br/>Openings</>,      subtitle: "One methodology" },
   };
   const accent: "amber" | "crimson" = tab === "symptoms" || tab === "all" ? "crimson" : "amber";
 
@@ -153,8 +155,9 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
             <span className="text-crimson">Every clue traced.</span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-foreground/75 max-w-3xl mx-auto leading-relaxed">
-            The whole ecosystem is on the map. Click any category below to filter.
-            Tap any node to trace how one leak feeds the next.
+            This interactive map traces how one disconnected system or missed handoff can affect
+            other parts of a company. Select a category, then tap a node to explore the relationships.
+            It's an explanatory model, not evidence that a particular company has these issues.
           </p>
         </div>
 
@@ -181,7 +184,7 @@ export const HomeMindMapSection: React.FC<{ onBookAudit: () => void }> = ({ onBo
           hub={hubByTab[tab]}
           nodes={nodes}
           accent={accent}
-          heightClass="h-[820px] md:h-[960px] lg:h-[1080px]"
+          heightClass="h-[680px] md:h-[820px] lg:h-[900px]"
         />
 
         <p className="text-center text-xs sm:text-sm font-mono uppercase tracking-widest text-foreground/55 mt-3">
