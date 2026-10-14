@@ -75,7 +75,7 @@ const LeakLanderPage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SEOHead
         title="Revenue Leak Audit for $5M-$50M Businesses"
-        description="Aetheris finds where mid-market businesses lose money: friction, contradictions, drop-offs, follow-up failures and waste. Operator-led forensic audit."
+        description="Aetheris is a strategic consulting firm that finds and fixes business failures, from communication and systems to revenue leaks, operational waste, and stalled growth."
         path="/"
         keywords="revenue leak audit, revenue forensics, business forensics operator, forensic revenue diagnostic, brand contradiction analysis, conversion drop-off audit, mid-market revenue diagnostic, forensic diagnostic Indianapolis"
       />
@@ -131,6 +131,68 @@ const LeakLanderPage: React.FC = () => {
           Indianapolis · Operating nationwide
         </p>
       </AnomalousMatterHero>
+
+      {/* What We Do: immediate positioning after the hero */}
+      <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div>
+            <SectionLabel>// What we do</SectionLabel>
+            <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
+              We pinpoint the failure. <span className="text-amber">Then we fix it.</span>
+            </h2>
+          </div>
+          <div className="space-y-5">
+            <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">
+              Aetheris is a strategic consulting firm. We identify where your company is
+              breaking down, from communication gaps and disconnected systems to failed
+              handoffs, operational waste, and overlooked revenue leaks.
+            </p>
+            <p className="text-base leading-relaxed text-muted-foreground">
+              We don't stop at telling you what's wrong. We fix the root causes to recover
+              lost value, increase ROI, and remove the friction slowing your growth.
+              Our goal is to help you scale in half the time, without adding complexity.
+            </p>
+            <Link
+              to="/services"
+              className="inline-flex items-center gap-2 border-b border-amber/50 pb-1 font-case text-xs font-bold uppercase tracking-widest text-amber transition-colors hover:border-amber"
+            >
+              Explore how we work <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Plain-language disclosure about recovery-based compensation */}
+      <section id="pricing-disclosure" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl border-l-2 border-amber/70 pl-5 sm:pl-8">
+          <SectionLabel>// A note about our pricing</SectionLabel>
+          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+            I know our prices may seem high. <span className="text-amber">But what is the leak already costing you?</span>
+          </h2>
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-foreground/90 sm:text-lg">
+            The real expense isn't finding the failure. It's letting lost revenue, wasted
+            hours, and broken processes keep taking their share of your business.
+            We focus on fixing those problems first and measuring what actually improves.
+          </p>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-foreground/90">
+            For recovery-based engagements, we earn a small, agreed portion of the ROI
+            we can verify you've recovered. If we can't identify a qualifying issue
+            or deliver the agreed result, you owe no recovery-based fee.
+            <strong className="font-bold text-foreground"> Guaranteed.</strong>
+          </p>
+          <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+            The guarantee applies to qualifying recovery-based engagements. Any separate
+            fixed-fee services, recovery calculations, and payment terms are defined in
+            writing before work begins.
+          </p>
+          <Link
+            to="/#prices"
+            className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-amber/50 px-6 font-case text-[11px] font-bold uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
+          >
+            View pricing <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
 
       {/* The Aetheris Methodology */}
       <section id="methodology" className="border-t border-border/60 py-16 px-6">
@@ -352,7 +414,7 @@ const LeakLanderPage: React.FC = () => {
       </section>
 
       {/* Prices */}
-      <section id="prices" className="border-t border-border/60 py-20 px-6">
+      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
         <PackageTiers />
       </section>
 
