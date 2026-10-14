@@ -4,7 +4,6 @@ import { ArrowRight, Calendar, CheckCircle2 } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { LanderNavbar } from "@/components/lander/LanderNavbar";
 import { Footer } from "@/components/Footer";
-import { BOOK_MEETING_URL } from "@/lib/links";
 
 type Topic = {
   path: string;
