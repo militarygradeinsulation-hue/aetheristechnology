@@ -344,6 +344,12 @@ const LeakLanderPage: React.FC = () => {
               </div>
             ))}
           </div>
+          <p className="mt-10 text-sm leading-relaxed text-muted-foreground">
+            For Indianapolis contractors and service companies:
+            {" "}<Link to="/indianapolis/contractor-follow-up" className="text-amber underline underline-offset-4">find quote follow-up gaps</Link>
+            {" "}or{" "}
+            <Link to="/indianapolis/service-business-lead-tracking" className="text-amber underline underline-offset-4">track leads across calls, texts, and social messages</Link>.
+          </p>
         </div>
       </section>
 
