@@ -169,7 +169,7 @@ const LeakAuditPage = () => {
                   <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                     Enter your company website and answer 14 operational questions. See the
                     gaps your answers suggest, practical solutions, and individual prices.
-                    A full Golden Report is prepared privately for the Aetheris team.
+                    A full Golden Report is processed separately for internal review, subject to scan capacity.
                   </p>
                 </div>
 
@@ -324,7 +324,7 @@ const LeakAuditPage = () => {
                   </h2>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     This is based on your self-reported answers, not a verified ROI claim.
-                    Your Golden Report is retained privately by Aetheris and is not emailed or downloaded.
+                    Any completed Golden Report is kept privately by Aetheris and is not emailed or downloaded.
                   </p>
                 </div>
                 <div className="glass space-y-4 rounded-lg border border-amber/35 p-6">
@@ -400,8 +400,8 @@ const LeakAuditPage = () => {
                   repeated={personalized.repeated}
                 />
                 <p className="text-center text-xs leading-relaxed text-muted-foreground">
-                  Your full Golden Report is retained in the Aetheris admin library for
-                  internal review and is not available through this public page.
+                  A separate, capacity-limited Golden Report is generated for the Aetheris team.
+                  When complete, it is archived privately, not delivered through this public page.
                 </p>
               </div>
             )}
