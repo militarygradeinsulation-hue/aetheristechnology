@@ -98,7 +98,7 @@ assert.match(read("src/components/AuditCustomQuote.tsx"), /Or schedule a scope d
 
 const auditBackend = read("supabase/functions/company-leak-audit/index.ts");
 const costCap = read("supabase/migrations/20261014233500_private_golden_daily_cap_hardening.sql");
-assert.match(auditBackend, /runtime\?\.waitUntil\(dispatch\)/);
+assert.match(auditBackend, /if \(runtime\?\.waitUntil\) runtime\.waitUntil\(dispatch\)/);
 assert.match(auditBackend, /claim_private_company_golden/);
 assert.match(costCap, /'dispatching', 'queued', 'reused', 'failed'/);
 assert.match(costCap, /pg_advisory_xact_lock/);
