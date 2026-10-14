@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.aetheris_company_audit_cases (
   revenue_band text NOT NULL,
   baseline_answers jsonb NOT NULL,
   recommendations jsonb NOT NULL,
+  offer_snapshot jsonb NOT NULL,
   engine_version text NOT NULL,
   scan_status text NOT NULL DEFAULT 'pending'
     CHECK (scan_status IN ('pending','dispatching','queued','reused','limited','failed')),
