@@ -427,6 +427,7 @@ const LeakAuditPage = () => {
     }
     if (!result) return;
     setSubmitting(true);
+    let leadSaved = false;
     try {
       const { error } = await supabase.from('assessment_leads').insert({
         email,
@@ -442,7 +443,13 @@ const LeakAuditPage = () => {
         } as any,
       });
       if (error) throw error;
+      leadSaved = true;
+    } catch (saveError) {
+      // A CRM write failure must not make the public, no-cost self-check a dead end.
+      console.error('Unable to save Leak Check lead', saveError);
+    }
 
+    try {
       generateLeakAuditPdf({
         name,
         company,
@@ -456,10 +463,14 @@ const LeakAuditPage = () => {
       });
 
       setStep('result');
-      toast.success('Leak Audit downloaded. Check your downloads folder.');
-    } catch (err: any) {
+      if (leadSaved) {
+        toast.success('Leak Check downloaded. Check your downloads folder.');
+      } else {
+        toast.warning('Your PDF downloaded, but we could not save your contact details. Contact us if you want a follow-up.');
+      }
+    } catch (err: unknown) {
       console.error(err);
-      toast.error('Could not save your audit. Try again or call (317) 376-2110.');
+      toast.error('Could not generate your PDF. Try again or call (317) 376-2110.');
     } finally {
       setSubmitting(false);
     }
