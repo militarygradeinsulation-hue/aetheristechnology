@@ -118,6 +118,11 @@ export function AuditCustomQuote({
             aria-disabled={cart.items.length === 0}>
             Request a tailored scope <ArrowRight className="h-4 w-4" />
           </a>
+          {cart.items.length > 0 && (
+            <Link to="/book" className="inline-flex min-h-11 items-center text-sm font-semibold text-amber underline underline-offset-4">
+              Or schedule a scope discussion
+            </Link>
+          )}
           {recommendations.length === 0 && <Link className="text-sm text-amber underline" to="/leak-audit/self-scan">Take the free company audit</Link>}
         </div>
       </div>
