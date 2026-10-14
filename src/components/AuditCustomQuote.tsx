@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ArrowRight, ShieldCheck } from "lucide-react";
+import { AETHERIS_TIERS, type TierId } from "@/lib/aetherisTiers";
+import { individualServiceIdsAtTier, TIMELINE_SERVICE_STEPS } from "@/lib/pricingTimelineServices";
 import {
   AUDIT_OPTIONS,
   type AuditOption, type AuditRecommendation,
@@ -12,6 +14,8 @@ type Props = {
   company?: string;
   repeated?: boolean;
   localOnly?: boolean;
+  /** Homepage only: show progressive choices associated with this pricing level. */
+  timelineTierId?: TierId;
 };
 const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
@@ -20,14 +24,23 @@ const money = (n: number) => "$" + (n / 100).toLocaleString("en-US", { maximumFr
  * no false summing of monthly and one-time line items.
  */
 export function AuditCustomQuote({
-  options = AUDIT_OPTIONS, recommendations = [], company, repeated, localOnly,
+  options = AUDIT_OPTIONS, recommendations = [], company, repeated, localOnly, timelineTierId,
 }: Props) {
-  const [selected, setSelected] = useState<string[]>(() => recommendations.map(r => r.id));
+  // Homepage timeline starts with all services relevant to that price level.
+  // PricingTimeline keys the component by tier, so sliding resets this list
+  // and its totals to the newly visible items (no ghost charges).
+  const [selected, setSelected] = useState<string[]>(() =>
+    timelineTierId ? individualServiceIdsAtTier(timelineTierId) : recommendations.map(r => r.id));
   const recommended = useMemo(() => new Map(recommendations.map(r => [r.id, r])), [recommendations]);
   const listedOptions = useMemo(() => {
-    const allowed = new Set(options.map(x => x.id));
-    return AUDIT_OPTIONS.filter(x => allowed.has(x.id)).map(x => options.find(o => o.id === x.id)!);
-  }, [options]);
+    const allowed = new Set(timelineTierId
+      ? individualServiceIdsAtTier(timelineTierId)
+      : options.map(x => x.id));
+    return AUDIT_OPTIONS.filter(x => allowed.has(x.id))
+      .map(x => options.find(o => o.id === x.id) || x);
+  }, [options, timelineTierId]);
+  const newAtTier = timelineTierId ? new Set(TIMELINE_SERVICE_STEPS[timelineTierId]) : new Set<string>();
+  const tier = timelineTierId ? AETHERIS_TIERS.find(t => t.id === timelineTierId) : undefined;
   // Price each item from the frozen server-provided snapshot when available.
   const cart = useMemo(() => {
     const ids = new Set(selected);
@@ -43,6 +56,11 @@ export function AuditCustomQuote({
 
   const mailBody = [
     "Company: " + (company || "To be confirmed"),
+    ...(tier ? [
+      "Pricing tier viewed: " + tier.name + " (" + money(tier.amountCents) +
+        (tier.cadence === "monthly" ? "/month" : tier.cadence === "one-time" ? " one-time" : " free") + ")",
+      "These individual service estimates are an ALTERNATIVE request for scope, not an addition to or a valuation of the tier package.",
+    ] : []),
     "Requested individual solutions:",
     ...cart.items.map(x => "- " + x.name + ": " + money(x.priceCents) + (x.cadence === "monthly" ? "/month" : " one-time")),
     "",
@@ -51,13 +69,15 @@ export function AuditCustomQuote({
     "Please confirm the scope, feasibility, and a formal written quote.",
   ].join("\n");
   const discussHref = "mailto:Aetheris.technology@outlook.com?subject=" +
-    encodeURIComponent("Aetheris custom scope " + (company || "")) +
+    encodeURIComponent("Aetheris custom scope " + (company || tier?.name || "")) +
     "&body=" + encodeURIComponent(mailBody);
 
   return (
     <section className="rounded-xl border border-amber/35 bg-card/60 p-5 sm:p-8" aria-label="Build your custom Aetheris solution">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">// Build only what you need</p>
+        <p className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
+          {tier ? "// Individual services linked to this tier" : "// Build only what you need"}
+        </p>
         {recommendations.length > 0 && (
           <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="h-4 w-4 text-amber" />
@@ -66,13 +86,35 @@ export function AuditCustomQuote({
         )}
       </div>
       <h3 className="mt-3 font-forensic text-2xl font-bold sm:text-3xl">
-        Individual solutions. <span className="text-amber">Your combination.</span>
+        {tier ? (
+          <>{tier.name}. <span className="text-amber">Services that become relevant.</span></>
+        ) : (
+          <>Individual solutions. <span className="text-amber">Your combination.</span></>
+        )}
       </h3>
       <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-        {recommendations.length
-          ? "We highlighted the options that correspond to the gaps reported in this company's first assessment. You can add or remove anything."
-          : "Choose the individual services you want. Take the free company Leak Check to see an automatically prioritized selection."}
+        {tier
+          ? "Moving the price line reveals or hides individual service choices. All visible choices start selected for comparison; uncheck any service to subtract its exact listed price. Moving the timeline again resets the comparison to that level. This is a separate custom-scope estimate, NOT an itemized promise of what the tier package contains."
+          : recommendations.length
+            ? "We highlighted the options that correspond to the gaps reported in this company's first assessment. You can add or remove anything."
+            : "Choose the individual services you want. Take the free company Leak Check to see an automatically prioritized selection."}
       </p>
+      {tier && (
+        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <span className="text-foreground">
+            Viewing <strong className="text-amber">{tier.name}</strong> at{" "}
+            <strong>{money(tier.amountCents)}{tier.cadence === "monthly" ? "/mo" : tier.cadence === "one-time" ? " one-time" : ""}</strong>
+          </span>
+          <span className="text-muted-foreground">{listedOptions.length} standalone service choices visible</span>
+          <span className="text-muted-foreground">{selected.length} chosen for a separate estimate</span>
+        </div>
+      )}
+      {tier && listedOptions.length === 0 && (
+        <div className="mt-6 rounded-lg border border-border/60 bg-background/30 p-5 text-sm text-muted-foreground">
+          The free level has no paid services in its comparison. Move the dot right to reveal the first individual service.
+          <Link to="/leak-audit/self-scan" className="ml-2 font-semibold text-amber underline underline-offset-4">Start your free assessment</Link>
+        </div>
+      )}
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {listedOptions.map(option => {
           const checked = selected.includes(option.id);
@@ -93,6 +135,11 @@ export function AuditCustomQuote({
                 {suggestion && <span className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-amber">
                   <Check className="h-3 w-3" /> Suggested · {suggestion.score}% gap signal
                 </span>}
+                {tier && newAtTier.has(option.id) && (
+                  <span className="mt-2 block font-mono text-[10px] font-semibold uppercase tracking-wider text-amber">
+                    First shown at this level
+                  </span>
+                )}
                 <span className="mt-2 block text-xs leading-relaxed text-muted-foreground">
                   <span className="font-semibold text-foreground">Fix:</span> {option.fix}
                 </span>
@@ -102,14 +149,17 @@ export function AuditCustomQuote({
         })}
       </div>
       <div className="mt-7 rounded-lg border border-amber/25 bg-background/50 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber">Your custom estimate</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber">
+          {tier ? "Separate individual-service comparison" : "Your custom estimate"}
+        </p>
         <div className="mt-4 flex flex-wrap gap-x-12 gap-y-4">
-          <div><p className="text-xs text-muted-foreground">One-time services</p><p className="font-forensic text-3xl font-bold">{money(cart.oneTimeCents)}</p></div>
-          <div><p className="text-xs text-muted-foreground">Monthly services</p><p className="font-forensic text-3xl font-bold">{money(cart.monthlyCents)}<span className="text-sm text-muted-foreground">/mo</span></p></div>
+          <div><p className="text-xs text-muted-foreground">One-time services</p><output aria-live="polite" className="block font-forensic text-3xl font-bold">{money(cart.oneTimeCents)}</output></div>
+          <div><p className="text-xs text-muted-foreground">Monthly services</p><output aria-live="polite" className="block font-forensic text-3xl font-bold">{money(cart.monthlyCents)}<span className="text-sm text-muted-foreground">/mo</span></output></div>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          One-time and monthly fees are separate. Estimates reflect listed individual prices, not a signed quote;
-          applicability and scope must be confirmed before any work or payment.
+          {tier
+            ? "Moving the timeline changes this separate comparison automatically. Individual services are not added to the tier fee and cannot be assumed to be included in it. One-time and monthly totals are never combined; amounts are not a signed quote."
+            : "One-time and monthly fees are separate. Estimates reflect listed individual prices, not a signed quote; applicability and scope must be confirmed before any work or payment."}
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-4">
           <a href={discussHref}
@@ -117,7 +167,7 @@ export function AuditCustomQuote({
               cart.items.length ? "bg-amber text-background" : "pointer-events-none bg-secondary text-muted-foreground"
             }`}
             aria-disabled={cart.items.length === 0}>
-            Request a tailored scope <ArrowRight className="h-4 w-4" />
+            {tier ? "Request selected services" : "Request a tailored scope"} <ArrowRight className="h-4 w-4" />
           </a>
           {cart.items.length > 0 && (
             <Link to="/book" className="inline-flex min-h-11 items-center text-sm font-semibold text-amber underline underline-offset-4">
