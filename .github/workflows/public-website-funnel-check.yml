@@ -46,7 +46,8 @@ jobs:
           node-version: "22"
       - name: Verify public landing, free assessment, search metadata and local pages
         run: node .github/scripts/public-website-funnel-check.mjs
+      - uses: oven-sh/setup-bun@v2
       - name: Install exact locked dependencies
-        run: npm ci --no-audit --no-fund
+        run: bun install --frozen-lockfile
       - name: Verify website production build
-        run: npm run build
+        run: bun run build
