@@ -172,7 +172,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                   <Link to="/portal" onClick={() => setOpen(false)} className={cn(pillBase, "w-full border border-border text-muted-foreground")}>
                     Client Portal
                   </Link>
-                  <Link to="/golden-report" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
+                  <Link to="/leak-audit/self-scan" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
                     Free Leak Check
                   </Link>
                 </div>
