@@ -454,6 +454,7 @@ const LeakAuditPage = () => {
                   recommendations={personalized.recommendations}
                   company={personalized.company}
                   repeated={personalized.repeated}
+                  localOnly={personalized.localOnly}
                 />
                 <p className="text-center text-xs leading-relaxed text-muted-foreground">
                   {personalized.localOnly
