@@ -41,10 +41,10 @@ const GoldenLanderPage: React.FC = () => {
   return (
     <div className="relative min-h-screen">
       <SEOHead
-        title="Check Your Company Free — The Golden Report | Aetheris"
-        description="Drop one URL. Aetheris runs the full forensic stack — a 14-chapter case file, positioning message, hero imagery, per-platform social posts, and a 30-day schedule. Free."
+        title="Golden Report Preview | Business Forensics"
+        description="Explore the Golden Report, an operator-led 14-chapter forensic case file. Talk with Aetheris to discuss a report for your company."
         path="/golden"
-        keywords="golden report, free forensic scan, business audit, revenue leak, aetheris"
+        keywords="golden report, operator-led forensic scan, business audit, revenue leak, aetheris"
         breadcrumbs={[
           { name: "Home", path: "/" },
           { name: "Golden Report", path: "/golden" },
@@ -84,13 +84,13 @@ const GoldenLanderPage: React.FC = () => {
                     Aetheris · Golden Report
                   </div>
                   <div className="mt-3 inline-flex items-center gap-2 border border-amber/40 bg-amber/5 px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
-                    <Cpu className="w-3 h-3" /> Free · 14-Chapter Case File
+                    <Cpu className="w-3 h-3" /> Operator-Led · 14-Chapter Case File
                   </div>
 
                   <h1 className="mt-6 font-forensic text-4xl md:text-6xl leading-[1.05] text-foreground">
-                    Check your <span className="text-amber italic">company</span>
+                    Explore the <span className="text-amber italic">Golden</span>
                     <br />
-                    <span className="text-amber">FREE</span>
+                    <span className="text-amber">Report</span>
                   </h1>
 
                   {/* Poster preview */}
@@ -104,10 +104,9 @@ const GoldenLanderPage: React.FC = () => {
                   </div>
 
                   <p className="mt-9 text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                    Drop one URL. Aetheris runs the full forensic stack{" "}
-                    <span className="text-amber">and</span> builds a fully branded content
-                    kit — 14-chapter case file, positioning message, hero imagery,
-                    per-platform social posts, and a 30-day schedule.
+                    The Golden Report is a company-specific forensic case file prepared with
+                    our team. It can cover brand, conversion paths, follow-up, and operational
+                    signals. Start with a conversation rather than a public scan.
                   </p>
 
                   {/* Ticket CTA */}
@@ -163,14 +162,14 @@ const GoldenLanderPage: React.FC = () => {
                               );
                             })}
                           </svg>
-                          <span className="font-mono text-lg font-bold tracking-widest">
-                            FREE
+                          <span className="font-mono text-xs font-bold tracking-widest">
+                            WITH OUR TEAM
                           </span>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between">
                           <span className="inline-flex items-center gap-2 border border-[#1a1a1a] rounded-sm px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.25em]">
-                            Open File
+                            Request a Report
                           </span>
                           <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#1a1a1a]/70 hidden sm:inline">
                             aetheris.technology/golden
@@ -193,8 +192,8 @@ const GoldenLanderPage: React.FC = () => {
             {/* Under-fold reassurance strip */}
             <div className="mt-8 grid sm:grid-cols-3 gap-3 text-center">
               {[
-                ["100% Confidential", "Your data stays with us."],
-                ["Evidence-Backed", "Every leak is proven."],
+                ["Private Engagement", "We discuss the scope before reviewing company data."],
+                ["Evidence-Led", "We separate observed facts from estimates."],
                 ["Action-First", "We don't just find leaks. We fix them."],
               ].map(([t, d]) => (
                 <div
