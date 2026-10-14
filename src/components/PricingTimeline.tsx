@@ -7,9 +7,9 @@ import { quoteAuditSelection } from "../../supabase/functions/_shared/company-au
 import { AuditCustomQuote } from "@/components/AuditCustomQuote";
 import { BOOK_MEETING_URL } from "@/lib/links";
 
-const usd = (cents: number) => cents === 0
-  ? "Free"
-  : "$" + (cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const dollars = (cents: number) =>
+  "$" + (cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const usd = (cents: number) => cents === 0 ? "Free" : dollars(cents);
 
 const cadenceLabel = (cadence: string) => cadence === "monthly"
   ? "/month" : cadence === "one-time" ? "one-time" : "no charge";
@@ -131,8 +131,8 @@ export function PricingTimeline() {
             )}
             <p className="mt-2 text-xs">
               {serviceSelection.length} of {visibleServices.length} individual service choices selected ·
-              estimate {usd(individualEstimate.oneTimeCents)} one-time and{" "}
-              {usd(individualEstimate.monthlyCents)}/mo, separately.
+              estimate {dollars(individualEstimate.oneTimeCents)} one-time and{" "}
+              {dollars(individualEstimate.monthlyCents)}/mo, separately.
             </p>
           </div>
         </div>
@@ -146,7 +146,8 @@ export function PricingTimeline() {
                 <span key={service.id} className={`rounded-full border px-3 py-1.5 text-xs ${newAtTier.has(service.id)
                   ? "border-amber/50 bg-amber/10 text-amber"
                   : "border-border/70 text-muted-foreground"}`}>
-                  {service.name}{serviceSelection.includes(service.id) ? " ✓" : " · unselected"}
+                  {service.name} · {dollars(service.priceCents)}{service.cadence === "monthly" ? "/mo" : ""}
+                  {serviceSelection.includes(service.id) ? " ✓" : " · unselected"}
                 </span>
               ))}
             </div>
