@@ -44,4 +44,40 @@ assert.match(app, /path="\/indianapolis\/service-business-lead-tracking"/);
 assert.match(local, /title=\{topic\.title\}/);
 assert.match(local, /description=\{topic\.description\}/);
 
+
+// Pricing timeline regression: the real seven-tier catalog, NOT fake demo prices.
+const pricing = read("src/components/PricingTimeline.tsx");
+const tiers = read("src/lib/aetherisTiers.ts");
+assert.match(homepage, /import \{ PricingTimeline \} from "@\/components\/PricingTimeline"/);
+assert.match(homepage, /<PricingTimeline \/>/);
+assert.doesNotMatch(homepage, /<PackageTiers \/>/);
+assert.ok(homepage.indexOf('<PricingTimeline />') < homepage.indexOf('The Aetheris Methodology'),
+  "Pricing must appear near the top of the homepage");
+assert.match(pricing, /AETHERIS_TIERS\.map/);
+assert.match(pricing, /type="range"/);
+assert.match(pricing, /onChange=\{\(e\) => setLevel/);
+assert.match(pricing, /aria-pressed=\{index === i\}/);
+assert.match(pricing, /selected\.adds\.map/);
+assert.match(pricing, /selected\.excludes/);
+assert.match(pricing, /selected\.cadence/);
+assert.match(pricing, /selected\.qualificationOnly/);
+assert.match(nav, /<Link to="\/leak-audit\/self-scan" onClick=\{\(\) => setOpen\(false\)\}/);
+const tierList = tiers.split("export const AETHERIS_TIERS: AetherisTier[] = [")[1]?.split("export function tier(")[0];
+assert.ok(tierList, "Public pricing tier list was not found");
+const expectedAmounts = {
+  free: 0,
+  intelligence: 250000,
+  signal: 750000,
+  revenue: 1000000,
+  suite: 1500000,
+  diagnostic: 2350000,
+  active: 2000000,
+};
+const allTiers = [...tierList.matchAll(/id: "(free|intelligence|signal|revenue|suite|diagnostic|active)",[\s\S]*?amountCents: (\d+)/g)];
+assert.equal(allTiers.length, 7, "Timeline must represent all seven priced offers");
+for (const match of allTiers) {
+  assert.equal(Number(match[2]), expectedAmounts[match[1]], "Pricing changed for " + match[1]);
+}
+assert.match(tierList, /ctaHref: "\/leak-audit\/self-scan"/);
+
 console.log("Public funnel and SEO regression checks passed.");
