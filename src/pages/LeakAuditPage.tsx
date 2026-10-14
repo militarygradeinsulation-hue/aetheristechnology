@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -12,7 +12,8 @@ import { Label } from '@/components/ui/label';
 import { ArrowRight, Download, Mail, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { generateLeakAuditPdf, type LeakAuditCategoryResult } from '@/lib/generateLeakAuditPdf';
+import { AuditCustomQuote } from '@/components/AuditCustomQuote';
+import { normalizePublicCompanyUrl, type AuditOption, type AuditRecommendation } from '../../supabase/functions/_shared/company-audit-offers';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 import { BOOK_MEETING_URL } from '@/lib/links';
@@ -68,193 +69,14 @@ const SCALE = [
   { v: 4, label: 'Always' },
 ];
 
-const CAT_DIAGNOSIS: Record<string, { strong: string; weak: string; leaks: string[] }> = {
-  capture: {
-    strong: 'Lead capture is operationally tight. Sources are tagged, channels are unified, and nothing is dying in someone\'s personal inbox.',
-    weak: 'Lead capture is leaking. Inbound is fragmented across inboxes, channels, and humans — meaning leads are being lost before anyone even knows they arrived.',
-    leaks: [
-      'Single Inbox Leak — leads landing in one human\'s Gmail with no routing or backup',
-      'Untagged Source Leak — you can\'t prove which channel actually drives revenue, so spend allocation is guesswork',
-      'Channel Blindspot — at least one inbound channel (DM, phone, walk-in, form) is not in your CRM',
-    ],
-  },
-  response: {
-    strong: 'Response cadence is disciplined. Speed-to-lead and second-touch coverage are systematized, not memory-based.',
-    weak: 'Response is bleeding. Speed-to-lead and follow-up are memory-driven — which means most leads die in the first 72 hours and stalled deals never get reactivated.',
-    leaks: [
-      'Speed-to-Lead Leak — first response averaging hours instead of minutes (industry norm: 5x close rate at <5min)',
-      'Stale Lead Leak — proposals over 14 days old with zero activity, no automated reactivation',
-      'Quote Follow-Up Gap — priced opportunities never touched after Day 3 (typically 60-80% of proposals)',
-    ],
-  },
-  drag: {
-    strong: 'Operations run on systems, not heroics. The owner is not a single point of failure on weekly tasks.',
-    weak: 'Operational drag is dragging the entire P&L. Repeated work is being retyped, key people are bottlenecks, and "the way we do it here" lives in someone\'s head.',
-    leaks: [
-      'Owner Bottleneck Leak — at least one critical workflow (quotes, invoicing, scheduling) waits on a single person',
-      'Re-Type Tax — the same data is keyed into 2+ systems weekly with no integration',
-      'Document Hunt Leak — staff hours/week burned hunting for past quotes, contracts, or files',
-    ],
-  },
-  trust: {
-    strong: 'Trust signals are intentional. Visitors get clarity in seconds and proof at every claim.',
-    weak: 'The site is sending mixed signals. Visitors can\'t answer "what do you do, for who, what happens next" in 5 seconds — which kills conversion before any sales touch.',
-    leaks: [
-      '5-Second Clarity Gap — value proposition not legible above the fold',
-      'Hidden Process Leak — pricing/process buried behind a contact form, killing self-qualifying buyers',
-      'Unbacked Claim Leak — major claims with no visible proof, eroding credibility silently',
-    ],
-  },
-};
-
-type LeakAuditTier = {
-  name: string;
-  price: string;
-  cadence: string;
-  blurb: string;
-  includes: string[];
-  cta: string;
-  highlight: boolean;
-  free?: boolean;
-  badge?: string;
-  flagship?: boolean;
-  priceId?: string;
-};
-
-type LeakAuditTierExtras = {
-  outcome: string;
-  bestFor: string;
-};
-
-const LEAK_AUDIT_TIERS: (LeakAuditTier & LeakAuditTierExtras)[] = [
-  {
-    name: 'Free Self-Scan',
-    price: '$0',
-    cadence: '~6 min · self-serve',
-    blurb: 'The 14-question forensic quiz. You leave with a directional PDF and a real dollar number on the leak.',
-    outcome: 'You walk away knowing — with a number — how much revenue is quietly leaving your business each year.',
-    bestFor: 'Owners who aren\'t sure a leak exists yet and want proof before spending a dollar.',
-    includes: [
-      '14-question forensic quiz',
-      'Estimated annual leak $ (range)',
-      'Case-file PDF you can share with your team',
-      'Zero sales pressure, zero call required',
-    ],
-    cta: 'Start Free Audit',
-    highlight: false,
-    free: true,
-  },
-  {
-    name: 'Signal Pack',
-    price: '$7,500',
-    cadence: 'one-time · ~6 hrs operator',
-    blurb: 'A real operator confirms — in writing — where your business is bleeding and why buyers ghost.',
-    outcome: 'You stop guessing. You get a written verdict on what\'s costing you the most, in plain English, from someone who has fixed it before.',
-    bestFor: 'Operators who already suspect the leak and want proof + a walkthrough before committing to a build.',
-    includes: [
-      'Full Website Forensic Report (not a checklist — a verdict)',
-      'Brand Contradiction Finder (every place your messaging fights itself)',
-      'Friction Vocabulary Audit (the exact words costing you deals)',
-      'Leak Findings memo you can hand to your team',
-      '30-min live walkthrough with the operator',
-      'Credits in full toward any higher tier',
-    ],
-    cta: 'Talk to an operator',
-    highlight: false,
-    priceId: 'leak_signal_pack_onetime',
-  },
-  {
-    name: 'Revenue Pack',
-    price: '$10,000',
-    cadence: 'one-time · ~14 hrs',
-    blurb: 'The fix-it-yourself system in a box. Most operators pick this because it pays for itself in one closed deal.',
-    outcome: 'You leave with the exact scripts, questions, and 30-day content plan your team runs on Monday morning — no more "what do I say?" hesitation.',
-    bestFor: 'Founders who have a team but no system — you\'re winging every sales call and every post.',
-    includes: [
-      'Everything in Signal Pack',
-      'Sales Script Pack (discovery → close, real language)',
-      'Follow-Up Plan (the sequence you\'re not running)',
-      'Strategic Question Engine (make buyers self-disqualify)',
-      '30-Day Content Calendar (built around YOUR leaks)',
-      'Two 45-min working sessions with the operator',
-      'One closed deal typically covers 3–5× the fee',
-    ],
-    cta: 'Talk to an operator',
-    highlight: true,
-    badge: 'Most Picked',
-    priceId: 'leak_revenue_pack_onetime',
-  },
-  {
-    name: 'Operator Suite',
-    price: '$15,000',
-    cadence: 'one-time · ~30 hrs / 3 wks',
-    blurb: 'The playbook + the tech suite. You stop paying five vendors for four tools that don\'t talk to each other.',
-    outcome: 'You get the full recovery system installed — strategy, content, lead-nurture, tech — and every dollar credits 1:1 toward the Active Case Retainer if you go deeper.',
-    bestFor: 'Businesses ready to consolidate their stack and run a real recovery — not another "growth hack."',
-    includes: [
-      'Everything in Revenue Pack',
-      'Strategy Blueprint (12-month, priced by leak)',
-      'Social Content Pack (branded, on-voice, ready to ship)',
-      'Digital Snapshot (audit of every buyer touchpoint)',
-      'Lead-Nurture Automation (installed, not just designed)',
-      'Aetheris Tech Suite access (the tools reps actually use)',
-      'Credits 1:1 toward the Active Case Retainer',
-    ],
-    cta: 'Talk to an operator',
-    highlight: false,
-    priceId: 'leak_operator_suite_onetime',
-  },
-  {
-    name: '21-Day Diagnostic',
-    price: '$23,500',
-    cadence: 'flagship · 21 days',
-    blurb: 'An operator inside your business for 21 days. You get a leak ledger with a dollar sign next to every finding.',
-    outcome: 'You end with a board-ready document that names every leak, its cost, and the exact fix — priced. This is the only door to the Active Case Retainer.',
-    bestFor: 'Businesses doing $500K–$25M who need a full forensic ledger before scaling, hiring, or raising.',
-    includes: [
-      'Everything above',
-      'Quantified leak ledger ($ per leak, ranked)',
-      'Implementation plan handoff (do-it-yourself or hand back)',
-      '21 days of operator inside your ops, sales, and marketing',
-      'Fit call required — we don\'t take every business',
-      'Prerequisite for the Active Case Retainer',
-    ],
-    cta: 'Request a fit call',
-    highlight: false,
-    badge: 'Flagship',
-    flagship: true,
-    priceId: 'leak_21_day_diagnostic_onetime',
-  },
-  {
-    name: 'Active Case Retainer',
-    price: '$20,000',
-    cadence: '/month · operator on retainer',
-    blurb: 'We stop advising and start running. Aetheris executes the recovery plan month after month until the leak is closed.',
-    outcome: 'You get an operator running point on execution — not another consultant with a slide deck. Every month we quantify what got recovered and re-rank what\'s left.',
-    bestFor: 'Post-Diagnostic businesses that want the recovery run FOR them, not handed off to an overworked team.',
-    includes: [
-      'Everything from prior tiers stays live',
-      'Weekly execution sprints (sales, content, ops, tech)',
-      'Monthly leak-recovery ledger ($ recovered vs. $ remaining)',
-      'Direct access to the operator, not an account manager',
-      'Priority builds inside the Aetheris Tech Suite',
-      'Cancel or pause any month — no long lock-in',
-      'Requires completed 21-Day Diagnostic',
-    ],
-    cta: 'Diagnostic clients only',
-    highlight: false,
-    badge: 'Retainer',
-    flagship: true,
-    priceId: 'leak_active_case_retainer_monthly',
-  },
-];
-
 type Step = 'intake' | 'questions' | 'gate' | 'result';
 
 const LeakAuditPage = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [step, setStep] = useState<Step>('intake');
   const [revenueBand, setRevenueBand] = useState<string>('');
+  const [website, setWebsite] = useState('');
+  const [personalized, setPersonalized] = useState<{ company: string; domain: string; repeated: boolean; recommendations: AuditRecommendation[]; options: AuditOption[] } | null>(null);
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
@@ -266,42 +88,6 @@ const LeakAuditPage = () => {
   const totalQs = QUESTIONS.length;
   const answeredCount = Object.keys(answers).length;
   const allAnswered = answeredCount === totalQs;
-
-  const result = useMemo(() => {
-    if (!allAnswered) return null;
-    const totalScore = Object.values(answers).reduce((a, b) => a + b, 0);
-    const maxScore = QUESTIONS.length * 4;
-    const pct = (totalScore / maxScore) * 100;
-
-    // Inverted: lower score = bigger leak
-    const leakRatio = 1 - pct / 100;
-    const band = REVENUE_BANDS.find((b) => b.value === revenueBand) || REVENUE_BANDS[2];
-    // Multiplier: businesses lose 8–22% of revenue to leaks. Map score → that range.
-    const leakPctOfRevenue = 0.08 + leakRatio * 0.14;
-    const estimatedAnnualLeak = Math.round((band.midpoint * leakPctOfRevenue) / 1000) * 1000;
-
-    const severity: 'CRITICAL' | 'ACTIVE' | 'MINOR' =
-      pct < 50 ? 'CRITICAL' : pct < 75 ? 'ACTIVE' : 'MINOR';
-
-    const categories: LeakAuditCategoryResult[] = (Object.keys(CATS) as Array<keyof typeof CATS>).map((key) => {
-      const qs = QUESTIONS.filter((q) => q.cat === key);
-      const score = qs.reduce((a, q) => a + (answers[q.id] || 0), 0);
-      const max = CATS[key].max;
-      const cPct = Math.round((score / max) * 100);
-      const isWeak = cPct < 65;
-      return {
-        key,
-        label: CATS[key].label,
-        score,
-        max,
-        pct: cPct,
-        diagnosis: isWeak ? CAT_DIAGNOSIS[key].weak : CAT_DIAGNOSIS[key].strong,
-        topLeaks: CAT_DIAGNOSIS[key].leaks,
-      };
-    });
-
-    return { totalScore, maxScore, pct, severity, estimatedAnnualLeak, categories };
-  }, [allAnswered, answers, revenueBand]);
 
   const handleAnswer = (v: number) => {
     setAnswers((a) => ({ ...a, [currentQ.id]: v }));
@@ -315,162 +101,31 @@ const LeakAuditPage = () => {
       toast.error('Pick a revenue band first.');
       return;
     }
+    try { normalizePublicCompanyUrl(website); }
+    catch { toast.error('Enter a valid public business website.'); return; }
     setStep('questions');
   };
 
-  const scrollToAuditStart = () => {
-    document.getElementById('leak-audit-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const pricingLadder = (context: 'intro' | 'result') => (
-    <div className="space-y-4">
-      <div className="text-center space-y-2">
-        <div className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">
-          Actual Leak Audit Offers
-        </div>
-        <h2 className="font-forensic text-2xl md:text-4xl font-bold text-foreground">
-          Pick the depth. Each rung includes everything below it.
-        </h2>
-        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-          There is no cart to fill. Start free, then talk to an operator about the right depth for your case.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-2.5 max-w-7xl mx-auto -mx-2 md:-mx-8 lg:-mx-16">
-        {LEAK_AUDIT_TIERS.map((tier) => (
-          <div
-            key={tier.name}
-            className={`glass rounded-md px-4 pt-4 pb-3 grid grid-cols-12 gap-4 items-center relative border ${
-              tier.highlight
-                ? 'border-amber shadow-[0_0_20px_-10px_hsl(var(--amber)/0.6)]'
-                : tier.flagship
-                  ? 'border-crimson/50'
-                  : 'border-border/60'
-            }`}
-          >
-            {/* Depth block (no public pricing — scope is agreed in conversation) */}
-            <div className="col-span-12 md:col-span-2 flex md:flex-col md:items-start items-baseline gap-2 md:gap-0.5 md:border-r md:border-border/40 md:pr-3">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <div className={`font-forensic text-lg font-bold leading-none ${tier.highlight ? 'text-amber' : tier.flagship ? 'text-crimson' : 'text-foreground'}`}>
-                  {tier.name}
-                </div>
-                {tier.badge && (
-                  <span className={`font-case text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm whitespace-nowrap ${tier.flagship ? 'bg-crimson text-primary-foreground' : 'bg-amber text-primary-foreground'}`}>
-                    {tier.badge}
-                  </span>
-                )}
-              </div>
-              <div className="font-case text-[9px] uppercase tracking-wider text-muted-foreground">
-                {tier.cadence.replace(/^\/month · /, '')}
-              </div>
-            </div>
-
-
-            {/* Copy block */}
-            <div className="col-span-12 md:col-span-7 min-w-0">
-              <p className="text-[13px] text-foreground/90 leading-snug mb-1.5">{tier.blurb}</p>
-              <p className="text-[11px] text-foreground/75 leading-snug mb-2">
-                <span className="font-case text-[9px] uppercase tracking-widest text-amber mr-1.5">Get:</span>
-                {tier.outcome}
-              </p>
-              <ul className="flex flex-wrap gap-x-3 gap-y-0.5">
-                {tier.includes.slice(0, 6).map((item) => (
-                  <li key={item} className="text-[11px] text-foreground/75 flex gap-1">
-                    <span className="text-amber shrink-0">›</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-1.5">
-                <span className="font-case text-[9px] uppercase tracking-widest text-muted-foreground mr-1.5">Best for:</span>
-                <span className="text-[11px] text-muted-foreground italic">{tier.bestFor}</span>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div className="col-span-12 md:col-span-3 flex md:justify-end">
-              {tier.free ? (
-                <Button variant="outline" size="sm" className="w-full md:w-auto" onClick={scrollToAuditStart}>
-                  {context === 'result' ? 'Run Again' : tier.cta}
-                </Button>
-              ) : (
-                <Button
-                  asChild
-                  size="sm"
-                  className={`w-full md:w-auto ${tier.highlight ? 'bg-amber text-primary-foreground hover:bg-amber/90' : ''}`}
-                  variant={tier.highlight ? 'default' : 'outline'}
-                >
-                  <a href={BOOK_MEETING_URL} target="_blank" rel="noopener noreferrer">
-                    <ArrowRight className="w-3.5 h-3.5 mr-1.5" />
-                    {tier.cta}
-                  </a>
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-
-
-      <p className="text-center text-xs text-muted-foreground italic pt-2">
-        Every engagement credits toward the next. The 21-Day Diagnostic is the gate to the Active Case Retainer.
-      </p>
-
-    </div>
-  );
-
   const handleSubmitGate = async () => {
     if (!email || !email.includes('@')) {
-      toast.error('Drop a real email — that\'s where the report goes.');
+      toast.error("Enter a valid email address.");
       return;
     }
-    if (!result) return;
+    if (!allAnswered) return;
     setSubmitting(true);
-    let leadSaved = false;
     try {
-      const { error } = await supabase.from('assessment_leads').insert({
-        email,
-        name: name || null,
-        company: company || null,
-        score: result.totalScore,
-        answers: {
-          source: 'leak_audit',
-          revenueBand,
-          estimatedAnnualLeak: result.estimatedAnnualLeak,
-          severity: result.severity,
-          answers,
-        } as any,
+      const { data, error } = await supabase.functions.invoke('company-leak-audit', {
+        body: { website, company, name, email, revenueBand, answers },
       });
-      if (error) throw error;
-      leadSaved = true;
-    } catch (saveError) {
-      // A CRM write failure must not make the public, no-cost self-check a dead end.
-      console.error('Unable to save Leak Check lead', saveError);
-    }
-
-    try {
-      generateLeakAuditPdf({
-        name,
-        company,
-        email,
-        revenueBand: REVENUE_BANDS.find((b) => b.value === revenueBand)?.label || '',
-        estimatedAnnualLeak: result.estimatedAnnualLeak,
-        severity: result.severity,
-        totalScore: result.totalScore,
-        maxScore: result.maxScore,
-        categories: result.categories,
-      });
-
-      setStep('result');
-      if (leadSaved) {
-        toast.success('Leak Check downloaded. Check your downloads folder.');
-      } else {
-        toast.warning('Your PDF downloaded, but we could not save your contact details. Contact us if you want a follow-up.');
+      if (error || !Array.isArray(data?.recommendations) || !Array.isArray(data?.options)) {
+        throw new Error((data as { error?: string } | null)?.error || error?.message || 'Unable to save assessment.');
       }
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error('Could not generate your PDF. Try again or call (317) 376-2110.');
+      setPersonalized(data);
+      setStep('result');
+      toast.success('Your company recommendations and individual prices are ready.');
+    } catch (err) {
+      console.error('Company Leak Check failed', err);
+      toast.error(err instanceof Error ? err.message : 'Could not complete your company assessment. Try again.');
     } finally {
       setSubmitting(false);
     }
@@ -519,7 +174,7 @@ const LeakAuditPage = () => {
                   </p>
                 </div>
 
-                {pricingLadder('intro')}
+                
 
                 <div id="leak-audit-start" className="glass rounded-lg border border-border/60 p-6 md:p-8 space-y-5 scroll-mt-28">
                   <div>
@@ -788,7 +443,7 @@ const LeakAuditPage = () => {
                 </div>
 
                 {/* Full pricing ladder — Ways to run the audit */}
-                {pricingLadder('result')}
+                
 
               </div>
             )}
