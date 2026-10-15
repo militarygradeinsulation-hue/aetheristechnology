@@ -48,6 +48,10 @@ export function PricingTimeline() {
         level. The package price, relevant individual services and their separate totals
         update immediately. Moving backward removes the higher-level choices.
       </p>
+      <div className="mt-5 inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-amber/30 bg-amber/[0.06] px-4 py-2 text-xs text-foreground/90">
+        <span className="font-semibold text-amber">First meeting complimentary.</span>
+        <span className="text-muted-foreground">Additional consulting is $100/hour unless included in a scoped engagement.</span>
+      </div>
 
       <div className="mt-8 rounded-xl border border-amber/25 bg-card/50 p-4 sm:p-7">
         <div className="flex items-center justify-between gap-3">
