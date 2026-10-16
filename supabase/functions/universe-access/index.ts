@@ -59,13 +59,9 @@ async function issue(email: string) {
   }
   // Send email (best-effort)
   try {
-    await sb.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'universe-access-code',
-        recipientEmail: email,
-        idempotencyKey: `universe-code-${code}`,
-        templateData: { code, universeUrl: UNIVERSE_URL },
-      },
+    await sendTemplateEmail('universe-access-code', email, {
+      idempotencyKey: `universe-code-${code}`,
+      templateData: { code, universeUrl: UNIVERSE_URL },
     })
   } catch (e) {
     console.error('universe-access: email send failed', e)

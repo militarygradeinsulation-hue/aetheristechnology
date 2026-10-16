@@ -184,12 +184,9 @@ async function sendQuote(rep: any, payload: { quote_id: string }) {
 
   const viewUrl = `${PUBLIC_ORIGIN}/q/${q.access_token}`;
 
-  await supabase.functions.invoke('send-transactional-email', {
-    body: {
-      templateName: 'rep-quote',
-      recipientEmail: q.customer_email,
-      idempotencyKey: `quote-send-${q.id}`,
-      templateData: {
+  await sendTemplateEmail('rep-quote', q.customer_email, {
+    idempotencyKey: `quote-send-${q.id}`,
+    templateData: {
         customer_name: q.customer_name || 'there',
         rep_name: q.rep_name || 'the Aetheris team',
         quote_number: q.quote_number,

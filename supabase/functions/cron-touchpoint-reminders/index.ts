@@ -88,10 +88,9 @@ serve(async (req) => {
         continue;
       }
 
-      const { error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "daily-touchpoints",
-          recipientEmail: rep.rep_email,
+      let sendErr: unknown = null;
+      try {
+        await sendTemplateEmail("daily-touchpoints", rep.rep_email, {
           idempotencyKey: `daily-touchpoints-${rep.code}-${from.slice(0, 10)}`,
           templateData: {
             rep_name: rep.rep_name || rep.code,
@@ -99,8 +98,10 @@ serve(async (req) => {
             portal_url: "https://aetheris.technology/portal",
             touchpoints,
           },
-        },
-      });
+        });
+      } catch (e) {
+        sendErr = e;
+      }
       if (sendErr) {
         console.error(`send failed for ${rep.code}:`, sendErr);
         summary.push({ code: rep.code, count: touchpoints.length, sent: false, reason: sendErr.message });

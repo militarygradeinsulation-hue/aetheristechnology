@@ -78,19 +78,15 @@ Deno.serve(async (req) => {
   // Fire-and-forget admin notification for NEW leads only.
   if (isNew) {
     try {
-      await supabase.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'contact-notification',
-          recipientEmail: email,
-          idempotencyKey: `tool-lead-${tool_slug}-${email}`,
-          templateData: {
-            name: name || 'Tool Lead',
-            email,
-            phone: phone || '—',
-            company: company || '—',
-            message: `Opened the "${tool_title || tool_slug}" tool via rep code ${rep_code || '(none)'}.`,
-            service_interest: `tool:${tool_slug}`,
-          },
+      await sendTemplateEmail('contact-notification', email, {
+        idempotencyKey: `tool-lead-${tool_slug}-${email}`,
+        templateData: {
+          name: name || 'Tool Lead',
+          email,
+          phone: phone || '—',
+          company: company || '—',
+          message: `Opened the "${tool_title || tool_slug}" tool via rep code ${rep_code || '(none)'}.`,
+          service_interest: `tool:${tool_slug}`,
         },
       });
     } catch (e) {
