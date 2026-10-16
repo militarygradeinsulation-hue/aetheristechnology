@@ -28,9 +28,31 @@ const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSect
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 
 const SIGNALS = [
-  { k: "Named leaks", v: "Every finding tied to evidence on your own site." },
-  { k: "One number", v: "A single annual leak total, not competing estimates." },
-  { k: "Plain language", v: "Written for an owner, not for a consultant." },
+  { k: "Evidence", v: "A named finding tied to something you can inspect." },
+  { k: "Cause", v: "Why it matters and what is creating it." },
+  { k: "Correction", v: "What should change first and how progress will be checked." },
+];
+
+const PAIN_POINTS = [
+  "Leads enter the business, but ownership changes as they move between people.",
+  "Follow-up depends on memory, inboxes, or individual habits.",
+  "CRM, spreadsheets, and conversations disagree about what is actually happening.",
+  "Teams repeat manual work while no one can see which friction is costing the most.",
+];
+
+const FIT_SIGNALS = [
+  "Steady inquiry volume and enough economic exposure for small breakdowns to matter.",
+  "Multiple people or departments touch the customer journey.",
+  "An owner or executive can authorize access and decisions.",
+  "The company has capacity to implement corrections once the evidence is clear.",
+];
+
+const BUYING_JOURNEY = [
+  { n: "01", title: "Recognize", text: "Free Leak Check and a complimentary first meeting establish whether there is a credible reason to investigate." },
+  { n: "02", title: "Investigate", text: "A paid diagnostic appropriate to the company establishes causes, priorities, and the correction plan." },
+  { n: "03", title: "Correct", text: "Aetheris executes the agreed corrections, or hands your team a clear implementation path." },
+  { n: "04", title: "Focus", text: "For a narrow issue, standalone consulting is $100/hour after the complimentary first meeting instead of forcing a larger scope." },
+  { n: "05", title: "Continue", text: "Ongoing monitoring or an Active Case is earned when continued operator involvement is useful." },
 ];
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -41,8 +63,8 @@ const LeakLanderPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SEOHead
-        title="Revenue Leak Audit for $5M-$50M Businesses"
-        description="Aetheris is a strategic consulting firm that finds and fixes business failures, from communication and systems to revenue leaks, operational waste, and stalled growth."
+        title="Find What Is Costing Your Company Money | Aetheris"
+        description="Aetheris examines how people, processes, and systems work together, identifies where value is being lost, shows the evidence, and builds the correction plan."
         path="/"
         keywords="revenue leak audit, revenue forensics, business forensics operator, forensic revenue diagnostic, brand contradiction analysis, conversion drop-off audit, mid-market revenue diagnostic, forensic diagnostic Indianapolis"
       />
@@ -71,9 +93,15 @@ const LeakLanderPage: React.FC = () => {
         }
         description=""
       >
-        <h1 className="max-w-3xl text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
-          I study the entire company as one connected system, tracing how every department, role, handoff, and decision either creates ROI or quietly destroys it.
+        <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
+          Find what's costing your company money. <span className="text-amber">Know what to fix first.</span>
         </h1>
+        <p className="max-w-3xl text-base sm:text-lg leading-relaxed text-foreground/85">
+          Aetheris examines how your people, processes, and systems work together, identifies where value is being lost, and builds a practical plan to correct it.
+        </p>
+        <p className="max-w-3xl border-l border-amber/50 pl-4 text-sm leading-relaxed text-muted-foreground">
+          Founder's lens: I study the entire company as one connected system, tracing how every department, role, handoff, and decision affects the next.
+        </p>
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
             to="/leak-audit/self-scan"
@@ -82,7 +110,7 @@ const LeakLanderPage: React.FC = () => {
             {CTA.primary} <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="#how-we-work"
+            href="#sample-reports"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
           >
             {CTA.secondary} <ArrowRight className="h-4 w-4" />
@@ -126,54 +154,73 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Plain-language disclosure about recovery-based compensation */}
-      <section id="pricing-disclosure" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl border-l-2 border-amber/70 pl-5 sm:pl-8">
-          <SectionLabel>// A note about our pricing</SectionLabel>
-          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-            I know our prices may seem high. <span className="text-amber">But what is the leak already costing you?</span>
-          </h2>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-foreground/90 sm:text-lg">
-            The real expense isn't finding the failure. It's letting lost revenue, wasted
-            hours, and broken processes keep taking their share of your business.
-            We focus on fixing those problems first and measuring what actually improves.
-          </p>
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-foreground/90">
-            In qualifying recovery-based engagements, our fee is tied to a defined share of
-            verified recovered value. The qualifying result, measurement method, and
-            conditions for any waived recovery fee are agreed in writing before work starts.
-          </p>
-          <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-            Recovery isn't guaranteed. The free self-check is directional, not proof of lost
-            revenue. Separately scoped fixed-fee services have their own written terms.
-          </p>
-          <Link
-            to="/#prices"
-            className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-amber/50 px-6 font-case text-[11px] font-bold uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
-          >
-            View pricing <ArrowRight className="h-4 w-4" />
-          </Link>
+      {/* Recognizable pain */}
+      <section id="recognize" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// What the problem looks like before it has a name</SectionLabel>
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <div>
+              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+                The company can look busy while value disappears <span className="text-amber">between the work.</span>
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                The issue is often not one bad department. It is what happens when ownership, information, timing, and decisions cross from one part of the business to another.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {PAIN_POINTS.map((point, i) => (
+                <div key={point} className="rounded-xl border border-border/60 bg-card/40 p-5">
+                  <p className="font-case text-[9px] uppercase tracking-widest text-amber">{String(i + 1).padStart(2, "0")}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/85">{point}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Interactive investment line */}
-      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
-        <PricingTimeline />
+      {/* Initial fit */}
+      <section id="fit" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// Where we start</SectionLabel>
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+            <div>
+              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+                Established service businesses where opportunity crosses <span className="text-amber">more than one set of hands.</span>
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                Our clearest starting profile is a company with steady inquiries, multiple people handling customers, and no reliable view of where opportunities are being lost.
+              </p>
+            </div>
+            <div>
+              <p className="font-case text-[10px] uppercase tracking-widest text-amber">A strong fit usually has</p>
+              <ul className="mt-5 space-y-3">
+                {FIT_SIGNALS.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-relaxed text-foreground/85">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Restored interactive Chaos Theory graph from the existing site code. */}
       <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-6xl">
-          <SectionLabel>// Chaos theory in business</SectionLabel>
+          <SectionLabel>// The mechanism</SectionLabel>
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="max-w-3xl">
               <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-                A single failure rarely <span className="text-amber">stays in one department.</span>
+                We follow the pattern <span className="text-amber">across the handoffs.</span>
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                This is the original interactive chaos-physics network map: drag a node, follow the
-                ripples, and switch between symptoms, handoffs, systems, and service pathways.
-                Connections illustrate potential dependencies, not proven losses for your business.
+                Aetheris investigates the business as a connected system. We follow evidence across
+                acquisition, sales, operations, systems, communication, and delivery to see where one
+                decision changes the next. The map below illustrates dependencies; a finding is not
+                treated as proven until the evidence supports it.
               </p>
             </div>
             <Link to="/stop-guessing" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-amber/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-amber transition hover:bg-amber/10">
@@ -261,17 +308,25 @@ const LeakLanderPage: React.FC = () => {
 
 
       {/* Case file preview */}
-      <section className="border-t border-border/60 py-20 px-6">
+      <section id="sample-reports" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center">
           <div>
-            <SectionLabel>// The deliverable</SectionLabel>
+            <SectionLabel>// The first useful output</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-              A case file, not a slide deck.
+              Evidence before recommendations.
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed max-w-lg">
-              Every scan produces the Golden Report: named leaks, evidence pulled from your own
-              site, a single annual exposure number, and the order to fix them in.
+              The Golden Report turns the investigation into a case file: the finding, the evidence,
+              why it matters, the correction to consider, and the order in which the work should happen.
+              Modeled exposure is kept distinct from financially verified recovery.
             </p>
+            <div className="mt-6 rounded-xl border border-amber/30 bg-amber/[0.05] p-5 max-w-lg">
+              <p className="font-case text-[10px] uppercase tracking-widest text-amber">First findings brief</p>
+              <p className="mt-2 text-sm leading-relaxed text-foreground/90">
+                The first meaningful win is a highest-priority issue supported by evidence, why it matters,
+                and the next action. The delivery window is confirmed at kickoff based on access and scope.
+              </p>
+            </div>
             <ul className="mt-8 space-y-4">
               {SIGNALS.map((s) => (
                 <li key={s.k} className="border-l border-amber/40 pl-4">
@@ -351,6 +406,83 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
+      {/* First win, effort and clocks */}
+      <section id="first-win" className="scroll-mt-28 border-t border-border/60 px-6 py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// What happens after we begin</SectionLabel>
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+                We carry the investigation. <span className="text-amber">You provide the context and access.</span>
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                We collect and connect the evidence, rank the issues, document the reasoning, and build the correction path. You provide the systems, people, and business context needed to make the findings accurate.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
+                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to first finding</p>
+                <p className="mt-2 text-sm text-foreground/85">When the first evidence-backed priority is ready. The specific window is confirmed at kickoff.</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
+                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to correction</p>
+                <p className="mt-2 text-sm text-foreground/85">Depends on the issue, required access, and whether your team or Aetheris performs the implementation.</p>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
+                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to financial result</p>
+                <p className="mt-2 text-sm text-foreground/85">Measured only after the correction has had enough time to affect the agreed baseline. It is not presented as guaranteed recovery.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Simplified buying journey */}
+      <section id="engagement-options" className="scroll-mt-28 border-t border-border/60 px-6 py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel>// One buying decision</SectionLabel>
+          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+            You do not need to know which Aetheris tool you need. <span className="text-amber">Start with the business problem.</span>
+          </h2>
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground">
+            The engagement expands only when the evidence justifies it. A narrower problem gets a narrower scope; the same work is not discounted simply to force a sale.
+          </p>
+          <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-5">
+            {BUYING_JOURNEY.map((step) => (
+              <div key={step.n} className="bg-background p-6">
+                <p className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">{step.n}</p>
+                <h3 className="mt-3 text-lg font-bold">{step.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive investment line */}
+      <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
+        <PricingTimeline />
+      </section>
+
+      {/* Commercial terms */}
+      <section id="pricing-disclosure" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl border-l-2 border-amber/70 pl-5 sm:pl-8">
+          <SectionLabel>// How fees work</SectionLabel>
+          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+            Clear terms before <span className="text-amber">paid work begins.</span>
+          </h2>
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-foreground/90 sm:text-lg">
+            Your first meeting is complimentary. After that, standalone consulting is $100 per hour unless that time is already included in a written project or ongoing engagement.
+          </p>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-foreground/90">
+            Fixed-fee investigations and implementation work are scoped in writing. If a qualifying engagement uses recovery-based compensation, the baseline, attribution method, payment timing, and definition of recovered value are agreed before the work starts.
+          </p>
+          <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+            Modeled exposure is not the same as measured recovery. No recovered-revenue outcome is guaranteed.
+          </p>
+        </div>
+      </section>
+
       {/* Intake */}
       <section className="border-t border-border/60 py-20 px-6">
         <div className="mx-auto max-w-2xl text-center">
@@ -359,8 +491,9 @@ const LeakLanderPage: React.FC = () => {
             Talk with Aetheris directly.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            30 minutes. No pitch deck. We look at your business and I tell you where the money is
-            leaking. If I cannot save you money, I do not want to do business with you.
+            The first meeting is complimentary. We use it to understand how the business works,
+            decide whether there is a credible issue worth investigating, and explain the next step.
+            Additional standalone consulting is $100/hour unless included in an agreed scope.
           </p>
           <a
             href={BOOK_MEETING_URL}
