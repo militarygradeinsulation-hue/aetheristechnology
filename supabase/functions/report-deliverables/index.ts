@@ -298,7 +298,8 @@ async function enrichScan(sb: SB, scanId: string, opts: { force?: boolean; image
   }
   // Final uniqueness gate: qualified AI posts first, distinct deterministic
   // archetypes fill the rest. Repetitive filler never ships.
-  const gated = qualifyPosts(deliverables.posts, base.posts);
+  const reserve = reserveFor({ company, url, report, base });
+  const gated = qualifyPosts(deliverables.posts, base.posts, reserve);
   deliverables.posts = gated.posts;
   deliverables.quality = gated.manifest;
   deliverables.schedule = {
