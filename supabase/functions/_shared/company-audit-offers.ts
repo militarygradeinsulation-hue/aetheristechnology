@@ -60,6 +60,54 @@ export function evaluateCompanyAudit(answers: AuditAnswers): AuditRecommendation
     reason: "Based on your responses to " + option.questions.join(" and ") + "; requires verification.",
   }));
 }
+
+export type AuditExposureEstimate = {
+  healthScore: number;
+  annualLow: number;
+  annualHigh: number;
+  revenueAnchor: number;
+  basis: string;
+  modelVersion: string;
+};
+
+export const AUDIT_EXPOSURE_MODEL_VERSION = "free-leak-check-exposure-v1";
+
+const REVENUE_MODEL: Record<string, { label: string; anchor: number }> = {
+  sub_500k: { label: "Under $500K", anchor: 250_000 },
+  "500k_1m": { label: "$500K – $1M", anchor: 750_000 },
+  "1m_3m": { label: "$1M – $3M", anchor: 2_000_000 },
+  "3m_10m": { label: "$3M – $10M", anchor: 6_000_000 },
+  "10m_plus": { label: "$10M+", anchor: 10_000_000 },
+};
+
+const round500 = (n: number) => Math.max(0, Math.round(n / 500) * 500);
+
+/**
+ * Directional, self-reported model only. It intentionally uses a conservative
+ * planning anchor for each revenue band and a bounded percentage of that anchor
+ * based on the 14-answer health score. It is not measured loss or recovered ROI.
+ */
+export function modelCompanyAuditExposure(answers: AuditAnswers, revenueBand: string): AuditExposureEstimate {
+  if (!validateAuditAnswers(answers)) throw new Error("All 14 assessment answers are required.");
+  const band = REVENUE_MODEL[revenueBand];
+  if (!band) throw new Error("Choose a valid revenue band.");
+  const points = Object.values(answers).reduce((sum, n) => sum + n, 0);
+  const healthFraction = points / (14 * 4);
+  const healthScore = Math.round(healthFraction * 100);
+  const gapFraction = Math.max(0, Math.min(1, 1 - healthFraction));
+
+  // At maximum observed gap: 1.5%–4% of the conservative planning anchor.
+  const annualLow = round500(band.anchor * gapFraction * 0.015);
+  const annualHigh = Math.max(annualLow, round500(band.anchor * gapFraction * 0.04));
+  return {
+    healthScore,
+    annualLow,
+    annualHigh,
+    revenueAnchor: band.anchor,
+    modelVersion: AUDIT_EXPOSURE_MODEL_VERSION,
+    basis: `Directional range from the self-reported 14-question score (${healthScore}/100) using a conservative ${band.label} planning reference. This is modeled exposure, not verified lost revenue.`,
+  };
+}
 export function auditOption(id: string) { return AUDIT_OPTIONS.find(option => option.id === id); }
 export function quoteAuditSelection(ids: string[]) {
   const unique = [...new Set(ids)];
