@@ -18,7 +18,7 @@ export const CORE_LEAK_FACTS: CitedFact[] = [
       'Joseph Toney runs the audit personally over 21 days. Output: written findings report, prioritized fixes, ROI projections, and a 60-minute readout. Terms are set after a conversation and a look at your data — not before.',
     source: 'Aetheris engagement model, /diagnostic',
     implication:
-      'No percentage-of-savings billing. No hourly. The Diagnostic stands on its own as the most concrete vendor evaluation you will run this quarter, and it is the basis for any continuing work.',
+      'The first meeting is complimentary. Standalone consulting after that is $100/hour unless included in a written scope. The Diagnostic stands on its own and is the basis for any continuing implementation or Active Case work; any recovery-based terms require a written baseline and attribution method.',
   },
   {
     answer: 'The Implementation Retainer is an open engagement reserved for Diagnostic clients, with terms discussed openly once the leaks are proven.',
