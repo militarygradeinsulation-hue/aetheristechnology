@@ -9,17 +9,17 @@
 // ============================================================================
 
 /** The central customer-facing promise. */
-export const CORE_PROMISE = "You're losing revenue. We find why\u2014and fix it.";
+export const CORE_PROMISE = "Find what's costing your company money. Know what to fix first.";
 
 export const HERO_SUPPORT =
-  "Joseph Toney, Strategic Architect. I increase your monthly ROI without leads, marketing, sales, and subscriptions by simply fixing your COE (cost of existing).";
+  "Aetheris examines how your people, processes, and systems work together, identifies where value is being lost, and builds a practical plan to correct it.";
 
 /** Consistent, human CTA wording used everywhere a visitor can act. */
 export const CTA = {
-  primary: "Find Where Revenue Is Leaking",
-  secondary: "See How It Works",
+  primary: "Find My Business Gaps",
+  secondary: "See a Sample Golden Report",
   talk: "Talk With Aetheris",
-  session: "Schedule a Working Session",
+  session: "Schedule the Complimentary First Meeting",
   show: "Show Me What I'm Losing",
 } as const;
 
@@ -69,11 +69,11 @@ export const FOUNDER_TRUST = {
   quote:
     "I would rather answer your questions honestly than sell you work you do not need. If we find a real loss, I will show you the evidence and the path to recover it. If we earn the right to keep working together, we will agree on a relationship that reflects the value, the work, and what is fair.",
   short:
-    "You will not be charged simply for asking questions. Whether or not we work together, I will answer honestly and help you understand what I see. If there is no clear case for Aetheris to create value, there is no pressure to manufacture one.",
-  punch: "No pressure. No mystery invoice. No paid relationship until there is a clear reason for one.",
+    "The first meeting is complimentary. We use it to understand the business, decide whether there is something worth investigating, and tell you what the sensible next step is. After that, standalone consulting is $100 per hour unless the time is already included in a scoped engagement.",
+  punch: "The first conversation is on us. Paid work begins only after the scope and terms are clear.",
   attribution: "Joseph \u00b7 Founder, Aetheris Technology",
 } as const;
 
 /** Calm expectation note to place near conversion points. */
 export const EXPECTATION_NOTE =
-  "The initial conversation carries no fee and does not promise implementation or recovered revenue. Any recovery-based fee conditions and any separately priced services are agreed in writing before work begins.";
+  "Your first meeting is complimentary. Additional standalone consulting is $100/hour unless included in a scoped engagement. Implementation, fixed-fee work, and any recovery-based terms are agreed in writing before work begins; no recovered revenue is guaranteed.";
