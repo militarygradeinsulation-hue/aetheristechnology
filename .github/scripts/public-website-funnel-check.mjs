@@ -68,7 +68,7 @@ assert.ok(homepage.indexOf('id="first-win"') < homepage.indexOf('<PricingTimelin
 assert.ok(homepage.indexOf('id="engagement-options"') < homepage.indexOf('<PricingTimeline />'),
   "Simplified buying journey must appear before the detailed pricing timeline");
 assert.match(homepage, /First meeting is complimentary|first meeting is complimentary/i);
-assert.match(homepage, /$100(?: per hour|/hour)/i);
+assert.match(homepage, /\$100(?: per hour|\/hour)/i);
 assert.match(pricing, /AETHERIS_TIERS\.map/);
 assert.match(pricing, /type="range"/);
 assert.match(pricing, /onChange=\{\(e\) => setLevel/);
