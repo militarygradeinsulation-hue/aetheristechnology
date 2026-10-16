@@ -156,7 +156,6 @@ async function maybeNotify(ev: any) {
         adminUrl,
         reportUrl,
       },
-      },
     })
   } catch (e) {
     console.error('notify failed:', (e as Error).message)
