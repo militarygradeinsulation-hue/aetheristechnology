@@ -78,6 +78,20 @@ describe("deterministic post set", () => {
     expect(postsPassGate(own.posts)).toBe(true);
   });
 
+  it("uses a long observed positioning sentence once instead of poisoning all twelve posts", () => {
+    const positioning = "Northline Mechanical helps homeowners replace aging heating and cooling systems with carefully planned installation, maintenance, and service support.";
+    const own = buildFallbackDeliverables({
+      company: "Northline Mechanical",
+      url: "https://northline.example",
+      brand: { name: "Northline Mechanical", description: positioning },
+      report: report as never,
+    });
+    expect(own.posts).toHaveLength(12);
+    expect(own.posts.filter((p) => p.body.includes(positioning))).toHaveLength(1);
+    expect(validatePostSet(own.posts, 12).ok).toBe(true);
+    expect(postsPassGate(own.posts)).toBe(true);
+  });
+
   it("uses the target domain when company_name is only contact metadata", () => {
     const own = buildFallbackDeliverables({ company: "Contact Person", url: "https://northline.example", report: report as never });
     expect(own.posts.some((p) => p.body.includes("We are Northline."))).toBe(true);
