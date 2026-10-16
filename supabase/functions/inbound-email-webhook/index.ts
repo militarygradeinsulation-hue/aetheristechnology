@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 // @ts-ignore - postal-mime esm bundle
 import PostalMime from "https://esm.sh/postal-mime@2.2.7";
+import { sendLovableEmail } from "npm:@lovable.dev/email-js@0.3.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -196,21 +197,16 @@ serve(async (req) => {
       // Optional forwarding
       if (m.forwarding_to) {
         try {
-          await sb.rpc("enqueue_email", {
-            queue_name: "transactional_emails",
-            payload: {
-              message_id: `<fwd-${crypto.randomUUID()}@aetheris.technology>`,
-              to: m.forwarding_to,
-              from: `<${addr}>`,
-              sender_domain: "notify.aetheris.technology",
-              subject: `[Fwd] ${subject}`,
-              html: bodyHtml || `<pre>${bodyText.replace(/[<>&]/g, (c: string) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" } as any)[c])}</pre>`,
-              text: `Originally to ${addr} from ${fromAddress}\n\n${bodyText}`,
-              purpose: "transactional",
-              label: "rep-mail-forward",
-              headers: { "Auto-Submitted": "auto-forwarded" },
-              queued_at: new Date().toISOString(),
-            },
+          await sendLovableEmail({
+            from: `<${addr}>`,
+            sender_domain: "notify.aetheris.technology",
+            to: m.forwarding_to,
+            subject: `[Fwd] ${subject}`,
+            html: bodyHtml || `<pre>${bodyText.replace(/[<>&]/g, (c: string) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" } as any)[c])}</pre>`,
+            text: `Originally to ${addr} from ${fromAddress}\n\n${bodyText}`,
+            purpose: "transactional",
+            label: "rep-mail-forward",
+            idempotency_key: `fwd-${crypto.randomUUID()}`,
           });
         } catch (e) {
           console.warn("forwarding failed", e);
