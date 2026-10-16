@@ -1,5 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,

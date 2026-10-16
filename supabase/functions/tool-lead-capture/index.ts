@@ -1,6 +1,7 @@
 // Public endpoint: capture an email when someone opens a rep-shared tool link.
 // Upserts into public.tool_leads (one row per email+tool), pings admin notification.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

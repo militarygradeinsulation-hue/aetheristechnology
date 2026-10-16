@@ -4,6 +4,7 @@
 // - action "redeem": accept staff PIN, active rep code, or a code stored in access_codes.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
