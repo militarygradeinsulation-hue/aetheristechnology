@@ -670,9 +670,7 @@ async function stageNotify(ctx: Ctx) {
   const email = (ctx.sub.customer_email as string | null) || (ctx.profile?.email as string | null) || null;
   if (!email) return;
   try {
-    await callFunction("send-transactional-email", {
-      templateName: "monthly-delivery",
-      recipientEmail: email,
+    await sendTemplateEmail("monthly-delivery", email, {
       idempotencyKey: `intel-${ctx.wf.id}`,
       templateData: {
         title: "Your Golden Report refreshed",
