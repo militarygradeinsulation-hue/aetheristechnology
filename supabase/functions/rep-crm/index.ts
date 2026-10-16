@@ -196,7 +196,6 @@ async function sendQuote(rep: any, payload: { quote_id: string }) {
         total_display: money(q.total_cents, q.currency),
         notes: q.notes || null,
         view_url: viewUrl,
-      },
     },
   });
 
