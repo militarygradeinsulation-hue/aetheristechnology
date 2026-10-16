@@ -14,6 +14,9 @@ const html = read("index.html");
 const sitemap = read("public/sitemap.xml");
 const robots = read("public/robots.txt");
 const local = read("src/pages/IndianapolisLeadPage.tsx");
+const goldenCarousel = read("src/components/lander/SampleGoldenReports.tsx");
+const goldenGrowth = read("src/components/GoldenGrowthAssets.tsx");
+const leadBackfill = read("supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql");
 
 const selfScanPath = "/leak-audit/self-scan";
 assert.match(app, /<Route path="\/leak-audit\/self-scan" element={<LeakAuditPage \/>} \/>/);
@@ -31,6 +34,9 @@ assert.match(selfScan, /path="\/leak-audit\/self-scan"/);
 assert.match(selfScan, /functions\.invoke\('company-leak-audit'/);
 assert.match(selfScan, /<AuditCustomQuote/);
 assert.match(selfScan, /personalized\.recommendations/);
+assert.match(selfScan, /generateFreeLeakCheckPdf/);
+assert.match(selfScan, /modelCompanyAuditExposure/);
+assert.match(selfScan, /Modeled annual exposure/i);
 assert.doesNotMatch(selfScan, /generateLeakAuditPdf|pricingLadder\(/);
 assert.match(golden, /Operator-led · 14-ch case file/);
 assert.doesNotMatch(golden, /Free · 14-ch case file|description="Free tool/);
@@ -108,8 +114,21 @@ const auditBackend = read("supabase/functions/company-leak-audit/index.ts");
 const costCap = read("supabase/migrations/20261014233500_private_golden_daily_cap_hardening.sql");
 assert.match(auditBackend, /if \(runtime\?\.waitUntil\) runtime\.waitUntil\(dispatch\)/);
 assert.match(auditBackend, /claim_private_company_golden/);
+assert.match(auditBackend, /from\("assessment_leads"\)\.insert/);
+assert.match(auditBackend, /modelCompanyAuditExposure/);
+assert.match(leadBackfill, /free_leak_check/);
+assert.match(leadBackfill, /assessment_leads/);
 assert.match(costCap, /'dispatching', 'queued', 'reused', 'failed'/);
 assert.match(costCap, /pg_advisory_xact_lock/);
+
+// Golden Report growth assets must survive large report libraries and bad saved post sets.
+assert.match(goldenCarousel, /overflow-x-auto/);
+assert.match(goldenCarousel, /snap-center/);
+assert.match(goldenCarousel, /scrollToIndex/);
+assert.doesNotMatch(goldenCarousel, /scaleReduction|rotationMultiplier|useTransform|useMotionValue/);
+assert.match(goldenGrowth, /postsPassGate/);
+assert.match(goldenGrowth, /storedPosts\.length !== 12/);
+assert.match(goldenGrowth, /storedDays\.length !== 30/);
 
 // Structured data must not promise fees, results or services at old prices.
 const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
