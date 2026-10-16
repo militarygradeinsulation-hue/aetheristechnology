@@ -105,12 +105,12 @@ Deno.serve(async (req) => {
         engine_version: AUDIT_ENGINE_VERSION, scan_status: "pending",
       };
       const { data: created, error: createError } = await sb.from("aetheris_company_audit_cases")
-        .insert(baseline).select("id, company_name, domain, recommendations, offer_snapshot, scan_status").single();
+        .insert(baseline).select("id, company_name, domain, revenue_band, baseline_answers, recommendations, offer_snapshot, scan_status").single();
       if (createError && createError.code !== "23505") throw createError;
       if (created) companyCase = created;
       else {
         const { data: winner, error: winnerError } = await sb.from("aetheris_company_audit_cases")
-          .select("id, company_name, domain, recommendations, offer_snapshot, scan_status")
+          .select("id, company_name, domain, revenue_band, baseline_answers, recommendations, offer_snapshot, scan_status")
           .eq("domain", companyUrl.domain).single();
         if (winnerError) throw winnerError;
         companyCase = winner;
