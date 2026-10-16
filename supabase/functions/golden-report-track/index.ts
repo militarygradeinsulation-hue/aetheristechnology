@@ -10,6 +10,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { verifyAdminToken } from '../_shared/admin-token.ts'
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts'
 import {
   formatDetroit,
   NOTIFY_SELECT,
@@ -99,13 +100,15 @@ async function maybeNotify(ev: any) {
       const scan = await claimNewReportNotification(sb as any, ev.scan_id)
       if (!scan) return
 
-      await sb.functions.invoke('send-transactional-email', {
-        body: buildNewReportEmail(scan, {
-          to,
-          reportUrl,
-          adminUrl,
-          location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
-        }),
+      const newReportEmail = buildNewReportEmail(scan, {
+        to,
+        reportUrl,
+        adminUrl,
+        location: [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown',
+      })
+      await sendTemplateEmail(newReportEmail.templateName, newReportEmail.recipientEmail, {
+        idempotencyKey: newReportEmail.idempotencyKey,
+        templateData: newReportEmail.templateData,
       })
       return
     }
@@ -141,21 +144,18 @@ async function maybeNotify(ev: any) {
 
     const location = [ev.city, ev.region, ev.country].filter(Boolean).join(', ') || 'unknown'
 
-    await sb.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'golden-report-opened',
-        recipientEmail: to,
-        idempotencyKey: `golden-open-${ev.scan_id}-${ev.event_type}-${Math.floor(Date.now() / 3600000)}`,
-        templateData: {
-          company: ev.company_name || 'Someone',
-          eventLabel,
-          location,
-          recipient: ev.recipient_email || 'anonymous',
-          openCount: total ?? 1,
-          when: formatDetroit(ev.created_at),
-          adminUrl,
-          reportUrl,
-        },
+    await sendTemplateEmail('golden-report-opened', to, {
+      idempotencyKey: `golden-open-${ev.scan_id}-${ev.event_type}-${Math.floor(Date.now() / 3600000)}`,
+      templateData: {
+        company: ev.company_name || 'Someone',
+        eventLabel,
+        location,
+        recipient: ev.recipient_email || 'anonymous',
+        openCount: total ?? 1,
+        when: formatDetroit(ev.created_at),
+        adminUrl,
+        reportUrl,
+      },
       },
     })
   } catch (e) {
