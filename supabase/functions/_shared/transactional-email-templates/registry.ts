@@ -36,5 +36,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'universe-access-code': universeAccessCode,
   'rep-quote': repQuote,
   'golden-report-opened': goldenReportOpened,
+  'tool-shop-license': toolShopLicense,
 }
 
