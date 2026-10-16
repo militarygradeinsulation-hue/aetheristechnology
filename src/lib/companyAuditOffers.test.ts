@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { REP_PRODUCTS } from "./repProducts";
 import {
-  AUDIT_OPTIONS, evaluateCompanyAudit, normalizePublicCompanyUrl,
+  AUDIT_OPTIONS, evaluateCompanyAudit, modelCompanyAuditExposure, normalizePublicCompanyUrl,
   quoteAuditSelection, validateAuditAnswers,
 } from "../../supabase/functions/_shared/company-audit-offers";
 
@@ -31,6 +31,20 @@ describe("private company audit", () => {
     expect(evaluateCompanyAudit(baseline)).toEqual(evaluateCompanyAudit(baseline));
     expect(evaluateCompanyAudit(answers)).toEqual([]);
   });
+  it("returns a bounded deterministic health score and modeled exposure", () => {
+    const weak = Object.fromEntries(Array.from({ length: 14 }, (_, i) => ["q" + (i + 1), 0]));
+    const strong = Object.fromEntries(Array.from({ length: 14 }, (_, i) => ["q" + (i + 1), 4]));
+    const weakModel = modelCompanyAuditExposure(weak, "1m_3m");
+    const strongModel = modelCompanyAuditExposure(strong, "1m_3m");
+    expect(weakModel.healthScore).toBe(0);
+    expect(weakModel.annualLow).toBeGreaterThan(0);
+    expect(weakModel.annualHigh).toBeGreaterThan(weakModel.annualLow);
+    expect(strongModel.healthScore).toBe(100);
+    expect(strongModel.annualLow).toBe(0);
+    expect(strongModel.annualHigh).toBe(0);
+    expect(modelCompanyAuditExposure(weak, "1m_3m")).toEqual(weakModel);
+    expect(() => modelCompanyAuditExposure(weak, "bogus")).toThrow();
+  });
   it("matches the existing admin commissions catalog exactly, with no invented prices", () => {
     for (const option of AUDIT_OPTIONS) {
       const rep = REP_PRODUCTS.find(p => p.name === option.name);
@@ -54,6 +68,8 @@ describe("private company audit", () => {
     expect(sql).toContain("REVOKE ALL ON public.aetheris_company_audit_cases FROM PUBLIC, anon, authenticated");
     expect(server).toContain("companyCase.recommendations");
     expect(server).toContain("companyCase.offer_snapshot");
+    expect(server).toContain('from("assessment_leads").insert');
+    expect(server).toContain("modelCompanyAuditExposure");
     expect(server).toContain('private_intake: true');
     expect(server).not.toContain("report: companyCase");
     expect(scanner).toContain('if (data.private_intake === true && !adminOk)');
