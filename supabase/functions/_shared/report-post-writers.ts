@@ -110,46 +110,103 @@ export function writeAllPosts(name: string, site: string, evidence: PostEvidence
 
 // Distinct reserve posts when an AI candidate fails uniqueness or voice checks.
 export function writeReservePosts(name: string, site: string, evidence: PostEvidence[], positioning = ""): WrittenPost[] {
+  const themes: Array<{ hook: string; body: string; cta: string; visual: string; takeaway: string }> = [
+    {
+      hook: "Define the finish line before the work begins.",
+      body: "A useful first step is to write down what a successful outcome would look like in plain terms. Not a slogan. Not a list of features. Name the change you expect to see and the evidence that would make you believe it happened. We use that definition to keep the work focused.",
+      cta: "Ask us how we would define success.",
+      visual: "A simple outcome statement beside a measurable checkpoint.",
+      takeaway: "Agree on the outcome before discussing tactics.",
+    },
+    {
+      hook: "Compare decisions, not presentations.",
+      body: "If you are weighing several options, build a short comparison around the things that affect the decision: scope, responsibility, timing, evidence, and what happens when something changes. A polished presentation can hide weak ownership. A clear comparison makes tradeoffs visible before they become expensive.",
+      cta: "Bring us the options you are comparing.",
+      visual: "A clean comparison grid with five decision criteria.",
+      takeaway: "Make tradeoffs visible before choosing.",
+    },
+    {
+      hook: "Timing changes the right answer.",
+      body: "A project that must move this month is a different problem from one that can be tested over a quarter. Tell us what deadline is real, what can move, and what cannot. That changes sequencing, staffing, and how much certainty is required before the first action.",
+      cta: "Tell us the deadline that actually matters.",
+      visual: "A restrained timeline showing fixed and flexible milestones.",
+      takeaway: "Design the approach around the real clock.",
+    },
+    {
+      hook: "Constraints belong on the table early.",
+      body: "Budget, access, staffing, compliance, legacy systems, and internal politics all shape what is practical. Hiding those constraints does not make them disappear. We would rather know them at the beginning so the recommendation fits the business that exists instead of an imaginary version of it.",
+      cta: "Start with the constraint everyone already knows about.",
+      visual: "A field-note style list of real operating constraints.",
+      takeaway: "Build around reality instead of ideal conditions.",
+    },
+    {
+      hook: "Scope is a decision tool.",
+      body: "Good work starts with boundaries. Ask what is included, what is not, who owns each decision, and what would trigger a change in scope. Those answers are not administrative details. They are what keep a useful project from turning into a moving target with no accountable finish.",
+      cta: "Ask us to define the boundary first.",
+      visual: "A scope card divided into included, excluded, and owner.",
+      takeaway: "Use boundaries to protect the result.",
+    },
+    {
+      hook: "Access determines how certain an answer can be.",
+      body: "Some questions can be answered from the outside. Others require records, systems, customer history, or the people doing the work every day. We will tell you which is which. The level of access should match the level of certainty you expect from the answer.",
+      cta: "Ask what evidence would be required.",
+      visual: "Layered evidence sources from public to internal.",
+      takeaway: "Match certainty to the evidence available.",
+    },
+    {
+      hook: "Look at what happens after approval.",
+      body: "Two proposals can sound similar until the work starts. Compare who owns implementation, how decisions are documented, what your team must provide, and how progress is checked. The operating model after the yes often matters more than the language used to win the yes.",
+      cta: "Ask us what happens after you approve the work.",
+      visual: "A handoff map from approval through implementation.",
+      takeaway: "Judge the operating model, not only the proposal.",
+    },
+    {
+      hook: "Name the uncertainty instead of hiding it.",
+      body: "Every meaningful business decision contains something that is not known yet. Separate facts from assumptions and assumptions from guesses. Once the uncertainty is visible, you can decide whether to test it, accept it, or gather more evidence before committing resources.",
+      cta: "Bring us the part you are least certain about.",
+      visual: "Three labeled columns for fact, assumption, and unknown.",
+      takeaway: "Turn uncertainty into an explicit decision.",
+    },
+    {
+      hook: "Proof should answer a specific question.",
+      body: "A logo wall is not proof of the thing you are trying to decide. A useful example shows the starting condition, what changed, and what was measured afterward. When you review evidence, ask exactly which claim it supports and which claims still depend on judgment.",
+      cta: "Ask us which evidence supports which claim.",
+      visual: "A case note connecting claim, evidence, and measured change.",
+      takeaway: "Tie every proof point to a claim.",
+    },
+    {
+      hook: "Ownership is part of the solution.",
+      body: "A recommendation without an owner is only an idea. Before implementation begins, decide who can approve changes, who performs the work, who supplies information, and who checks the result. Clear ownership prevents good decisions from disappearing between departments.",
+      cta: "Ask us to map ownership before implementation.",
+      visual: "A four-role ownership map with one accountable decision maker.",
+      takeaway: "Give every correction an accountable owner.",
+    },
+    {
+      hook: "A handoff should leave nothing to interpret.",
+      body: "When work moves from one person or system to another, the next owner should know what happened, what is expected, and when action is due. If any of those are missing, the handoff depends on memory. We prefer explicit transitions that can be checked.",
+      cta: "Show us the handoff that causes the most friction.",
+      visual: "A before-and-after handoff diagram with clear ownership.",
+      takeaway: "Make transitions explicit and checkable.",
+    },
+    {
+      hook: "The next step does not need to be the biggest step.",
+      body: "Sometimes the right move is a narrow investigation, one correction, or a short working session before anything larger is considered. A smaller scope is useful when it answers the decision in front of you. We would rather solve the right-sized problem than manufacture a larger one.",
+      cta: "Ask us for the narrowest useful next step.",
+      visual: "A progression from one question to one verified action.",
+      takeaway: "Match the scope to the decision.",
+    },
+  ];
+
   return POST_ROLES.map((role, i) => {
-    const x = { name, site, positioning, index: i, ev: evidence[i % Math.max(1, evidence.length)] };
-    const b = brandLine(x);
-    const themes = [
-      ["A question worth asking first.", `Before you choose a direction, tell us what you are hoping to accomplish. ${b} We can start there and talk through what is actually relevant to your situation.`],
-      ["Clarity beats a long introduction.", `You should not have to decode a pitch to find out whether there is a fit. ${b} Ask us what matters most to you, and we will keep the answer grounded.`],
-      ["The right next step starts with listening.", `Every situation carries its own priorities. Share yours with us before anyone suggests a solution. ${b} A practical conversation begins with those details.`],
-      ["There is room for a better question.", `If the usual question does not get at what you need, ask another. ${b} Tell us what you are still trying to understand and we can start with that.`],
-      ["You deserve an answer you can use.", `A clear answer should help you decide what to do next, even if that means taking more time. ${b} Bring us the question behind your decision.`],
-      ["Consider what matters to you.", `Timing, priorities, and context make a difference. Before moving forward, tell us which of those is driving your decision. ${b} We can talk it through.`],
-      ["A conversation can start small.", `You do not need a complete plan to get in touch. One specific concern or question is enough to begin. ${b} Let us know what is on your mind.`],
-      ["Make space for the practical details.", `The right questions are often the everyday ones: what happens next, what do you need from me, and what is still unknown? ${b} Ask us directly.`],
-      ["Not sure where to begin?", `Start with what has been hardest to clarify so far. ${b} We can work from the actual question rather than a guessed answer.`],
-      ["The decision is yours.", `We want you to understand your options before you choose. ${b} Tell us what would help you make an informed decision.`],
-      ["Look past the polished promise.", `Ask what a conversation would cover and which details still need to be confirmed. ${b} We welcome that kind of direct question.`],
-      ["Talk to us about the real situation.", `A useful discussion does not need buzzwords. ${b} Tell us what is happening and what you need to know next.`],
-    ] as const;
-    const [hook, body] = themes[i];
-    const followups = [
-      "If there is a particular detail you would like us to clarify, tell us what it is. A direct question makes the next conversation more useful for both of us.",
-      "Tell us what you have already explored and what you still need to understand. We can take the conversation from there without jumping to conclusions.",
-      "Share the context behind your question when you reach out. It helps us respond to your actual situation instead of sending a generic answer.",
-      "You can tell us which part feels uncertain. We will focus the conversation on that point and explain what we know and what still needs checking.",
-      "If you have a particular deadline, let us know at the outset. That context helps keep the discussion focused on what is practical for you.",
-      "Tell us which tradeoffs matter most before anyone suggests a direction. A better answer takes your priorities into account.",
-      "You can begin with a single concern and add the details as we talk. There is no need to prepare a polished presentation first.",
-      "We can discuss what is known and which questions still need answers. That distinction matters when you are deciding what to do next.",
-      "Explain where the uncertainty started. We will listen to the specifics before assuming that a familiar solution is the right one.",
-      "Let us know what a useful outcome would look like from your perspective. It gives the conversation a real point of reference.",
-      "Bring the questions that did not fit into the usual form. They may be the most important part of the decision you are making.",
-      "We can start from your circumstances rather than a standard sales script. Tell us which detail you want to unpack first.",
-    ];
-    const ctas = [
-      "Tell us what you hope to accomplish.", "Ask us what a good first step looks like.",
-      "Share the details behind your question.", "Send us the part you want explained.",
-      "Ask us for a practical answer.", "Tell us what is driving your decision.",
-      "Reach out with your starting point.", "Ask us about the next step.",
-      "Tell us what has been unclear.", "Share what you need to decide.",
-      "Ask us what still needs confirming.", "Start a conversation with us.",
-    ];
-    return { role, hook: c(hook), body: c(`${body} ${followups[i % followups.length]}`), cta: c(ctas[i]), visual: "Use the scanned company's visual identity.", takeaway: "Invite a useful conversation." };
+    const theme = themes[i];
+    const identity = i === 0 ? brandLine({ name, site, positioning, index: 0, ev: evidence[0] }) : "";
+    return {
+      role,
+      hook: c(theme.hook),
+      body: c(identity ? `${identity} ${theme.body}` : theme.body),
+      cta: c(theme.cta),
+      visual: c(theme.visual),
+      takeaway: c(theme.takeaway),
+    };
   });
 }
