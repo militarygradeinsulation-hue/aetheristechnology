@@ -3,6 +3,7 @@
 // or rep_codes.created_at (grace window for brand-new hires).
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,22 +82,13 @@ Deno.serve(async (req) => {
     // Notify admin (always, even on zero, so the cron is visible).
     let emailed = false;
     try {
-      const resp = await fetch(`${url}/functions/v1/send-transactional-email`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${svc}`,
-          "apikey": svc,
-        },
-        body: JSON.stringify({
-          templateName: "rep-inactivity-alert",
-          templateData: { reps: inactive, threshold_days: THRESHOLD_DAYS, revoked: revoked > 0 },
-          idempotencyKey: `rep-inactivity-${new Date().toISOString().slice(0, 10)}`,
-          purpose: "transactional",
-        }),
+      // Template defines the fixed admin recipient.
+      const result = await sendTemplateEmail("rep-inactivity-alert", "", {
+        templateData: { reps: inactive, threshold_days: THRESHOLD_DAYS, revoked: revoked > 0 },
+        idempotencyKey: `rep-inactivity-${new Date().toISOString().slice(0, 10)}`,
       });
-      emailed = resp.ok;
-      if (!resp.ok) console.error("email send failed:", await resp.text());
+      emailed = result.sent;
+      if (!result.sent) console.error("email send failed:", result.reason);
     } catch (e) {
       console.error("email send threw:", e);
     }

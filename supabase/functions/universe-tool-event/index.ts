@@ -3,6 +3,7 @@
 // per (tool_id, event_type) per 30 minutes via admin_kv.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -56,13 +57,7 @@ Deno.serve(async (req) => {
     // Rate-limited notification
     try {
       if (await shouldNotify(toolId, evt)) {
-        await sb.functions.invoke('send-transactional-email', {
-          body: {
-            templateName: 'raw-html',
-            recipientEmail: NOTIFY_EMAIL,
-            idempotencyKey: `universe-tool-${toolId}-${evt}-${Math.floor(Date.now() / (NOTIFY_BUCKET_MIN * 60_000))}`,
-            subject: `[Universe] ${toolName || toolId} · ${evt.replace('universe_tool_', '')}`,
-            html: `<p>Someone just interacted with an Aetheris Universe tool.</p>
+        const htmlBody = `<p>Someone just interacted with an Aetheris Universe tool.</p>
 <ul>
   <li><strong>Tool:</strong> ${toolName || toolId}</li>
   <li><strong>Event:</strong> ${evt}</li>
@@ -72,10 +67,21 @@ Deno.serve(async (req) => {
   <li><strong>When:</strong> ${new Date().toISOString()}</li>
 </ul>
 <p>Live analytics: <a href="https://aetheris.technology/admin">Admin → Universe Analytics</a></p>
-<p><em>Rate-limited: one alert per tool+event per ${NOTIFY_BUCKET_MIN} min.</em></p>`,
-            templateData: {},
+<p><em>Rate-limited: one alert per tool+event per ${NOTIFY_BUCKET_MIN} min.</em></p>`
+        await sendLovableEmail(
+          {
+            to: NOTIFY_EMAIL,
+            from: 'Aetheris.Technology Website <noreply@aetheris.technology>',
+            sender_domain: 'notify.aetheris.technology',
+            subject: `[Universe] ${toolName || toolId} · ${evt.replace('universe_tool_', '')}`,
+            html: htmlBody,
+            text: htmlBody.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+            purpose: 'transactional',
+            label: 'universe-tool-event',
+            idempotency_key: `universe-tool-${toolId}-${evt}-${Math.floor(Date.now() / (NOTIFY_BUCKET_MIN * 60_000))}`,
           },
-        })
+          { apiKey: Deno.env.get('LOVABLE_API_KEY')!, sendUrl: Deno.env.get('LOVABLE_SEND_URL') },
+        )
       }
     } catch (e) { console.error('notify failed', e) }
 

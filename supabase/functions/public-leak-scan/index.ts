@@ -3,6 +3,7 @@
 // out a notification email so operators can follow up.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -287,15 +288,9 @@ serve(async (req) => {
     const idKey = leadId || crypto.randomUUID();
     await Promise.allSettled(
       notifyTargets.map((to) =>
-        fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SVC}`, apikey: SVC },
-          body: JSON.stringify({
-            templateName: "lead-intake-notification",
-            recipientEmail: to,
-            idempotencyKey: `public-leak-${idKey}-${to}`,
-            templateData,
-          }),
+        sendTemplateEmail("lead-intake-notification", to, {
+          idempotencyKey: `public-leak-${idKey}-${to}`,
+          templateData,
         }).catch((err) => console.error("notify failed", to, err)),
       ),
     );

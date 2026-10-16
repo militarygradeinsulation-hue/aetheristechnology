@@ -1,6 +1,7 @@
 // Public endpoint: capture an email when someone opens a rep-shared tool link.
 // Upserts into public.tool_leads (one row per email+tool), pings admin notification.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,19 +79,15 @@ Deno.serve(async (req) => {
   // Fire-and-forget admin notification for NEW leads only.
   if (isNew) {
     try {
-      await supabase.functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'contact-notification',
-          recipientEmail: email,
-          idempotencyKey: `tool-lead-${tool_slug}-${email}`,
-          templateData: {
-            name: name || 'Tool Lead',
-            email,
-            phone: phone || '—',
-            company: company || '—',
-            message: `Opened the "${tool_title || tool_slug}" tool via rep code ${rep_code || '(none)'}.`,
-            service_interest: `tool:${tool_slug}`,
-          },
+      await sendTemplateEmail('contact-notification', email, {
+        idempotencyKey: `tool-lead-${tool_slug}-${email}`,
+        templateData: {
+          name: name || 'Tool Lead',
+          email,
+          phone: phone || '—',
+          company: company || '—',
+          message: `Opened the "${tool_title || tool_slug}" tool via rep code ${rep_code || '(none)'}.`,
+          service_interest: `tool:${tool_slug}`,
         },
       });
     } catch (e) {

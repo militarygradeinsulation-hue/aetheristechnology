@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -255,21 +256,17 @@ Respond with a JSON object containing:
       .eq("id", sub.user_id)
       .single();
 
-    // Send email notification via existing email infrastructure
+    // Send email notification via managed email
     if (profileData?.email) {
       try {
-        await supabase.rpc("enqueue_email", {
-          queue_name: "transactional_email_queue",
-          payload: {
-            template_name: "monthly-delivery",
-            recipient_email: profileData.email,
-            data: {
-              name: profileData.full_name || "Subscriber",
-              delivery_title: deliveryOutput.title,
-              delivery_summary: deliveryOutput.summary,
-              delivery_type: deliveryConfig.type,
-              portal_url: "https://aetheris.technology/my-subscription",
-            },
+        await sendTemplateEmail("monthly-delivery", profileData.email, {
+          idempotencyKey: `monthly-delivery-${delivery.id}`,
+          templateData: {
+            name: profileData.full_name || "Subscriber",
+            delivery_title: deliveryOutput.title,
+            delivery_summary: deliveryOutput.summary,
+            delivery_type: deliveryConfig.type,
+            portal_url: "https://aetheris.technology/my-subscription",
           },
         });
       } catch (emailErr) {

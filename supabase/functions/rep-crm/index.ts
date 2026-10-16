@@ -1,5 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -184,12 +185,9 @@ async function sendQuote(rep: any, payload: { quote_id: string }) {
 
   const viewUrl = `${PUBLIC_ORIGIN}/q/${q.access_token}`;
 
-  await supabase.functions.invoke('send-transactional-email', {
-    body: {
-      templateName: 'rep-quote',
-      recipientEmail: q.customer_email,
-      idempotencyKey: `quote-send-${q.id}`,
-      templateData: {
+  await sendTemplateEmail('rep-quote', q.customer_email, {
+    idempotencyKey: `quote-send-${q.id}`,
+    templateData: {
         customer_name: q.customer_name || 'there',
         rep_name: q.rep_name || 'the Aetheris team',
         quote_number: q.quote_number,
@@ -199,7 +197,6 @@ async function sendQuote(rep: any, payload: { quote_id: string }) {
         total_display: money(q.total_cents, q.currency),
         notes: q.notes || null,
         view_url: viewUrl,
-      },
     },
   });
 
