@@ -142,10 +142,8 @@ export const WhatsWrongDiagnostic: React.FC = () => {
     if (!emailInput.trim() || !recommendation) return;
     setEmailSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-transactional-email', {
+      const { error } = await supabase.functions.invoke('notify-contact-submission', {
         body: {
-          templateName: 'contact-notification',
-          recipientEmail: emailInput.trim(),
           idempotencyKey: `whats-wrong-${Date.now()}`,
           templateData: {
             name: 'Aetheris Recommendation',

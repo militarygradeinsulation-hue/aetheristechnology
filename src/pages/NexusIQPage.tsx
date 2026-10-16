@@ -67,10 +67,8 @@ const NexusIQPage: React.FC = () => {
       if (error) throw error;
 
       // Push admin notification — every Nexus IQ unlock becomes a tracked lead.
-      supabase.functions.invoke("send-transactional-email", {
+      supabase.functions.invoke("notify-contact-submission", {
         body: {
-          templateName: "contact-notification",
-          recipientEmail: cleanEmail,
           idempotencyKey: `nexus-iq-${submissionId}`,
           templateData: {
             name: cleanName,
