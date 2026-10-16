@@ -113,10 +113,13 @@ export async function sendTemplateEmail(
     )
   } catch (error) {
     if (error instanceof EmailAPIError && error.code === 'recipient_suppressed') {
+      await logSend(templateName, recipient, 'suppressed')
       return { sent: false, reason: 'recipient_suppressed' }
     }
+    await logSend(templateName, recipient, 'failed', error instanceof Error ? error.message : String(error))
     throw error
   }
 
+  await logSend(templateName, recipient, 'sent')
   return { sent: true }
 }
