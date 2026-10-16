@@ -39,14 +39,15 @@ export function PricingTimeline() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">// Aetheris investment levels</p>
+      <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">// Engagement depth</p>
       <h2 className="mt-3 font-forensic text-3xl font-bold sm:text-4xl">
-        Follow the price line. <span className="text-amber">Choose your depth.</span>
+        Start with the problem. <span className="text-amber">Choose the depth after it is clear.</span>
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-        Move the amber dot left or right, use the up and down arrows, or tap a greyed-out
-        level. The package price, relevant individual services and their separate totals
-        update immediately. Moving backward removes the higher-level choices.
+        You do not need to diagnose yourself or pick a tool. This line shows how far Aetheris
+        can go, from a directional first look to a full investigation and ongoing correction.
+        Move the amber dot to compare outcome, first deliverable, timeframe, client involvement,
+        and price. Detailed service scope stays underneath.
       </p>
       <div className="mt-5 inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-amber/30 bg-amber/[0.06] px-4 py-2 text-xs text-foreground/90">
         <span className="font-semibold text-amber">First meeting complimentary.</span>
@@ -142,7 +143,7 @@ export function PricingTimeline() {
         </div>
         <div className="mt-5 border-t border-border/50 pt-4" aria-label="Services linked to current price level">
           <p className="font-case text-[10px] uppercase tracking-widest text-amber">
-            Relevant individual services at this level
+            Detailed scope examples at this level
           </p>
           {visibleServices.length ? (
             <div className="mt-3 flex flex-wrap gap-2" aria-live="polite">
@@ -159,7 +160,7 @@ export function PricingTimeline() {
             <p className="mt-3 text-sm text-muted-foreground">Free self-check; individual paid services appear at the next price level.</p>
           )}
           <a href="#individual-pricing" className="mt-4 inline-flex text-sm font-semibold text-amber underline underline-offset-4">
-            Adjust the individual service choices below
+            Compare detailed service scope below
           </a>
         </div>
       </div>
@@ -178,6 +179,20 @@ export function PricingTimeline() {
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             <strong className="text-foreground">Best for:</strong> {selected.useCase}
           </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-border/60 bg-background/40 p-4">
+              <p className="font-case text-[9px] uppercase tracking-widest text-amber">First deliverable</p>
+              <p className="mt-2 text-xs leading-relaxed text-foreground/85">{selected.firstDeliverable}</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-background/40 p-4">
+              <p className="font-case text-[9px] uppercase tracking-widest text-amber">Timeframe</p>
+              <p className="mt-2 text-xs leading-relaxed text-foreground/85">{selected.timeline}</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-background/40 p-4">
+              <p className="font-case text-[9px] uppercase tracking-widest text-amber">Your involvement</p>
+              <p className="mt-2 text-xs leading-relaxed text-foreground/85">{selected.clientInvolvement}</p>
+            </div>
+          </div>
           {selected.qualificationOnly && <p className="mt-4 text-xs text-amber">Available to completed Diagnostic clients only.</p>}
           <Link to={selected.id === "free" ? "/leak-audit/self-scan" : selected.id === "intelligence" ? selected.ctaHref : BOOK_MEETING_URL}
             className="mt-7 inline-flex min-h-12 w-fit items-center gap-2 rounded-full bg-amber px-6 py-3 text-xs font-bold uppercase tracking-widest text-background hover:bg-amber/90">
