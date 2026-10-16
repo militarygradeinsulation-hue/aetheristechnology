@@ -13,6 +13,10 @@ on:
       - "src/components/SEOHead.tsx"
       - "src/components/PricingTimeline.tsx"
       - "src/components/AuditCustomQuote.tsx"
+      - "src/components/GoldenGrowthAssets.tsx"
+      - "src/components/lander/SampleGoldenReports.tsx"
+      - "src/lib/generateFreeLeakCheckPdf.ts"
+      - "src/lib/contentQuality.test.ts"
       - "src/lib/companyAuditOffers.test.ts"
       - "src/lib/pricingTimelineServices.ts"
       - "src/lib/pricingTimelineServices.test.ts"
@@ -22,8 +26,13 @@ on:
       - "src/components/LeakMindMap.tsx"
       - "supabase/functions/company-leak-audit/**"
       - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/_shared/report-post-writers.ts"
+      - "supabase/functions/_shared/report-deliverables.ts"
+      - "supabase/functions/_shared/content-uniqueness.ts"
+      - "supabase/functions/report-deliverables/**"
       - "supabase/functions/forensic-scan-all/**"
       - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
+      - "supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql"
       - "src/lib/aetherisTiers.ts"
       - "src/App.tsx"
       - "index.html"
@@ -38,6 +47,10 @@ on:
       - "src/components/SEOHead.tsx"
       - "src/components/PricingTimeline.tsx"
       - "src/components/AuditCustomQuote.tsx"
+      - "src/components/GoldenGrowthAssets.tsx"
+      - "src/components/lander/SampleGoldenReports.tsx"
+      - "src/lib/generateFreeLeakCheckPdf.ts"
+      - "src/lib/contentQuality.test.ts"
       - "src/lib/companyAuditOffers.test.ts"
       - "src/lib/pricingTimelineServices.ts"
       - "src/lib/pricingTimelineServices.test.ts"
@@ -47,8 +60,13 @@ on:
       - "src/components/LeakMindMap.tsx"
       - "supabase/functions/company-leak-audit/**"
       - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/_shared/report-post-writers.ts"
+      - "supabase/functions/_shared/report-deliverables.ts"
+      - "supabase/functions/_shared/content-uniqueness.ts"
+      - "supabase/functions/report-deliverables/**"
       - "supabase/functions/forensic-scan-all/**"
       - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
+      - "supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql"
       - "src/lib/aetherisTiers.ts"
       - "src/components/lander/LanderNavbar.tsx"
       - "src/App.tsx"
@@ -75,6 +93,6 @@ jobs:
       - name: Install exact locked dependencies
         run: bun install --frozen-lockfile
       - name: Test deterministic company audit, price catalog and privacy
-        run: bunx vitest run src/lib/companyAuditOffers.test.ts src/lib/pricingTimelineServices.test.ts src/lib/homeRouteChaos.test.ts
+        run: bunx vitest run src/lib/companyAuditOffers.test.ts src/lib/pricingTimelineServices.test.ts src/lib/homeRouteChaos.test.ts src/lib/contentQuality.test.ts
       - name: Verify website production build
         run: bun run build
