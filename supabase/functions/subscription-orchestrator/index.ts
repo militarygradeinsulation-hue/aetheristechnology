@@ -18,6 +18,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 import {
   GOLDEN_REPORT_INTELLIGENCE,
   MONTHLY_WORKFLOW_VERSION,
