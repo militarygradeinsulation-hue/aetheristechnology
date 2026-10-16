@@ -58,14 +58,12 @@ export const ContactForm: React.FC = () => {
       supabase.functions.invoke('notify-contact-submission', {
         body: {
           idempotencyKey: `contact-notify-${submissionId}`,
-          templateData: {
-            name: trimmed.name,
-            email: trimmed.email,
-            phone: trimmed.phone,
-            company: trimmed.company,
-            message: trimmed.message,
-            service_interest: trimmed.service_interest,
-          },
+          name: trimmed.name,
+          email: trimmed.email,
+          phone: trimmed.phone,
+          company: trimmed.company,
+          message: trimmed.message,
+          service_interest: trimmed.service_interest,
         },
       });
       

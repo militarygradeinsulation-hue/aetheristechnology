@@ -70,14 +70,12 @@ const NexusIQPage: React.FC = () => {
       supabase.functions.invoke("notify-contact-submission", {
         body: {
           idempotencyKey: `nexus-iq-${submissionId}`,
-          templateData: {
-            name: cleanName,
-            email: cleanEmail,
-            phone: cleanPhone,
-            company: cleanCompany || null,
-            message: "Unlocked the Nexus IQ 5M Business Strategist from the free tools.",
-            service_interest: "nexus-iq-strategist",
-          },
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          company: cleanCompany || null,
+          message: "Unlocked the Nexus IQ 5M Business Strategist from the free tools.",
+          service_interest: "nexus-iq-strategist",
         },
       });
 

@@ -117,14 +117,12 @@ export const HomeFreeTools: React.FC<{ embedded?: boolean }> = ({ embedded = fal
       supabase.functions.invoke("notify-contact-submission", {
         body: {
           idempotencyKey: `free-tools-unlock-${submissionId}`,
-          templateData: {
-            name: "Free Tools Unlock",
-            email: cleanEmail,
-            phone: cleanPhone,
-            company: null,
-            message: "Unlocked the free tools suite from the home page.",
-            service_interest: "free-tools-unlock",
-          },
+          name: "Free Tools Unlock",
+          email: cleanEmail,
+          phone: cleanPhone,
+          company: null,
+          message: "Unlocked the free tools suite from the home page.",
+          service_interest: "free-tools-unlock",
         },
       });
 

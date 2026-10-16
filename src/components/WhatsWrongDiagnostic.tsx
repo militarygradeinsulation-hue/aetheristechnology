@@ -145,12 +145,10 @@ export const WhatsWrongDiagnostic: React.FC = () => {
       const { error } = await supabase.functions.invoke('notify-contact-submission', {
         body: {
           idempotencyKey: `whats-wrong-${Date.now()}`,
-          templateData: {
-            name: 'Aetheris Recommendation',
-            email: emailInput.trim(),
-            message: buildPlainText(recommendation, selectedIssues),
-            service_interest: recommendation.recommendedPackage.name,
-          },
+          name: 'Aetheris Recommendation',
+          email: emailInput.trim(),
+          message: buildPlainText(recommendation, selectedIssues),
+          service_interest: recommendation.recommendedPackage.name,
         },
       });
       if (error) throw error;
