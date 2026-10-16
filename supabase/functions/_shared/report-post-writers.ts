@@ -23,8 +23,13 @@ const c = (s: string) => stripDashes(String(s || "").replace(/\s+/g, " ").trim()
 // Use only observed public positioning, never the report's criticisms or a
 // guessed product, customer result, testimonial, team member, or guarantee.
 function brandLine(x: WriterContext): string {
+  // A long observed positioning sentence is useful once, but repeating the
+  // exact sentence across all twelve posts makes the uniqueness gate reject
+  // posts 2 through 12 as copied prose. Anchor identity in the first post only.
+  if (x.index !== 0) return "";
   const description = c(x.positioning || "").split(/(?<=[.!?])\s+/)[0].slice(0, 220).trim();
-  return description || `We are ${x.name}.`;
+  if (description) return description;
+  return x.name && x.name !== "this company" ? `We are ${x.name}.` : "";
 }
 function invite(x: WriterContext): string {
   return x.site ? `Learn more about us at ${x.site}.` : `Send us a message to start a conversation.`;
