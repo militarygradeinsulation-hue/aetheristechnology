@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { EmailAPIError, sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0'
 import { TEMPLATES } from './registry.ts'
 
 // Server-only: reads LOVABLE_API_KEY. Import from edge functions only — never
@@ -18,6 +19,34 @@ const FROM_DOMAIN = "aetheris.technology"
 export type SendTemplateEmailResult =
   | { sent: true }
   | { sent: false; reason: 'recipient_suppressed' }
+
+// Audit trail: append to email_send_log so the admin email log keeps working.
+// Never decides the send result — a logging failure is only console-logged.
+async function logSend(
+  templateName: string,
+  recipient: string,
+  status: 'sent' | 'suppressed' | 'failed',
+  errorMessage?: string
+): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !serviceKey) return
+    const supabase = createClient(supabaseUrl, serviceKey)
+    const { error } = await supabase.from('email_send_log').insert({
+      message_id: null,
+      template_name: templateName,
+      recipient_email: recipient,
+      status,
+      error_message: errorMessage ? errorMessage.slice(0, 1000) : null,
+    })
+    if (error) {
+      console.error('email_send_log insert failed', { code: error.code, message: error.message })
+    }
+  } catch (e) {
+    console.error('email_send_log insert threw', { error: e instanceof Error ? e.message : String(e) })
+  }
+}
 
 export interface SendTemplateEmailOptions {
   templateData?: Record<string, any>
