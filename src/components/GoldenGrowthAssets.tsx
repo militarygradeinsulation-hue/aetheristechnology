@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Copy, Check, Palette, Image as ImageIcon, MessageSquareQuote, CalendarDays } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { buildFallbackDeliverables, isCompanyVoicePost } from "@/lib/reportDeliverables";
+import { buildFallbackDeliverables, isCompanyVoicePost, postsPassGate } from "@/lib/reportDeliverables";
 
 export type GoldenDeliverables = {
   brand?: {
@@ -156,18 +156,28 @@ export function GoldenGrowthAssets({
 
   const brand = d!.brand;
   const imagery = d!.imagery;
-  // Older saved scans may have investigator-voice posts. Replace only their
-  // displayed post set; leave the canonical saved report and numbers untouched.
+  // Older saved scans may have investigator-voice, duplicate, or truncated
+  // post sets. Rebuild the displayed growth assets deterministically when the
+  // stored set cannot satisfy the 12-post / 30-day contract. Report findings
+  // and financial fields remain untouched.
   const storedPosts = d!.posts || [];
-  const posts = storedPosts.some((p) => !isCompanyVoicePost({ hook: p.hook || "", body: p.body || "", cta: p.cta || "" })) && report
+  const storedDays = d!.schedule?.days || [];
+  const brokenStoredPosts =
+    storedPosts.length !== 12 ||
+    !postsPassGate(storedPosts) ||
+    storedPosts.some((p) => !isCompanyVoicePost({ hook: p.hook || "", body: p.body || "", cta: p.cta || "" }));
+  const displayFallback = report && (brokenStoredPosts || storedDays.length !== 30)
     ? buildFallbackDeliverables({
         company,
         url: targetUrl || company,
         report,
         brand: d?.brand as Record<string, unknown> | null,
-      }).posts
-    : storedPosts;
-  const days = d!.schedule?.days || [];
+      })
+    : null;
+  const posts = brokenStoredPosts && displayFallback ? displayFallback.posts : storedPosts;
+  const days = (brokenStoredPosts || storedDays.length !== 30) && displayFallback
+    ? displayFallback.schedule.days
+    : storedDays;
   const concepts: ImageryConcept[] = imagery?.concepts?.length
     ? imagery.concepts
     : (imagery?.prompts || []).map((p, i) => ({ id: `img-${i + 1}`, title: p.title, prompt: p.prompt }));
