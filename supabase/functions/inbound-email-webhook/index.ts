@@ -225,21 +225,16 @@ serve(async (req) => {
           .gte("created_at", since);
         if ((recentReplies || 0) === 0) {
           try {
-            await sb.rpc("enqueue_email", {
-              queue_name: "transactional_emails",
-              payload: {
-                message_id: `<auto-${crypto.randomUUID()}@aetheris.technology>`,
-                to: fromAddress,
-                from: `<${addr}>`,
-                sender_domain: "notify.aetheris.technology",
-                subject: `Re: ${subject}`,
-                html: m.auto_reply_body.replace(/\n/g, "<br/>"),
-                text: m.auto_reply_body,
-                purpose: "transactional",
-                label: "rep-mail-autoreply",
-                headers: { "Auto-Submitted": "auto-replied" },
-                queued_at: new Date().toISOString(),
-              },
+            await sendLovableEmail({
+              from: `<${addr}>`,
+              sender_domain: "notify.aetheris.technology",
+              to: fromAddress,
+              subject: `Re: ${subject}`,
+              html: m.auto_reply_body.replace(/\n/g, "<br/>"),
+              text: m.auto_reply_body,
+              purpose: "transactional",
+              label: "rep-mail-autoreply",
+              idempotency_key: `auto-${crypto.randomUUID()}`,
             });
           } catch (e) {
             console.warn("auto-reply enqueue failed", e);
