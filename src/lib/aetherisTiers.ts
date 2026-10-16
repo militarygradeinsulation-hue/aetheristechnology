@@ -26,6 +26,10 @@ export type AetherisTier = {
   priceLabel: string;
   /** Delivery expectation, e.g. "about a week". */
   timeline: string;
+  /** The first concrete thing the buyer receives. */
+  firstDeliverable: string;
+  /** What we need from the client to do the work well. */
+  clientInvolvement: string;
   /** Short positioning line. Says what changed versus the rung below. */
   headline: string;
   /** Who this is for. */
@@ -60,6 +64,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "free",
     priceLabel: "Free",
     timeline: "about 6 minutes · no call",
+    firstDeliverable: "A directional score and downloadable case-file assessment.",
+    clientInvolvement: "About 6 minutes of your input. No meeting or system access required.",
     headline:
       "A free 14-question self-check highlights possible gaps in lead capture, follow-up, operations, and trust.",
     useCase: "You want a directional first look before speaking with an operator.",
@@ -82,6 +88,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "monthly",
     priceLabel: "Monthly, agreed together",
     timeline: "live in minutes · no minimum term",
+    firstDeliverable: "A living Golden Report workspace for one company.",
+    clientInvolvement: "Your company URL, a primary contact, and up to five users. No internal-system integration required.",
     headline:
       "Your Golden Report stops being a document and becomes a living company operating workspace, rescanned and rewritten every month.",
     useCase:
@@ -116,6 +124,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about a week",
+    firstDeliverable: "A written findings memo naming the highest-priority problems and the evidence behind them.",
+    clientInvolvement: "Business context, public-site access, and one operator walkthrough.",
     headline:
       "Three instruments run together to name what is actually wrong. Any one alone gives you a symptom. Together they give you a diagnosis.",
     useCase: "You know something is wrong but cannot name it, and you are tired of guessing.",
@@ -140,6 +150,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about two weeks",
+    firstDeliverable: "The first installed revenue-response assets built directly from the findings.",
+    clientInvolvement: "Two 45-minute working sessions, examples of current sales/follow-up language, and approvals.",
     headline:
       "Signal Pack tells you what is broken. Revenue Pack gives your team the words to fix it, built from your leaks and not from a template.",
     useCase: "You have a team but no system. Every sales call is improvised and every post is a guess.",
@@ -163,6 +175,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about 3 weeks",
+    firstDeliverable: "A working operating environment that connects the diagnostic instruments and correction workflow.",
+    clientInvolvement: "A kickoff, access to agreed systems, and one internal owner for implementation decisions.",
     headline:
       "You stop receiving reports and start running the instruments yourself. This is where you own the loop.",
     useCase: "You are paying five vendors for four tools that do not talk to each other.",
@@ -189,6 +203,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "21 days · fit call required",
+    firstDeliverable: "An initial findings brief, followed by the calibrated Golden Report and quantified leak ledger.",
+    clientInvolvement: "CRM, pipeline, and relevant internal-data access plus stakeholder time for the investigation.",
     headline:
       "Everything above analyzes your public surface. This is the only tier where an operator works inside your business, with your CRM, pipeline, and internal data connected. Estimated loss becomes measured loss.",
     useCase: "You need a board-ready number before you scale, hire, or raise.",
@@ -216,6 +232,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "monthly",
     priceLabel: "Continuing partnership",
     timeline: "3-month minimum · requires a completed Diagnostic",
+    firstDeliverable: "The first execution sprint plan tied to the Diagnostic baseline.",
+    clientInvolvement: "A named internal owner, access required for the agreed work, and timely approvals on implementation.",
     headline:
       "We stop advising and start running it. Every month we show you what got recovered and what is left.",
     useCase:
