@@ -3,7 +3,7 @@
 // Full forensic jobs are triggered once per domain, limited at the database.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import {
-  AUDIT_ENGINE_VERSION, AUDIT_OPTIONS, evaluateCompanyAudit,
+  AUDIT_ENGINE_VERSION, AUDIT_OPTIONS, evaluateCompanyAudit, modelCompanyAuditExposure,
   normalizePublicCompanyUrl, validateAuditAnswers,
 } from "../_shared/company-audit-offers.ts";
 
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
     // Later questionnaires for the same normalized host get precisely the same
     // findings and frozen prices, even if their input answers differ.
     const { data: existing, error: readError } = await sb.from("aetheris_company_audit_cases")
-      .select("id, company_name, domain, recommendations, offer_snapshot, scan_status")
+      .select("id, company_name, domain, revenue_band, baseline_answers, recommendations, offer_snapshot, scan_status")
       .eq("domain", companyUrl.domain).maybeSingle();
     if (readError) throw readError;
     let companyCase = existing;
@@ -123,6 +123,25 @@ Deno.serve(async (req) => {
     });
     if (submissionError) throw submissionError;
 
+    // Keep the established admin lead surfaces and admin assistant in sync.
+    // assessment_leads is the historical inbox used for public assessments.
+    const visitorModel = modelCompanyAuditExposure(body.answers, revenueBand);
+    const { error: legacyLeadError } = await sb.from("assessment_leads").insert({
+      email,
+      name: name || null,
+      company: companyName || companyCase.company_name || null,
+      score: visitorModel.healthScore,
+      answers: {
+        source: "free_leak_check",
+        domain: companyUrl.domain,
+        case_id: companyCase.id,
+        revenue_band: revenueBand,
+        exposure: visitorModel,
+        responses: body.answers,
+      },
+    });
+    if (legacyLeadError) console.error("assessment lead mirror failed", legacyLeadError.message);
+
     // The public request has no privileged scan ID and never accesses report
     // JSON. The existing Golden scanner stores a full case file in the private
     // forensic_scans table and automatically archives it in Golden Library.
@@ -135,12 +154,18 @@ Deno.serve(async (req) => {
       if (runtime?.waitUntil) runtime.waitUntil(dispatch);
       else await dispatch;
     }
+    const canonicalExposure = modelCompanyAuditExposure(
+      companyCase.baseline_answers as Record<string, number>,
+      companyCase.revenue_band,
+    );
     return json({
       company: companyCase.company_name, domain: companyUrl.domain,
       repeated: !!existing, engineVersion: AUDIT_ENGINE_VERSION,
       recommendations: companyCase.recommendations,
       options: companyCase.offer_snapshot,
-      message: "Directional suggestions from the company's original self-reported baseline. Full forensic work is internal only; exact prices require scope confirmation.",
+      score: canonicalExposure.healthScore,
+      exposure: canonicalExposure,
+      message: "Directional suggestions and modeled exposure from the company's original self-reported baseline. This is not verified lost revenue.",
     });
   } catch (e) {
     console.error("company audit error", e instanceof Error ? e.message : e);
