@@ -1,11 +1,11 @@
 // ============================================================================
 // AETHERIS PUBLIC ENGAGEMENT MODEL — single source of truth for public copy
 // ----------------------------------------------------------------------------
-// The public website does not publish prices. It publishes the relationship:
-// we meet, we investigate, we prove the cause, we fix the highest-value problem
-// first, and only then do we talk about what a continuing partnership is worth.
-// Anything price-shaped belongs in a conversation, a proposal, or the internal
-// tooling — never on a public marketing surface.
+// The public website makes the buying path and pricing logic clear without
+// forcing a visitor to diagnose themselves. We meet, investigate, prove the
+// cause, correct the highest-value problem first, and expand only when the
+// evidence justifies it. The first meeting is complimentary; standalone
+// consulting after that is $100/hour unless included in a written scope.
 // ============================================================================
 
 /** The central customer-facing promise. */
