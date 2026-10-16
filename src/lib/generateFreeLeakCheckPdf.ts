@@ -41,8 +41,8 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   doc.setFontSize(24);
   doc.text("Directional Business Findings", margin, y);
   y += 10;
-  line(\`\${data.company || data.domain}  ·  \${data.domain}\`, 11, "bold", 5.5);
-  line(\`Revenue band: \${data.revenueBandLabel}  ·  Prepared for: \${data.email}\`, 8, "normal", 4.4);
+  line(`${data.company || data.domain}  ·  ${data.domain}`, 11, "bold", 5.5);
+  line(`Revenue band: ${data.revenueBandLabel}  ·  Prepared for: ${data.email}`, 8, "normal", 4.4);
   y += 4;
 
   doc.setDrawColor(221, 147, 36);
@@ -52,11 +52,11 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   doc.setFontSize(9);
   doc.text("SELF-REPORTED BUSINESS HEALTH", margin + 6, y + 8);
   doc.setFontSize(22);
-  doc.text(\`\${data.exposure.healthScore}/100\`, margin + 6, y + 21);
+  doc.text(`${data.exposure.healthScore}/100`, margin + 6, y + 21);
   doc.setFontSize(9);
   doc.text("MODELED ANNUAL EXPOSURE", margin + 72, y + 8);
   doc.setFontSize(18);
-  doc.text(\`\${money(data.exposure.annualLow)} – \${money(data.exposure.annualHigh)}\`, margin + 72, y + 21);
+  doc.text(`${money(data.exposure.annualLow)} – ${money(data.exposure.annualHigh)}`, margin + 72, y + 21);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   const basis = doc.splitTextToSize(data.exposure.basis, width - 12);
@@ -84,12 +84,12 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(199, 133, 34);
-      doc.text(\`PRIORITY \${String(index + 1).padStart(2, "0")}  /  SELF-REPORTED SIGNAL\`, margin, y);
+      doc.text(`PRIORITY ${String(index + 1).padStart(2, "0")}  /  SELF-REPORTED SIGNAL`, margin, y);
       y += 6;
       doc.setTextColor(17, 19, 23);
       line(finding.problem, 11, "bold", 5.5);
-      line(\`Why it surfaced: \${finding.reason}\`, 8.5, "normal", 4.5);
-      line(\`Correction to consider: \${finding.fix}\`, 8.5, "normal", 4.5);
+      line(`Why it surfaced: ${finding.reason}`, 8.5, "normal", 4.5);
+      line(`Correction to consider: ${finding.fix}`, 8.5, "normal", 4.5);
       y += 5;
     });
   }
@@ -108,5 +108,5 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   line("aetheris.technology  ·  (317) 376-2110", 8, "bold", 4.5);
 
   const safe = (data.company || data.domain || "company").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
-  doc.save(\`Aetheris-Free-Leak-Check-\${safe}.pdf\`);
+  doc.save(`Aetheris-Free-Leak-Check-${safe}.pdf`);
 }
