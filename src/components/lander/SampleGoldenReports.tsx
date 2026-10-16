@@ -1,15 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  animate,
-  type PanInfo,
-  type MotionValue,
-} from "framer-motion";
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink, ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import kanPierson from "@/assets/sample-reports/aetheris-forensic-kan-pierson-f1539967.pdf.asset.json";
 import bioPure from "@/assets/sample-reports/aetheris-forensic-bio-pure-d2e38126.pdf.asset.json";
@@ -56,158 +48,96 @@ const REPORTS: Report[] = [
   { name: "Lawrence Management Group", sector: "Property management", url: scanUrl("a2446bd8-44e3-4cc2-af25-9d031ea5b043") },
 ];
 
-interface CarouselConfig {
-  distanceDivisor: number;
-  velocityDivisor: number;
-  sensitivity: number;
-  xMultiplier: number;
-  yMultiplier: number;
-  rotationMultiplier: number;
-  scaleReduction: number;
-}
-
-const getCarouselConfig = (width: number): CarouselConfig => {
-  if (width < 640) {
-    return {
-      distanceDivisor: 120,
-      velocityDivisor: 500,
-      sensitivity: 180,
-      xMultiplier: 70,
-      yMultiplier: 16,
-      rotationMultiplier: 6,
-      scaleReduction: 0.07,
-    };
-  }
-  if (width < 1024) {
-    return {
-      distanceDivisor: 160,
-      velocityDivisor: 650,
-      sensitivity: 220,
-      xMultiplier: 110,
-      yMultiplier: 24,
-      rotationMultiplier: 8,
-      scaleReduction: 0.09,
-    };
-  }
-  return {
-    distanceDivisor: 200,
-    velocityDivisor: 800,
-    sensitivity: 250,
-    xMultiplier: 140,
-    yMultiplier: 30,
-    rotationMultiplier: 9,
-    scaleReduction: 0.11,
-  };
-};
-
 export default function SampleGoldenReports() {
-  const scrollProgress = useMotionValue(0);
-  const startProgress = React.useRef(0);
-  const [windowWidth, setWindowWidth] = React.useState(0);
+  const shelfRef = React.useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const frameRef = React.useRef<number | null>(null);
 
-  const total = REPORTS.length;
-
-  React.useEffect(() => {
-    setWindowWidth(window.innerWidth);
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+  const scrollToIndex = React.useCallback((index: number) => {
+    const shelf = shelfRef.current;
+    if (!shelf) return;
+    const safeIndex = Math.max(0, Math.min(REPORTS.length - 1, index));
+    const child = shelf.children.item(safeIndex) as HTMLElement | null;
+    if (!child) return;
+    const left = child.offsetLeft - (shelf.clientWidth - child.clientWidth) / 2;
+    shelf.scrollTo({ left, behavior: "smooth" });
+    setActiveIndex(safeIndex);
   }, []);
 
-  const config = React.useMemo(() => getCarouselConfig(windowWidth), [windowWidth]);
+  const updateActiveFromScroll = React.useCallback(() => {
+    const shelf = shelfRef.current;
+    if (!shelf) return;
+    const center = shelf.scrollLeft + shelf.clientWidth / 2;
+    let closest = 0;
+    let distance = Number.POSITIVE_INFINITY;
+    Array.from(shelf.children).forEach((node, index) => {
+      const item = node as HTMLElement;
+      const itemCenter = item.offsetLeft + item.clientWidth / 2;
+      const nextDistance = Math.abs(itemCenter - center);
+      if (nextDistance < distance) {
+        distance = nextDistance;
+        closest = index;
+      }
+    });
+    setActiveIndex(closest);
+  }, []);
 
-  const goTo = (target: number) => {
-    animate(scrollProgress, target, { type: "spring", stiffness: 200, damping: 30, mass: 1 });
+  const handleScroll = () => {
+    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    frameRef.current = requestAnimationFrame(updateActiveFromScroll);
   };
 
-  const handleDragStart = () => {
-    startProgress.current = scrollProgress.get();
-  };
-
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const distanceShift = -info.offset.x / config.distanceDivisor;
-    const velocityShift = -info.velocity.x / config.velocityDivisor;
-    let totalShift = Math.round(distanceShift + velocityShift);
-    totalShift = Math.max(-3, Math.min(3, totalShift));
-    goTo(Math.round(startProgress.current) + totalShift);
-  };
+  React.useEffect(() => () => {
+    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+  }, []);
 
   return (
     <div className="mt-10">
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <p className="font-case text-[10px] uppercase tracking-widest text-amber">Real Golden Reports</p>
-        <p className="font-case text-[10px] uppercase tracking-widest text-muted-foreground">Drag to browse</p>
-      </div>
-
-      <div className="relative h-[260px] sm:h-[300px] w-full select-none overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragStart={handleDragStart}
-            onDrag={(_, info) => {
-              const delta = -info.delta.x / config.sensitivity;
-              scrollProgress.set(scrollProgress.get() + delta);
-            }}
-            onDragEnd={handleDragEnd}
-            className="absolute inset-0 z-50 cursor-grab active:cursor-grabbing"
-          />
-          {REPORTS.map((report, i) => (
-            <BookCard
-              key={report.url}
-              report={report}
-              index={i}
-              total={total}
-              progress={scrollProgress}
-              config={config}
-            />
-          ))}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="font-case text-[10px] uppercase tracking-widest text-amber">Real Golden Reports</p>
+          <p className="mt-1 text-xs text-muted-foreground">Swipe, drag, or use the arrows to browse the case files.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="min-w-16 text-center font-case text-[10px] uppercase tracking-widest text-muted-foreground">
+            {String(activeIndex + 1).padStart(2, "0")} / {String(REPORTS.length).padStart(2, "0")}
+          </span>
+          <button
+            type="button"
+            aria-label="Previous Golden Report"
+            onClick={() => scrollToIndex(activeIndex - 1)}
+            disabled={activeIndex === 0}
+            className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition hover:border-amber/50 hover:text-amber disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next Golden Report"
+            onClick={() => scrollToIndex(activeIndex + 1)}
+            disabled={activeIndex === REPORTS.length - 1}
+            className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition hover:border-amber/50 hover:text-amber disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-center gap-2">
-        {REPORTS.map((r, i) => (
-          <button
-            key={r.url}
-            type="button"
-            aria-label={`Show ${r.name}`}
-            onClick={() => goTo(i)}
-            className="h-1.5 w-6 rounded-full bg-border transition-colors hover:bg-amber/60"
-          />
+      <div
+        ref={shelfRef}
+        onScroll={handleScroll}
+        className="flex w-full snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain px-[calc(50%-95px)] pb-5 pt-2 sm:px-[calc(50%-110px)] [scrollbar-width:thin]"
+        aria-label="Golden Report examples"
+      >
+        {REPORTS.map((report, index) => (
+          <BookCard key={report.url} report={report} index={index} />
         ))}
       </div>
     </div>
   );
 }
 
-interface BookCardProps {
-  report: Report;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-  config: CarouselConfig;
-}
-
-const BookCard = ({ report, index, total, progress, config }: BookCardProps) => {
-  const offset = useTransform(progress, (p) => {
-    let diff = (index - p) % total;
-    if (diff > total / 2) diff -= total;
-    if (diff < -total / 2) diff += total;
-    return diff;
-  });
-
-  const x = useTransform(offset, (o) => o * config.xMultiplier);
-  const rotate = useTransform(offset, (o) => (Math.abs(o) < 0.05 ? 0 : o * config.rotationMultiplier));
-  const y = useTransform(offset, (o) => (Math.abs(o) < 0.05 ? 0 : Math.abs(o) * config.yMultiplier));
-  const scale = useTransform(offset, (o) => 1 - Math.abs(o) * config.scaleReduction);
-  const opacity = useTransform(
-    offset,
-    [-total / 2, -total / 2 + 0.5, 0, total / 2 - 0.5, total / 2],
-    [0, 1, 1, 1, 0],
-  );
-  const zIndex = useTransform(offset, (o) => Math.round(100 - Math.abs(o) * 10));
-
+const BookCard = ({ report, index }: { report: Report; index: number }) => {
   const initials = report.name
     .split(" ")
     .filter(Boolean)
@@ -217,27 +147,23 @@ const BookCard = ({ report, index, total, progress, config }: BookCardProps) => 
     .toUpperCase();
 
   return (
-    <motion.article
-      style={{ x, y, rotate, scale, opacity, zIndex, perspective: 1200 }}
-      className="absolute h-[250px] w-[190px] sm:h-[290px] sm:w-[220px]"
+    <article
+      className="h-[250px] w-[190px] shrink-0 snap-center sm:h-[290px] sm:w-[220px]"
+      aria-label={`Golden Report example ${index + 1}: ${report.name}`}
     >
       <div
         className={cn(
-          "relative h-full w-full rounded-l-[3px] rounded-r-lg overflow-hidden",
+          "relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg",
           "border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)]",
           "shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)]",
         )}
-        style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
       >
-        {/* Page block on the right edge */}
         <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
-        {/* Spine */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/70 via-amber/25 to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 left-6 w-px bg-amber/25" />
-        {/* Cover sheen */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/[0.06] to-transparent" />
 
-        <div className="relative flex h-full flex-col justify-between pl-9 pr-4 py-5">
+        <div className="relative flex h-full flex-col justify-between py-5 pl-9 pr-4">
           <div>
             <div className="flex items-center justify-between">
               <p className="font-case text-[9px] uppercase tracking-[0.2em] text-amber">Golden Report</p>
@@ -246,7 +172,7 @@ const BookCard = ({ report, index, total, progress, config }: BookCardProps) => 
               </span>
             </div>
             <div className="mt-3 h-px w-10 bg-amber/50" />
-            <h3 className="mt-3 font-display text-base sm:text-lg font-bold leading-snug line-clamp-4">
+            <h3 className="mt-3 line-clamp-4 font-display text-base font-bold leading-snug sm:text-lg">
               {report.name}
             </h3>
           </div>
@@ -259,14 +185,13 @@ const BookCard = ({ report, index, total, progress, config }: BookCardProps) => 
               href={report.url}
               target="_blank"
               rel="noopener noreferrer"
-              onPointerDownCapture={(e) => e.stopPropagation()}
-              className="relative z-[60] mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
+              className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
             >
               <FileText className="h-3 w-3" /> {report.pdf ? "Open PDF" : "Open report"} <ExternalLink className="h-2.5 w-2.5" />
             </a>
           </div>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 };
