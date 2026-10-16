@@ -124,32 +124,32 @@ const LeakLanderPage: React.FC = () => {
         </p>
       </AnomalousMatterHero>
 
-      {/* What We Do: immediate positioning after the hero */}
+      {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
-            <SectionLabel>// What we do</SectionLabel>
+            <SectionLabel>// The decision</SectionLabel>
             <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-              We pinpoint the failure. <span className="text-amber">Then we fix it.</span>
+              Can we find what is costing the company money, <span className="text-amber">show the evidence, and help correct it?</span>
             </h2>
           </div>
           <div className="space-y-5">
             <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">
-              Aetheris is a strategic consulting firm. We identify where your company is
-              breaking down, from communication gaps and disconnected systems to failed
-              handoffs, operational waste, and overlooked revenue leaks.
+              That is the entire buying decision. Aetheris examines the business across people,
+              processes, systems, handoffs, and decisions to determine where value is being lost
+              and what deserves attention first.
             </p>
             <p className="text-base leading-relaxed text-muted-foreground">
-              We don't stop at telling you what's wrong. We fix the root causes to recover
-              lost value, increase ROI, and remove the friction slowing your growth.
-              Our goal is to help you scale in half the time, without adding complexity.
+              You are not asked to choose a tool or diagnose the company yourself. The investigation
+              determines the cause, the appropriate correction, who should own it, and how the result
+              should be measured.
             </p>
-            <Link
-              to="/services"
+            <a
+              href="#chaos-theory"
               className="inline-flex items-center gap-2 border-b border-amber/50 pb-1 font-case text-xs font-bold uppercase tracking-widest text-amber transition-colors hover:border-amber"
             >
-              Explore how we work <ArrowRight className="h-4 w-4" />
-            </Link>
+              See the investigation method <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
@@ -479,6 +479,9 @@ const LeakLanderPage: React.FC = () => {
           </p>
           <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
             Modeled exposure is not the same as measured recovery. No recovered-revenue outcome is guaranteed.
+          </p>
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">
+            Our assurance is procedural: if a finding cannot be supported by evidence, it does not belong in the deliverable. If the scope changes, the commercial terms are agreed before the additional work is billed.
           </p>
         </div>
       </section>
