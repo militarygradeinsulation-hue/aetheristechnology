@@ -574,6 +574,10 @@ export function qualifyPosts(
   const tryAdd = (p: DeliverablePost) => {
     if (kept.length >= POST_COUNT) return false;
     if (!isCompanyVoicePost(p)) return false;
+    // Preserve editorial variety while backfilling. If a primary post for one
+    // role is rejected, wait for the reserve post for that missing role instead
+    // of filling the slot with a second copy of another archetype.
+    if (p.role && kept.some((existing) => existing.role === p.role)) return false;
     const res = validatePostSet([...kept, p], kept.length + 1);
     if (res.qualifiedIndexes.length === kept.length + 1) {
       kept.push(p);
