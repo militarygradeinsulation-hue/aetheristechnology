@@ -21,7 +21,7 @@ assert.match(homepage, /to="\/leak-audit\/self-scan"/);
 assert.doesNotMatch(homepage, /const STEPS|STEPS\.map|id="how-it-works"|Three steps\./);
 assert.doesNotMatch(homepage, /const FINDINGS|FINDINGS\.map|id="what-we-find"|The leaks that never show up/);
 assert.doesNotMatch(homepage, /\{HERO_SUPPORT\}/);
-assert.match(homepage, /href="#how-we-work"/);
+assert.match(homepage, /href="#sample-reports"/);
 assert.match(homepage, /id="how-we-work"/);
 assert.match(homepage, /id="case-studies"/);
 assert.match(homepage, /id="prices"/);
@@ -59,8 +59,16 @@ const tiers = read("src/lib/aetherisTiers.ts");
 assert.match(homepage, /import \{ PricingTimeline \} from "@\/components\/PricingTimeline"/);
 assert.match(homepage, /<PricingTimeline \/>/);
 assert.doesNotMatch(homepage, /<PackageTiers \/>/);
-assert.ok(homepage.indexOf('<PricingTimeline />') < homepage.indexOf('The Aetheris Methodology'),
-  "Pricing must appear near the top of the homepage");
+assert.ok(homepage.indexOf('The Aetheris Methodology') < homepage.indexOf('<PricingTimeline />'),
+  "Pricing must come after the mechanism and proof sections");
+assert.ok(homepage.indexOf('id="sample-reports"') < homepage.indexOf('<PricingTimeline />'),
+  "Sample Golden Reports must appear before pricing");
+assert.ok(homepage.indexOf('id="first-win"') < homepage.indexOf('<PricingTimeline />'),
+  "First-win and client-effort framing must appear before pricing");
+assert.ok(homepage.indexOf('id="engagement-options"') < homepage.indexOf('<PricingTimeline />'),
+  "Simplified buying journey must appear before the detailed pricing timeline");
+assert.match(homepage, /First meeting is complimentary|first meeting is complimentary/i);
+assert.match(homepage, /$100(?: per hour|/hour)/i);
 assert.match(pricing, /AETHERIS_TIERS\.map/);
 assert.match(pricing, /type="range"/);
 assert.match(pricing, /onChange=\{\(e\) => setLevel/);
