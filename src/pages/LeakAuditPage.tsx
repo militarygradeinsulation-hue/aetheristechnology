@@ -8,16 +8,17 @@ import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AuditCustomQuote } from '@/components/AuditCustomQuote';
 import {
-  AUDIT_OPTIONS, evaluateCompanyAudit, normalizePublicCompanyUrl,
-  type AuditOption, type AuditRecommendation,
+  AUDIT_OPTIONS, evaluateCompanyAudit, modelCompanyAuditExposure, normalizePublicCompanyUrl,
+  type AuditExposureEstimate, type AuditOption, type AuditRecommendation,
 } from '../../supabase/functions/_shared/company-audit-offers';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
+import { generateFreeLeakCheckPdf } from '@/lib/generateFreeLeakCheckPdf';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -77,6 +78,7 @@ type PersonalizedAudit = {
   repeated: boolean;
   recommendations: AuditRecommendation[];
   options: AuditOption[];
+  exposure: AuditExposureEstimate;
   // A local preview is never described as a saved company baseline or queued scan.
   localOnly?: boolean;
 };
@@ -130,12 +132,16 @@ const LeakAuditPage = () => {
       if (error || !Array.isArray(data?.recommendations) || !Array.isArray(data?.options)) {
         throw new Error((data as { error?: string } | null)?.error || error?.message || 'Unable to save assessment.');
       }
+      const serverExposure = data?.exposure && typeof data.exposure.healthScore === 'number'
+        ? data.exposure as AuditExposureEstimate
+        : modelCompanyAuditExposure(answers, revenueBand);
       setPersonalized({
         company: data.company,
         domain: data.domain,
         repeated: data.repeated === true,
         recommendations: data.recommendations,
         options: data.options,
+        exposure: serverExposure,
         localOnly: false,
       });
       setStep('result');
@@ -153,6 +159,7 @@ const LeakAuditPage = () => {
           repeated: false,
           recommendations: evaluateCompanyAudit(answers),
           options: AUDIT_OPTIONS,
+          exposure: modelCompanyAuditExposure(answers, revenueBand),
           localOnly: true,
         });
         setStep('result');
@@ -166,11 +173,24 @@ const LeakAuditPage = () => {
     }
   };
 
+  const downloadResults = () => {
+    if (!personalized) return;
+    const revenueBandLabel = REVENUE_BANDS.find((band) => band.value === revenueBand)?.label || revenueBand;
+    generateFreeLeakCheckPdf({
+      company: personalized.company,
+      domain: personalized.domain,
+      email,
+      revenueBandLabel,
+      exposure: personalized.exposure,
+      recommendations: personalized.recommendations,
+    });
+  };
+
   return (
     <div className="relative min-h-screen">
       <SEOHead
         title="The Leak Audit™ — Free Business Forensics Self-Scan | Aetheris"
-        description="Enter your company's website and complete a free 14-question assessment. See consistent recommended fixes and choose individual Aetheris services with transparent estimated prices."
+        description="Complete a free 14-question business assessment. Receive a directional 0–100 score, modeled annual exposure range, prioritized findings, and a downloadable PDF."
         path="/leak-audit/self-scan"
         keywords="business leak audit, revenue leak assessment, business forensics audit, sales leak finder, operational diagnostic, AI consulting Indianapolis"
         breadcrumbs={[
@@ -361,7 +381,8 @@ const LeakAuditPage = () => {
                   </h2>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     This is based on your self-reported answers, not a verified ROI claim.
-                    Any completed Golden Report is kept privately by Aetheris and is not emailed or downloaded.
+                    Your Free Leak Check includes a downloadable findings PDF and a modeled annual exposure range.
+                    Any separate Golden Report created internally by Aetheris remains private.
                   </p>
                 </div>
                 <div className="glass space-y-4 rounded-lg border border-amber/35 p-6">
@@ -384,7 +405,7 @@ const LeakAuditPage = () => {
                   </div>
                   <Button size="lg" onClick={handleSubmitGate} disabled={submitting}
                     className="w-full bg-amber text-background">
-                    {submitting ? "Saving your company baseline..." : "See My Fixes and Pricing"}
+                    {submitting ? "Saving your company baseline..." : "See My Findings + PDF"}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <p className="text-xs leading-relaxed text-muted-foreground">
@@ -429,6 +450,29 @@ const LeakAuditPage = () => {
                         ? "This company has already been assessed. The original baseline has been reused instead of changing your recommendations with each submission."
                         : "These are directional gaps suggested by the company's answers. They are not proof of a verified website issue or actual lost revenue."}
                   </p>
+                </div>
+                <div className="glass rounded-xl border border-amber/35 p-6">
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div>
+                      <p className="font-case text-[10px] uppercase tracking-widest text-amber">Self-reported business health</p>
+                      <p className="mt-2 font-forensic text-4xl font-bold">{personalized.exposure.healthScore}<span className="text-lg text-muted-foreground">/100</span></p>
+                    </div>
+                    <div>
+                      <p className="font-case text-[10px] uppercase tracking-widest text-amber">Modeled annual exposure</p>
+                      <p className="mt-2 font-forensic text-2xl font-bold">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(personalized.exposure.annualLow)}
+                        {' – '}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(personalized.exposure.annualHigh)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{personalized.exposure.basis}</p>
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
+                    <Button type="button" variant="outline" onClick={downloadResults} className="border-amber/40 text-amber hover:bg-amber/10">
+                      <Download className="mr-2 h-4 w-4" /> Download My Findings PDF
+                    </Button>
+                    <span className="text-[11px] text-muted-foreground">Directional model only. Not verified lost revenue.</span>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {personalized.recommendations.length ? personalized.recommendations.map((finding, i) => (
