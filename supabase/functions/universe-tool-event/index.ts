@@ -3,6 +3,7 @@
 // per (tool_id, event_type) per 30 minutes via admin_kv.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -56,12 +57,7 @@ Deno.serve(async (req) => {
     // Rate-limited notification
     try {
       if (await shouldNotify(toolId, evt)) {
-        await sb.functions.invoke('send-transactional-email', {
-          body: {
-            templateName: 'raw-html',
-            recipientEmail: NOTIFY_EMAIL,
-            idempotencyKey: `universe-tool-${toolId}-${evt}-${Math.floor(Date.now() / (NOTIFY_BUCKET_MIN * 60_000))}`,
-            subject: `[Universe] ${toolName || toolId} · ${evt.replace('universe_tool_', '')}`,
+        const htmlBody = `<p>Someone just interacted with an Aetheris Universe tool.</p>`
             html: `<p>Someone just interacted with an Aetheris Universe tool.</p>
 <ul>
   <li><strong>Tool:</strong> ${toolName || toolId}</li>
