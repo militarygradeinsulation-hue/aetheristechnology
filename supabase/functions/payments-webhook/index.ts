@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
 import { planById, planByLookupKey } from "../_shared/plans.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -551,7 +552,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
             memory: brandKit,
           });
 
-          triggerFunction("send-transactional-email", {
+          triggerEmail("tool-shop-license", email, `ext-lic-${lic.id}`, {
             code, plan: "extension",
             portalUrl: `${PUBLIC_SITE_URL}/brand-voice-extension`,
             tools: ["Brand Voice Chrome Extension"],
