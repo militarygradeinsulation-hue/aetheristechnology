@@ -119,7 +119,13 @@ export const CustomViewSelector: React.FC<Props> = ({
   }, [views, active]);
 
   const applyViewLocal = (v: SavedView) => {
-    onChange(v.tabs);
+    // Merge in tabs added after this view was saved (e.g. the owner-only
+    // ICP Connection Engine) so an older saved view can never hide them.
+    const merged = [...v.tabs];
+    for (const k of alwaysInclude) {
+      if (!merged.includes(k) && allTabs.some(t => t.key === k)) merged.push(k);
+    }
+    onChange(merged);
     onLayoutChange(v.layout || "tabs");
     if (v.sizes) {
       Object.entries(v.sizes).forEach(([k, s]) => onWidgetSizeChange(k, s));
