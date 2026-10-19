@@ -3,6 +3,7 @@
 // embedded expiry (issued by the admin-pin-login edge function).
 
 const TOKEN_KEY = "aetheris_admin_token";
+const OWNER_TOKEN_KEY = "aetheris_owner_token";
 
 export function getAdminToken(): string | null {
   try {
@@ -28,7 +29,31 @@ export function setAdminToken(token: string) {
 
 export function clearAdminToken() {
   localStorage.removeItem(TOKEN_KEY);
+  try { sessionStorage.removeItem(OWNER_TOKEN_KEY); } catch { /* noop */ }
 }
+
+export function setOwnerToken(token: string | null) {
+  try {
+    if (token) sessionStorage.setItem(OWNER_TOKEN_KEY, token);
+    else sessionStorage.removeItem(OWNER_TOKEN_KEY);
+  } catch { /* noop */ }
+}
+
+export function getOwnerToken(): string | null {
+  if (!getAdminToken()) return null;
+  try {
+    const token = sessionStorage.getItem(OWNER_TOKEN_KEY);
+    if (!token) return null;
+    const expiry = Number(token.slice(0, token.indexOf('.')));
+    if (!Number.isFinite(expiry) || expiry < Date.now()) {
+      sessionStorage.removeItem(OWNER_TOKEN_KEY);
+      return null;
+    }
+    return token;
+  } catch { return null; }
+}
+
+export const hasValidOwnerToken = () => Boolean(getOwnerToken());
 
 export function hasValidAdminToken(): boolean {
   return getAdminToken() !== null;
