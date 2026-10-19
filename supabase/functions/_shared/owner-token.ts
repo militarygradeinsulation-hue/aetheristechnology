@@ -15,7 +15,7 @@ export async function verifyOwnerToken(req: Request): Promise<boolean> {
   const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!pin || !secret || !token || token.length > 140) return false;
   const parts = token.split(".");
-  if (parts.length !== 2 || !/^\\d+$/.test(parts[0]) || !/^[0-9a-f]{64}$/.test(parts[1])) return false;
+  if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || !/^[0-9a-f]{64}$/.test(parts[1])) return false;
   const expiry = Number(parts[0]);
   if (!Number.isSafeInteger(expiry) || expiry <= Date.now() || expiry > Date.now() + 12 * 60 * 60 * 1000) return false;
   const expected = await signOwnerToken(pin, secret, expiry);
