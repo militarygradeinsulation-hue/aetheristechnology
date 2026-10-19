@@ -815,6 +815,7 @@ const AdminDashboard: React.FC = () => {
             onLayoutChange={setLayout}
             widgetSizes={widgetSizes}
             onWidgetSizeChange={setWidgetSize}
+            alwaysInclude={ALWAYS_INCLUDE_NEW}
           />
           <TabColorToggle />
           <TabSizeSlider />
