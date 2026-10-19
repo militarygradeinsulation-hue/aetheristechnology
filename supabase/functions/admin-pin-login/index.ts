@@ -1,6 +1,7 @@
 // PIN-only admin login. The master admin PIN path intentionally avoids all DB
 // and auth-admin calls so the login response stays near-instant on live.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { signOwnerToken } from "../_shared/owner-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,7 +46,7 @@ Deno.serve(async (req) => {
       const exp = Date.now() + TOKEN_TTL_MS;
       const pinToken = await signToken(exp, SUPABASE_SERVICE_ROLE_KEY);
       return new Response(
-        JSON.stringify({ ok: true, token: pinToken }),
+        JSON.stringify({ ok: true, token: pinToken, owner_token: await signOwnerToken(ADMIN_PIN, SUPABASE_SERVICE_ROLE_KEY, exp) }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
