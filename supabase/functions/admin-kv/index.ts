@@ -2,11 +2,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { verifyOwnerToken } from "../_shared/owner-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-admin-token",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-owner-token",
 };
 
 serve(async (req) => {
@@ -21,6 +22,10 @@ serve(async (req) => {
     const action = String(body.action || "");
     const key = String(body.key || "");
     if (!key) return new Response(JSON.stringify({ error: "key required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Do not let partner-issued admin tokens bypass the owner prospecting boundary.
+    if (key.startsWith("owner:") && !(await verifyOwnerToken(req))) {
+      return new Response(JSON.stringify({ error: "Owner session required" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     if (action === "get") {
       const { data } = await supabase.from("admin_kv").select("value, updated_at").eq("key", key).maybeSingle();
