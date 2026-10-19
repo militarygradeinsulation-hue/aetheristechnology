@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { setAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { setAdminToken, clearAdminToken, setOwnerToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
 
 
@@ -34,6 +34,7 @@ const AdminLogin: React.FC = () => {
         throw new Error(data?.error || error?.message || 'Invalid PIN');
       }
       setAdminToken(data.token);
+      setOwnerToken(typeof data.owner_token === 'string' ? data.owner_token : null);
       navigate('/admin', { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'PIN login failed.';

@@ -53,10 +53,13 @@ interface Props {
   onLayoutChange: (l: LayoutMode) => void;
   widgetSizes: Record<string, WidgetSize>;
   onWidgetSizeChange: (key: string, size: WidgetSize) => void;
+  /** Tab keys that must always be appended when a saved view is applied,
+   *  so tabs added after the view was saved are never hidden by it. */
+  alwaysInclude?: string[];
 }
 
 export const CustomViewSelector: React.FC<Props> = ({
-  allTabs, visibleTabs, onChange, layout, onLayoutChange, widgetSizes, onWidgetSizeChange,
+  allTabs, visibleTabs, onChange, layout, onLayoutChange, widgetSizes, onWidgetSizeChange, alwaysInclude = [],
 }) => {
   const { toast } = useToast();
   const [views, setViews] = useState<SavedView[]>(() => {
@@ -116,7 +119,13 @@ export const CustomViewSelector: React.FC<Props> = ({
   }, [views, active]);
 
   const applyViewLocal = (v: SavedView) => {
-    onChange(v.tabs);
+    // Merge in tabs added after this view was saved (e.g. the owner-only
+    // ICP Connection Engine) so an older saved view can never hide them.
+    const merged = [...v.tabs];
+    for (const k of alwaysInclude) {
+      if (!merged.includes(k) && allTabs.some(t => t.key === k)) merged.push(k);
+    }
+    onChange(merged);
     onLayoutChange(v.layout || "tabs");
     if (v.sizes) {
       Object.entries(v.sizes).forEach(([k, s]) => onWidgetSizeChange(k, s));
