@@ -50,10 +50,9 @@ function cleanUrl(u: unknown): string {
 }
 function noteFor(p: Pick<Prospect, "name" | "title" | "company">, profile: Profile): string {
   const first = p.name.split(" ")[0] || "there";
-  const company = p.company ? ` at ${p.company}` : "";
   const offer = profile.offer || defaults.offer;
-  // No invented compliments, pain assertions, or false claims of previous research.
-  return `Hi ${first}, I work with leaders${company ? " like those" + company : ""} on ${offer.charAt(0).toLowerCase() + offer.slice(1)} Thought it would be worth connecting.`.slice(0, 300);
+  // Never claim that a company has a problem without evidence.
+  return `Hi ${first}, I run Aetheris Technology. ${offer} I would welcome the opportunity to connect${p.company ? " and learn more about " + p.company : ""}.`.slice(0, 300);
 }
 function score(p: Partial<Prospect>, profile: Profile): { score: number; reasons: string[] } {
   const reasons: string[] = [];
