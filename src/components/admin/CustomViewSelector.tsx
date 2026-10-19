@@ -53,10 +53,13 @@ interface Props {
   onLayoutChange: (l: LayoutMode) => void;
   widgetSizes: Record<string, WidgetSize>;
   onWidgetSizeChange: (key: string, size: WidgetSize) => void;
+  /** Tab keys that must always be appended when a saved view is applied,
+   *  so tabs added after the view was saved are never hidden by it. */
+  alwaysInclude?: string[];
 }
 
 export const CustomViewSelector: React.FC<Props> = ({
-  allTabs, visibleTabs, onChange, layout, onLayoutChange, widgetSizes, onWidgetSizeChange,
+  allTabs, visibleTabs, onChange, layout, onLayoutChange, widgetSizes, onWidgetSizeChange, alwaysInclude = [],
 }) => {
   const { toast } = useToast();
   const [views, setViews] = useState<SavedView[]>(() => {
