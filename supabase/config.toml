@@ -123,6 +123,9 @@ verify_jwt = false
 [functions.admin-pin-login]
 verify_jwt = false
 
+[functions.owner-icp-prospector]
+verify_jwt = false
+
 [functions.personal-engine-token]
 verify_jwt = false
 

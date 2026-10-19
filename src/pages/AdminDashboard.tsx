@@ -8,7 +8,7 @@ const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPane
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
-import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { getAdminToken, hasValidAdminToken, hasValidOwnerToken, clearAdminToken } from '@/lib/adminAuth';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import ChipControlBar from '@/components/admin/ChipControlBar';
 import NotificationBell from '@/components/admin/NotificationBell';
@@ -84,6 +84,7 @@ const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompany
 const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
 const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
 const AdminLinkedInPublisher = lazy(() => import('@/components/admin/AdminLinkedInPublisher'));
+const OwnerIcpProspector = lazy(() => import('@/components/admin/OwnerIcpProspector'));
 const AdminSubstackPanel = lazy(() => import('@/components/admin/AdminSubstackPanel'));
 const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedInComments'));
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
@@ -227,9 +228,10 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+      if (saved === 'prospector' && !hasValidOwnerToken()) return 'workspace';
       if (saved) return saved as any;
     } catch {}
     return 'workspace';
@@ -253,6 +255,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
+    ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'ICP Connection Engine', icon: UserPlus }] : []),
     { key: 'documents', label: 'Documents', icon: FileBox },
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
@@ -283,7 +286,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command', 'prospector']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -656,6 +659,7 @@ const AdminDashboard: React.FC = () => {
         </Tabs>
       );
       case 'crm': return <AdminCrm />;
+      case 'prospector': return hasValidOwnerToken() ? <OwnerIcpProspector /> : null;
       
       case 'commissions': return <div className="space-y-6"><AdminQuotingPos /><CommissionStructurePanel /></div>;
       case 'catalog': return <ServicesPricing />;
@@ -874,7 +878,7 @@ const AdminDashboard: React.FC = () => {
             {!tabsCollapsed && !classicTabs && (() => {
               const CATEGORIES: { name: string; keys: string[] }[] = [
                 { name: 'Overview', keys: ['overview', 'insights', 'events'] },
-                { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
+                { name: 'Leads & Sales', keys: ['submissions', 'prospector', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
                 { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
