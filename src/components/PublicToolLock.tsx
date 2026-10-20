@@ -1,7 +1,7 @@
 // Overlay lock card used on public tool pages (Chaos Scan, Head-to-Head,
 // Reciprocation Engine, Aetheris IQ). Visitors can read the page and see the
-// tool's shape, but cannot run it — the Golden Report is the only usable tool
-// on the public site. Admin/rep portals bypass by using the components directly.
+// tool's shape, but cannot run it. The free Leak Check is a separate
+// 14-question self-assessment; operator-led Golden Reports remain restricted. Admin/rep portals bypass by using the components directly.
 import React from "react";
 import { Link } from "react-router-dom";
 import { Lock, ArrowRight, ScrollText } from "lucide-react";
@@ -22,22 +22,22 @@ const Card: React.FC<Pick<Props, "toolLabel" | "blurb">> = ({ toolLabel, blurb }
       <Lock className="w-3 h-3" /> Preview only · {toolLabel}
     </div>
     <h2 className="font-forensic text-2xl sm:text-3xl font-bold leading-tight">
-      One tool is <span className="text-amber italic">live</span> right now.
+      Start with a <span className="text-amber italic">free self-check.</span>
     </h2>
     <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
       {blurb ??
-        `You can read how ${toolLabel} works, but the run button is locked on the public site. Every leak this tool catches shows up inside the Golden Report — the one 14-chapter case file we hand out free.`}
+        `You can read how ${toolLabel} works, but the run button is locked on the public site. For now, start with a separate 14-question Leak Check, or discuss an operator-led Golden Report with Aetheris.`}
     </p>
     <Link
-      to="/golden-report"
+      to="/leak-audit/self-scan"
       className="mt-5 inline-flex items-center justify-center gap-2 w-full rounded-sm bg-amber hover:bg-amber/90 text-charcoal font-bold font-mono text-xs uppercase tracking-widest px-4 py-3 shadow-[0_0_30px_-4px_hsl(var(--amber)/0.55)] transition"
     >
       <ScrollText className="w-4 h-4" />
-      Run the Golden Report
+      Take the Free Leak Check
       <ArrowRight className="w-4 h-4" />
     </Link>
     <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-foreground/50">
-      Free · 14-chapter case file
+      Free · 14-question self-assessment
     </p>
   </div>
 );

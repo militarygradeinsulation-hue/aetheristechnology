@@ -389,7 +389,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
       )}
 
       {row?.brand_kit && (
-        <BrandedCreationKit kit={row.brand_kit} company={row.company_name || row.target_url} />
+        <BrandedCreationKit kit={row.brand_kit} company={row.company_name || row.target_url} report={report as unknown as Record<string, unknown> | null} targetUrl={row.target_url} />
       )}
 
       {report && row && (
@@ -523,6 +523,8 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
             <GoldenGrowthAssets
               deliverables={report.deliverables}
               company={row.company_name || row.target_url}
+              targetUrl={row.target_url}
+              report={report as unknown as Record<string, unknown>}
             />
 
 

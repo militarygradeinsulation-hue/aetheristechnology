@@ -21,7 +21,7 @@ import { routedChatCompletion, type AiTier } from "../_shared/ai-router.ts";
 import { verifyAdminToken } from "../_shared/admin-token.ts";
 import { verifyPortalToken } from "../_shared/portal-token.ts";
 import { resolveScanOrigin } from "../_shared/golden-report-source.ts";
-import { buildFallbackDeliverables } from "../_shared/report-deliverables.ts";
+import { buildFallbackDeliverables, isCompanyVoicePost } from "../_shared/report-deliverables.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,7 +114,7 @@ function clampSocialPack(raw: unknown): SocialPack {
 async function generateBrandKit(id: string, brand: Brand): Promise<Record<string, unknown>> {
   const brandName = brand.name || brand.sourceURL;
   const brief = `Company: ${brandName}. Positioning: ${brand.description || "unknown"}. Goal: build brand awareness, drive qualified inbound, and convert warm leads.`;
-  const system = `You are a senior brand designer, copywriter, and content strategist. Match the brand's tone from its palette + positioning. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
+  const system = `You are a senior brand designer, copywriter, and content strategist creating publishable content AS the scanned company for its own customers. Match the company's observed positioning and tone. Never mention Aetheris, a scan, or an outside review in its posts. Never invent services, proof, results or pricing. Never break character. No preamble.\n\n${brandPromptBlock(brand)}`;
 
   const [messageRes, calendarRes, imageRes, socialRes] = await Promise.allSettled([
     (async () => { await setBrandKitStage(id, "message", "running"); const md = await aiChat(system, ONE_PAGER_PROMPT(brief), { max_tokens: 1200 }); await setBrandKitStage(id, "message", "done"); return md; })(),
@@ -130,6 +130,11 @@ async function generateBrandKit(id: string, brand: Brand): Promise<Record<string
         if (m) { try { parsed = JSON.parse(m[0]); } catch { /* ignore */ } }
       }
       const pack = clampSocialPack(parsed);
+      for (const post of Object.values(pack)) {
+        if (post.copy && !isCompanyVoicePost({ hook: "", body: post.copy, cta: "" })) {
+          throw new Error("The generated post speaks as an outside reviewer instead of the scanned company.");
+        }
+      }
       await setBrandKitStage(id, "social", "done");
       return pack;
     })(),
@@ -1460,8 +1465,14 @@ Deno.serve(async (req) => {
       if (!id) return new Response(JSON.stringify({ error: "id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       const { data, error } = await sb.from("forensic_scans").select("*").eq("id", id).single();
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      // Origin/creator identity is admin-only — never expose it on public reads.
+      // Private intake cases must never be accessible through the shared report
+      // link/GET endpoint, even to someone who obtains a scan UUID.
       const adminOk = await verifyAdminToken(req.headers.get("x-admin-token"), SUPABASE_SERVICE_ROLE_KEY).catch(() => false);
+      if (data.private_intake === true && !adminOk) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const payload: Record<string, unknown> = { ...(data as Record<string, unknown>) };
       if (!adminOk) {
         for (const k of ["creator_user_id", "creator_name", "creator_email", "creator_profile_id", "portal_source", "lead_name", "lead_email", "lead_phone", "source_notified_at"]) {
@@ -1528,11 +1539,58 @@ Deno.serve(async (req) => {
       body,
     });
 
+    // Only Joseph (admin login or portal 163675), Dean (482917) and Braden
+    // (963169) may run Golden Reports. Internal automation is still allowed.
+    const GOLDEN_REPORT_RUNNER_CODES = new Set(["163675", "482917", "963169"]);
+    const portalAllowed = !!portalClaims && GOLDEN_REPORT_RUNNER_CODES.has(String(portalClaims.code).trim());
+    if (!adminAuthenticated && !serviceRoleCaller && !portalAllowed) {
+      return new Response(
+        JSON.stringify({ error: "Golden Reports are run by the Aetheris team. Connect with us to get one." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Reuse: if this company (same normalized domain) already has a completed
+    // Golden Report, hand back that report instead of running a new one.
+    // Only admins may force a fresh run with force_new: true.
+    const forceNew = body.force_new === true && (adminAuthenticated || serviceRoleCaller);
+    if (!forceNew) {
+      const host = (() => {
+        try {
+          return new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.toLowerCase().replace(/^www\./, "");
+        } catch { return ""; }
+      })();
+      if (host) {
+        const { data: prior, error: priorErr } = await sb
+          .from("forensic_scans")
+          .select("id, target_url, created_at")
+          .eq("status", "completed")
+          .ilike("target_url", `%${host}%`)
+          .order("created_at", { ascending: false })
+          .limit(25);
+        console.log("reuse lookup", host, priorErr?.message, (prior || []).length);
+        const match = (prior || []).find((p: { target_url: string | null }) => {
+          try {
+            const t = String(p.target_url || "");
+            return new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`).hostname.toLowerCase().replace(/^www\./, "") === host;
+          } catch { return false; }
+        });
+        if (match) {
+          return new Response(JSON.stringify({ scan_id: match.id, reused: true }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
+
     const { data: row, error } = await sb.from("forensic_scans").insert({
       target_url: url,
       company_name: company || null,
       hubspot_account_id: accountId,
       status: "queued",
+      // Only an authenticated internal service-role call can flag a report as
+      // permanently private. Never trust the flag on unauthenticated input.
+      private_intake: serviceRoleCaller && body.private_intake === true,
       stage_status: { queued: { state: "done", at: new Date().toISOString() } },
       ...origin,
     }).select("id").single();

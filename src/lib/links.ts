@@ -15,8 +15,8 @@ export const CONTACT_EMAIL_HREF = `mailto:${CONTACT_EMAIL}`;
 export const CONTACT_PHONE = '(317) 376-2110';
 export const CONTACT_PHONE_HREF = 'tel:+13173762110';
 
-// Where the public "Run My Revenue Leak Audit" CTA sends people: the live
-// Golden Report scanner. Kept here so the audit page and partner page agree.
-export const RUN_AUDIT_URL = '/golden-report';
+// Where public self-service audit CTAs send visitors. This never launches a
+// Golden Report or bypasses its staffed access controls.
+export const RUN_AUDIT_URL = '/leak-audit/self-scan';
 // The Golden Report exhibit page, used for "View a Sample Golden Report".
 export const SAMPLE_REPORT_URL = '/golden';

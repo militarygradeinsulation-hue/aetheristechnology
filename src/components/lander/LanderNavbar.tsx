@@ -5,9 +5,10 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { name: "How We Work", to: "/services" },
+  { name: "What We Do", to: "/#what-we-do" },
+  { name: "Pricing", to: "/#prices" },
   { name: "Case Studies", to: "/#case-studies" },
-  { name: "Leak Audit", to: "/leak-audit" },
+  { name: "Free Leak Check", to: "/leak-audit/self-scan" },
   { name: "Golden Report", to: "/golden-report" },
   { name: "Partners", to: "/partners" },
 ];
@@ -39,21 +40,38 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
   const { scrollY } = useScroll();
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const navigate = useNavigate();
 
-  /** Anchor links (e.g. /#pricing) smooth-scroll instead of hard-jumping. */
+  // Resolve deep links after the landing page mounts, including from other routes.
+  React.useEffect(() => {
+    if (pathname !== "/" || !hash) return;
+    const id = decodeURIComponent(hash.slice(1));
+    let timeoutId: number | undefined;
+    let attempts = 0;
+    const scrollToTarget = () => {
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (attempts++ < 12) {
+        timeoutId = window.setTimeout(scrollToTarget, 100);
+      }
+    };
+    timeoutId = window.setTimeout(scrollToTarget, 50);
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [pathname, hash]);
+
+  /** Same-page anchors scroll immediately; cross-page links retain their hash. */
   const handleNav = (to: string) => (e: React.MouseEvent) => {
     if (!to.includes("#")) return;
-    const id = to.split("#")[1];
     e.preventDefault();
     setOpen(false);
-    const scrollTo = () =>
+    navigate(to);
+    if (pathname === "/") {
+      const id = to.split("#")[1];
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (pathname === "/") scrollTo();
-    else {
-      navigate("/");
-      window.setTimeout(scrollTo, 350);
     }
   };
 
@@ -66,13 +84,12 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
         <motion.nav
           animate={{
             backdropFilter: visible ? "blur(16px)" : "blur(8px)",
-            width: visible ? "78%" : "100%",
+            width: visible ? "96%" : "100%",
             y: visible ? 8 : 0,
           }}
           transition={{ type: "spring", stiffness: 220, damping: 40 }}
-          style={{ minWidth: visible ? "680px" : "auto" }}
           className={cn(
-            "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-full border border-border/60 bg-background/70 px-6 py-2.5 lg:flex",
+            "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between rounded-full border border-border/60 bg-background/70 px-6 py-2.5 xl:flex",
             visible && "border-amber/40 bg-card/90 shadow-[0_0_30px_rgba(0,0,0,0.8)]"
           )}
         >
@@ -84,8 +101,8 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                 to={item.to}
                 onClick={handleNav(item.to)}
                 className={cn(
-                  "relative rounded-full px-3 py-1.5 text-[11px] font-case uppercase tracking-widest transition-colors",
-                  pathname === item.to
+                  "relative whitespace-nowrap rounded-full px-2.5 py-1.5 text-[10px] font-case uppercase tracking-wider transition-colors",
+                  (item.to.includes("#") ? pathname === "/" && hash === "#" + item.to.split("#")[1] : pathname === item.to)
                     ? "text-foreground bg-secondary/60 border border-amber/30"
                     : "text-muted-foreground hover:text-foreground"
                 )}
@@ -98,8 +115,8 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
             <Link to="/portal" className={cn(pillBase, "border border-border text-muted-foreground hover:text-foreground hover:border-amber/40")}>
               Client Portal
             </Link>
-            <Link to="/golden-report" className={cn(pillBase, "bg-amber text-primary-foreground shadow-[0_0_15px_hsl(var(--amber-glow)/0.4)] hover:brightness-110")}>
-              Start Free Scan
+            <Link to="/leak-audit/self-scan" className={cn(pillBase, "bg-amber text-primary-foreground shadow-[0_0_15px_hsl(var(--amber-glow)/0.4)] hover:brightness-110")}>
+              Free Leak Check
             </Link>
           </div>
         </motion.nav>
@@ -114,7 +131,7 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
           }}
           transition={{ type: "spring", stiffness: 220, damping: 40 }}
           className={cn(
-            "relative z-50 mx-auto flex w-full max-w-[calc(100vw-1rem)] flex-col items-center justify-between border border-border/60 bg-background/85 px-4 py-2 lg:hidden",
+            "relative z-50 mx-auto flex w-full max-w-[calc(100vw-1rem)] flex-col items-center justify-between border border-border/60 bg-background/85 px-4 py-2 xl:hidden",
             visible && "bg-card/95 border-amber/40"
           )}
         >
@@ -155,8 +172,8 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                   <Link to="/portal" onClick={() => setOpen(false)} className={cn(pillBase, "w-full border border-border text-muted-foreground")}>
                     Client Portal
                   </Link>
-                  <Link to="/golden-report" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
-                    Start Free Scan
+                  <Link to="/leak-audit/self-scan" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
+                    Free Leak Check
                   </Link>
                 </div>
               </motion.div>

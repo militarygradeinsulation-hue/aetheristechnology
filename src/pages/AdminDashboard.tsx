@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook } from 'lucide-react';
 const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
-import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
+import { getAdminToken, hasValidAdminToken, hasValidOwnerToken, clearAdminToken } from '@/lib/adminAuth';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import ChipControlBar from '@/components/admin/ChipControlBar';
 import NotificationBell from '@/components/admin/NotificationBell';
@@ -47,6 +47,7 @@ const SEOOptimizer = lazy(() => import('@/components/admin/SEOOptimizer').then(m
 const AdminAssistant = lazy(() => import('@/components/admin/AdminAssistant').then(m => ({ default: m.AdminAssistant })));
 const AdminLiveTrafficBar = lazy(() => import('@/components/admin/AdminLiveTrafficBar').then(m => ({ default: m.AdminLiveTrafficBar })));
 const CommissionStructurePanel = lazy(() => import('@/components/admin/CommissionStructurePanel').then(m => ({ default: m.CommissionStructurePanel })));
+const AdminQuotingPos = lazy(() => import('@/components/admin/AdminQuotingPos').then(m => ({ default: m.AdminQuotingPos })));
 const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
 const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
 const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
@@ -83,11 +84,15 @@ const AdminCompanyTaskAudit = lazy(() => import('@/components/admin/AdminCompany
 const AdminMailboxesPanel = lazy(() => import('@/components/admin/AdminMailboxesPanel').then(m => ({ default: m.AdminMailboxesPanel })));
 const AdminCreationStudio = lazy(() => import('@/components/admin/AdminCreationStudio').then(m => ({ default: m.AdminCreationStudio })));
 const AdminLinkedInPublisher = lazy(() => import('@/components/admin/AdminLinkedInPublisher'));
+const OwnerIcpProspector = lazy(() => import('@/components/admin/OwnerIcpProspector'));
 const AdminSubstackPanel = lazy(() => import('@/components/admin/AdminSubstackPanel'));
 const AdminLinkedInComments = lazy(() => import('@/components/admin/AdminLinkedInComments'));
 const AdminLiveEventsPanel = lazy(() => import('@/components/admin/AdminLiveEventsPanel').then(m => ({ default: m.AdminLiveEventsPanel })));
 const WebsiteScanner = lazy(() => import('@/components/WebsiteScanner').then(m => ({ default: m.WebsiteScanner })));
 const SocialSchedulerPanel = lazy(() => import('@/components/admin/SocialSchedulerPanel').then(m => ({ default: m.SocialSchedulerPanel })));
+const AdminXPublisher = lazy(() => import('@/components/admin/AdminXPublisher'));
+const AdminFacebookPublisher = lazy(() => import('@/components/admin/AdminFacebookPublisher'));
+const AdminSocialQueuePanel = lazy(() => import('@/components/admin/AdminSocialQueuePanel'));
 const HubSpotBlogPanel = lazy(() => import('@/components/admin/HubSpotBlogPanel').then(m => ({ default: m.HubSpotBlogPanel })));
 const HubSpotMeetingsPanel = lazy(() => import('@/components/admin/HubSpotMeetingsPanel').then(m => ({ default: m.HubSpotMeetingsPanel })));
 const AdminResumeAnalyzer = lazy(() => import('@/components/admin/AdminResumeAnalyzer').then(m => ({ default: m.AdminResumeAnalyzer })));
@@ -105,7 +110,7 @@ const PanelFallback = () => (
   </div>
 );
 
-type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
+type ToolKey = 'allinone' | 'golden' | 'reciprocation' | 'chaosscan' | 'headtohead' | 'social' | 'sales' | 'calendar' | 'followup' | 'questions' | 'brand' | 'friction' | 'playbook' | 'scanner' | 'social_scheduler' | 'x_publisher' | 'facebook_publisher' | 'social_queue' | 'hubspot_blog' | 'hubspot_meetings' | 'resume_analyzer' | 'ai_detect' | 'scam_check' | 'detective' | 'podcast';
 type ToolCategory = 'core' | 'content' | 'sales' | 'forensics' | 'integrations' | 'hr';
 type EventsSubTab = 'campaign' | 'site';
 
@@ -138,6 +143,9 @@ const ADMIN_TOOLS: { key: ToolKey; label: string; description: string; icon: Rea
   { key: 'detective', label: 'Detective Mode', description: 'Drop a website + business. Auto-runs scan, RDAP, scrape, enrichment. Walks the detective monologue, picks the best angle, writes the opener.', icon: FileSearch, category: 'forensics' },
   { key: 'playbook', label: 'Playbook Creator', description: 'Generate a 4-5k word strategic playbook PDF saved to your library.', icon: BookOpen, category: 'content' },
   { key: 'social_scheduler', label: 'Social Scheduler', description: 'Schedule posts to LinkedIn, Facebook, IG, X, TikTok, YouTube, Threads, Pinterest, Bluesky.', icon: CalendarClock, category: 'content' },
+  { key: 'x_publisher', label: 'X (Twitter) Publisher', description: 'Connect an X account with native OAuth2 and post directly — no third-party aggregator.', icon: Twitter, category: 'content' },
+  { key: 'facebook_publisher', label: 'Facebook & Instagram Publisher', description: 'Connect a Facebook Page (and its linked Instagram Business account) with native OAuth and post directly.', icon: Facebook, category: 'content' },
+  { key: 'social_queue', label: 'Browser-Agent Post Queue', description: 'Queue posts for a browser-controlling agent to publish manually and report back — no developer API keys needed.', icon: Inbox, category: 'content' },
   { key: 'hubspot_blog', label: 'HubSpot Blog Publisher', description: 'Push and schedule local blog posts directly to your HubSpot CMS.', icon: FileUp, category: 'integrations' },
   { key: 'hubspot_meetings', label: 'Meetings (HubSpot)', description: 'Bookings made on your HubSpot meetings link, synced every 5 minutes.', icon: CalendarClock, category: 'integrations' },
   { key: 'resume_analyzer', label: 'Resume Analyzer', description: 'Upload any candidate resume (PDF/DOCX) and get a forensic AI breakdown: fit score, strengths, red flags, and interview questions.', icon: FileUp, category: 'hr' },
@@ -226,9 +234,10 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+      if (saved === 'prospector' && !hasValidOwnerToken()) return 'workspace';
       if (saved) return saved as any;
     } catch {}
     return 'workspace';
@@ -252,6 +261,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'portal', label: 'Company Portal', icon: Building2 },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
+    ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'ICP Connection Engine', icon: UserPlus }] : []),
     { key: 'documents', label: 'Documents', icon: FileBox },
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
@@ -282,7 +292,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command', 'prospector']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -655,8 +665,9 @@ const AdminDashboard: React.FC = () => {
         </Tabs>
       );
       case 'crm': return <AdminCrm />;
+      case 'prospector': return hasValidOwnerToken() ? <OwnerIcpProspector /> : null;
       
-      case 'commissions': return <CommissionStructurePanel />;
+      case 'commissions': return <div className="space-y-6"><AdminQuotingPos /><CommissionStructurePanel /></div>;
       case 'catalog': return <ServicesPricing />;
       case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
@@ -873,7 +884,7 @@ const AdminDashboard: React.FC = () => {
             {!tabsCollapsed && !classicTabs && (() => {
               const CATEGORIES: { name: string; keys: string[] }[] = [
                 { name: 'Overview', keys: ['overview', 'insights', 'events'] },
-                { name: 'Leads & Sales', keys: ['submissions', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
+                { name: 'Leads & Sales', keys: ['submissions', 'prospector', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
                 { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
@@ -1329,6 +1340,9 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
         {activeTool === 'friction' && <FrictionVocabularyAudit adminMode />}
         {activeTool === 'playbook' && <PlaybookCreator />}
         {activeTool === 'social_scheduler' && <SocialSchedulerPanel />}
+        {activeTool === 'x_publisher' && <Suspense fallback={<PanelFallback />}><AdminXPublisher /></Suspense>}
+        {activeTool === 'facebook_publisher' && <Suspense fallback={<PanelFallback />}><AdminFacebookPublisher /></Suspense>}
+        {activeTool === 'social_queue' && <Suspense fallback={<PanelFallback />}><AdminSocialQueuePanel /></Suspense>}
         {activeTool === 'hubspot_blog' && <HubSpotBlogPanel />}
         {activeTool === 'hubspot_meetings' && <HubSpotMeetingsPanel />}
         {activeTool === 'resume_analyzer' && <AdminResumeAnalyzer />}

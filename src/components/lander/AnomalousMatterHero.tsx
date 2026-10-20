@@ -5,6 +5,7 @@ const GenerativeArtScene = lazy(() => import("./GenerativeArtScene"));
 interface AnomalousMatterHeroProps {
   eyebrow?: string;
   title: React.ReactNode;
+  titleAs?: "h1" | "div";
   description?: React.ReactNode;
   children?: React.ReactNode;
 }
@@ -24,6 +25,7 @@ const StaticField: React.FC = () => (
 export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
   eyebrow,
   title,
+  titleAs: TitleTag = "h1",
   description,
   children,
 }) => {
@@ -67,9 +69,9 @@ export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
             {eyebrow}
           </span>
         )}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+        <TitleTag className="text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
           {title}
-        </h1>
+        </TitleTag>
         {description && (
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl mx-auto">
             {description}

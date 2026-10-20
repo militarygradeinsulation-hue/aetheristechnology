@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Copy, Download, Check, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { buildFallbackDeliverables, isCompanyVoicePost } from "@/lib/reportDeliverables";
 
 export type SocialPost = { copy: string; hashtags: string[]; best_time: string; char_count: number };
 export type BrandKit = {
@@ -43,9 +44,20 @@ function CopyBtn({ text }: { text: string }) {
   );
 }
 
-export function BrandedCreationKit({ kit, company }: { kit: BrandKit; company: string }) {
+export function BrandedCreationKit({ kit, company, report, targetUrl }: { kit: BrandKit; company: string; report?: Record<string, unknown> | null; targetUrl?: string }) {
   const brand = kit.brand || {};
-  const posts = kit.social_posts || {};
+  const originalPosts = kit.social_posts || {};
+  const oldVoice = Object.values(originalPosts).some((p) => !isCompanyVoicePost({ hook: "", body: p.copy, cta: "" }));
+  const replacement = oldVoice && report
+    ? buildFallbackDeliverables({ company, url: targetUrl || company, report, brand: brand as Record<string, unknown> }).posts
+    : [];
+  const posts = oldVoice && replacement.length
+    ? Object.fromEntries(Object.keys(originalPosts).map((platform, i) => {
+        const post = replacement.find((p) => p.platform.toLowerCase() === platform) || replacement[i % replacement.length];
+        const copy = [post.hook, post.body, post.cta].filter(Boolean).join("\n\n");
+        return [platform, { copy, hashtags: [], best_time: "", char_count: copy.length } as SocialPost];
+      }))
+    : originalPosts;
 
   const downloadKit = () => {
     const parts: string[] = [];

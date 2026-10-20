@@ -1,0 +1,98 @@
+name: Public website funnel and SEO guard
+
+on:
+  pull_request:
+    paths:
+      - "src/pages/LeakLanderPage.tsx"
+      - "src/pages/LeakAuditPage.tsx"
+      - "src/pages/StopGuessingPage.tsx"
+      - "src/pages/GoldenReportPage.tsx"
+      - "src/pages/GoldenLanderPage.tsx"
+      - "src/pages/IndianapolisLeadPage.tsx"
+      - "src/components/lander/LanderNavbar.tsx"
+      - "src/components/SEOHead.tsx"
+      - "src/components/PricingTimeline.tsx"
+      - "src/components/AuditCustomQuote.tsx"
+      - "src/components/GoldenGrowthAssets.tsx"
+      - "src/components/lander/SampleGoldenReports.tsx"
+      - "src/lib/generateFreeLeakCheckPdf.ts"
+      - "src/lib/contentQuality.test.ts"
+      - "src/lib/companyAuditOffers.test.ts"
+      - "src/lib/pricingTimelineServices.ts"
+      - "src/lib/pricingTimelineServices.test.ts"
+      - "src/lib/homeRouteChaos.test.ts"
+      - "src/components/Navbar.tsx"
+      - "src/components/HomeMindMapSection.tsx"
+      - "src/components/LeakMindMap.tsx"
+      - "supabase/functions/company-leak-audit/**"
+      - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/_shared/report-post-writers.ts"
+      - "supabase/functions/_shared/report-deliverables.ts"
+      - "supabase/functions/_shared/content-uniqueness.ts"
+      - "supabase/functions/report-deliverables/**"
+      - "supabase/functions/forensic-scan-all/**"
+      - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
+      - "supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql"
+      - "src/lib/aetherisTiers.ts"
+      - "src/App.tsx"
+      - "index.html"
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - ".github/scripts/public-website-funnel-check.mjs"
+      - ".github/workflows/public-website-funnel-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/pages/**"
+      - "src/components/SEOHead.tsx"
+      - "src/components/PricingTimeline.tsx"
+      - "src/components/AuditCustomQuote.tsx"
+      - "src/components/GoldenGrowthAssets.tsx"
+      - "src/components/lander/SampleGoldenReports.tsx"
+      - "src/lib/generateFreeLeakCheckPdf.ts"
+      - "src/lib/contentQuality.test.ts"
+      - "src/lib/companyAuditOffers.test.ts"
+      - "src/lib/pricingTimelineServices.ts"
+      - "src/lib/pricingTimelineServices.test.ts"
+      - "src/lib/homeRouteChaos.test.ts"
+      - "src/components/Navbar.tsx"
+      - "src/components/HomeMindMapSection.tsx"
+      - "src/components/LeakMindMap.tsx"
+      - "supabase/functions/company-leak-audit/**"
+      - "supabase/functions/_shared/company-audit-offers.ts"
+      - "supabase/functions/_shared/report-post-writers.ts"
+      - "supabase/functions/_shared/report-deliverables.ts"
+      - "supabase/functions/_shared/content-uniqueness.ts"
+      - "supabase/functions/report-deliverables/**"
+      - "supabase/functions/forensic-scan-all/**"
+      - "supabase/migrations/20261014231000_aetheris_private_company_audit.sql"
+      - "supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql"
+      - "src/lib/aetherisTiers.ts"
+      - "src/components/lander/LanderNavbar.tsx"
+      - "src/App.tsx"
+      - "index.html"
+      - "public/sitemap.xml"
+      - "public/robots.txt"
+      - ".github/scripts/public-website-funnel-check.mjs"
+      - ".github/workflows/public-website-funnel-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify public landing, free assessment, search metadata and local pages
+        run: node .github/scripts/public-website-funnel-check.mjs
+      - uses: oven-sh/setup-bun@v2
+      - name: Install exact locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Test deterministic company audit, price catalog and privacy
+        run: bunx vitest run src/lib/companyAuditOffers.test.ts src/lib/pricingTimelineServices.test.ts src/lib/homeRouteChaos.test.ts src/lib/contentQuality.test.ts
+      - name: Verify website production build
+        run: bun run build

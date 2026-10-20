@@ -4,9 +4,9 @@ import goldenReportHomeAsset from "@/assets/golden-report-home.png.asset.json";
 
 
 /**
- * Homepage CTA for the free Golden Report — rendered as an integrated-circuit
+ * Homepage preview of the operator-led Golden Report — rendered as an integrated-circuit
  * package on an Aetheris Chip substrate: floating die outlines, amber trace
- * field, fine solder nodes, and a silicon die you press to run the scan.
+ * field, fine solder nodes, and an operator-led report request.
  */
 export function HomeToolShopGrid() {
   // 10 pins per side — enough to read as a real DIP without getting noisy
@@ -291,19 +291,19 @@ export function HomeToolShopGrid() {
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Cpu className="w-4 h-4 text-amber/80" />
                   <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber">
-                    FREE · 14-CHAPTER CASE FILE
+                    OPERATOR-LED · 14-CHAPTER CASE FILE
                   </span>
                 </div>
 
                 <h2 className="font-forensic text-2xl sm:text-4xl font-extrabold leading-tight mb-5">
-                  Check your{" "}
+                  Explore the{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber to-amber/50">
-                    company FREE
+                    Golden Report
                   </span>
                 </h2>
 
                 {/* Golden Report preview image */}
-                <Link to="/golden-report" aria-label="Open the free Golden Report">
+                <Link to="/golden-report" aria-label="Request an operator-led Golden Report">
                   <img
                     src={goldenReportHomeAsset.url}
                     alt="The Golden Report forensic preview card: leak score, priority fixes, and annual loss estimate"
@@ -320,7 +320,7 @@ export function HomeToolShopGrid() {
                 {/* CTA — case-file evidence tag with perforation + scan sweep */}
                 <Link
                   to="/golden-report"
-                  aria-label="Open the free Golden Report"
+                  aria-label="Request an operator-led Golden Report"
                   className="group/tag relative block mx-auto max-w-md text-left overflow-hidden rounded-[2px] text-[hsl(0_0%_0%)] transition-transform duration-300 hover:-translate-y-0.5"
                   style={{
                     background:
@@ -393,7 +393,7 @@ export function HomeToolShopGrid() {
                         }}
                       />
                       <div className="font-case text-sm sm:text-base md:text-lg uppercase tracking-[0.18em] font-black text-[hsl(0_0%_0%)]">
-                        FREE
+                        BY REQUEST
                       </div>
                     </div>
 

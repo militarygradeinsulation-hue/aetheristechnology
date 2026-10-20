@@ -3,6 +3,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -320,15 +321,10 @@ serve(async (req) => {
       }
       const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://aetheris.technology";
       const testUrl = `${siteUrl}/careers/test?session_id=${sessionId}`;
-      const { data: sendData, error: sendErr } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "careers-test-access",
-          recipientEmail: email,
-          idempotencyKey: `careers-test-resend-${sessionId}-${Date.now()}`,
-          templateData: { testUrl },
-        },
+      const sendData = await sendTemplateEmail("careers-test-access", email, {
+        idempotencyKey: `careers-test-resend-${sessionId}-${Date.now()}`,
+        templateData: { testUrl },
       });
-      if (sendErr) throw sendErr;
       // Poll email_send_log briefly for confirmation
       let confirmation: any = null;
       for (let i = 0; i < 5; i++) {

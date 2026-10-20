@@ -26,6 +26,10 @@ export type AetherisTier = {
   priceLabel: string;
   /** Delivery expectation, e.g. "about a week". */
   timeline: string;
+  /** The first concrete thing the buyer receives. */
+  firstDeliverable: string;
+  /** What we need from the client to do the work well. */
+  clientInvolvement: string;
   /** Short positioning line. Says what changed versus the rung below. */
   headline: string;
   /** Who this is for. */
@@ -54,25 +58,27 @@ export type AetherisTier = {
 export const AETHERIS_TIERS: AetherisTier[] = [
   {
     id: "free",
-    name: "Free Self-Scan",
+    name: "Free Leak Check",
     verb: "Demonstrate",
     amountCents: 0,
     cadence: "free",
     priceLabel: "Free",
     timeline: "about 6 minutes · no call",
+    firstDeliverable: "A directional score and downloadable case-file assessment.",
+    clientInvolvement: "About 6 minutes of your input. No meeting or system access required.",
     headline:
-      "We scan one page of your site live and show you one thing that is costing you money.",
-    useCase: "You want proof this is real before you talk to anyone.",
-    outcome: "One specific problem you did not know you had.",
+      "A free 14-question self-check highlights possible gaps in lead capture, follow-up, operations, and trust.",
+    useCase: "You want a directional first look before speaking with an operator.",
+    outcome: "Your answers turned into a downloadable, directional leak assessment.",
     adds: [
-      "One live scan of one URL",
-      "Your Revenue Score, 0 to 100",
-      "One named leak, in plain language, with the evidence behind it",
-      "A dollar range on that leak where the data supports it",
-      "A PDF you can forward to your partner without explaining it first",
+      "14 questions about lead capture, response, operations, and trust",
+      "A directional score based on your answers",
+      "A modeled annual exposure estimate based on your revenue band and responses, not verified lost revenue",
+      "A downloadable case-file PDF with your results",
+      "No fee or operator call required",
     ],
-    ctaLabel: "Run the free scan",
-    ctaHref: "/scan",
+    ctaLabel: "Take the free Leak Check",
+    ctaHref: "/leak-audit/self-scan",
   },
   {
     id: "intelligence",
@@ -82,6 +88,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "monthly",
     priceLabel: "Monthly, agreed together",
     timeline: "live in minutes · no minimum term",
+    firstDeliverable: "A living Golden Report workspace for one company.",
+    clientInvolvement: "Your company URL, a primary contact, and up to five users. No internal-system integration required.",
     headline:
       "Your Golden Report stops being a document and becomes a living company operating workspace, rescanned and rewritten every month.",
     useCase:
@@ -116,6 +124,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about a week",
+    firstDeliverable: "A written findings memo naming the highest-priority problems and the evidence behind them.",
+    clientInvolvement: "Business context, public-site access, and one operator walkthrough.",
     headline:
       "Three instruments run together to name what is actually wrong. Any one alone gives you a symptom. Together they give you a diagnosis.",
     useCase: "You know something is wrong but cannot name it, and you are tired of guessing.",
@@ -140,6 +150,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about two weeks",
+    firstDeliverable: "The first installed revenue-response assets built directly from the findings.",
+    clientInvolvement: "Two 45-minute working sessions, examples of current sales/follow-up language, and approvals.",
     headline:
       "Signal Pack tells you what is broken. Revenue Pack gives your team the words to fix it, built from your leaks and not from a template.",
     useCase: "You have a team but no system. Every sales call is improvised and every post is a guess.",
@@ -163,6 +175,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "about 3 weeks",
+    firstDeliverable: "A working operating environment that connects the diagnostic instruments and correction workflow.",
+    clientInvolvement: "A kickoff, access to agreed systems, and one internal owner for implementation decisions.",
     headline:
       "You stop receiving reports and start running the instruments yourself. This is where you own the loop.",
     useCase: "You are paying five vendors for four tools that do not talk to each other.",
@@ -189,6 +203,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "one-time",
     priceLabel: "Scoped in conversation",
     timeline: "21 days · fit call required",
+    firstDeliverable: "An initial findings brief, followed by the calibrated Golden Report and quantified leak ledger.",
+    clientInvolvement: "CRM, pipeline, and relevant internal-data access plus stakeholder time for the investigation.",
     headline:
       "Everything above analyzes your public surface. This is the only tier where an operator works inside your business, with your CRM, pipeline, and internal data connected. Estimated loss becomes measured loss.",
     useCase: "You need a board-ready number before you scale, hire, or raise.",
@@ -216,6 +232,8 @@ export const AETHERIS_TIERS: AetherisTier[] = [
     cadence: "monthly",
     priceLabel: "Continuing partnership",
     timeline: "3-month minimum · requires a completed Diagnostic",
+    firstDeliverable: "The first execution sprint plan tied to the Diagnostic baseline.",
+    clientInvolvement: "A named internal owner, access required for the agreed work, and timely approvals on implementation.",
     headline:
       "We stop advising and start running it. Every month we show you what got recovered and what is left.",
     useCase:
@@ -229,7 +247,7 @@ export const AETHERIS_TIERS: AetherisTier[] = [
       "Living Leak Register — dollars recovered versus dollars remaining, updated monthly",
       "Priority builds — when you need an instrument that does not exist yet, we build it",
       "Standing operator capacity and direct access, not an account manager",
-      "Pause or cancel any month — no long lock-in",
+      "After the initial 3-month minimum, renewal and cancellation follow the written agreement",
     ],
     qualificationOnly: true,
     ctaLabel: "Diagnostic clients only",

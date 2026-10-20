@@ -150,7 +150,7 @@ const LocationPage: React.FC = () => {
 
             <div className="flex flex-wrap gap-3 mb-12">
               <Button asChild size="lg" className="bg-amber text-primary-foreground hover:bg-amber/90">
-                <Link to="/leak-audit">
+                <Link to="/leak-audit/self-scan">
                   Run the free Leak Audit
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
@@ -158,6 +158,13 @@ const LocationPage: React.FC = () => {
               <Button asChild size="lg" variant="outline">
                 <Link to="/diagnostic">Book the 21-Day Revenue Diagnostic</Link>
               </Button>
+            </div>
+
+            <div className="mb-8 rounded-md border border-amber/25 bg-card/30 p-5 text-sm leading-relaxed text-muted-foreground">
+              <p className="mb-2 font-semibold text-foreground">Common Central Indiana revenue handoffs</p>
+              <Link to="/indianapolis/contractor-follow-up" className="text-amber underline underline-offset-4">Contractors: quote follow-up and lost estimates</Link>
+              <span className="mx-3" aria-hidden="true">·</span>
+              <Link to="/indianapolis/service-business-lead-tracking" className="text-amber underline underline-offset-4">Service businesses: calls, texts and DMs in one lead record</Link>
             </div>
 
             <section className="glass rounded-md border border-border/60 p-6 md:p-8 mb-8">

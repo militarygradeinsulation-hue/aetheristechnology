@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
 import { planById, planByLookupKey } from "../_shared/plans.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -404,15 +405,10 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       if (d && email) {
         const intakeUrl =
           `${PUBLIC_SITE_URL}/deliverable/${accessToken}`;
-        triggerFunction("send-transactional-email", {
-          templateName: "deliverable-magic-link",
-          recipientEmail: email,
-          idempotencyKey: `deliv-${d.id}`,
-          templateData: {
-            title: SYSTEM_TITLES[priceId] || "Your purchase",
-            intakeUrl,
-            name: name || undefined,
-          },
+        triggerEmail("deliverable-magic-link", email, `deliv-${d.id}`, {
+          title: SYSTEM_TITLES[priceId] || "Your purchase",
+          intakeUrl,
+          name: name || undefined,
         });
       }
     }
@@ -452,12 +448,7 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     // Careers test access fee — email a resume link so the applicant can take the test.
     if (session.metadata?.purpose === "careers_test_fee" && email) {
       const testUrl = `${PUBLIC_SITE_URL}/careers/test?session_id=${session.id}`;
-      triggerFunction("send-transactional-email", {
-        templateName: "careers-test-access",
-        recipientEmail: email,
-        idempotencyKey: `careers-test-${session.id}`,
-        templateData: { testUrl, name: name || undefined },
-      });
+      triggerEmail("careers-test-access", email, `careers-test-${session.id}`, { testUrl, name: name || undefined });
     }
 
     // ---- Tool Shop: mint lifetime license code ----
@@ -487,15 +478,10 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
 
         if (lic) {
           const portalUrl = `${PUBLIC_SITE_URL}/tools-shop/redeem?code=${encodeURIComponent(code)}`;
-          triggerFunction("send-transactional-email", {
-            templateName: "tool-shop-license",
-            recipientEmail: email,
-            idempotencyKey: `tool-lic-${lic.id}`,
-            templateData: {
-              code, plan, portalUrl,
-              tools: toolIds,
-              name: name || undefined,
-            },
+          triggerEmail("tool-shop-license", email, `tool-lic-${lic.id}`, {
+            code, plan, portalUrl,
+            tools: toolIds,
+            name: name || undefined,
           });
         }
       } catch (e) {
@@ -566,16 +552,11 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
             memory: brandKit,
           });
 
-          triggerFunction("send-transactional-email", {
-            templateName: "tool-shop-license",
-            recipientEmail: email,
-            idempotencyKey: `ext-lic-${lic.id}`,
-            templateData: {
-              code, plan: "extension",
-              portalUrl: `${PUBLIC_SITE_URL}/brand-voice-extension`,
-              tools: ["Brand Voice Chrome Extension"],
-              name: name || undefined,
-            },
+          triggerEmail("tool-shop-license", email, `ext-lic-${lic.id}`, {
+            code, plan: "extension",
+            portalUrl: `${PUBLIC_SITE_URL}/brand-voice-extension`,
+            tools: ["Brand Voice Chrome Extension"],
+            name: name || undefined,
           });
         }
       } catch (e) {
@@ -593,6 +574,18 @@ function triggerFunction(name: string, body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${KEY}` },
     body: JSON.stringify(body),
   }).catch(e => console.error(`trigger ${name}:`, e));
+}
+
+// Fire-and-forget transactional email through the managed send helper.
+function triggerEmail(
+  templateName: string,
+  recipientEmail: string,
+  idempotencyKey: string,
+  templateData: Record<string, unknown>,
+) {
+  sendTemplateEmail(templateName, recipientEmail, { idempotencyKey, templateData })
+    .then((r) => { if (!r.sent) console.warn(`email ${templateName}:`, r.reason); })
+    .catch(e => console.error(`email ${templateName}:`, e));
 }
 
 /**

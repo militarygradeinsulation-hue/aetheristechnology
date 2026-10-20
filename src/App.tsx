@@ -28,8 +28,7 @@ import { FloatingWorkbench } from "@/components/workbench/FloatingWorkbench";
 import { ToolBuyBar } from "@/components/ToolBuyBar";
 
 
-// Eager: home + 404 (always needed)
-import Home from "./pages/Home";
+// Eager: 404 and booking redirect; the primary homepage is route-lazy.
 import NotFound from "./pages/NotFound";
 import BookRedirect from "./pages/BookRedirect";
 
@@ -56,6 +55,8 @@ const QuoteViewPage = lazy(() => import("./pages/QuoteViewPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const XOAuthCallbackPage = lazy(() => import("./pages/XOAuthCallbackPage"));
+const FacebookOAuthCallbackPage = lazy(() => import("./pages/FacebookOAuthCallbackPage"));
 const PersonalEnginePage = lazy(() => import("./pages/PersonalEnginePage"));
 const AssessmentPage = lazy(() => import("./pages/AssessmentPage"));
 const AIChecklistPage = lazy(() => import("./pages/AIChecklistPage"));
@@ -88,12 +89,13 @@ const SubscriberOnboardingPage = lazy(() => import("./pages/SubscriberOnboarding
 const MySubscriptionPage = lazy(() => import("./pages/MySubscriptionPage"));
 const GoldenReportIntelligencePage = lazy(() => import("./pages/GoldenReportIntelligencePage"));
 const VerticalLandingPage = lazy(() => import("./pages/VerticalLandingPage"));
+const IndianapolisLeadPage = lazy(() => import("./pages/IndianapolisLeadPage"));
 import { VERTICAL_BY_SLUG } from "@/config/verticals";
 const CrmDemoPage = lazy(() => import("./pages/CrmDemoPage"));
 const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
-const HomePage = lazy(() => import("./pages/Home"));
+const StopGuessingPage = lazy(() => import("./pages/StopGuessingPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
 const TestPortalPage = lazy(() => import("./pages/TestPortalPage"));
@@ -128,6 +130,7 @@ const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
 const BusinessGenomePage = lazy(() => import("./pages/BusinessGenomePage"));
+const LovableOptimizerPage = lazy(() => import("./pages/LovableOptimizerPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -160,6 +163,8 @@ const App = () => (
             {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/x-callback" element={<XOAuthCallbackPage />} />
+            <Route path="/admin/facebook-callback" element={<FacebookOAuthCallbackPage />} />
             <Route path="/engine" element={<PersonalEnginePage />} />
             <Route
               path="/admin"
@@ -191,7 +196,8 @@ const App = () => (
                       <Route path="/book" element={<BookRedirect />} />
                       <Route path="/case-intake" element={<Navigate to="/book" replace />} />
                       <Route path="/booking" element={<Navigate to="/book" replace />} />
-                      <Route path="/home" element={<HomePage />} />
+                      <Route path="/home" element={<Navigate to="/" replace />} />
+                      <Route path="/stop-guessing" element={<StopGuessingPage />} />
                       <Route path="/services" element={<ServicesPage />} />
                       <Route path="/catalog" element={<Navigate to="/diagnostic" replace />} />
                       <Route path="/bundles" element={<Navigate to="/diagnostic" replace />} />
@@ -300,6 +306,8 @@ const App = () => (
                       <Route path="/diagnostic" element={<DiagnosticPage />} />
                       <Route path="/implementation" element={<ImplementationPage />} />
                       <Route path="/indianapolis" element={<LocationPage />} />
+                      <Route path="/indianapolis/contractor-follow-up" element={<IndianapolisLeadPage />} />
+                      <Route path="/indianapolis/service-business-lead-tracking" element={<IndianapolisLeadPage />} />
                       <Route path="/indiana" element={<LocationPage />} />
                       <Route path="/extension" element={<ExtensionPage />} />
                       <Route path="/brand-voice-extension" element={<BrandVoiceExtensionPage />} />
@@ -327,6 +335,7 @@ const App = () => (
                       <Route path="/competitor-analysis" element={<AuthorityArticlePage />} />
                       <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
                       <Route path="/report/:scanId/ask" element={<ForensicReportAskPage />} />
+                      <Route path="/lovable" element={<LovableOptimizerPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

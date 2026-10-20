@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { sanitizePostgrestLike } from "../_shared/sanitize.ts";
+import { sendLovableEmail } from "npm:@lovable.dev/email-js@0.3.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -365,64 +366,24 @@ serve(async (req) => {
 
       const messageId = `<${crypto.randomUUID()}@${EMAIL_DOMAIN}>`;
 
-      // Get/create unsubscribe token for the primary recipient (required by the email API)
-      const primaryRecipient = allowedTo[0].toLowerCase();
-      let unsubscribeToken: string | null = null;
-      const { data: existingTok } = await sb
-        .from("email_unsubscribe_tokens")
-        .select("token, used_at")
-        .eq("email", primaryRecipient)
-        .maybeSingle();
-      if (existingTok && !existingTok.used_at) {
-        unsubscribeToken = existingTok.token;
-      } else {
-        const newTok = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-        await sb
-          .from("email_unsubscribe_tokens")
-          .upsert({ token: newTok, email: primaryRecipient }, { onConflict: "email", ignoreDuplicates: true });
-        const { data: stored } = await sb
-          .from("email_unsubscribe_tokens")
-          .select("token")
-          .eq("email", primaryRecipient)
-          .maybeSingle();
-        unsubscribeToken = stored?.token || newTok;
-      }
-
-      // Build headers — Reply-To and Return-Path so replies come back to us
-      const extraHeaders: Record<string, string> = {
-        "Reply-To": addr,
-        "Return-Path": addr,
-      };
-      if (inReplyTo) {
-        extraHeaders["In-Reply-To"] = inReplyTo;
-        extraHeaders["References"] = inReplyTo;
-      }
-
-      // Enqueue via existing email queue infrastructure
-      const { error: enqErr } = await sb.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload: {
-          message_id: messageId,
-          to: allowedTo.join(", ") + (cc.length ? `, ${cc.map((a: string) => a).join(", ")}` : ""),
-          to_list: allowedTo,
-          cc_list: cc,
-          bcc_list: bcc,
+      // Send via Lovable's managed email (handles suppression + unsubscribe).
+      // The managed API sends to one recipient; cc/bcc were never delivered by
+      // the legacy processor either, so they are not reproduced here.
+      try {
+        await sendLovableEmail({
           from: fromHeader,
           sender_domain: SENDER_DOMAIN,
+          to: allowedTo[0],
           subject,
           html: finalHtml,
           text: finalText,
           purpose: "transactional",
-          unsubscribe_token: unsubscribeToken,
           label: `rep-mail:${mailbox.code}`,
           idempotency_key: `rep-mail-${messageId}`,
-          headers: extraHeaders,
-          queued_at: new Date().toISOString(),
-        },
-      });
-      if (enqErr) {
-        console.error("enqueue failed", enqErr);
-        return json(500, { error: "Failed to queue email" });
+        });
+      } catch (sendErr) {
+        console.error("send failed", sendErr);
+        return json(500, { error: "Failed to send email" });
       }
 
       // Log in sent folder

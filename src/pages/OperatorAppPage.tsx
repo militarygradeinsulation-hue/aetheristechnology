@@ -672,7 +672,7 @@ export default function OperatorAppPage() {
         <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-amber/25 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <Link
-              to="/home"
+              to="/"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-amber/10 hover:bg-amber/20 border border-amber/40 text-amber font-mono text-[10px] uppercase tracking-widest transition-colors shrink-0"
               aria-label="Back to main website"
             >

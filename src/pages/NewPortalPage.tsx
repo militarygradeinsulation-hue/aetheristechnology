@@ -224,7 +224,7 @@ const NewPortalPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="ghost" className="h-8 text-muted-foreground hover:text-amber-300">
-              <Link to="/home"><Home className="w-3.5 h-3.5 mr-1" /> Main site</Link>
+              <Link to="/"><Home className="w-3.5 h-3.5 mr-1" /> Main site</Link>
             </Button>
             <Button
               size="sm" variant="outline"

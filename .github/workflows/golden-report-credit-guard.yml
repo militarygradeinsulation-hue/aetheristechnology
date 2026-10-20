@@ -1,0 +1,31 @@
+name: Golden Report credit guard
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/generate-drip-batch/**"
+      - "supabase/functions/process-drip/**"
+      - "supabase/functions/forensic-scan-all/**"
+      - ".github/workflows/golden-report-credit-guard.yml"
+      - ".github/scripts/golden-report-credit-guard.mjs"
+  push:
+    paths:
+      - "supabase/functions/generate-drip-batch/**"
+      - "supabase/functions/process-drip/**"
+      - "supabase/functions/forensic-scan-all/**"
+      - ".github/workflows/golden-report-credit-guard.yml"
+      - ".github/scripts/golden-report-credit-guard.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify automatic Golden Report generation stays disabled
+        run: node .github/scripts/golden-report-credit-guard.mjs

@@ -55,19 +55,15 @@ export const ContactForm: React.FC = () => {
       if (error) throw error;
       
       // Send notification email to aetheris.technology@outlook.com
-      supabase.functions.invoke('send-transactional-email', {
+      supabase.functions.invoke('notify-contact-submission', {
         body: {
-          templateName: 'contact-notification',
-          recipientEmail: trimmed.email,
           idempotencyKey: `contact-notify-${submissionId}`,
-          templateData: {
-            name: trimmed.name,
-            email: trimmed.email,
-            phone: trimmed.phone,
-            company: trimmed.company,
-            message: trimmed.message,
-            service_interest: trimmed.service_interest,
-          },
+          name: trimmed.name,
+          email: trimmed.email,
+          phone: trimmed.phone,
+          company: trimmed.company,
+          message: trimmed.message,
+          service_interest: trimmed.service_interest,
         },
       });
       

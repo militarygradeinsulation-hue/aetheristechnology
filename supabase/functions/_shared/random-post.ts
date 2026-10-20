@@ -123,7 +123,7 @@ ${v.topic ? `TOPIC: ${v.topic}` : ""}
 CONTENT ANGLE FOR THIS RUN (use it, do not name it): ${v.angle || "your choice, pick an unexpected one"}
 RANDOM SEED (forces a different treatment each run): ${v.seed}
 ${v.tone ? `TONE: ${v.tone}` : ""}
-${architectIdentityPrompt(v.identity)}
+${architectIdentityPrompt(v.identity, "post")}
 
 PLATFORM: ${PLATFORM_GUIDE[v.platform]}
 

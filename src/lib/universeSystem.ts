@@ -33,7 +33,6 @@ export type PayloadKind = "tool_sandbox" | "scan" | "passthrough" | "internal_fo
 export const EXISTING_EDGE_FUNCTIONS: string[] = [
   "try-tool-sandbox",
   "scan-website",
-  "send-transactional-email",
   "social-scheduler",
   "hygiene-execute",
   "company-system",
@@ -169,7 +168,6 @@ export const UNIVERSE_MODULE_REGISTRY: UniverseModule[] = [
     outputs: ["sequence_assets"],
     actions: [
       { id: "draft_sequence", label: "Draft follow-up sequence", fn: "try-tool-sandbox", payload_kind: "tool_sandbox", risk: "draft", confirm: false, input: ["company_context"], rollback: "Draft only." },
-      { id: "send_sequence", label: "Send follow-up sequence", fn: "send-transactional-email", payload_kind: "passthrough", risk: "external", confirm: true, input: ["sequence_id", "recipients"], rollback: "Sent email cannot be recalled. Suppress the recipients and stop the sequence." },
     ],
     sensitivity: "high",
   },

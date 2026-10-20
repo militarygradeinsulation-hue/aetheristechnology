@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -161,30 +162,18 @@ serve(async (req) => {
         return json(400, { error: "No valid recipient email on file. Generate one first or provide an inbox override." });
       }
 
-      // Invoke send-transactional-email
-      const url = `${SUPABASE_URL}/functions/v1/send-transactional-email`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SVC}`,
-          "apikey": SVC,
-        },
-        body: JSON.stringify({
-          templateName: "rep-welcome",
-          to: recipient,
-          data: { name: rep.rep_name || "Rep" },
+      try {
+        const result = await sendTemplateEmail("rep-welcome", recipient, {
+          templateData: { name: rep.rep_name || "Rep" },
           idempotencyKey: `rep-test-${rep.id}-${Date.now()}`,
-          purpose: "transactional",
-        }),
-      });
-      const bodyText = await resp.text();
-      let parsed: unknown = bodyText;
-      try { parsed = JSON.parse(bodyText); } catch { /* keep text */ }
-      if (!resp.ok) {
-        return json(502, { error: "Email send failed", status: resp.status, response: parsed });
+        });
+        if (!result.sent) {
+          return json(200, { ok: false, recipient, reason: result.reason });
+        }
+        return json(200, { ok: true, recipient });
+      } catch (e) {
+        return json(502, { error: "Email send failed", response: e instanceof Error ? e.message : String(e) });
       }
-      return json(200, { ok: true, recipient, response: parsed });
     }
 
     return json(400, { error: "Unknown action" });

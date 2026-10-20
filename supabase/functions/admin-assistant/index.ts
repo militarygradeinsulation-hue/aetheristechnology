@@ -48,7 +48,7 @@ ${AETHERIS_KNOWLEDGE}
 - create-checkout / payments-webhook / get-stripe-price / generate-purchase-delivery — Stripe flow
 - monthly-delivery — smart subscription deliveries via invoice.paid
 - process-drip / generate-drip-batch / handle-drip-replies — outbound drip
-- send-transactional-email / process-email-queue / handle-email-suppression / handle-email-unsubscribe — email infra
+- email sending runs through Lovable's managed email (no queue functions)
 - linkedin-post / linkedin-auth — LinkedIn publishing
 - hubspot-oauth-start / hubspot-oauth-callback / hubspot-sync / hubspot-self-test / hubspot-disconnect — HubSpot connection
 - admin-data / admin-insights / admin-library / admin-pin-login / admin-assistant (this one) / admin-generate-briefing — admin endpoints
