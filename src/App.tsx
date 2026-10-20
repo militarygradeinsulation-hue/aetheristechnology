@@ -130,6 +130,8 @@ const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
 const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
 const LovableOptimizerPage = lazy(() => import("./pages/LovableOptimizerPage"));
+const MemberNetworkPage = lazy(() => import("./pages/MemberNetworkPage"));
+const MemberActivationPage = lazy(() => import("./pages/MemberActivationPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -334,6 +336,9 @@ const App = () => (
                       <Route path="/above-the-fold" element={<AuthorityArticlePage />} />
                       <Route path="/report/:scanId/ask" element={<ForensicReportAskPage />} />
                       <Route path="/lovable" element={<LovableOptimizerPage />} />
+                      {/* Member Network — connection-first activation */}
+                      <Route path="/network" element={<MemberNetworkPage />} />
+                      <Route path="/member/activate" element={<MemberActivationPage />} />
                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
