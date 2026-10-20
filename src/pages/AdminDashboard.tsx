@@ -981,6 +981,10 @@ const AdminDashboard: React.FC = () => {
                                     id={`admin-tab-btn-${tab}`}
                                     type="button"
                                     onClick={() => {
+                                      if (tab === 'meetingflow') {
+                                        navigate('/admin/meeting-flow');
+                                        return;
+                                      }
                                       setActiveTab(tab as typeof activeTab);
                                       ensureTabData(tab);
                                       if (tab !== 'tools') setActiveTool(null);
