@@ -39,8 +39,8 @@ export default function MemberActivationPage() {
           .eq("user_id", user.id);
 
         if (!error && data && data.length > 0) {
-          const serverMap = new Map(
-            data.map((row: { step_id: string; completed: boolean }) => [
+          const serverMap = new Map<string, boolean>(
+            data.map((row: { step_id: string; completed: boolean }): [string, boolean] => [
               row.step_id,
               row.completed,
             ]),
