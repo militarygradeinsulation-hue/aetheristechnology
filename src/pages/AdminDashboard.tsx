@@ -234,7 +234,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved === 'prospector' && !hasValidOwnerToken()) return 'workspace';
@@ -259,6 +259,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'companycal', label: 'Company Calendar', icon: CalendarClock },
     { key: 'liveevents', label: 'Live Events & Webinars', icon: CalendarDays },
     { key: 'portal', label: 'Company Portal', icon: Building2 },
+    { key: 'meetingflow', label: 'Meeting Flow', icon: Target },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
     ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'ICP Connection Engine', icon: UserPlus }] : []),
@@ -292,7 +293,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command', 'prospector']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command', 'prospector', 'meetingflow']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -672,6 +673,7 @@ const AdminDashboard: React.FC = () => {
       case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
       case 'portal': return <CompanyPortalPreview />;
+      case 'meetingflow': return <ExecutiveMeetingFlow />;
       case 'playbook': return <RepPlaybookPanel />;
       case 'training': return <AdminTrainingPanel />;
       case 'onboarding': return <AdminOnboardingStudio />;
