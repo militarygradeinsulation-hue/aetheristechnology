@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getPortalToken } from "@/lib/portalAuth";
+import { getAdminToken } from "@/lib/adminAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,6 +120,14 @@ const ownerTone: Record<MeetingStageId, string> = {
   joseph: "border-emerald-400/30 bg-emerald-400/5 text-emerald-200",
 };
 
+const meetingAuthHeaders = (): Record<string, string> => {
+  const portalToken = getPortalToken();
+  if (portalToken) return { "x-portal-token": portalToken };
+  const adminToken = getAdminToken();
+  if (adminToken) return { "x-admin-token": adminToken };
+  return {};
+};
+
 export const ExecutiveMeetingFlow: React.FC = () => {
   const [cases, setCases] = useState<MeetingCase[]>([]);
   const [selected, setSelected] = useState<MeetingCase>(() => blankCase());
@@ -141,11 +150,11 @@ export const ExecutiveMeetingFlow: React.FC = () => {
     setLoading(true);
     const local = localCases();
     try {
-      const token = getPortalToken();
-      if (!token) throw new Error("No portal session");
+      const headers = meetingAuthHeaders();
+      if (!Object.keys(headers).length) throw new Error("No portal or admin session");
       const { data, error } = await supabase.functions.invoke("portal-meeting-flow", {
         body: { action: "list" },
-        headers: { "x-portal-token": token },
+        headers,
       });
       if (error || !data?.ok) throw new Error(error?.message || data?.error || "Meeting flow unavailable");
       const remote = Array.isArray(data.cases) ? data.cases.map(normalizeCase) : [];
@@ -224,11 +233,11 @@ export const ExecutiveMeetingFlow: React.FC = () => {
     };
 
     try {
-      const token = getPortalToken();
-      if (!token) throw new Error("No portal session");
+      const headers = meetingAuthHeaders();
+      if (!Object.keys(headers).length) throw new Error("No portal or admin session");
       const { data, error } = await supabase.functions.invoke("portal-meeting-flow", {
         body: { action: "upsert", ...payload },
-        headers: { "x-portal-token": token },
+        headers,
       });
       if (error || !data?.case) throw new Error(error?.message || data?.error || "Save failed");
       const saved = normalizeCase(data.case);
@@ -317,11 +326,11 @@ export const ExecutiveMeetingFlow: React.FC = () => {
       return;
     }
     try {
-      const token = getPortalToken();
-      if (!token) throw new Error("No portal session");
+      const headers = meetingAuthHeaders();
+      if (!Object.keys(headers).length) throw new Error("No portal or admin session");
       const { data, error } = await supabase.functions.invoke("portal-meeting-flow", {
         body: { action: "archive", id: selected.id },
-        headers: { "x-portal-token": token },
+        headers,
       });
       if (error || !data?.ok) throw new Error(error?.message || data?.error || "Archive failed");
       setCases((prev) => prev.filter((c) => c.id !== selected.id));
