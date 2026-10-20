@@ -131,7 +131,6 @@ const ToolsShopReturnPage = lazy(() => import("./pages/ToolsShopReturnPage"));
 const TryToolPage = lazy(() => import("./pages/TryToolPage"));
 const LovableOptimizerPage = lazy(() => import("./pages/LovableOptimizerPage"));
 const BusinessGenomePage = lazy(() => import("./pages/BusinessGenomePage"));
-const LovableOptimizerPage = lazy(() => import("./pages/LovableOptimizerPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
