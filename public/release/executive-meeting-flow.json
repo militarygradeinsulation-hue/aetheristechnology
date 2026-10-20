@@ -1,0 +1,7 @@
+{
+  "release": "executive-meeting-flow",
+  "version": "2026-10-20.1",
+  "portal": "Dean -> Braden -> Joseph",
+  "backend": "portal-meeting-flow",
+  "sourceOfTruth": "GitHub main"
+}
