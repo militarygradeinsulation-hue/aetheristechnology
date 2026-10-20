@@ -291,3 +291,6 @@ verify_jwt = false
 
 [functions.company-leak-audit]
 verify_jwt = false
+
+[functions.portal-meeting-flow]
+verify_jwt = false

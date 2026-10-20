@@ -471,6 +471,69 @@ export type Database = {
         }
         Relationships: []
       }
+      aetheris_executive_meeting_cases: {
+        Row: {
+          answers: Json
+          archived_at: string | null
+          company: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_role: string | null
+          context: Json
+          created_at: string
+          created_by_code: string | null
+          decision: Json
+          gates: Json
+          handoff_summary: string | null
+          id: string
+          last_meeting_at: string | null
+          stage: string
+          status: string
+          updated_at: string
+          updated_by_code: string | null
+        }
+        Insert: {
+          answers?: Json
+          archived_at?: string | null
+          company: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_role?: string | null
+          context?: Json
+          created_at?: string
+          created_by_code?: string | null
+          decision?: Json
+          gates?: Json
+          handoff_summary?: string | null
+          id?: string
+          last_meeting_at?: string | null
+          stage?: string
+          status?: string
+          updated_at?: string
+          updated_by_code?: string | null
+        }
+        Update: {
+          answers?: Json
+          archived_at?: string | null
+          company?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_role?: string | null
+          context?: Json
+          created_at?: string
+          created_by_code?: string | null
+          decision?: Json
+          gates?: Json
+          handoff_summary?: string | null
+          id?: string
+          last_meeting_at?: string | null
+          stage?: string
+          status?: string
+          updated_at?: string
+          updated_by_code?: string | null
+        }
+        Relationships: []
+      }
       ai_detection_scans: {
         Row: {
           created_at: string
@@ -9495,10 +9558,6 @@ export type Database = {
         Args: { _ciphertext: string; _key: string }
         Returns: string
       }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       detect_closed_lost_reactivation: {
         Args: {
           _account_id: string
@@ -9540,14 +9599,9 @@ export type Database = {
         Args: { _account_id: string; _days?: number }
         Returns: Json
       }
-      email_queue_dispatch: { Args: never; Returns: undefined }
       encrypt_token: {
         Args: { _key: string; _plaintext: string }
         Returns: string
-      }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       find_webinar_rep_for_email: {
         Args: { _email: string }
@@ -9629,25 +9683,8 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       promote_if_first_admin: { Args: { _user_id: string }; Returns: boolean }
       purge_expired_ai_cache: { Args: never; Returns: undefined }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
-      }
       refund_resume_credit: { Args: { _email: string }; Returns: undefined }
       rep_mailbox_local_part: {
         Args: { _code: string; _rep_name: string }
