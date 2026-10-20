@@ -18,6 +18,7 @@ import {
   Link2, Link2Off, CheckCircle2, Target, MessageCircle,
 } from "lucide-react";
 import { outlookConnect, type OutlookStatus } from "@/lib/outlookConnect";
+import { googleConnect, type GoogleStatus } from "@/lib/googleConnect";
 import { portalLeads, type RepLead } from "@/lib/portalLeads";
 
 type Folder = "inbox" | "sent" | "drafts" | "trash";
@@ -35,13 +36,21 @@ export const InboxTab: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [outlook, setOutlook] = useState<OutlookStatus | null>(null);
   const [outlookBusy, setOutlookBusy] = useState(false);
+  const [google, setGoogle] = useState<GoogleStatus | null>(null);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const refreshOutlook = async () => {
     try { setOutlook(await outlookConnect.getStatus()); }
     catch (e: any) { console.warn("outlook status", e?.message); }
   };
 
+  const refreshGoogle = async () => {
+    try { setGoogle(await googleConnect.getStatus()); }
+    catch (e: any) { console.warn("google status", e?.message); }
+  };
+
   useEffect(() => { refreshOutlook(); }, []);
+  useEffect(() => { refreshGoogle(); }, []);
 
   // If the OAuth popup posts back, refresh status
   useEffect(() => {
@@ -49,6 +58,10 @@ export const InboxTab: React.FC = () => {
       if (e?.data?.type === "outlook_oauth") {
         refreshOutlook();
         if (e.data.ok) toast({ title: "Outlook connected" });
+      }
+      if (e?.data?.type === "google_oauth") {
+        refreshGoogle();
+        if (e.data.ok) toast({ title: "Google connected" });
       }
     };
     window.addEventListener("message", onMsg);
@@ -86,6 +99,35 @@ export const InboxTab: React.FC = () => {
     } catch (e: any) {
       toast({ title: "Disconnect failed", description: e.message, variant: "destructive" });
     } finally { setOutlookBusy(false); }
+  };
+
+  const connectGoogle = async () => {
+    setGoogleBusy(true);
+    try {
+      const url = await googleConnect.getAuthUrl();
+      const w = window.open(url, "google_oauth", "width=520,height=720");
+      if (!w) window.location.href = url;
+    } catch (e: any) {
+      toast({
+        title: "Couldn't start Google connection",
+        description: e.message?.includes("GOOGLE_OAUTH_CLIENT_ID")
+          ? "Google OAuth isn't fully configured yet. Ask the admin to add the Google app credentials."
+          : e.message,
+        variant: "destructive",
+      });
+    } finally { setGoogleBusy(false); }
+  };
+
+  const disconnectGoogle = async () => {
+    if (!confirm("Disconnect your Google account from this portal?")) return;
+    setGoogleBusy(true);
+    try {
+      await googleConnect.disconnect();
+      await refreshGoogle();
+      toast({ title: "Google disconnected" });
+    } catch (e: any) {
+      toast({ title: "Disconnect failed", description: e.message, variant: "destructive" });
+    } finally { setGoogleBusy(false); }
   };
 
   const refresh = async (preserveSelected = false) => {
@@ -184,6 +226,17 @@ export const InboxTab: React.FC = () => {
                 Outlook not connected
               </Badge>
             )}
+            {google?.connected ? (
+              <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 bg-emerald-500/10 gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                Google: {google.google_email || "connected"}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground gap-1">
+                <Link2Off className="w-3 h-3" />
+                Google not connected
+              </Badge>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -213,6 +266,24 @@ export const InboxTab: React.FC = () => {
             >
               {outlookBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2 className="w-3 h-3 mr-1" />}
               Connect Outlook
+            </Button>
+          )}
+          {google?.connected ? (
+            <Button size="sm" variant="outline" onClick={disconnectGoogle} disabled={googleBusy}>
+              {googleBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2Off className="w-3 h-3 mr-1" />}
+              Disconnect Google
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+              onClick={connectGoogle}
+              disabled={googleBusy || (google ? !google.configured : false)}
+              title={google && !google.configured ? "Google OAuth not configured by admin yet" : undefined}
+            >
+              {googleBusy ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Link2 className="w-3 h-3 mr-1" />}
+              Connect Google
             </Button>
           )}
           <Button size="sm" variant="outline" onClick={() => refresh()}><RefreshCcw className="w-3 h-3 mr-1" /> Refresh</Button>
