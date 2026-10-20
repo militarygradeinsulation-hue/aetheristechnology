@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase, Target,
 } from 'lucide-react';
 
 
@@ -40,6 +40,7 @@ import { EngagementBoard } from '@/components/portal/EngagementBoard';
 import { DailyHustleCard } from '@/components/portal/DailyHustleCard';
 import { GoldenSlowDownNudge } from '@/components/portal/GoldenSlowDownNudge';
 import RepCRMPanel from '@/components/portal/RepCRMPanel';
+import { ExecutiveMeetingFlow } from '@/components/portal/ExecutiveMeetingFlow';
 import { startHeartbeat, logGoldenView } from '@/lib/portalEngagement';
 
 
@@ -296,6 +297,7 @@ const NewPortalPage: React.FC = () => {
               ['start', 'Start', LayoutGrid, true],
               ['leads', 'Leads', Users, true],
               ['crm', 'CRM', Briefcase, true],
+              ['meetings', 'Meetings', Target, true],
               ['calendar', 'Calendar', CalendarDays, true],
               ['playbook', 'Playbook', ClipboardList, showAdvanced],
               ['coach', 'Coach', MessageSquare, true],
@@ -307,7 +309,7 @@ const NewPortalPage: React.FC = () => {
             ];
             const visible = allTabs.filter(([, , , show]) => show);
             const gridColsMap: Record<number, string> = {
-              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9', 10: 'md:grid-cols-10', 11: 'md:grid-cols-11',
+              4: 'md:grid-cols-4', 5: 'md:grid-cols-5', 6: 'md:grid-cols-6', 7: 'md:grid-cols-7', 8: 'md:grid-cols-8', 9: 'md:grid-cols-9', 10: 'md:grid-cols-10', 11: 'md:grid-cols-11', 12: 'md:grid-cols-6 lg:grid-cols-12',
             };
 
             const gridCols = gridColsMap[visible.length] || 'md:grid-cols-4';
@@ -431,6 +433,25 @@ const NewPortalPage: React.FC = () => {
             </ToolCard>
           </TabsContent>
 
+
+          {/* MEETINGS — Dean -> Braden -> Joseph executive flow */}
+          <TabsContent value="meetings" className="mt-8">
+            <ToolCard
+              eyebrow="// Executive Sales Process //"
+              title="Meeting Flow — Dean → Braden → Joseph"
+              summary="A live meeting guide that keeps each executive in the right role. Capture answers as they happen, complete the stage gate, and hand the opportunity forward without making the prospect repeat themselves."
+              howTo={[
+                'Dean opens the relationship and records the situation, friction, economic importance and decision structure.',
+                'Braden tests the cause, traces the pattern, establishes the business case, surfaces objections and confirms decision readiness.',
+                'Joseph enters after qualification to confirm the architecture, define the first win and scope, then reach the commercial decision.',
+                'Use the Joseph first-meeting exception only when the prospect is already decision-ready and the meeting is expected to produce a deal decision.',
+                'Save progress during or after every meeting. The handoff brief builds from the important answers automatically.',
+              ]}
+              defaultOpen
+            >
+              <ExecutiveMeetingFlow />
+            </ToolCard>
+          </TabsContent>
 
           {/* PLAYBOOK — gated */}
           {showAdvanced && (
