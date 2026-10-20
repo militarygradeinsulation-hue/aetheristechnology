@@ -5,7 +5,7 @@
 // in localStorage (`aetheris.portalStyle`).
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
@@ -157,6 +157,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ eyebrow, title, summary, howTo, chi
 
 const NewPortalPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState(() => getPortalProfile());
   const authed = hasValidPortalSession() && !!profile;
 
@@ -165,6 +166,16 @@ const NewPortalPage: React.FC = () => {
 
   // Portal engagement — track seconds-online (heartbeat) + Golden Report opens.
   const [activeTab, setActiveTab] = useState('start');
+
+  // Direct-link support makes the meeting workspace impossible to miss:
+  // /portal/meetings or /portal?tab=meetings opens it immediately.
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(location.search).get('tab');
+    if (location.pathname.endsWith('/meetings') || requestedTab === 'meetings') {
+      setActiveTab('meetings');
+    }
+  }, [location.pathname, location.search]);
+
   useEffect(() => {
     if (!authed) return;
     const stop = startHeartbeat();
