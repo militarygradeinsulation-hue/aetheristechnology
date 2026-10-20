@@ -20,7 +20,8 @@ jobs:
         run: |
           set -euo pipefail
           ORIGIN="https://aetheris.technology"
-          NEEDLE="Executive Relationship-to-Close"
+          NEEDLE_ONE="Executive Sales Process · New"
+          NEEDLE_TWO="Open Executive Meeting Flow"
 
           find_in_live_bundles() {
             local html queue next seen asset url js refs
@@ -45,8 +46,8 @@ jobs:
                 esac
 
                 js="$(curl -fsSL --max-time 30 "$url" 2>/dev/null || true)"
-                if printf '%s' "$js" | grep -Fq "$NEEDLE"; then
-                  echo "Production frontend verified via $url"
+                if printf '%s' "$js" | grep -Fq "$NEEDLE_ONE" && printf '%s' "$js" | grep -Fq "$NEEDLE_TWO"; then
+                  echo "Admin Meeting Flow callout verified in production via $url"
                   return 0
                 fi
 
@@ -62,14 +63,14 @@ jobs:
 
           for attempt in $(seq 1 40); do
             if find_in_live_bundles; then
-              echo "Executive meeting flow is live in production on attempt $attempt."
+              echo "Admin Meeting Flow callout is live in production on attempt $attempt."
               exit 0
             fi
-            echo "Attempt $attempt/40: production bundles do not contain the executive meeting flow yet."
+            echo "Attempt $attempt/40: production bundles do not contain the visible Admin Meeting Flow callout yet."
             sleep 15
           done
 
-          echo "Executive meeting flow did not appear in production within 10 minutes."
+          echo "Visible Admin Meeting Flow callout did not appear in production within 10 minutes."
           exit 1
 
       - name: Verify meeting-flow edge auth boundary
