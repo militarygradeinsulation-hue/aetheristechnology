@@ -55,6 +55,7 @@ const QuoteViewPage = lazy(() => import("./pages/QuoteViewPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const StaffEntry = lazy(() => import("./pages/StaffEntry"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminMeetingFlowPage = lazy(() => import("./pages/AdminMeetingFlowPage"));
 const XOAuthCallbackPage = lazy(() => import("./pages/XOAuthCallbackPage"));
 const FacebookOAuthCallbackPage = lazy(() => import("./pages/FacebookOAuthCallbackPage"));
 const PersonalEnginePage = lazy(() => import("./pages/PersonalEnginePage"));
@@ -173,6 +174,14 @@ const App = () => (
                 <AuthProvider>
                   <AdminDashboard />
                   <FloatingWorkbench />
+                </AuthProvider>
+              }
+            />
+            <Route
+              path="/admin/meeting-flow"
+              element={
+                <AuthProvider>
+                  <AdminMeetingFlowPage />
                 </AuthProvider>
               }
             />
