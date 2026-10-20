@@ -292,6 +292,7 @@ const App = () => (
 
                       {/* Reps now log into the new portal by default. Old portal preserved for admins only at /portal/legacy. */}
                       <Route path="/portal" element={<NewPortalPage />} />
+                      <Route path="/portal/meetings" element={<NewPortalPage />} />
                       <Route path="/portal/new" element={<Navigate to="/portal" replace />} />
                       <Route path="/portal/legacy" element={<PortalPage />} />
                       <Route path="/partner-portal" element={<NewPortalPage />} />
