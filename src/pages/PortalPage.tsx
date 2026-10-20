@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Lock, Loader2, ArrowLeft, DollarSign, TrendingUp, Percent, Shield, Crown,
   Calculator, Wrench, MessageSquareCode, Building2, LogOut, Repeat, Users, Briefcase, Activity,
-  X, Minimize2, Maximize2, Zap, Sparkles,
+  X, Minimize2, Maximize2, Zap, Sparkles, Target,
 } from 'lucide-react';
 import { WorkspaceTab } from '@/components/portal/WorkspaceTab';
 import { RepImageStudio } from '@/components/portal/RepImageStudio';
@@ -109,10 +109,11 @@ import { Compass } from 'lucide-react';
 import { IdeaRoom } from '@/components/portal/IdeaRoom';
 import { Lightbulb } from 'lucide-react';
 import { DialerPanel } from '@/components/portal/DialerPanel';
+import { ExecutiveMeetingFlow } from '@/components/portal/ExecutiveMeetingFlow';
 import { Phone as PhoneIcon } from 'lucide-react';
 
 
-type Tab = 'overview' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas' | 'execdesk' | 'goldenlibrary' | 'command';
+type Tab = 'overview' | 'meetings' | 'calendar' | 'companycal' | 'commissions' | 'forecast' | 'leads' | 'playbook' | 'training' | 'onboarding' | 'team' | 'tools' | 'workspace' | 'sharedws' | 'interviews' | 'briefing' | 'documents' | 'coach' | 'company' | 'art' | 'video' | 'poststudio' | 'careers' | 'inbox' | 'news' | 'sprint' | 'incentives' | 'catalog' | 'linkedin' | 'workbench' | 'partnerhub' | 'ideas' | 'execdesk' | 'goldenlibrary' | 'command';
 type ToolKey =
   | 'all-in-one'
   | 'business-post-analyst'
@@ -182,7 +183,7 @@ const PortalPage: React.FC = () => {
     return next;
   });
   // Tabs that benefit from a wider canvas (workspace boards, company portal, etc.)
-  const WIDE_TABS = new Set<Tab>(['execdesk','workspace','sharedws','company','briefing','interviews','careers','leads','forecast','documents','training','onboarding']);
+  const WIDE_TABS = new Set<Tab>(['execdesk','workspace','sharedws','company','briefing','interviews','careers','leads','meetings','forecast','documents','training','onboarding']);
 
 
 
@@ -219,7 +220,7 @@ const PortalPage: React.FC = () => {
     } catch {}
   }, [activeTool, profile?.code, restoredFor, ACTIVE_TOOL_KEY]);
 
-  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint', 'coach']; // newly added tabs auto-show; coach pinned so Braden never loses it
+  const PORTAL_ALWAYS_INCLUDE_NEW = ['briefing', 'interviews', 'news', 'sprint', 'coach', 'meetings']; // newly added tabs auto-show; coach pinned so Braden never loses it
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_KEY);
@@ -359,7 +360,7 @@ const PortalPage: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
     const toolParam = params.get('tool');
-    const VALID_TABS: Tab[] = ['overview','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas','execdesk'];
+    const VALID_TABS: Tab[] = ['overview','meetings','calendar','companycal','commissions','forecast','leads','playbook','training','onboarding','team','tools','workspace','sharedws','interviews','briefing','documents','coach','company','art','video','poststudio','careers','inbox','news','sprint','incentives','catalog','linkedin','ideas','execdesk'];
     const VALID_TOOLS: ToolKey[] = ['all-in-one','business-post-analyst','outreach-email','golden-report','leak-audit','scan','scam-check','detective','ai-detect','business-diagnostic','sales-scripts','follow-up-plan','strategic-questions','brand-contradictions','friction-audit'];
     if (tabParam && (VALID_TABS as string[]).includes(tabParam)) {
       setTab(tabParam as Tab);
@@ -624,6 +625,7 @@ const PortalPage: React.FC = () => {
     { id: 'interviews', label: 'Interviews', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'incentives', label: 'Incentive Plan', icon: <Trophy className="w-4 h-4" />, iconCmp: Trophy, adminOrPartnerOnly: true },
     { id: 'leads', label: 'Leads', icon: <Users className="w-4 h-4" />, iconCmp: Users },
+    { id: 'meetings', label: 'Meeting Flow', icon: <Target className="w-4 h-4" />, iconCmp: Target },
     { id: 'calendar', label: 'My Calendar', icon: <CalendarDays className="w-4 h-4" />, iconCmp: CalendarDays },
     { id: 'tools', label: 'My Tools', icon: <Wrench className="w-4 h-4" />, iconCmp: Wrench },
     { id: 'catalog', label: 'Catalog & Pricing', icon: <ShoppingCart className="w-4 h-4" />, iconCmp: ShoppingCart },
@@ -714,6 +716,7 @@ const PortalPage: React.FC = () => {
         </div>
       );
       case 'leads': return <LeadsBoard />;
+      case 'meetings': return <ExecutiveMeetingFlow />;
       case 'forecast': return <ForecastCenter isPartner={isPartner} />;
       case 'tools':
         return !activeTool ? (
