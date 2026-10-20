@@ -14,38 +14,57 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for executive meeting flow in production bundle
+      - name: Wait for executive meeting flow in production bundles
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN="https://aetheris.technology"
           NEEDLE="Executive Relationship-to-Close"
 
-          for attempt in $(seq 1 40); do
+          find_in_live_bundles() {
+            local html queue next seen asset url js refs
             html="$(curl -fsSL --max-time 20 "$ORIGIN/" 2>/dev/null || true)"
-            found=0
+            queue="$(printf '%s' "$html" | grep -oE '(https?://[^" ]+\.js[^" ]*|/?assets/[A-Za-z0-9._-]+\.js)' | sed -E 's#^//#https://#' | sort -u || true)"
+            seen=""
 
-            while IFS= read -r asset; do
-              [ -n "$asset" ] || continue
-              case "$asset" in
-                http*) url="$asset" ;;
-                /*) url="$ORIGIN$asset" ;;
-                *) url="$ORIGIN/$asset" ;;
-              esac
+            for round in 1 2 3 4; do
+              [ -n "$queue" ] || break
+              next=""
+              while IFS= read -r asset; do
+                [ -n "$asset" ] || continue
+                if printf '%s\n' "$seen" | grep -Fxq "$asset"; then
+                  continue
+                fi
+                seen="$seen$asset"$'\n'
 
-              js="$(curl -fsSL --max-time 30 "$url" 2>/dev/null || true)"
-              if printf '%s' "$js" | grep -Fq "$NEEDLE"; then
-                echo "Production frontend verified on attempt $attempt via $url"
-                found=1
-                break
-              fi
-            done < <(printf '%s' "$html" | grep -oE 'src="[^"]+\.js[^"]*"' | sed -E 's/^src="//;s/"$//' | sort -u)
+                case "$asset" in
+                  http*) url="$asset" ;;
+                  /*) url="$ORIGIN$asset" ;;
+                  *) url="$ORIGIN/$asset" ;;
+                esac
 
-            if [ "$found" = "1" ]; then
+                js="$(curl -fsSL --max-time 30 "$url" 2>/dev/null || true)"
+                if printf '%s' "$js" | grep -Fq "$NEEDLE"; then
+                  echo "Production frontend verified via $url"
+                  return 0
+                fi
+
+                refs="$(printf '%s' "$js" | grep -oE '/?assets/[A-Za-z0-9._-]+\.js' | sort -u || true)"
+                if [ -n "$refs" ]; then
+                  next="$next$refs"$'\n'
+                fi
+              done <<< "$queue"
+              queue="$(printf '%s' "$next" | sed '/^$/d' | sort -u)"
+            done
+            return 1
+          }
+
+          for attempt in $(seq 1 40); do
+            if find_in_live_bundles; then
+              echo "Executive meeting flow is live in production on attempt $attempt."
               exit 0
             fi
-
-            echo "Attempt $attempt/40: production bundle does not contain the executive meeting flow yet."
+            echo "Attempt $attempt/40: production bundles do not contain the executive meeting flow yet."
             sleep 15
           done
 
