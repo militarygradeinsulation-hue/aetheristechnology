@@ -235,6 +235,14 @@ const NewPortalPage: React.FC = () => {
             {isPartner ? 'Partner Portal' : 'Operator Portal'} · {profile!.code}
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setActiveTab('meetings')}
+              className="h-8 bg-amber-400 text-black hover:bg-amber-300 font-mono uppercase tracking-wider text-[10px]"
+              title="Open the Dean → Braden → Joseph meeting workspace"
+            >
+              <Target className="w-3.5 h-3.5 mr-1" /> Meeting Flow
+            </Button>
             <Button asChild size="sm" variant="ghost" className="h-8 text-muted-foreground hover:text-amber-300">
               <Link to="/"><Home className="w-3.5 h-3.5 mr-1" /> Main site</Link>
             </Button>
