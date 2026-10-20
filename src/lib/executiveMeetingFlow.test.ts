@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
   EXECUTIVE_MEETING_FLOW,
   answeredQuestionCount,
@@ -7,6 +9,8 @@ import {
   stageGateComplete,
   stageQuestionCount,
 } from "./executiveMeetingFlow";
+
+const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
 describe("Aetheris executive meeting flow", () => {
   it("keeps the required Dean -> Braden -> Joseph sequence", () => {
@@ -52,5 +56,19 @@ describe("Aetheris executive meeting flow", () => {
     expect(handoff).toContain("Alex Rivera");
     expect(handoff).toContain("Expansion exposed gaps");
     expect(handoff).not.toContain("This should not appear");
+  });
+
+  it("is visible in both portal experiences and has a direct route", () => {
+    const newPortal = read("src/pages/NewPortalPage.tsx");
+    const classicPortal = read("src/pages/PortalPage.tsx");
+    const app = read("src/App.tsx");
+
+    expect(newPortal).toContain("['meetings', 'Meetings', Target, true]");
+    expect(newPortal).toContain('<TabsContent value="meetings"');
+    expect(newPortal).toContain("location.pathname.endsWith('/meetings')");
+    expect(classicPortal).toContain("{ id: 'meetings', label: 'Meeting Flow'");
+    expect(classicPortal).toContain("case 'meetings': return <ExecutiveMeetingFlow />;");
+    expect(classicPortal).toContain("'meetings'");
+    expect(app).toContain('path="/portal/meetings"');
   });
 });
