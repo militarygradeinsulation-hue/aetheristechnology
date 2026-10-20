@@ -816,13 +816,7 @@ const AdminDashboard: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => {
-            if (!visibleTabs.includes('meetingflow')) setVisibleTabs([...visibleTabs, 'meetingflow']);
-            setLayout('tabs');
-            setTabsCollapsed(false);
-            setActiveTab('meetingflow');
-            ensureTabData('meetingflow');
-          }}
+          onClick={() => navigate('/admin/meeting-flow')}
           className="w-full rounded-xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-400/15 via-emerald-400/5 to-transparent p-4 text-left transition hover:border-emerald-300 hover:from-emerald-400/25 shadow-[0_0_28px_rgba(52,211,153,0.08)]"
           aria-label="Open Executive Meeting Flow"
         >
@@ -896,6 +890,10 @@ const AdminDashboard: React.FC = () => {
                         id={`admin-tab-btn-${tab}`}
                         type="button"
                         onClick={() => {
+                          if (tab === 'meetingflow') {
+                            navigate('/admin/meeting-flow');
+                            return;
+                          }
                           setActiveTab(tab as typeof activeTab);
                           ensureTabData(tab);
                           if (tab !== 'tools') setActiveTool(null);
@@ -1048,7 +1046,7 @@ const AdminDashboard: React.FC = () => {
                         size="icon"
                         className="h-6 w-6"
                         title="Open full"
-                        onClick={() => { setLayout('tabs'); setActiveTab(tab as typeof activeTab); ensureTabData(tab); }}
+                        onClick={() => { setLayout('tabs'); if (tab === 'meetingflow') { navigate('/admin/meeting-flow'); return; } setActiveTab(tab as typeof activeTab); ensureTabData(tab); }}
                       >
                         <Maximize2 className="w-3 h-3" />
                       </Button>
