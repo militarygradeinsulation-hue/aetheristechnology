@@ -813,6 +813,35 @@ const AdminDashboard: React.FC = () => {
           </div>
         </Link>
 
+        <button
+          type="button"
+          onClick={() => {
+            if (!visibleTabs.includes('meetingflow')) setVisibleTabs([...visibleTabs, 'meetingflow']);
+            setLayout('tabs');
+            setTabsCollapsed(false);
+            setActiveTab('meetingflow');
+            ensureTabData('meetingflow');
+          }}
+          className="w-full rounded-xl border-2 border-emerald-400/60 bg-gradient-to-r from-emerald-400/15 via-emerald-400/5 to-transparent p-4 text-left transition hover:border-emerald-300 hover:from-emerald-400/25 shadow-[0_0_28px_rgba(52,211,153,0.08)]"
+          aria-label="Open Executive Meeting Flow"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-lg border border-emerald-400/40 bg-emerald-400/10 p-2.5">
+                <Target className="h-5 w-5 text-emerald-300" />
+              </div>
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-emerald-300">Executive Sales Process · New</div>
+                <div className="mt-1 text-xl font-semibold text-zinc-100">Meeting Flow</div>
+                <div className="mt-1 text-sm text-zinc-400">Dean → Braden → Joseph · live questions, answer capture, stage gates, handoff brief, and close tracking.</div>
+              </div>
+            </div>
+            <div className="shrink-0 rounded-full border border-emerald-400/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-emerald-200">
+              Open →
+            </div>
+          </div>
+        </button>
+
         {/* View selector + Tabs */}
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
           <CustomViewSelector
