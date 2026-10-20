@@ -886,7 +886,7 @@ const AdminDashboard: React.FC = () => {
             {!tabsCollapsed && !classicTabs && (() => {
               const CATEGORIES: { name: string; keys: string[] }[] = [
                 { name: 'Overview', keys: ['overview', 'insights', 'events'] },
-                { name: 'Leads & Sales', keys: ['submissions', 'prospector', 'crm', 'sales', 'catalog', 'commissions', 'forecast'] },
+                { name: 'Leads & Sales', keys: ['submissions', 'prospector', 'crm', 'sales', 'meetingflow', 'catalog', 'commissions', 'forecast'] },
                 { name: 'Content', keys: ['library', 'engine', 'mediastudio', 'news', 'seo'] },
                 { name: 'People', keys: ['hires', 'hiring', 'careers', 'training', 'onboarding', 'playbook'] },
                 { name: 'Ops', keys: ['execdesk', 'calendars', 'companycal', 'liveevents', 'mailboxes', 'outlook', 'documents'] },
