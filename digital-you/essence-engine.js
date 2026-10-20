@@ -1,0 +1,1222 @@
+/*!
+ * Essence Engine — attachable Digital You core.
+ * Include essence-engine.css + this script, then call EssenceEngine.mount(el).
+ *
+ * Pluggable seams (set BEFORE mount(), or via EssenceEngine.setProviderAdapter / setStorageAdapter):
+ *   window.DigitalYouStorageAdapter  — { load(key) -> Promise<any>, save(key, value) -> Promise<boolean> }
+ *   window.DigitalYouProviderAdapter — { isRemote:true, name, chat(messages,opts), decomposeGoal(goal,ctx),
+ *                                         evaluateDecision(problem,ctx), testVoice() }
+ * Without either, the engine runs entirely on localStorage + a local heuristic reasoning
+ * engine (transparent retrieval over memory/decision-rules — no network calls, nothing faked).
+ */
+(function (global) {
+  "use strict";
+
+  var BRIDGE_CHANNEL_NAME = "aetheris-digital-you-bridge";
+  var LS_DB_KEY = "essence_engine_db_v1";
+  var LS_SNAPSHOT_KEY = "aetheris_bridge_ci_snapshot";
+  var LS_ACK_KEY = "aetheris_bridge_dy_ack";
+  var CI_URL = "channel-intelligence-dashboard.html";
+
+  var AUTONOMY_LEVELS = ["Observe", "Recommend", "Draft", "Execute With Approval", "Autonomous"];
+  var AUTONOMY_DESC = [
+    "Watches and logs. Never speaks or acts.",
+    "Suggests a course of action. A human decides and acts.",
+    "Produces the draft/artifact itself. A human reviews before it goes anywhere.",
+    "Acts, but only after a human signs off in the Decision Center.",
+    "Acts on its own within its mandate, and reports through the Proof System."
+  ];
+  var ARCHETYPES = ["Executive You", "Marketing You", "Operations You", "Research You", "Custom"];
+
+  /* ----------------------------------------------------------------------
+   * Small utilities
+   * -------------------------------------------------------------------- */
+  function uid(prefix) { return (prefix || "id") + "_" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4); }
+  function now() { return Date.now(); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+  function fmtDate(ts) { return ts ? new Date(ts).toLocaleString() : "—"; }
+  function fmtPct(n) { return n == null ? "—" : Math.round(n * 100) + "%"; }
+  function lines(text) { return String(text || "").split("\n").map(function (s) { return s.trim(); }).filter(Boolean); }
+
+  var STOPWORDS = new Set(["the","and","for","are","with","this","that","from","have","was","were","what","when",
+    "where","which","would","should","could","about","into","then","than","them","they","their","there","been",
+    "being","does","doing","your","you","our","not","but","can","get","its","it's"]);
+  function tokenize(text) {
+    return String(text || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/)
+      .filter(function (w) { return w.length > 2 && !STOPWORDS.has(w); });
+  }
+  function overlapScore(corpus, query) {
+    var a = new Set(tokenize(corpus));
+    var b = tokenize(query);
+    if (!a.size || !b.length) return 0;
+    var hits = 0;
+    b.forEach(function (w) { if (a.has(w)) hits++; });
+    return hits / Math.max(3, b.length);
+  }
+
+  /* ----------------------------------------------------------------------
+   * Default adapters (overridable)
+   * -------------------------------------------------------------------- */
+  var DefaultStorageAdapter = {
+    name: "localStorage (built-in)",
+    load: function (key) {
+      return new Promise(function (resolve) {
+        try { var raw = localStorage.getItem(key); resolve(raw ? JSON.parse(raw) : null); }
+        catch (e) { resolve(null); }
+      });
+    },
+    save: function (key, value) {
+      return new Promise(function (resolve) {
+        try { localStorage.setItem(key, JSON.stringify(value)); resolve(true); }
+        catch (e) { resolve(false); }
+      });
+    }
+  };
+
+  var LocalHeuristicProvider = {
+    isRemote: false,
+    name: "Local Heuristic (no external AI wired)",
+    decomposeGoal: function (goal) {
+      return Promise.resolve([
+        { title: "Clarify the outcome", description: "Confirm what \"done\" looks like for: " + goal.outcome },
+        { title: "Gather inputs", description: "Pull relevant memory, prior decisions, and connected intelligence before starting." },
+        { title: "Draft the approach", description: "Produce a first draft plan or artifact." },
+        { title: "Review against standards", description: "Check the draft against Digital Core standards and boundaries." },
+        { title: "Execute or hand off", description: "Execute if autonomy allows; otherwise route to the Decision Center." }
+      ]);
+    },
+    evaluateDecision: function () { return Promise.resolve(null); },
+    testVoice: function () {
+      return Promise.resolve({
+        connected: false,
+        message: "No backend wired. Connect adapters/provider-adapter.example.js to a real voice/avatar provider through your own server — API keys never belong in browser code."
+      });
+    }
+  };
+
+  /* ----------------------------------------------------------------------
+   * Engine state
+   * -------------------------------------------------------------------- */
+  var storageAdapter = global.DigitalYouStorageAdapter || DefaultStorageAdapter;
+  var providerAdapter = global.DigitalYouProviderAdapter || LocalHeuristicProvider;
+  var rootEl = null;
+  var db = null;
+
+  var uiState = {
+    tab: "core",
+    sidebarOpen: false,
+    wwidResult: null,
+    correctingProofId: null,
+    correctingProblem: "",
+    memoryFilterType: "all",
+    liveWorkFilter: { instance: "all", status: "all" },
+    proofFilterInstance: "all",
+    ciConnected: false
+  };
+
+  function seedDb() {
+    var coreId = uid("core");
+    var execId = uid("inst");
+    var db0 = {
+      core: {
+        id: coreId,
+        name: "Digital You",
+        mission: "Protect and extend the judgment, standards, and voice of the person I represent — in every channel, at any hour.",
+        standards: [
+          "Never commit to something I don't have authority for.",
+          "Always show my reasoning, not just my answer.",
+          "Say \"I don't know\" before guessing."
+        ],
+        boundaries: [
+          "No financial commitments over the approval threshold.",
+          "No external communication without Draft autonomy or higher.",
+          "No irreversible action without human sign-off."
+        ],
+        style: { tone: "direct, warm, no filler", vocabulary: "plain language, short sentences", doNot: ["corporate jargon", "overpromising", "hedging every sentence"] },
+        voice: { provider: "", avatarProvider: "", voiceId: "", avatarId: "", baseUrl: "" },
+        createdAt: now()
+      },
+      instances: [
+        { id: execId, name: "Executive You", archetype: "Executive You", missionOverride: "Own outcomes, protect the roadmap, decide fast with incomplete information.", autonomy: 1, memoryScope: "all", createdAt: now() }
+      ],
+      settings: { activeInstanceId: execId, storageMode: "local" },
+      memory: [
+        { id: uid("mem"), type: "principle", content: "Say what I will not do before what I will do.", tags: ["communication"], linkedInstanceId: null, source: "seed", weight: 0.6, createdAt: now() },
+        { id: uid("mem"), type: "preference", content: "Prefer concise written updates over live meetings for status.", tags: ["ops"], linkedInstanceId: null, source: "seed", weight: 0.5, createdAt: now() },
+        { id: uid("mem"), type: "observation", content: "Deals close faster when the ROI number appears in the first email.", tags: ["sales", "revenue"], linkedInstanceId: null, source: "seed", weight: 0.6, createdAt: now() }
+      ],
+      thoughtRules: [
+        { id: uid("rule"), situation: "A prospect asks for a discount before seeing the full proposal", whatINotice: ["Price is being asked before value is understood"], whatIConsider: ["Whether a discount now anchors the wrong number", "Whether the real blocker is budget or urgency"], whatIUsuallyDo: "Redirect to a scoped proposal with ROI numbers before discussing price.", source: "taught", confidence: 0.8, linkedInstanceId: null, createdAt: now() }
+      ],
+      goals: [],
+      tasks: [],
+      decisions: [],
+      ideas: [
+        { id: uid("idea"), title: "Automate weekly channel ROI digest", description: "Summarize Channel Intelligence KPIs every Monday and flag underperforming channels.", potentialImpact: "medium", status: "new", convertedGoalId: null, createdAt: now() }
+      ],
+      corrections: [],
+      proofs: [],
+      connectedSnapshots: []
+    };
+    return db0;
+  }
+
+  function activeInstance() {
+    return db.instances.find(function (i) { return i.id === db.settings.activeInstanceId; }) || db.instances[0];
+  }
+
+  function addProof(p) {
+    var rec = {
+      id: uid("proof"), actor: p.actor, action: p.action, reason: p.reason || "",
+      evidence: p.evidence || [], confidence: p.confidence == null ? null : p.confidence,
+      outcome: p.outcome || "", recordedAt: now()
+    };
+    db.proofs.unshift(rec);
+    return rec;
+  }
+
+  function addMemory(m) {
+    var node = {
+      id: uid("mem"), type: m.type, content: m.content, tags: m.tags || [],
+      linkedInstanceId: m.linkedInstanceId || null, source: m.source || "manual",
+      weight: m.weight == null ? 0.5 : m.weight, createdAt: now()
+    };
+    db.memory.unshift(node);
+    return node;
+  }
+
+  function persist() { return storageAdapter.save(LS_DB_KEY, db); }
+  function persistAndRender() { persist(); render(); }
+
+  /* ----------------------------------------------------------------------
+   * Goal decomposition (works with or without a remote provider)
+   * -------------------------------------------------------------------- */
+  function decomposeAndCreateGoal(outcome, ownerInstance) {
+    var goal = { id: uid("goal"), outcome: outcome, ownerInstanceId: ownerInstance.id, status: "active", createdAt: now() };
+    db.goals.unshift(goal);
+    var providerUsed = "Local Heuristic";
+    var work;
+    if (providerAdapter && providerAdapter.isRemote && typeof providerAdapter.decomposeGoal === "function") {
+      work = providerAdapter.decomposeGoal(goal, { core: db.core, instance: ownerInstance })
+        .then(function (remote) {
+          if (Array.isArray(remote) && remote.length) { providerUsed = providerAdapter.name || "Remote Provider"; return remote; }
+          return LocalHeuristicProvider.decomposeGoal(goal);
+        })
+        .catch(function () { return LocalHeuristicProvider.decomposeGoal(goal); });
+    } else {
+      work = LocalHeuristicProvider.decomposeGoal(goal);
+    }
+    return work.then(function (subtasks) {
+      subtasks.forEach(function (t) {
+        db.tasks.unshift({ id: uid("task"), goalId: goal.id, title: t.title, description: t.description || "", ownerInstanceId: ownerInstance.id, status: "queued", createdAt: now() });
+      });
+      addProof({ actor: ownerInstance.name, action: "Goal decomposed", reason: providerUsed, evidence: subtasks.map(function (t) { return t.title; }), confidence: 0.7, outcome: subtasks.length + " tasks created in Live Work" });
+      return goal;
+    });
+  }
+
+  function tasksForGoal(goalId) { return db.tasks.filter(function (t) { return t.goalId === goalId; }); }
+  function goalProgress(goal) {
+    var ts = tasksForGoal(goal.id);
+    var done = ts.filter(function (t) { return t.status === "done"; }).length;
+    return { done: done, total: ts.length, pct: ts.length ? done / ts.length : 0 };
+  }
+  function maybeCompleteGoal(goalId) {
+    var goal = db.goals.find(function (g) { return g.id === goalId; });
+    if (!goal) return;
+    var p = goalProgress(goal);
+    if (p.total > 0 && p.done === p.total && goal.status !== "complete") {
+      goal.status = "complete";
+      var owner = db.instances.find(function (i) { return i.id === goal.ownerInstanceId; });
+      addProof({ actor: owner ? owner.name : "Digital You", action: "Goal completed", reason: goal.outcome, evidence: [], confidence: 1, outcome: "All tasks done" });
+    } else if (goal.status === "complete" && p.done < p.total) {
+      goal.status = "active";
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+   * What Would I Do? — local retrieval reasoning, with optional remote override
+   * -------------------------------------------------------------------- */
+  function evaluateLocally(problem, instance) {
+    var scoredMemory = db.memory
+      .filter(function (m) { return !m.linkedInstanceId || m.linkedInstanceId === instance.id; })
+      .map(function (m) { return { item: m, score: overlapScore(m.content + " " + (m.tags || []).join(" "), problem) }; })
+      .filter(function (x) { return x.score > 0; })
+      .sort(function (a, b) { return b.score - a.score; })
+      .slice(0, 5);
+
+    var scoredRules = db.thoughtRules
+      .filter(function (r) { return !r.linkedInstanceId || r.linkedInstanceId === instance.id; })
+      .map(function (r) { return { item: r, score: overlapScore(r.situation + " " + (r.whatINotice || []).join(" "), problem) }; })
+      .filter(function (x) { return x.score > 0; })
+      .sort(function (a, b) { return b.score - a.score; })
+      .slice(0, 3);
+
+    var boundaryHits = (db.core.boundaries || []).filter(function (b) { return overlapScore(b, problem) > 0; });
+
+    var recommendation, confidence;
+    if (scoredRules.length) {
+      recommendation = scoredRules[0].item.whatIUsuallyDo;
+      confidence = Math.min(0.95, 0.45 + scoredRules[0].score * 0.5 + (scoredMemory.length ? 0.1 : 0));
+    } else if (scoredMemory.length) {
+      recommendation = "No matching decision rule yet. Closest guidance: “" + scoredMemory[0].item.content + "” — treat this as a Recommend-level suggestion, not a rule-backed action.";
+      confidence = Math.min(0.6, 0.25 + scoredMemory[0].score * 0.4);
+    } else {
+      recommendation = "No memory or decision rule matches this situation yet. Falling back to the Digital Core mission: “" + db.core.mission + "”. Route to a human, then teach this pattern via Teach Me You.";
+      confidence = 0.15;
+    }
+
+    var trace = [];
+    scoredRules.forEach(function (x) { trace.push({ type: "thought-rule", label: x.item.situation, score: x.score }); });
+    scoredMemory.forEach(function (x) { trace.push({ type: "memory", label: x.item.content, score: x.score }); });
+    boundaryHits.forEach(function (b) { trace.push({ type: "boundary", label: b, score: 1 }); });
+
+    return { recommendation: recommendation, confidence: confidence, reasoningTrace: trace };
+  }
+
+  function runWwid(problem, instance) {
+    var local = evaluateLocally(problem, instance);
+    var usedProviderName = "Local Heuristic";
+    var chain;
+    if (providerAdapter && providerAdapter.isRemote && typeof providerAdapter.evaluateDecision === "function") {
+      chain = providerAdapter.evaluateDecision(problem, {
+        core: db.core, instance: instance,
+        memory: local.reasoningTrace.filter(function (t) { return t.type === "memory"; }),
+        thoughtRules: local.reasoningTrace.filter(function (t) { return t.type === "thought-rule"; })
+      }).then(function (remote) {
+        if (remote && remote.recommendation) {
+          usedProviderName = providerAdapter.name || "Remote Provider";
+          return { recommendation: remote.recommendation, confidence: remote.confidence != null ? remote.confidence : local.confidence, reasoningTrace: remote.reasoningTrace || local.reasoningTrace };
+        }
+        return local;
+      }).catch(function (e) {
+        local.reasoningTrace.push({ type: "note", label: "Remote provider call failed (" + e.message + ") — used local heuristic instead.", score: 0 });
+        return local;
+      });
+    } else {
+      chain = Promise.resolve(local);
+    }
+
+    return chain.then(function (result) {
+      var needsHuman = instance.autonomy < 3 || result.confidence < 0.5;
+      var proof = addProof({
+        actor: instance.name, action: "Evaluated: “" + problem + "”", reason: usedProviderName,
+        evidence: result.reasoningTrace.map(function (t) { return t.label; }).slice(0, 5),
+        confidence: result.confidence,
+        outcome: needsHuman ? "Routed to Decision Center (autonomy/confidence gate)" : result.recommendation
+      });
+      if (needsHuman) {
+        db.decisions.unshift({
+          id: uid("dec"), question: problem, context: result.recommendation,
+          requiredAuthority: "Execute With Approval", currentAutonomy: AUTONOMY_LEVELS[instance.autonomy],
+          status: "pending_human", proofId: proof.id, instanceId: instance.id, createdAt: now()
+        });
+      }
+      return { problem: problem, instance: instance, result: result, proofId: proof.id, needsHuman: needsHuman, usedProviderName: usedProviderName };
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+   * Channel Intelligence Bridge
+   * -------------------------------------------------------------------- */
+  var bridgeChannel = null;
+  try { bridgeChannel = new BroadcastChannel(BRIDGE_CHANNEL_NAME); } catch (e) { bridgeChannel = null; }
+  var ciWindowRef = null;
+  var lastCiSnapshot = null;
+
+  function handleCiMessage(msg) {
+    if (!msg || msg.type !== "ci:snapshot") return;
+    lastCiSnapshot = msg.payload;
+    uiState.ciConnected = true;
+    updateBridgePill();
+  }
+  if (bridgeChannel) bridgeChannel.onmessage = function (ev) { handleCiMessage(ev.data); };
+  global.addEventListener("message", function (ev) { handleCiMessage(ev.data); });
+  global.addEventListener("storage", function (ev) {
+    if (ev.key === LS_SNAPSHOT_KEY && ev.newValue) {
+      try { handleCiMessage({ type: "ci:snapshot", payload: JSON.parse(ev.newValue) }); } catch (e) {}
+    }
+  });
+
+  function openChannelIntelligence() {
+    ciWindowRef = global.open(CI_URL, "ci_dashboard");
+    setTimeout(function () {
+      try { ciWindowRef && ciWindowRef.postMessage({ type: "ci:hello" }, "*"); } catch (e) {}
+    }, 600);
+  }
+
+  function absorbCurrentDashboard() {
+    var snapshot = lastCiSnapshot;
+    if (!snapshot) {
+      try { var raw = localStorage.getItem(LS_SNAPSHOT_KEY); if (raw) snapshot = JSON.parse(raw); } catch (e) {}
+    }
+    if (!snapshot) {
+      toast("No dashboard snapshot found yet. Open the Channel Intelligence Dashboard first (it pushes a snapshot automatically), then absorb.");
+      return;
+    }
+    var record = {
+      id: uid("ci"), capturedAt: now(), filters: snapshot.filters, kpis: snapshot.kpis,
+      filteredData: snapshot.filteredData, historyExcerpt: snapshot.history,
+      rawChannelCount: (snapshot.rawData || []).length
+    };
+    db.connectedSnapshots.unshift(record);
+
+    var inst = activeInstance();
+    var kpis = snapshot.kpis || {};
+    var kpiNode = addMemory({
+      type: "connected_intelligence",
+      content: "Channel Intelligence snapshot: spend $" + Math.round(kpis.spend || 0) + ", revenue $" + Math.round(kpis.revenue || 0) + ", blended ROAS " + (kpis.roas ? kpis.roas.toFixed(2) + "x" : "N/A") + ".",
+      tags: ["channel-intelligence", "kpi"], linkedInstanceId: inst.id, source: "bridge"
+    });
+
+    var byChannel = {};
+    (snapshot.filteredData || []).forEach(function (r) {
+      byChannel[r.channel] = byChannel[r.channel] || { spend: 0, revenue: 0 };
+      byChannel[r.channel].spend += r.spend; byChannel[r.channel].revenue += r.revenue;
+    });
+    var flagged = 0;
+    Object.keys(byChannel).forEach(function (ch) {
+      var v = byChannel[ch];
+      if (v.spend <= 0) return;
+      var roas = v.revenue / v.spend;
+      if (roas >= 3 || roas < 1.2) {
+        flagged++;
+        addMemory({
+          type: "connected_intelligence",
+          content: ch + " is " + (roas >= 3 ? "a strong channel" : "underperforming") + " at " + roas.toFixed(2) + "x ROAS.",
+          tags: ["channel-intelligence", ch.toLowerCase().replace(/\s+/g, "-")], linkedInstanceId: inst.id, source: "bridge"
+        });
+      }
+    });
+
+    addProof({
+      actor: "Channel Intelligence Bridge", action: "Absorbed dashboard snapshot", reason: "Manual absorb triggered",
+      evidence: [kpiNode.content], confidence: 1, outcome: (1 + flagged) + " connected-intelligence memory nodes created"
+    });
+
+    var ack = { type: "ci:absorbed", payload: { instance: inst.name, ts: now() } };
+    if (bridgeChannel) bridgeChannel.postMessage(ack);
+    if (ciWindowRef) { try { ciWindowRef.postMessage(ack, "*"); } catch (e) {} }
+    try { localStorage.setItem(LS_ACK_KEY, JSON.stringify(ack)); } catch (e) {}
+
+    toast("Absorbed dashboard snapshot into memory (" + (1 + flagged) + " new node" + (flagged ? "s" : "") + ").");
+    persistAndRender();
+  }
+
+  /* ----------------------------------------------------------------------
+   * Toasts (rendered outside the churn of full re-renders)
+   * -------------------------------------------------------------------- */
+  function toast(msg) {
+    var wrap = document.getElementById("ee-toast-wrap");
+    if (!wrap) return;
+    var el = document.createElement("div");
+    el.className = "ee-toast";
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(function () { el.remove(); }, 4200);
+  }
+
+  function updateBridgePill() {
+    var pill = document.getElementById("ee-ci-pill");
+    if (!pill) return;
+    pill.className = "ee-connected-pill" + (uiState.ciConnected ? " on" : "");
+    pill.innerHTML = '<span class="d"></span> Channel Intelligence: ' + (uiState.ciConnected ? "live snapshot available" : "not connected yet");
+  }
+
+  /* ----------------------------------------------------------------------
+   * Templates
+   * -------------------------------------------------------------------- */
+  var TABS = [
+    ["core", "Digital Core"],
+    ["team", "My Digital Team"],
+    ["dna", "Decision DNA"],
+    ["memory", "Memory Graph"],
+    ["goals", "Goal Engine"],
+    ["livework", "Live Work"],
+    ["wwid", "What Would I Do?"],
+    ["ideas", "Idea Engine"],
+    ["decisions", "Decision Center"],
+    ["proof", "Proof Log"],
+    ["voice", "Voice & Identity"],
+    ["legacy", "Legacy"],
+    ["bridge", "Channel Intelligence Bridge"],
+    ["settings", "Settings"]
+  ];
+
+  function autonomyBadge(n) {
+    return '<span class="ee-badge lvl-' + n + '">' + esc(AUTONOMY_LEVELS[n]) + "</span>";
+  }
+  function instanceOptions(selectedId) {
+    return db.instances.map(function (i) {
+      return '<option value="' + i.id + '"' + (i.id === selectedId ? " selected" : "") + ">" + esc(i.name) + "</option>";
+    }).join("");
+  }
+  function instanceName(id) {
+    var i = db.instances.find(function (x) { return x.id === id; });
+    return i ? i.name : "—";
+  }
+
+  function shellTemplate() {
+    return (
+      '<div class="ee-scrim' + (uiState.sidebarOpen ? " open" : "") + '" data-action="close-sidebar"></div>' +
+      '<div class="ee-shell">' +
+        sidebarTemplate() +
+        '<div class="ee-main">' + topbarTemplate() + tabContentTemplate() + "</div>" +
+      "</div>"
+    );
+  }
+
+  function sidebarTemplate() {
+    return (
+      '<div class="ee-sidebar' + (uiState.sidebarOpen ? " open" : "") + '">' +
+        '<div class="ee-brand"><span class="dot"></span><div><h1>Digital You</h1><span>Essence Engine</span></div></div>' +
+        '<div class="ee-nav">' +
+          TABS.map(function (t) {
+            return '<button data-action="nav-tab" data-tab="' + t[0] + '" class="' + (uiState.tab === t[0] ? "active" : "") + '">' + t[1] + "</button>";
+          }).join("") +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function topbarTemplate() {
+    var tab = TABS.find(function (t) { return t[0] === uiState.tab; });
+    var inst = activeInstance();
+    return (
+      '<div class="ee-topbar">' +
+        '<button class="ee-btn ee-mobile-toggle" data-action="toggle-sidebar">☰ Menu</button>' +
+        '<div><h2>' + esc(tab ? tab[1] : "") + '</h2><div class="sub">Acting as <b>' + esc(inst.name) + "</b> · " + autonomyBadge(inst.autonomy) + "</div></div>" +
+        '<div class="ee-field" style="margin:0;min-width:200px;">' +
+          '<select data-onchange="set-active-instance">' + instanceOptions(inst.id) + "</select>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function tabContentTemplate() {
+    var prefix = uiState.correctingProofId ? correctionFormTemplate() : "";
+    var fn = {
+      core: coreTab, team: teamTab, dna: dnaTab, memory: memoryTab, goals: goalsTab,
+      livework: liveWorkTab, wwid: wwidTab, ideas: ideasTab, decisions: decisionsTab,
+      proof: proofTab, voice: voiceTab, legacy: legacyTab, bridge: bridgeTab, settings: settingsTab
+    }[uiState.tab] || coreTab;
+    return prefix + fn();
+  }
+
+  function correctionFormTemplate() {
+    return (
+      '<div class="ee-panel" style="border-color:var(--ee-warn);">' +
+        '<h3>That’s Not Me</h3>' +
+        '<p class="desc">Tell it what should have happened. This becomes a new decision rule and memory, not just a note.</p>' +
+        '<form data-form="correction" data-proof="' + esc(uiState.correctingProofId) + '">' +
+          '<input type="hidden" name="problem" value="' + esc(uiState.correctingProblem) + '"/>' +
+          '<div class="ee-field"><label>What should have happened</label><textarea name="whatShouldHaveBeen" required></textarea></div>' +
+          '<div class="ee-field"><label>Why (what did it miss?)</label><textarea name="why" required></textarea></div>' +
+          '<div style="display:flex;gap:8px;">' +
+            '<button class="ee-btn primary" type="submit">Save Correction</button>' +
+            '<button class="ee-btn" type="button" data-action="cancel-correction">Cancel</button>' +
+          "</div>" +
+        "</form>" +
+      "</div>"
+    );
+  }
+
+  /* ---- Digital Core -------------------------------------------------- */
+  function coreTab() {
+    var c = db.core;
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Identity, Mission & Standards</h3>' +
+        '<p class="desc">This is what every specialized Digital You inherits unless it overrides it.</p>' +
+        '<form data-form="core-edit">' +
+          '<div class="ee-field"><label>Name</label><input type="text" name="name" value="' + esc(c.name) + '"/></div>' +
+          '<div class="ee-field"><label>Mission</label><textarea name="mission">' + esc(c.mission) + "</textarea></div>" +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Standards (one per line)</label><textarea name="standards">' + esc(c.standards.join("\n")) + "</textarea></div>" +
+            '<div class="ee-field"><label>Boundaries (one per line)</label><textarea name="boundaries">' + esc(c.boundaries.join("\n")) + "</textarea></div>" +
+          "</div>" +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Tone</label><input type="text" name="tone" value="' + esc(c.style.tone) + '"/></div>' +
+            '<div class="ee-field"><label>Vocabulary</label><input type="text" name="vocabulary" value="' + esc(c.style.vocabulary) + '"/></div>' +
+          "</div>" +
+          '<div class="ee-field"><label>Style — never do (one per line)</label><textarea name="donot">' + esc(c.style.doNot.join("\n")) + "</textarea></div>" +
+          '<button class="ee-btn primary" type="submit">Save Digital Core</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel">' +
+        '<h3>Autonomy Ladder (reference)</h3>' +
+        '<p class="desc">Every instance sits on one rung. Actions above its rung route to the Decision Center.</p>' +
+        AUTONOMY_LEVELS.map(function (l, i) {
+          return '<div class="ee-card"><div class="row"><span class="title">' + (i + 1) + ". " + esc(l) + "</span>" + autonomyBadge(i) + "</div><div class=\"body\">" + esc(AUTONOMY_DESC[i]) + "</div></div>";
+        }).join("") +
+      "</div>"
+    );
+  }
+
+  /* ---- My Digital Team ------------------------------------------------ */
+  function teamTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Create a Specialized You</h3>' +
+        '<p class="desc">Executive, Marketing, Operations, Research, or unlimited custom copies — each inherits the Digital Core and can override mission emphasis, autonomy, and memory scope.</p>' +
+        '<form data-form="create-instance">' +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Name</label><input type="text" name="name" required placeholder="e.g. Marketing You"/></div>' +
+            '<div class="ee-field"><label>Archetype</label><select name="archetype">' + ARCHETYPES.map(function (a) { return '<option value="' + a + '">' + a + "</option>"; }).join("") + "</select></div>" +
+          "</div>" +
+          '<div class="ee-field"><label>Mission override (optional)</label><textarea name="missionOverride" placeholder="Leave blank to inherit the core mission as-is"></textarea></div>' +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Starting autonomy</label><select name="autonomy">' + AUTONOMY_LEVELS.map(function (l, i) { return '<option value="' + i + '">' + (i + 1) + ". " + l + "</option>"; }).join("") + "</select></div>" +
+            '<div class="ee-field"><label>Memory scope</label><select name="memoryScope"><option value="all">All shared memory</option><option value="own">Only its own memory</option></select></div>' +
+          "</div>" +
+          '<button class="ee-btn primary" type="submit">Create Digital You</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel"><h3>The Team</h3>' +
+        (db.instances.length ? db.instances.map(function (i) {
+          var isActive = i.id === db.settings.activeInstanceId;
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(i.name) + (isActive ? ' <span class="ee-badge good">active</span>' : "") + "</span>" + autonomyBadge(i.autonomy) + "</div>" +
+              '<div class="meta">' + esc(i.archetype) + " · memory scope: " + esc(i.memoryScope) + " · created " + fmtDate(i.createdAt) + "</div>" +
+              (i.missionOverride ? '<div class="body">' + esc(i.missionOverride) + "</div>" : "") +
+              '<div class="actions">' +
+                (isActive ? "" : '<button class="ee-btn sm" data-action="set-active" data-id="' + i.id + '">Act as this one</button>') +
+                '<select data-onchange="set-instance-autonomy" data-id="' + i.id + '" class="ee-btn sm" style="padding:5px 8px;">' + AUTONOMY_LEVELS.map(function (l, idx) { return '<option value="' + idx + '"' + (idx === i.autonomy ? " selected" : "") + ">" + l + "</option>"; }).join("") + "</select>" +
+                (db.instances.length > 1 ? '<button class="ee-btn sm danger" data-action="delete-instance" data-id="' + i.id + '">Remove</button>' : "") +
+              "</div>" +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No specialized instances yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Decision DNA ---------------------------------------------------- */
+  function dnaTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Teach Me You</h3>' +
+        '<p class="desc">Describe a situation, what you notice, what you weigh, and what you normally do. No workflow-building required — this becomes a decision rule.</p>' +
+        '<form data-form="teach-rule">' +
+          '<div class="ee-field"><label>Situation</label><input type="text" name="situation" required placeholder="e.g. A client goes quiet after a proposal"/></div>' +
+          '<div class="ee-field"><label>What I notice (one per line)</label><textarea name="whatINotice"></textarea></div>' +
+          '<div class="ee-field"><label>What I consider (one per line)</label><textarea name="whatIConsider"></textarea></div>' +
+          '<div class="ee-field"><label>What I usually do</label><textarea name="whatIUsuallyDo" required></textarea></div>' +
+          '<div class="ee-field"><label>Applies to</label><select name="linkedInstanceId"><option value="">All instances</option>' + instanceOptions(null) + "</select></div>" +
+          '<button class="ee-btn primary" type="submit">Save Decision Rule</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel"><h3>Thought Process Library (' + db.thoughtRules.length + ")</h3>" +
+        (db.thoughtRules.length ? db.thoughtRules.map(function (r) {
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(r.situation) + '</span><span class="ee-badge ' + (r.source === "corrected" ? "warn" : "good") + '">' + esc(r.source) + "</span></div>" +
+              '<div class="meta">Applies to: ' + (r.linkedInstanceId ? esc(instanceName(r.linkedInstanceId)) : "All instances") + " · confidence " + fmtPct(r.confidence) + "</div>" +
+              '<div class="body">' +
+                (r.whatINotice.length ? "<b>Notices:</b> " + r.whatINotice.map(esc).join("; ") + "<br/>" : "") +
+                (r.whatIConsider.length ? "<b>Considers:</b> " + r.whatIConsider.map(esc).join("; ") + "<br/>" : "") +
+                "<b>Usually does:</b> " + esc(r.whatIUsuallyDo) +
+              "</div>" +
+              '<div class="actions"><button class="ee-btn sm danger" data-action="delete-rule" data-id="' + r.id + '">Remove</button></div>' +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No decision rules taught yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Memory Graph ------------------------------------------------- */
+  var MEMORY_TYPES = ["principle", "preference", "observation", "connected_intelligence", "correction", "decision_pattern"];
+  function memoryTab() {
+    var filtered = uiState.memoryFilterType === "all" ? db.memory : db.memory.filter(function (m) { return m.type === uiState.memoryFilterType; });
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Add to Memory</h3>' +
+        '<form data-form="add-memory">' +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Type</label><select name="type">' + MEMORY_TYPES.map(function (t) { return '<option value="' + t + '">' + t.replace("_", " ") + "</option>"; }).join("") + "</select></div>" +
+            '<div class="ee-field"><label>Tags (comma separated)</label><input type="text" name="tags" placeholder="sales, tone"/></div>' +
+          "</div>" +
+          '<div class="ee-field"><label>Content</label><textarea name="content" required></textarea></div>' +
+          '<div class="ee-field"><label>Linked instance</label><select name="linkedInstanceId"><option value="">All instances</option>' + instanceOptions(null) + "</select></div>" +
+          '<button class="ee-btn primary" type="submit">Add Memory Node</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel">' +
+        '<h3>Memory Graph (' + db.memory.length + " nodes)</h3>" +
+        '<div class="ee-tabs-inline">' +
+          '<button data-action="filter-memory-type" data-type="all" class="' + (uiState.memoryFilterType === "all" ? "active" : "") + '">All</button>' +
+          MEMORY_TYPES.map(function (t) { return '<button data-action="filter-memory-type" data-type="' + t + '" class="' + (uiState.memoryFilterType === t ? "active" : "") + '">' + t.replace("_", " ") + "</button>"; }).join("") +
+        "</div>" +
+        (filtered.length ? filtered.map(function (m) {
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="ee-badge">' + m.type.replace("_", " ") + '</span><span class="meta">' + fmtDate(m.createdAt) + "</span></div>" +
+              '<div class="body">' + esc(m.content) + "</div>" +
+              '<div class="meta">' + (m.tags.length ? m.tags.map(function (t) { return '<span class="ee-tag">' + esc(t) + "</span>"; }).join("") : "") + " · " + (m.linkedInstanceId ? esc(instanceName(m.linkedInstanceId)) : "all instances") + " · source: " + esc(m.source) + "</div>" +
+              '<div class="actions"><button class="ee-btn sm danger" data-action="delete-memory" data-id="' + m.id + '">Remove</button></div>' +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No memory in this filter yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Goal Engine ---------------------------------------------------- */
+  function goalsTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Give it an Outcome</h3>' +
+        '<p class="desc">The Goal Engine decomposes the outcome into tasks that land directly in Live Work.</p>' +
+        '<form data-form="create-goal">' +
+          '<div class="ee-field"><label>Outcome</label><textarea name="outcome" required placeholder="e.g. Cut CAC on paid channels 15% this quarter"></textarea></div>' +
+          '<div class="ee-field"><label>Owner</label><select name="ownerInstanceId">' + instanceOptions(activeInstance().id) + "</select></div>" +
+          '<button class="ee-btn primary" type="submit">Decompose Into Work</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel"><h3>Goals (' + db.goals.length + ")</h3>" +
+        (db.goals.length ? db.goals.map(function (g) {
+          var p = goalProgress(g);
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(g.outcome) + '</span><span class="ee-badge ' + (g.status === "complete" ? "good" : "") + '">' + g.status + "</span></div>" +
+              '<div class="meta">Owner: ' + esc(instanceName(g.ownerInstanceId)) + " · " + fmtDate(g.createdAt) + "</div>" +
+              '<div class="ee-progress" style="margin:8px 0;"><i style="width:' + Math.round(p.pct * 100) + '%"></i></div>' +
+              '<div class="meta">' + p.done + " / " + p.total + " tasks complete</div>" +
+              tasksForGoal(g.id).map(function (t) {
+                return '<div class="ee-card" style="margin-top:8px;background:var(--ee-panel);"><div class="row"><span class="title" style="font-size:12.5px;">' + esc(t.title) + '</span><span class="ee-badge">' + t.status + "</span></div><div class=\"body\">" + esc(t.description) + '</div><div class="actions"><button class="ee-btn sm" data-action="toggle-task" data-id="' + t.id + '">Cycle status</button></div></div>';
+              }).join("") +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No goals yet — give it an outcome above.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Live Work -------------------------------------------------- */
+  function liveWorkTab() {
+    var f = uiState.liveWorkFilter;
+    var rows = db.tasks.filter(function (t) {
+      return (f.instance === "all" || t.ownerInstanceId === f.instance) && (f.status === "all" || t.status === f.status);
+    });
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Live Work — every version of you, one stream</h3>' +
+        '<div class="ee-grid2">' +
+          '<div class="ee-field"><label>Instance</label><select data-onchange="live-work-filter-instance"><option value="all">All instances</option>' + instanceOptions(f.instance === "all" ? null : f.instance) + "</select></div>" +
+          '<div class="ee-field"><label>Status</label><select data-onchange="live-work-filter-status">' +
+            ["all", "queued", "in-progress", "done"].map(function (s) { return '<option value="' + s + '"' + (f.status === s ? " selected" : "") + ">" + s + "</option>"; }).join("") +
+          "</select></div>" +
+        "</div>" +
+        (rows.length ? '<table class="ee-table"><thead><tr><th>Task</th><th>Owner</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>' +
+          rows.map(function (t) {
+            return "<tr><td>" + esc(t.title) + "</td><td>" + esc(instanceName(t.ownerInstanceId)) + '</td><td><span class="ee-badge ' + (t.status === "done" ? "good" : t.status === "in-progress" ? "warn" : "") + '">' + t.status + "</td><td>" + fmtDate(t.createdAt) + '</td><td><button class="ee-btn sm" data-action="toggle-task" data-id="' + t.id + '">Cycle</button></td></tr>';
+          }).join("") + "</tbody></table>" : '<div class="ee-empty">No tasks match this filter.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- What Would I Do? ------------------------------------------- */
+  function wwidTab() {
+    var r = uiState.wwidResult;
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Ask the active Digital You</h3>' +
+        '<p class="desc">Evaluated using identity, memory, decision rules, and connected intelligence — with a visible reasoning trace.</p>' +
+        '<form data-form="wwid">' +
+          '<div class="ee-field"><label>Problem</label><textarea name="problem" required placeholder="e.g. A key account wants a 20% discount to renew"></textarea></div>' +
+          '<div class="ee-field"><label>Evaluate as</label><select name="instance">' + instanceOptions(activeInstance().id) + "</select></div>" +
+          '<button class="ee-btn primary" type="submit">What Would I Do?</button>' +
+        "</form>" +
+      "</div>" +
+      (r ? (
+        '<div class="ee-panel">' +
+          '<h3>Result — ' + esc(r.instance.name) + " on “" + esc(r.problem) + "”</h3>" +
+          '<div class="ee-card"><div class="body" style="font-size:14px;">' + esc(r.result.recommendation) + "</div>" +
+            '<div class="meta" style="margin-top:8px;">Confidence: ' + fmtPct(r.result.confidence) + " · reasoned via " + esc(r.usedProviderName) + (r.needsHuman ? ' · <span class="ee-badge warn">routed to Decision Center</span>' : ' · <span class="ee-badge good">within autonomy — logged to Proof</span>') + "</div>" +
+          "</div>" +
+          '<h3 style="margin-top:16px;font-size:13px;">Reasoning trace</h3>' +
+          (r.result.reasoningTrace.length ? r.result.reasoningTrace.map(function (t) {
+            return '<div class="ee-card"><div class="row"><span class="ee-badge">' + t.type + '</span><span class="meta">match ' + Math.round(t.score * 100) + "%</span></div><div class=\"body\">" + esc(t.label) + "</div></div>";
+          }).join("") : '<div class="ee-empty">No matching memory or rules — fell back to core mission.</div>') +
+          '<div class="actions" style="margin-top:10px;">' +
+            (db.corrections.some(function (c) { return c.proofId === r.proofId; }) ? '<span class="ee-badge good">correction filed</span>' : '<button class="ee-btn" data-action="open-correction" data-proof="' + r.proofId + '" data-problem="' + esc(r.problem) + '">That’s Not Me</button>') +
+          "</div>" +
+        "</div>"
+      ) : "")
+    );
+  }
+
+  /* ---- Idea Engine -------------------------------------------------- */
+  function ideasTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Capture an Idea</h3>' +
+        '<form data-form="add-idea">' +
+          '<div class="ee-field"><label>Title</label><input type="text" name="title" required/></div>' +
+          '<div class="ee-field"><label>Description</label><textarea name="description"></textarea></div>' +
+          '<div class="ee-field"><label>Potential impact</label><select name="potentialImpact"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>' +
+          '<button class="ee-btn primary" type="submit">Save Idea</button>' +
+        "</form>" +
+      "</div>" +
+      '<div class="ee-panel"><h3>Ideas (' + db.ideas.length + ")</h3>" +
+        (db.ideas.length ? db.ideas.map(function (i) {
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(i.title) + '</span><span class="ee-badge ' + (i.status === "queued" ? "good" : i.status === "dismissed" ? "bad" : "") + '">' + i.status + "</span></div>" +
+              '<div class="meta">Impact: ' + i.potentialImpact + " · " + fmtDate(i.createdAt) + "</div>" +
+              '<div class="body">' + esc(i.description) + "</div>" +
+              (i.status === "new" ? '<div class="actions"><button class="ee-btn sm primary" data-action="convert-idea" data-id="' + i.id + '">Convert to Work</button><button class="ee-btn sm" data-action="dismiss-idea" data-id="' + i.id + '">Dismiss</button></div>' : "") +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No ideas captured yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Decision Center --------------------------------------------- */
+  function decisionsTab() {
+    var pending = db.decisions.filter(function (d) { return d.status === "pending_human"; });
+    var resolved = db.decisions.filter(function (d) { return d.status !== "pending_human"; });
+    return (
+      '<div class="ee-panel"><h3>Waiting on you (' + pending.length + ")</h3>" +
+        '<p class="desc">Digital You didn’t have the authority or confidence to act on these alone.</p>' +
+        (pending.length ? pending.map(function (d) {
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(d.question) + '</span><span class="ee-badge warn">' + esc(d.requiredAuthority) + " needed, has " + esc(d.currentAutonomy) + "</span></div>" +
+              '<div class="body">' + esc(d.context) + "</div>" +
+              '<div class="ee-field" style="margin-top:8px;"><label>Note (optional)</label><input type="text" data-role="note"/></div>' +
+              '<div class="actions">' +
+                '<button class="ee-btn sm primary" data-action="resolve-decision" data-id="' + d.id + '" data-resolution="approved">Approve</button>' +
+                '<button class="ee-btn sm danger" data-action="resolve-decision" data-id="' + d.id + '" data-resolution="rejected">Reject</button>' +
+              "</div>" +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">Nothing waiting — every recent decision was within its rung.</div>') +
+      "</div>" +
+      '<div class="ee-panel"><h3>Resolved (' + resolved.length + ")</h3>" +
+        (resolved.length ? resolved.slice(0, 20).map(function (d) {
+          return '<div class="ee-card"><div class="row"><span class="title">' + esc(d.question) + '</span><span class="ee-badge ' + (d.resolution === "approved" ? "good" : "bad") + '">' + d.resolution + "</span></div><div class=\"meta\">Resolved " + fmtDate(d.resolvedAt) + (d.resolutionNote ? " — " + esc(d.resolutionNote) : "") + "</div></div>";
+        }).join("") : '<div class="ee-empty">No history yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Proof Log ------------------------------------------------- */
+  function proofTab() {
+    var f = uiState.proofFilterInstance;
+    var rows = f === "all" ? db.proofs : db.proofs.filter(function (p) { return p.actor === instanceName(f); });
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Proof System</h3>' +
+        '<p class="desc">Actor, action, reason, evidence, confidence, outcome, and the time it was recorded — for everything Digital You does or is asked.</p>' +
+        '<div class="ee-field" style="max-width:260px;"><label>Filter by instance</label><select data-onchange="proof-filter-instance"><option value="all">All</option>' + instanceOptions(f === "all" ? null : f) + "</select></div>" +
+        (rows.length ? rows.slice(0, 60).map(function (p) {
+          return (
+            '<div class="ee-card">' +
+              '<div class="row"><span class="title">' + esc(p.actor) + " — " + esc(p.action) + '</span>' + (p.confidence != null ? '<span class="ee-badge">' + fmtPct(p.confidence) + " confidence</span>" : "") + "</div>" +
+              '<div class="meta">' + fmtDate(p.recordedAt) + (p.reason ? " · reason: " + esc(p.reason) : "") + "</div>" +
+              (p.evidence && p.evidence.length ? '<div class="meta">Evidence: ' + p.evidence.map(esc).join("; ") + "</div>" : "") +
+              (p.outcome ? '<div class="body">Outcome: ' + esc(p.outcome) + "</div>" : "") +
+              (p.action.indexOf("Evaluated:") === 0 && !db.corrections.some(function (c) { return c.proofId === p.id; }) ?
+                '<div class="actions"><button class="ee-btn sm" data-action="open-correction" data-proof="' + p.id + '" data-problem="' + esc(p.action.replace(/^Evaluated: /, "")) + '">That’s Not Me</button></div>' : "") +
+            "</div>"
+          );
+        }).join("") : '<div class="ee-empty">No proof recorded yet.</div>') +
+      "</div>"
+    );
+  }
+
+  /* ---- Voice & Identity --------------------------------------------- */
+  function voiceTab() {
+    var v = db.core.voice;
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Voice & Avatar Configuration</h3>' +
+        '<p class="desc">Config only — no API keys live in this page. Wire a real provider through your own backend (see server/provider-server.example.js) and set window.DigitalYouProviderAdapter.</p>' +
+        '<form data-form="voice-config">' +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Voice provider</label><input type="text" name="provider" value="' + esc(v.provider) + '" placeholder="e.g. ElevenLabs"/></div>' +
+            '<div class="ee-field"><label>Avatar provider</label><input type="text" name="avatarProvider" value="' + esc(v.avatarProvider) + '" placeholder="e.g. HeyGen"/></div>' +
+          "</div>" +
+          '<div class="ee-grid2">' +
+            '<div class="ee-field"><label>Voice ID</label><input type="text" name="voiceId" value="' + esc(v.voiceId) + '"/></div>' +
+            '<div class="ee-field"><label>Avatar ID</label><input type="text" name="avatarId" value="' + esc(v.avatarId) + '"/></div>' +
+          "</div>" +
+          '<div class="ee-field"><label>Backend base URL</label><input type="url" name="baseUrl" value="' + esc(v.baseUrl) + '" placeholder="https://your-server.example.com/api/digital-you"/></div>' +
+          '<div style="display:flex;gap:8px;"><button class="ee-btn primary" type="submit">Save</button><button class="ee-btn" type="button" data-action="test-voice">Test Connection</button></div>' +
+        "</form>" +
+        '<div id="ee-voice-test-result" class="hint" style="margin-top:10px;"></div>' +
+      "</div>"
+    );
+  }
+
+  /* ---- Legacy / Portability ------------------------------------------ */
+  function legacyTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Export</h3>' +
+        '<p class="desc">Full Digital You state — core, team, memory, decision rules, goals, tasks, decisions, ideas, corrections, and proof — as one JSON file.</p>' +
+        '<button class="ee-btn primary" data-action="export-legacy">Export Digital You (JSON)</button>' +
+      "</div>" +
+      '<div class="ee-panel">' +
+        '<h3>Import</h3>' +
+        '<p class="desc">Load a previously exported Digital You into this browser.</p>' +
+        '<input type="file" accept="application/json" data-onchange="import-legacy"/>' +
+      "</div>"
+    );
+  }
+
+  /* ---- Channel Intelligence Bridge ------------------------------------ */
+  function bridgeTab() {
+    var latest = db.connectedSnapshots[0];
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Channel Intelligence Bridge</h3>' +
+        '<p class="desc">Digital You connects to the existing dashboard rather than replacing it — its filters, KPIs, filtered/raw data, and history flow into memory here.</p>' +
+        '<div id="ee-ci-pill" class="ee-connected-pill' + (uiState.ciConnected ? " on" : "") + '"><span class="d"></span> Channel Intelligence: ' + (uiState.ciConnected ? "live snapshot available" : "not connected yet") + "</div>" +
+        '<div class="actions" style="margin-top:12px;">' +
+          '<button class="ee-btn" data-action="open-ci">Open Channel Intelligence Dashboard</button>' +
+          '<button class="ee-btn primary" data-action="absorb-ci">Absorb Current Dashboard</button>' +
+        "</div>" +
+      "</div>" +
+      '<div class="ee-panel"><h3>Connected Snapshots (' + db.connectedSnapshots.length + ")</h3>" +
+        (latest ? '<div class="ee-card"><div class="title">Latest — ' + fmtDate(latest.capturedAt) + '</div><div class="body">Spend $' + Math.round(latest.kpis.spend || 0) + " · Revenue $" + Math.round(latest.kpis.revenue || 0) + " · ROAS " + (latest.kpis.roas ? latest.kpis.roas.toFixed(2) + "x" : "N/A") + " · " + latest.rawChannelCount + " dataset rows seen</div></div>" : "") +
+        (db.connectedSnapshots.length > 1 ? db.connectedSnapshots.slice(1, 8).map(function (s) {
+          return '<div class="ee-card" style="opacity:.8;"><div class="meta">' + fmtDate(s.capturedAt) + " · Revenue $" + Math.round(s.kpis.revenue || 0) + "</div></div>";
+        }).join("") : "") +
+        (!db.connectedSnapshots.length ? '<div class="ee-empty">Nothing absorbed yet.</div>' : "") +
+      "</div>"
+    );
+  }
+
+  /* ---- Settings -------------------------------------------------- */
+  function settingsTab() {
+    return (
+      '<div class="ee-panel">' +
+        '<h3>Adapters</h3>' +
+        '<div class="ee-grid2">' +
+          '<div class="ee-stat"><div class="label">Storage adapter</div><div class="value" style="font-size:14px;">' + esc(storageAdapter.name || "custom") + "</div></div>" +
+          '<div class="ee-stat"><div class="label">AI provider adapter</div><div class="value" style="font-size:14px;">' + esc(providerAdapter.name || "custom") + "</div></div>" +
+        "</div>" +
+        '<p class="hint" style="margin-top:10px;">Swap either by setting window.DigitalYouStorageAdapter / window.DigitalYouProviderAdapter before mount(), or calling EssenceEngine.setStorageAdapter() / setProviderAdapter().</p>' +
+      "</div>" +
+      '<div class="ee-panel">' +
+        '<h3>Danger Zone</h3>' +
+        '<p class="desc">Wipes this Digital You from this browser’s storage. Export first if you want it back.</p>' +
+        '<button class="ee-btn danger" data-action="reset-all">Reset All Data</button>' +
+      "</div>"
+    );
+  }
+
+  /* ----------------------------------------------------------------------
+   * Render
+   * -------------------------------------------------------------------- */
+  function render() {
+    rootEl.innerHTML = shellTemplate();
+    updateBridgePill();
+  }
+
+  /* ----------------------------------------------------------------------
+   * Dispatch tables
+   * -------------------------------------------------------------------- */
+  var ACTIONS = {
+    "nav-tab": function (el) { uiState.tab = el.getAttribute("data-tab"); uiState.sidebarOpen = false; render(); },
+    "toggle-sidebar": function () { uiState.sidebarOpen = !uiState.sidebarOpen; render(); },
+    "close-sidebar": function () { uiState.sidebarOpen = false; render(); },
+
+    "set-active": function (el) { db.settings.activeInstanceId = el.getAttribute("data-id"); persistAndRender(); },
+    "delete-instance": function (el) {
+      var id = el.getAttribute("data-id");
+      if (db.instances.length <= 1) return;
+      db.instances = db.instances.filter(function (i) { return i.id !== id; });
+      if (db.settings.activeInstanceId === id) db.settings.activeInstanceId = db.instances[0].id;
+      addProof({ actor: "Human", action: "Removed Digital You instance", reason: "", evidence: [], confidence: 1, outcome: "" });
+      persistAndRender();
+    },
+
+    "delete-rule": function (el) {
+      db.thoughtRules = db.thoughtRules.filter(function (r) { return r.id !== el.getAttribute("data-id"); });
+      persistAndRender();
+    },
+
+    "filter-memory-type": function (el) { uiState.memoryFilterType = el.getAttribute("data-type"); render(); },
+    "delete-memory": function (el) {
+      db.memory = db.memory.filter(function (m) { return m.id !== el.getAttribute("data-id"); });
+      persistAndRender();
+    },
+
+    "toggle-task": function (el) {
+      var t = db.tasks.find(function (x) { return x.id === el.getAttribute("data-id"); });
+      if (!t) return;
+      t.status = t.status === "queued" ? "in-progress" : t.status === "in-progress" ? "done" : "queued";
+      maybeCompleteGoal(t.goalId);
+      persistAndRender();
+    },
+
+    "convert-idea": function (el) {
+      var idea = db.ideas.find(function (i) { return i.id === el.getAttribute("data-id"); });
+      if (!idea) return;
+      var owner = activeInstance();
+      return decomposeAndCreateGoal(idea.title + (idea.description ? " — " + idea.description : ""), owner).then(function (goal) {
+        idea.status = "queued";
+        idea.convertedGoalId = goal.id;
+        addProof({ actor: "Idea Engine", action: "Converted idea to goal", reason: idea.title, evidence: [], confidence: 1, outcome: "Goal created and decomposed" });
+        persistAndRender();
+      });
+    },
+    "dismiss-idea": function (el) {
+      var idea = db.ideas.find(function (i) { return i.id === el.getAttribute("data-id"); });
+      if (idea) idea.status = "dismissed";
+      persistAndRender();
+    },
+
+    "resolve-decision": function (el) {
+      var id = el.getAttribute("data-id");
+      var resolution = el.getAttribute("data-resolution");
+      var card = el.closest(".ee-card");
+      var note = card ? (card.querySelector('[data-role="note"]') || {}).value : "";
+      var d = db.decisions.find(function (x) { return x.id === id; });
+      if (!d) return;
+      d.status = "resolved"; d.resolution = resolution; d.resolutionNote = note || ""; d.resolvedAt = now();
+      addProof({ actor: "Human", action: "Resolved decision: " + resolution, reason: note || "", evidence: [d.question], confidence: 1, outcome: resolution === "approved" ? "Cleared to proceed" : "Not proceeding" });
+      persistAndRender();
+    },
+
+    "open-correction": function (el) {
+      uiState.correctingProofId = el.getAttribute("data-proof");
+      uiState.correctingProblem = el.getAttribute("data-problem") || "";
+      render();
+    },
+    "cancel-correction": function () { uiState.correctingProofId = null; uiState.correctingProblem = ""; render(); },
+
+    "test-voice": function () {
+      var out = document.getElementById("ee-voice-test-result");
+      if (out) out.textContent = "Testing…";
+      return providerAdapter.testVoice().then(function (res) {
+        if (out) out.textContent = (res.connected ? "Connected. " : "Not connected. ") + (res.message || "");
+      });
+    },
+
+    "export-legacy": function () {
+      var blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "digital-you-export-" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      addProof({ actor: "Human", action: "Exported Digital You legacy", reason: "", evidence: [], confidence: 1, outcome: "JSON download triggered" });
+      persistAndRender();
+    },
+
+    "open-ci": function () { openChannelIntelligence(); },
+    "absorb-ci": function () { absorbCurrentDashboard(); },
+
+    "reset-all": function (el) {
+      if (el.getAttribute("data-armed") !== "1") {
+        el.setAttribute("data-armed", "1");
+        el.textContent = "Click again to confirm reset";
+        setTimeout(function () { el.removeAttribute("data-armed"); el.textContent = "Reset All Data"; }, 4000);
+        return;
+      }
+      db = seedDb();
+      persistAndRender();
+      toast("Digital You reset to a fresh state.");
+    }
+  };
+
+  var FORMS = {
+    "core-edit": function (fd) {
+      db.core.name = fd.get("name");
+      db.core.mission = fd.get("mission");
+      db.core.standards = lines(fd.get("standards"));
+      db.core.boundaries = lines(fd.get("boundaries"));
+      db.core.style.tone = fd.get("tone");
+      db.core.style.vocabulary = fd.get("vocabulary");
+      db.core.style.doNot = lines(fd.get("donot"));
+      addProof({ actor: "Human", action: "Updated Digital Core", reason: "", evidence: [], confidence: 1, outcome: "" });
+      persistAndRender();
+    },
+    "create-instance": function (fd) {
+      var inst = {
+        id: uid("inst"), name: fd.get("name"), archetype: fd.get("archetype"),
+        missionOverride: fd.get("missionOverride") || "", autonomy: parseInt(fd.get("autonomy"), 10) || 0,
+        memoryScope: fd.get("memoryScope") || "all", createdAt: now()
+      };
+      db.instances.push(inst);
+      addProof({ actor: "Human", action: "Created Digital You instance: " + inst.name, reason: inst.archetype, evidence: [], confidence: 1, outcome: "" });
+      persistAndRender();
+    },
+    "teach-rule": function (fd) {
+      db.thoughtRules.unshift({
+        id: uid("rule"), situation: fd.get("situation"), whatINotice: lines(fd.get("whatINotice")),
+        whatIConsider: lines(fd.get("whatIConsider")), whatIUsuallyDo: fd.get("whatIUsuallyDo"),
+        source: "taught", confidence: 0.75, linkedInstanceId: fd.get("linkedInstanceId") || null, createdAt: now()
+      });
+      addProof({ actor: "Human", action: "Taught a decision rule", reason: fd.get("situation"), evidence: [], confidence: 1, outcome: "" });
+      persistAndRender();
+    },
+    "add-memory": function (fd) {
+      addMemory({
+        type: fd.get("type"), content: fd.get("content"),
+        tags: String(fd.get("tags") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+        linkedInstanceId: fd.get("linkedInstanceId") || null, source: "manual"
+      });
+      persistAndRender();
+    },
+    "create-goal": function (fd) {
+      var owner = db.instances.find(function (i) { return i.id === fd.get("ownerInstanceId"); }) || activeInstance();
+      return decomposeAndCreateGoal(fd.get("outcome"), owner).then(function () { persistAndRender(); });
+    },
+    "wwid": function (fd) {
+      var problem = fd.get("problem");
+      var instance = db.instances.find(function (i) { return i.id === fd.get("instance"); }) || activeInstance();
+      return runWwid(problem, instance).then(function (result) { uiState.wwidResult = result; persistAndRender(); });
+    },
+    "correction": function (fd, form) {
+      var proofId = form.getAttribute("data-proof");
+      var problem = fd.get("problem");
+      var whatShouldHaveBeen = fd.get("whatShouldHaveBeen");
+      var why = fd.get("why");
+      var inst = activeInstance();
+      db.corrections.unshift({ id: uid("corr"), proofId: proofId, problem: problem, whatShouldHaveBeen: whatShouldHaveBeen, why: why, instanceId: inst.id, createdAt: now() });
+      addMemory({ type: "correction", content: why, tags: ["correction"], linkedInstanceId: inst.id, source: "correction" });
+      db.thoughtRules.unshift({
+        id: uid("rule"), situation: problem, whatINotice: [why], whatIConsider: [],
+        whatIUsuallyDo: whatShouldHaveBeen, source: "corrected", confidence: 0.6, linkedInstanceId: inst.id, createdAt: now()
+      });
+      addProof({ actor: "Human correction", action: "Correction filed", reason: why, evidence: [proofId], confidence: 1, outcome: "New decision pattern recorded" });
+      uiState.correctingProofId = null; uiState.correctingProblem = "";
+      persistAndRender();
+    },
+    "add-idea": function (fd) {
+      db.ideas.unshift({ id: uid("idea"), title: fd.get("title"), description: fd.get("description") || "", potentialImpact: fd.get("potentialImpact"), status: "new", convertedGoalId: null, createdAt: now() });
+      persistAndRender();
+    },
+    "voice-config": function (fd) {
+      db.core.voice = { provider: fd.get("provider"), avatarProvider: fd.get("avatarProvider"), voiceId: fd.get("voiceId"), avatarId: fd.get("avatarId"), baseUrl: fd.get("baseUrl") };
+      addProof({ actor: "Human", action: "Updated voice & identity config", reason: "", evidence: [], confidence: 1, outcome: "" });
+      persistAndRender();
+    }
+  };
+
+  var ONCHANGE = {
+    "set-active-instance": function (el) { db.settings.activeInstanceId = el.value; persistAndRender(); },
+    "set-instance-autonomy": function (el) {
+      var i = db.instances.find(function (x) { return x.id === el.getAttribute("data-id"); });
+      if (i) i.autonomy = parseInt(el.value, 10);
+      persistAndRender();
+    },
+    "live-work-filter-instance": function (el) { uiState.liveWorkFilter.instance = el.value; render(); },
+    "live-work-filter-status": function (el) { uiState.liveWorkFilter.status = el.value; render(); },
+    "proof-filter-instance": function (el) { uiState.proofFilterInstance = el.value; render(); },
+    "import-legacy": function (el) {
+      var file = el.files && el.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var imported = JSON.parse(reader.result);
+          if (!imported || typeof imported !== "object" || !imported.core || !Array.isArray(imported.instances) || !imported.instances.length) {
+            toast("That file doesn't look like a Digital You export.");
+            return;
+          }
+          // Merge onto a fresh seed rather than swapping wholesale, so an older or partial
+          // export (missing an array the engine has since added) degrades instead of crashing.
+          var base = seedDb();
+          db = {
+            core: Object.assign({}, base.core, imported.core),
+            instances: imported.instances,
+            settings: imported.settings || { activeInstanceId: imported.instances[0].id, storageMode: "local" },
+            memory: Array.isArray(imported.memory) ? imported.memory : base.memory,
+            thoughtRules: Array.isArray(imported.thoughtRules) ? imported.thoughtRules : base.thoughtRules,
+            goals: Array.isArray(imported.goals) ? imported.goals : base.goals,
+            tasks: Array.isArray(imported.tasks) ? imported.tasks : base.tasks,
+            decisions: Array.isArray(imported.decisions) ? imported.decisions : base.decisions,
+            ideas: Array.isArray(imported.ideas) ? imported.ideas : base.ideas,
+            corrections: Array.isArray(imported.corrections) ? imported.corrections : base.corrections,
+            proofs: Array.isArray(imported.proofs) ? imported.proofs : base.proofs,
+            connectedSnapshots: Array.isArray(imported.connectedSnapshots) ? imported.connectedSnapshots : base.connectedSnapshots
+          };
+          if (!db.settings.activeInstanceId || !db.instances.some(function (i) { return i.id === db.settings.activeInstanceId; })) {
+            db.settings.activeInstanceId = db.instances[0].id;
+          }
+          addProof({ actor: "Human", action: "Imported Digital You legacy", reason: file.name, evidence: [], confidence: 1, outcome: "" });
+          persistAndRender();
+          toast("Digital You imported.");
+        } catch (e) { toast("Could not parse that file: " + e.message); }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  /* ----------------------------------------------------------------------
+   * Event wiring
+   * -------------------------------------------------------------------- */
+  function wireEvents() {
+    rootEl.addEventListener("click", function (e) {
+      var el = e.target.closest("[data-action]");
+      if (!el || !rootEl.contains(el)) return;
+      var fn = ACTIONS[el.getAttribute("data-action")];
+      if (!fn) return;
+      var result = fn(el, e);
+      if (result && typeof result.catch === "function") result.catch(function (err) { toast("Error: " + err.message); });
+    });
+    rootEl.addEventListener("submit", function (e) {
+      var form = e.target.closest("form[data-form]");
+      if (!form) return;
+      e.preventDefault();
+      var fn = FORMS[form.getAttribute("data-form")];
+      if (!fn) return;
+      var fd = new FormData(form);
+      var result = fn(fd, form);
+      if (result && typeof result.catch === "function") result.catch(function (err) { toast("Error: " + err.message); });
+    });
+    rootEl.addEventListener("change", function (e) {
+      var el = e.target.closest("[data-onchange]");
+      if (!el) return;
+      var fn = ONCHANGE[el.getAttribute("data-onchange")];
+      if (fn) fn(el);
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+   * Public API
+   * -------------------------------------------------------------------- */
+  function mount(el) {
+    rootEl = el;
+    rootEl.classList.add("ee-root");
+    if (!document.getElementById("ee-toast-wrap")) {
+      var t = document.createElement("div");
+      t.className = "ee-toast-wrap"; t.id = "ee-toast-wrap";
+      document.body.appendChild(t);
+    }
+    return Promise.resolve(storageAdapter.load(LS_DB_KEY)).then(function (loaded) {
+      db = (loaded && loaded.core && loaded.instances) ? loaded : seedDb();
+      if (!db.settings.activeInstanceId) db.settings.activeInstanceId = db.instances[0].id;
+      wireEvents();
+      render();
+    });
+  }
+
+  function setStorageAdapter(adapter) { storageAdapter = adapter; }
+  function setProviderAdapter(adapter) { providerAdapter = adapter; }
+
+  global.EssenceEngine = {
+    mount: mount,
+    setStorageAdapter: setStorageAdapter,
+    setProviderAdapter: setProviderAdapter,
+    AUTONOMY_LEVELS: AUTONOMY_LEVELS,
+    LocalHeuristicProvider: LocalHeuristicProvider,
+    DefaultStorageAdapter: DefaultStorageAdapter,
+    openChannelIntelligence: openChannelIntelligence,
+    absorbCurrentDashboard: absorbCurrentDashboard,
+    _debugGetDb: function () { return db; }
+  };
+})(window);

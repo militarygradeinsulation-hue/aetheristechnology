@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Channel Intelligence Dashboard</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel-2:#161d2b; --border:#232b3d;
+    --text:#e8ecf4; --muted:#8a95ac; --accent:#5b8cff; --accent-2:#7ee0c3;
+    --warn:#ffb454; --bad:#ff6b6b; --good:#3ddc97; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  a{color:var(--accent);}
+  header{position:sticky;top:0;z-index:20;background:rgba(11,14,20,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);}
+  .brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;}
+  .brand span{font-size:11px;color:var(--muted);}
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);}
+  .pill.on{color:var(--good);border-color:rgba(61,220,151,.35);background:rgba(61,220,151,.08);}
+  .pill .dot2{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  button{font:inherit;cursor:pointer;}
+  .btn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;transition:.15s;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#3a63d8);border:none;color:#fff;}
+  .btn.primary:hover{filter:brightness(1.1);color:#fff;}
+  .btn.ghost{background:transparent;}
+  main{max-width:1400px;margin:0 auto;padding:20px;}
+  .filters{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:18px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+  select,input[type=range]{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;max-width:420px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel-2);color:var(--muted);}
+  .chip input{accent-color:var(--accent);}
+  .chip.active{color:var(--text);border-color:var(--accent);}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px;}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .kpi .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .kpi .value{font-size:22px;font-weight:700;}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:4px;}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:18px;}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+  .panel h2{margin:0 0 4px;font-size:14px;}
+  .panel .desc{font-size:12px;color:var(--muted);margin:0 0 14px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.04em;cursor:pointer;}
+  th:hover{color:var(--accent);}
+  tbody tr:hover{background:rgba(91,140,255,.06);}
+  .spark{display:block;}
+  .roas-good{color:var(--good);} .roas-mid{color:var(--warn);} .roas-bad{color:var(--bad);}
+  .alloc-row{display:grid;grid-template-columns:110px 1fr 70px 90px;gap:10px;align-items:center;margin-bottom:12px;}
+  .alloc-row .ch-name{font-size:12.5px;font-weight:600;}
+  .alloc-row .amt{font-size:12px;color:var(--muted);text-align:right;}
+  .alloc-row .proj{font-size:12px;text-align:right;font-weight:600;}
+  input[type=range]{width:100%;padding:0;accent-color:var(--accent);}
+  .alloc-summary{display:flex;justify-content:space-between;margin-top:10px;padding-top:12px;border-top:1px dashed var(--border);font-size:13px;}
+  .alloc-summary b{font-size:15px;}
+  .delta-pos{color:var(--good);} .delta-neg{color:var(--bad);}
+  .forecast-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .fc-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+  .fc-card .ch{font-size:11.5px;font-weight:700;margin-bottom:2px;}
+  .fc-card .num{font-size:15px;font-weight:700;}
+  .fc-card .num.up{color:var(--good);} .fc-card .num.down{color:var(--bad);}
+  .history{max-height:260px;overflow-y:auto;font-size:12px;}
+  .history li{list-style:none;padding:8px 0;border-bottom:1px solid var(--border);color:var(--muted);display:flex;gap:8px;}
+  .history li:last-child{border-bottom:none;}
+  .history time{color:#5b6478;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  footer{max-width:1400px;margin:0 auto;padding:8px 20px 40px;color:var(--muted);font-size:12px;}
+  .full{grid-column:1/-1;}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px;}
+  @media (max-width:1000px){
+    .kpis{grid-template-columns:repeat(3,1fr);}
+    .grid2{grid-template-columns:1fr;}
+    .forecast-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .alloc-row{grid-template-columns:90px 1fr;grid-template-rows:auto auto;row-gap:4px;}
+    .alloc-row .amt,.alloc-row .proj{text-align:left;}
+    .forecast-grid{grid-template-columns:1fr;}
+    header{padding:12px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="dot"></span>
+    <div>
+      <h1>Channel Intelligence Dashboard</h1>
+      <span>Spend · ROI · Forecasting — the connected intelligence layer</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="pill" id="bridgeStatus"><span class="dot2"></span> Digital You: not connected</span>
+    <button class="btn ghost" id="pushSnapshotBtn">Push Snapshot</button>
+    <button class="btn primary" id="openDigitalYouBtn">Open Digital You</button>
+  </div>
+</header>
+
+<main>
+
+  <section class="filters" id="filters">
+    <div class="field">
+      <label for="dateRange">Date Range</label>
+      <select id="dateRange">
+        <option value="1">Last Month</option>
+        <option value="3">Last 3 Months</option>
+        <option value="6" selected>Last 6 Months</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="segment">Audience Segment</label>
+      <select id="segment">
+        <option value="all" selected>All Visitors</option>
+        <option value="new">New</option>
+        <option value="returning">Returning</option>
+      </select>
+    </div>
+    <div class="field" style="flex:1;min-width:240px;">
+      <label>Channels</label>
+      <div class="chips" id="channelChips"></div>
+    </div>
+    <div class="field">
+      <button class="btn" id="resetFiltersBtn">Reset Filters</button>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2>Channel Performance (raw dataset)</h2>
+      <p class="desc">Sortable by column. This is the underlying dataset Digital You can absorb.</p>
+      <table id="rawTable">
+        <thead>
+          <tr>
+            <th data-key="channel">Channel</th>
+            <th data-key="spend">Spend</th>
+            <th data-key="revenue">Revenue</th>
+            <th data-key="roas">ROAS</th>
+            <th data-key="leads">Leads</th>
+            <th data-key="conversions">Conv.</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody id="rawTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>ROI / Spend Allocation Simulator</h2>
+      <p class="desc">Reallocate the paid budget pool and see projected revenue shift (simplified elasticity model).</p>
+      <div id="allocRows"></div>
+      <div class="alloc-summary">
+        <div>Baseline revenue: <b id="allocBaseline">$0</b></div>
+        <div>Projected: <b id="allocProjected">$0</b> <span id="allocDelta"></span></div>
+      </div>
+      <button class="btn" id="resetAllocBtn" style="margin-top:12px;">Reset Allocation</button>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-bottom:18px;">
+    <h2>Forecast — Next Month Projection</h2>
+    <p class="desc">Linear trend over the selected history window, per channel.</p>
+    <div class="forecast-grid" id="forecastGrid"></div>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <h2>Dashboard History</h2>
+      <p class="desc">Every filter change, simulation run, and bridge event — this feeds Digital You's memory too.</p>
+      <ul class="history" id="historyList"></ul>
+    </div>
+    <div class="panel">
+      <h2>Bridge</h2>
+      <p class="desc">Digital You connects here rather than replacing this dashboard's own state.</p>
+      <p style="font-size:13px;line-height:1.6;color:var(--muted);">
+        This page keeps its own filters, KPIs, history, and dataset locally (localStorage).
+        When opened from Digital You, or when Digital You clicks <b>Absorb Current Dashboard</b>,
+        a full snapshot (filters + KPIs + filtered data + raw data + history) is sent over
+        <code>postMessage</code>/<code>BroadcastChannel</code>, and mirrored to localStorage as a fallback.
+      </p>
+      <div class="hint" id="lastPushInfo">No snapshot pushed yet.</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Sample dataset for prototype purposes — swap <code>RAW_DATASET</code> for a live feed via the storage adapter.
+  Six months, six channels, deterministic (no random regeneration on reload).
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------------
+   * CONFIG / DATA
+   * ------------------------------------------------------------------- */
+  const BRIDGE_CHANNEL_NAME = "aetheris-digital-you-bridge";
+  const LS_STATE_KEY = "ci_dashboard_state_v1";
+  const LS_SNAPSHOT_KEY = "aetheris_bridge_ci_snapshot";
+  const DIGITAL_YOU_URL = "digital-you-essence-engine.html";
+
+  const MONTHS = ["2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"];
+  const MONTH_LABELS = ["Mar","Apr","May","Jun","Jul","Aug"];
+
+  // channel: [baseSpend, baseRevenue, baseLeads] with fixed per-month multipliers (deterministic, no RNG)
+  const CHANNEL_DEFS = {
+    "Google Ads":     { spend: 18000, revenue: 54000, leads: 420, mult: [0.90,0.97,1.00,1.06,1.11,1.18] },
+    "Meta Ads":       { spend: 12000, revenue: 30000, leads: 610, mult: [0.85,0.93,1.02,0.97,1.10,1.15] },
+    "LinkedIn Ads":   { spend: 9000,  revenue: 31500, leads: 140, mult: [0.80,0.90,1.00,1.08,1.14,1.22] },
+    "Email":          { spend: 1200,  revenue: 21000, leads: 260, mult: [0.95,1.00,1.03,1.05,1.02,1.08] },
+    "Organic Search": { spend: 0,     revenue: 38000, leads: 510, mult: [0.92,0.96,1.00,1.03,1.07,1.12] },
+    "Referral":       { spend: 0,     revenue: 9500,  leads: 95,  mult: [0.88,0.94,1.00,1.02,1.05,1.09] }
+  };
+
+  const RAW_DATASET = [];
+  Object.entries(CHANNEL_DEFS).forEach(([channel, def]) => {
+    MONTHS.forEach((month, i) => {
+      const m = def.mult[i];
+      const spend = Math.round(def.spend * m);
+      const revenue = Math.round(def.revenue * m);
+      const leads = Math.round(def.leads * m);
+      const conversions = Math.round(leads * (revenue > 0 ? Math.min(0.42, 0.14 + (revenue / (def.revenue*6)) * 0.1) : 0.1));
+      RAW_DATASET.push({ channel, month, spend, revenue, leads, conversions });
+    });
+  });
+
+  const CHANNEL_NAMES = Object.keys(CHANNEL_DEFS);
+  const PAID_CHANNELS = CHANNEL_NAMES.filter(c => CHANNEL_DEFS[c].spend > 0);
+
+  const SEGMENT_MULT = {
+    all:        { revenue: 1,    leads: 1 },
+    new:        { revenue: 0.55, leads: 0.6 },
+    returning:  { revenue: 0.45, leads: 0.4 }
+  };
+
+  /* ---------------------------------------------------------------------
+   * STATE
+   * ------------------------------------------------------------------- */
+  function defaultState(){
+    return {
+      dateRange: 6,
+      segment: "all",
+      channels: [...CHANNEL_NAMES],
+      allocation: {}, // channel -> pct override for PAID_CHANNELS, sums to 100
+      sort: { key: "revenue", dir: "desc" },
+      history: []
+    };
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(LS_STATE_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    }catch(e){ return defaultState(); }
+  }
+
+  let state = loadState();
+  if (!state.allocation || Object.keys(state.allocation).length === 0){
+    resetAllocationToBaseline();
+  }
+
+  function saveState(){
+    localStorage.setItem(LS_STATE_KEY, JSON.stringify(state));
+  }
+
+  function logHistory(action, detail){
+    state.history.unshift({ ts: Date.now(), action, detail: detail || "" });
+    state.history = state.history.slice(0, 50);
+    saveState();
+    renderHistory();
+  }
+
+  /* ---------------------------------------------------------------------
+   * COMPUTE
+   * ------------------------------------------------------------------- */
+  function visibleMonths(){
+    return MONTHS.slice(MONTHS.length - state.dateRange);
+  }
+
+  function filteredRows(){
+    const months = new Set(visibleMonths());
+    const chans = new Set(state.channels);
+    const segMult = SEGMENT_MULT[state.segment];
+    return RAW_DATASET
+      .filter(r => months.has(r.month) && chans.has(r.channel))
+      .map(r => ({
+        ...r,
+        revenue: Math.round(r.revenue * segMult.revenue),
+        leads: Math.round(r.leads * segMult.leads),
+        conversions: Math.round(r.conversions * segMult.leads)
+      }));
+  }
+
+  function channelTotals(rows){
+    const totals = {};
+    CHANNEL_NAMES.forEach(c => totals[c] = { channel: c, spend:0, revenue:0, leads:0, conversions:0, series: [] });
+    rows.forEach(r => {
+      const t = totals[r.channel];
+      t.spend += r.spend; t.revenue += r.revenue; t.leads += r.leads; t.conversions += r.conversions;
+    });
+    // build per-channel monthly series (unfiltered by segment for trend shape, using visible months)
+    const months = visibleMonths();
+    CHANNEL_NAMES.forEach(c => {
+      totals[c].series = months.map(m => {
+        const row = RAW_DATASET.find(r => r.channel === c && r.month === m);
+        return row ? row.revenue : 0;
+      });
+    });
+    Object.values(totals).forEach(t => { t.roas = t.spend > 0 ? t.revenue / t.spend : null; });
+    return totals;
+  }
+
+  function computeKpis(rows){
+    const spend = rows.reduce((a,r)=>a+r.spend,0);
+    const revenue = rows.reduce((a,r)=>a+r.revenue,0);
+    const leads = rows.reduce((a,r)=>a+r.leads,0);
+    const conversions = rows.reduce((a,r)=>a+r.conversions,0);
+    return {
+      spend, revenue, leads, conversions,
+      roas: spend > 0 ? revenue / spend : null,
+      cac: conversions > 0 ? spend / conversions : null,
+      convRate: leads > 0 ? (conversions/leads)*100 : null
+    };
+  }
+
+  function linreg(ys){
+    const n = ys.length;
+    const xs = ys.map((_,i)=>i);
+    const sumX = xs.reduce((a,b)=>a+b,0), sumY = ys.reduce((a,b)=>a+b,0);
+    const sumXY = xs.reduce((a,x,i)=>a+x*ys[i],0);
+    const sumXX = xs.reduce((a,x)=>a+x*x,0);
+    const denom = (n*sumXX - sumX*sumX) || 1;
+    const slope = (n*sumXY - sumX*sumY) / denom;
+    const intercept = (sumY - slope*sumX) / n;
+    return { slope, intercept, next: slope*n + intercept };
+  }
+
+  /* ---------------------------------------------------------------------
+   * ALLOCATION SIMULATOR
+   * ------------------------------------------------------------------- */
+  function resetAllocationToBaseline(){
+    const totals = {};
+    PAID_CHANNELS.forEach(c => {
+      totals[c] = RAW_DATASET.filter(r=>r.channel===c).reduce((a,r)=>a+r.spend,0);
+    });
+    const sum = Object.values(totals).reduce((a,b)=>a+b,0) || 1;
+    state.allocation = {};
+    PAID_CHANNELS.forEach(c => { state.allocation[c] = Math.round((totals[c]/sum)*1000)/10; });
+  }
+
+  function allocationBudgetPool(){
+    return PAID_CHANNELS.reduce((sum,c) => {
+      const rows = RAW_DATASET.filter(r=>r.channel===c && visibleMonths().includes(r.month));
+      return sum + rows.reduce((a,r)=>a+r.spend,0);
+    }, 0);
+  }
+
+  function avgHistoricalRoas(channel){
+    const rows = RAW_DATASET.filter(r=>r.channel===channel);
+    const spend = rows.reduce((a,r)=>a+r.spend,0);
+    const revenue = rows.reduce((a,r)=>a+r.revenue,0);
+    return spend > 0 ? revenue/spend : 0;
+  }
+
+  function avgHistoricalSpend(channel){
+    const rows = RAW_DATASET.filter(r=>r.channel===channel);
+    return rows.reduce((a,r)=>a+r.spend,0) / rows.length;
+  }
+
+  function projectedRevenueForChannel(channel, allocatedSpend){
+    const baseRoas = avgHistoricalRoas(channel);
+    const baseSpend = avgHistoricalSpend(channel) * state.dateRange;
+    if (baseSpend <= 0 || allocatedSpend <= 0) return 0;
+    // simplified diminishing-returns elasticity model, calibrated so allocatedSpend===baseSpend reproduces baseline revenue
+    const calibration = (baseRoas * baseSpend) / Math.pow(baseSpend, 0.85);
+    return calibration * Math.pow(allocatedSpend, 0.85);
+  }
+
+  function freeChannelBaselineRevenue(){
+    return CHANNEL_NAMES.filter(c => !PAID_CHANNELS.includes(c))
+      .reduce((sum,c) => sum + RAW_DATASET.filter(r=>r.channel===c && visibleMonths().includes(r.month)).reduce((a,r)=>a+r.revenue,0), 0);
+  }
+
+  function baselinePaidRevenue(){
+    return PAID_CHANNELS.reduce((sum,c) => sum + RAW_DATASET.filter(r=>r.channel===c && visibleMonths().includes(r.month)).reduce((a,r)=>a+r.revenue,0), 0);
+  }
+
+  /* ---------------------------------------------------------------------
+   * BRIDGE
+   * ------------------------------------------------------------------- */
+  let bridgeChannel = null;
+  try { bridgeChannel = new BroadcastChannel(BRIDGE_CHANNEL_NAME); } catch(e){ bridgeChannel = null; }
+  let connected = false;
+  let lastPushAt = null;
+
+  function buildSnapshot(){
+    const rows = filteredRows();
+    const kpis = computeKpis(rows);
+    return {
+      source: "channel-intelligence-dashboard",
+      sentAt: Date.now(),
+      filters: { dateRange: state.dateRange, segment: state.segment, channels: [...state.channels] },
+      kpis,
+      filteredData: rows,
+      rawData: RAW_DATASET,
+      history: state.history.slice(0, 20),
+      allocation: state.allocation
+    };
+  }
+
+  function setConnected(val){
+    connected = val;
+    const el = document.getElementById("bridgeStatus");
+    el.className = "pill" + (val ? " on" : "");
+    el.innerHTML = '<span class="dot2"></span> Digital You: ' + (val ? "connected" : "not connected");
+  }
+
+  function pushSnapshot(reason){
+    const snapshot = buildSnapshot();
+    localStorage.setItem(LS_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    if (bridgeChannel) bridgeChannel.postMessage({ type: "ci:snapshot", payload: snapshot });
+    if (window.opener) { try { window.opener.postMessage({ type: "ci:snapshot", payload: snapshot }, "*"); } catch(e){} }
+    lastPushAt = Date.now();
+    document.getElementById("lastPushInfo").textContent =
+      "Last snapshot pushed " + new Date(lastPushAt).toLocaleTimeString() + (reason ? " (" + reason + ")" : "");
+  }
+
+  function handleBridgeMessage(msg){
+    if (!msg || !msg.type) return;
+    if (msg.type === "ci:request-snapshot"){
+      pushSnapshot("requested");
+      setConnected(true);
+    } else if (msg.type === "ci:absorbed"){
+      setConnected(true);
+      logHistory("Absorbed by Digital You", (msg.payload && msg.payload.instance) ? ("instance: " + msg.payload.instance) : "");
+    } else if (msg.type === "ci:hello"){
+      setConnected(true);
+      pushSnapshot("hello");
+    }
+  }
+
+  if (bridgeChannel){
+    bridgeChannel.onmessage = (ev) => handleBridgeMessage(ev.data);
+  }
+  window.addEventListener("message", (ev) => handleBridgeMessage(ev.data));
+  window.addEventListener("storage", (ev) => {
+    if (ev.key === "aetheris_bridge_dy_ack" && ev.newValue){
+      try { handleBridgeMessage(JSON.parse(ev.newValue)); } catch(e){}
+    }
+  });
+
+  document.getElementById("pushSnapshotBtn").addEventListener("click", () => {
+    pushSnapshot("manual push");
+    logHistory("Manual snapshot push", "Pushed current filters/KPIs/data to Digital You bridge");
+  });
+
+  document.getElementById("openDigitalYouBtn").addEventListener("click", () => {
+    const w = window.open(DIGITAL_YOU_URL, "digital_you");
+    if (w) setTimeout(() => pushSnapshot("opened from dashboard"), 800);
+  });
+
+  // If we were opened by Digital You (window.opener), announce ourselves immediately.
+  if (window.opener){
+    setTimeout(() => { pushSnapshot("initial handshake"); setConnected(true); }, 300);
+  }
+
+  /* ---------------------------------------------------------------------
+   * RENDER
+   * ------------------------------------------------------------------- */
+  function fmtMoney(n){
+    if (n === null || n === undefined || isNaN(n)) return "—";
+    return "$" + Math.round(n).toLocaleString();
+  }
+  function fmtNum(n){
+    if (n === null || n === undefined || isNaN(n)) return "—";
+    return Math.round(n).toLocaleString();
+  }
+  function fmtRoas(n){
+    if (n === null || n === undefined) return "—";
+    return n.toFixed(2) + "x";
+  }
+  function roasClass(n){
+    if (n === null) return "";
+    if (n >= 3) return "roas-good";
+    if (n >= 1.5) return "roas-mid";
+    return "roas-bad";
+  }
+
+  function renderFilters(){
+    document.getElementById("dateRange").value = String(state.dateRange);
+    document.getElementById("segment").value = state.segment;
+    const chips = document.getElementById("channelChips");
+    chips.innerHTML = "";
+    CHANNEL_NAMES.forEach(c => {
+      const active = state.channels.includes(c);
+      const label = document.createElement("label");
+      label.className = "chip" + (active ? " active" : "");
+      label.innerHTML = '<input type="checkbox" data-channel="' + c + '" ' + (active ? "checked" : "") + '/> ' + c;
+      chips.appendChild(label);
+    });
+    chips.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const c = cb.getAttribute("data-channel");
+        if (cb.checked) { if (!state.channels.includes(c)) state.channels.push(c); }
+        else { state.channels = state.channels.filter(x => x !== c); }
+        saveState();
+        logHistory("Filter changed", "Channels: " + state.channels.join(", "));
+        renderAll();
+        pushSnapshot("filter change");
+      });
+    });
+  }
+
+  function renderKpis(){
+    const kpis = computeKpis(filteredRows());
+    const cards = [
+      { label: "Total Spend", value: fmtMoney(kpis.spend) },
+      { label: "Total Revenue", value: fmtMoney(kpis.revenue) },
+      { label: "Blended ROAS", value: kpis.roas===null?"—":kpis.roas.toFixed(2)+"x" },
+      { label: "Blended CAC", value: fmtMoney(kpis.cac) },
+      { label: "Conversion Rate", value: kpis.convRate===null?"—":kpis.convRate.toFixed(1)+"%" },
+      { label: "Leads", value: fmtNum(kpis.leads) }
+    ];
+    document.getElementById("kpis").innerHTML = cards.map(c =>
+      '<div class="kpi"><div class="label">'+c.label+'</div><div class="value">'+c.value+'</div></div>'
+    ).join("");
+  }
+
+  function sparklineSvg(series){
+    if (!series.length) return "";
+    const w = 90, h = 26, pad = 2;
+    const min = Math.min(...series), max = Math.max(...series);
+    const range = (max - min) || 1;
+    const step = (w - pad*2) / (series.length - 1 || 1);
+    const pts = series.map((v,i) => {
+      const x = pad + i*step;
+      const y = h - pad - ((v-min)/range) * (h - pad*2);
+      return x.toFixed(1) + "," + y.toFixed(1);
+    }).join(" ");
+    const up = series[series.length-1] >= series[0];
+    return '<svg class="spark" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+
+      '<polyline points="'+pts+'" fill="none" stroke="'+(up?"#3ddc97":"#ff6b6b")+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '</svg>';
+  }
+
+  function renderRawTable(){
+    const rows = filteredRows();
+    const totals = Object.values(channelTotals(rows));
+    let sorted = totals.slice();
+    const { key, dir } = state.sort;
+    sorted.sort((a,b) => {
+      let av = a[key], bv = b[key];
+      if (av === null) av = -Infinity; if (bv === null) bv = -Infinity;
+      if (typeof av === "string") return dir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+      return dir==="asc" ? av-bv : bv-av;
+    });
+    document.getElementById("rawTableBody").innerHTML = sorted.map(t =>
+      '<tr>'+
+      '<td>'+t.channel+'</td>'+
+      '<td>'+fmtMoney(t.spend)+'</td>'+
+      '<td>'+fmtMoney(t.revenue)+'</td>'+
+      '<td class="'+roasClass(t.roas)+'">'+fmtRoas(t.roas)+'</td>'+
+      '<td>'+fmtNum(t.leads)+'</td>'+
+      '<td>'+fmtNum(t.conversions)+'</td>'+
+      '<td>'+sparklineSvg(t.series)+'</td>'+
+      '</tr>'
+    ).join("");
+  }
+
+  function renderAllocation(){
+    const container = document.getElementById("allocRows");
+    const pool = allocationBudgetPool();
+    container.innerHTML = "";
+    let totalProjected = 0;
+    PAID_CHANNELS.forEach(c => {
+      const pct = state.allocation[c] || 0;
+      const allocatedSpend = pool * (pct/100);
+      const projRevenue = projectedRevenueForChannel(c, allocatedSpend);
+      totalProjected += projRevenue;
+      const row = document.createElement("div");
+      row.className = "alloc-row";
+      row.innerHTML =
+        '<div class="ch-name">'+c+'</div>'+
+        '<input type="range" min="0" max="100" step="1" value="'+pct+'" data-channel="'+c+'"/>'+
+        '<div class="amt">'+pct.toFixed(0)+'% · '+fmtMoney(allocatedSpend)+'</div>'+
+        '<div class="proj">'+fmtMoney(projRevenue)+'</div>';
+      container.appendChild(row);
+    });
+    totalProjected += freeChannelBaselineRevenue();
+    const baseline = baselinePaidRevenue() + freeChannelBaselineRevenue();
+    document.getElementById("allocBaseline").textContent = fmtMoney(baseline);
+    document.getElementById("allocProjected").textContent = fmtMoney(totalProjected);
+    const delta = totalProjected - baseline;
+    const deltaEl = document.getElementById("allocDelta");
+    deltaEl.textContent = (delta>=0?" +":" ") + fmtMoney(delta);
+    deltaEl.className = delta>=0 ? "delta-pos" : "delta-neg";
+
+    container.querySelectorAll("input[type=range]").forEach(slider => {
+      slider.addEventListener("input", () => {
+        const c = slider.getAttribute("data-channel");
+        const newVal = parseFloat(slider.value);
+        const others = PAID_CHANNELS.filter(x => x !== c);
+        const othersSum = others.reduce((a,x)=>a+(state.allocation[x]||0),0) || 1;
+        const remaining = 100 - newVal;
+        others.forEach(x => {
+          state.allocation[x] = Math.max(0, (state.allocation[x]||0) / othersSum * remaining);
+        });
+        state.allocation[c] = newVal;
+        saveState();
+        renderAllocation();
+      });
+      slider.addEventListener("change", () => {
+        logHistory("Spend allocation simulated", PAID_CHANNELS.map(c => c+": "+(state.allocation[c]||0).toFixed(0)+"%").join(", "));
+        pushSnapshot("allocation simulation");
+      });
+    });
+  }
+
+  function renderForecast(){
+    const grid = document.getElementById("forecastGrid");
+    grid.innerHTML = CHANNEL_NAMES.map(c => {
+      const rows = RAW_DATASET.filter(r => r.channel===c && visibleMonths().includes(r.month));
+      const series = rows.map(r=>r.revenue);
+      const { next } = linreg(series);
+      const last = series[series.length-1] || 0;
+      const up = next >= last;
+      return '<div class="fc-card"><div class="ch">'+c+'</div>'+
+        '<div class="num '+(up?"up":"down")+'">'+fmtMoney(Math.max(0,next))+'</div>'+
+        '<div class="sub" style="font-size:11px;color:var(--muted);">projected next month ('+(up?"↑":"↓")+' vs '+fmtMoney(last)+')</div></div>';
+    }).join("");
+  }
+
+  function renderHistory(){
+    const list = document.getElementById("historyList");
+    if (!state.history.length){
+      list.innerHTML = '<li>No activity yet.</li>';
+      return;
+    }
+    list.innerHTML = state.history.map(h =>
+      '<li><time>'+new Date(h.ts).toLocaleTimeString()+'</time><div><b>'+h.action+'</b>'+(h.detail?' — '+h.detail:'')+'</div></li>'
+    ).join("");
+  }
+
+  function wireSort(){
+    document.querySelectorAll("#rawTable th[data-key]").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.getAttribute("data-key");
+        if (state.sort.key === key) state.sort.dir = state.sort.dir==="asc"?"desc":"asc";
+        else state.sort = { key, dir: "desc" };
+        saveState();
+        renderRawTable();
+      });
+    });
+  }
+
+  function renderAll(){
+    renderKpis();
+    renderRawTable();
+    renderAllocation();
+    renderForecast();
+    renderHistory();
+  }
+
+  document.getElementById("dateRange").addEventListener("change", (e) => {
+    state.dateRange = parseInt(e.target.value, 10);
+    saveState();
+    logHistory("Filter changed", "Date range: last " + state.dateRange + " month(s)");
+    renderAll();
+    pushSnapshot("filter change");
+  });
+  document.getElementById("segment").addEventListener("change", (e) => {
+    state.segment = e.target.value;
+    saveState();
+    logHistory("Filter changed", "Segment: " + state.segment);
+    renderAll();
+    pushSnapshot("filter change");
+  });
+  document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+    const hist = state.history;
+    state = Object.assign(defaultState(), { history: hist });
+    resetAllocationToBaseline();
+    saveState();
+    renderFilters();
+    renderAll();
+    logHistory("Filters reset", "");
+    pushSnapshot("filters reset");
+  });
+  document.getElementById("resetAllocBtn").addEventListener("click", () => {
+    resetAllocationToBaseline();
+    saveState();
+    renderAllocation();
+    logHistory("Spend allocation reset to baseline", "");
+    pushSnapshot("allocation reset");
+  });
+
+  /* ---------------------------------------------------------------------
+   * INIT
+   * ------------------------------------------------------------------- */
+  renderFilters();
+  wireSort();
+  renderAll();
+  if (!state.history.length) logHistory("Dashboard loaded", "Channel Intelligence Dashboard initialized");
+  setConnected(!!window.opener);
+})();
+</script>
+</body>
+</html>
