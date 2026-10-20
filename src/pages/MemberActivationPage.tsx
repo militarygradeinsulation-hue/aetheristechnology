@@ -32,7 +32,8 @@ export default function MemberActivationPage() {
     }
     (async () => {
       try {
-        const { data, error } = await supabase
+        // Table is not in the generated types yet; query it untyped.
+        const { data, error } = await (supabase as any)
           .from("member_activation_steps")
           .select("step_id, completed")
           .eq("user_id", user.id);

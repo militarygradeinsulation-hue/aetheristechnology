@@ -104,7 +104,10 @@ export function LovableOptimizer() {
 
   const copyPrompt = () => {
     if (optimizedPrompt) {
-      const fullText = formatLovablePromptForCopy(optimizedPrompt);
+      const fullText = formatLovablePromptForCopy({
+        creditSavingTips: [],
+        ...optimizedPrompt,
+      });
       navigator.clipboard.writeText(fullText);
       toast.success("Prompt copied to clipboard");
     }
