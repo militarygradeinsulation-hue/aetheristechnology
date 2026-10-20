@@ -61,6 +61,8 @@ describe("Aetheris executive meeting flow", () => {
   it("is visible in both portal experiences and has a direct route", () => {
     const newPortal = read("src/pages/NewPortalPage.tsx");
     const classicPortal = read("src/pages/PortalPage.tsx");
+    const admin = read("src/pages/AdminDashboard.tsx");
+    const meetingWorkspace = read("src/components/portal/ExecutiveMeetingFlow.tsx");
     const app = read("src/App.tsx");
 
     expect(newPortal).toContain("['meetings', 'Meetings', Target, true]");
@@ -69,6 +71,11 @@ describe("Aetheris executive meeting flow", () => {
     expect(classicPortal).toContain("{ id: 'meetings', label: 'Meeting Flow'");
     expect(classicPortal).toContain("case 'meetings': return <ExecutiveMeetingFlow />;");
     expect(classicPortal).toContain("'meetings'");
+    expect(admin).toContain("{ key: 'meetingflow', label: 'Meeting Flow', icon: Target }");
+    expect(admin).toContain("case 'meetingflow': return <ExecutiveMeetingFlow />;");
+    expect(admin).toContain("'meetingflow'");
+    expect(meetingWorkspace).toContain('getAdminToken');
+    expect(meetingWorkspace).toContain('"x-admin-token"');
     expect(app).toContain('path="/portal/meetings"');
   });
 });
