@@ -37,7 +37,7 @@ export const AnomalousMatterHero: React.FC<AnomalousMatterHeroProps> = ({
   }, []);
 
   return (
-    <section className="relative w-full min-h-[78vh] md:min-h-[88vh] text-foreground overflow-hidden flex flex-col justify-center items-center py-24 px-6">
+    <section className="relative w-full min-h-[min(78vh,880px)] md:min-h-[min(88vh,880px)] text-foreground overflow-hidden flex flex-col justify-center items-center py-24 px-6">
       {/* Ambient field behind the orb: grid, corner brackets, drifting motes */}
       <div aria-hidden className="ambient-bg absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="ambient-grid absolute inset-0" />
