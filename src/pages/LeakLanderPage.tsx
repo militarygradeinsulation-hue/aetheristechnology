@@ -122,6 +122,22 @@ const LeakLanderPage: React.FC = () => {
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
+        <div className="w-full max-w-sm mx-auto pt-6">
+          <div className="relative w-full overflow-hidden rounded-xl border border-border/60 bg-black" style={{ aspectRatio: "9 / 16" }}>
+            <iframe
+              className="absolute inset-0 h-full w-full"
+              src="https://www.youtube.com/embed/SnWiB2rSbz4"
+              title="Aetheris — Find what's costing your company money"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              loading="eager"
+            />
+          </div>
+          <p className="mt-3 text-center font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">
+            Aetheris in 60 seconds
+          </p>
+        </div>
       </AnomalousMatterHero>
 
       {/* One purchase decision */}
