@@ -122,28 +122,29 @@ const LeakLanderPage: React.FC = () => {
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
-        <div className="w-full max-w-sm mx-auto pt-6">
-          <div className="relative w-full overflow-hidden rounded-xl border border-border/60 bg-black" style={{ aspectRatio: "9 / 16" }}>
-            <iframe
-              className="absolute inset-0 h-full w-full"
-              src="https://www.youtube.com/embed/SnWiB2rSbz4"
-              title="Aetheris — Find what's costing your company money"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              loading="eager"
-            />
-          </div>
-          <p className="mt-3 text-center font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">
-            Aetheris in 60 seconds
-          </p>
-        </div>
       </AnomalousMatterHero>
 
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
+            <div className="mb-8">
+              <div className="relative mx-auto h-56 w-56 overflow-hidden rounded-full border border-amber/40 bg-black shadow-[var(--shadow-glow)] sm:h-64 sm:w-64 lg:mx-0">
+                <iframe
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{ width: "100%", height: "177.78%" }}
+                  src="https://www.youtube.com/embed/SnWiB2rSbz4"
+                  title="Aetheris — Find what's costing your company money"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              </div>
+              <p className="mt-3 text-center font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 lg:text-left">
+                Aetheris in 60 seconds
+              </p>
+            </div>
             <SectionLabel>// The decision</SectionLabel>
             <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
               Can we find what is costing the company money, <span className="text-amber">show the evidence, and help correct it?</span>
