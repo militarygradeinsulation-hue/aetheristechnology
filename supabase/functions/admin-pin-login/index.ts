@@ -2,11 +2,12 @@
 // and auth-admin calls so the login response stays near-instant on live.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { signOwnerToken } from "../_shared/owner-token.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const ADMIN_PIN = Deno.env.get("ADMIN_PIN");
@@ -38,6 +39,20 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Token exchange: a still-valid admin token (master-PIN session) can mint a
+    // fresh owner token without re-entering the PIN. This restores owner-only
+    // tools after a new tab or refresh clears the session-scoped owner token.
+    // Partner-issued admin tokens are signed over the partner code, not the
+    // master PIN, so they fail verifyAdminToken and never reach this path.
+    const presentedAdminToken = getAdminTokenFromRequest(req);
+    if (!pin && presentedAdminToken && (await verifyAdminToken(presentedAdminToken, SUPABASE_SERVICE_ROLE_KEY))) {
+      const exp = Date.now() + TOKEN_TTL_MS;
+      return new Response(
+        JSON.stringify({ ok: true, owner_token: await signOwnerToken(ADMIN_PIN, SUPABASE_SERVICE_ROLE_KEY, exp) }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Fast path: the actual admin PIN must never wait on database, auth-admin,

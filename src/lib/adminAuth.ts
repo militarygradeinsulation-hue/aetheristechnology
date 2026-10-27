@@ -55,6 +55,36 @@ export function getOwnerToken(): string | null {
 
 export const hasValidOwnerToken = () => Boolean(getOwnerToken());
 
+// The owner token is session-scoped, so a new tab or refresh loses it even
+// though the admin token persists in localStorage. When that happens, exchange
+// the still-valid admin token for a fresh owner token via admin-pin-login.
+let ownerTokenMintPromise: Promise<string | null> | null = null;
+export function ensureOwnerToken(): Promise<string | null> {
+  const existing = getOwnerToken();
+  if (existing) return Promise.resolve(existing);
+  const adminToken = getAdminToken();
+  if (!adminToken) return Promise.resolve(null);
+  if (!ownerTokenMintPromise) {
+    ownerTokenMintPromise = (async () => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data, error } = await supabase.functions.invoke("admin-pin-login", {
+          body: {},
+          headers: { "x-admin-token": adminToken },
+        });
+        if (error || typeof data?.owner_token !== "string") return null;
+        setOwnerToken(data.owner_token);
+        return data.owner_token as string;
+      } catch {
+        return null;
+      } finally {
+        ownerTokenMintPromise = null;
+      }
+    })();
+  }
+  return ownerTokenMintPromise;
+}
+
 export function hasValidAdminToken(): boolean {
   return getAdminToken() !== null;
 }
