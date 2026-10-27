@@ -263,7 +263,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'meetingflow', label: 'Meeting Flow', icon: Target },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
-    ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'ICP Connection Engine', icon: UserPlus }] : []),
+    ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'Buyer Intent + ICP', icon: UserPlus }] : []),
     { key: 'documents', label: 'Documents', icon: FileBox },
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },

@@ -1,0 +1,47 @@
+name: Buyer Intent Radar - daily public-signal scan
+
+on:
+  schedule:
+    - cron: "15 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buyer-intent-daily
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Invoke owner-approved scan (no outreach)
+        shell: bash
+        env:
+          INTENT_CRON_TOKEN: ${{ secrets.BUYER_INTENT_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "$INTENT_CRON_TOKEN" ]; then
+            echo "Scheduled scan inactive: configure BUYER_INTENT_CRON_SECRET in GitHub and the function environment."
+            exit 0
+          fi
+
+          # The server separately checks scheduleEnabled, time since the last scan,
+          # and the independent 24+ character secret. No browser owner PIN is used.
+          code="$(curl --silent --show-error --max-time 115 \
+            --output /tmp/intent-response.json \
+            --write-out '%{http_code}' \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "x-intent-cron-token: $INTENT_CRON_TOKEN" \
+            --data '{"action":"scan_cron"}' \
+            "https://ihdjpxhcaiaixmqxyqoe.supabase.co/functions/v1/owner-buyer-intent")"
+
+          # Never print the returned private opportunity queue into public CI logs.
+          if [ "$code" != "200" ]; then
+            echo "Buyer-intent scan HTTP $code. Verify function deployment and matching cron secret."
+            exit 1
+          fi
+          echo "Scheduled buyer-intent request accepted. Check the private owner dashboard for the result."

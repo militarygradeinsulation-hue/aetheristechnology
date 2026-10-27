@@ -126,6 +126,10 @@ verify_jwt = false
 [functions.owner-icp-prospector]
 verify_jwt = false
 
+# Both manual and scheduled calls validate independent owner/cron credentials in code.
+[functions.owner-buyer-intent]
+verify_jwt = false
+
 [functions.personal-engine-token]
 verify_jwt = false
 
