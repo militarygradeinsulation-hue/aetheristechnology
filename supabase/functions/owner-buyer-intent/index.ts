@@ -164,11 +164,38 @@ async function extractOpportunities(
   });
   if (!response.ok) throw new Error(`AI extraction failed (HTTP ${response.status})`);
   const payload = await response.json();
-  const content = short(payload?.choices?.[0]?.message?.content, 32000);
-  let parsed: any;
-  try { parsed = JSON.parse(content); }
-  catch { throw new Error("AI extraction returned invalid JSON; no prospects were saved."); }
+  const raw = String(payload?.choices?.[0]?.message?.content ?? "");
+  const parsed = parseAiJson(raw);
+  if (!parsed) {
+    console.error("owner-buyer-intent: unparseable AI output; treating as zero candidates", raw.slice(0, 300));
+    return [];
+  }
   return Array.isArray(parsed?.opportunities) ? parsed.opportunities.slice(0, MAX_AI_CANDIDATES) : [];
+}
+// Models sometimes wrap JSON in code fences, add prose, or get cut off mid-array.
+function parseAiJson(raw: string): any | null {
+  const text = raw.replace(/```(?:json)?/gi, "").trim();
+  try { return JSON.parse(text); } catch { /* fall through */ }
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    try { return JSON.parse(text.slice(start, end + 1)); } catch { /* fall through */ }
+  }
+  // Truncated output: keep every complete opportunity object.
+  const arrStart = text.indexOf("[", start);
+  if (arrStart >= 0) {
+    let depth = 0, inStr = false, esc = false, objStart = -1;
+    const items: unknown[] = [];
+    for (let i = arrStart + 1; i < text.length; i++) {
+      const c = text[i];
+      if (inStr) { if (esc) esc = false; else if (c === "\\") esc = true; else if (c === '"') inStr = false; continue; }
+      if (c === '"') inStr = true;
+      else if (c === "{") { if (depth === 0) objStart = i; depth++; }
+      else if (c === "}") { depth--; if (depth === 0 && objStart >= 0) { try { items.push(JSON.parse(text.slice(objStart, i + 1))); } catch { /* skip */ } objStart = -1; } }
+    }
+    return { opportunities: items };
+  }
+  return null;
 }
 async function runScan(store: Store): Promise<ScanReport> {
   const crawlKey = Deno.env.get("FIRECRAWL_API_KEY");

@@ -85,7 +85,17 @@ export default function BuyerIntentRadar() {
     const { data, error: callError } = await supabase.functions.invoke('owner-buyer-intent', {
       body: { action, ...values }, headers: { 'x-owner-token': token },
     });
-    if (callError) throw new Error('Buyer Intent Radar is not available: ' + callError.message);
+    if (callError) {
+      let detail = callError.message;
+      try {
+        const ctx = (callError as { context?: Response }).context;
+        if (ctx && typeof ctx.text === 'function') {
+          const body = await ctx.text();
+          try { detail = JSON.parse(body)?.error || body || detail; } catch { detail = body || detail; }
+        }
+      } catch { /* keep generic message */ }
+      throw new Error('Buyer Intent Radar: ' + detail);
+    }
     if (data?.error) throw new Error(data.error);
     return data as RadarResult;
   }, []);
