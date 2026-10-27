@@ -325,7 +325,7 @@ const NewPortalPage: React.FC = () => {
               ['dialer', 'Dialer', Phone, true],
               ['training', 'Training', GraduationCap, showAdvanced],
               ['studio', 'Studio', Palette, showAdvanced],
-              ['intent', 'Buyer Intent', Radar, hasValidOwnerToken()],
+              ['intent', 'Buyer Intent', Radar, hasValidAdminToken()],
               ['workspace', 'Workspace', Sparkles, true],
             ];
             const visible = allTabs.filter(([, , , show]) => show);

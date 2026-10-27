@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook, Target } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook, Target, Radar } from 'lucide-react';
 const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
@@ -263,7 +263,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'meetingflow', label: 'Meeting Flow', icon: Target },
     { key: 'engine', label: 'Content Engine', icon: Zap },
     { key: 'crm', label: 'CRM', icon: Briefcase },
-    ...(hasValidOwnerToken() ? [{ key: 'prospector', label: 'Buyer Intent + ICP', icon: UserPlus }] : []),
+    ...(hasValidAdminToken() ? [{ key: 'prospector', label: 'Buyer Intent + ICP', icon: UserPlus }] : []),
     { key: 'documents', label: 'Documents', icon: FileBox },
     { key: 'easymode', label: 'Easy Mode Translator', icon: Languages },
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
@@ -832,6 +832,29 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="shrink-0 rounded-full border border-emerald-400/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-emerald-200">
+              Open →
+            </div>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => jumpToTab('prospector')}
+          className="w-full rounded-xl border-2 border-cyan-400/60 bg-gradient-to-r from-cyan-400/15 via-cyan-400/5 to-transparent p-4 text-left transition hover:border-cyan-300 hover:from-cyan-400/25 shadow-[0_0_28px_rgba(34,211,238,0.08)]"
+          aria-label="Open Buyer Intent Radar"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-lg border border-cyan-400/40 bg-cyan-400/10 p-2.5">
+                <Radar className="h-5 w-5 text-cyan-300" />
+              </div>
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-cyan-300">Owner Tool · New</div>
+                <div className="mt-1 text-xl font-semibold text-zinc-100">Buyer Intent Radar</div>
+                <div className="mt-1 text-sm text-zinc-400">Live buying signals and ICP prospecting — who's in-market right now.</div>
+              </div>
+            </div>
+            <div className="shrink-0 rounded-full border border-cyan-400/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-cyan-200">
               Open →
             </div>
           </div>
