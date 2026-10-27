@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ArrowUpRight, CheckCircle2, Clock3, Copy, Download, ExternalLink, Filter, Loader2,
+  ArrowUpRight, CheckCircle2, Clock3, Copy, Download, Filter, Loader2,
   Radar, RefreshCw, Save, Search, ShieldCheck, Sparkles, Target, Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
