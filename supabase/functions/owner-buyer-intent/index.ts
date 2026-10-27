@@ -227,7 +227,7 @@ serve(async req => {
     if (action === "save_settings") {
       store.settings = sanitizeIntentSettings(payload.settings);
       if (!store.settings.services.length) return respond({ error: "Select a service to scan." }, 400);
-      if (store.settings.scheduleEnabled && !Deno.env.get("BUYER_INTENT_CRON_SECRET")) {
+      if (store.settings.scheduleEnabled && !withFlags(store).cronReady) {
         return respond({ error: "Scheduled discovery needs BUYER_INTENT_CRON_SECRET configured." }, 409);
       }
     } else if (action === "scan" || isCron) {
