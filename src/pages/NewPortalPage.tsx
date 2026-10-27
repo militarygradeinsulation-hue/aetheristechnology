@@ -10,7 +10,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
-  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase, Target,
+  DollarSign, Shield, Building2, LayoutGrid, CalendarDays, ScrollText, Phone, Briefcase, Target, Radar,
 } from 'lucide-react';
 
 
@@ -20,7 +20,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   hasValidPortalSession, getPortalProfile, clearPortalSession,
 } from '@/lib/portalAuth';
-import { hasValidAdminToken } from '@/lib/adminAuth';
+import { hasValidAdminToken, hasValidOwnerToken } from '@/lib/adminAuth';
+const BuyerIntentRadar = React.lazy(() => import('@/components/admin/BuyerIntentRadar'));
 import { fmtUsd } from '@/lib/repProducts';
 
 // Live tool components — reused verbatim so leads/data are identical.
@@ -324,6 +325,7 @@ const NewPortalPage: React.FC = () => {
               ['dialer', 'Dialer', Phone, true],
               ['training', 'Training', GraduationCap, showAdvanced],
               ['studio', 'Studio', Palette, showAdvanced],
+              ['intent', 'Buyer Intent', Radar, hasValidOwnerToken()],
               ['workspace', 'Workspace', Sparkles, true],
             ];
             const visible = allTabs.filter(([, , , show]) => show);
@@ -591,6 +593,14 @@ const NewPortalPage: React.FC = () => {
           )}
 
           {/* WORKSPACE */}
+          {hasValidOwnerToken() && (
+            <TabsContent value="intent" className="mt-8">
+              <React.Suspense fallback={<div className="text-sm text-muted-foreground">Loading Buyer Intent…</div>}>
+                <BuyerIntentRadar />
+              </React.Suspense>
+            </TabsContent>
+          )}
+
           <TabsContent value="workspace" className="mt-8">
             <ToolCard
               eyebrow="// Shared Space //"
