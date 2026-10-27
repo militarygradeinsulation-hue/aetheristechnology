@@ -41,6 +41,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Token exchange: a still-valid admin token (master-PIN session) can mint a
+    // fresh owner token without re-entering the PIN. This restores owner-only
+    // tools after a new tab or refresh clears the session-scoped owner token.
+    // Partner-issued admin tokens are signed over the partner code, not the
+    // master PIN, so they fail verifyAdminToken and never reach this path.
+    const presentedAdminToken = getAdminTokenFromRequest(req);
+    if (!pin && presentedAdminToken && (await verifyAdminToken(presentedAdminToken, SUPABASE_SERVICE_ROLE_KEY))) {
+      const exp = Date.now() + TOKEN_TTL_MS;
+      return new Response(
+        JSON.stringify({ ok: true, owner_token: await signOwnerToken(ADMIN_PIN, SUPABASE_SERVICE_ROLE_KEY, exp) }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Fast path: the actual admin PIN must never wait on database, auth-admin,
     // rate-limit cleanup, or partner-code lookups.
     if (String(pin || "") === ADMIN_PIN) {
