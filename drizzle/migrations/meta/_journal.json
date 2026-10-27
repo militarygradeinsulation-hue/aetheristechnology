@@ -15,6 +15,13 @@
       "when": 1790940034931,
       "tag": "0001_create_admin_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793133858287,
+      "tag": "0002_repair_forensic_scans_private_intake_column",
+      "breakpoints": true
     }
   ]
 }

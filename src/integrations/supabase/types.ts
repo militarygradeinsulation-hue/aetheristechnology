@@ -3770,6 +3770,7 @@ export type Database = {
           lead_name: string | null
           lead_phone: string | null
           portal_source: string | null
+          private_intake: boolean
           raw_findings: Json
           rep_code: string | null
           report: Json | null
@@ -3801,6 +3802,7 @@ export type Database = {
           lead_name?: string | null
           lead_phone?: string | null
           portal_source?: string | null
+          private_intake?: boolean
           raw_findings?: Json
           rep_code?: string | null
           report?: Json | null
@@ -3832,6 +3834,7 @@ export type Database = {
           lead_name?: string | null
           lead_phone?: string | null
           portal_source?: string | null
+          private_intake?: boolean
           raw_findings?: Json
           rep_code?: string | null
           report?: Json | null
