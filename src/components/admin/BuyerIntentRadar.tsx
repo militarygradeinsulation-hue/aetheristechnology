@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { getOwnerToken } from '@/lib/adminAuth';
+import { ensureOwnerToken } from '@/lib/adminAuth';
 
 type Service = 'marketing' | 'consulting' | 'ai';
 type Stage = 'new' | 'researching' | 'approved' | 'contacted' | 'qualified' | 'won' | 'dismissed';
@@ -80,7 +80,7 @@ export default function BuyerIntentRadar() {
   const [draftNotes, setDraftNotes] = useState<Record<string, string>>({});
 
   const invoke = useCallback(async (action: string, values: Record<string, unknown> = {}): Promise<RadarResult> => {
-    const token = getOwnerToken();
+    const token = await ensureOwnerToken();
     if (!token) throw new Error('Owner session expired. Sign in with your owner PIN again.');
     const { data, error: callError } = await supabase.functions.invoke('owner-buyer-intent', {
       body: { action, ...values }, headers: { 'x-owner-token': token },
