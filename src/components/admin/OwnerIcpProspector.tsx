@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import BuyerIntentRadar from './BuyerIntentRadar';
 import { supabase } from '@/integrations/supabase/client';
 import { getOwnerToken } from '@/lib/adminAuth';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ const validLinkedin = (u: string) => { try { return new URL(u).protocol === 'htt
 
 export default function OwnerIcpProspector() {
   const { toast } = useToast();
+  const [workspace, setWorkspace] = useState<'intent' | 'connections'>('intent');
   const [data, setData] = useState<Dashboard | null>(null);
   const [draft, setDraft] = useState<ProfileDraft>(emptyDraft);
   const [busy, setBusy] = useState('');
@@ -123,6 +125,14 @@ export default function OwnerIcpProspector() {
   );
 
   return (
+    <div className="space-y-5 text-foreground">
+      <div role="tablist" aria-label="Prospecting workspace" className="flex flex-wrap gap-2 border-b border-border pb-3">
+        <Button role="tab" aria-selected={workspace === 'intent'} variant={workspace === 'intent' ? 'default' : 'outline'}
+          onClick={() => setWorkspace('intent')}>Buyer Intent Radar</Button>
+        <Button role="tab" aria-selected={workspace === 'connections'} variant={workspace === 'connections' ? 'default' : 'outline'}
+          onClick={() => setWorkspace('connections')}>ICP Connections</Button>
+      </div>
+      {workspace === 'intent' ? <BuyerIntentRadar /> : (
     <section className="space-y-6 text-foreground" aria-label="Owner ICP Prospecting workspace">
       <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
         <div>
@@ -301,5 +311,7 @@ export default function OwnerIcpProspector() {
         </>
       )}
     </section>
+      )}
+    </div>
   );
 }
