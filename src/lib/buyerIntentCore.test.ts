@@ -41,6 +41,20 @@ describe('Buyer Intent Radar evidence boundary', () => {
     expect(qualifyBuyerOpportunity({ ...candidate, quote: jobQuote, publishedAt: '' }, jobSources, DEFAULT_INTENT_SETTINGS, now)).toBeNull();
   });
 
+  it('rejects vague seeking language without external-service procurement', () => {
+    const vague = 'Acme Company is seeking marketing ideas to improve conversion rates.';
+    const excerpt = new Map([[url, { url, title: 'Acme Company', text: vague }]]);
+    expect(qualifyBuyerOpportunity({ ...candidate, quote: vague, publishedAt: '' }, excerpt, DEFAULT_INTENT_SETTINGS, now)).toBeNull();
+  });
+
+  it('keeps undated procurement signals out of the high-priority tier', () => {
+    const undated = new Map([[url, { url, title: 'Acme Company RFP', text: quote }]]);
+    const result = qualifyBuyerOpportunity({ ...candidate, publishedAt: '' }, undated, DEFAULT_INTENT_SETTINGS, now);
+    expect(result?.score).toBeLessThan(80);
+    expect(result?.tier).not.toBe('high');
+    expect(result?.publishedAt).toBe('');
+  });
+
   it('rejects old vendor requests instead of presenting them as hot', () => {
     const old = new Map([[url, { url, title: 'Acme Company', text: '2025-01-01. ' + quote }]]);
     expect(qualifyBuyerOpportunity({ ...candidate, publishedAt: '2025-01-01' }, old, DEFAULT_INTENT_SETTINGS, now)).toBeNull();
