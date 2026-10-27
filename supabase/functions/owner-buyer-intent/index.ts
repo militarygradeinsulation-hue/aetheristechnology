@@ -232,9 +232,9 @@ serve(async req => {
       }
     } else if (action === "scan" || isCron) {
       const now = Date.now();
-      if (isCron && !store.settings.scheduleEnabled) return respond({ skipped: "schedule disabled", ...withFlags(store) });
+      if (isCron && !store.settings.scheduleEnabled) return respond({ ok: true, skipped: "schedule disabled" });
       if (isCron && store.lastRunAt && now - Date.parse(store.lastRunAt) < CRON_SCAN_INTERVAL_MS) {
-        return respond({ skipped: "recent scan", ...withFlags(store) });
+        return respond({ ok: true, skipped: "recent scan" });
       }
       if (!isCron) {
         const today = new Date().toISOString().slice(0, 10);
@@ -244,14 +244,21 @@ serve(async req => {
           return respond({ error: "Wait at least 30 minutes between manual searches." }, 429);
         }
       }
-      const report = await runScan(store);
+      // Reserve a scan attempt before any paid search/AI call. A provider error
+      // must not permit unlimited free retries or unexpected credit consumption.
+      const reservedAt = new Date().toISOString();
       if (!isCron) {
-        store.manualDay = new Date().toISOString().slice(0, 10);
+        store.manualDay = reservedAt.slice(0, 10);
         store.manualCount++;
-        store.lastManualAt = report.at;
+        store.lastManualAt = reservedAt;
+      } else {
+        store.lastRunAt = reservedAt;
       }
       await storeData(db, store);
-      return respond({ ...withFlags(store), scan: report });
+      const report = await runScan(store);
+      await storeData(db, store);
+      // The cron credential permits triggering scans, not reading the private lead queue.
+      return respond(isCron ? { ok: true, scan: report } : { ...withFlags(store), scan: report });
     } else if (action === "update") {
       const row = store.opportunities.find(item => item.id === short(payload.id, 80));
       if (!row) return respond({ error: "Opportunity not found" }, 404);
