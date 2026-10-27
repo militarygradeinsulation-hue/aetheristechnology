@@ -4,10 +4,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyOwnerToken } from "../_shared/owner-token.ts";
 import {
-  BuyerOpportunity, DEFAULT_INTENT_SETTINGS, INTENT_STAGES, IntentSettings,
-  intentDedupeKey, qualifyBuyerOpportunity, safeEvidenceUrl, sanitizeIntentSettings,
-  SourceEvidence,
+  DEFAULT_INTENT_SETTINGS, INTENT_STAGES, intentDedupeKey,
+  qualifyBuyerOpportunity, safeEvidenceUrl, sanitizeIntentSettings,
 } from "../_shared/buyer-intent-core.ts";
+import type { BuyerOpportunity, IntentSettings, SourceEvidence } from "../_shared/buyer-intent-core.ts";
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
