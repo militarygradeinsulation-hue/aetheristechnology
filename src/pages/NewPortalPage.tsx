@@ -20,7 +20,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   hasValidPortalSession, getPortalProfile, clearPortalSession,
 } from '@/lib/portalAuth';
-import { hasValidAdminToken, hasValidOwnerToken } from '@/lib/adminAuth';
+import { hasValidAdminToken } from '@/lib/adminAuth';
 const BuyerIntentRadar = React.lazy(() => import('@/components/admin/BuyerIntentRadar'));
 import { fmtUsd } from '@/lib/repProducts';
 
@@ -593,7 +593,7 @@ const NewPortalPage: React.FC = () => {
           )}
 
           {/* WORKSPACE */}
-          {hasValidOwnerToken() && (
+          {hasValidAdminToken() && (
             <TabsContent value="intent" className="mt-8">
               <React.Suspense fallback={<div className="text-sm text-muted-foreground">Loading Buyer Intent…</div>}>
                 <BuyerIntentRadar />

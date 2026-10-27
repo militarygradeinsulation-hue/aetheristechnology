@@ -8,7 +8,7 @@ const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPane
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
 import { type ViewMode } from '@/components/admin/ContentCalendar';
-import { getAdminToken, hasValidAdminToken, hasValidOwnerToken, clearAdminToken } from '@/lib/adminAuth';
+import { getAdminToken, hasValidAdminToken, clearAdminToken } from '@/lib/adminAuth';
 import { OperatorIdentityBar } from '@/components/OperatorIdentityBar';
 import ChipControlBar from '@/components/admin/ChipControlBar';
 import NotificationBell from '@/components/admin/NotificationBell';
