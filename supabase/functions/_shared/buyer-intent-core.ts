@@ -63,6 +63,8 @@ export function sanitizeIntentSettings(value: unknown): IntentSettings {
 const fold = (text: string) => text.toLowerCase().replace(/\s+/g, " ").trim();
 const explicitRequest = /\b(rfp|request for proposals?|solicit(?:ing|ation)?|seeking|looking for|searching for|inviting bids|accepting proposals|hire an? |hiring an? |need an? |need help with|vendor|procurement|contracting for|partner wanted)\b/i;
 const recruitingOnly = /\b(full[- ]time|apply for (?:the|this) job|salary|job opening|resume|recruitment|benefits package)\b/i;
+// Words such as "seeking" alone do not establish a need for an outside supplier.
+const vendorLanguage = /\b(rfp|request for proposals?|solicitation|bids?|proposals?|agenc(?:y|ies)|vendors?|consultants?|consulting firms?|service providers?|implementation partners?|external partners?|suppliers?|contracting for)\b/i;
 const serviceWords: Record<BuyerService, RegExp> = {
   marketing: /\b(marketing|advertising|branding|seo|social media|lead generation|paid media|search engine)\b/i,
   consulting: /\b(consult(?:ant|ancy|ing)|advisory|business strategy|operations strategy|change management|process improvement|fractional cmo|fractional cto)\b/i,
@@ -85,7 +87,7 @@ export function qualifyBuyerOpportunity(
   // The literal excerpt AND named buyer must be present in the fetched evidence.
   if (!company || company.length < 3 || quote.length < 18 ||
       !sourceContent.includes(fold(company)) || !sourceContent.includes(fold(quote))) return null;
-  if (!explicitRequest.test(quote) || (recruitingOnly.test(quote) && !/agency|vendor|consultant|partner|service provider/i.test(quote))) return null;
+  if (!explicitRequest.test(quote) || !vendorLanguage.test(quote) || recruitingOnly.test(quote)) return null;
 
   const service = candidate.service;
   const signalType = candidate.signalType;
@@ -106,10 +108,10 @@ export function qualifyBuyerOpportunity(
   if (/^\d{4}-\d{2}-\d{2}$/.test(publishedRaw) && sourceContent.includes(publishedRaw)) {
     const date = Date.parse(publishedRaw + "T00:00:00Z");
     const days = (now.getTime() - date) / 86_400_000;
-    if (Number.isFinite(days) && days >= -1 && days <= 365) {
-      publishedAt = publishedRaw;
-      ageDays = Math.max(0, days);
-    }
+    // A known stale or future date is grounds for rejection, not "date unverified".
+    if (!Number.isFinite(days) || days < -1 || days > 180) return null;
+    publishedAt = publishedRaw;
+    ageDays = Math.max(0, days);
   }
   if (ageDays !== null && ageDays > 180) return null;
 
@@ -133,7 +135,8 @@ export function qualifyBuyerOpportunity(
   if (settings.geography && location.toLowerCase().includes(settings.geography.toLowerCase())) {
     score += 5; reasons.push("Target geography explicitly matched");
   }
-  score = Math.min(100, score);
+  // Unknown publication date is never a high-confidence hot lead.
+  score = ageDays === null ? Math.min(74, score) : Math.min(100, score);
   if (score < settings.minScore) return null;
   const offer: Record<BuyerService, string> = {
     marketing: "Marketing strategy, lead generation and conversion audit",
