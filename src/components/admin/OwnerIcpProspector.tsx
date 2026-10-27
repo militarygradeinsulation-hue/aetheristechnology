@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import BuyerIntentRadar from './BuyerIntentRadar';
 import { supabase } from '@/integrations/supabase/client';
-import { getOwnerToken } from '@/lib/adminAuth';
+import { ensureOwnerToken } from '@/lib/adminAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,7 +50,7 @@ export default function OwnerIcpProspector() {
   const [editableLinks, setEditableLinks] = useState<Record<string, string>>({});
 
   const invoke = useCallback(async (action: string, payload: Record<string, unknown> = {}): Promise<Dashboard> => {
-    const token = getOwnerToken();
+    const token = await ensureOwnerToken();
     if (!token) throw new Error('Owner session expired. Sign out and sign in with your owner PIN.');
     const { data: result, error: callError } = await supabase.functions.invoke('owner-icp-prospector', {
       body: { action, ...payload }, headers: { 'x-owner-token': token },

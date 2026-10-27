@@ -238,7 +238,7 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
-      if (saved === 'prospector' && !hasValidOwnerToken()) return 'workspace';
+      if (saved === 'prospector' && !hasValidAdminToken()) return 'workspace';
       if (saved) return saved as any;
     } catch {}
     return 'workspace';
@@ -667,7 +667,7 @@ const AdminDashboard: React.FC = () => {
         </Tabs>
       );
       case 'crm': return <AdminCrm />;
-      case 'prospector': return hasValidOwnerToken() ? <OwnerIcpProspector /> : null;
+      case 'prospector': return hasValidAdminToken() ? <OwnerIcpProspector /> : null;
       
       case 'commissions': return <div className="space-y-6"><AdminQuotingPos /><CommissionStructurePanel /></div>;
       case 'catalog': return <ServicesPricing />;
