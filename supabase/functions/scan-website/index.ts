@@ -189,7 +189,7 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
   const contentDepth = lower.length > 8000 ? 5 : lower.length > 4500 ? 4 : lower.length > 2200 ? 3 : lower.length > 900 ? 2 : 1;
   const ctaStrength = Math.max(0, Math.min(5, ctaHits + (hasCalendarLink ? 1 : 0) + (hasContactForm ? 1 : 0)));
 
-  const signals: WebsiteSignals = {
+  const signals = {
     has_phone: hasPhone,
     has_email: hasEmail,
     has_contact_form: hasContactForm,
@@ -207,7 +207,7 @@ function buildDeterministicAnalysis(markdown: string, links: unknown[], metadata
     brand_consistency: title && hasMetaDescription ? 4 : 3,
     industry_fit: "medium",
     revenue_band: "unknown",
-  };
+  } satisfies WebsiteSignals;
 
   // ---------------------------------------------------------------------------
   // ALWAYS produce a full forensic findings set (12-15 leaks). Severity adjusts
@@ -777,10 +777,11 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
         aiResponse = null;
         continue;
       }
-      if (aiResponse!.ok) break outer;
-      lastErrText = await aiResponse!.clone().text();
-      console.error(`AI gateway error (model=${m.id}):`, aiResponse!.status, lastErrText);
-      if (aiResponse!.status === 402) { hardStopStatus = 402; break outer; }
+      if (!aiResponse) continue;
+      if (aiResponse.ok) break outer;
+      lastErrText = await aiResponse.clone().text();
+      console.error(`AI gateway error (model=${m.id}):`, aiResponse.status, lastErrText);
+      if (aiResponse.status === 402) { hardStopStatus = 402; break outer; }
       // 429/5xx/etc — try the next model immediately
     }
     if (hardStopStatus === 0 && aiResponse && !aiResponse.ok && aiResponse.status === 429) {
@@ -788,7 +789,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       hardStopStatus = 429;
     }
 
-    if (!aiResponse || !aiResponse!.ok) {
+    if (!aiResponse || !aiResponse.ok) {
       const status = aiResponse?.status ?? 503;
       console.error("AI gateway final failure:", status, lastErrText);
 
@@ -828,7 +829,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       });
     }
 
-    const aiData = await aiResponse!.json();
+    const aiData = await aiResponse.json();
     console.log("AI response received");
 
     let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };

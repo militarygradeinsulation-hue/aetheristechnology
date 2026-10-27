@@ -1,10 +1,10 @@
 // Shared aggregator for live site traffic. Used by both admin-live-traffic
 // (top dashboard bar) and admin-assistant (AI tool answers).
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 
 type Row = { event_type: string; event_data: Record<string, unknown> | null; session_id: string | null; created_at: string };
 
-export async function buildLiveTraffic(sb: ReturnType<typeof createClient>, windowHours = 24) {
+export async function buildLiveTraffic(sb: SupabaseClient, windowHours = 24) {
   const now = Date.now();
   const sinceWindow = new Date(now - windowHours * 3600_000).toISOString();
   const since5m = new Date(now - 5 * 60_000).toISOString();

@@ -22,7 +22,7 @@ interface Props {
 const RepInactivityAlert = ({ reps = [], threshold_days = 3, revoked = true }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{reps.length} rep(s) inactive {threshold_days}+ days{revoked ? ' — access revoked' : ''}</Preview>
+    <Preview>{`${reps.length} rep(s) inactive ${threshold_days}+ days${revoked ? ' — access revoked' : ''}`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>🚨 Inactive Rep Sweep</Heading>

@@ -93,7 +93,7 @@ export function qualifyBuyerOpportunity(
   const signalType = candidate.signalType;
   if ((service !== "marketing" && service !== "consulting" && service !== "ai") ||
       !settings.services.includes(service) ||
-      !validTypes.includes(signalType as IntentType)) return null;
+      !validTypes.some((type) => type === signalType)) return null;
   if (!serviceWords[service].test(quote + " " + source.title + " " + source.text.slice(0, 350))) return null;
 
   const name = clip(candidate.contactName, 110);
@@ -146,7 +146,7 @@ export function qualifyBuyerOpportunity(
   const stamp = now.toISOString();
   return {
     id: crypto.randomUUID(), company, contactName, contactTitle,
-    location, service, signalType, summary: clip(candidate.summary, 360),
+    location, service, signalType: signalType as IntentType, summary: clip(candidate.summary, 360),
     quote, sourceUrl, sourceTitle: clip(source.title, 200),
     publishedAt, observedAt: stamp, score,
     tier: score >= 80 ? "high" : score >= 65 ? "medium" : "watch",
