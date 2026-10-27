@@ -2,11 +2,12 @@
 // and auth-admin calls so the login response stays near-instant on live.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { signOwnerToken } from "../_shared/owner-token.ts";
+import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-admin-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const ADMIN_PIN = Deno.env.get("ADMIN_PIN");
