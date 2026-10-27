@@ -33,7 +33,7 @@ const DailyTouchpoints = ({
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>{touchpoints.length} touchpoint{touchpoints.length === 1 ? '' : 's'} scheduled for {date_label}</Preview>
+    <Preview>{`${touchpoints.length} touchpoint${touchpoints.length === 1 ? '' : 's'} scheduled for ${date_label}`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Your touchpoints for {date_label}</Heading>

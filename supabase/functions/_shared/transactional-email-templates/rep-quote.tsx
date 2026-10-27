@@ -29,7 +29,7 @@ const RepQuote = ({
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Aetheris quote {quote_number}</Preview>
+    <Preview>{`Your Aetheris quote ${quote_number || ''}`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={eyebrow}>AETHERIS TECHNOLOGY — QUOTE</Text>

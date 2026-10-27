@@ -74,14 +74,15 @@ Deno.serve(async (req) => {
       // Use typed eq() lookups instead of building a raw .or() string from
       // webhook-supplied values (commas/parens in those fields would otherwise
       // let an attacker inject extra PostgREST filter clauses).
-      let existing: { id: string; pages_viewed: unknown } | null = null;
+      type ExistingVisitor = { id: string; pages_viewed: unknown };
+      let existing: ExistingVisitor | null = null;
       if (person_email) {
         const r = await supabase
           .from('identified_visitors')
           .select('id, pages_viewed')
           .eq('person_email', person_email)
           .maybeSingle();
-        existing = r.data as typeof existing;
+        existing = r.data as ExistingVisitor | null;
       }
       if (!existing && company_domain && person_name) {
         const r = await supabase
@@ -90,7 +91,7 @@ Deno.serve(async (req) => {
           .eq('company_domain', company_domain)
           .eq('person_name', person_name)
           .maybeSingle();
-        existing = r.data as typeof existing;
+        existing = r.data as ExistingVisitor | null;
       }
 
       if (existing) {
