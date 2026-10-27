@@ -18,7 +18,7 @@ The interface shows the evidence URL, request excerpt, signal reasons, ranking, 
 
 The repo already contains \`supabase/functions/_shared/owner-token.ts\` and \`admin_kv\`. There are **no new tables or public RLS grants**. An independent owner token (issued by the existing admin PIN login) is required for dashboard actions, while a separate 24+ character random secret authenticates scheduled calls.
 
-The GitHub workflow \`.github/workflows/deploy-buyer-intent-edge.yml\` deploys **only** \`owner-buyer-intent\` on a merge to main, using \`SUPABASE_ACCESS_TOKEN\` in repository Actions secrets. If the secret is absent, the workflow safely skips; GitHub code merging alone does **not** deploy this function. To enable deployment:
+The GitHub workflow \`.github/workflows/deploy-buyer-intent-edge.yml\` deploys **only** \`owner-buyer-intent\` on a merge to main, using \`SUPABASE_ACCESS_TOKEN\` in repository Actions secrets. If the secret is absent, the workflow now **fails visibly** with an actionable GitHub Actions summary. A green run no longer masks a skipped deployment. GitHub code merging alone does **not** deploy this function. To enable deployment:
 
 - In **GitHub → Repository → Settings → Secrets and variables → Actions**, configure \`SUPABASE_ACCESS_TOKEN\` with a Supabase personal access token that can deploy to project \`ihdjpxhcaiaixmqxyqoe\`. Do not commit or paste secrets in chat.
 - Ensure the deployed function has server secrets \`FIRECRAWL_API_KEY\`, \`LOVABLE_API_KEY\`, \`SUPABASE_URL\`, \`SUPABASE_SERVICE_ROLE_KEY\`, \`ADMIN_PIN\`, and optionally \`BUYER_INTENT_CRON_SECRET\`. The existing ICP engine uses the first two providers; still verify each in the production function environment.
