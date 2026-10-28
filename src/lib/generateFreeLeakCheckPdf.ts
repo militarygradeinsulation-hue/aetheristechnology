@@ -39,7 +39,7 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   y += 13;
 
   doc.setFontSize(24);
-  doc.text("Directional Business Findings", margin, y);
+  doc.text("What We Found", margin, y);
   y += 10;
   line(`${data.company || data.domain}  ·  ${data.domain}`, 11, "bold", 5.5);
   line(`Revenue band: ${data.revenueBandLabel}  ·  Prepared for: ${data.email}`, 8, "normal", 4.4);
@@ -54,7 +54,7 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   doc.setFontSize(22);
   doc.text(`${data.exposure.healthScore}/100`, margin + 6, y + 21);
   doc.setFontSize(9);
-  doc.text("MODELED ANNUAL EXPOSURE", margin + 72, y + 8);
+  doc.text("POTENTIAL ANNUAL SAVINGS", margin + 72, y + 8);
   doc.setFontSize(18);
   doc.text(`${money(data.exposure.annualLow)} – ${money(data.exposure.annualHigh)}`, margin + 72, y + 21);
   doc.setFont("helvetica", "normal");
@@ -64,7 +64,7 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   y += 46;
 
   line(
-    "This is a directional self-assessment, not proof of actual lost revenue. The dollar range is a planning model based on the selected revenue band and your responses. A paid investigation is required to verify causes, baselines, and financial impact.",
+    "Based on your answers and revenue band, this is roughly what these gaps could be costing you each year. We confirm the exact number together before any work starts.",
     8.5,
     "normal",
     4.7,
@@ -73,7 +73,7 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text("What to investigate first", margin, y);
+  doc.text("Where the money is leaking", margin, y);
   y += 8;
 
   if (!data.recommendations.length) {
@@ -84,12 +84,12 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(199, 133, 34);
-      doc.text(`PRIORITY ${String(index + 1).padStart(2, "0")}  /  SELF-REPORTED SIGNAL`, margin, y);
+      doc.text(`PRIORITY ${String(index + 1).padStart(2, "0")}`, margin, y);
       y += 6;
       doc.setTextColor(17, 19, 23);
       line(finding.problem, 11, "bold", 5.5);
-      line(`Why it surfaced: ${finding.reason}`, 8.5, "normal", 4.5);
-      line(`Correction to consider: ${finding.fix}`, 8.5, "normal", 4.5);
+      line(`Why: ${finding.reason}`, 8.5, "normal", 4.5);
+      line(`Our fix (ready to go): ${finding.fix}`, 8.5, "normal", 4.5);
       y += 5;
     });
   }
@@ -100,7 +100,7 @@ export function generateFreeLeakCheckPdf(data: FreeLeakCheckPdfData) {
   y += 8;
   line("Next step", 10, "bold");
   line(
-    "Your first meeting with Aetheris is complimentary. If you want to examine one issue without a larger engagement, standalone consulting after that is $100/hour unless the time is included in a written scope.",
+    "Your first meeting is free. We already have a solution ready for each item above — we walk you through it and confirm the savings with you.",
     8.5,
     "normal",
     4.6,

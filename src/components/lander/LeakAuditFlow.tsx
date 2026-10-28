@@ -487,6 +487,7 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             company={personalized.company}
             repeated={personalized.repeated}
             localOnly={personalized.localOnly}
+            savings={{ low: personalized.exposure.annualLow, high: personalized.exposure.annualHigh }}
           />
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             {personalized.localOnly
