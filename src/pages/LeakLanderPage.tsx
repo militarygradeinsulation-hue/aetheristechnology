@@ -282,28 +282,6 @@ const LeakLanderPage: React.FC = () => {
         <PricingTimeline />
       </section>
 
-      {/* Commercial terms */}
-      <section id="pricing-disclosure" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl border-l-2 border-amber/70 pl-5 sm:pl-8">
-          <SectionLabel>// How fees work</SectionLabel>
-          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-            Clear terms before <span className="text-amber">paid work begins.</span>
-          </h2>
-          <p className="mt-6 max-w-3xl text-base leading-relaxed text-foreground/90 sm:text-lg">
-            Your first meeting is complimentary. After that, standalone consulting is $100 per hour unless that time is already included in a written project or ongoing engagement.
-          </p>
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-foreground/90">
-            Fixed-fee investigations and implementation work are scoped in writing. If a qualifying engagement uses recovery-based compensation, the baseline, attribution method, payment timing, and definition of recovered value are agreed before the work starts.
-          </p>
-          <p className="mt-4 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-            Modeled exposure is not the same as measured recovery. No recovered-revenue outcome is guaranteed.
-          </p>
-          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground/85">
-            Our assurance is procedural: if a finding cannot be supported by evidence, it does not belong in the deliverable. If the scope changes, the commercial terms are agreed before the additional work is billed.
-          </p>
-        </div>
-      </section>
-
       {/* Intake */}
       <section className="border-t border-border/60 py-20 px-6">
         <div className="mx-auto max-w-2xl text-center">
