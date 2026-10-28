@@ -40,13 +40,6 @@ const PAIN_POINTS = [
   "Teams repeat manual work while no one can see which friction is costing the most.",
 ];
 
-const FIT_SIGNALS = [
-  "Steady inquiry volume and enough economic exposure for small breakdowns to matter.",
-  "Multiple people or departments touch the customer journey.",
-  "An owner or executive can authorize access and decisions.",
-  "The company has capacity to implement corrections once the evidence is clear.",
-];
-
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-4">{children}</p>
 );
@@ -183,34 +176,6 @@ const LeakLanderPage: React.FC = () => {
                   <p className="mt-3 text-sm leading-relaxed text-foreground/85">{point}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Initial fit */}
-      <section id="fit" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// Where we start</SectionLabel>
-          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
-            <div>
-              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-                Established service businesses where opportunity crosses <span className="text-amber">more than one set of hands.</span>
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-                Our clearest starting profile is a company with steady inquiries, multiple people handling customers, and no reliable view of where opportunities are being lost.
-              </p>
-            </div>
-            <div>
-              <p className="font-case text-[10px] uppercase tracking-widest text-amber">A strong fit usually has</p>
-              <ul className="mt-5 space-y-3">
-                {FIT_SIGNALS.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm leading-relaxed text-foreground/85">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
