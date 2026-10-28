@@ -5,7 +5,6 @@ import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { LanderNavbar } from "@/components/lander/LanderNavbar";
 import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
-import { CaseFilePreview } from "@/components/lander/CaseFilePreview";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import {
   CTA,
@@ -15,10 +14,8 @@ import {
   FOUNDER_TRUST,
   EXPECTATION_NOTE,
 } from "@/lib/engagementModel";
-import { ObsidianVibeWaitlist } from "@/components/ObsidianVibeWaitlist";
 import { Footer } from "@/components/Footer";
 import { PricingTimeline } from "@/components/PricingTimeline";
-import SampleGoldenReports from "@/components/lander/SampleGoldenReports";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
 
 // Reuse the original interactive chaos-physics graph without bloating the initial hero.
@@ -27,18 +24,6 @@ const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSect
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 
-const SIGNALS = [
-  { k: "Evidence", v: "A named finding tied to something you can inspect." },
-  { k: "Cause", v: "Why it matters and what is creating it." },
-  { k: "Correction", v: "What should change first and how progress will be checked." },
-];
-
-const PAIN_POINTS = [
-  "Leads enter the business, but ownership changes as they move between people.",
-  "Follow-up depends on memory, inboxes, or individual habits.",
-  "CRM, spreadsheets, and conversations disagree about what is actually happening.",
-  "Teams repeat manual work while no one can see which friction is costing the most.",
-];
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-4">{children}</p>
@@ -95,7 +80,7 @@ const LeakLanderPage: React.FC = () => {
             {CTA.primary} <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="#sample-reports"
+            href="#case-studies"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
           >
             {CTA.secondary} <ArrowRight className="h-4 w-4" />
@@ -131,9 +116,6 @@ const LeakLanderPage: React.FC = () => {
               </p>
             </div>
             <SectionLabel>// The decision</SectionLabel>
-            <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-              Can we find what is costing the company money, <span className="text-amber">show the evidence, and help correct it?</span>
-            </h2>
           </div>
           <div className="space-y-5">
             <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">
@@ -152,31 +134,6 @@ const LeakLanderPage: React.FC = () => {
             >
               See the investigation method <ArrowRight className="h-4 w-4" />
             </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Recognizable pain */}
-      <section id="recognize" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// What the problem looks like before it has a name</SectionLabel>
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            <div>
-              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-                The company can look busy while value disappears <span className="text-amber">between the work.</span>
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-                The issue is often not one bad department. It is what happens when ownership, information, timing, and decisions cross from one part of the business to another.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {PAIN_POINTS.map((point, i) => (
-                <div key={point} className="rounded-xl border border-border/60 bg-card/40 p-5">
-                  <p className="font-case text-[9px] uppercase tracking-widest text-amber">{String(i + 1).padStart(2, "0")}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/85">{point}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -280,41 +237,6 @@ const LeakLanderPage: React.FC = () => {
       </section>
 
 
-
-      {/* Case file preview */}
-      <section id="sample-reports" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center">
-          <div>
-            <SectionLabel>// The first useful output</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-              Evidence before recommendations.
-            </h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed max-w-lg">
-              The Golden Report turns the investigation into a case file: the finding, the evidence,
-              why it matters, the correction to consider, and the order in which the work should happen.
-              Modeled exposure is kept distinct from financially verified recovery.
-            </p>
-            <div className="mt-6 rounded-xl border border-amber/30 bg-amber/[0.05] p-5 max-w-lg">
-              <p className="font-case text-[10px] uppercase tracking-widest text-amber">First findings brief</p>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/90">
-                The first meaningful win is a highest-priority issue supported by evidence, why it matters,
-                and the next action. The delivery window is confirmed at kickoff based on access and scope.
-              </p>
-            </div>
-            <ul className="mt-8 space-y-4">
-              {SIGNALS.map((s) => (
-                <li key={s.k} className="border-l border-amber/40 pl-4">
-                  <p className="font-case text-[10px] uppercase tracking-widest text-amber">{s.k}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{s.v}</p>
-                </li>
-              ))}
-            </ul>
-            <SampleGoldenReports />
-          </div>
-
-          <CaseFilePreview />
-        </div>
-      </section>
 
       {/* Case files */}
       <section id="case-studies" className="border-t border-border/60 py-20 px-6">
@@ -460,12 +382,6 @@ const LeakLanderPage: React.FC = () => {
           </a>
         </div>
       </section>
-
-      <div className="border-t border-border/60 py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <ObsidianVibeWaitlist />
-        </div>
-      </div>
 
       {/* Contact strip */}
       <section className="border-t border-border/60 py-10 px-6">
