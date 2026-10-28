@@ -15,6 +15,11 @@ export interface LibraryCompany {
   location: string | null;
   contact_names: string[] | null;
   aliases: string[] | null;
+  poc_name?: string | null;
+  poc_title?: string | null;
+  poc_email?: string | null;
+  poc_phone?: string | null;
+  poc_found_at?: string | null;
 }
 
 export interface LibraryCard {
@@ -139,6 +144,10 @@ export const getCompany = (companyId: string, portalToken?: string | null) =>
 export const getReport = (scanId: string, portalToken?: string | null) =>
   call<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] }>(
     "golden-report-library", { action: "get_report", scan_id: scanId }, portalToken);
+
+export const findCompanyContact = (companyId: string, portalToken?: string | null) =>
+  call<{ ok: boolean; contact: { poc_name: string | null; poc_title: string | null; poc_email: string | null; poc_phone: string | null; poc_found_at: string } }>(
+    "golden-report-library", { action: "find_contact", company_id: companyId }, portalToken);
 
 export const getLibraryStats = () =>
   call<{ total_scans: number; total_archived: number; total_companies: number }>(

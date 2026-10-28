@@ -4011,6 +4011,12 @@ export type Database = {
           industry: string | null
           location: string | null
           normalized_name: string
+          poc_email: string | null
+          poc_found_at: string | null
+          poc_name: string | null
+          poc_phone: string | null
+          poc_source: string | null
+          poc_title: string | null
           primary_domain: string | null
           summary_generated_at: string | null
           summary_source: string
@@ -4027,6 +4033,12 @@ export type Database = {
           industry?: string | null
           location?: string | null
           normalized_name: string
+          poc_email?: string | null
+          poc_found_at?: string | null
+          poc_name?: string | null
+          poc_phone?: string | null
+          poc_source?: string | null
+          poc_title?: string | null
           primary_domain?: string | null
           summary_generated_at?: string | null
           summary_source?: string
@@ -4043,6 +4055,12 @@ export type Database = {
           industry?: string | null
           location?: string | null
           normalized_name?: string
+          poc_email?: string | null
+          poc_found_at?: string | null
+          poc_name?: string | null
+          poc_phone?: string | null
+          poc_source?: string | null
+          poc_title?: string | null
           primary_domain?: string | null
           summary_generated_at?: string | null
           summary_source?: string

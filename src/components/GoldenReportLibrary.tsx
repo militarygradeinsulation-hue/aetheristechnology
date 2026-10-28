@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import {
   Loader2, Search, RefreshCw, Building2, ExternalLink, FileText, Copy, Download,
-  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck, Network,
+  ChevronLeft, AlertTriangle, CheckCircle2, Cpu, Database, Link2, ShieldCheck, Network, User, Mail, Phone, UserSearch,
 } from 'lucide-react';
 import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
   listCompanies, getCompany, getReport, getLibraryStats, runBackfillBatch,
-  generateBlueprint, setBlueprintApproval, formatExposure, downloadTextFile,
+  generateBlueprint, setBlueprintApproval, findCompanyContact, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
 import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
@@ -402,6 +402,40 @@ const CompanyDetail: React.FC<{ companyId: string; onBack: () => void; onOpenRep
   );
 };
 
+const ContactStrip: React.FC<{ company: LibraryCompany; portalToken: string | null; onFound: (c: Partial<LibraryCompany>) => void }> = ({ company, portalToken, onFound }) => {
+  const [busy, setBusy] = useState(false);
+  const has = company.poc_name || company.poc_email || company.poc_phone;
+  const find = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBusy(true);
+    try {
+      const res = await findCompanyContact(company.id, portalToken);
+      onFound(res.contact);
+      const c = res.contact;
+      toast({ title: c.poc_name || c.poc_email || c.poc_phone ? 'Contact found' : 'No contact details listed on their site' });
+    } catch (err) {
+      toast({ title: 'Contact lookup failed', description: (err as Error).message, variant: 'destructive' });
+    } finally { setBusy(false); }
+  };
+  return (
+    <div className="mt-3 rounded-md border border-border/60 bg-background/40 p-2" onClick={e => e.stopPropagation()}>
+      {has ? (
+        <div className="space-y-1 text-[11px]">
+          {company.poc_name && <p className="flex items-center gap-1.5 text-foreground"><User className="h-3 w-3 text-amber" />{company.poc_name}{company.poc_title ? <span className="text-muted-foreground"> · {company.poc_title}</span> : null}</p>}
+          {company.poc_email && <a href={`mailto:${company.poc_email}`} className="flex items-center gap-1.5 truncate text-muted-foreground hover:text-amber"><Mail className="h-3 w-3" />{company.poc_email}</a>}
+          {company.poc_phone && <a href={`tel:${company.poc_phone}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-amber"><Phone className="h-3 w-3" />{company.poc_phone}</a>}
+        </div>
+      ) : (
+        <p className="text-[10px] text-muted-foreground">No point of contact yet.</p>
+      )}
+      <Button size="sm" variant="outline" className="mt-2 h-6 px-2 text-[10px]" onClick={find} disabled={busy}>
+        {busy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <UserSearch className="mr-1 h-3 w-3" />}
+        {has ? 'Refresh contact' : 'Find contact'}
+      </Button>
+    </div>
+  );
+};
+
 /* ───────────────────────── main library ───────────────────────── */
 
 export interface GoldenReportLibraryProps {
@@ -576,8 +610,9 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
         <>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {items.map(card => (
-              <button key={card.company.id} onClick={() => setCompanyId(card.company.id)}
-                className="group flex flex-col rounded-xl border border-border bg-card/40 p-4 text-left transition-colors hover:border-amber/50">
+              <div key={card.company.id} role="button" tabIndex={0} onClick={() => setCompanyId(card.company.id)}
+                onKeyDown={e => { if (e.key === 'Enter') setCompanyId(card.company.id); }}
+                className="group cursor-pointer flex flex-col rounded-xl border border-border bg-card/40 p-4 text-left transition-colors hover:border-amber/50">
                 <div className="flex items-start gap-2">
                   <Building2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber" />
                   <div className="min-w-0 flex-1">
@@ -599,7 +634,9 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
                   {card.report_count} report{card.report_count === 1 ? '' : 's'} · {card.finding_count} findings · {card.root_cause_count} root causes
                   {card.newest_completed_at ? ` · ${new Date(card.newest_completed_at).toLocaleDateString()}` : ''}
                 </p>
-              </button>
+                <ContactStrip company={card.company} portalToken={portalToken}
+                  onFound={c => setItems(prev => prev.map(it => it.company.id === card.company.id ? { ...it, company: { ...it.company, ...c } } : it))} />
+              </div>
             ))}
           </div>
 

@@ -22,6 +22,13 @@
       "when": 1793133858287,
       "tag": "0002_repair_forensic_scans_private_intake_column",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793218673469,
+      "tag": "0003_golden_company_contact",
+      "breakpoints": true
     }
   ]
 }

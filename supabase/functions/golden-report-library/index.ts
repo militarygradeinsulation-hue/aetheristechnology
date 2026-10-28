@@ -204,6 +204,70 @@ serve(async (req) => {
     const scoped = <T extends { in: (c: string, v: string[]) => T }>(q: T): T =>
       scopeCodes === null ? q : q.in("rep_code", scopeCodes.length ? scopeCodes : ["\u0000none"]);
 
+    /* find point of contact (name / email / phone) from the company's own site */
+    if (action === "find_contact") {
+      const companyId = String(body.company_id ?? "");
+      if (!companyId) return json({ error: "company_id required" }, 400);
+      const { data: co } = await sb.from("golden_report_companies").select("*").eq("id", companyId).maybeSingle();
+      if (!co) return json({ error: "company not found" }, 404);
+      const c = co as Record<string, unknown>;
+      const site = String(c.website_url || c.primary_domain || "").trim();
+      if (!site) return json({ error: "No website on file for this company" }, 400);
+      const FC = Deno.env.get("FIRECRAWL_API_KEY");
+      const AI = Deno.env.get("LOVABLE_API_KEY");
+      if (!FC || !AI) return json({ error: "Contact lookup is not configured" }, 500);
+      const base = /^https?:\/\//i.test(site) ? site : `https://${site}`;
+      let origin = base;
+      try { origin = new URL(base).origin; } catch { /* keep */ }
+      const pages = [origin, `${origin}/contact`, `${origin}/contact-us`, `${origin}/about`];
+      const texts: string[] = [];
+      await Promise.all(pages.map(async (u) => {
+        try {
+          const r = await fetch("https://api.firecrawl.dev/v2/scrape", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${FC}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ url: u, formats: ["markdown"], onlyMainContent: false }),
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          const md = d?.data?.markdown || "";
+          if (md) texts.push(`URL: ${u}\n${md.slice(0, 7000)}`);
+        } catch { /* skip */ }
+      }));
+      if (!texts.length) return json({ error: "Could not read the company website" }, 502);
+      const ai = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${AI}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-3.8-flash",
+          messages: [
+            { role: "system", content: "Extract the best point of contact for this business (owner, president, GM, or main office). Only use details literally present in the text. Never invent emails or phone numbers; leave a field empty if not found." },
+            { role: "user", content: `Business: ${c.display_name}\n\n${texts.join("\n\n---\n\n").slice(0, 26000)}` },
+          ],
+          tools: [{ type: "function", function: { name: "contact", parameters: { type: "object", properties: {
+            name: { type: "string" }, title: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, source_url: { type: "string" },
+          } } } }],
+          tool_choice: { type: "function", function: { name: "contact" } },
+        }),
+      });
+      if (!ai.ok) return json({ error: `AI lookup failed (${ai.status})` }, 502);
+      const aj = await ai.json();
+      let found: Record<string, string> = {};
+      try { found = JSON.parse(aj?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments || "{}"); } catch { /* empty */ }
+      const blob = texts.join("\n").toLowerCase();
+      const clean = (v: unknown, n = 200) => { const s = String(v ?? "").trim(); return s ? s.slice(0, n) : null; };
+      let email = clean(found.email);
+      if (email && !blob.includes(email.toLowerCase())) email = null; // must appear on the site
+      let phone = clean(found.phone, 40);
+      if (phone && !blob.replace(/\D/g, "").includes(phone.replace(/\D/g, ""))) phone = null;
+      const patch = {
+        poc_name: clean(found.name), poc_title: clean(found.title), poc_email: email, poc_phone: phone,
+        poc_source: clean(found.source_url, 500) || origin, poc_found_at: new Date().toISOString(),
+      };
+      await sb.from("golden_report_companies").update(patch).eq("id", companyId);
+      return json({ ok: true, contact: patch });
+    }
+
     /* archive a single scan (completion hook / admin retry) */
     if (action === "archive_scan") {
       if (!isAdmin && !internal) return json({ error: "Forbidden" }, 403);
