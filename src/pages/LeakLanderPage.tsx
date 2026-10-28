@@ -218,37 +218,6 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
-      {/* First win, effort and clocks */}
-      <section id="first-win" className="scroll-mt-28 border-t border-border/60 px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// What happens after we begin</SectionLabel>
-          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-                We carry the investigation. <span className="text-amber">You provide the context and access.</span>
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-                We collect and connect the evidence, rank the issues, document the reasoning, and build the correction path. You provide the systems, people, and business context needed to make the findings accurate.
-              </p>
-            </div>
-            <div className="grid gap-3">
-              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
-                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to first finding</p>
-                <p className="mt-2 text-sm text-foreground/85">When the first evidence-backed priority is ready. The specific window is confirmed at kickoff.</p>
-              </div>
-              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
-                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to correction</p>
-                <p className="mt-2 text-sm text-foreground/85">Depends on the issue, required access, and whether your team or Aetheris performs the implementation.</p>
-              </div>
-              <div className="rounded-xl border border-border/60 bg-card/40 p-5">
-                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Time to financial result</p>
-                <p className="mt-2 text-sm text-foreground/85">Measured only after the correction has had enough time to affect the agreed baseline. It is not presented as guaranteed recovery.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Interactive investment line */}
       <section id="prices" className="scroll-mt-28 border-t border-border/60 py-20 px-6">
         <PricingTimeline />
