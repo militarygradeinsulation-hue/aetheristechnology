@@ -1,8 +1,7 @@
 # Roadmap
 
-- [x] Preserve the supplied full Architect persona specification server-side.
-- [x] Implement one bounded shared runtime policy for Nexus and post contexts.
-- [x] Route the shared policy through Random Post, regeneration, and Architect post generators.
-- [x] Add regression tests for domains, analogies, context composition, fallback, and wiring.
-- [x] Run typecheck, tests, production build, and inspect preview health.
-- [x] Deploy only affected cloud functions; do not publish the website.
+- [ ] Remove #recognize section ("What the problem looks like") from LeakLanderPage
+- [ ] Remove decision headline h2 ("Can we find what is costing...") from LeakLanderPage
+- [ ] Remove "The first useful output" section from LeakLanderPage
+- [ ] Remove ObsidianVibeWaitlist block from LeakLanderPage
+- [ ] Verify no dangling references (constants, anchors)
