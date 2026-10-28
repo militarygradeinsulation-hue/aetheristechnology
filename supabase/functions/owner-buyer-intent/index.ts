@@ -22,7 +22,6 @@ const MAX_MANUAL_PER_DAY = 3;
 const MAX_SEARCHES_PER_RUN = 6;
 const MAX_SOURCES = 30;
 const MAX_AI_CANDIDATES = 24;
-const MIN_SCAN_INTERVAL_MS = 30 * 60 * 1000;
 const CRON_SCAN_INTERVAL_MS = 20 * 60 * 60 * 1000;
 
 type ScanReport = {
@@ -267,9 +266,6 @@ serve(async req => {
         const today = new Date().toISOString().slice(0, 10);
         if (store.manualDay !== today) { store.manualDay = today; store.manualCount = 0; }
         if (store.manualCount >= MAX_MANUAL_PER_DAY) return respond({ error: "Daily manual scan limit reached (3/day)." }, 429);
-        if (store.lastManualAt && now - Date.parse(store.lastManualAt) < MIN_SCAN_INTERVAL_MS) {
-          return respond({ error: "Wait at least 30 minutes between manual searches." }, 429);
-        }
       }
       // Reserve a scan attempt before any paid search/AI call. A provider error
       // must not permit unlimited free retries or unexpected credit consumption.

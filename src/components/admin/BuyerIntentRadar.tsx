@@ -278,7 +278,7 @@ export default function BuyerIntentRadar() {
             </label>
           </div>
           <p className="text-xs text-muted-foreground">
-            Manual searches are capped at 3 daily, at least 30 minutes apart. Automated scans
+            Manual searches are capped at 3 daily. Automated scans
             only run when both the schedule and the server-side scheduler credentials are configured.
             The schedule never sends outreach.
           </p>
