@@ -47,14 +47,6 @@ const FIT_SIGNALS = [
   "The company has capacity to implement corrections once the evidence is clear.",
 ];
 
-const BUYING_JOURNEY = [
-  { n: "01", title: "Recognize", text: "Free Leak Check and a complimentary first meeting establish whether there is a credible reason to investigate." },
-  { n: "02", title: "Investigate", text: "A paid diagnostic appropriate to the company establishes causes, priorities, and the correction plan." },
-  { n: "03", title: "Correct", text: "Aetheris executes the agreed corrections, or hands your team a clear implementation path." },
-  { n: "04", title: "Focus", text: "For a narrow issue, standalone consulting is $100/hour after the complimentary first meeting instead of forcing a larger scope." },
-  { n: "05", title: "Continue", text: "Ongoing monitoring or an Active Case is earned when continued operator involvement is useful." },
-];
-
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80 mb-4">{children}</p>
 );
@@ -450,28 +442,6 @@ const LeakLanderPage: React.FC = () => {
                 <p className="mt-2 text-sm text-foreground/85">Measured only after the correction has had enough time to affect the agreed baseline. It is not presented as guaranteed recovery.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Simplified buying journey */}
-      <section id="engagement-options" className="scroll-mt-28 border-t border-border/60 px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// One buying decision</SectionLabel>
-          <h2 className="max-w-4xl font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-            You do not need to know which Aetheris tool you need. <span className="text-amber">Start with the business problem.</span>
-          </h2>
-          <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground">
-            The engagement expands only when the evidence justifies it. A narrower problem gets a narrower scope; the same work is not discounted simply to force a sale.
-          </p>
-          <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-5">
-            {BUYING_JOURNEY.map((step) => (
-              <div key={step.n} className="bg-background p-6">
-                <p className="font-case text-[10px] uppercase tracking-[0.28em] text-amber">{step.n}</p>
-                <h3 className="mt-3 text-lg font-bold">{step.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{step.text}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
