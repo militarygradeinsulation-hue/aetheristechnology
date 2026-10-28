@@ -45,6 +45,12 @@ export function validateAuditAnswers(raw: unknown): raw is AuditAnswers {
     return Number.isInteger(v) && typeof v === "number" && v >= 0 && v <= 4;
   });
 }
+const GROUP_REASON: Record<AuditGroup, string> = {
+  capture: "You rated how leads are captured and tracked as weak.",
+  response: "You rated response speed and follow-up as weak.",
+  drag: "You rated internal handoffs and team workload as weak.",
+  trust: "You rated your website clarity and proof as weak.",
+};
 export function evaluateCompanyAudit(answers: AuditAnswers): AuditRecommendation[] {
   if (!validateAuditAnswers(answers)) throw new Error("All 14 assessment answers are required.");
   const scored = AUDIT_OPTIONS.map(option => {
@@ -57,7 +63,7 @@ export function evaluateCompanyAudit(answers: AuditAnswers): AuditRecommendation
   return scored.slice(0, 6).map(({option, average}) => ({
     id: option.id,
     problem: option.problem, fix: option.fix, score: Math.round(average * 25),
-    reason: "Based on your responses to " + option.questions.join(" and ") + "; requires verification.",
+    reason: GROUP_REASON[option.group],
   }));
 }
 
