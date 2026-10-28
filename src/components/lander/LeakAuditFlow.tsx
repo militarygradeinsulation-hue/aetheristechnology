@@ -144,7 +144,7 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
         localOnly: false,
       });
       setStep('result');
-      toast.success('Your company recommendations and individual prices are ready.');
+      toast.success('Your company findings and ready-to-go fixes are ready.');
     } catch (err) {
       // The newer server endpoint and database migration may not yet be deployed.
       // Preserve a useful, deterministic no-cost result without making a scan,
@@ -215,7 +215,7 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             )}
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Enter your company website and answer 14 operational questions. See the
-              gaps your answers suggest, practical solutions, and individual prices.
+              gaps your answers suggest, and the fixes we already have ready.
               A full Golden Report is processed separately for internal review, subject to scan capacity.
             </p>
           </div>
@@ -365,7 +365,7 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
               <ShieldCheck className="h-4 w-4" /> Your company assessment
             </div>
             <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
-              View your fixes and individual prices.
+              View your fixes and what you could save.
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               This is based on your self-reported answers, not a verified ROI claim.
