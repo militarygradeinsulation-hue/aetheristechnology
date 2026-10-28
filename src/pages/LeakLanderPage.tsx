@@ -8,10 +8,6 @@ import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import {
   CTA,
-  ENGAGEMENT_STAGES,
-  ENGAGEMENT_STAGES_HEADLINE,
-  ENGAGEMENT_STAGES_INTRO,
-  FOUNDER_TRUST,
   EXPECTATION_NOTE,
 } from "@/lib/engagementModel";
 import { Footer } from "@/components/Footer";
@@ -247,58 +243,6 @@ const LeakLanderPage: React.FC = () => {
             stories and situations. We will give you the same courtesy when we partner with you.
           </p>
           <RealCaseStudiesSection />
-        </div>
-      </section>
-
-      {/* How we work */}
-      <section id="how-we-work" className="border-t border-border/60 py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel>// How we work</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-            {ENGAGEMENT_STAGES_HEADLINE}
-          </h2>
-          <p className="mt-4 max-w-2xl text-muted-foreground leading-relaxed">
-            {ENGAGEMENT_STAGES_INTRO}
-          </p>
-
-          <div className="mt-10 grid gap-px bg-border/60 sm:grid-cols-2 lg:grid-cols-5 rounded-xl overflow-hidden border border-border/60">
-            {ENGAGEMENT_STAGES.map((s) => (
-              <div key={s.n} className="bg-background p-6 flex flex-col">
-                <span className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/70">
-                  {s.n}
-                </span>
-                <h3 className="mt-3 text-lg font-bold">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.line}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-start">
-            <blockquote className="border-l-2 border-amber/60 pl-5">
-              <p className="text-lg leading-relaxed text-foreground/90">
-                &ldquo;{FOUNDER_TRUST.quote}&rdquo;
-              </p>
-              <footer className="mt-4 font-case text-[10px] uppercase tracking-[0.28em] text-amber">
-                {FOUNDER_TRUST.attribution}
-              </footer>
-            </blockquote>
-
-            <div className="rounded-xl border border-border/60 p-6">
-              <p className="text-sm text-muted-foreground leading-relaxed">{FOUNDER_TRUST.short}</p>
-              <p className="mt-4 font-semibold text-foreground">{FOUNDER_TRUST.punch}</p>
-              <p className="mt-4 text-xs text-muted-foreground/80 leading-relaxed">
-                {EXPECTATION_NOTE}
-              </p>
-              <a
-                href={BOOK_MEETING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-amber/40 px-6 font-case text-[11px] font-bold uppercase tracking-widest text-amber transition-colors hover:bg-amber/10"
-              >
-                <Calendar className="h-4 w-4" /> {CTA.session}
-              </a>
-            </div>
-          </div>
         </div>
       </section>
 
