@@ -13,6 +13,7 @@ import {
 import { Footer } from "@/components/Footer";
 import { PricingTimeline } from "@/components/PricingTimeline";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
+import { LeakAuditFlow } from "@/components/lander/LeakAuditFlow";
 
 // Reuse the original interactive chaos-physics graph without bloating the initial hero.
 const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSection"));
@@ -70,12 +71,12 @@ const LeakLanderPage: React.FC = () => {
           loading="eager"
         />
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <Link
-            to="/leak-audit/self-scan"
+          <a
+            href="#leak-audit"
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
           >
             {CTA.primary} <ArrowRight className="h-4 w-4" />
-          </Link>
+          </a>
         </div>
         <p className="max-w-2xl pt-1 text-xs text-muted-foreground/80 leading-relaxed">
           {EXPECTATION_NOTE}
@@ -84,6 +85,11 @@ const LeakLanderPage: React.FC = () => {
           Indianapolis · Operating nationwide
         </p>
       </AnomalousMatterHero>
+
+      {/* Free Leak Audit questionnaire — embedded so visitors can start without leaving the page */}
+      <section id="leak-audit" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <LeakAuditFlow embedded />
+      </section>
 
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
