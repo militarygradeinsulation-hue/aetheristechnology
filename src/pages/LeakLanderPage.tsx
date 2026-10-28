@@ -86,6 +86,11 @@ const LeakLanderPage: React.FC = () => {
         </p>
       </AnomalousMatterHero>
 
+      {/* Free Leak Audit questionnaire — embedded so visitors can start without leaving the page */}
+      <section id="leak-audit" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
+        <LeakAuditFlow embedded />
+      </section>
+
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
