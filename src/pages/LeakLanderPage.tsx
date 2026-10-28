@@ -76,12 +76,6 @@ const LeakLanderPage: React.FC = () => {
           >
             {CTA.primary} <ArrowRight className="h-4 w-4" />
           </Link>
-          <a
-            href="#case-studies"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-border px-8 font-case text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
-          >
-            {CTA.secondary} <ArrowRight className="h-4 w-4" />
-          </a>
         </div>
         <p className="max-w-2xl pt-1 text-xs text-muted-foreground/80 leading-relaxed">
           {EXPECTATION_NOTE}
