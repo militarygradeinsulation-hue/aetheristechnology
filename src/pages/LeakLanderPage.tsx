@@ -19,6 +19,7 @@ const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSect
 
 
 import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
+import problemReasonSolution from "@/assets/problem-reason-solution.png.asset.json";
 
 
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -62,12 +63,12 @@ const LeakLanderPage: React.FC = () => {
         <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
           Find what's costing your company money. <span className="text-amber">Know what to fix first.</span>
         </h1>
-        <p className="max-w-3xl text-base sm:text-lg leading-relaxed text-foreground/85">
-          Aetheris examines how your people, processes, and systems work together, identifies where value is being lost, and builds a practical plan to correct it.
-        </p>
-        <p className="max-w-3xl border-l border-amber/50 pl-4 text-sm leading-relaxed text-muted-foreground">
-          Founder's lens: I study the entire company as one connected system, tracing how every department, role, handoff, and decision affects the next.
-        </p>
+        <img
+          src={problemReasonSolution.url}
+          alt="The problem: the cost of existing creates financial leaks. The reason: we look through the lens of science and psychology across people, processes, systems, and structure. The solution: by fixing the leaks, your ROI automatically increases."
+          className="w-full max-w-4xl rounded-xl border border-border/60"
+          loading="eager"
+        />
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
           <Link
             to="/leak-audit/self-scan"
