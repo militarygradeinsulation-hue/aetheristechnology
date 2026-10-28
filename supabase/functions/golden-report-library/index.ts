@@ -239,7 +239,7 @@ serve(async (req) => {
         method: "POST",
         headers: { Authorization: `Bearer ${AI}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-3.8-flash",
           messages: [
             { role: "system", content: "Extract the best point of contact for this business (owner, president, GM, or main office). Only use details literally present in the text. Never invent emails or phone numbers; leave a field empty if not found." },
             { role: "user", content: `Business: ${c.display_name}\n\n${texts.join("\n\n---\n\n").slice(0, 26000)}` },
