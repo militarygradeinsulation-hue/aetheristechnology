@@ -54,6 +54,12 @@ export function PricingTimeline() {
         <span className="text-muted-foreground">Additional consulting is $100/hour unless included in a scoped engagement.</span>
       </div>
 
+      <details className="group mt-6">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-amber/40 px-5 py-2.5 font-case text-xs font-bold uppercase tracking-widest text-amber hover:bg-amber/10 [&::-webkit-details-marker]:hidden">
+        <span className="group-open:hidden">Show engagement levels &amp; pricing</span>
+        <span className="hidden group-open:inline">Hide engagement levels</span>
+        <ArrowDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+      </summary>
       <div className="mt-8 rounded-xl border border-amber/25 bg-card/50 p-4 sm:p-7">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-xs text-foreground" aria-live="polite">
@@ -237,6 +243,7 @@ export function PricingTimeline() {
         to an already-scoped tier. One-time and monthly amounts remain separate. Exact scope,
         eligibility, payment and any recovery-based terms are agreed in writing; outcomes are not guaranteed.
       </p>
+      </details>
     </div>
   );
 }

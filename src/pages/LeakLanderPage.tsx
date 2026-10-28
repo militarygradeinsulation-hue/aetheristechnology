@@ -70,13 +70,8 @@ const LeakLanderPage: React.FC = () => {
           className="w-full max-w-4xl rounded-xl border border-border/60"
           loading="eager"
         />
-        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-          <a
-            href="#leak-audit"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-amber px-8 font-case text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5"
-          >
-            {CTA.primary} <ArrowRight className="h-4 w-4" />
-          </a>
+        <div id="leak-audit" className="w-full max-w-4xl scroll-mt-28 pt-4 text-left">
+          <LeakAuditFlow embedded />
         </div>
         <p className="max-w-2xl pt-1 text-xs text-muted-foreground/80 leading-relaxed">
           {EXPECTATION_NOTE}
@@ -86,14 +81,9 @@ const LeakLanderPage: React.FC = () => {
         </p>
       </AnomalousMatterHero>
 
-      {/* Free Leak Audit questionnaire — embedded so visitors can start without leaving the page */}
-      <section id="leak-audit" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <LeakAuditFlow embedded />
-      </section>
-
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <div className="mx-auto flex max-w-6xl justify-center">
           <div>
             <div className="mb-8">
               <div className="relative mx-auto h-56 w-56 overflow-hidden rounded-full border border-amber/40 bg-black shadow-[var(--shadow-glow)] sm:h-64 sm:w-64 lg:mx-0">
@@ -112,25 +102,6 @@ const LeakLanderPage: React.FC = () => {
                 Aetheris in 60 seconds
               </p>
             </div>
-            <SectionLabel>// The decision</SectionLabel>
-          </div>
-          <div className="space-y-5">
-            <p className="text-base leading-relaxed text-foreground/90 sm:text-lg">
-              That is the entire buying decision. Aetheris examines the business across people,
-              processes, systems, handoffs, and decisions to determine where value is being lost
-              and what deserves attention first.
-            </p>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              You are not asked to choose a tool or diagnose the company yourself. The investigation
-              determines the cause, the appropriate correction, who should own it, and how the result
-              should be measured.
-            </p>
-            <a
-              href="#chaos-theory"
-              className="inline-flex items-center gap-2 border-b border-amber/50 pb-1 font-case text-xs font-bold uppercase tracking-widest text-amber transition-colors hover:border-amber"
-            >
-              See the investigation method <ArrowRight className="h-4 w-4" />
-            </a>
           </div>
         </div>
       </section>
