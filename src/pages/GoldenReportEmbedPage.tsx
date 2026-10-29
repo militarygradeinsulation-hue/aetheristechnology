@@ -119,7 +119,15 @@ const GoldenReportEmbedPage: React.FC = () => {
           </div>
         )}
 
+        {!embed && status === "ready" && (
+          <div className="mb-4">{backButton}</div>
+        )}
+
         <ForensicScanAllPanel initialScanId={activeScanId} />
+
+        {!embed && status === "ready" && (
+          <div className="mt-8 flex justify-center">{backButton}</div>
+        )}
       </div>
     </div>
   );
