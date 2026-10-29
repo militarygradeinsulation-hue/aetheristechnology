@@ -21,8 +21,8 @@ const TABS: { id: TabId; label: string; blurb: string }[] = [
 ];
 
 export const HomeMindMapSection: React.FC<{ onBookAudit?: () => void }> = ({ onBookAudit }) => {
-  // Start with seven visible symptom nodes and let visitors expand into the full system.
-  const [tab, setTab] = useState<TabId>("symptoms");
+  // Default to the full ecosystem so visitors see the whole system first.
+  const [tab, setTab] = useState<TabId>("all");
   const navigate = useNavigate();
   const openBook = () => onBookAudit ? onBookAudit() : navigate("/book");
 
