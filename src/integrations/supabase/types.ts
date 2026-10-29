@@ -471,6 +471,100 @@ export type Database = {
         }
         Relationships: []
       }
+      aetheris_company_audit_cases: {
+        Row: {
+          baseline_answers: Json
+          company_name: string
+          created_at: string
+          domain: string
+          engine_version: string
+          id: string
+          offer_snapshot: Json
+          private_scan_id: string | null
+          recommendations: Json
+          revenue_band: string
+          scan_status: string
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          baseline_answers: Json
+          company_name: string
+          created_at?: string
+          domain: string
+          engine_version: string
+          id?: string
+          offer_snapshot: Json
+          private_scan_id?: string | null
+          recommendations: Json
+          revenue_band: string
+          scan_status?: string
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          baseline_answers?: Json
+          company_name?: string
+          created_at?: string
+          domain?: string
+          engine_version?: string
+          id?: string
+          offer_snapshot?: Json
+          private_scan_id?: string | null
+          recommendations?: Json
+          revenue_band?: string
+          scan_status?: string
+          updated_at?: string
+          website_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aetheris_company_audit_cases_private_scan_id_fkey"
+            columns: ["private_scan_id"]
+            isOneToOne: false
+            referencedRelation: "forensic_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aetheris_company_audit_submissions: {
+        Row: {
+          case_id: string
+          contact_email: string
+          contact_name: string | null
+          created_at: string
+          id: string
+          ip_hash: string | null
+          submission_answers: Json
+        }
+        Insert: {
+          case_id: string
+          contact_email: string
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          submission_answers: Json
+        }
+        Update: {
+          case_id?: string
+          contact_email?: string
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          submission_answers?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aetheris_company_audit_submissions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "aetheris_company_audit_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aetheris_executive_meeting_cases: {
         Row: {
           answers: Json
@@ -9531,6 +9625,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_private_company_golden: {
+        Args: { p_case_id: string }
+        Returns: boolean
+      }
       claim_subscription_seats: { Args: never; Returns: number }
       claim_subscription_workflow: {
         Args: { _lease_seconds?: number; _owner: string; _workflow_id: string }

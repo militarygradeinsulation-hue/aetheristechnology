@@ -1,0 +1,9 @@
+.systems-builds-track { animation: systems-builds-scroll 560s linear infinite; }
+.systems-builds-viewport:hover .systems-builds-track,
+.systems-builds-viewport:focus-within .systems-builds-track,
+.systems-builds-viewport[data-paused="true"] .systems-builds-track { animation-play-state: paused; }
+@keyframes systems-builds-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .systems-builds-track { animation: none; }
+  .systems-builds-track > div[aria-hidden="true"] { display: none; }
+}

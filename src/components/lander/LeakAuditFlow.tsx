@@ -2,23 +2,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AuditCustomQuote } from '@/components/AuditCustomQuote';
-import {
-  AUDIT_OPTIONS,
-  evaluateCompanyAudit,
-  modelCompanyAuditExposure,
-  normalizePublicCompanyUrl,
-  type AuditExposureEstimate,
-  type AuditOption,
-  type AuditRecommendation,
-} from '../../../supabase/functions/_shared/company-audit-offers';
+import { normalizePublicCompanyUrl } from '../../../supabase/functions/_shared/company-audit-offers';
 import architectLogo from '@/assets/architect-logo.jpg';
 import leakAuditIntro from '@/assets/leak-audit-intro.mp4';
 import { ClickToPlayVideo } from '@/components/ClickToPlayVideo';
-import { generateFreeLeakCheckPdf } from '@/lib/generateFreeLeakCheckPdf';
 
 // 14 questions across 4 categories. Each scored 0–4 (Never → Always systemized).
 interface Q {
@@ -72,16 +62,7 @@ const SCALE = [
 ];
 
 type Step = 'intake' | 'questions' | 'gate' | 'result';
-type PersonalizedAudit = {
-  company: string;
-  domain: string;
-  repeated: boolean;
-  recommendations: AuditRecommendation[];
-  options: AuditOption[];
-  exposure: AuditExposureEstimate;
-  // A local preview is never described as a saved company baseline or queued scan.
-  localOnly?: boolean;
-};
+type PersonalizedAudit = { domain: string; repeated: boolean; deliveryStatus: string };
 
 export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const [step, setStep] = useState<Step>('intake');
@@ -128,61 +109,17 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
       const { data, error } = await supabase.functions.invoke('company-leak-audit', {
         body: { website, company, name, email, revenueBand, answers },
       });
-      if (error || !Array.isArray(data?.recommendations) || !Array.isArray(data?.options)) {
-        throw new Error((data as { error?: string } | null)?.error || error?.message || 'Unable to save assessment.');
+      if (error || data?.saved !== true) {
+        throw new Error(data?.error || error?.message || 'Unable to save your request.');
       }
-      const serverExposure = data?.exposure && typeof data.exposure.healthScore === 'number'
-        ? data.exposure as AuditExposureEstimate
-        : modelCompanyAuditExposure(answers, revenueBand);
-      setPersonalized({
-        company: data.company,
-        domain: data.domain,
-        repeated: data.repeated === true,
-        recommendations: data.recommendations,
-        options: data.options,
-        exposure: serverExposure,
-        localOnly: false,
-      });
+      setPersonalized({ domain: data.domain, repeated: data.repeated === true, deliveryStatus: data.deliveryStatus });
       setStep('result');
-      toast.success('Your company findings and ready-to-go fixes are ready.');
-    } catch (err) {
-      // The newer server endpoint and database migration may not yet be deployed.
-      // Preserve a useful, deterministic no-cost result without making a scan,
-      // saving personal data, or claiming this is the canonical company baseline.
-      console.error('Company Leak Check backend unavailable', err);
-      try {
-        const target = normalizePublicCompanyUrl(website);
-        setPersonalized({
-          company: company.trim() || target.domain,
-          domain: target.domain,
-          repeated: false,
-          recommendations: evaluateCompanyAudit(answers),
-          options: AUDIT_OPTIONS,
-          exposure: modelCompanyAuditExposure(answers, revenueBand),
-          localOnly: true,
-        });
-        setStep('result');
-        toast.warning('The assessment service is unavailable. Showing a local preview; your details were not confirmed saved.');
-      } catch (fallbackError) {
-        console.error('Company Leak Check fallback failed', fallbackError);
-        toast.error('Could not prepare your results. Try again or contact Aetheris.');
-      }
+      toast.success('Your Leak Audit request is saved.');
+    } catch {
+      toast.error('Your request could not be confirmed. Please try again; no email delivery has been promised.');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const downloadResults = () => {
-    if (!personalized) return;
-    const revenueBandLabel = REVENUE_BANDS.find((band) => band.value === revenueBand)?.label || revenueBand;
-    generateFreeLeakCheckPdf({
-      company: personalized.company,
-      domain: personalized.domain,
-      email,
-      revenueBandLabel,
-      exposure: personalized.exposure,
-      recommendations: personalized.recommendations,
-    });
   };
 
   return (
@@ -214,9 +151,8 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
               </h1>
             )}
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Enter your company website and answer 14 operational questions. See the
-              gaps your answers suggest, and the fixes we already have ready.
-              A full Golden Report is processed separately for internal review, subject to scan capacity.
+              Enter your company website and answer 14 operational questions. We’ll use a Golden Report
+              to email you the findings, financial exposure, and recommended corrections in plain language.
             </p>
           </div>
 
@@ -237,9 +173,8 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                 required
               />
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Your domain identifies a single company baseline. Repeat submissions for the same
-                company use the original recommendation set. The full forensic report remains
-                in our private internal library and is not included with the free results.
+                One Golden Report per company website. If we already have your report, we reuse it.
+                You receive the findings appendix; the complete case file stays private.
               </p>
             </div>
             <div>
@@ -349,7 +284,7 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                 disabled={!allAnswered}
                 className="bg-amber text-primary-foreground hover:bg-amber/90"
               >
-                See My Leaks
+                Continue to Email
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             )}
@@ -365,12 +300,11 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
               <ShieldCheck className="h-4 w-4" /> Your company assessment
             </div>
             <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
-              View your fixes and what you could save.
+              Where should we email your findings?
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              This is based on your self-reported answers, not a verified ROI claim.
-              Your Free Leak Check includes a downloadable findings PDF and a modeled annual exposure range.
-              Any separate Golden Report created internally by Aetheris remains private.
+              Your email will include what the report found, its annual financial range when supported,
+              the evidence behind it, and recommended solutions. We review findings before delivery.
             </p>
           </div>
           <div className="glass space-y-4 rounded-lg border border-amber/35 p-6">
@@ -393,107 +327,38 @@ export const LeakAuditFlow: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             </div>
             <Button size="lg" onClick={handleSubmitGate} disabled={submitting}
               className="w-full bg-amber text-background">
-              {submitting ? "Saving your company baseline..." : "See My Findings + PDF"}
+              {submitting ? "Saving your request..." : "Email My Findings"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <p className="text-xs leading-relaxed text-muted-foreground">
-              We attempt to securely save your answers and contact details for follow-up.
-              If our assessment service is unavailable, you'll still see an unsaved local preview.
-              No automatic purchase or payment occurs.
+              New reports are subject to scan capacity and review. Repeat requests do not trigger another scan.
+              No purchase or payment occurs.
             </p>
           </div>
         </div>
       )}
 
-      {/* RESULT */}
+      {/* REQUEST CONFIRMATION — never invent instant report findings */}
       {step === 'result' && personalized && (
-        <div className="space-y-8">
-          {personalized.localOnly && (
-            <div role="status" className="rounded-lg border border-amber/60 bg-amber/10 p-5 text-sm leading-relaxed">
-              <p className="font-semibold text-foreground">Preview only — not saved to Aetheris</p>
-              <p className="mt-2 text-muted-foreground">
-                Our assessment service couldn't confirm your submission. These suggestions were calculated
-                locally from your answers. No private Golden Report was queued, and this is not an archived
-                company baseline. You can still select services below and request a tailored review.
-              </p>
-              <a
-                href={"mailto:aetheris.technology@outlook.com?subject=" + encodeURIComponent("Leak Check review for " + personalized.domain)}
-                className="mt-3 inline-block font-semibold text-amber underline underline-offset-4"
-              >
-                Request an operator review by email
-              </a>
-            </div>
-          )}
-          <div className="text-center">
-            <p className="font-case text-[10px] uppercase tracking-[0.25em] text-amber">
-              {personalized.localOnly ? "Local preview" : "Company assessment"} · {personalized.domain}
-            </p>
-            <h2 className="mt-4 font-forensic text-3xl font-bold md:text-5xl">
-              What needs attention. What fixes it.
-            </h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              {personalized.localOnly
-                ? "This is a local preview from your answers. Recommendations and prices haven't been saved to a company record."
-                : personalized.repeated
-                  ? "This company has already been assessed. The original baseline has been reused instead of changing your recommendations with each submission."
-                  : "These are directional gaps suggested by the company's answers. They are not proof of a verified website issue or actual lost revenue."}
-            </p>
-          </div>
-          <div className="glass rounded-xl border border-amber/35 p-6">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Self-reported business health</p>
-                <p className="mt-2 font-forensic text-4xl font-bold">{personalized.exposure.healthScore}<span className="text-lg text-muted-foreground">/100</span></p>
-              </div>
-              <div>
-                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Modeled annual exposure</p>
-                <p className="mt-2 font-forensic text-2xl font-bold">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(personalized.exposure.annualLow)}
-                  {' – '}
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(personalized.exposure.annualHigh)}
-                </p>
-              </div>
-            </div>
-            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">{personalized.exposure.basis}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button type="button" variant="outline" onClick={downloadResults} className="border-amber/40 text-amber hover:bg-amber/10">
-                <Download className="mr-2 h-4 w-4" /> Download My Findings PDF
-              </Button>
-              <span className="text-[11px] text-muted-foreground">Directional model only. Not verified lost revenue.</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {personalized.recommendations.length ? personalized.recommendations.map((finding, i) => (
-              <div key={finding.id} className="glass rounded-lg border border-border/60 p-5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-amber">
-                  Priority {String(i + 1).padStart(2, '0')} · Self-reported gap
-                </p>
-                <h3 className="mt-2 font-forensic text-xl font-bold">{finding.problem}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  <strong className="text-foreground">Recommended fix:</strong> {finding.fix}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">{finding.reason}</p>
-              </div>
-            )) : (
-              <div className="rounded-lg border border-border/60 p-6 text-sm text-muted-foreground">
-                Your responses didn't indicate a major gap under our screening thresholds.
-                You can still choose specific services below or request a deeper review.
-              </div>
-            )}
-          </div>
-          <AuditCustomQuote key={personalized.domain}
-            options={personalized.options}
-            recommendations={personalized.recommendations}
-            company={personalized.company}
-            repeated={personalized.repeated}
-            localOnly={personalized.localOnly}
-            savings={{ low: personalized.exposure.annualLow, high: personalized.exposure.annualHigh }}
-          />
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            {personalized.localOnly
-              ? "No private scan was requested from this local preview. An operator can discuss a full Golden Report separately."
-              : "A separate internal Golden Report may be queued, subject to capacity and system availability. It isn't delivered through this page."}
+        <div role="status" className="space-y-6 py-8 text-center">
+          <Mail className="mx-auto h-12 w-12 text-amber" />
+          <p className="font-case text-xs uppercase text-amber">{personalized.domain}</p>
+          <h2 className="font-forensic text-3xl font-bold md:text-4xl">
+            {personalized.deliveryStatus === 'sent' ? 'Your findings have been emailed.' : 'Your request is saved.'}
+          </h2>
+          <p className="mx-auto max-w-xl leading-relaxed text-muted-foreground">
+            {personalized.deliveryStatus === 'sent'
+              ? `We sent the plain-language findings appendix to ${email}.`
+              : personalized.deliveryStatus === 'suppressed'
+                ? 'Email delivery is unavailable for this address. Contact Aetheris to arrange delivery.'
+                : 'We’ll email your plain-language findings once the Golden Report is ready and passes review. If scan capacity is full, your request waits for operator review.'}
           </p>
+          <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground">
+            {personalized.repeated ? 'We reuse the existing report for your company website. ' : ''}
+            Your appendix includes the evidence, supported annual financial range, and recommended corrections.
+            The complete case file remains private. Estimates are not guaranteed savings.
+          </p>
+          <a href="/book" className="inline-block font-semibold text-amber underline underline-offset-4">Request a tailored scope</a>
         </div>
       )}
     </div>
