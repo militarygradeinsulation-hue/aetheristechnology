@@ -50,7 +50,7 @@ export const RandomPostGenerator: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [bodyText, setBodyText] = useState('');
-  const [meta, setMeta] = useState<{ words: number; target: number; ok: boolean; angle: string; brandVoice: boolean } | null>(null);
+  const [meta, setMeta] = useState<{ words: number; target: number; ok: boolean; angle: string; brandVoice: boolean; reportBrainUsed?: boolean; reportBrainExamples?: number } | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -112,7 +112,7 @@ export const RandomPostGenerator: React.FC = () => {
     }
 
     const effMode: TopicModeId = opts.surprise
-      ? (['brand', 'industry', 'story', 'educational', 'contrarian'] as TopicModeId[])[Math.floor(Math.random() * 5)]
+      ? (['brand', 'industry', 'report_brain', 'story', 'educational', 'contrarian'] as TopicModeId[])[Math.floor(Math.random() * 6)]
       : mode;
     const angle = pickAngle({ recentSeeds: usedAngles.current });
     usedAngles.current = [angle, ...usedAngles.current].slice(0, MAX_RECENT);
@@ -155,6 +155,8 @@ export const RandomPostGenerator: React.FC = () => {
         ok: withinTolerance(words, Number(post.target_words) || targetWords),
         angle,
         brandVoice: Boolean(post.brand_voice),
+        reportBrainUsed: Boolean(post.report_brain_used),
+        reportBrainExamples: Number(post.report_brain_examples || 0),
       });
       recentRef.current = [fingerprint(text), ...recentRef.current].slice(0, MAX_RECENT);
     } catch (e) {
@@ -206,11 +208,18 @@ export const RandomPostGenerator: React.FC = () => {
             <div className="font-display font-bold text-foreground">Random Post Generator</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Any length, from 40 to 3,000 words</div>
           </div>
-          {meta?.brandVoice && (
-            <Badge className="ml-auto bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] uppercase tracking-widest">
-              Digital You voice active
-            </Badge>
-          )}
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {meta?.reportBrainUsed && (
+              <Badge className="bg-amber/15 text-amber border-amber/30 text-[10px] uppercase tracking-widest">
+                Golden Report Brain · {meta.reportBrainExamples || 0} findings
+              </Badge>
+            )}
+            {meta?.brandVoice && (
+              <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px] uppercase tracking-widest">
+                Digital You voice active
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Platform */}
