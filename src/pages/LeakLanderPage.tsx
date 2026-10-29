@@ -99,24 +99,23 @@ const LeakLanderPage: React.FC = () => {
             </p>
           </div>
 
-          <Link
-            to="/digital-you"
+          <a
+            href="https://cal.com/aetheristechnology/dean-network"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group mt-10 flex w-full items-center justify-between gap-5 rounded-2xl border-2 border-amber/55 bg-amber px-5 py-6 text-left text-background shadow-[0_18px_50px_-22px_hsl(var(--amber)/0.85)] transition hover:-translate-y-0.5 hover:bg-amber/90 sm:px-7 sm:py-7"
-            aria-label="Curious what we know about you?"
+            aria-label="Curious what we know about you? Book an appointment."
           >
             <div>
-              <p className="font-case text-[10px] font-bold uppercase tracking-[0.28em] text-background/70">
-                Start with the person
-              </p>
-              <p className="mt-2 font-forensic text-2xl font-black leading-tight sm:text-4xl">
+              <p className="font-forensic text-2xl font-black leading-tight sm:text-4xl">
                 Curious what we know about you?
               </p>
-              <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-background/80 sm:text-base">
-                See how Aetheris maps the thinking, patterns, standards, and decisions behind the business.
+              <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-background/80 sm:text-base">
+                We guarantee we can help you save money in less than 30 days.
               </p>
             </div>
             <ArrowRight className="h-7 w-7 shrink-0 transition-transform group-hover:translate-x-1 sm:h-9 sm:w-9" />
-          </Link>
+          </a>
         </div>
 
         <img
