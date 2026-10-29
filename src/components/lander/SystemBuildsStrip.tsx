@@ -19,7 +19,7 @@ export function SystemBuildsStrip() {
           {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
         </Button>
       </div>
-      <div className="systems-builds-viewport overflow-x-auto" data-paused={paused}>
+      <div className="systems-builds-viewport overflow-hidden" data-paused={paused}>
         <div className="systems-builds-track flex w-max">
           {[0, 1].map(copy => <div key={copy} className="flex shrink-0 gap-5 pr-5" aria-hidden={copy === 1 ? true : undefined}>
             {JOSEPH_BUILDS.map(build => (
