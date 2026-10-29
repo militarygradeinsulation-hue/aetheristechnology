@@ -11,7 +11,14 @@ async function setup() {
     env: { get: (key: string) => ({ ADMIN_PIN: pin, SUPABASE_URL: "https://example.invalid", SUPABASE_SERVICE_ROLE_KEY: secret })[key] },
     serve: (fn: typeof handler) => { handler = fn; },
   });
-  const auth = await import("../../../supabase/functions/_shared/admin-token");
+  const authSource = readFileSync("supabase/functions/_shared/admin-token.ts", "utf8")
+    .replace(/export /g, "")
+    .replace(/token: string \| null/g, "token")
+    .replace(/secret: string/g, "secret")
+    .replace(/req: Request/g, "req")
+    .replace(/\): Promise<boolean>/g, ")")
+    .replace(/\): string \| null/g, ")");
+  const auth = new Function(`${authSource}; return { verifyAdminToken, getAdminTokenFromRequest };`)();
   const query = { select: () => query, order: () => query, limit: async () => ({ data: [], error: null }), eq: () => query, maybeSingle: async () => ({ data: { id: "collective" }, error: null }) };
   const createClient = vi.fn(() => ({ from: () => query }));
   const source = readFileSync("supabase/functions/golden-report-brain/index.ts", "utf8").replace(/^import .*;\s*$/gm, "");
