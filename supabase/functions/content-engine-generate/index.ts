@@ -533,11 +533,37 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       const { data: strategy } = await supabase
         .from("content_engine_strategy").select("*").limit(1).maybeSingle();
 
-      // Golden Report Post Brain: sample anonymized indexed findings from the archive.
-      // This does not trigger scans, mutate reports, or expose company identifiers.
+      // Golden Report Post Brain: prefer the aggregate collective intelligence layer,
+      // then fall back to anonymized indexed findings. Neither path triggers a scan.
       const wantsReportBrain = v.mode === "report_brain" || v.mode === "industry";
       if (wantsReportBrain) {
         try {
+          const { data: collective } = await supabase
+            .from("golden_report_collective_patterns")
+            .select("pattern_title,category,chapter_slug,report_count,occurrence_count,company_count,report_share,sample_actions,evidence_grades")
+            .order("report_count", { ascending: false })
+            .limit(24);
+
+          if (collective?.length) {
+            const seedInt = Math.abs(Array.from(v.seed || "seed").reduce((acc, ch) => ((acc * 33) ^ ch.charCodeAt(0)) | 0, 5381));
+            const start = seedInt % collective.length;
+            const rotated = [...collective.slice(start), ...collective.slice(0, start)].slice(0, 10);
+            v.reportBrain = rotated.map((row: any, i: number) => [
+              "Collective pattern " + (i + 1),
+              "Problem: " + String(row.pattern_title || "").trim(),
+              row.category ? "Category: " + row.category : "",
+              row.chapter_slug ? "Area: " + row.chapter_slug : "",
+              "Reports observed: " + Number(row.report_count || 0),
+              "Companies observed: " + Number(row.company_count || 0),
+              "Occurrences: " + Number(row.occurrence_count || 0),
+              row.report_share != null ? "Archive share: " + Math.round(Number(row.report_share) * 1000) / 10 + "%" : "",
+              Array.isArray(row.sample_actions) && row.sample_actions.length ? "Common correction: " + String(row.sample_actions[0]).slice(0, 320) : "",
+            ].filter(Boolean).join("\n")).join("\n\n");
+          }
+
+          if (v.reportBrain) {
+            // Aggregate brain is sufficient; skip raw sampling below.
+          } else {
           const seedInt = Math.abs(Array.from(v.seed || "seed").reduce((acc, ch) => ((acc * 33) ^ ch.charCodeAt(0)) | 0, 5381));
           const { count: findingCount } = await supabase
             .from("golden_report_findings_index")
@@ -600,6 +626,7 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
             });
 
             if (rows.length) v.reportBrain = rows.join("\n\n");
+          }
           }
         } catch (brainErr) {
           console.warn("Golden Report Post Brain unavailable, using standard generation", brainErr);
