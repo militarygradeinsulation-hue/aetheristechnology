@@ -24,6 +24,21 @@ describe('customer Golden Report appendix', () => {
     expect(buildLeakAuditAppendix(input, 'example.com')?.annual).toBeNull();
     expect(JSON.stringify(input)).toBe(before);
   });
+  it('includes production correction fields without inventing finding-to-chapter attribution', () => {
+    const input = { ...report,
+      compiled_findings: [{ ...report.compiled_findings[0], chapter_slug: 'seo' }],
+      evidence_ledger: [{ claim_id: 'c1', normalized_fact: 'Search snippet is underperforming', status: 'unverified', source_kind: 'structured_api', source_url: 'https://example.com', limitations: 'Crawl was incomplete.' }],
+      chapters: [{ slug: 'seo-discoverability', title: 'SEO & Discoverability', what_to_do: {
+        this_week: ['Verify the search snippet.'], this_month: ['Update the saved page title.'], this_quarter: ['Recheck the index.'],
+      } }],
+    };
+    const before = JSON.stringify(input);
+    const appendix = buildLeakAuditAppendix(input, 'example.com');
+    expect(appendix?.findings[0].evidence[0]).toMatchObject({ observation: 'Search snippet is underperforming', status: 'unverified', limitations: 'Crawl was incomplete.' });
+    expect(appendix?.findings[0].solutions).toEqual([]);
+    expect(appendix?.corrections).toEqual([{ chapter: 'SEO & Discoverability', solutions: ['Verify the search snippet.', 'Update the saved page title.', 'Recheck the index.'] }]);
+    expect(JSON.stringify(input)).toBe(before);
+  });
   it('blocks regeneration-required and compiler failures', () => {
     expect(buildLeakAuditAppendix({ ...report, report_state: 'regeneration_required' }, 'example.com')).toBeNull();
     expect(buildLeakAuditAppendix({ ...report, compiler: { state: 'needs_review' } }, 'example.com')).toBeNull();

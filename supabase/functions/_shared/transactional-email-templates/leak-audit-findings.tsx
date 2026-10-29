@@ -26,6 +26,13 @@ const Findings = ({ appendix }: { appendix?: Appendix }) => (
           </Section>)}
           {f.solutions.length > 0 && <><Heading as="h3">Recommended correction</Heading>{f.solutions.map((s, j) => <Text key={j}>{s}</Text>)}</>}
         </Section>)}
+        {appendix?.corrections?.length ? <Section>
+          <Heading as="h2">Your saved correction plan</Heading>
+          {appendix.corrections.map((c, i) => <Section key={i}>
+            <Heading as="h3">{c.chapter}</Heading>
+            {c.solutions.map((s, j) => <Text key={j}>{s}</Text>)}
+          </Section>)}
+        </Section> : null}
         <Text>The recommended corrections are ready for discussion. We confirm access, scope, and measurement before promising a financial result.</Text>
         <Link href="https://aetheris.technology/book">Request a tailored scope</Link>
         <Text>— Aetheris Technology</Text>
@@ -37,5 +44,5 @@ export const template = {
   component: Findings,
   subject: (data: Record<string, any>) => `Your Leak Audit findings — ${data.appendix?.domain || 'Aetheris'}`,
   displayName: 'Leak Audit findings appendix',
-  previewData: { appendix: { domain: 'example.com', annual: null, source: 'financial_ledger', findings: [] } },
+  previewData: { appendix: { domain: 'example.com', annual: null, source: 'financial_ledger', findings: [], corrections: [] } },
 } satisfies TemplateEntry;

@@ -1,5 +1,11 @@
 # Roadmap
 
+## Missing Leak Audit appendix investigation
+- [x] Confirm saved submissions, report readiness, and accepted email events.
+- [x] Repair production correction-plan and evidence projection without changing canonical report amounts.
+- [x] Verify corrected appendix rules (6 tests), deploy, and complete a real questionnaire: existing Ask Intros report reused and corrected findings email accepted for militarygradeinsulation@gmail.com; inbox receipt remains unverified.
+- [ ] Identify Joseph's exact missing test if it differs from the two saved submissions; website/email not supplied.
+
 All landing-page removals complete:
 - [x] Remove #recognize section ("What the problem looks like")
 - [x] Remove decision headline h2 ("Can we find what is costing...")

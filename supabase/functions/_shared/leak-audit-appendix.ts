@@ -2,6 +2,12 @@
 const obj = (v: unknown): Record<string, unknown> => v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const text = (v: unknown): string => typeof v === 'string' ? v.trim() : '';
 const list = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
+const savedActions = (input: unknown): string[] => {
+  const actions = obj(input);
+  return [...list(actions.this_week), ...list(actions.this_month), ...list(actions.this_quarter),
+    ...list(actions.day_30), ...list(actions.day_60), ...list(actions.day_90)]
+    .filter((s): s is string => typeof s === 'string' && !!s.trim());
+};
 
 export function buildLeakAuditAppendix(reportInput: unknown, domain: string) {
   const report = obj(reportInput);
@@ -25,15 +31,20 @@ export function buildLeakAuditAppendix(reportInput: unknown, domain: string) {
       finding: text(f.statement),
       status: text(f.status) || 'unverified',
       evidence: claims.filter(c => list(f.claim_ids).includes(c.claim_id)).map(c => ({
-        observation: text(c.statement), status: text(c.status),
+        observation: text(c.statement) || text(c.normalized_fact), status: text(c.status),
         source: text(c.source_kind), url: text(c.source_url), limitations: text(c.limitations),
       })),
-      solutions: [...list(correction.day_30), ...list(correction.day_60), ...list(correction.day_90)]
-        .filter((s): s is string => typeof s === 'string' && !!s.trim()),
+      solutions: savedActions(correction),
     };
   });
   if (!findings.length) return null;
-  return { domain, annual, source: text(overall.source) || 'financial_ledger', findings };
+  // Detector category slugs are not necessarily chapter slugs. Preserve the
+  // saved chapter attribution instead of guessing which fix belongs to a leak.
+  const corrections = chapters.map(c => ({
+    chapter: text(c.title) || text(c.slug),
+    solutions: savedActions(c.what_to_do),
+  })).filter(c => c.solutions.length > 0);
+  return { domain, annual, source: text(overall.source) || 'financial_ledger', findings, corrections };
 }
 
 export function shouldStartCompanyReport(status: string, scanId: string | null): boolean {
