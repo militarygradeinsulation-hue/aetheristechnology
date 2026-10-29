@@ -4181,6 +4181,10 @@ export type Database = {
           display_name: string
           id: string
           industry: string | null
+          industry_classified_at: string | null
+          industry_confidence: number | null
+          industry_signals: Json
+          industry_source: string | null
           location: string | null
           normalized_name: string
           poc_email: string | null
@@ -4203,6 +4207,10 @@ export type Database = {
           display_name: string
           id?: string
           industry?: string | null
+          industry_classified_at?: string | null
+          industry_confidence?: number | null
+          industry_signals?: Json
+          industry_source?: string | null
           location?: string | null
           normalized_name: string
           poc_email?: string | null
@@ -4225,6 +4233,10 @@ export type Database = {
           display_name?: string
           id?: string
           industry?: string | null
+          industry_classified_at?: string | null
+          industry_confidence?: number | null
+          industry_signals?: Json
+          industry_source?: string | null
           location?: string | null
           normalized_name?: string
           poc_email?: string | null
@@ -9942,6 +9954,10 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       promote_if_first_admin: { Args: { _user_id: string }; Returns: boolean }
       purge_expired_ai_cache: { Args: never; Returns: undefined }
+      refresh_golden_report_collective_brain: {
+        Args: never
+        Returns: undefined
+      }
       refund_resume_credit: { Args: { _email: string }; Returns: undefined }
       rep_mailbox_local_part: {
         Args: { _code: string; _rep_name: string }

@@ -57,6 +57,13 @@
       "when": 1793300199921,
       "tag": "0007_golden_report_collective_brain_de54dd5",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793300932990,
+      "tag": "0008_golden_report_collective_brain_main",
+      "breakpoints": true
     }
   ]
 }
