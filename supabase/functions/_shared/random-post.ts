@@ -11,7 +11,7 @@ export const PRESET_WORDS: Record<string, number> = {
   micro: 40, short: 100, social: 200, expanded: 400, article: 750, substack: 1200, deep: 2000, custom: 0,
 };
 export const PLATFORM_IDS = ["general", "linkedin", "facebook", "instagram", "x", "blog", "substack"];
-export const MODE_IDS = ["brand", "industry", "story", "educational", "contrarian", "custom"];
+export const MODE_IDS = ["brand", "industry", "report_brain", "story", "educational", "contrarian", "custom"];
 export const IDENTITY_IDS = ["default", THE_ARCHITECT_ID];
 export const CUSTOM_MIN_WORDS = 40;
 export const CUSTOM_MAX_WORDS = 3000;
@@ -41,6 +41,7 @@ export interface ValidatedRandomPost {
   /** Selected visual style preset id. Only recognised ids steer the copy. */
   stylePreset: string;
   identity: string;
+  reportBrain: string;
 }
 
 export function validateRandomPost(body: Record<string, unknown>): ValidatedRandomPost {
@@ -72,6 +73,7 @@ export function validateRandomPost(body: Record<string, unknown>): ValidatedRand
     brief: String(body.brief ?? "").trim().slice(0, 6000),
     stylePreset: String(body.style_preset ?? "").trim().slice(0, 64),
     identity: IDENTITY_IDS.includes(String(body.identity ?? "")) ? String(body.identity) : "default",
+    reportBrain: String(body.report_brain ?? "").trim().slice(0, 12000),
   };
 }
 
@@ -87,7 +89,8 @@ const PLATFORM_GUIDE: Record<string, string> = {
 
 const MODE_GUIDE: Record<string, string> = {
   brand: "Pick one topic that comes straight out of this business, its offer, and the buyer it serves.",
-  industry: "Pick one insight about the wider industry. Name a pattern and quantify it.",
+  industry: "Pick one insight about the wider industry. Prefer supplied Golden Report Library evidence when present. Name the pattern, mechanism, and consequence without exposing a company.",
+  report_brain: "Build the post from supplied Golden Report Library evidence. Use a real recurring problem, root cause, or recommended action from the library as the topic seed. Generalize it into an industry lesson. Never identify the source company.",
   story: "Tell one first person story or state one opinion and defend it with specifics.",
   educational: "Teach one mechanism end to end so the reader could run it tomorrow.",
   contrarian: "Take one widely repeated belief in this market, show why it fails, and give the better play.",
@@ -120,6 +123,7 @@ export function randomPostUserPrompt(v: ValidatedRandomPost, wantsTitle: boolean
   const band = toleranceBand(v.targetWords);
   return `${MODE_GUIDE[v.mode]}
 ${v.topic ? `TOPIC: ${v.topic}` : ""}
+${v.reportBrain ? `GOLDEN REPORT POST BRAIN (anonymized internal evidence; use as source material, never name or identify a company):\n${v.reportBrain}\n\nRULES FOR THIS EVIDENCE:\n- Treat problem titles, root causes, categories, industries, and recommended actions as topic source material.\n- Do not expose company names, domains, contacts, report IDs, URLs, or identifying details.\n- Do not copy long report prose verbatim; synthesize patterns into original language.\n- Do not invent prevalence percentages, dollar amounts, or unsupported claims.\n- If several examples appear, connect them into a recurring pattern without claiming statistical frequency unless explicitly supported.\n` : ""}
 CONTENT ANGLE FOR THIS RUN (use it, do not name it): ${v.angle || "your choice, pick an unexpected one"}
 RANDOM SEED (forces a different treatment each run): ${v.seed}
 ${v.tone ? `TONE: ${v.tone}` : ""}
