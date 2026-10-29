@@ -67,6 +67,16 @@ grant all on public.golden_report_brain_state to service_role;
 create index if not exists grcp_report_count_idx on public.golden_report_collective_patterns(report_count desc);
 create index if not exists grip_industry_idx on public.golden_report_industry_patterns(industry, report_count desc);
 
+alter table public.golden_report_companies
+  add column if not exists industry_confidence numeric,
+  add column if not exists industry_source text,
+  add column if not exists industry_signals jsonb not null default '[]'::jsonb,
+  add column if not exists industry_classified_at timestamptz;
+
+create index if not exists grc_industry_idx on public.golden_report_companies(industry);
+create index if not exists grc_industry_confidence_idx on public.golden_report_companies(industry_confidence desc nulls last);
+
+
 -- Refresh statements are intentionally deterministic and can be rerun after every archive.
 truncate table public.golden_report_collective_patterns;
 insert into public.golden_report_collective_patterns (
