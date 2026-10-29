@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, Mail, Phone, MapPin } from "lucide-react";
+import { ArrowRight, Calendar, Mail, Phone, MapPin, ChevronDown } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { LanderNavbar } from "@/components/lander/LanderNavbar";
@@ -29,6 +29,8 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 );
 
 const LeakLanderPage: React.FC = () => {
+  const [leakAuditOpen, setLeakAuditOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <SEOHead
@@ -124,11 +126,30 @@ const LeakLanderPage: React.FC = () => {
           loading="eager"
         />
         <div id="leak-audit" className="w-full max-w-4xl scroll-mt-28 pt-4 text-left">
-          <LeakAuditFlow embedded />
+          <button
+            type="button"
+            onClick={() => setLeakAuditOpen((open) => !open)}
+            aria-expanded={leakAuditOpen}
+            aria-controls="homepage-leak-audit-panel"
+            className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-amber/40 bg-card/45 px-5 py-5 text-left transition hover:border-amber/70 hover:bg-card/65 sm:px-6 sm:py-6"
+          >
+            <span className="font-forensic text-xl font-bold leading-tight text-foreground sm:text-2xl">
+              See if there’s even a reason to talk to us.
+            </span>
+            <ChevronDown
+              className={`h-6 w-6 shrink-0 text-amber transition-transform duration-200 ${leakAuditOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {leakAuditOpen && (
+            <div id="homepage-leak-audit-panel" className="pt-4">
+              <LeakAuditFlow embedded />
+              <p className="max-w-2xl pt-3 text-xs text-muted-foreground/80 leading-relaxed">
+                {EXPECTATION_NOTE}
+              </p>
+            </div>
+          )}
         </div>
-        <p className="max-w-2xl pt-1 text-xs text-muted-foreground/80 leading-relaxed">
-          {EXPECTATION_NOTE}
-        </p>
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
