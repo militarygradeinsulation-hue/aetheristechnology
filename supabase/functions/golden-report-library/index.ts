@@ -15,6 +15,7 @@ import {
   deterministicBusinessSummary,
   type ScanRow,
 } from "../_shared/golden-archive.ts";
+import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,17 @@ type SB = ReturnType<typeof createClient>;
 
 async function upsertCompany(sb: SB, scan: ScanRow) {
   const identity = resolveBusinessIdentity(scan);
+  const heuristic = identity.industry ? null : classifyIndustryHeuristic({
+    companyName: identity.display_name,
+    domain: identity.primary_domain,
+    websiteUrl: identity.website_url,
+    reportEvidence: JSON.stringify({
+      report: scan.report ?? {},
+      raw_findings: scan.raw_findings ?? {},
+    }).slice(0, 12000),
+  });
+  const inferredIndustry = identity.industry || ((heuristic?.confidence || 0) >= 0.68 ? heuristic?.industry : null);
+  const resolvedIdentity = { ...identity, industry: inferredIndustry || null };
 
   let existing: Record<string, unknown> | null = null;
   if (identity.primary_domain) {
@@ -62,11 +74,17 @@ async function upsertCompany(sb: SB, scan: ScanRow) {
       aliases: [...aliases],
       contact_names: [...contacts],
     };
-    if (!existing.industry && identity.industry) patch.industry = identity.industry;
+    if (!existing.industry && resolvedIdentity.industry) {
+      patch.industry = resolvedIdentity.industry;
+      patch.industry_confidence = identity.industry ? 1 : heuristic?.confidence ?? null;
+      patch.industry_source = identity.industry ? "report_evidence" : heuristic?.source ?? null;
+      patch.industry_signals = identity.industry ? ["explicit report industry"] : heuristic?.signals ?? [];
+      patch.industry_classified_at = new Date().toISOString();
+    }
     if (!existing.location && identity.location) patch.location = identity.location;
     if (!existing.website_url && identity.website_url) patch.website_url = identity.website_url;
     await sb.from("golden_report_companies").update(patch).eq("id", existing.id as string);
-    return { id: existing.id as string, identity, row: existing };
+    return { id: existing.id as string, identity: resolvedIdentity, row: existing };
   }
 
   const insert = {
@@ -75,7 +93,11 @@ async function upsertCompany(sb: SB, scan: ScanRow) {
     primary_domain: identity.primary_domain,
     website_url: identity.website_url,
     aliases: [],
-    industry: identity.industry,
+    industry: resolvedIdentity.industry,
+    industry_confidence: identity.industry ? 1 : heuristic?.confidence ?? null,
+    industry_source: identity.industry ? "report_evidence" : heuristic?.source ?? null,
+    industry_signals: identity.industry ? ["explicit report industry"] : heuristic?.signals ?? [],
+    industry_classified_at: resolvedIdentity.industry ? new Date().toISOString() : null,
     location: identity.location,
     contact_names: identity.contact_name ? [identity.contact_name] : [],
     summary_source: "pending",
@@ -88,9 +110,9 @@ async function upsertCompany(sb: SB, scan: ScanRow) {
         identity.primary_domain ?? identity.normalized_name)
       .maybeSingle();
     if (!again) throw error;
-    return { id: (again as Record<string, unknown>).id as string, identity, row: again as never };
+    return { id: (again as Record<string, unknown>).id as string, identity: resolvedIdentity, row: again as never };
   }
-  return { id: (data as Record<string, unknown>).id as string, identity, row: data as never };
+  return { id: (data as Record<string, unknown>).id as string, identity: resolvedIdentity, row: data as never };
 }
 
 async function archiveScan(sb: SB, scan: ScanRow): Promise<{ archive_id: string; skipped?: string }> {
