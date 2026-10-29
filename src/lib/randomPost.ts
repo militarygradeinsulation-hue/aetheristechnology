@@ -39,11 +39,12 @@ export const PLATFORMS: { id: PlatformId; label: string }[] = [
 ];
 
 export type TopicModeId =
-  | 'brand' | 'industry' | 'story' | 'educational' | 'contrarian' | 'custom';
+  | 'brand' | 'industry' | 'report_brain' | 'story' | 'educational' | 'contrarian' | 'custom';
 
 export const TOPIC_MODES: { id: TopicModeId; label: string; hint: string }[] = [
   { id: 'brand',       label: 'Random Brand Topic',    hint: 'Pulled from your business and offer.' },
-  { id: 'industry',    label: 'Random Industry Insight', hint: 'A pattern across the market you serve.' },
+  { id: 'industry',    label: 'Random Industry Insight', hint: 'A pattern across the market you serve, grounded in Golden Report findings.' },
+  { id: 'report_brain', label: 'Golden Report Brain',     hint: 'Uses anonymized problems and root causes found across the Golden Report Library.' },
   { id: 'story',       label: 'Random Story or Opinion', hint: 'First person, lived, specific.' },
   { id: 'educational', label: 'Random Educational Post', hint: 'Teach one mechanism end to end.' },
   { id: 'contrarian',  label: 'Random Contrarian Take',  hint: 'Reframe accepted advice.' },
