@@ -99,7 +99,6 @@ const LeakLanderPage: React.FC = () => {
               <p className="mt-3 text-center font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 lg:text-left">
                 Aetheris in 60 seconds
               </p>
-            </div>
           </div>
         </div>
       </section>
