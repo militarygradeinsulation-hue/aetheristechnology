@@ -35,6 +35,8 @@ const LeakLanderPage: React.FC = () => {
   const [methodologyActivated, setMethodologyActivated] = useState(false);
   const [caseStudiesOpen, setCaseStudiesOpen] = useState(false);
   const [caseStudiesActivated, setCaseStudiesActivated] = useState(false);
+  const [ecosystemOpen, setEcosystemOpen] = useState(false);
+  const [ecosystemActivated, setEcosystemActivated] = useState(false);
 
   const openLeakAuditFromPopup = () => {
     setEntryPopupOpen(false);
@@ -242,28 +244,60 @@ const LeakLanderPage: React.FC = () => {
       {/* Restored interactive Chaos Theory graph from the existing site code. */}
       <SystemBuildsStrip />
 
-      <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-4 py-16 sm:px-6 sm:py-20">
+      {/* The Leak Ecosystem — compact until the visitor chooses to explore the interactive map. */}
+      <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-6 py-10 sm:py-12">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>// The mechanism</SectionLabel>
-          <div className="flex flex-wrap items-start justify-between gap-5">
-            <div className="max-w-3xl">
-              <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
-                We follow the pattern <span className="text-amber">across the handoffs.</span>
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Aetheris investigates the business as a connected system. We follow evidence across
-                acquisition, sales, operations, systems, communication, and delivery to see where one
-                decision changes the next. The map below illustrates dependencies; a finding is not
-                treated as proven until the evidence supports it.
-              </p>
-            </div>
-            <Link to="/stop-guessing" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-amber/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-amber transition hover:bg-amber/10">
-              Explore the original Leak Check page <ArrowRight className="h-4 w-4" />
-            </Link>
+          <h2 className="font-forensic text-2xl font-bold leading-tight sm:text-3xl">
+            <button
+              type="button"
+              onClick={() => {
+                setEcosystemActivated(true);
+                setEcosystemOpen((open) => !open);
+              }}
+              aria-expanded={ecosystemOpen}
+              aria-controls="homepage-leak-ecosystem-panel"
+              className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-amber/30 bg-card/40 px-5 py-5 text-left transition hover:border-amber/60 hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber/70 sm:px-7 sm:py-6"
+            >
+              <span>The Leak Ecosystem</span>
+              <span className="flex shrink-0 items-center gap-3 text-amber">
+                <span className="hidden font-case text-[10px] font-bold uppercase tracking-widest sm:inline">
+                  {ecosystemOpen ? "Minimize" : "Explore"}
+                </span>
+                <ChevronDown className={`h-6 w-6 transition-transform duration-200 ${ecosystemOpen ? "rotate-180" : ""}`} />
+              </span>
+            </button>
+          </h2>
+          {!ecosystemOpen && (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              See how decisions, people, processes, and systems connect to financial leaks.
+            </p>
+          )}
+          <div id="homepage-leak-ecosystem-panel" hidden={!ecosystemOpen} className="mt-8">
+            {ecosystemActivated && (
+              <>
+              <div className="flex flex-wrap items-start justify-between gap-5">
+                <div className="max-w-3xl">
+                  <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">
+                    We follow the pattern <span className="text-amber">across the handoffs.</span>
+                  </h2>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    Aetheris investigates the business as a connected system. We follow evidence across
+                    acquisition, sales, operations, systems, communication, and delivery to see where one
+                    decision changes the next. The map below illustrates dependencies; a finding is not
+                    treated as proven until the evidence supports it.
+                  </p>
+                </div>
+                <Link to="/stop-guessing" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-amber/40 px-5 py-2 text-xs font-bold uppercase tracking-wider text-amber transition hover:bg-amber/10">
+                  Explore the original Leak Check page <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <React.Suspense fallback={<div role="status" className="mt-8 rounded-xl border border-amber/20 bg-card/40 p-8 text-sm text-muted-foreground">Loading interactive chaos map…</div>}>
+                <HomeMindMapSection />
+              </React.Suspense>
+              </>
+            )}
           </div>
-          <React.Suspense fallback={<div role="status" className="mt-8 rounded-xl border border-amber/20 bg-card/40 p-8 text-sm text-muted-foreground">Loading interactive chaos map…</div>}>
-            <HomeMindMapSection />
-          </React.Suspense>
         </div>
       </section>
 
