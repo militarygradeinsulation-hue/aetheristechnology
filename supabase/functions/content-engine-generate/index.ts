@@ -533,6 +533,79 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
       const { data: strategy } = await supabase
         .from("content_engine_strategy").select("*").limit(1).maybeSingle();
 
+      // Golden Report Post Brain: sample anonymized indexed findings from the archive.
+      // This does not trigger scans, mutate reports, or expose company identifiers.
+      const wantsReportBrain = v.mode === "report_brain" || v.mode === "industry";
+      if (wantsReportBrain) {
+        try {
+          const seedInt = Math.abs(Array.from(v.seed || "seed").reduce((acc, ch) => ((acc * 33) ^ ch.charCodeAt(0)) | 0, 5381));
+          const { count: findingCount } = await supabase
+            .from("golden_report_findings_index")
+            .select("id", { count: "exact", head: true });
+
+          const count = Math.max(0, Number(findingCount || 0));
+          if (count > 0) {
+            const sampleSize = Math.min(12, count);
+            const maxOffset = Math.max(0, count - sampleSize);
+            const offset = maxOffset ? seedInt % (maxOffset + 1) : 0;
+
+            const { data: findings } = await supabase
+              .from("golden_report_findings_index")
+              .select("scan_id,title,detail,category,chapter_slug,root_cause_title,evidence_grade,recommended_action,status")
+              .order("id", { ascending: true })
+              .range(offset, offset + sampleSize - 1);
+
+            const scanIds = [...new Set((findings || []).map((row: any) => String(row.scan_id || "")).filter(Boolean))];
+            const industryByScan = new Map<string, string>();
+
+            if (scanIds.length) {
+              const { data: archives } = await supabase
+                .from("golden_report_archive")
+                .select("scan_id,company_id")
+                .in("scan_id", scanIds);
+
+              const companyIds = [...new Set((archives || []).map((row: any) => String(row.company_id || "")).filter(Boolean))];
+              const companyIndustry = new Map<string, string>();
+
+              if (companyIds.length) {
+                const { data: companies } = await supabase
+                  .from("golden_report_companies")
+                  .select("id,industry")
+                  .in("id", companyIds);
+
+                for (const row of companies || []) {
+                  const industry = String((row as any).industry || "").trim();
+                  if (industry) companyIndustry.set(String((row as any).id), industry);
+                }
+              }
+
+              for (const row of archives || []) {
+                const industry = companyIndustry.get(String((row as any).company_id)) || "";
+                if (industry) industryByScan.set(String((row as any).scan_id), industry);
+              }
+            }
+
+            const rows = (findings || []).map((row: any, i: number) => {
+              const industry = industryByScan.get(String(row.scan_id)) || "Unclassified industry";
+              return [
+                "Example " + (i + 1),
+                "Industry: " + industry,
+                "Problem: " + String(row.title || "").trim(),
+                row.root_cause_title ? "Root cause: " + String(row.root_cause_title).trim() : "",
+                row.category ? "Category: " + String(row.category).trim() : "",
+                row.chapter_slug ? "Area: " + String(row.chapter_slug).trim() : "",
+                row.detail ? "Evidence detail: " + String(row.detail).replace(/\s+/g, " ").trim().slice(0, 360) : "",
+                row.recommended_action ? "Recommended action: " + String(row.recommended_action).replace(/\s+/g, " ").trim().slice(0, 320) : "",
+              ].filter(Boolean).join("\n");
+            });
+
+            if (rows.length) v.reportBrain = rows.join("\n\n");
+          }
+        } catch (brainErr) {
+          console.warn("Golden Report Post Brain unavailable, using standard generation", brainErr);
+        }
+      }
+
       const voiceReference = String((strategy as any)?.voice_reference || "").trim();
       const hasBrandVoice = voiceReference.length > 40;
       const system = randomPostSystemPrompt({
@@ -586,6 +659,8 @@ ${directionBlock ? `Topic angles must still be DIVERSE — do not repeat the sam
           seed: v.seed,
           brand_voice: hasBrandVoice,
           style_preset: v.stylePreset || null,
+          report_brain_used: Boolean(v.reportBrain),
+          report_brain_examples: v.reportBrain ? (v.reportBrain.match(/Example \d+/g) || []).length : 0,
 
         },
       });
