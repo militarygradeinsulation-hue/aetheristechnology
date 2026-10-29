@@ -8,6 +8,7 @@
 //   → 200 forensic_scans row
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { deliverLeakAuditSubmission } from '../_shared/deliver-leak-audit.ts';
 import {
   brandPromptBlock,
   parseFirecrawlBranding,
@@ -1361,6 +1362,18 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
     // Golden Report Library: archive the completed report (idempotent by scan id).
     await internalCall("golden-report-library", { action: "archive_scan", scan_id: id });
+
+    // One completed intake event notifies its original requesting visitor.
+    // Other visitors requesting an already completed report are handled by intake.
+    try {
+      const { data: intake } = await sb.from('aetheris_company_audit_cases')
+        .select('id').eq('private_scan_id', id).maybeSingle();
+      if (intake) {
+        const { data: request } = await sb.from('aetheris_company_audit_submissions')
+          .select('id').eq('case_id', intake.id).order('created_at').limit(1).maybeSingle();
+        if (request) await deliverLeakAuditSubmission(request.id);
+      }
+    } catch (e) { console.error('Leak Audit appendix delivery failed', e instanceof Error ? e.message : 'delivery error'); }
 
     // Background growth asset enrichment. Fire and forget, idempotent, and it
     // re-archives the scan itself once the enriched deliverables are stored.

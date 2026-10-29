@@ -2,12 +2,16 @@
 // internal findings, or the raw answers from a different visitor.
 // Full forensic jobs are triggered once per domain, limited at the database.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { deliverLeakAuditSubmission } from '../_shared/deliver-leak-audit.ts';
+import { shouldStartCompanyReport } from '../_shared/leak-audit-appendix.ts';
 import {
   AUDIT_ENGINE_VERSION, AUDIT_OPTIONS, evaluateCompanyAudit, modelCompanyAuditExposure,
   normalizePublicCompanyUrl, validateAuditAnswers,
 } from "../_shared/company-audit-offers.ts";
 
 const CORS = {
+  ...corsHeaders,
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -56,6 +60,10 @@ async function queuePrivateGolden(caseId: string, domain: string, websiteUrl: st
       updated_at: new Date().toISOString(),
     }).eq("id", caseId).eq("domain", domain);
     if (error) throw error;
+    // Reuse may finish before the scanner's completion hook ever runs.
+    const { data: request } = await sb.from('aetheris_company_audit_submissions')
+      .select('id').eq('case_id', caseId).order('created_at').limit(1).maybeSingle();
+    if (request) await deliverLeakAuditSubmission(request.id);
   } catch (e) {
     console.error("private Golden dispatch failed", e instanceof Error ? e.message : e);
     await sb.from("aetheris_company_audit_cases").update({
@@ -117,11 +125,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { error: submissionError } = await sb.from("aetheris_company_audit_submissions").insert({
+    const { data: submission, error: submissionError } = await sb.from("aetheris_company_audit_submissions").insert({
       case_id: companyCase.id, contact_name: name || null, contact_email: email,
       submission_answers: body.answers, ip_hash: ipHash,
-    });
+    }).select('id').single();
     if (submissionError) throw submissionError;
+    if (!submission) throw new Error('Assessment was not saved');
 
     // Keep the established admin lead surfaces and admin assistant in sync.
     // assessment_leads is the historical inbox used for public assessments.
@@ -145,7 +154,7 @@ Deno.serve(async (req) => {
     // The public request has no privileged scan ID and never accesses report
     // JSON. The existing Golden scanner stores a full case file in the private
     // forensic_scans table and automatically archives it in Golden Library.
-    if (companyCase.scan_status === "pending") {
+    if (shouldStartCompanyReport(companyCase.scan_status, null)) {
       // The private Golden dispatch is optional work, not part of giving visitors
       // their own deterministic results. Never block the response for up to 20s
       // on a costed scan dispatch or claim that dispatch completion is guaranteed.
@@ -154,18 +163,18 @@ Deno.serve(async (req) => {
       if (runtime?.waitUntil) runtime.waitUntil(dispatch);
       else await dispatch;
     }
-    const canonicalExposure = modelCompanyAuditExposure(
-      companyCase.baseline_answers as Record<string, number>,
-      companyCase.revenue_band,
-    );
+    // No questionnaire-derived dollar range is presented as report findings.
+    let deliveryStatus = 'pending';
+    try { deliveryStatus = (await deliverLeakAuditSubmission(submission.id)).status; }
+    catch (e) { console.error('appendix delivery failed', e instanceof Error ? e.message : 'delivery error'); deliveryStatus = 'review'; }
     return json({
-      company: companyCase.company_name, domain: companyUrl.domain,
+      company: companyUrl.domain, domain: companyUrl.domain,
       repeated: !!existing, engineVersion: AUDIT_ENGINE_VERSION,
       recommendations: companyCase.recommendations,
       options: companyCase.offer_snapshot,
-      score: canonicalExposure.healthScore,
-      exposure: canonicalExposure,
-      message: "Directional suggestions and modeled exposure from the company's original self-reported baseline. This is not verified lost revenue.",
+      saved: true,
+      deliveryStatus: ['limited', 'failed'].includes(companyCase.scan_status) ? 'review' : deliveryStatus,
+      message: 'Your request is saved. Findings are emailed only from a completed, reviewed Golden Report.',
     });
   } catch (e) {
     console.error("company audit error", e instanceof Error ? e.message : e);
