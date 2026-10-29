@@ -4,7 +4,8 @@
 - [x] Requested migration, function, Collective Brain UI, and AdminDashboard match GitHub main d7cf1ce2193c4819a63923071819cf726c53cf52 byte-for-byte; no manual Git sync operation performed.
 - [ ] Apply supplied migration: blocked by PostgreSQL 42702, column reference "company_id" is ambiguous (SELECT f.*, a.company_id duplicates company_id). Transaction rolled back; aggregate tables remain absent. Source left unchanged as requested.
 - [x] Deploy golden-report-brain; unauthenticated request returns 401 Admin session required.
-- [ ] Fix Collective Brain 401 by using the existing shared admin-token verifier; deploy and verify real admin access while retaining rejection of missing, forged, and expired tokens.
+- [x] Fix Collective Brain 401 using the existing shared admin-token verifier and deploy; real PIN login now passes authorization. Four regression tests cover valid, missing, forged, and expired sessions; invalid deployed token still returns 401. Authorized reads now reach the database but return 500 "Brain query failed" because the supplied migration remains blocked above.
+- [x] Latest harness build OK at 2026-10-29T16:54:53Z; authenticated Collective Brain screen verified in browser. No feature or database architecture rewrite.
 - [x] Harness build OK at 2026-10-29T16:41:05Z; authenticated Admin Collective Brain renders, Vite serves component HTTP 200, no runtime errors; no compile fixes required.
 
 ## Missing Leak Audit appendix investigation
