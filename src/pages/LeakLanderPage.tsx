@@ -31,6 +31,10 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const LeakLanderPage: React.FC = () => {
   const [leakAuditOpen, setLeakAuditOpen] = useState(false);
   const [entryPopupOpen, setEntryPopupOpen] = useState(true);
+  const [methodologyOpen, setMethodologyOpen] = useState(false);
+  const [methodologyActivated, setMethodologyActivated] = useState(false);
+  const [caseStudiesOpen, setCaseStudiesOpen] = useState(false);
+  const [caseStudiesActivated, setCaseStudiesActivated] = useState(false);
 
   const openLeakAuditFromPopup = () => {
     setEntryPopupOpen(false);
@@ -263,89 +267,144 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
-      {/* The Aetheris Methodology */}
-      <section id="methodology" className="border-t border-border/60 py-16 px-6">
-        <div className="mx-auto max-w-5xl text-center">
+      {/* The Aetheris Methodology — collapsed on first load */}
+      <section id="methodology" className="scroll-mt-28 border-t border-border/60 px-6 py-10 sm:py-12">
+        <div className="mx-auto max-w-5xl">
           <SectionLabel>// The system</SectionLabel>
-          <h2 className="font-forensic text-3xl sm:text-4xl font-bold leading-tight">
-            The Aetheris Methodology
+          <h2 className="font-forensic text-2xl font-bold leading-tight sm:text-3xl">
+            <button
+              type="button"
+              onClick={() => {
+                setMethodologyActivated(true);
+                setMethodologyOpen((open) => !open);
+              }}
+              aria-expanded={methodologyOpen}
+              aria-controls="homepage-methodology-panel"
+              className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-amber/30 bg-card/40 px-5 py-5 text-left transition hover:border-amber/60 hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber/70 sm:px-7 sm:py-6"
+            >
+              <span>The Aetheris Methodology</span>
+              <span className="flex shrink-0 items-center gap-3 text-amber">
+                <span className="hidden font-case text-[10px] font-bold uppercase tracking-widest sm:inline">
+                  {methodologyOpen ? "Minimize" : "Explore"}
+                </span>
+                <ChevronDown className={`h-6 w-6 transition-transform duration-200 ${methodologyOpen ? "rotate-180" : ""}`} />
+              </span>
+            </button>
           </h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            How the Golden Report becomes a system for fixing the company. Read it, or ask the AI
-            attached to it.
-          </p>
+          {!methodologyOpen && (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              How the Golden Report becomes a system for fixing the company.
+            </p>
+          )}
+          <div id="homepage-methodology-panel" hidden={!methodologyOpen} className="mt-8 text-center">
+            {methodologyActivated && (
+              <>
+                <p className="mx-auto max-w-2xl leading-relaxed text-muted-foreground">
+                  How the Golden Report becomes a system for fixing the company. Read it, or ask the AI attached to it.
+                </p>
+                <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr] md:items-start text-left">
+                  <div className="flex flex-col items-center md:items-start gap-4">
+                    <div
+                      className="group block h-[290px] w-[210px] shrink-0"
+                      style={{ perspective: 1200 }}
+                    >
+                      <div
+                        className="relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)]"
+                        style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
+                      >
+                        <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
+                        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/70 via-amber/25 to-transparent" />
+                        <div className="pointer-events-none absolute inset-y-0 left-6 w-px bg-amber/25" />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/[0.06] to-transparent" />
 
-          <div className="mt-8 grid gap-6 md:grid-cols-[240px_1fr] md:items-start text-left">
-            <div className="flex flex-col items-center md:items-start gap-4">
-              <div
-                className="group block h-[290px] w-[210px] shrink-0"
-                style={{ perspective: 1200 }}
-              >
-                <div
-                  className="relative h-full w-full overflow-hidden rounded-l-[3px] rounded-r-lg border border-amber/30 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--secondary))_55%,hsl(var(--card))_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_hsl(var(--amber)/0.15)]"
-                  style={{ transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}
-                >
-                  <div className="pointer-events-none absolute inset-y-[3px] right-0 w-2 rounded-r-lg bg-[repeating-linear-gradient(to_left,hsl(var(--foreground)/0.22)_0px,hsl(var(--foreground)/0.22)_1px,transparent_1px,transparent_3px)]" />
-                  <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/70 via-amber/25 to-transparent" />
-                  <div className="pointer-events-none absolute inset-y-0 left-6 w-px bg-amber/25" />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-foreground/[0.06] to-transparent" />
-
-                  <div className="relative flex h-full flex-col justify-between pl-9 pr-4 py-5">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <p className="font-case text-[9px] uppercase tracking-[0.2em] text-amber">Methodology</p>
-                        <span className="rounded-sm border border-amber/40 px-1.5 py-0.5 font-case text-[8px] tracking-widest text-amber/80">
-                          AM
-                        </span>
+                        <div className="relative flex h-full flex-col justify-between pl-9 pr-4 py-5">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <p className="font-case text-[9px] uppercase tracking-[0.2em] text-amber">Methodology</p>
+                              <span className="rounded-sm border border-amber/40 px-1.5 py-0.5 font-case text-[8px] tracking-widest text-amber/80">
+                                AM
+                              </span>
+                            </div>
+                            <div className="mt-3 h-px w-10 bg-amber/50" />
+                            <h3 className="mt-3 font-display text-lg font-bold leading-snug">
+                              The Aetheris Methodology
+                            </h3>
+                          </div>
+                          <div>
+                            <p className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
+                              Field document
+                            </p>
+                            <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber/80">
+                              Being reissued
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-3 h-px w-10 bg-amber/50" />
-                      <h3 className="mt-3 font-display text-lg font-bold leading-snug">
-                        The Aetheris Methodology
-                      </h3>
                     </div>
-                    <div>
-                      <p className="font-case text-[9px] uppercase tracking-widest text-muted-foreground">
-                        Field document
-                      </p>
-                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-amber/40 px-3 py-1.5 font-case text-[9px] uppercase tracking-widest text-amber/80">
-                        Being reissued
-                      </span>
-                    </div>
+
+                    <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-[210px]">
+                      The field document is being reissued. Ask the reader anything, or talk it through
+                      with us directly.
+                    </p>
+                    <a
+                      href={BOOK_MEETING_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border px-6 font-case text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
+                    >
+                      Talk With Aetheris
+                    </a>
                   </div>
+
+
+                  <MethodologyAI />
                 </div>
-              </div>
-
-              <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-[210px]">
-                The field document is being reissued. Ask the reader anything, or talk it through
-                with us directly.
-              </p>
-              <a
-                href={BOOK_MEETING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border px-6 font-case text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-amber/40 hover:text-foreground"
-              >
-                Talk With Aetheris
-              </a>
-            </div>
-
-
-            <MethodologyAI />
+              </>
+            )}
           </div>
         </div>
       </section>
 
-
-
-      {/* Case files */}
-      <section id="case-studies" className="border-t border-border/60 py-20 px-6">
+      {/* Case files — collapsed on first load */}
+      <section id="case-studies" className="scroll-mt-28 border-t border-border/60 px-6 py-10 sm:py-12">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>// Case files</SectionLabel>
-          <p className="mb-8 max-w-3xl text-base text-muted-foreground">
-            We sign NDAs to keep our clients private and their data safe. But you can read their
-            stories and situations. We will give you the same courtesy when we partner with you.
-          </p>
-          <RealCaseStudiesSection />
+          <h2 className="font-forensic text-2xl font-bold leading-tight sm:text-3xl">
+            <button
+              type="button"
+              onClick={() => {
+                setCaseStudiesActivated(true);
+                setCaseStudiesOpen((open) => !open);
+              }}
+              aria-expanded={caseStudiesOpen}
+              aria-controls="homepage-case-studies-panel"
+              className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-amber/30 bg-card/40 px-5 py-5 text-left transition hover:border-amber/60 hover:bg-card/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber/70 sm:px-7 sm:py-6"
+            >
+              <span>50 Case Studies</span>
+              <span className="flex shrink-0 items-center gap-3 text-amber">
+                <span className="hidden font-case text-[10px] font-bold uppercase tracking-widest sm:inline">
+                  {caseStudiesOpen ? "Minimize" : "Explore"}
+                </span>
+                <ChevronDown className={`h-6 w-6 transition-transform duration-200 ${caseStudiesOpen ? "rotate-180" : ""}`} />
+              </span>
+            </button>
+          </h2>
+          {!caseStudiesOpen && (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Explore 50 sourced case files, including the problem, the fix, and the outcome.
+            </p>
+          )}
+          <div id="homepage-case-studies-panel" hidden={!caseStudiesOpen} className="pt-6">
+            {caseStudiesActivated && (
+              <>
+                <p className="mb-8 max-w-3xl text-base text-muted-foreground">
+                  We sign NDAs to keep our clients private and their data safe. But you can read their
+                  stories and situations. We will give you the same courtesy when we partner with you.
+                </p>
+                <RealCaseStudiesSection />
+              </>
+            )}
+          </div>
         </div>
       </section>
 
