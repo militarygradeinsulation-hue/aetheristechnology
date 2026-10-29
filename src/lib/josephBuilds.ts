@@ -19,7 +19,6 @@ import build17 from "@/assets/builds/build-17.jpg.asset.json";
 import build18 from "@/assets/builds/build-18.jpg.asset.json";
 import build19 from "@/assets/builds/build-19.jpg.asset.json";
 import build20 from "@/assets/builds/build-20.jpg.asset.json";
-import build21 from "@/assets/builds/build-21.jpg.asset.json";
 import build22 from "@/assets/builds/build-22.jpg.asset.json";
 import build23 from "@/assets/builds/build-23.jpg.asset.json";
 import build24 from "@/assets/builds/build-24.jpg.asset.json";
@@ -88,7 +87,6 @@ export const JOSEPH_BUILDS = [
   { name: "The Monolith", url: "https://themonolith.lovable.app", description: "Unified console that pulls fragmented tools into a single operating surface.", image: build18.url },
   { name: "Reboot Revive Run", url: "https://reboot-revive-run.lovable.app", description: "Turnaround playbook for restarting a stalled business function and keeping it running.", image: build19.url },
   { name: "CreatorSignal Growth Edition", url: "https://creatorsignal2.lovable.app", description: "Second-generation creator tracker focused on audience growth and content performance.", image: build20.url },
-  { name: "LeadPulse", url: "https://leadpulsebyaetheris.lovable.app", description: "Live lead-flow monitor that shows response speed and where inquiries go cold.", image: build21.url },
   { name: "Perfect System Builder", url: "https://perfect-system-builder.lovable.app", description: "Blueprinting tool for designing a business system before anyone builds it.", image: build22.url },
   { name: "Transition Guardian", url: "https://transition-guardian.lovable.app", description: "Protects handoffs and role changes so knowledge does not walk out the door.", image: build23.url },
   { name: "PromptForge", url: "https://prompt-forge-ai-59.lovable.app", description: "Workbench for writing, testing, and version-tracking production prompts.", image: build24.url },
