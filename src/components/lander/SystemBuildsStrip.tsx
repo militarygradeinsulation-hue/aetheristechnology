@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { GOLDEN_REPORT_STRIP } from '@/lib/goldenReportStrip';
+import { formatMoney } from '@/lib/crm';
 import { ArrowUpRight, Pause, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JOSEPH_BUILDS } from '@/lib/josephBuilds';
@@ -34,6 +37,24 @@ export function SystemBuildsStrip() {
                   <p className="break-all font-case text-[10px] text-muted-foreground">{build.url.replace(/^https:\/\//, '').replace(/\/$/, '')}</p>
                 </div>
               </a>
+            ))}
+          </div>)}
+        </div>
+      </div>
+      <div className="mx-auto mb-4 mt-12 max-w-6xl px-6">
+        <p className="font-case text-xs uppercase text-amber">{GOLDEN_REPORT_STRIP.length} Golden Reports · inside real businesses</p>
+      </div>
+      <div className="systems-builds-viewport overflow-hidden" data-paused={paused}>
+        <div className="systems-builds-track systems-builds-track--reverse flex w-max">
+          {[0, 1].map(copy => <div key={copy} className="flex shrink-0 gap-4 pr-4" aria-hidden={copy === 1 ? true : undefined}>
+            {GOLDEN_REPORT_STRIP.map(r => (
+              <Link key={`${copy}-${r.scanId}`} to={`/golden-report/run?scan=${r.scanId}`} tabIndex={copy === 1 ? -1 : undefined}
+                className="block w-60 shrink-0 rounded-md border border-amber/30 bg-card p-4 transition-colors hover:border-amber/70">
+                <p className="font-case text-[10px] uppercase tracking-widest text-amber">Golden Report</p>
+                <h3 className="mt-2 truncate font-display text-base font-semibold">{r.domain}</h3>
+                <p className="mt-2 font-case text-[10px] uppercase text-muted-foreground">Annual leakage found</p>
+                <p className="font-forensic text-lg font-bold text-destructive">{formatMoney(r.annualLow)} – {formatMoney(r.annualHigh)}</p>
+              </Link>
             ))}
           </div>)}
         </div>
