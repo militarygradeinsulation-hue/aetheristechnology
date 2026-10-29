@@ -30,6 +30,15 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const LeakLanderPage: React.FC = () => {
   const [leakAuditOpen, setLeakAuditOpen] = useState(false);
+  const [entryPopupOpen, setEntryPopupOpen] = useState(true);
+
+  const openLeakAuditFromPopup = () => {
+    setEntryPopupOpen(false);
+    setLeakAuditOpen(true);
+    window.setTimeout(() => {
+      document.getElementById("leak-audit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -41,6 +50,46 @@ const LeakLanderPage: React.FC = () => {
       />
 
       <LanderNavbar />
+
+      {entryPopupOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 px-4 py-8 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="entry-popup-title"
+          onClick={() => setEntryPopupOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-[2rem] border border-amber/50 bg-amber p-8 text-background shadow-[0_30px_100px_-25px_hsl(var(--amber)/0.8)] sm:p-12"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setEntryPopupOpen(false)}
+              className="absolute right-5 top-4 text-2xl font-light text-background/65 transition hover:text-background"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <button
+              type="button"
+              onClick={openLeakAuditFromPopup}
+              className="group flex w-full items-center justify-between gap-6 text-left"
+              aria-label="Curious what we know about you? Go to the Leak Audit."
+            >
+              <div>
+                <h2 id="entry-popup-title" className="font-forensic text-4xl font-black leading-[1.05] sm:text-6xl">
+                  Curious what we know about you?
+                </h2>
+                <p className="mt-8 max-w-xl text-xl font-semibold leading-relaxed text-background/80 sm:text-2xl">
+                  We guarantee we can help you save money in less than 30 days.
+                </p>
+              </div>
+              <ArrowRight className="h-10 w-10 shrink-0 transition-transform group-hover:translate-x-2 sm:h-14 sm:w-14" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <AnomalousMatterHero
         eyebrow="Revenue Leak Audit"
@@ -99,12 +148,14 @@ const LeakLanderPage: React.FC = () => {
             </p>
           </div>
 
-          <a
-            href="https://cal.com/aetheristechnology/dean-network"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => {
+              setLeakAuditOpen(true);
+              window.setTimeout(() => document.getElementById("leak-audit")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+            }}
             className="group mt-10 flex w-full items-center justify-between gap-5 rounded-2xl border-2 border-amber/55 bg-amber px-5 py-6 text-left text-background shadow-[0_18px_50px_-22px_hsl(var(--amber)/0.85)] transition hover:-translate-y-0.5 hover:bg-amber/90 sm:px-7 sm:py-7"
-            aria-label="Curious what we know about you? Book an appointment."
+            aria-label="Curious what we know about you? Go to the Leak Audit."
           >
             <div>
               <p className="font-forensic text-2xl font-black leading-tight sm:text-4xl">
@@ -115,7 +166,7 @@ const LeakLanderPage: React.FC = () => {
               </p>
             </div>
             <ArrowRight className="h-7 w-7 shrink-0 transition-transform group-hover:translate-x-1 sm:h-9 sm:w-9" />
-          </a>
+          </button>
         </div>
 
         <img
