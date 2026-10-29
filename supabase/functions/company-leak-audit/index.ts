@@ -34,6 +34,22 @@ async function ipDigest(req: Request): Promise<string> {
 }
 
 async function queuePrivateGolden(caseId: string, domain: string, websiteUrl: string, companyName: string) {
+  // Reusing a completed or in-flight report consumes no new paid scan budget.
+  const { data: prior, error: priorError } = await sb.from('forensic_scans')
+    .select('id, target_url, status').in('status', ['completed', 'queued', 'running'])
+    .ilike('target_url', `%${domain}%`).order('created_at', { ascending: false }).limit(100);
+  if (priorError) throw priorError;
+  const reusable = (prior || []).find(scan => {
+    try { return normalizePublicCompanyUrl(scan.target_url).domain === domain; } catch { return false; }
+  });
+  if (reusable) {
+    await sb.from('aetheris_company_audit_cases').update({ private_scan_id: reusable.id, scan_status: 'reused' })
+      .eq('id', caseId).eq('scan_status', 'pending');
+    const { data: request } = await sb.from('aetheris_company_audit_submissions')
+      .select('id').eq('case_id', caseId).order('created_at').limit(1).maybeSingle();
+    if (request) await deliverLeakAuditSubmission(request.id);
+    return;
+  }
   // Atomic claim in Postgres prevents duplicate starts and enforces daily cost cap.
   const { data: claimed, error: claimError } = await sb.rpc("claim_private_company_golden", { p_case_id: caseId });
   if (claimError) {
@@ -49,7 +65,7 @@ async function queuePrivateGolden(caseId: string, domain: string, websiteUrl: st
         "apikey": service,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url: websiteUrl, company: companyName, private_intake: true }),
+      body: JSON.stringify({ url: websiteUrl, company: domain, private_intake: true }),
       signal: AbortSignal.timeout(20000),
     });
     const data = await res.json().catch(() => ({}));
@@ -124,6 +140,7 @@ Deno.serve(async (req) => {
         companyCase = winner;
       }
     }
+    if (!companyCase) throw new Error('Company request not saved');
 
     const { data: submission, error: submissionError } = await sb.from("aetheris_company_audit_submissions").insert({
       case_id: companyCase.id, contact_name: name || null, contact_email: email,
@@ -158,10 +175,7 @@ Deno.serve(async (req) => {
       // The private Golden dispatch is optional work, not part of giving visitors
       // their own deterministic results. Never block the response for up to 20s
       // on a costed scan dispatch or claim that dispatch completion is guaranteed.
-      const dispatch = queuePrivateGolden(companyCase.id, companyUrl.domain, companyUrl.url, companyCase.company_name);
-      const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (job: Promise<unknown>) => void } }).EdgeRuntime;
-      if (runtime?.waitUntil) runtime.waitUntil(dispatch);
-      else await dispatch;
+      await queuePrivateGolden(companyCase.id, companyUrl.domain, companyUrl.url, companyCase.company_name);
     }
     // No questionnaire-derived dollar range is presented as report findings.
     let deliveryStatus = 'pending';
