@@ -65,6 +65,43 @@ const LeakLanderPage: React.FC = () => {
         <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
           Find what's costing your company money. <span className="text-amber">Know what to fix first.</span>
         </h1>
+
+        <div className="w-full max-w-4xl rounded-2xl border border-amber/25 bg-card/35 px-6 py-8 text-left shadow-[0_20px_60px_-40px_hsl(var(--amber)/0.45)] backdrop-blur-sm sm:px-8 sm:py-10">
+          <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80">
+            The human evidence
+          </p>
+          <h2 className="mt-3 font-forensic text-3xl font-bold leading-tight text-foreground sm:text-4xl">
+            Your business is evidence.
+          </h2>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            It reflects how you think, what you tolerate, and what you repeat.
+          </p>
+
+          <div className="mt-7 grid gap-2 text-base font-medium text-foreground/90 sm:text-lg">
+            <p>We map the person first.</p>
+            <p>Then the patterns.</p>
+            <p>Then the company.</p>
+          </div>
+
+          <div className="mt-7 space-y-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p>Because financial leaks rarely begin with software.</p>
+            <p className="text-foreground">They begin with decisions.</p>
+            <p className="font-semibold text-amber">And decisions leave fingerprints.</p>
+          </div>
+
+          <div className="mt-8 border-t border-border/60 pt-7">
+            <p className="text-sm text-muted-foreground sm:text-base">
+              So if the same problems keep showing up...
+            </p>
+            <p className="mt-3 font-forensic text-2xl font-bold leading-tight text-foreground sm:text-3xl">
+              Is the company failing you?
+            </p>
+            <p className="mt-1 font-forensic text-2xl font-bold leading-tight text-amber sm:text-3xl">
+              Or is it reflecting you?
+            </p>
+          </div>
+        </div>
+
         <img
           src={problemReasonSolution.url}
           alt="The problem: the cost of existing creates financial leaks. The reason: we look through the lens of science and psychology across people, processes, systems, and structure. The solution: by fixing the leaks, your ROI automatically increases."
