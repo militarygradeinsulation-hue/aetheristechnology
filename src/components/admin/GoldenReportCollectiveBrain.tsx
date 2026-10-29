@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis,
+  PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis, Legend, LabelList,
 } from "recharts";
 
 type Pattern = { pattern_key:string; pattern_title:string; category:string|null; chapter_slug:string|null; report_count:number; occurrence_count:number; company_count:number; report_share:number|null; sample_actions:any; evidence_grades:any };
@@ -22,14 +22,39 @@ const pct=(v:number|null|undefined)=>v==null?"—":`${(Number(v)*100).toFixed(1)
 const fmt=(v:number|null|undefined)=>Number(v||0).toLocaleString();
 const short=(s:string,n=30)=>s.length>n?`${s.slice(0,n-1)}…`:s;
 
-const amber="hsl(var(--amber))";
+const amber="hsl(var(--amber-glow))";
 const crimson="hsl(var(--crimson))";
 const fg="hsl(var(--foreground))";
-const muted="hsl(var(--muted-foreground))";
-const grid="hsl(var(--border))";
-const chartPalette=[amber,"hsl(42 80% 52%)","hsl(32 75% 50%)","hsl(18 75% 50%)",crimson,"hsl(214 65% 52%)","hsl(164 55% 46%)","hsl(275 52% 58%)"];
+const axisText="hsl(40 16% 82%)";
+const muted="hsl(42 10% 70%)";
+const grid="hsl(var(--border) / 0.72)";
+const chartPalette=[
+  amber,
+  "hsl(44 92% 62%)",
+  "hsl(30 88% 58%)",
+  "hsl(17 82% 58%)",
+  "hsl(0 72% 58%)",
+  "hsl(210 78% 62%)",
+  "hsl(158 62% 52%)",
+  "hsl(276 66% 65%)"
+];
+const confidencePalette={
+  "High confidence":"hsl(145 60% 48%)",
+  "Medium confidence":amber,
+  "Low confidence":"hsl(25 88% 56%)",
+  "Unclassified":"hsl(220 9% 48%)"
+};
 
-const tipStyle={ background:"hsl(var(--popover))", border:"1px solid hsl(var(--border))", borderRadius:10, color:fg, fontSize:12 };
+const tipStyle={
+  background:"hsl(var(--popover))",
+  border:"1px solid hsl(var(--amber-glow) / 0.45)",
+  borderRadius:10,
+  color:fg,
+  fontSize:13,
+  fontWeight:600,
+  boxShadow:"0 10px 28px hsl(0 0% 0% / 0.45)"
+};
+const axisTick={fill:axisText,fontSize:12,fontWeight:600};
 
 export default function GoldenReportCollectiveBrain(){
  const [patterns,setPatterns]=useState<Pattern[]>([]);
@@ -148,65 +173,77 @@ export default function GoldenReportCollectiveBrain(){
   <div className="grid xl:grid-cols-2 gap-4">
    <ChartCard title="Most recurring problems" subtitle="Reports containing each recurring pattern">
     <ResponsiveContainer width="100%" height="100%">
-     <BarChart data={patternBars} layout="vertical" margin={{left:20,right:20,top:5,bottom:5}}>
+     <BarChart data={patternBars} layout="vertical" margin={{left:36,right:58,top:8,bottom:8}}>
       <CartesianGrid stroke={grid} strokeDasharray="3 3" horizontal={false}/>
-      <XAxis type="number" tick={{fill:muted,fontSize:11}}/>
-      <YAxis dataKey="name" type="category" width={170} tick={{fill:muted,fontSize:10}}/>
-      <Tooltip contentStyle={tipStyle} formatter={(v:any)=>[fmt(Number(v)),"Reports"]}/>
-      <Bar dataKey="reports" fill={amber} radius={[0,5,5,0]}/>
+      <XAxis type="number" tick={axisTick} axisLine={{stroke:grid}} tickLine={{stroke:grid}}/>
+      <YAxis dataKey="name" type="category" width={210} tick={{...axisTick,fontSize:11}} axisLine={false} tickLine={false}/>
+      <Tooltip contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}} formatter={(v:any)=>[fmt(Number(v)),"Reports"]}/>
+      <Bar dataKey="reports" fill={amber} radius={[0,6,6,0]}>
+       <LabelList dataKey="reports" position="right" fill={fg} fontSize={12} fontWeight={700} formatter={(v:any)=>fmt(Number(v))}/>
+      </Bar>
      </BarChart>
     </ResponsiveContainer>
    </ChartCard>
 
    <ChartCard title="Industry coverage" subtitle="Companies classified into each industry">
     {industryBars.length?<ResponsiveContainer width="100%" height="100%">
-     <BarChart data={industryBars} layout="vertical" margin={{left:20,right:20,top:5,bottom:5}}>
+     <BarChart data={industryBars} layout="vertical" margin={{left:36,right:58,top:8,bottom:8}}>
       <CartesianGrid stroke={grid} strokeDasharray="3 3" horizontal={false}/>
-      <XAxis type="number" tick={{fill:muted,fontSize:11}}/>
-      <YAxis dataKey="name" type="category" width={165} tick={{fill:muted,fontSize:10}}/>
-      <Tooltip contentStyle={tipStyle}/>
-      <Bar dataKey="companies" fill={amber} radius={[0,5,5,0]}/>
+      <XAxis type="number" tick={axisTick} axisLine={{stroke:grid}} tickLine={{stroke:grid}}/>
+      <YAxis dataKey="name" type="category" width={210} tick={{...axisTick,fontSize:11}} axisLine={false} tickLine={false}/>
+      <Tooltip contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}}/>
+      <Bar dataKey="companies" fill={amber} radius={[0,6,6,0]}>
+       <LabelList dataKey="companies" position="right" fill={fg} fontSize={12} fontWeight={700}/>
+      </Bar>
      </BarChart>
     </ResponsiveContainer>:<EmptyVisual text="Run industry enrichment to build industry comparisons."/>}
    </ChartCard>
 
    <ChartCard title="Problem category mix" subtitle="Share of all indexed observations by category">
     {categoryPie.length?<ResponsiveContainer width="100%" height="100%">
-     <PieChart><Pie data={categoryPie} dataKey="value" nameKey="name" innerRadius={55} outerRadius={105} paddingAngle={2}>
+     <PieChart><Pie data={categoryPie} dataKey="value" nameKey="name" innerRadius={58} outerRadius={100} paddingAngle={3} stroke="hsl(var(--background))" strokeWidth={2}>
       {categoryPie.map((_,i)=><Cell key={i} fill={chartPalette[i%chartPalette.length]}/>)}
-     </Pie><Tooltip contentStyle={tipStyle} formatter={(v:any)=>[fmt(Number(v)),"Observations"]}/></PieChart>
+     </Pie>
+     <Tooltip contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}} formatter={(v:any)=>[fmt(Number(v)),"Observations"]}/>
+     <Legend verticalAlign="bottom" height={54} wrapperStyle={{color:axisText,fontSize:12,fontWeight:600,lineHeight:"20px"}}/>
+     </PieChart>
     </ResponsiveContainer>:<EmptyVisual text="Category data will appear after the brain refreshes."/>}
    </ChartCard>
 
    <ChartCard title="Industry confidence" subtitle="How strongly each company classification is supported">
     {confidencePie.length?<ResponsiveContainer width="100%" height="100%">
-     <PieChart><Pie data={confidencePie} dataKey="value" nameKey="name" innerRadius={55} outerRadius={105} paddingAngle={2}>
-      {confidencePie.map((_,i)=><Cell key={i} fill={chartPalette[i%chartPalette.length]}/>)}
-     </Pie><Tooltip contentStyle={tipStyle}/></PieChart>
+     <PieChart><Pie data={confidencePie} dataKey="value" nameKey="name" innerRadius={58} outerRadius={100} paddingAngle={3} stroke="hsl(var(--background))" strokeWidth={2}>
+      {confidencePie.map((entry,i)=><Cell key={i} fill={confidencePalette[entry.name as keyof typeof confidencePalette] || chartPalette[i%chartPalette.length]}/>)}
+     </Pie>
+     <Tooltip contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}}/>
+     <Legend verticalAlign="bottom" height={54} wrapperStyle={{color:axisText,fontSize:12,fontWeight:600,lineHeight:"20px"}}/>
+     </PieChart>
     </ResponsiveContainer>:<EmptyVisual text="Industry confidence will appear after classification."/>}
    </ChartCard>
 
    <ChartCard title="Pattern spread" subtitle="Companies affected versus reports observed">
     {scatter.length?<ResponsiveContainer width="100%" height="100%">
-     <ScatterChart margin={{left:10,right:20,top:15,bottom:10}}>
+     <ScatterChart margin={{left:18,right:28,top:18,bottom:22}}>
       <CartesianGrid stroke={grid} strokeDasharray="3 3"/>
-      <XAxis type="number" dataKey="x" name="Companies" tick={{fill:muted,fontSize:11}}/>
-      <YAxis type="number" dataKey="y" name="Reports" tick={{fill:muted,fontSize:11}}/>
-      <ZAxis type="number" dataKey="z" range={[35,220]}/>
-      <Tooltip cursor={{strokeDasharray:"3 3"}} contentStyle={tipStyle} formatter={(v:any,n:any,p:any)=>n==="x"?[fmt(Number(v)),"Companies"]:n==="y"?[fmt(Number(v)),"Reports"]:[p?.payload?.name||"Pattern","Pattern"]}/>
-      <Scatter data={scatter} fill={amber}/>
+      <XAxis type="number" dataKey="x" name="Companies" tick={axisTick} axisLine={{stroke:grid}} tickLine={{stroke:grid}} label={{value:"Companies affected",position:"insideBottom",offset:-12,fill:axisText,fontSize:12,fontWeight:600}}/>
+      <YAxis type="number" dataKey="y" name="Reports" tick={axisTick} axisLine={{stroke:grid}} tickLine={{stroke:grid}} label={{value:"Reports observed",angle:-90,position:"insideLeft",fill:axisText,fontSize:12,fontWeight:600}}/>
+      <ZAxis type="number" dataKey="z" range={[45,260]}/>
+      <Tooltip cursor={{stroke:grid,strokeDasharray:"3 3"}} contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}} formatter={(v:any,n:any,p:any)=>n==="x"?[fmt(Number(v)),"Companies"]:n==="y"?[fmt(Number(v)),"Reports"]:[p?.payload?.name||"Pattern","Pattern"]}/>
+      <Scatter data={scatter} fill={amber} stroke="hsl(40 95% 75%)" strokeWidth={1.5}/>
      </ScatterChart>
     </ResponsiveContainer>:<EmptyVisual text="Pattern distribution will appear after the brain refreshes."/>}
    </ChartCard>
 
    <ChartCard title="Evidence strength" subtitle="Evidence grades accumulated across recurring findings">
     {evidenceBars.length?<ResponsiveContainer width="100%" height="100%">
-     <BarChart data={evidenceBars} margin={{left:5,right:15,top:5,bottom:25}}>
+     <BarChart data={evidenceBars} margin={{left:12,right:20,top:20,bottom:38}}>
       <CartesianGrid stroke={grid} strokeDasharray="3 3" vertical={false}/>
-      <XAxis dataKey="name" angle={-18} textAnchor="end" height={55} tick={{fill:muted,fontSize:10}}/>
-      <YAxis tick={{fill:muted,fontSize:11}}/>
-      <Tooltip contentStyle={tipStyle}/>
-      <Bar dataKey="count" fill={amber} radius={[5,5,0,0]}/>
+      <XAxis dataKey="name" angle={-16} textAnchor="end" height={68} tick={{...axisTick,fontSize:11}} axisLine={{stroke:grid}} tickLine={{stroke:grid}}/>
+      <YAxis tick={axisTick} axisLine={{stroke:grid}} tickLine={{stroke:grid}}/>
+      <Tooltip contentStyle={tipStyle} labelStyle={{color:fg,fontWeight:700}} itemStyle={{color:fg}}/>
+      <Bar dataKey="count" fill={amber} radius={[6,6,0,0]}>
+       <LabelList dataKey="count" position="top" fill={fg} fontSize={12} fontWeight={700} formatter={(v:any)=>fmt(Number(v))}/>
+      </Bar>
      </BarChart>
     </ResponsiveContainer>:<EmptyVisual text="Evidence grade distribution will appear after the brain refreshes."/>}
    </ChartCard>
@@ -223,7 +260,7 @@ export default function GoldenReportCollectiveBrain(){
       <div className="text-xs font-medium pr-3 py-3">{ind}</div>
       {heatPatterns.map(k=>{
        const share=heatMap.get(`${ind}::${k}`)||0;
-       return <div key={k} className="rounded-md border border-border/40 min-h-12 flex items-center justify-center text-xs font-mono" style={{backgroundColor:`hsl(var(--amber) / ${Math.max(.035,Math.min(.8,share))})`}} title={`${ind}: ${pct(share)} of reports show ${byKey.get(k)||k}`}>{share?pct(share):"—"}</div>;
+       return <div key={k} className="rounded-md border border-border/40 min-h-12 flex items-center justify-center text-xs font-mono" style={{backgroundColor:`hsl(var(--amber-glow) / ${Math.max(.08,Math.min(.82,share))})`,color:share>.45?"hsl(var(--background))":fg,fontWeight:700}} title={`${ind}: ${pct(share)} of reports show ${byKey.get(k)||k}`}>{share?pct(share):"—"}</div>;
       })}
      </React.Fragment>)}
     </div>
@@ -271,10 +308,10 @@ export default function GoldenReportCollectiveBrain(){
 }
 
 function ChartCard({title,subtitle,children}:{title:string;subtitle:string;children:React.ReactNode}){
- return <div className="rounded-xl border border-border bg-card/20 p-5 min-h-[360px]">
-  <h3 className="font-bold text-lg">{title}</h3>
-  <p className="text-xs text-muted-foreground mt-1 mb-4">{subtitle}</p>
-  <div className="h-[285px]">{children}</div>
+ return <div className="rounded-xl border border-border/90 bg-card/30 p-5 min-h-[410px] shadow-sm">
+  <h3 className="font-bold text-xl text-foreground">{title}</h3>
+  <p className="text-sm text-foreground/75 mt-1 mb-4">{subtitle}</p>
+  <div className="h-[325px]">{children}</div>
  </div>;
 }
 
