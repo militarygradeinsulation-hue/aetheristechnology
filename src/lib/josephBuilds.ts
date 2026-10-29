@@ -65,6 +65,86 @@ import build64 from "@/assets/builds/build-64.jpg.asset.json";
 import build65 from "@/assets/builds/build-65.jpg.asset.json";
 import build66 from "@/assets/builds/build-66.jpg.asset.json";
 
+import ov0 from "@/assets/builds/ov-000.jpg.asset.json";
+import ov1 from "@/assets/builds/ov-001.jpg.asset.json";
+import ov2 from "@/assets/builds/ov-002.jpg.asset.json";
+import ov3 from "@/assets/builds/ov-003.jpg.asset.json";
+import ov4 from "@/assets/builds/ov-004.jpg.asset.json";
+import ov5 from "@/assets/builds/ov-005.jpg.asset.json";
+import ov6 from "@/assets/builds/ov-006.jpg.asset.json";
+import ov7 from "@/assets/builds/ov-007.jpg.asset.json";
+import ov8 from "@/assets/builds/ov-008.jpg.asset.json";
+import ov9 from "@/assets/builds/ov-009.jpg.asset.json";
+import ov10 from "@/assets/builds/ov-010.jpg.asset.json";
+import ov11 from "@/assets/builds/ov-011.jpg.asset.json";
+import ov12 from "@/assets/builds/ov-012.jpg.asset.json";
+import ov13 from "@/assets/builds/ov-013.jpg.asset.json";
+import ov14 from "@/assets/builds/ov-014.jpg.asset.json";
+import ov15 from "@/assets/builds/ov-015.jpg.asset.json";
+import ov16 from "@/assets/builds/ov-016.jpg.asset.json";
+import ov17 from "@/assets/builds/ov-017.jpg.asset.json";
+import ov18 from "@/assets/builds/ov-018.jpg.asset.json";
+import ov19 from "@/assets/builds/ov-019.jpg.asset.json";
+import ov20 from "@/assets/builds/ov-020.jpg.asset.json";
+import ov21 from "@/assets/builds/ov-021.jpg.asset.json";
+import ov22 from "@/assets/builds/ov-022.jpg.asset.json";
+import ov23 from "@/assets/builds/ov-023.jpg.asset.json";
+import ov24 from "@/assets/builds/ov-024.jpg.asset.json";
+import ov25 from "@/assets/builds/ov-025.jpg.asset.json";
+import ov26 from "@/assets/builds/ov-026.jpg.asset.json";
+import ov27 from "@/assets/builds/ov-027.jpg.asset.json";
+import ov28 from "@/assets/builds/ov-028.jpg.asset.json";
+import ov29 from "@/assets/builds/ov-029.jpg.asset.json";
+import ov30 from "@/assets/builds/ov-030.jpg.asset.json";
+import ov31 from "@/assets/builds/ov-031.jpg.asset.json";
+import ov32 from "@/assets/builds/ov-032.jpg.asset.json";
+import ov33 from "@/assets/builds/ov-033.jpg.asset.json";
+import ov34 from "@/assets/builds/ov-034.jpg.asset.json";
+import ov35 from "@/assets/builds/ov-035.jpg.asset.json";
+import ov36 from "@/assets/builds/ov-036.jpg.asset.json";
+import ov37 from "@/assets/builds/ov-037.jpg.asset.json";
+import ov38 from "@/assets/builds/ov-038.jpg.asset.json";
+import ov39 from "@/assets/builds/ov-039.jpg.asset.json";
+import ov40 from "@/assets/builds/ov-040.jpg.asset.json";
+import ov41 from "@/assets/builds/ov-041.jpg.asset.json";
+import ov42 from "@/assets/builds/ov-042.jpg.asset.json";
+import ov43 from "@/assets/builds/ov-043.jpg.asset.json";
+import ov44 from "@/assets/builds/ov-044.jpg.asset.json";
+import ov45 from "@/assets/builds/ov-045.jpg.asset.json";
+import ov46 from "@/assets/builds/ov-046.jpg.asset.json";
+import ov47 from "@/assets/builds/ov-047.jpg.asset.json";
+import ov48 from "@/assets/builds/ov-048.jpg.asset.json";
+import ov49 from "@/assets/builds/ov-049.jpg.asset.json";
+import ov50 from "@/assets/builds/ov-050.jpg.asset.json";
+import ov51 from "@/assets/builds/ov-051.jpg.asset.json";
+import ov52 from "@/assets/builds/ov-052.jpg.asset.json";
+import ov53 from "@/assets/builds/ov-053.jpg.asset.json";
+import ov54 from "@/assets/builds/ov-054.jpg.asset.json";
+import ov55 from "@/assets/builds/ov-055.jpg.asset.json";
+import ov56 from "@/assets/builds/ov-056.jpg.asset.json";
+import ov57 from "@/assets/builds/ov-057.jpg.asset.json";
+import ov58 from "@/assets/builds/ov-058.jpg.asset.json";
+import ov59 from "@/assets/builds/ov-059.jpg.asset.json";
+import ov60 from "@/assets/builds/ov-060.jpg.asset.json";
+import ov61 from "@/assets/builds/ov-061.jpg.asset.json";
+import ov62 from "@/assets/builds/ov-062.jpg.asset.json";
+import ov63 from "@/assets/builds/ov-063.jpg.asset.json";
+import ov64 from "@/assets/builds/ov-064.jpg.asset.json";
+import ov65 from "@/assets/builds/ov-065.jpg.asset.json";
+import ov66 from "@/assets/builds/ov-066.jpg.asset.json";
+import ov67 from "@/assets/builds/ov-067.jpg.asset.json";
+import ov68 from "@/assets/builds/ov-068.jpg.asset.json";
+import ov69 from "@/assets/builds/ov-069.jpg.asset.json";
+import ov70 from "@/assets/builds/ov-070.jpg.asset.json";
+import ov71 from "@/assets/builds/ov-071.jpg.asset.json";
+import ov72 from "@/assets/builds/ov-072.jpg.asset.json";
+import ov73 from "@/assets/builds/ov-073.jpg.asset.json";
+import ov74 from "@/assets/builds/ov-074.jpg.asset.json";
+import ov75 from "@/assets/builds/ov-075.jpg.asset.json";
+import ov76 from "@/assets/builds/ov-076.jpg.asset.json";
+import ov77 from "@/assets/builds/ov-077.jpg.asset.json";
+import ov78 from "@/assets/builds/ov-078.jpg.asset.json";
+import ov79 from "@/assets/builds/ov-079.jpg.asset.json";
 export const JOSEPH_BUILDS = [
   { name: "YourBrain Knowledge Engine", url: "https://yourbrain.technology/", description: "Second-brain workspace that captures thinking and turns scattered notes into usable knowledge.", image: build0.url },
   { name: "WhisperFlow Queue", url: "https://whisper-flow-queue.lovable.app/", description: "Voice-to-text pipeline that queues, transcribes, and organizes spoken input at volume.", image: build1.url },
@@ -132,4 +212,84 @@ export const JOSEPH_BUILDS = [
   { name: "StitchVideo", url: "https://stitchvideobyaetheris.lovable.app", description: "Video assembly tool that stitches clips into a finished cut.", image: build64.url },
   { name: "Atelier Curriculum", url: "https://ateliercurriculum.lovable.app", description: "Course and curriculum design studio for structured teaching programs.", image: build65.url },
   { name: "Digital Assets Library", url: "https://digitalassetsbyaetheris.lovable.app", description: "Asset library that keeps brand files findable and version-clean.", image: build66.url },
+  { name: "The Ledger Desk: Editorial Post Creator and Study Dashboard", url: "https://obsidianvibe.live/api/public/share/2w1v373r574h1s", description: "The Ledger.", image: ov0.url },
+  { name: "Command Dashboard", url: "https://obsidianvibe.live/api/public/share/2u2h515q3t155u", description: "COMMAND DASHBOARD", image: ov1.url },
+  { name: "The browser that sees what business is missing.", url: "https://obsidianvibe.live/api/public/share/1i4s0b615i700c", description: "The browser that sees what business is missing.", image: ov2.url },
+  { name: "ExtractIQ", url: "https://obsidianvibe.live/api/public/share/1x056z595w444l", description: "LinkedIn Lead Extraction Command Center", image: ov3.url },
+  { name: "Storyforge", url: "https://obsidianvibe.live/api/public/share/381t5f3h4l0f3n", description: "Interactive Storytelling Platform", image: ov4.url },
+  { name: "Ink on Paper", url: "https://obsidianvibe.live/api/public/share/3j5a702z2v0p5m", description: "A Scroll Score in Three Stations", image: ov5.url },
+  { name: "Pre-Feast", url: "https://obsidianvibe.live/api/public/share/2i174k5j2r736t", description: "Meal Planning, Simplified", image: ov6.url },
+  { name: "Financial Cockpit", url: "https://obsidianvibe.live/api/public/share/5t4p515y105i4s", description: "Built and shared on Obsidian Vibe.", image: ov7.url },
+  { name: "Obsidian Foundry", url: "https://obsidianvibe.live/api/public/share/6q4v4126596q4d", description: "Strategy Atlas", image: ov8.url },
+  { name: "Obsidian Forge", url: "https://obsidianvibe.live/api/public/share/4p2z5v2a6z1r0l", description: "Technical Portfolio for Open-Source Developers", image: ov9.url },
+  { name: "Dirt Daddy’s", url: "https://obsidianvibe.live/api/public/share/2k454f5m4u6v0g", description: "Screened topsoil, fast.", image: ov10.url },
+  { name: "Obsidian Pocket", url: "https://obsidianvibe.live/api/public/share/0j4x4q013e5a5w", description: "Component Intelligence for Modern SaaS", image: ov11.url },
+  { name: "Aetheris AppForge", url: "https://obsidianvibe.live/api/public/share/0q5o1m0v6i3k3h", description: "turn vibe-coded web apps into native iOS + Android", image: ov12.url },
+  { name: "ATLAS", url: "https://obsidianvibe.live/api/public/share/481b355n48730e", description: "Personal Intelligence & Life Operating System", image: ov13.url },
+  { name: "Obsidian Lift", url: "https://obsidianvibe.live/api/public/share/344n3g6o6g0g3x", description: "Social Workout Companion", image: ov14.url },
+  { name: "Creator LTV Command", url: "https://obsidianvibe.live/api/public/share/3o0d6g5v165p1b", description: "Micro-Creator Metrics", image: ov15.url },
+  { name: "Aetheris 95 Support Desktop", url: "https://obsidianvibe.live/api/public/share/1m1z6x054s4r0o", description: "Built and shared on Obsidian Vibe.", image: ov16.url },
+  { name: "AetherDesk AI", url: "https://obsidianvibe.live/api/public/share/3g6g02252a7257", description: "Enterprise Customer Support Hub", image: ov17.url },
+  { name: "SheetLogic Ops", url: "https://obsidianvibe.live/api/public/share/6i520b6r6e2l0n", description: "Spreadsheet Automation Interface", image: ov18.url },
+  { name: "MaskForge Pro", url: "https://obsidianvibe.live/api/public/share/513x6223546v44", description: "Browser Masking Studio", image: ov19.url },
+  { name: "Aetheris Cut", url: "https://obsidianvibe.live/api/public/share/4z0b1p3o2s2q4b", description: "AI image editing workspace", image: ov20.url },
+  { name: "Smart Voices", url: "https://obsidianvibe.live/api/public/share/0u1i2c2v034i50", description: "Podcast Website & Management Studio", image: ov21.url },
+  { name: "VoltGrid Dispatch Calendar", url: "https://obsidianvibe.live/api/public/share/2d1a2c0x71083w", description: "Complete time calendar for electrical field operations.", image: ov22.url },
+  { name: "LedgerLine", url: "https://obsidianvibe.live/api/public/share/3a266c6a6y3e41", description: "Bulk Processing Queue for Media Transcription", image: ov23.url },
+  { name: "Bio-Pure® Wastewater Systems", url: "https://obsidianvibe.live/api/public/share/4n2y6b6q471y3s", description: "Make Difficult Land Buildable", image: ov24.url },
+  { name: "Aetheris CRM/ERP Command Suite", url: "https://obsidianvibe.live/api/public/share/6a304c03001j5p", description: "Run the whole client engine from one clean console.", image: ov25.url },
+  { name: "Command Vault", url: "https://obsidianvibe.live/api/public/share/5y440o616m6l03", description: "Developer Cheatsheet", image: ov26.url },
+  { name: "Theme Park Ride Work Order", url: "https://obsidianvibe.live/api/public/share/1a03656h0h2y56", description: "Ride issues logged fast, tracked clearly, and ready for print on the floor.", image: ov27.url },
+  { name: "Metrics Command Center", url: "https://obsidianvibe.live/api/public/share/6o6h18023b5t51", description: "Performance Dashboard", image: ov28.url },
+  { name: "SignalScope", url: "https://obsidianvibe.live/api/public/share/721u2k32521w4t", description: "AI Research Dashboard", image: ov29.url },
+  { name: "Creator ROI Analytics", url: "https://obsidianvibe.live/api/public/share/2i0x2a6d1m015w", description: "Evaluate every product by positive or negative impact.", image: ov30.url },
+  { name: "ContentGap", url: "https://obsidianvibe.live/api/public/share/26170b4v2b3k71", description: "Whitespace Intelligence", image: ov31.url },
+  { name: "Institutional AI Tool Governance Ledger", url: "https://obsidianvibe.live/api/public/share/4v5r56424n2n1x", description: "Built and shared on Obsidian Vibe.", image: ov32.url },
+  { name: "Mythweaver", url: "https://obsidianvibe.live/api/public/share/6h166q641w2315", description: "Character & World Development Platform", image: ov33.url },
+  { name: "Humanize My Text", url: "https://obsidianvibe.live/api/public/share/286n2w2o4j2h2s", description: "Paste or type content here", image: ov34.url },
+  { name: "POP_MATRIX // NEURAL BUBBLE PROTOCOL", url: "https://obsidianvibe.live/api/public/share/0g3h074r1j6o0n", description: "Built and shared on Obsidian Vibe.", image: ov35.url },
+  { name: "AETHERIS // Zero-Knowledge Screen Protocol", url: "https://obsidianvibe.live/api/public/share/020i2m304q513w", description: "ZERO-KNOWLEDGE SCREEN PROTOCOL", image: ov36.url },
+  { name: "AetherColony: Subterranean Nanotech Ant Farm", url: "https://obsidianvibe.live/api/public/share/0d140n50104i54", description: "Built and shared on Obsidian Vibe.", image: ov37.url },
+  { name: "CineChain", url: "https://obsidianvibe.live/api/public/share/3b47181i6b1m1q", description: "The Infinite Cinematic Trivia Sequence", image: ov38.url },
+  { name: "Aetheris Cosmic Drift", url: "https://obsidianvibe.live/api/public/share/2k05425k2d1f3p", description: "Next-Gen Arcade Drift Station", image: ov39.url },
+  { name: "AetherFlow // Creator Pipeline & Kanban Board", url: "https://obsidianvibe.live/api/public/share/504n1c6n2q5t2w", description: "Track your Research-to-Output Pipeline", image: ov40.url },
+  { name: "LedgerFlow Enterprise", url: "https://obsidianvibe.live/api/public/share/036x626z4o6y67", description: "Financial Command & Client Portfolio Engine", image: ov41.url },
+  { name: "AuraInvoice // Premium Financial Control Center", url: "https://obsidianvibe.live/api/public/share/4y2h534f1y4k6j", description: "AURORA SYSTEMS", image: ov42.url },
+  { name: "Halo Logistics Lead Vetting System", url: "https://obsidianvibe.live/api/public/share/5s40074z506u59", description: "WORKSPACE LOCK", image: ov43.url },
+  { name: "Logic Loom", url: "https://obsidianvibe.live/api/public/share/4x5g5d4z5f612a", description: "Interactive Programming Tutor", image: ov44.url },
+  { name: "Field Notes", url: "https://obsidianvibe.live/api/public/share/2g0j5e5z0z6g0q", description: "Independent Editorial", image: ov45.url },
+  { name: "Aetheris Obsidian", url: "https://obsidianvibe.live/api/public/share/3n4i4g4w4d5e63", description: "Direct Deficiency to Repair Quotations", image: ov46.url },
+  { name: "AURELIA • Fine Art Editorial & Portrait Photographer", url: "https://obsidianvibe.live/api/public/share/0p2r0s1j2g4f3t", description: "Preserving authentic moments in ephemeral light", image: ov47.url },
+  { name: "Aether3D", url: "https://obsidianvibe.live/api/public/share/6d4p4x5738525d", description: "AI-Powered 2D to 3D Generation Engine", image: ov48.url },
+  { name: "AETHER VOYAGES", url: "https://obsidianvibe.live/api/public/share/5u006e0m1m176s", description: "Ultra-Luxury Architectural Expeditions", image: ov49.url },
+  { name: "Aetheris Gold", url: "https://obsidianvibe.live/api/public/share/3m210g6v3x1o0w", description: "Proactive Field Service Leak Plugger", image: ov50.url },
+  { name: "IgnisFlow // Elite Deficiency-To-Quote Engine & Leak Prevention Suite", url: "https://obsidianvibe.live/api/public/share/50571r4x0k602x", description: "Inspections to Invoices. Seamlessly Streamlined.", image: ov51.url },
+  { name: "Aether Dispatch", url: "https://obsidianvibe.live/api/public/share/250v2f5447362u", description: "Elite Weekly Frontend Newsletter & Engine", image: ov52.url },
+  { name: "Aetheris Synth-9 // Pro Sequencer & Master Tape Deck", url: "https://obsidianvibe.live/api/public/share/283912263e1x1w", description: "Live Recording DJ Sequencer Suite", image: ov53.url },
+  { name: "Super Synth Land", url: "https://obsidianvibe.live/api/public/share/0i0h6z605s6r3i", description: "2D Retro HTML5 Platformer Engine", image: ov54.url },
+  { name: "RetroPutt 95", url: "https://obsidianvibe.live/api/public/share/6z0q396u353y1k", description: "Swing to victory with the Original Retro Putt-Putt.", image: ov55.url },
+  { name: "AETHERSTRIKE // Quantum Targeting Range", url: "https://obsidianvibe.live/api/public/share/02400z241l5f66", description: "Built and shared on Obsidian Vibe.", image: ov56.url },
+  { name: "AETHER STUDIO", url: "https://obsidianvibe.live/api/public/share/6b6d6s5t576o65", description: "Premium Design & Development Agency", image: ov57.url },
+  { name: "Apex Shield", url: "https://obsidianvibe.live/api/public/share/6m1a230b5e2r2x", description: "Engineered to Protect. Crafted to Inspire.", image: ov58.url },
+  { name: "Aetheris Forge", url: "https://obsidianvibe.live/api/public/share/364w4s0l2j5j47", description: "Prompt-to-Code Workspace", image: ov59.url },
+  { name: "Relay", url: "https://obsidianvibe.live/api/public/share/2o6z316g5n3c19", description: "Referral Connector CRM", image: ov60.url },
+  { name: "Aetheris Flap", url: "https://obsidianvibe.live/api/public/share/160h5s1n2q1o3w", description: "Aetheris Flap", image: ov61.url },
+  { name: "WildTrace", url: "https://obsidianvibe.live/api/public/share/706r116y2j542a", description: "Community Wildlife Observatory", image: ov62.url },
+  { name: "Foldyard", url: "https://obsidianvibe.live/api/public/share/1p6w3o4k6r5a6k", description: "Flat-Pack Backyard Offices", image: ov63.url },
+  { name: "Orion Agent Systems", url: "https://obsidianvibe.live/api/public/share/352n020r6u5f5l", description: "AI Agent Portfolio", image: ov64.url },
+  { name: "Eisenhower Matrix Organizer", url: "https://obsidianvibe.live/api/public/share/3m4u2y2c3b1q1w", description: "Prioritization Board", image: ov65.url },
+  { name: "AETHERIS OBSIDIAN // SYNAPSE ENGINE", url: "https://obsidianvibe.live/api/public/share/5w122l0y2x2612", description: "REPLICATE the SYNAPSE WAVE.", image: ov66.url },
+  { name: "Wedding Planner Panic", url: "https://obsidianvibe.live/api/public/share/4p2d1x4s4i1j6f", description: "Save the Date. Save the Day.", image: ov67.url },
+  { name: "Memory Streak", url: "https://obsidianvibe.live/api/public/share/4m46480e2d2s62", description: "Memory Streak", image: ov68.url },
+  { name: "Caldera Run", url: "https://obsidianvibe.live/api/public/share/201m4834431802", description: "Crimson Core", image: ov69.url },
+  { name: "LUX AETERNA", url: "https://obsidianvibe.live/api/public/share/480k0y2s201p6o", description: "Obsidian Maze Protocol", image: ov70.url },
+  { name: "Robo-Sweep: Dust Buster Puzzle", url: "https://obsidianvibe.live/api/public/share/4l5l4l325i363c", description: "RoboSweep", image: ov71.url },
+  { name: "Aetheris Circuit: Overdrive Redline", url: "https://obsidianvibe.live/api/public/share/446h2c0o60524d", description: "Neon Vector Circuit", image: ov72.url },
+  { name: "SkipSet", url: "https://obsidianvibe.live/api/public/share/48055q6f085z1f", description: "The Ultimate Jump Rope Training Toolkit", image: ov73.url },
+  { name: "Emberline Field Systems", url: "https://obsidianvibe.live/api/public/share/5d441s5z285f3i", description: "Compliance, quoted in the field", image: ov74.url },
+  { name: "Marble Lab", url: "https://obsidianvibe.live/api/public/share/1x3k6b3d4f5w3q", description: "Probability Studio", image: ov75.url },
+  { name: "Grantline", url: "https://obsidianvibe.live/api/public/share/310i6n640g4959", description: "Grant Writing Workspace", image: ov76.url },
+  { name: "Aetheris Obsidian :: Decision Engine", url: "https://obsidianvibe.live/api/public/share/1908171g6d3x1u", description: "New CRM Platform", image: ov77.url },
+  { name: "Blocklight", url: "https://obsidianvibe.live/api/public/share/5q0g5e426a1k2o", description: "Hyper-Local Verified Community Board", image: ov78.url },
+  { name: "Aetheris Obsidian Pro // Infinite Video Studio", url: "https://obsidianvibe.live/api/public/share/6z0j074v553q3l", description: "Built and shared on Obsidian Vibe.", image: ov79.url },
 ];
