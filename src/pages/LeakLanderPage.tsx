@@ -144,9 +144,17 @@ const LeakLanderPage: React.FC = () => {
           {leakAuditOpen && (
             <div id="homepage-leak-audit-panel" className="pt-4">
               <LeakAuditFlow embedded />
-              <p className="max-w-2xl pt-3 text-xs text-muted-foreground/80 leading-relaxed">
-                {EXPECTATION_NOTE}
-              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="max-w-2xl text-xs text-muted-foreground/80 leading-relaxed">
+                  {EXPECTATION_NOTE}
+                </p>
+                <Link
+                  to="/leak-audit/self-scan"
+                  className="font-case text-[10px] font-bold uppercase tracking-wider text-amber hover:text-amber/80"
+                >
+                  Open the full self-scan <ArrowRight className="ml-1 inline h-3 w-3" />
+                </Link>
+              </div>
             </div>
           )}
         </div>
