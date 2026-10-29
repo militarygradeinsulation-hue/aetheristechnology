@@ -62,10 +62,6 @@ const LeakLanderPage: React.FC = () => {
         }
         description=""
       >
-        <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground [text-wrap:balance]">
-          Find what's costing your company money. <span className="text-amber">Know what to fix first.</span>
-        </h1>
-
         <div className="w-full max-w-4xl rounded-2xl border border-amber/25 bg-card/35 px-6 py-8 text-left shadow-[0_20px_60px_-40px_hsl(var(--amber)/0.45)] backdrop-blur-sm sm:px-8 sm:py-10">
           <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80">
             The human evidence
