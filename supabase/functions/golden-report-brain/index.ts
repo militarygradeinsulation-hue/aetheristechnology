@@ -21,5 +21,8 @@ Deno.serve(async(req)=>{
   ]);
   if(pe||pae||se) throw pe||pae||se;
   return new Response(JSON.stringify({patterns:patterns||[],pairs:pairs||[],state:state||null}),{headers:{...cors,"Content-Type":"application/json","Cache-Control":"private, max-age=60"}});
- }catch(e){return new Response(JSON.stringify({error:e instanceof Error?e.message:"Brain query failed"}),{status:500,headers:{...cors,"Content-Type":"application/json"}})}
+ }catch(e){
+  const msg=(e&&typeof e==="object"&&"message" in e&&typeof (e as {message:unknown}).message==="string")?(e as {message:string}).message:"Brain query failed";
+  console.error("golden-report-brain failed:",e);
+  return new Response(JSON.stringify({error:msg}),{status:500,headers:{...cors,"Content-Type":"application/json"}})}
 });
