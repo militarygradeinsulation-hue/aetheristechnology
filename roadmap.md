@@ -2,7 +2,7 @@
 
 ## Collective Brain production release
 - [x] Requested migration, function, Collective Brain UI, and AdminDashboard match GitHub main d7cf1ce2193c4819a63923071819cf726c53cf52 byte-for-byte; no manual Git sync operation performed.
-- [ ] Resolve Collective Brain 500: confirm missing aggregate tables, apply the corrected additive migration without truncation, and verify populated intelligence through real admin login.
+- [x] Resolve Collective Brain 500: missing aggregate tables confirmed; corrected additive migration applied with service-role grants and RLS, no truncation or canonical report modifications. Real admin screen now receives HTTP 200 and displays 1,910 reports, 22,282 findings, and 1,067 companies; 701 stored patterns and 339 pairs. Four auth regressions pass; harness build OK at 2026-10-29T17:03:46Z.
 - [x] Deploy golden-report-brain; unauthenticated request returns 401 Admin session required.
 - [x] Fix Collective Brain 401 using the existing shared admin-token verifier and deploy; real PIN login now passes authorization. Four regression tests cover valid, missing, forged, and expired sessions; invalid deployed token still returns 401. Authorized reads now reach the database but return 500 "Brain query failed" because the supplied migration remains blocked above.
 - [x] Latest harness build OK at 2026-10-29T16:54:53Z; authenticated Collective Brain screen verified in browser. No feature or database architecture rewrite.
