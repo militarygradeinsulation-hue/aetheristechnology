@@ -21,3 +21,6 @@ Operational limitation: additional visitors requesting a report while its first 
 - [x] Extract all 67 build names, URLs, and screenshots from https://josephtoneymsbaibm.com/#builds.
 - [x] Add a linked scrolling strip to the home page with Joseph's requested caption.
 - [x] Verify sourced links, desktop/mobile rendering, pause, and reduced-motion behavior; hosted assets verified separately from local asset serving.
+
+- [x] Add obsidianvibe.live/library projects to builds strip (no duplicates)
+- [x] Builds caption update + 100 Golden Reports scrolling strip under it

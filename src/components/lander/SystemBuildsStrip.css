@@ -5,3 +5,4 @@
 @media (prefers-reduced-motion: reduce) {
   .systems-builds-track { animation-duration: 400s; }
 }
+.systems-builds-track--reverse { animation-direction: reverse; animation-duration: 260s; }
