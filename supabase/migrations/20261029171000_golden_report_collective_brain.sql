@@ -83,13 +83,13 @@ with total as (
     min(chapter_slug) chapter_slug,
     count(distinct scan_id)::int report_count,
     count(*)::int occurrence_count,
-    count(distinct company_id)::int company_count,
+    count(distinct brain_company_id)::int company_count,
     min(created_at) first_seen_at,
     max(created_at) last_seen_at,
     jsonb_agg(distinct recommended_action) filter (where coalesce(trim(recommended_action),'') <> '') sample_actions,
     jsonb_object_agg(coalesce(evidence_grade,'unknown'), grade_count) evidence_grades
   from (
-    select f.*, a.company_id,
+    select f.*, coalesce(f.company_id, a.company_id) as brain_company_id,
       count(*) over (
         partition by lower(regexp_replace(trim(coalesce(nullif(root_cause_title,''), nullif(title,''), 'unknown')), '\\s+', ' ', 'g')),
         coalesce(evidence_grade,'unknown')
