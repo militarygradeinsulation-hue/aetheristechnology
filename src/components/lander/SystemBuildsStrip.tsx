@@ -53,7 +53,7 @@ export function SystemBuildsStrip() {
                 <p className="font-case text-[10px] uppercase tracking-widest text-amber">Golden Report</p>
                 <h3 className="mt-2 truncate font-display text-base font-semibold">{r.domain}</h3>
                 <p className="mt-2 font-case text-[10px] uppercase text-muted-foreground">Annual leakage found</p>
-                <p className="font-forensic text-lg font-bold text-destructive">{formatMoney(r.annualLow)} – {formatMoney(r.annualHigh)}</p>
+                <p className="font-forensic text-lg font-bold text-destructive">{formatMoney(r.annualLow * 100)} – {formatMoney(r.annualHigh * 100)}</p>
               </Link>
             ))}
           </div>)}
