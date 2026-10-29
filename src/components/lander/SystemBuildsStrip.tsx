@@ -11,7 +11,7 @@ export function SystemBuildsStrip() {
       <div className="mx-auto mb-8 flex max-w-6xl items-start justify-between gap-4 px-6">
         <div className="max-w-4xl">
           <p className="mb-3 font-case text-xs uppercase text-amber">Built by Joseph Toney · {JOSEPH_BUILDS.length} systems</p>
-          <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">We KNOW systems because we build them.</h2>
+          <h2 className="font-forensic text-3xl font-bold leading-tight sm:text-4xl">We KNOW systems because we build them. We KNOW business because we looked inside thousands of them.</h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">So believe us when we say we can find why yours have financial leaks.</p>
         </div>
         <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setPaused(v => !v)}
