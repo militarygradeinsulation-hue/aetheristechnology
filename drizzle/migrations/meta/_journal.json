@@ -43,6 +43,13 @@
       "when": 1793234196273,
       "tag": "0005_private_golden_daily_cap_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793293418631,
+      "tag": "0006_restore_golden_report_collective_brain",
+      "breakpoints": true
     }
   ]
 }

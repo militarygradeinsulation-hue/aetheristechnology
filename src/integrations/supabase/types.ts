@@ -4094,6 +4094,84 @@ export type Database = {
           },
         ]
       }
+      golden_report_brain_state: {
+        Row: {
+          classified_industries: number
+          companies_analyzed: number
+          findings_analyzed: number
+          id: string
+          last_refresh_at: string | null
+          notes: Json
+          reports_analyzed: number
+        }
+        Insert: {
+          classified_industries?: number
+          companies_analyzed?: number
+          findings_analyzed?: number
+          id?: string
+          last_refresh_at?: string | null
+          notes?: Json
+          reports_analyzed?: number
+        }
+        Update: {
+          classified_industries?: number
+          companies_analyzed?: number
+          findings_analyzed?: number
+          id?: string
+          last_refresh_at?: string | null
+          notes?: Json
+          reports_analyzed?: number
+        }
+        Relationships: []
+      }
+      golden_report_collective_patterns: {
+        Row: {
+          category: string | null
+          chapter_slug: string | null
+          company_count: number
+          evidence_grades: Json
+          first_seen_at: string | null
+          last_seen_at: string | null
+          occurrence_count: number
+          pattern_key: string
+          pattern_title: string
+          report_count: number
+          report_share: number | null
+          sample_actions: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          chapter_slug?: string | null
+          company_count?: number
+          evidence_grades?: Json
+          first_seen_at?: string | null
+          last_seen_at?: string | null
+          occurrence_count?: number
+          pattern_key: string
+          pattern_title: string
+          report_count?: number
+          report_share?: number | null
+          sample_actions?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          chapter_slug?: string | null
+          company_count?: number
+          evidence_grades?: Json
+          first_seen_at?: string | null
+          last_seen_at?: string | null
+          occurrence_count?: number
+          pattern_key?: string
+          pattern_title?: string
+          report_count?: number
+          report_share?: number | null
+          sample_actions?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       golden_report_companies: {
         Row: {
           aliases: string[]
@@ -4307,6 +4385,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      golden_report_industry_patterns: {
+        Row: {
+          category: string | null
+          industry: string
+          industry_report_count: number
+          industry_share: number | null
+          occurrence_count: number
+          pattern_key: string
+          pattern_title: string
+          report_count: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          industry: string
+          industry_report_count?: number
+          industry_share?: number | null
+          occurrence_count?: number
+          pattern_key: string
+          pattern_title: string
+          report_count?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          industry?: string
+          industry_report_count?: number
+          industry_share?: number | null
+          occurrence_count?: number
+          pattern_key?: string
+          pattern_title?: string
+          report_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      golden_report_pattern_pairs: {
+        Row: {
+          pair_share: number | null
+          pattern_a: string
+          pattern_b: string
+          reports_together: number
+          updated_at: string
+        }
+        Insert: {
+          pair_share?: number | null
+          pattern_a: string
+          pattern_b: string
+          reports_together?: number
+          updated_at?: string
+        }
+        Update: {
+          pair_share?: number | null
+          pattern_a?: string
+          pattern_b?: string
+          reports_together?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       golden_system_blueprints: {
         Row: {
