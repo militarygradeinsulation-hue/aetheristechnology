@@ -14,6 +14,7 @@ import { Footer } from "@/components/Footer";
 import { PricingTimeline } from "@/components/PricingTimeline";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
 import { LeakAuditFlow } from "@/components/lander/LeakAuditFlow";
+import { SystemBuildsStrip } from "@/components/lander/SystemBuildsStrip";
 
 // Reuse the original interactive chaos-physics graph without bloating the initial hero.
 const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSection"));
@@ -104,6 +105,8 @@ const LeakLanderPage: React.FC = () => {
       </section>
 
       {/* Restored interactive Chaos Theory graph from the existing site code. */}
+      <SystemBuildsStrip />
+
       <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>// The mechanism</SectionLabel>
