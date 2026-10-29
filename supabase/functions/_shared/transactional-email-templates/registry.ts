@@ -22,8 +22,10 @@ import { template as universeAccessCode } from './universe-access-code.tsx'
 import { template as repQuote } from './rep-quote.tsx'
 import { template as goldenReportOpened } from './golden-report-opened.tsx'
 import { template as toolShopLicense } from './tool-shop-license.tsx'
+import { template as leakAuditFindings } from './leak-audit-findings.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'leak-audit-findings': leakAuditFindings,
   'rep-welcome': repWelcome,
   'contact-notification': contactNotification,
   'rep-application-notification': repApplicationNotification,
