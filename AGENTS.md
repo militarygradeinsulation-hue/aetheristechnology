@@ -1,6 +1,7 @@
 # Project Architecture Rules
 
 - Edge functions without a function-specific Deno configuration inherit automatic npm dependency resolution from the functions directory, preserving versioned npm imports during validation.
+- Collective Brain verifies signed admin sessions with the shared server-side admin-token verifier before querying aggregates. Why: an unsupported admin-data action must not reject legitimate admin sessions.
 
 - Writing identities use stable IDs and server-held prompt definitions so browser requests never become the source of truth for persona behavior.
 - The Architect uses one bounded server policy builder with separate Nexus and post contexts; its complete source specification remains server-only for auditability.
