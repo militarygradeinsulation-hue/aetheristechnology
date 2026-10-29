@@ -1,5 +1,11 @@
 # Roadmap
 
+## Collective Brain production release
+- [ ] Verify GitHub main files are present without rewriting the feature.
+- [ ] Apply the supplied migration and verify production aggregate tables.
+- [ ] Deploy golden-report-brain and verify admin-only reads.
+- [ ] Verify Admin Collective Brain compilation; make only required minimal compile fixes.
+
 ## Missing Leak Audit appendix investigation
 - [x] Confirm saved submissions, report readiness, and accepted email events.
 - [x] Repair production correction-plan and evidence projection without changing canonical report amounts.
