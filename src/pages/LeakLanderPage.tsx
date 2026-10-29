@@ -83,9 +83,8 @@ const LeakLanderPage: React.FC = () => {
 
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
-        <div className="mx-auto flex max-w-6xl justify-center">
-          <div>
-            <div className="mb-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8">
               <div className="relative mx-auto aspect-video w-full max-w-4xl overflow-hidden rounded-2xl border border-amber/40 bg-black shadow-[var(--shadow-glow)]">
                 <iframe
                   className="absolute inset-0 h-full w-full"
