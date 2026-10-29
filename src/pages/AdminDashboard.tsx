@@ -37,6 +37,7 @@ const PlaybookCreator = lazy(() => import('@/components/PlaybookCreator').then(m
 const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').then(m => ({ default: m.AllInOneGenerator })));
 const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
 const GoldenReportLibrary = lazy(() => import('@/components/GoldenReportLibrary').then(m => ({ default: m.GoldenReportLibrary })));
+const GoldenReportCollectiveBrain = lazy(() => import('@/components/admin/GoldenReportCollectiveBrain'));
 const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
 const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
 const AuthorityPromptStudio = lazy(() => import('@/components/admin/AuthorityPromptStudio'));
@@ -235,7 +236,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'collectivebrain' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved === 'prospector' && !hasValidAdminToken()) return 'workspace';
@@ -269,6 +270,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'forecast', label: 'Forecast', icon: TrendingUp },
     { key: 'systems', label: 'Forensics', icon: FlaskConical },
     { key: 'goldenlibrary', label: 'Golden Report Library', icon: Database },
+    { key: 'collectivebrain', label: 'Collective Brain', icon: Brain },
     
     { key: 'mediastudio', label: 'Media Studio', icon: ImageIcon },
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
@@ -294,7 +296,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'command', 'prospector', 'meetingflow']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'collectivebrain', 'command', 'prospector', 'meetingflow']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -622,6 +624,7 @@ const AdminDashboard: React.FC = () => {
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'goldenlibrary': return <GoldenReportLibrary />;
+      case 'collectivebrain': return <GoldenReportCollectiveBrain />;
       case 'command': return (
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3 flex-wrap">
