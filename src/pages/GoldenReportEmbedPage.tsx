@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
 import { SEOHead } from "@/components/SEOHead";
@@ -30,6 +32,23 @@ const GoldenReportEmbedPage: React.FC = () => {
   const [activeScanId, setActiveScanId] = useState<string | null>(existingScan);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const startedRef = useRef(false);
+  const navigate = useNavigate();
+
+  const goBack = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/");
+  };
+
+  const backButton = (
+    <button
+      type="button"
+      onClick={goBack}
+      className="inline-flex items-center gap-2 rounded-lg border border-amber/40 bg-amber/10 px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-amber transition-colors hover:bg-amber/20"
+    >
+      <ArrowLeft className="h-4 w-4" />
+      Back
+    </button>
+  );
 
 
   useEffect(() => {
@@ -100,7 +119,15 @@ const GoldenReportEmbedPage: React.FC = () => {
           </div>
         )}
 
+        {!embed && status === "ready" && (
+          <div className="mb-4">{backButton}</div>
+        )}
+
         <ForensicScanAllPanel initialScanId={activeScanId} />
+
+        {!embed && status === "ready" && (
+          <div className="mt-8 flex justify-center">{backButton}</div>
+        )}
       </div>
     </div>
   );
