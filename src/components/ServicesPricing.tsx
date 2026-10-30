@@ -569,7 +569,7 @@ export const ServicesPricing: React.FC = () => {
   }, [expandedIdx]);
 
   const bundleableServices = useMemo(
-    () => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable && !isServiceComingSoon(s)),
+    () => services.map((s, i) => ({ ...s, idx: i })).filter(s => s.bundleable && !isServiceComingSoon(s) && ![\'scan_full_report_once\', \'digital_snapshot_once\', \'scan_strategy_blueprint_once\'].includes(s.priceId || \'\')),
     []
   );
 
@@ -964,7 +964,7 @@ export const ServicesPricing: React.FC = () => {
                         <ShoppingCart className="w-4 h-4" /> Buy Now, {expandedService.pricing}
                       </button>
                     ) : null}
-                    {expandedService.bundleable && !isServiceComingSoon(expandedService) && (
+                    {expandedService.bundleable && !isServiceComingSoon(expandedService) && ![\'scan_full_report_once\', \'digital_snapshot_once\', \'scan_strategy_blueprint_once\'].includes(expandedService.priceId || \'\') && (
                       <button
                         onClick={() => { toggleSelect(expandedIdx); }}
                         className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold transition-colors active:scale-[0.97] border-2 ${
