@@ -19,7 +19,9 @@
         "Founder/President",
         "Operations leader"
       ],
-      "uncertainty": "Reported expansion is public; actual process gaps, budget, interest and buyer contact are unverified."
+      "uncertainty": "Reported expansion is public; actual process gaps, budget, interest and buyer contact are unverified.",
+      "official_website_url": "https://boundlessrecreation.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "Med-Mizer",
@@ -36,7 +38,9 @@
         "Operations director",
         "Plant leader"
       ],
-      "uncertainty": "Expansion does not mean operational waste; qualification must confirm a problem."
+      "uncertainty": "Expansion does not mean operational waste; qualification must confirm a problem.",
+      "official_website_url": "https://www.med-mizer.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "Babilla Roofing",
@@ -52,7 +56,9 @@
         "President",
         "Operations manager"
       ],
-      "uncertainty": "Integration questions are hypotheses only; no actual friction has been established."
+      "uncertainty": "Integration questions are hypotheses only; no actual friction has been established.",
+      "official_website_url": "https://www.babillaroofing.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "Brucker Company",
@@ -68,7 +74,9 @@
         "President/CEO",
         "Operations manager"
       ],
-      "uncertainty": "This is an HVAC representative, not a field-service contractor; fit with the free X-Ray requires confirmation."
+      "uncertainty": "This is an HVAC representative, not a field-service contractor; fit with the free X-Ray requires confirmation.",
+      "official_website_url": "https://www.bruckerco.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "GovParts",
@@ -85,7 +93,9 @@
         "Operations director",
         "Supply chain director"
       ],
-      "uncertainty": "Source describes expansion, not defects in operations; do not claim it does."
+      "uncertainty": "Source describes expansion, not defects in operations; do not claim it does.",
+      "official_website_url": "https://www.govpartsllc.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "V Tech Conversions",
@@ -101,7 +111,9 @@
         "Founder/Owner",
         "Operations director"
       ],
-      "uncertainty": "Public press coverage does not establish technology needs or purchasing authority."
+      "uncertainty": "Public press coverage does not establish technology needs or purchasing authority.",
+      "official_website_url": "https://vtechconversions.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     },
     {
       "company": "Advantage Roofing & Exteriors",
@@ -117,7 +129,9 @@
         "Owner/General manager",
         "Operations director"
       ],
-      "uncertainty": "This is a public integration signal, not confirmation of customer pain or willingness to buy."
+      "uncertainty": "This is a public integration signal, not confirmation of customer pain or willingness to buy.",
+      "official_website_url": "https://www.advantageroofingandexteriors.com/",
+      "website_verification": "Public official company site identified; not proof of current purchase intent"
     }
   ]
 }
