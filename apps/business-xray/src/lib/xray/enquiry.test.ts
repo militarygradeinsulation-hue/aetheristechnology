@@ -28,7 +28,7 @@ describe("Business X-Ray direct-send enquiry", () => {
     expect(msg).toContain("(317) 555-0123");
     expect(msg).toContain("https://linkedin.com/in/example-owner");
     expect(msg).toContain("https://example.com/");
-    expect(msg).toContain("not been taken");
+    expect(msg).toContain("No payment has been taken");
   });
 
   it("validates consent and links before submitting anything", () => {
