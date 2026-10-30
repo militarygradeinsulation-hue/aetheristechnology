@@ -2202,7 +2202,7 @@ $("af-apply")?.addEventListener("click", async () => {
                 output_data: {
                   scan_id: row.id,
                   report: row.report || null,
-                  report_url: `https://aetheris.technology/report/${row.id}/ask`,
+                  report_url: `https://businessforensics.tech/?report_chat=${encodeURIComponent(row.id)}`,
                   html: reportEl.innerHTML?.slice(0, 200000) || "",
                 },
                 silent: false,
