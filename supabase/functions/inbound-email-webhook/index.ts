@@ -207,7 +207,7 @@ serve(async (req) => {
             purpose: "transactional",
             label: "rep-mail-forward",
             idempotency_key: `fwd-${crypto.randomUUID()}`,
-          });
+          }, { apiKey: Deno.env.get("LOVABLE_API_KEY")!, sendUrl: Deno.env.get("LOVABLE_SEND_URL") });
         } catch (e) {
           console.warn("forwarding failed", e);
         }
@@ -235,7 +235,7 @@ serve(async (req) => {
               purpose: "transactional",
               label: "rep-mail-autoreply",
               idempotency_key: `auto-${crypto.randomUUID()}`,
-            });
+            }, { apiKey: Deno.env.get("LOVABLE_API_KEY")!, sendUrl: Deno.env.get("LOVABLE_SEND_URL") });
           } catch (e) {
             console.warn("auto-reply enqueue failed", e);
           }

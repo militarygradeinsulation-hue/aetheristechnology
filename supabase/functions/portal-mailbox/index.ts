@@ -380,7 +380,7 @@ serve(async (req) => {
           purpose: "transactional",
           label: `rep-mail:${mailbox.code}`,
           idempotency_key: `rep-mail-${messageId}`,
-        });
+        }, { apiKey: Deno.env.get("LOVABLE_API_KEY")!, sendUrl: Deno.env.get("LOVABLE_SEND_URL") });
       } catch (sendErr) {
         console.error("send failed", sendErr);
         return json(500, { error: "Failed to send email" });
