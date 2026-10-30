@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { normalizePublicCompanyUrl } from "../_shared/company-audit-offers.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -92,15 +93,40 @@ serve(async (req) => {
 
       const result = await resp.json();
 
-      // Store the result
-      await supabase
+      // Record the result before notifying the customer. The payment webhook
+      // alone must never be interpreted as report generation succeeding.
+      const { error: saveError } = await supabase
         .from("purchase_deliverables")
         .update({
           status: "ready",
           output_data: result,
         })
-        .eq("id", deliverableId);
+        .eq("id", deliverableId)
+        .eq("status", "generating");
+      if (saveError) throw saveError;
 
+      // Automatic email is optional best effort. The report remains accessible
+      // on the paid return page even if an email provider is temporarily down.
+      const websiteProducts: Record<string, string> = {
+        website_report: "Automated Website Report",
+        digital_snapshot: "Digital Snapshot",
+        strategy_blueprint: "Strategy Blueprint",
+      };
+      if (websiteProducts[toolType] && deliverable.email && deliverable.stripe_session_id) {
+        try {
+          const emailResult = await sendTemplateEmail("website-report-ready", deliverable.email, {
+            idempotencyKey: `report-ready-${deliverable.id}`,
+            templateData: {
+              title: websiteProducts[toolType],
+              websiteUrl: normalizePublicCompanyUrl(inputData.website_url || inputData.websiteUrl).url,
+              reportUrl: `https://aetheris.technology/checkout/return?type=deliverable&session_id=${encodeURIComponent(deliverable.stripe_session_id)}`,
+            },
+          });
+          if (!emailResult.sent) console.warn("website report email suppressed:", deliverable.id);
+        } catch (notifyError) {
+          console.error("website report email could not be confirmed:", notifyError instanceof Error ? notifyError.message : "unknown");
+        }
+      }
       console.log(`Deliverable ${deliverableId} ready for ${toolType}`);
       return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json" },
