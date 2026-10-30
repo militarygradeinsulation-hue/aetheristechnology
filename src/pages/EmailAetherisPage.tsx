@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   CONTACT_INTERESTS,
   buildDirectEmailPayload,
+  confirmedByMailService,
   parseContactInterest,
   validateDirectEmail,
   type ContactInterest,
@@ -87,7 +88,7 @@ export default function EmailAetherisPage() {
         "notify-contact-submission",
         { body: payload },
       );
-      if (sendError || data?.success !== true) {
+      if (!confirmedByMailService(data, sendError)) {
         throw new Error("The Aetheris mail service has not confirmed delivery.");
       }
       setDelivered(true);
