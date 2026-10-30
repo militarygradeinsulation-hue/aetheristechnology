@@ -1,0 +1,199 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/instrument-serif/latin-400.css";
+@import "@fontsource/instrument-serif/latin-400-italic.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Aetheris forensic design system.
+ * Near-black ink on warm off-white paper, with a restrained copper signal colour.
+ * All colours oklch. Components use semantic tokens only.
+ */
+
+@theme inline {
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 1px);
+  --radius-xl: calc(var(--radius) + 3px);
+  --radius-2xl: calc(var(--radius) + 6px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-border: var(--ink-border);
+  --color-copper: var(--copper);
+  --color-copper-strong: var(--copper-strong);
+  --color-copper-soft: var(--copper-soft);
+  --color-copper-wash: var(--copper-wash);
+  --color-paper: var(--paper);
+  --color-band-low: var(--band-low);
+  --color-band-moderate: var(--band-moderate);
+  --color-band-high: var(--band-high);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.2rem;
+  --background: oklch(0.975 0.006 80);
+  --paper: oklch(0.99 0.004 80);
+  --foreground: oklch(0.18 0.006 60);
+  --card: oklch(0.99 0.004 80);
+  --card-foreground: oklch(0.18 0.006 60);
+  --popover: oklch(0.99 0.004 80);
+  --popover-foreground: oklch(0.18 0.006 60);
+  --primary: oklch(0.18 0.006 60);
+  --primary-foreground: oklch(0.975 0.006 80);
+  --secondary: oklch(0.94 0.008 75);
+  --secondary-foreground: oklch(0.18 0.006 60);
+  --muted: oklch(0.94 0.008 75);
+  --muted-foreground: oklch(0.45 0.01 60);
+  --accent: oklch(0.93 0.025 55);
+  --accent-foreground: oklch(0.18 0.006 60);
+  --destructive: oklch(0.52 0.19 27);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.88 0.008 70);
+  --input: oklch(0.84 0.01 70);
+  --ring: oklch(0.56 0.13 48);
+
+  --ink: oklch(0.16 0.006 60);
+  --ink-foreground: oklch(0.95 0.008 80);
+  --ink-muted: oklch(0.7 0.01 70);
+  --ink-border: oklch(0.3 0.008 60);
+  --copper: oklch(0.6 0.13 48);
+  --copper-strong: oklch(0.5 0.12 45);
+  --copper-soft: oklch(0.82 0.07 55);
+  --copper-wash: oklch(0.95 0.025 60);
+  --band-low: oklch(0.72 0.02 70);
+  --band-moderate: oklch(0.74 0.1 58);
+  --band-high: oklch(0.55 0.13 45);
+
+  --chart-1: oklch(0.6 0.13 48);
+  --chart-2: oklch(0.45 0.01 60);
+  --chart-3: oklch(0.82 0.07 55);
+  --chart-4: oklch(0.3 0.008 60);
+  --chart-5: oklch(0.72 0.02 70);
+  --sidebar: oklch(0.975 0.006 80);
+  --sidebar-foreground: oklch(0.18 0.006 60);
+  --sidebar-primary: oklch(0.18 0.006 60);
+  --sidebar-primary-foreground: oklch(0.975 0.006 80);
+  --sidebar-accent: oklch(0.94 0.008 75);
+  --sidebar-accent-foreground: oklch(0.18 0.006 60);
+  --sidebar-border: oklch(0.88 0.008 70);
+  --sidebar-ring: oklch(0.56 0.13 48);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "tnum";
+  }
+  ::selection {
+    background: var(--color-copper-soft);
+  }
+}
+
+/* Small uppercase mono label used for eyebrows, evidence tags and data captions. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility hairline-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Print: three A4 report pages ───────────────────────── */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  html,
+  body {
+    background: var(--paper) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-size: 10.5px;
+  }
+  .report-page {
+    break-after: page;
+    page-break-after: always;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .report-page:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
