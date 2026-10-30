@@ -1,12 +1,12 @@
 /**
  * Site-wide configuration. Edit here, not in components.
- * ENQUIRY_EMAIL receives mailto drafts — confirm it is the correct Aetheris inbox before launch.
+ * ENQUIRY_EMAIL receives mailto drafts — matches the public Aetheris contact-page address; verify inbox delivery before launch.
  */
 export const SITE = {
   company: "Aetheris Technology",
   product: "Aetheris Business X-Ray",
   promise: "Find where your business may be losing money — and what to investigate first.",
-  enquiryEmail: "hello@aetheris.technology",
+  enquiryEmail: "aetheris.technology@outlook.com",
 };
 
 export interface ServiceTier {
