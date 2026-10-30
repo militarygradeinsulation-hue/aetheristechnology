@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ function VerifyPage() {
     (tier === "roadmap" ? "business_xray_roadmap" : tier === "verified" ? "business_xray_verified" : "business_xray_unsure");
   const directConfigured = Boolean(serverConfig.url && serverConfig.publishableKey);
 
-  const submit = async (event: React.FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (pending || delivered) return;
     if (trap.trim()) { setError("Your request could not be sent."); return; }
