@@ -85,13 +85,13 @@ export const RENDER_PROFILES: RenderProfile[] = ["executive", "complete", "data_
 
 /**
  * Base origin for the "Ask this report" link printed into every report.
- * businessforensics.tech is the live custom domain, so it is the default and
- * stays reachable even if aetheris.technology is not resolving. Override with
- * PUBLIC_REPORT_URL (or PUBLIC_SITE_URL) if the primary domain changes.
+ * The PDF deliberately links to the site root with a report_chat query param.
+ * Deep SPA links can be rejected by a hosting/CDN layer before React loads;
+ * the root URL always loads first, then App.tsx routes client-side to the chat.
  */
 export const ASK_REPORT_BASE_URL = (() => {
   const env = (globalThis as { Deno?: { env?: { get(k: string): string | undefined } } }).Deno?.env;
-  const raw = env?.get("PUBLIC_REPORT_URL") || env?.get("PUBLIC_SITE_URL") || "";
+  const raw = env?.get("PUBLIC_REPORT_URL") || "";
   return (raw || "https://businessforensics.tech").replace(/\/+$/, "");
 })();
 
@@ -1027,7 +1027,7 @@ export function buildGoldenReportModel(opts: {
     url: opts.url,
     scanId: opts.scanId,
     generatedAt: opts.generatedAt || new Date(),
-    askUrl: `${ASK_REPORT_BASE_URL}/report/${opts.scanId}/ask`,
+    askUrl: `${ASK_REPORT_BASE_URL}/?report_chat=${encodeURIComponent(opts.scanId)}`,
   };
 
   // The appendix profile is the machine-readable half of the same report: the
