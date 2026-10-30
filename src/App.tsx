@@ -75,6 +75,7 @@ const CareersTestPage = lazy(() => import("./pages/CareersTestPage"));
 const CareersLicensePage = lazy(() => import("./pages/CareersLicensePage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
+const BusinessXrayCheckoutPage = lazy(() => import("./pages/BusinessXrayCheckoutPage"));
 const ContentGeneratorPage = lazy(() => import("./pages/ContentGeneratorPage"));
 const SalesScriptsPage = lazy(() => import("./pages/SalesScriptsPage"));
 const ContentCalendarPage = lazy(() => import("./pages/ContentCalendarPage"));
@@ -239,6 +240,7 @@ const App = () => (
                       <Route path="/careers/license" element={<CareersLicensePage />} />
                       <Route path="/unsubscribe" element={<UnsubscribePage />} />
                       <Route path="/checkout/return" element={<CheckoutReturn />} />
+                      <Route path="/business-xray/checkout" element={<BusinessXrayCheckoutPage />} />
                       <Route path="/deliverable/:token" element={<DeliverablePage />} />
                       <Route path="/q/:token" element={<QuoteViewPage />} />
 
