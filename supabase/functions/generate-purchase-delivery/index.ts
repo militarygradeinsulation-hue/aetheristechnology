@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { normalizePublicCompanyUrl } from "../_shared/company-audit-offers.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -24,6 +25,12 @@ const TOOL_FUNCTIONS: Record<string, string> = {
 };
 
 serve(async (req) => {
+  // This function uses the service role to read private paid orders. Reject
+  // public anonymous calls before looking up a deliverable or starting a scan.
+  const authorization = req.headers.get("authorization")?.replace(/^Bearer\\s+/i, "").trim();
+  if (req.method !== "POST" || !SUPABASE_SERVICE_ROLE_KEY || authorization !== SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
   try {
     const { deliverableId } = await req.json();
     if (!deliverableId) {
@@ -42,11 +49,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Deliverable not found" }), { status: 404 });
     }
 
-    // Mark as generating
-    await supabase
+    // Atomically claim only pending orders. Concurrent retries cannot generate
+    // the same report multiple times and consume credits twice.
+    const { data: claimed, error: claimError } = await supabase
       .from("purchase_deliverables")
       .update({ status: "generating" })
-      .eq("id", deliverableId);
+      .eq("id", deliverableId)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
+    if (claimError) throw claimError;
+    if (!claimed) return new Response(JSON.stringify({ status: "already_claimed" }), {status: 200, headers: {"Content-Type":"application/json"}});
 
     const toolType = deliverable.tool_type;
     const inputData = deliverable.input_data as Record<string, unknown>;
@@ -135,7 +148,8 @@ function buildRequestBody(toolType: string, input: Record<string, unknown>): Rec
     case "website_report":
     case "digital_snapshot":
     case "strategy_blueprint":
-      return { url: websiteUrl, tier: toolType };
+      // Never charge a user and then scan example.com because checkout lacked a URL.
+      return { url: normalizePublicCompanyUrl(input.website_url || input.websiteUrl).url, tier: toolType };
     default:
       return { websiteUrl, businessName };
   }
