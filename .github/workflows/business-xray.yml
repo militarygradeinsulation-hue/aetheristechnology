@@ -48,7 +48,9 @@ jobs:
       - name: Check zero-cost public prototype
         run: |
           test -s ../../public/business-xray/index.html
-          grep -q 'Aetheris | Business X-Ray' ../../public/business-xray/index.html
+          grep -q 'Free Business X-Ray:' ../../public/business-xray/index.html
+          grep -q 'rel="canonical" href="https://aetheris.technology/business-xray/index.html"' ../../public/business-xray/index.html
+          grep -q 'SoftwareApplication' ../../public/business-xray/index.html
 
   growth-qa:
     name: Validate SEO, public ICP research and safe campaign generation
