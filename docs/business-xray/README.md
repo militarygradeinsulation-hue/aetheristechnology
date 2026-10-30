@@ -16,8 +16,8 @@ A browser-based, self-service operations diagnostic designed to drive interest i
 2. Upload `index.html` as the site's root index file.
 3. Publish using Cloudflare Pages (connect GitHub, set output root for a static HTML site, no build command) (do not use GitHub Pages to host a commercial SaaS).
 4. Open the live URL on desktop and mobile and test both a blank assessment and the demo scenario.
-5. Create a Stripe Payment Link under **your own Stripe account** for the *Verified Business X-Ray*. Open `index.html` and replace `const PAID_AUDIT_URL='';` with `const PAID_AUDIT_URL='https://buy.stripe.com/your-real-link';`. The paid offer button appears automatically after that URL is configured. Use your actual live link, never a dummy link.
-6. Start manually delivering paid audits; collect written permission before accessing business records or Mindprint reports. No automated paywall or fulfillment is included.
+5. The results page now offers **Request verified review**, opening an editable email to the contact address published on the Aetheris website (`aetheris.technology@outlook.com`). This is a manual service enquiry, **not** a checkout or a completed order. Verify the inbox is monitored before advertising.
+6. Agree on scope, delivery and payment with each buyer, then deliver the paid review manually. Collect written permission before accessing business records or Mindprint reports. No automated paywall, payment processing or fulfillment is included.
 
 You can also open `index.html` locally to test without hosting.
 
@@ -35,7 +35,7 @@ The first paid deliverable can be prepared with ordinary documents and manual an
 - It does not prove revenue losses, certify ROI, infer employee personality, scan LinkedIn, process uploaded PDFs, or generate a bespoke AI report.
 - It cannot promise guaranteed savings. Self-reported answers may overlap; never add the three financial cards and present them as confirmed recoverable money.
 - It does not collect leads or automatically email anyone. Add only a consent-based lead flow and a proper privacy policy if you later include server-side data collection.
-- It does not charge customers until the owner supplies a live Stripe Payment Link. Fulfillment remains manual: the seller must contact paid customers and deliver the agreed service.
+- It does not process customer payments. The results page starts an email enquiry; pricing, scope, payment and fulfillment remain manual.
 
 ## Quick verification
 
