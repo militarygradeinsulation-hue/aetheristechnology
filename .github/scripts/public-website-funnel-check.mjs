@@ -24,8 +24,8 @@ assert.match(homepage, /to="\/leak-audit\/self-scan"/);
 assert.doesNotMatch(homepage, /const STEPS|STEPS\.map|id="how-it-works"|Three steps\./);
 assert.doesNotMatch(homepage, /const FINDINGS|FINDINGS\.map|id="what-we-find"|The leaks that never show up/);
 assert.doesNotMatch(homepage, /\{HERO_SUPPORT\}/);
-assert.match(homepage, /href="#sample-reports"/);
-assert.match(homepage, /id="how-we-work"/);
+assert.match(homepage, /id="leak-audit"/);
+assert.match(homepage, /id="what-we-do"/);
 assert.match(homepage, /id="case-studies"/);
 assert.match(homepage, /id="prices"/);
 assert.match(nav, /to="\/leak-audit\/self-scan"/);
@@ -50,7 +50,7 @@ assert.match(robots, /Sitemap: https:\/\/aetheris\.technology\/sitemap\.xml/);
 assert.doesNotMatch(sitemap, /businessforensics\.tech/);
 
 const urls = [...sitemap.matchAll(/<loc>(https:\/\/aetheris\.technology[^<]+)<\/loc>/g)].map((m) => m[1]);
-for (const path of ["/", selfScanPath, "/golden-report", "/indianapolis/contractor-follow-up", "/indianapolis/service-business-lead-tracking"]) {
+for (const path of ["/", selfScanPath, "/golden-report", "/indianapolis/contractor-follow-up", "/indianapolis/service-business-lead-tracking", "/business-xray/index.html", "/business-xray/guide/index.html", "/business-xray/industries/hvac/index.html", "/business-xray/industries/roofing/index.html", "/business-xray/industries/manufacturing/index.html"]) {
   assert.ok(urls.includes("https://aetheris.technology" + path), "Missing public sitemap route: " + path);
 }
 assert.match(app, /path="\/indianapolis\/contractor-follow-up"/);
@@ -67,13 +67,13 @@ assert.match(homepage, /<PricingTimeline \/>/);
 assert.doesNotMatch(homepage, /<PackageTiers \/>/);
 assert.ok(homepage.indexOf('The Aetheris Methodology') < homepage.indexOf('<PricingTimeline />'),
   "Pricing must come after the mechanism and proof sections");
-assert.ok(homepage.indexOf('id="sample-reports"') < homepage.indexOf('<PricingTimeline />'),
-  "Sample Golden Reports must appear before pricing");
-assert.ok(homepage.indexOf('id="first-win"') < homepage.indexOf('<PricingTimeline />'),
-  "First-win and client-effort framing must appear before pricing");
-assert.ok(homepage.indexOf('id="engagement-options"') < homepage.indexOf('<PricingTimeline />'),
-  "Simplified buying journey must appear before the detailed pricing timeline");
-assert.match(homepage, /First meeting is complimentary|first meeting is complimentary/i);
+assert.ok(homepage.indexOf('id="case-studies"') < homepage.indexOf('<PricingTimeline />'),
+  "Case studies must appear before pricing");
+assert.ok(homepage.indexOf('id="what-we-do"') < homepage.indexOf('<PricingTimeline />'),
+  "What we do must appear before pricing");
+assert.ok(homepage.indexOf('id="leak-audit"') < homepage.indexOf('<PricingTimeline />'),
+  "Free leak audit must appear before the detailed pricing timeline");
+assert.match(homepage, /See if there/);
 assert.match(homepage, /\$100(?: per hour|\/hour)/i);
 assert.match(pricing, /AETHERIS_TIERS\.map/);
 assert.match(pricing, /type="range"/);
