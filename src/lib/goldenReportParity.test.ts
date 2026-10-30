@@ -24,9 +24,9 @@ describe("golden report view model", () => {
 
   it("prints a hosting-safe Golden Report chat link instead of a deep-link URL", () => {
     const model = build(fullReport);
-    expect(model.meta.askUrl).toContain("/?report_chat=");
+    expect(model.meta.askUrl).toMatch(/^https:\/\/aetheris\.technology\/\?report_chat=/);
     expect(model.meta.askUrl).not.toContain("/report/");
-    expect(model.meta.askUrl).not.toContain("PUBLIC_SITE_URL");
+    expect(model.meta.askUrl).not.toContain("businessforensics.tech");
   });
 
   it("exports executive summary, top leaks, all chapters and all growth assets", () => {
