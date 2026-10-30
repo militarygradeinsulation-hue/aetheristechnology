@@ -786,13 +786,15 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       // 429/5xx/etc — try the next model immediately
     }
     const finalAi = aiResponse as Response | null;
-    if (hardStopStatus === 0 && finalAi !== null && !finalAi.ok && finalAi.status === 429) {
+    const finalOk = finalAi?.ok === true;
+    const finalStatus = finalAi?.status ?? 503;
+    if (hardStopStatus === 0 && finalAi !== null && !finalOk && finalStatus === 429) {
       // treat exhausted retries on 429 as "try again later"
       hardStopStatus = 429;
     }
 
-    if (finalAi === null || !finalAi.ok) {
-      const status = finalAi?.status ?? 503;
+    if (finalAi === null || !finalOk) {
+      const status = finalStatus;
       console.error("AI gateway final failure:", status, lastErrText);
 
       if (status === 429) {
@@ -831,7 +833,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       });
     }
 
-    const aiData = await finalAi.json();
+    const aiData = await (finalAi as Response).json();
     console.log("AI response received");
 
     let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
