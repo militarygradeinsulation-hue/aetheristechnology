@@ -13,7 +13,8 @@ describe("canonical Aetheris home, standalone explainer and restored chaos map",
   const sitemap = read("public/sitemap.xml");
 
   it("keeps the main website at / and redirects /home to it", () => {
-    expect(app).toContain('<Route path="/" element={<LeakLanderPage />} />');
+    expect(app).toContain('<Route path="/" element={<RootEntry />} />');
+    expect(app).toContain('return <LeakLanderPage />;');
     expect(app).toContain('<Route path="/home" element={<Navigate to="/" replace />} />');
     expect(app).toContain('<Route path="/stop-guessing" element={<StopGuessingPage />} />');
     expect(app).not.toContain('import("./pages/Home")');
