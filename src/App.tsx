@@ -151,6 +151,16 @@ const RouteFallback = () => (
   <div className="min-h-screen bg-background" aria-hidden="true" />
 );
 
+const RootEntry = () => {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const reportChat = params.get("report_chat");
+  if (reportChat) {
+    return <Navigate to={`/report/${encodeURIComponent(reportChat)}/ask`} replace />;
+  }
+  return <LeakLanderPage />;
+};
+
 import { ThumbShimmerOnScroll } from "@/components/ThumbShimmerOnScroll";
 import { AmbientBackground } from "@/components/AmbientBackground";
 
@@ -204,7 +214,7 @@ const App = () => (
 
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
-                      <Route path="/" element={<LeakLanderPage />} />
+                      <Route path="/" element={<RootEntry />} />
                       <Route path="/book" element={<BookRedirect />} />
                       <Route path="/case-intake" element={<Navigate to="/book" replace />} />
                       <Route path="/booking" element={<Navigate to="/book" replace />} />
