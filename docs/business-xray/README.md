@@ -16,7 +16,7 @@ A browser-based, self-service operations diagnostic designed to drive interest i
 2. Upload `index.html` as the site's root index file.
 3. Publish using Cloudflare Pages (connect GitHub, set output root for a static HTML site, no build command) (do not use GitHub Pages to host a commercial SaaS).
 4. Open the live URL on desktop and mobile and test both a blank assessment and the demo scenario.
-5. The results page now offers **Request verified review**, opening an editable email to the contact address published on the Aetheris website (`aetheris.technology@outlook.com`). This is a manual service enquiry, **not** a checkout or a completed order. Verify the inbox is monitored before advertising.
+5. The results page now opens the Aetheris on-site email form. Visitors provide name, email, optional phone, LinkedIn, company, website and message and click **Send Email**. The existing fixed-recipient `notify-contact-submission` backend reports whether the notification was sent. No email application is needed; no payment is taken. Verify production delivery before advertising.
 6. Agree on scope, delivery and payment with each buyer, then deliver the paid review manually. Collect written permission before accessing business records or Mindprint reports. No automated paywall, payment processing or fulfillment is included.
 
 You can also open `index.html` locally to test without hosting.
