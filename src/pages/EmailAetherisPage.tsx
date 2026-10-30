@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2, Mail, Send } from "lucide-react";
 import { Footer } from "@/components/Footer";
@@ -41,6 +41,23 @@ export default function EmailAetherisPage() {
   const [delivered, setDelivered] = useState(false);
   const [error, setError] = useState("");
   const dedupe = useRef<string | null>(null);
+
+  // Optional one-time company-name handoff from the on-device free X-Ray.
+  // No scan answers, financial figures, or personal data are transmitted here.
+  useEffect(() => {
+    if (location.pathname !== "/business-xray/contact") return;
+    try {
+      const saved = sessionStorage.getItem("aetheris-xray-contact-prefill");
+      if (!saved) return;
+      sessionStorage.removeItem("aetheris-xray-contact-prefill");
+      const parsed = JSON.parse(saved);
+      if (typeof parsed.company === "string" && parsed.company.trim()) {
+        setInput((prior) => ({ ...prior, company: parsed.company.trim().slice(0, 120) }));
+      }
+    } catch {
+      // Browser may disable session storage; the form works without it.
+    }
+  }, [location.pathname]);
 
   const change = (field: keyof DirectEmailInput, value: string | boolean) => {
     setInput((prior) => ({ ...prior, [field]: value }));
@@ -153,13 +170,13 @@ export default function EmailAetherisPage() {
                 </div>
                 <div className={fieldStyle}>
                   <label htmlFor="aetheris-contact-linkedin" className={labelStyle}>LinkedIn profile <span className="text-muted-foreground">(optional)</span></label>
-                  <Input id="aetheris-contact-linkedin" name="linkedin" type="url" inputMode="url" maxLength={300}
+                  <Input id="aetheris-contact-linkedin" name="linkedin" type="text" inputMode="url" maxLength={300}
                     placeholder="https://www.linkedin.com/in/yourname" value={input.linkedin} onChange={(e) => change("linkedin", e.target.value)} className={inputStyle} />
                   <p className="text-xs text-muted-foreground">A personal profile or company page works.</p>
                 </div>
                 <div className={fieldStyle}>
                   <label htmlFor="aetheris-contact-website" className={labelStyle}>Website URL <span className="text-muted-foreground">(optional)</span></label>
-                  <Input id="aetheris-contact-website" name="website" type="url" inputMode="url" maxLength={300}
+                  <Input id="aetheris-contact-website" name="website" type="text" inputMode="url" maxLength={300}
                     placeholder="https://yourcompany.com" value={input.website} onChange={(e) => change("website", e.target.value)} className={inputStyle} />
                 </div>
               </div>
