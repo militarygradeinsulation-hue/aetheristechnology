@@ -1,0 +1,123 @@
+{
+  "schema": "aetheris.business-xray.prospect-seeds/v1",
+  "source_date": "2026-10-30",
+  "purpose": "Company-level public-signal research only. NOT confirmed customers, evidence of inefficiency, or an outreach contact list.",
+  "no_personal_contacts": true,
+  "requires_manual_verification": true,
+  "companies": [
+    {
+      "company": "Boundless Recreation",
+      "industry": "manufacturing",
+      "location": "Bristol, Indiana",
+      "reported_date": "2026-10-28",
+      "event_type": "launch",
+      "reported_fact": "Launched production in a new Bristol RV manufacturing operation; reported 45 employees hired and a plan to create up to 115 jobs by 2028.",
+      "source_url": "https://www.iedc.in.gov/events/news/details/2026/10/28/gov.-braun-grows-jobs-in-elkhart-county-with-new-rv-manufacturer",
+      "source_kind": "Indiana Economic Development Corporation",
+      "fit_question": "How are sales commitments, production build slots and customer handoffs managed as the team grows?",
+      "buyer_roles": [
+        "Founder/President",
+        "Operations leader"
+      ],
+      "uncertainty": "Reported expansion is public; actual process gaps, budget, interest and buyer contact are unverified."
+    },
+    {
+      "company": "Med-Mizer",
+      "industry": "manufacturing",
+      "location": "Batesville, Indiana",
+      "reported_date": "2026-10-13",
+      "event_type": "expansion",
+      "reported_fact": "Announced $9 million in expanded medical-device production, additional equipment, a second shift and up to 73 new jobs.",
+      "source_url": "https://iedc.in.gov/events/news/details/2026/10/13/governor-braun-grows-manufacturing-jobs-with-med-mizer-s-expansion-in-batesville",
+      "source_kind": "Indiana Economic Development Corporation",
+      "fit_question": "Has adding shifts changed the ownership of production, inspection or engineering handoffs?",
+      "buyer_roles": [
+        "President",
+        "Operations director",
+        "Plant leader"
+      ],
+      "uncertainty": "Expansion does not mean operational waste; qualification must confirm a problem."
+    },
+    {
+      "company": "Babilla Roofing",
+      "industry": "roofing",
+      "location": "Gary, Indiana",
+      "reported_date": "2026-09-28",
+      "event_type": "acquisition",
+      "reported_fact": "Tecta America announced the acquisition of the commercial roofing contractor; Babilla's existing team and leadership were reported as remaining in place.",
+      "source_url": "https://www.roofingcontractor.com/articles/102739-tecta-america-acquires-indianas-babilla-roofing",
+      "source_kind": "Roofing Contractor trade publication",
+      "fit_question": "How do commercial estimating, maintenance scheduling and customer follow-up work alongside the new parent company's systems?",
+      "buyer_roles": [
+        "President",
+        "Operations manager"
+      ],
+      "uncertainty": "Integration questions are hypotheses only; no actual friction has been established."
+    },
+    {
+      "company": "Brucker Company",
+      "industry": "hvac",
+      "location": "Elk Grove Village and Peoria, Illinois",
+      "reported_date": "2026-10-02",
+      "event_type": "acquisition",
+      "reported_fact": "Meriton announced acquisition of commercial HVAC manufacturers' representative Brucker; existing leader and team continue, with coordination among three Illinois businesses.",
+      "source_url": "https://meriton.com/newsroom/news/meriton-acquires-brucker-and-expands-commercial-hvac-capabilities-in-illinois/",
+      "source_kind": "Company announcement",
+      "fit_question": "Where might product-line changes and cross-company coordination require a clear handoff or single owner?",
+      "buyer_roles": [
+        "President/CEO",
+        "Operations manager"
+      ],
+      "uncertainty": "This is an HVAC representative, not a field-service contractor; fit with the free X-Ray requires confirmation."
+    },
+    {
+      "company": "GovParts",
+      "industry": "manufacturing",
+      "location": "Fort Wayne, Indiana",
+      "reported_date": "2026-09-09",
+      "event_type": "expansion",
+      "reported_fact": "Announced more than $3.4 million to move its defense manufacturing and sourcing operation to a much larger Fort Wayne facility, with up to 20 planned new jobs.",
+      "source_url": "https://iedc.in.gov/events/news/details/2026/09/09/gov.-braun-powers-defense-sector-with-govparts-expansion-in-northeast-indiana",
+      "source_kind": "Indiana Economic Development Corporation",
+      "fit_question": "How will RFQ intake, made-to-print manufacturing, kitting and procurement handoffs scale in the larger facility?",
+      "buyer_roles": [
+        "Founder/President",
+        "Operations director",
+        "Supply chain director"
+      ],
+      "uncertainty": "Source describes expansion, not defects in operations; do not claim it does."
+    },
+    {
+      "company": "V Tech Conversions",
+      "industry": "manufacturing",
+      "location": "Plymouth, Indiana",
+      "reported_date": "2026-08-19",
+      "event_type": "launch",
+      "reported_fact": "Announced launch of mobile-workspace manufacturing; reporting initial production in July, an equipped 16,000-square-foot site and planned growth to 25 jobs.",
+      "source_url": "https://iedc.in.gov/events/news/details/2026/08/19/gov.-braun-growing-jobs-wages-with-new-manufacturer-v-tech-conversions-in-northern-indiana",
+      "source_kind": "Indiana Economic Development Corporation",
+      "fit_question": "How are custom-build quotes, revisions and job handoffs controlled as order volume grows?",
+      "buyer_roles": [
+        "Founder/Owner",
+        "Operations director"
+      ],
+      "uncertainty": "Public press coverage does not establish technology needs or purchasing authority."
+    },
+    {
+      "company": "Advantage Roofing & Exteriors",
+      "industry": "roofing",
+      "location": "Kalamazoo, Michigan",
+      "reported_date": "2026-09-24",
+      "event_type": "acquisition",
+      "reported_fact": "Reportedly acquired by Ridgeline Roofing & Restoration in a transaction expanding the platform into southwest Michigan.",
+      "source_url": "https://www.roofingcontractor.com/articles/keyword/11414-ridgeline-roofing",
+      "source_kind": "Roofing Contractor trade reporting",
+      "fit_question": "Are CRM ownership, customer follow-up and production status represented consistently after the acquisition?",
+      "buyer_roles": [
+        "Owner/General manager",
+        "Operations director"
+      ],
+      "uncertainty": "This is a public integration signal, not confirmation of customer pain or willingness to buy."
+    }
+  ]
+}
