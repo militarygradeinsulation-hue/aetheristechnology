@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { normalizePublicCompanyUrl } from "../_shared/company-audit-offers.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -24,6 +26,12 @@ const TOOL_FUNCTIONS: Record<string, string> = {
 };
 
 serve(async (req) => {
+  // This function uses the service role to read private paid orders. Reject
+  // public anonymous calls before looking up a deliverable or starting a scan.
+  const authorization = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
+  if (req.method !== "POST" || !SUPABASE_SERVICE_ROLE_KEY || authorization !== SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
   try {
     const { deliverableId } = await req.json();
     if (!deliverableId) {
@@ -42,11 +50,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Deliverable not found" }), { status: 404 });
     }
 
-    // Mark as generating
-    await supabase
+    // Atomically claim only pending orders. Concurrent retries cannot generate
+    // the same report multiple times and consume credits twice.
+    const { data: claimed, error: claimError } = await supabase
       .from("purchase_deliverables")
       .update({ status: "generating" })
-      .eq("id", deliverableId);
+      .eq("id", deliverableId)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
+    if (claimError) throw claimError;
+    if (!claimed) return new Response(JSON.stringify({ status: "already_claimed" }), {status: 200, headers: {"Content-Type":"application/json"}});
 
     const toolType = deliverable.tool_type;
     const inputData = deliverable.input_data as Record<string, unknown>;
@@ -79,15 +93,40 @@ serve(async (req) => {
 
       const result = await resp.json();
 
-      // Store the result
-      await supabase
+      // Record the result before notifying the customer. The payment webhook
+      // alone must never be interpreted as report generation succeeding.
+      const { error: saveError } = await supabase
         .from("purchase_deliverables")
         .update({
           status: "ready",
           output_data: result,
         })
-        .eq("id", deliverableId);
+        .eq("id", deliverableId)
+        .eq("status", "generating");
+      if (saveError) throw saveError;
 
+      // Automatic email is optional best effort. The report remains accessible
+      // on the paid return page even if an email provider is temporarily down.
+      const websiteProducts: Record<string, string> = {
+        website_report: "Automated Website Report",
+        digital_snapshot: "Digital Snapshot",
+        strategy_blueprint: "Strategy Blueprint",
+      };
+      if (websiteProducts[toolType] && deliverable.email && deliverable.stripe_session_id) {
+        try {
+          const emailResult = await sendTemplateEmail("website-report-ready", deliverable.email, {
+            idempotencyKey: `report-ready-${deliverable.id}`,
+            templateData: {
+              title: websiteProducts[toolType],
+              websiteUrl: normalizePublicCompanyUrl(inputData.website_url || inputData.websiteUrl).url,
+              reportUrl: `https://aetheris.technology/checkout/return?type=deliverable&session_id=${encodeURIComponent(deliverable.stripe_session_id)}`,
+            },
+          });
+          if (!emailResult.sent) console.warn("website report email suppressed:", deliverable.id);
+        } catch (notifyError) {
+          console.error("website report email could not be confirmed:", notifyError instanceof Error ? notifyError.message : "unknown");
+        }
+      }
       console.log(`Deliverable ${deliverableId} ready for ${toolType}`);
       return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json" },
@@ -113,7 +152,8 @@ async function markFailed(id: string, msg: string) {
 function buildRequestBody(toolType: string, input: Record<string, unknown>): Record<string, unknown> {
   // Use metadata from the checkout session to build generation requests
   // The website URL or business info from metadata is used as input
-  const websiteUrl = (input.website_url as string) || (input.websiteUrl as string) || "https://example.com";
+  // No fictional fallback domain; products requiring a URL validate it below.
+  const websiteUrl = (input.website_url as string) || (input.websiteUrl as string) || "";
   const businessName = (input.business_name as string) || (input.businessName as string) || "";
   const industry = (input.industry as string) || "";
 
@@ -135,7 +175,8 @@ function buildRequestBody(toolType: string, input: Record<string, unknown>): Rec
     case "website_report":
     case "digital_snapshot":
     case "strategy_blueprint":
-      return { url: websiteUrl, tier: toolType };
+      // Never charge a user and then scan example.com because checkout lacked a URL.
+      return { url: normalizePublicCompanyUrl(input.website_url || input.websiteUrl).url, tier: toolType };
     default:
       return { websiteUrl, businessName };
   }

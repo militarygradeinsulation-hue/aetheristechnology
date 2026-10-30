@@ -85,6 +85,31 @@ function applyDeterministicLeaks(analysis: any, host: string): any {
   return analysis;
 }
 
+/** Public website analysis cannot substantiate profit losses from a URL/hash. */
+function safePublicWebsitePaidView(value: any): any {
+  const report = structuredClone(value);
+  const moneyPattern = /\$[\d,]+(?:\.\d{2})?(?:\s*[-–]\s*\$[\d,]+(?:\.\d{2})?)?/g;
+  report.reportScope = "public_website_only";
+  report.evidenceLevel = "public_website_observations_only";
+  report.financialVerification = "not_verified";
+  report.totalAnnualLeak = "Not verified from public website data";
+  report.estimatedAnnualProfit = null;
+  if (typeof report.executiveSummary === "string") {
+    report.executiveSummary = report.executiveSummary.replace(moneyPattern, "unverified financial impact");
+  }
+  if (Array.isArray(report.gaps)) {
+    for (const gap of report.gaps) {
+      if (!gap || typeof gap !== "object") continue;
+      gap.annualCost = "Not verified";
+      gap.costEvidence = "No financial records reviewed";
+      if (typeof gap.description === "string") gap.description = gap.description.replace(moneyPattern, "unverified financial impact");
+    }
+  }
+  report.roiTable = [];
+  report.claimsDisclosure = "This automated report reviews public website signals only. It cannot verify lost sales, profit, recoverability, ROI, employee behavior or internal systems. Financial outcomes require authorized records and a separate human review.";
+  return report;
+}
+
 const CRAWLER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 function htmlToText(html: string): string {
@@ -327,7 +352,8 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
+    const { url, tier } = await req.json();
+    const publicWebsiteOnly = ["website_report", "digital_snapshot", "strategy_blueprint"].includes(tier);
     if (!url) {
       return new Response(JSON.stringify({ error: "URL is required" }), {
         status: 400,
@@ -366,7 +392,7 @@ serve(async (req) => {
           const cachedGapCount = Array.isArray(cached?.gaps) ? cached.gaps.length : 0;
           if (cached && typeof cached === "object" && cached.score != null && cachedGapCount >= 10) {
             console.log("Returning cached scan for host:", parsedHost);
-            return new Response(JSON.stringify({ ...cached, _cached: true }), {
+            return new Response(JSON.stringify(publicWebsiteOnly ? { ...safePublicWebsitePaidView(cached), _cached: true } : { ...cached, _cached: true }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
           }
@@ -483,7 +509,7 @@ serve(async (req) => {
       const fallback = buildDeterministicAnalysis("", [], { title: parsedHost, description: "" }, formattedUrl, parsedHost);
       fallback._fallback = true;
       fallback._fallbackReason = "The site limited automated extraction, so Aetheris returned a conservative public-signal report instead.";
-      return new Response(JSON.stringify(fallback), {
+      return new Response(JSON.stringify(publicWebsiteOnly ? safePublicWebsitePaidView(fallback) : fallback), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -824,7 +850,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
         }),
       });
 
-      return new Response(JSON.stringify(fallback), {
+      return new Response(JSON.stringify(publicWebsiteOnly ? safePublicWebsitePaidView(fallback) : fallback), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -872,7 +898,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       }),
     });
 
-    return new Response(JSON.stringify(analysis), {
+    return new Response(JSON.stringify(publicWebsiteOnly ? safePublicWebsitePaidView(analysis) : analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

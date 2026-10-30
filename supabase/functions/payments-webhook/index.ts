@@ -104,13 +104,19 @@ serve(async (req) => {
     console.log("event:", event.type, "env:", env);
     switch (event.type) {
       case "checkout.session.completed":
-      case "checkout.session.async_payment_succeeded":
-        if (isBusinessXrayServiceSession(event.data.object)) {
-          await recordPaidBusinessXray(event.data.object, env);
-        } else if (event.type === "checkout.session.completed") {
-          await handleCheckoutCompleted(event.data.object, env);
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object;
+        // Delayed methods emit completed while unpaid. No paid downloads or
+        // service fulfillment may be issued until Stripe confirms payment.
+        if (event.type === "checkout.session.async_payment_succeeded" && session.mode !== "payment") break;
+        if (session.mode === "payment" && session.payment_status !== "paid") break;
+        if (isBusinessXrayServiceSession(session)) {
+          await recordPaidBusinessXray(session, env);
+        } else {
+          await handleCheckoutCompleted(session, env);
         }
         break;
+      }
       case "checkout.session.async_payment_failed":
         console.warn("Asynchronous checkout failed", event.data.object?.id);
         break;
@@ -605,11 +611,17 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
 function triggerFunction(name: string, body: Record<string, unknown>) {
   const URL_ = Deno.env.get("SUPABASE_URL")!;
   const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  fetch(`${URL_}/functions/v1/${name}`, {
+  const dispatch = fetch(`${URL_}/functions/v1/${name}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${KEY}` },
     body: JSON.stringify(body),
-  }).catch(e => console.error(`trigger ${name}:`, e));
+  }).then((response) => {
+    if (!response.ok) console.error(`trigger ${name}: worker returned HTTP ${response.status}`);
+  }).catch((e) => console.error(`trigger ${name}:`, e instanceof Error ? e.message : "unknown"));
+  // Keep dispatch alive after the Stripe webhook returns. Background work is
+  // still subject to platform timeouts; pending rows require monitoring.
+  const runtime = (globalThis as any).EdgeRuntime;
+  if (runtime?.waitUntil) runtime.waitUntil(dispatch);
 }
 
 // Fire-and-forget transactional email through the managed send helper.

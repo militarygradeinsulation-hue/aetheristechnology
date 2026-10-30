@@ -115,6 +115,9 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
             <Link to="/portal" className={cn(pillBase, "border border-border text-muted-foreground hover:text-foreground hover:border-amber/40")}>
               Client Portal
             </Link>
+            <a href="/business-xray/index.html" className={cn(pillBase, "border border-amber/50 bg-amber/10 text-amber hover:bg-amber/20")}>
+              Free Business X-Ray
+            </a>
             <Link to="/leak-audit/self-scan" className={cn(pillBase, "bg-amber text-primary-foreground shadow-[0_0_15px_hsl(var(--amber-glow)/0.4)] hover:brightness-110")}>
               Free Leak Check
             </Link>
@@ -172,6 +175,9 @@ export const LanderNavbar: React.FC<{ minimal?: boolean }> = ({ minimal = false 
                   <Link to="/portal" onClick={() => setOpen(false)} className={cn(pillBase, "w-full border border-border text-muted-foreground")}>
                     Client Portal
                   </Link>
+                  <a href="/business-xray/index.html" onClick={() => setOpen(false)} className={cn(pillBase, "w-full border border-amber/50 bg-amber/10 text-amber")}>
+                    Free Business X-Ray
+                  </a>
                   <Link to="/leak-audit/self-scan" onClick={() => setOpen(false)} className={cn(pillBase, "w-full bg-amber text-primary-foreground")}>
                     Free Leak Check
                   </Link>

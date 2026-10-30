@@ -24,6 +24,7 @@ SCAN = BASE + "/business-xray/index.html"
 PUBLIC_PAGES = [
     "/business-xray/index.html",
     "/business-xray/guide/index.html",
+    "/business-xray/website-report/index.html",
     "/business-xray/industries/hvac/index.html",
     "/business-xray/industries/roofing/index.html",
     "/business-xray/industries/manufacturing/index.html",

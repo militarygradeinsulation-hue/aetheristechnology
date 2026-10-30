@@ -128,6 +128,7 @@ Last updated: 2026-07-03.
 - HVAC and mechanical contractors: https://aetheris.technology/business-xray/industries/hvac/index.html
 - Roofing and restoration: https://aetheris.technology/business-xray/industries/roofing/index.html
 - Specialty manufacturing and machine shops: https://aetheris.technology/business-xray/industries/manufacturing/index.html
+- Automated website report comparison (public-only, $59 planned after live checks): https://aetheris.technology/business-xray/website-report/index.html
 - Business X-Ray is a free in-browser self-assessment, not an automated Golden Report, verified financial audit, psychometric assessment, or a live CRM connection.
 - Free figures use customer-supplied inputs and disclosed assumptions. Independent estimates can overlap and must not be added without checking source records.
 - No account, payment, or server upload is required for the free X-Ray. Users can choose to save or export locally, or request an optional paid manual review via email.
