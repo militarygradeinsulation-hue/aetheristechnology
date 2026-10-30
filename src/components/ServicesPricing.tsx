@@ -3,6 +3,7 @@ import { RevealOnScroll } from './RevealOnScroll';
 import { Image, Globe, Eye, Search, Wrench, TrendingUp, ShoppingCart, MessageCircle, BarChart3, X, Share2, Phone, Calendar, Mail, Check, Percent, Brain, FileText, RefreshCw, Database, GitBranch, Swords, Send, Settings, Users, LayoutTemplate, ListChecks, Rocket, Workflow, Handshake, GraduationCap, Bot, Mic, DollarSign, Activity, FlaskConical, Copy, UserPlus, HeartPulse, Map, Maximize2, Gauge, Bug, Radar, Network } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StripeEmbeddedCheckout } from './StripeEmbeddedCheckout';
+import { normalizePublicCompanyUrl } from '../../supabase/functions/_shared/company-audit-offers';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { isComingSoonPriceId } from '@/lib/forensicsSystems';
@@ -553,6 +554,10 @@ export const ServicesPricing: React.FC = () => {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [billingMode, setBillingMode] = useState<'once' | 'monthly'>('once');
   const [checkoutBundleItems, setCheckoutBundleItems] = useState<string[] | null>(null);
+  const [checkoutWebsiteInput, setCheckoutWebsiteInput] = useState('');
+  const [confirmedWebsiteUrl, setConfirmedWebsiteUrl] = useState<string | null>(null);
+  const [websiteValidationError, setWebsiteValidationError] = useState('');
+  useEffect(() => { setConfirmedWebsiteUrl(null); setWebsiteValidationError(''); }, [checkoutPriceId]);
 
   const isServiceComingSoon = (s: { priceId?: string; monthlyPriceId?: string }) =>
     isComingSoonPriceId(s.priceId) || isComingSoonPriceId(s.monthlyPriceId);
@@ -582,6 +587,8 @@ export const ServicesPricing: React.FC = () => {
   const discountedTotal = Math.round(subtotal * (1 - discount));
 
   const isMonthlyCheckout = checkoutPriceId?.endsWith('_monthly');
+  const NEEDS_WEBSITE = new Set(['scan_full_report_once', 'digital_snapshot_once', 'scan_strategy_blueprint_once']);
+  const needsWebsite = !!checkoutPriceId && NEEDS_WEBSITE.has(checkoutPriceId);
 
   const AUTOMATABLE_PRICES = new Set([
     'scan_full_report_once', 'digital_snapshot_once', 'scan_strategy_blueprint_once',
@@ -606,6 +613,7 @@ export const ServicesPricing: React.FC = () => {
     ...(user ? { userId: user.id } : {}),
     ...(checkoutPriceId ? { priceId: checkoutPriceId } : {}),
     ...(checkoutBundleItems ? { bundle_items: JSON.stringify(checkoutBundleItems) } : {}),
+    ...(needsWebsite && confirmedWebsiteUrl ? { website_url: confirmedWebsiteUrl } : {}),
   };
 
   if (checkoutPriceId) {
@@ -618,7 +626,38 @@ export const ServicesPricing: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 overflow-auto p-4">
-            <StripeEmbeddedCheckout priceId={checkoutPriceId} returnUrl={checkoutReturnUrl} customerEmail={user?.email || undefined} metadata={checkoutMetadata} />
+            {needsWebsite && !confirmedWebsiteUrl ? (
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                try {
+                  const url = normalizePublicCompanyUrl(checkoutWebsiteInput).url;
+                  setWebsiteValidationError('');
+                  setConfirmedWebsiteUrl(url);
+                } catch {
+                  setWebsiteValidationError('Enter a public company website URL (not a local or private server).');
+                }
+              }} className="mx-auto max-w-md space-y-4">
+                <label className="block text-sm font-medium text-foreground" htmlFor="services-website-scan">
+                  Website to analyze
+                </label>
+                <input id="services-website-scan" name="website" autoComplete="url" inputMode="url"
+                  value={checkoutWebsiteInput} onChange={e => setCheckoutWebsiteInput(e.target.value)}
+                  placeholder="https://examplecompany.com" maxLength={240} required
+                  className="h-12 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground"/>
+                <p className="text-xs text-muted-foreground">The report analyzes the public website you enter. It does not audit internal company finances, personnel, or systems.</p>
+                {websiteValidationError && <p role="alert" className="text-sm text-destructive">{websiteValidationError}</p>}
+                <button type="submit" className="w-full rounded-lg bg-amber px-5 py-3 font-bold text-black">
+                  Continue to secure checkout
+                </button>
+              </form>
+            ) : (
+              <div>
+                {needsWebsite && <p className="mb-3 text-center text-xs text-muted-foreground">Website: {confirmedWebsiteUrl}</p>}
+                <StripeEmbeddedCheckout key={checkoutPriceId + (confirmedWebsiteUrl || '')}
+                  priceId={checkoutPriceId} returnUrl={checkoutReturnUrl}
+                  customerEmail={user?.email || undefined} metadata={checkoutMetadata} />
+              </div>
+            )}
           </div>
         </div>
       </div>
