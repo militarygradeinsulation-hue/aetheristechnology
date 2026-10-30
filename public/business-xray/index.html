@@ -104,6 +104,15 @@
     .paid-offer .btn { text-decoration:none; display:inline-flex; align-items:center; white-space:nowrap; }
     @media(max-width:760px){ .paid-offer { flex-direction:column; align-items:stretch; } }
 
+    .paid-offer-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:20px}
+    .upgrade-option{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--edge);border-radius:12px;background:rgba(0,0,0,.13)}
+    .upgrade-option strong{font-size:15px}
+    .upgrade-option b{font-size:26px;color:#f9b590}
+    .upgrade-option small{line-height:1.55;flex:1;color:#c3c7c6}
+    .upgrade-option .btn{font-size:12px;text-align:center;padding:12px 11px}
+    details{border-bottom:1px solid var(--edge);padding:15px 0}
+    details summary{cursor:pointer;font-weight:650;color:var(--ink)}
+    details p{font-size:14px;color:var(--muted);max-width:870px;margin:12px 0 4px}
     .footer { padding:35px 0 55px; border-top:1px solid var(--edge); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; justify-content:space-between; gap:15px; }
     .footer-legal { flex-basis:100%; display:block; border-top:1px solid var(--edge); padding-top:16px; text-align:center; }
     .footer-legal a { color:inherit; text-decoration:underline; text-underline-offset:3px; }
@@ -178,6 +187,7 @@
           <div class="eyebrow">01 / Commercial flow</div><h2>Where opportunities get lost</h2><p class="sub">These inputs illustrate possible opportunity exposure, not confirmed lost sales.</p>
           <div class="fields">
             <div class="wide"><label for="company">Business name <span class="hint">Optional. Used only to label your report.</span></label><input id="company" type="text" maxlength="100" placeholder="Your business"></div>
+            <div class="wide"><label for="website">Public business website <span class="hint">Optional. Only needed if you later choose the automated website-only report.</span></label><input id="website" type="text" inputmode="url" autocomplete="url" maxlength="240" placeholder="https://yourcompany.com"></div>
             <div><label for="missedLeads">Incoming inquiries missed per month<span class="hint">Calls, forms, or messages never answered.</span></label><input id="missedLeads" type="number" min="0" max="1000000" step="1" inputmode="numeric" placeholder="e.g. 12"></div>
             <div><label for="closeRate">Typical inquiry-to-customer rate (%)<span class="hint">If unsure, use a rough estimate.</span></label><input id="closeRate" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 20"></div>
             <div><label for="unfollowedQuotes">Quotes not followed up per month<span class="hint">Quotes sent to prospects with no scheduled follow-up.</span></label><input id="unfollowedQuotes" type="number" min="0" max="1000000" step="1" inputmode="numeric" placeholder="e.g. 8"></div>
@@ -218,17 +228,49 @@
       <article class="results-panel"><h3>Three places to investigate first</h3><div id="topFindings"></div></article>
     </div>
     <div class="disclaimer"><strong>How to read the numbers:</strong> Each financial figure is an independent scenario calculated from your assumptions. Some opportunities may represent the same customers or overlapping work. <strong>Do not add the three figures together.</strong> Validate missed inquiries, quote outcomes, and labor hours against records before claiming savings or ROI. This diagnostic does not infer psychological traits.</div>
-    <aside class="paid-offer no-print" id="paidOffer" hidden><div><div class="eyebrow" style="margin-bottom:4px">Next step / Human-verified review</div><h3>Validate the numbers before changing the business.</h3><p>Verified Business X-Ray · Evidence review and prioritized action brief · $199. Manual service; scope, delivery and payment confirmed by email before work begins.</p></div><a class="btn" id="paidOfferBtn" href="/business-xray/contact?service=business_xray_verified">Send an enquiry</a></aside>
+    <section class="paid-offer no-print" id="paidOffer" hidden aria-label="Choose the next step">
+      <div><div class="eyebrow" style="margin-bottom:5px">Your report is ready / Optional next step</div>
+        <h3>Choose how far you want to go.</h3>
+        <p>Keep your free report, add a digitally generated public-website report, or request human verification. Different products answer different questions.</p>
+      </div>
+      <div class="paid-offer-choices">
+        <div class="upgrade-option">
+          <strong>Automated Website Report</strong><b>$59</b>
+          <small>Digital report of your public website after payment and generation. Not a verified financial audit.</small>
+          <a class="btn" id="instantOfferBtn" href="/business-xray/checkout?offer=website">Choose website report</a>
+        </div>
+        <div class="upgrade-option">
+          <strong>Verified Business X-Ray</strong><b>$199</b>
+          <small>Human review of evidence and a written findings brief. Not instantly fulfilled.</small>
+          <a class="btn ghost" id="paidOfferBtn" href="/business-xray/contact?service=business_xray_verified">Request verification</a>
+        </div>
+        <div class="upgrade-option">
+          <strong>Correction Roadmap</strong><b>$599</b>
+          <small>Human-reviewed priorities, process owners and measurable corrective steps. Not instantly fulfilled.</small>
+          <a class="btn ghost" id="roadmapOfferBtn" href="/business-xray/contact?service=business_xray_roadmap">Ask for a roadmap</a>
+        </div>
+      </div>
+      <p class="fine">Checkout is enabled only after the Stripe price, signed webhook and digital delivery checks pass. Until then the checkout page explains what is available. No payment is taken by the free X-Ray.</p>
+    </section>
     <div class="report-actions no-print"><button type="button" class="btn" id="printBtn">Print / save PDF</button><button type="button" class="btn ghost" id="exportBtn">Export inputs and results</button><button type="button" class="btn ghost" id="newBtn">Start a new X-Ray</button></div>
+  </section>
+  <section class="no-print" aria-labelledby="frequently-asked" style="padding:15px 0 48px">
+    <div class="eyebrow">What business owners ask</div>
+    <h2 id="frequently-asked">Answers before you run a scan</h2>
+    <details><summary>What does the free Business X-Ray actually scan?</summary><p>The free assessment uses your answers to quantify illustrative scenarios for unanswered inquiries, missed quote follow-up and employee capacity. It scores nine reported People, Process and Systems handoffs. It does not browse internal business systems or access employee records.</p></details>
+    <details><summary>Can it find verified financial leaks automatically?</summary><p>No. The free estimates depend on your assumptions. Verification requires a review of source records, actual outcomes, gross margins and duplicated opportunities. A higher estimated value is not proof that money was lost or will be recovered.</p></details>
+    <details><summary>What is the difference between the $59 and $199 reports?</summary><p>The $59 Automated Website Report examines the public site you choose and is generated digitally after confirmed payment and successful processing. The $199 Verified Business X-Ray is a separate human review of business evidence; it is not an instantly generated report.</p></details>
+    <details><summary>How long does the free assessment take, and is it private?</summary><p>There are three short steps. Calculations are performed in your browser; answers are not uploaded. You can print the report or export a JSON copy. Moving to a paid website report shares only the public website address with the checkout/scan service.</p></details>
+    <details><summary>Do I need to buy another subscription or install software?</summary><p>No. Start free. If you pay for a separate one-time service, the product and price are shown before checkout. The method is to identify handoffs and test simple corrections before assuming more software is necessary.</p></details>
   </section>
 </main>
 <footer class="shell footer"><span>Aetheris Technology · Business X-Ray · Version 1.0</span><span>Built for investigation, not invented certainty.</span><span class="footer-legal">Copyright © 2026 · Owned by <a href="https://aetheris.technology/">Aetheris.Technology</a> · All rights reserved.</span></footer>
 <script>
 (function(){
   'use strict';
-  // This free static version uses a customer-initiated email enquiry, not checkout.
+  // Free assessment remains browser-only. Paid products use the site's guarded checkout or a manual enquiry.
   const ENQUIRY_FORM='/business-xray/contact?service=business_xray_verified';
-  const FORM_IDS=['company','missedLeads','closeRate','unfollowedQuotes','quoteWinRate','avgDeal','margin','staff','hours','hourCost'];
+  const FORM_IDS=['company','website','missedLeads','closeRate','unfollowedQuotes','quoteWinRate','avgDeal','margin','staff','hours','hourCost'];
   const QUESTIONS=[
     {id:'p1',category:'People',label:'Decisions repeatedly wait for one leader.'},
     {id:'p2',category:'People',label:'Ownership becomes unclear between employees or teams.'},
@@ -305,7 +347,14 @@
     $('scoreBars').innerHTML=categories.map(cat=>'<div class="score-row"><div class="score-label"><span>'+cat+'</span><b>'+(scores[cat]===null?'Not assessed':scores[cat]+' / 100')+'</b></div><div class="track"><div class="fill" style="width:'+(scores[cat]??0)+'%"></div></div></div>').join('');
     $('topFindings').innerHTML=recommendations(latest.results).map((rec,i)=>'<div class="finding"><div class="number">'+(i+1)+'</div><div><strong>'+rec.name+'</strong><p>'+rec.body+'</p></div></div>').join('');
     $('paidOfferBtn').href=ENQUIRY_FORM;
-    $('paidOfferBtn').onclick=()=>{if(!demo&&raw.company.trim()){try{sessionStorage.setItem('aetheris-xray-contact-prefill',JSON.stringify({company:raw.company.trim().slice(0,120)}));}catch(e){}}};
+    ['paidOfferBtn','roadmapOfferBtn'].forEach(id=>{$(id).onclick=()=>{if(!demo&&raw.company.trim()){try{sessionStorage.setItem('aetheris-xray-contact-prefill',JSON.stringify({company:raw.company.trim().slice(0,120)}));}catch(e){}}};});
+    $('instantOfferBtn').onclick=()=>{try{
+      sessionStorage.setItem('aetheris-xray-checkout-prefill',JSON.stringify({
+        company:demo?'':raw.company.trim().slice(0,120),
+        website:demo?'':raw.website.trim().slice(0,240),
+        demo:demo===true
+      }));
+    }catch(e){}};
     $('paidOffer').hidden=false;
     $('results').classList.add('visible');
     $('results').scrollIntoView({behavior:'smooth',block:'start'});
@@ -314,7 +363,7 @@
   $('jumpBtn').onclick=()=>{$('assessment').scrollIntoView({behavior:'smooth'});};
   $('prevBtn').onclick=()=>showStep(step-1);
   $('nextBtn').onclick=()=>showStep(step+1);
-  $('xrayForm').onsubmit=e=>{e.preventDefault();const any=FORM_IDS.slice(1).some(id=>$(id).value!=='')||QUESTIONS.some(q=>$(q.id).value!=='');if(!any){alert('Add at least one estimate or friction observation to generate an X-Ray.');return;}render();};
+  $('xrayForm').onsubmit=e=>{e.preventDefault();const any=FORM_IDS.slice(2).some(id=>$(id).value!=='')||QUESTIONS.some(q=>$(q.id).value!=='');if(!any){alert('Add at least one estimate or friction observation to generate an X-Ray.');return;}render();};
 
   $('editBtn').onclick=()=>{$('assessment').scrollIntoView({behavior:'smooth'});};
   $('printBtn').onclick=()=>window.print();
