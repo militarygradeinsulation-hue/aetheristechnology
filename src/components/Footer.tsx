@@ -12,7 +12,7 @@ export const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 py-4">
           <div className="flex items-center space-x-3">
             <img src="/aetheris-logo.png" alt="Aetheris AI Logo" className="w-14 h-14 object-contain" />
-            <span className="text-sm text-muted-foreground">© {currentYear} Aetheris · Chaos Theory Forensics</span>
+            <span className="text-sm text-muted-foreground">Aetheris · Chaos Theory Forensics</span>
           </div>
           <div className="flex flex-col items-center md:items-end gap-1">
             <a
@@ -31,6 +31,13 @@ export const Footer: React.FC = () => {
               Chaos Theory Forensics · Real Findings · No Sugar
             </p>
           </div>
+        </div>
+        <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
+          Copyright © {currentYear} · Owned by{" "}
+          <a href="https://aetheris.technology" className="font-medium text-foreground hover:text-amber">
+            Aetheris.Technology
+          </a>{" "}
+          · All rights reserved.
         </div>
       </div>
     </footer>
