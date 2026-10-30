@@ -42,8 +42,8 @@ describe("canonical Aetheris home, standalone explainer and restored chaos map",
     expect(main).toContain('<HomeMindMapSection />');
     expect(main).toContain('to="/stop-guessing"');
     expect(map).toContain('<LeakMindMap');
-    expect(map).toContain('useState<TabId>("symptoms")');
-    expect(map).toContain('navigate("/leak-audit/self-scan")');
+    expect(map).toContain('useState<TabId>("all")');
+    expect(map).toContain('navigate("/book")');
     expect(physics).toContain('useChaosPhysics(');
   });
 

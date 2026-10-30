@@ -5,11 +5,23 @@ on:
     paths:
       - 'apps/business-xray/**'
       - 'public/business-xray/**'
+      - 'public/sitemap.xml'
+      - 'public/llms.txt'
+      - 'public/f2ae351ef1aac49ba48ce811dfe25983.txt'
+      - 'growth/business-xray/**'
+      - 'scripts/business_xray_growth/**'
+      - '.github/workflows/business-xray-growth.yml'
       - '.github/workflows/business-xray.yml'
   pull_request:
     paths:
       - 'apps/business-xray/**'
       - 'public/business-xray/**'
+      - 'public/sitemap.xml'
+      - 'public/llms.txt'
+      - 'public/f2ae351ef1aac49ba48ce811dfe25983.txt'
+      - 'growth/business-xray/**'
+      - 'scripts/business_xray_growth/**'
+      - '.github/workflows/business-xray-growth.yml'
       - '.github/workflows/business-xray.yml'
   workflow_dispatch:
 
@@ -36,4 +48,23 @@ jobs:
       - name: Check zero-cost public prototype
         run: |
           test -s ../../public/business-xray/index.html
-          grep -q 'Aetheris | Business X-Ray' ../../public/business-xray/index.html
+          grep -q 'Free Business X-Ray:' ../../public/business-xray/index.html
+          grep -q 'rel="canonical" href="https://aetheris.technology/business-xray/index.html"' ../../public/business-xray/index.html
+          grep -q 'SoftwareApplication' ../../public/business-xray/index.html
+
+  growth-qa:
+    name: Validate SEO, public ICP research and safe campaign generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run offline growth regression tests
+        run: python -m unittest discover -s scripts/business_xray_growth -p 'test_*.py' -v
+      - name: Validate static SEO and produce draft artifacts without external requests
+        run: python scripts/business_xray_growth/run.py --offline --out growth-qa
+      - name: Validate IndexNow key config without submitting anything
+        run: python -m scripts.business_xray_growth.indexnow --offline --out growth-qa/indexnow.json

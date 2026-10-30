@@ -1,0 +1,89 @@
+name: Business X-Ray organic growth and ICP intelligence
+
+on:
+  # Two review cycles a week. GitHub schedules may run late on busy days.
+  schedule:
+    - cron: '23 13 * * 1,4'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'public/business-xray/**'
+      - 'public/sitemap.xml'
+      - 'growth/business-xray/**'
+      - 'scripts/business_xray_growth/**'
+      - '.github/workflows/business-xray-growth.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  research-and-drafts:
+    name: Public research, SEO audit and organic drafts (no paid APIs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Get the repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test the deterministic offline pipeline
+        run: |
+          python -m unittest discover -s scripts/business_xray_growth -p 'test_*.py' -v
+          python scripts/business_xray_growth/run.py --offline --out growth-qa
+      - name: Collect public company signals and check the live website
+        run: python scripts/business_xray_growth/run.py --out growth-out
+      - name: Preserve reviewable outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: business-xray-growth-review
+          path: growth-out/
+          retention-days: 21
+          if-no-files-found: error
+      - name: Create or update one human-review issue per week
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('growth-out/summary.json', 'utf8'));
+            const md = fs.readFileSync('growth-out/review.md', 'utf8');
+            const title = 'Business X-Ray growth review: ' + data.review_week;
+            const { owner, repo } = context.repo;
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', per_page: 100
+            });
+            const old = issues.find(i => !i.pull_request && i.title === title);
+            if (old) {
+              await github.rest.issues.update({
+                owner, repo, issue_number: old.number, body: md.slice(0, 60000)
+              });
+            } else {
+              await github.rest.issues.create({
+                owner, repo, title, body: md.slice(0, 60000)
+              });
+            }
+      - name: Restore last successful IndexNow notification cache
+        id: index-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/business-xray-indexnow-marker
+          key: bx-indexnow-${{ hashFiles('public/business-xray/**', 'public/sitemap.xml', 'public/f2ae351ef1aac49ba48ce811dfe25983.txt') }}
+      - name: Notify IndexNow only if all public URLs are deployed
+        id: notify
+        if: steps.index-cache.outputs.cache-hit != 'true'
+        run: python -m scripts.business_xray_growth.indexnow --out growth-out/indexnow.json
+      - name: Cache successful notification to avoid duplicate unchanged submissions
+        if: steps.index-cache.outputs.cache-hit != 'true' && steps.notify.outputs.submitted == 'true'
+        run: |
+          mkdir -p .cache
+          echo 'IndexNow accepted URL notification; this is not a guarantee of indexing.' > .cache/business-xray-indexnow-marker
+      - name: Save successful IndexNow notification cache
+        if: steps.index-cache.outputs.cache-hit != 'true' && steps.notify.outputs.submitted == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/business-xray-indexnow-marker
+          key: bx-indexnow-${{ hashFiles('public/business-xray/**', 'public/sitemap.xml', 'public/f2ae351ef1aac49ba48ce811dfe25983.txt') }}

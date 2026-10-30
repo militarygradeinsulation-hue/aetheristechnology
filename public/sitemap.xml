@@ -272,4 +272,10 @@
   <url><loc>https://aetheris.technology/leak-audit/self-scan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://aetheris.technology/indianapolis/contractor-follow-up</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://aetheris.technology/indianapolis/service-business-lead-tracking</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <!-- Business X-Ray: public crawlable diagnostic and owner-useful industry guides -->
+  <url><loc>https://aetheris.technology/business-xray/index.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://aetheris.technology/business-xray/guide/index.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://aetheris.technology/business-xray/industries/hvac/index.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://aetheris.technology/business-xray/industries/roofing/index.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://aetheris.technology/business-xray/industries/manufacturing/index.html</loc><lastmod>2026-10-30</lastmod></url>
 </urlset>
