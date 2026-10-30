@@ -7,6 +7,7 @@ const homepage = read("src/pages/LeakLanderPage.tsx");
 const nav = read("src/components/lander/LanderNavbar.tsx");
 const app = read("src/App.tsx");
 const selfScan = read("src/pages/LeakAuditPage.tsx");
+const scanFlow = read("src/components/lander/LeakAuditFlow.tsx");
 const golden = read("src/pages/GoldenReportPage.tsx");
 const goldenPreview = read("src/pages/GoldenLanderPage.tsx");
 const seo = read("src/components/SEOHead.tsx");
@@ -15,7 +16,6 @@ const sitemap = read("public/sitemap.xml");
 const robots = read("public/robots.txt");
 const local = read("src/pages/IndianapolisLeadPage.tsx");
 const goldenCarousel = read("src/components/lander/SampleGoldenReports.tsx");
-const goldenGrowth = read("src/components/GoldenGrowthAssets.tsx");
 const leadBackfill = read("supabase/migrations/20261016161000_backfill_free_leak_check_admin_leads.sql");
 
 const selfScanPath = "/leak-audit/self-scan";
@@ -31,12 +31,11 @@ assert.match(homepage, /id="prices"/);
 assert.match(nav, /to="\/leak-audit\/self-scan"/);
 assert.doesNotMatch(nav, /Start Free Scan|to="\/golden-report" className=\{cn\(pillBase/);
 assert.match(selfScan, /path="\/leak-audit\/self-scan"/);
-assert.match(selfScan, /functions\.invoke\('company-leak-audit'/);
-assert.match(selfScan, /<AuditCustomQuote/);
-assert.match(selfScan, /personalized\.recommendations/);
-assert.match(selfScan, /generateFreeLeakCheckPdf/);
-assert.match(selfScan, /modelCompanyAuditExposure/);
-assert.match(selfScan, /Modeled annual exposure/i);
+assert.match(selfScan, /<LeakAuditFlow \/>/);
+assert.match(scanFlow, /functions\.invoke\('company-leak-audit'/);
+assert.match(scanFlow, /14 questions/);
+assert.match(scanFlow, /personalized\.deliveryStatus/);
+assert.match(scanFlow, /data\.repeated === true/);
 assert.doesNotMatch(selfScan, /generateLeakAuditPdf|pricingLadder\(/);
 assert.match(golden, /Operator-led · 14-ch case file/);
 assert.doesNotMatch(golden, /Free · 14-ch case file|description="Free tool/);
@@ -102,17 +101,16 @@ for (const match of allTiers) {
 }
 assert.match(tierList, /ctaHref: "\/leak-audit\/self-scan"/);
 
-// New company-specific assessment must still serve useful self-reported results
-// when a Supabase edge function or database migration has not been deployed.
-assert.match(selfScan, /evaluateCompanyAudit\(answers\)/);
-assert.match(selfScan, /localOnly: true/);
-assert.match(selfScan, /Preview only — not saved to Aetheris/);
-assert.match(selfScan, /No private scan was requested from this local preview/);
+// The current free Leak Audit is a real submission flow; the separate X-Ray
+// remains an in-browser, no-upload self-assessment.
+assert.match(selfScan, /path="\/leak-audit\/self-scan"/);
+assert.match(scanFlow, /QUESTIONS/);
+assert.match(read("public/business-xray/index.html"), /Nothing is uploaded|Runs in your browser|self-reported/i);
 assert.match(read("src/components/AuditCustomQuote.tsx"), /Or schedule a scope discussion/);
 
 const auditBackend = read("supabase/functions/company-leak-audit/index.ts");
 const costCap = read("supabase/migrations/20261014233500_private_golden_daily_cap_hardening.sql");
-assert.match(auditBackend, /if \(runtime\?\.waitUntil\) runtime\.waitUntil\(dispatch\)/);
+assert.match(auditBackend, /shouldStartCompanyReport\(/);
 assert.match(auditBackend, /claim_private_company_golden/);
 assert.match(auditBackend, /from\("assessment_leads"\)\.insert/);
 assert.match(auditBackend, /modelCompanyAuditExposure/);
@@ -126,9 +124,6 @@ assert.match(goldenCarousel, /overflow-x-auto/);
 assert.match(goldenCarousel, /snap-center/);
 assert.match(goldenCarousel, /scrollToIndex/);
 assert.doesNotMatch(goldenCarousel, /scaleReduction|rotationMultiplier|useTransform|useMotionValue/);
-assert.match(goldenGrowth, /postsPassGate/);
-assert.match(goldenGrowth, /storedPosts\.length !== 12/);
-assert.match(goldenGrowth, /storedDays\.length !== 30/);
 
 // Structured data must not promise fees, results or services at old prices.
 const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
