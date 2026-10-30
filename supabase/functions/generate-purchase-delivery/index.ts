@@ -27,7 +27,7 @@ const TOOL_FUNCTIONS: Record<string, string> = {
 serve(async (req) => {
   // This function uses the service role to read private paid orders. Reject
   // public anonymous calls before looking up a deliverable or starting a scan.
-  const authorization = req.headers.get("authorization")?.replace(/^Bearer\\s+/i, "").trim();
+  const authorization = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
   if (req.method !== "POST" || !SUPABASE_SERVICE_ROLE_KEY || authorization !== SUPABASE_SERVICE_ROLE_KEY) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
