@@ -15,9 +15,9 @@ class GrowthPipelineTest(unittest.TestCase):
 
     def test_five_pages_have_good_static_seo(self):
         rows = growth.static_seo_audit()
-        self.assertEqual(len(rows), 5)
+        self.assertEqual(len(rows), 6)
         self.assertTrue(all(r["pass"] for r in rows), rows)
-        self.assertEqual(len({r["title"] for r in rows}), 5)
+        self.assertEqual(len({r["title"] for r in rows}), 6)
 
     def test_prospect_seed_is_cited_and_not_claimed_as_verified_pain(self):
         rows = growth.read_seeds(self.today)
