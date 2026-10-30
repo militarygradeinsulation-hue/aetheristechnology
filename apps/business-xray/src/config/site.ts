@@ -1,6 +1,6 @@
 /**
  * Site-wide configuration. Edit here, not in components.
- * ENQUIRY_EMAIL receives mailto drafts — matches the public Aetheris contact-page address; verify inbox delivery before launch.
+ * ENQUIRY_EMAIL identifies the Aetheris inbox for the on-page fixed-recipient email service. Verify actual production delivery before launch.
  */
 export const SITE = {
   company: "Aetheris Technology",
