@@ -15,6 +15,12 @@ export const Footer: React.FC = () => {
             <span className="text-sm text-muted-foreground">© {currentYear} Aetheris · Chaos Theory Forensics</span>
           </div>
           <div className="flex flex-col items-center md:items-end gap-1">
+            <a
+              href="/business-xray/index.html"
+              className="font-case text-[10px] uppercase tracking-widest text-muted-foreground hover:text-amber transition-colors"
+            >
+              Free Business X-Ray
+            </a>
             <Link
               to="/digital-you"
               className="font-case text-[10px] uppercase tracking-widest text-muted-foreground hover:text-amber transition-colors"
