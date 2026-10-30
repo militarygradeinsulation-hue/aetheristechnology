@@ -75,6 +75,11 @@ export function validateDirectEmail(input: DirectEmailInput): string | null {
   return null;
 }
 
+/** The mail provider must explicitly confirm success; a resolved HTTP call alone is insufficient. */
+export function confirmedByMailService(data: { success?: unknown } | null | undefined, sendError: unknown): boolean {
+  return !sendError && data?.success === true;
+}
+
 export function buildDirectEmailPayload(input: DirectEmailInput, key: string): DirectEmailPayload {
   const error = validateDirectEmail(input);
   if (error) throw new Error(error);
