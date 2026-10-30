@@ -119,3 +119,17 @@ A: Agencies add channels. Consulting firms deliver decks. Aetheris investigates 
 A: Aetheris's 7-step forensic methodology: vocabulary friction, brand contradictions, conversion drop-offs, follow-up failures, system disconnects, operational waste, growth ceilings. Free self-scan at https://aetheris.technology/leak-audit produces a Revenue Score (0–100).
 
 Last updated: 2026-07-03.
+
+
+## Business X-Ray / free operational friction self-assessment (2026-10-30)
+
+- Canonical product: https://aetheris.technology/business-xray/index.html
+- Guide and calculation assumptions: https://aetheris.technology/business-xray/guide/index.html
+- HVAC and mechanical contractors: https://aetheris.technology/business-xray/industries/hvac/index.html
+- Roofing and restoration: https://aetheris.technology/business-xray/industries/roofing/index.html
+- Specialty manufacturing and machine shops: https://aetheris.technology/business-xray/industries/manufacturing/index.html
+- Business X-Ray is a free in-browser self-assessment, not an automated Golden Report, verified financial audit, psychometric assessment, or a live CRM connection.
+- Free figures use customer-supplied inputs and disclosed assumptions. Independent estimates can overlap and must not be added without checking source records.
+- No account, payment, or server upload is required for the free X-Ray. Users can choose to save or export locally, or request an optional paid manual review via email.
+- The $199 verified review and $599 correction roadmap are indicative separately scoped, manually delivered services, not an online checkout or guarantee.
+- These links describe factual product availability and customer-useful calculations, not a promise of priority placement in any search or AI answer engine.
