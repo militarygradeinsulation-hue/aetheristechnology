@@ -214,6 +214,16 @@ const LeakLanderPage: React.FC = () => {
             </div>
           )}
         </div>
+        <a
+          href="/business-xray/index.html"
+          className="group mt-4 inline-flex max-w-4xl items-center justify-between gap-4 rounded-xl border border-amber/30 bg-card/40 px-5 py-4 text-left text-foreground transition hover:border-amber/60 hover:bg-card/70"
+        >
+          <span>
+            <span className="block text-sm font-semibold">Prefer to start privately?</span>
+            <span className="mt-1 block text-xs text-muted-foreground">Take the free Business X-Ray. Understand friction across people, processes, and systems before buying another tool.</span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-amber transition-transform group-hover:translate-x-1" />
+        </a>
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
