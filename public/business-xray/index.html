@@ -218,7 +218,7 @@
       <article class="results-panel"><h3>Three places to investigate first</h3><div id="topFindings"></div></article>
     </div>
     <div class="disclaimer"><strong>How to read the numbers:</strong> Each financial figure is an independent scenario calculated from your assumptions. Some opportunities may represent the same customers or overlapping work. <strong>Do not add the three figures together.</strong> Validate missed inquiries, quote outcomes, and labor hours against records before claiming savings or ROI. This diagnostic does not infer psychological traits.</div>
-    <aside class="paid-offer no-print" id="paidOffer" hidden><div><div class="eyebrow" style="margin-bottom:4px">Next step / Human-verified review</div><h3>Validate the numbers before changing the business.</h3><p>Verified Business X-Ray · Evidence review and prioritized action brief · $199. Manual service; scope, delivery and payment confirmed by email before work begins.</p></div><a class="btn" id="paidOfferBtn" href="mailto:aetheris.technology@outlook.com">Request verified review</a></aside>
+    <aside class="paid-offer no-print" id="paidOffer" hidden><div><div class="eyebrow" style="margin-bottom:4px">Next step / Human-verified review</div><h3>Validate the numbers before changing the business.</h3><p>Verified Business X-Ray · Evidence review and prioritized action brief · $199. Manual service; scope, delivery and payment confirmed by email before work begins.</p></div><a class="btn" id="paidOfferBtn" href="/business-xray/contact?service=business_xray_verified">Send an enquiry</a></aside>
     <div class="report-actions no-print"><button type="button" class="btn" id="printBtn">Print / save PDF</button><button type="button" class="btn ghost" id="exportBtn">Export inputs and results</button><button type="button" class="btn ghost" id="newBtn">Start a new X-Ray</button></div>
   </section>
 </main>
@@ -227,7 +227,7 @@
 (function(){
   'use strict';
   // This free static version uses a customer-initiated email enquiry, not checkout.
-  const ENQUIRY_EMAIL='aetheris.technology@outlook.com';
+  const ENQUIRY_FORM='/business-xray/contact?service=business_xray_verified';
   const FORM_IDS=['company','missedLeads','closeRate','unfollowedQuotes','quoteWinRate','avgDeal','margin','staff','hours','hourCost'];
   const QUESTIONS=[
     {id:'p1',category:'People',label:'Decisions repeatedly wait for one leader.'},
@@ -304,9 +304,8 @@
     $('timeExplain').textContent=timeValue===null?'Enter people impacted, hours each week, and loaded hourly cost.':'People × hours/week × 4.33 weeks × loaded hourly cost.';
     $('scoreBars').innerHTML=categories.map(cat=>'<div class="score-row"><div class="score-label"><span>'+cat+'</span><b>'+(scores[cat]===null?'Not assessed':scores[cat]+' / 100')+'</b></div><div class="track"><div class="fill" style="width:'+(scores[cat]??0)+'%"></div></div></div>').join('');
     $('topFindings').innerHTML=recommendations(latest.results).map((rec,i)=>'<div class="finding"><div class="number">'+(i+1)+'</div><div><strong>'+rec.name+'</strong><p>'+rec.body+'</p></div></div>').join('');
-    const subject=encodeURIComponent('Aetheris Business X-Ray - Verified Review');
-    const body=encodeURIComponent('Hello Aetheris,\n\nPlease contact me about a $199 Verified Business X-Ray.\nBusiness: '+(raw.company.trim()||'(not provided)')+'\n\nI understand this is an enquiry, not a payment or completed order.');
-    $('paidOfferBtn').href='mailto:'+ENQUIRY_EMAIL+'?subject='+subject+'&body='+body;
+    $('paidOfferBtn').href=ENQUIRY_FORM;
+    $('paidOfferBtn').onclick=()=>{if(!demo&&raw.company.trim()){try{sessionStorage.setItem('aetheris-xray-contact-prefill',JSON.stringify({company:raw.company.trim().slice(0,120)}));}catch(e){}}};
     $('paidOffer').hidden=false;
     $('results').classList.add('visible');
     $('results').scrollIntoView({behavior:'smooth',block:'start'});
