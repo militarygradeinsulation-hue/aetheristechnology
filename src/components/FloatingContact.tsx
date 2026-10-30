@@ -33,14 +33,14 @@ export const FloatingContact: React.FC = () => {
               <Phone className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">(317) 376-2110</span>
             </a>
-            <a
-              href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business"
+            <Link
+              to="/email"
               className="flex items-center gap-3 glass px-5 py-3 rounded-full hover:scale-[1.03] transition-transform shadow-lg group"
               onClick={() => trackEvent('click', { label: 'email', location: 'floating' })}
             >
               <Mail className="w-5 h-5 text-amber" />
               <span className="text-sm font-medium text-foreground group-hover:text-amber transition-colors">Email Us</span>
-            </a>
+            </Link>
             <a
               href="https://www.linkedin.com/in/thejosephtoney"
               target="_blank"
@@ -124,10 +124,10 @@ const StickyContactBar: React.FC = () => {
           <Phone className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">Call</span>
         </a>
-        <a href="mailto:aetheris.technology@outlook.com?subject=I%20Need%20Help%20With%20My%20Business" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('click', { label: 'email', location: 'sticky_bar' })}>
+        <Link to="/email" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('click', { label: 'email', location: 'sticky_bar' })}>
           <Mail className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">Email</span>
-        </a>
+        </Link>
         <a href="https://www.linkedin.com/in/thejosephtoney" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 p-2" onClick={() => trackEvent('linkedin_click', { location: 'sticky_bar' })}>
           <Linkedin className="w-5 h-5 text-amber" />
           <span className="text-[10px] text-muted-foreground">LinkedIn</span>

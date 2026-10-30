@@ -493,12 +493,12 @@ const LeakLanderPage: React.FC = () => {
           <a href="tel:+13173762110" className="inline-flex items-center gap-2 hover:text-amber transition-colors">
             <Phone className="h-3.5 w-3.5 text-amber" /> (317) 376-2110
           </a>
-          <a
-            href="mailto:Aetheris.technology@outlook.com"
+          <Link
+            to="/email"
             className="inline-flex items-center gap-2 hover:text-amber transition-colors"
           >
-            <Mail className="h-3.5 w-3.5 text-amber" /> Aetheris.technology@outlook.com
-          </a>
+            <Mail className="h-3.5 w-3.5 text-amber" /> Email Aetheris
+          </Link>
           <span className="inline-flex items-center gap-2 text-muted-foreground">
             <MapPin className="h-3.5 w-3.5 text-amber" /> Noblesville, Indiana
           </span>
