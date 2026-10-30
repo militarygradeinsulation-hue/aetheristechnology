@@ -29,6 +29,6 @@ jobs:
       - name: Install exact locked dependencies
         run: bun install --frozen-lockfile
       - name: Test executive meeting flow
-        run: bunx vitest run src/lib/executiveMeetingFlow.test.ts src/lib/buyerIntentCore.test.ts src/lib/businessXrayPayments.test.ts
+        run: bunx vitest run src/lib/executiveMeetingFlow.test.ts src/lib/buyerIntentCore.test.ts src/lib/businessXrayPayments.test.ts src/lib/aetherisDirectEmail.test.ts
       - name: Build website
         run: bun run build
