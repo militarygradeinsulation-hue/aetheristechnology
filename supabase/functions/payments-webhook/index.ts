@@ -104,13 +104,19 @@ serve(async (req) => {
     console.log("event:", event.type, "env:", env);
     switch (event.type) {
       case "checkout.session.completed":
-      case "checkout.session.async_payment_succeeded":
-        if (isBusinessXrayServiceSession(event.data.object)) {
-          await recordPaidBusinessXray(event.data.object, env);
-        } else if (event.type === "checkout.session.completed") {
-          await handleCheckoutCompleted(event.data.object, env);
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object;
+        // Delayed methods emit completed while unpaid. No paid downloads or
+        // service fulfillment may be issued until Stripe confirms payment.
+        if (event.type === "checkout.session.async_payment_succeeded" && session.mode !== "payment") break;
+        if (session.mode === "payment" && session.payment_status !== "paid") break;
+        if (isBusinessXrayServiceSession(session)) {
+          await recordPaidBusinessXray(session, env);
+        } else {
+          await handleCheckoutCompleted(session, env);
         }
         break;
+      }
       case "checkout.session.async_payment_failed":
         console.warn("Asynchronous checkout failed", event.data.object?.id);
         break;
