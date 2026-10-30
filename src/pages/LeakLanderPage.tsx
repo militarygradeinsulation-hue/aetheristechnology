@@ -214,6 +214,23 @@ const LeakLanderPage: React.FC = () => {
             </div>
           )}
         </div>
+        <a
+          href="/business-xray/index.html"
+          className="group mt-4 flex w-full max-w-4xl items-center justify-between gap-5 rounded-xl border border-amber/35 bg-card/50 px-5 py-5 text-left text-foreground transition hover:border-amber/75 hover:bg-card/75 sm:px-6"
+        >
+          <div>
+            <p className="font-case text-[10px] font-bold uppercase tracking-[0.19em] text-amber">
+              Free operational diagnostic
+            </p>
+            <p className="mt-2 font-forensic text-lg font-bold sm:text-xl">
+              What is the cost of how your company operates?
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+              Take the private Business X-Ray. Map people, processes and systems and see transparent, unverified estimates. No account required.
+            </p>
+          </div>
+          <ArrowRight className="h-6 w-6 shrink-0 text-amber transition-transform group-hover:translate-x-1" />
+        </a>
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
