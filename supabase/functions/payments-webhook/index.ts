@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
 import { planById, planByLookupKey } from "../_shared/plans.ts";
+import { isBusinessXrayServiceSession, verifiedBusinessXrayPayment } from "../_shared/business-xray-offers.ts";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const supabase = createClient(
@@ -103,7 +104,15 @@ serve(async (req) => {
     console.log("event:", event.type, "env:", env);
     switch (event.type) {
       case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object, env);
+      case "checkout.session.async_payment_succeeded":
+        if (isBusinessXrayServiceSession(event.data.object)) {
+          await recordPaidBusinessXray(event.data.object, env);
+        } else if (event.type === "checkout.session.completed") {
+          await handleCheckoutCompleted(event.data.object, env);
+        }
+        break;
+      case "checkout.session.async_payment_failed":
+        console.warn("Asynchronous checkout failed", event.data.object?.id);
         break;
       case "customer.subscription.created":
         await handleSubscriptionCreated(event.data.object, env);
@@ -320,6 +329,33 @@ async function recordSaleAndCommissions(args: {
     summary: `${args.kind} ${(amount / 100).toFixed(2)} ${args.currency.toUpperCase()} (${args.price_id ?? "?"})${fixed ? ' [FLAGSHIP]' : ''}`,
     metadata: { env: args.env, ...splitMeta, ...(args.metadata ?? {}) },
   });
+}
+
+/** Manual service fulfillment: only a paid, amount-verified event is recorded. */
+async function recordPaidBusinessXray(session: any, env: StripeEnv) {
+  const offer = verifiedBusinessXrayPayment(session);
+  if (!offer) {
+    // Stripe may emit checkout.session.completed before an asynchronous payment is paid.
+    if (session.payment_status === "unpaid") return;
+    throw new Error("Business X-Ray checkout metadata, amount or payment state did not verify");
+  }
+  const email = session.customer_details?.email || session.customer_email || null;
+  if (!email) throw new Error("Business X-Ray payment missing a customer email");
+  // The existing sale recorder includes idempotent session constraints and CRM activity.
+  await recordSaleAndCommissions({
+    amount_cents: offer.amountCents, currency: offer.currency,
+    email, name: session.customer_details?.name || null,
+    stripe_customer_id: session.customer || null,
+    price_id: offer.key, product_name: offer.label,
+    kind: "business_xray_manual_service", status: "paid",
+    stripe_session_id: session.id, env,
+    metadata: { purpose: "business_xray_manual_service", xray_tier: offer.tier,
+      fulfillment: "manual_review_required", stripe_session_id: session.id },
+  });
+  await logActivity({ event_type: "business_xray.paid_review_requested",
+    entity_type: "stripe_checkout", entity_id: session.id,
+    summary: `${offer.label}: paid; human fulfillment required`,
+    metadata: { tier: offer.tier, env, session_id: session.id } });
 }
 
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {

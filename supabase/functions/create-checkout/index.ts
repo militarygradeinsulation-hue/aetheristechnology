@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { integrationIdentifier, planByLookupKey } from "../_shared/plans.ts";
+import { businessXrayOfferForKey, BUSINESS_XRAY_RETURN_URL } from "../_shared/business-xray-offers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,9 @@ serve(async (req) => {
       });
     }
 
-    const env = (environment || 'sandbox') as StripeEnv;
+    const env = (environment === "live" ? "live" : "sandbox") as StripeEnv;
+    const xray = businessXrayOfferForKey(priceId);
+    if (priceId.startsWith("business_xray_") && !xray) throw new Error("Unknown Business X-Ray offer");
     const stripe = createStripeClient(env);
 
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
@@ -34,6 +37,9 @@ serve(async (req) => {
       });
     }
     const stripePrice = prices.data[0];
+    if (xray && (stripePrice.active !== true || stripePrice.type !== "one_time" || stripePrice.unit_amount !== xray.amountCents || stripePrice.currency !== xray.currency)) {
+      return new Response(JSON.stringify({ error: "Business X-Ray price is not configured at the expected amount" }), {status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" }});
+    }
     const isRecurring = stripePrice.type === "recurring";
     const plan = planByLookupKey(stripePrice.lookup_key || priceId);
 
@@ -51,10 +57,10 @@ serve(async (req) => {
     }
 
     const sessionParams: any = {
-      line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
+      line_items: [{ price: stripePrice.id, quantity: xray ? 1 : quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded",
-      return_url: returnUrl || `${req.headers.get("origin")}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+      return_url: xray ? BUSINESS_XRAY_RETURN_URL : returnUrl || `${req.headers.get("origin")}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
       ...(customerEmail || userEmail ? { customer_email: customerEmail || userEmail } : {}),
       // Stable prefix plus 8 random lowercase letters, per Stripe's format.
       integration_identifier: integrationIdentifier("aetheris"),
@@ -70,6 +76,13 @@ serve(async (req) => {
       Object.assign(meta, metadata);
     }
     meta.priceId = priceId;
+    if (xray) {
+      // Override any untrusted product metadata supplied by the client.
+      for (const k of Object.keys(meta)) if (!["priceId", "userId"].includes(k)) delete meta[k];
+      meta.purpose = "business_xray_manual_service";
+      meta.xray_tier = xray.tier;
+      meta.product_name = xray.label;
+    }
     if (plan) meta.plan_id = plan.id;
     if (userId) meta.userId = userId;
 

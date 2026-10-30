@@ -292,6 +292,7 @@ export default function CheckoutReturn() {
   const type = searchParams.get("type");
   const topic = searchParams.get("topic");
 
+  const isBusinessXray = type === "business_xray";
   const isPlaybook = type === "playbook";
   const isPlaybookUnlock = type === "playbook_unlock";
   const isScanReport = type === "scan_report";
@@ -326,7 +327,7 @@ export default function CheckoutReturn() {
       if (error) throw error;
       return Array.isArray(data) && data.length > 0;
     },
-    enabled: !!sessionId && !isPlaybook && !isScanReport && !isSubscription && !isDeliverable,
+    enabled: !!sessionId && !isBusinessXray && !isPlaybook && !isScanReport && !isSubscription && !isDeliverable,
   });
 
   const showDeliverable = isDeliverable || hasDeliverables;
@@ -338,7 +339,14 @@ export default function CheckoutReturn() {
         <div className="text-center max-w-md">
           {sessionId ? (
             <>
-              {isPlaybook ? (
+              {isBusinessXray ? (
+                <>
+                  <Loader2 className="w-12 h-12 text-amber mx-auto mb-4" />
+                  <h1 className="text-3xl font-bold mb-3">Payment confirmation processing</h1>
+                  <p className="text-muted-foreground mb-4">Your checkout has returned to Aetheris. We verify payment using Stripe webhooks before starting any review. This screen alone does not establish that payment succeeded.</p>
+                  <p className="text-sm text-muted-foreground">A person will follow up when payment is confirmed. Questions? <a className="underline text-amber" href="mailto:aetheris.technology@outlook.com">Contact Aetheris</a>.</p>
+                </>
+              ) : isPlaybook ? (
                 <>
                   {(!playbook || playbook.status === 'pending' || playbook.status === 'generating') && (
                     <>
