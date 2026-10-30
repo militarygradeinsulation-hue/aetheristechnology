@@ -515,7 +515,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") || "";
 
 
-    const callAi = async (model: string, timeoutMs: number) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const callAi = async (model: string, timeoutMs: number): Promise<Response> => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       signal: AbortSignal.timeout(timeoutMs),
       headers: {
@@ -768,29 +768,33 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
     let aiResponse: Response | null = null;
     let lastErrText = "";
     let hardStopStatus = 0; // 402 = credits exhausted, stop everything
-    outer: for (const m of models) {
+    for (const m of models) {
+      let res: Response;
       try {
-        aiResponse = await callAi(m.id, m.timeoutMs);
+        res = await callAi(m.id, m.timeoutMs);
       } catch (err: any) {
         lastErrText = err instanceof Error ? err.message : String(err);
         console.error(`AI gateway request failed (model=${m.id}):`, lastErrText);
         aiResponse = null;
         continue;
       }
-      if (!aiResponse) continue;
-      if (aiResponse.ok) break outer;
-      lastErrText = await aiResponse.clone().text();
-      console.error(`AI gateway error (model=${m.id}):`, aiResponse.status, lastErrText);
-      if (aiResponse.status === 402) { hardStopStatus = 402; break outer; }
+      aiResponse = res;
+      if (res.ok) break;
+      lastErrText = await res.clone().text();
+      console.error(`AI gateway error (model=${m.id}):`, res.status, lastErrText);
+      if (res.status === 402) { hardStopStatus = 402; break; }
       // 429/5xx/etc — try the next model immediately
     }
-    if (hardStopStatus === 0 && aiResponse && !aiResponse.ok && aiResponse.status === 429) {
+    const finalAi = aiResponse as Response | null;
+    const finalOk = finalAi?.ok === true;
+    const finalStatus = finalAi?.status ?? 503;
+    if (hardStopStatus === 0 && finalAi !== null && !finalOk && finalStatus === 429) {
       // treat exhausted retries on 429 as "try again later"
       hardStopStatus = 429;
     }
 
-    if (!aiResponse || !aiResponse.ok) {
-      const status = aiResponse?.status ?? 503;
+    if (finalAi === null || !finalOk) {
+      const status = finalStatus;
       console.error("AI gateway final failure:", status, lastErrText);
 
       if (status === 429) {
@@ -829,7 +833,7 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       });
     }
 
-    const aiData = await aiResponse.json();
+    const aiData = await (finalAi as Response).json();
     console.log("AI response received");
 
     let analysis: any = { score: null, grade: "?", companyName: "Unknown", executiveSummary: "", gaps: [], roadmap: [], roiTable: [], nextSteps: [], competitiveBrief: "", signals: null };
