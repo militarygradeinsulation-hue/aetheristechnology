@@ -187,7 +187,7 @@
       <article class="results-panel"><h3>Three places to investigate first</h3><div id="topFindings"></div></article>
     </div>
     <div class="disclaimer"><strong>How to read the numbers:</strong> Each financial figure is an independent scenario calculated from your assumptions. Some opportunities may represent the same customers or overlapping work. <strong>Do not add the three figures together.</strong> Validate missed inquiries, quote outcomes, and labor hours against records before claiming savings or ROI. This diagnostic does not infer psychological traits.</div>
-    <aside class="paid-offer no-print" id="paidOffer" hidden><div><div class="eyebrow" style="margin-bottom:4px">Next step / Human-verified review</div><h3>Validate the numbers before changing the business.</h3><p>Verified Business X-Ray · Evidence review and prioritized action brief · $199</p></div><a class="btn" id="paidOfferBtn" rel="noopener noreferrer" target="_blank">Get a verified X-Ray</a></aside>
+    <aside class="paid-offer no-print" id="paidOffer" hidden><div><div class="eyebrow" style="margin-bottom:4px">Next step / Human-verified review</div><h3>Validate the numbers before changing the business.</h3><p>Verified Business X-Ray · Evidence review and prioritized action brief · $199. Manual service; scope, delivery and payment confirmed by email before work begins.</p></div><a class="btn" id="paidOfferBtn" href="mailto:aetheris.technology@outlook.com">Request verified review</a></aside>
     <div class="report-actions no-print"><button type="button" class="btn" id="printBtn">Print / save PDF</button><button type="button" class="btn ghost" id="exportBtn">Export inputs and results</button><button type="button" class="btn ghost" id="newBtn">Start a new X-Ray</button></div>
   </section>
 </main>
@@ -195,8 +195,8 @@
 <script>
 (function(){
   'use strict';
-  // Paste your own live Stripe Payment Link here to activate the paid offer.
-  const PAID_AUDIT_URL='';
+  // This free static version uses a customer-initiated email enquiry, not checkout.
+  const ENQUIRY_EMAIL='aetheris.technology@outlook.com';
   const FORM_IDS=['company','missedLeads','closeRate','unfollowedQuotes','quoteWinRate','avgDeal','margin','staff','hours','hourCost'];
   const QUESTIONS=[
     {id:'p1',category:'People',label:'Decisions repeatedly wait for one leader.'},
@@ -273,6 +273,10 @@
     $('timeExplain').textContent=timeValue===null?'Enter people impacted, hours each week, and loaded hourly cost.':'People × hours/week × 4.33 weeks × loaded hourly cost.';
     $('scoreBars').innerHTML=categories.map(cat=>'<div class="score-row"><div class="score-label"><span>'+cat+'</span><b>'+(scores[cat]===null?'Not assessed':scores[cat]+' / 100')+'</b></div><div class="track"><div class="fill" style="width:'+(scores[cat]??0)+'%"></div></div></div>').join('');
     $('topFindings').innerHTML=recommendations(latest.results).map((rec,i)=>'<div class="finding"><div class="number">'+(i+1)+'</div><div><strong>'+rec.name+'</strong><p>'+rec.body+'</p></div></div>').join('');
+    const subject=encodeURIComponent('Aetheris Business X-Ray - Verified Review');
+    const body=encodeURIComponent('Hello Aetheris,\n\nPlease contact me about a $199 Verified Business X-Ray.\nBusiness: '+(raw.company.trim()||'(not provided)')+'\n\nI understand this is an enquiry, not a payment or completed order.');
+    $('paidOfferBtn').href='mailto:'+ENQUIRY_EMAIL+'?subject='+subject+'&body='+body;
+    $('paidOffer').hidden=false;
     $('results').classList.add('visible');
     $('results').scrollIntoView({behavior:'smooth',block:'start'});
   }
@@ -281,7 +285,7 @@
   $('prevBtn').onclick=()=>showStep(step-1);
   $('nextBtn').onclick=()=>showStep(step+1);
   $('xrayForm').onsubmit=e=>{e.preventDefault();const any=FORM_IDS.slice(1).some(id=>$(id).value!=='')||QUESTIONS.some(q=>$(q.id).value!=='');if(!any){alert('Add at least one estimate or friction observation to generate an X-Ray.');return;}render();};
-  if(/^https:\/\/[^\s]+$/.test(PAID_AUDIT_URL)){$('paidOfferBtn').href=PAID_AUDIT_URL;$('paidOffer').hidden=false;}
+
   $('editBtn').onclick=()=>{$('assessment').scrollIntoView({behavior:'smooth'});};
   $('printBtn').onclick=()=>window.print();
   $('exportBtn').onclick=()=>{if(!latest)return;const safe=(latest.inputs.company||'business').replace(/[^a-z0-9-]/gi,'-').slice(0,30);download('aetheris-xray-'+safe+'.json',JSON.stringify({...latest,notice:'Self-reported inputs. Financial outcomes are independent illustrative scenarios; do not add them together or claim verified savings.',generatedAt:new Date().toISOString()},null,2),'application/json');};
