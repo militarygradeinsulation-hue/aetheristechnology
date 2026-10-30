@@ -42,7 +42,7 @@ export default function BusinessXrayCheckoutPage() {
           <aside className="mt-7 rounded-xl border border-amber/30 p-5">
             <strong>Checkout activation is being verified.</strong>
             <p className="mt-2 text-sm text-muted-foreground">The payment account is connected to the Aetheris website, but this particular service checkout is not yet enabled. No payment has been attempted.</p>
-            <a className="mt-3 inline-block font-semibold text-amber underline" href="mailto:aetheris.technology@outlook.com?subject=Business%20X-Ray%20Service%20Request">Request the service by email</a>
+            <Link className="mt-3 inline-block font-semibold text-amber underline" to={`/business-xray/contact?service=${tier === "verified" ? "business_xray_verified" : "business_xray_roadmap"}`}>Send your enquiry from the website</Link>
           </aside>
         )}
       </main>

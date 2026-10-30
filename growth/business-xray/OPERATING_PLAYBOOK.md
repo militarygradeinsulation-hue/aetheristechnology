@@ -99,7 +99,7 @@ Organic posts use `utm_source`, `utm_medium`, `utm_campaign=business_xray`, and 
 | Impressions / clicks | Google Search Console and owned-channel insights after connecting | No figures invented |
 | Free scan starts | Real privacy-reviewed event only if tracking is enabled | Avoid tracking individual answers |
 | Completed scans | Valid completed assessments | Current browser-only tool does not automatically collect |
-| Review enquiries | Customer-initiated email or consent-based form | Mailto opens a draft; it is not proof an email was sent |
+| Review enquiries | Consent-based on-site email submission with provider-confirmed success | A link click or failed delivery is not proof an email was sent |
 | Paid clients | Verified payment/order record | Do not infer from clicking a button |
 | Confirmed recovered margin | Audited before-and-after financial evidence | Not equivalent to estimated opportunity |
 

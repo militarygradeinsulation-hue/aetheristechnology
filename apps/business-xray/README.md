@@ -38,7 +38,7 @@ src/
     engine.ts            computeAssessment() — deterministic calculation & ranking
     format.ts            Display rounding and labels
     export.ts            Customer JSON export (schema aetheris.business-xray/v1)
-    enquiry.ts           mailto: draft builder for paid-service enquiries
+    enquiry.ts           Direct-send payload, validation and optional summary
     sample.ts            Fictional demo business (always labelled Demo)
     store.ts             In-memory session store (no persistence)
     *.test.ts            Vitest tests for the engine, boundaries, zero-data case
@@ -48,7 +48,7 @@ src/
   routes/
     index.tsx            Public landing page (/)
     xray.tsx             Questionnaire + report (/xray, /xray?demo=true)
-    verify.tsx           Optional service enquiry via mailto (/verify)
+    verify.tsx           Direct-send enquiry with name/email/phone/LinkedIn/URL (/verify)
 ```
 
 Business logic never imports from components. Components never compute figures themselves — they call `computeAssessment()`.
@@ -106,7 +106,7 @@ The JSON export (`schema: "aetheris.business-xray/v1"`) is the integration bound
 
 ### (c) Aetheris Command CRM — *future*
 - **Direction:** X-Ray → CRM, only when a customer chooses to send an enquiry.
-- **Contract:** A lead record `{ tier, businessName?, contactName?, contactEmail, summaryText, exportSchema, engineVersion, demo }`. Until an authenticated server endpoint exists, the only channel is the customer-initiated `mailto:` draft built by `buildMailto()`. Any future endpoint must require explicit consent and must not receive raw answers unless the customer attaches the JSON themselves.
+- **Contract:** A lead record `{ tier, businessName?, contactName?, contactEmail, summaryText, exportSchema, engineVersion, demo }`. The existing Aetheris site now has an on-page, explicit-consent form that calls its fixed-recipient `notify-contact-submission` server function. In the standalone app, that same function can be called only when public Supabase endpoint configuration is supplied; otherwise visitors use the hosted Aetheris on-page form. No raw scan answers are sent without the person's opt-in summary checkbox. The website backend owns the inbox and sender credentials.
 
 ---
 
