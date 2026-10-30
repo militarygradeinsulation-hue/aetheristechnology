@@ -786,12 +786,12 @@ For TOUCHPOINT_PLAN (CRITICAL — this populates the rep's calendar with fully-w
       // 429/5xx/etc — try the next model immediately
     }
     const finalAi = aiResponse as Response | null;
-    if (hardStopStatus === 0 && finalAi && !finalAi.ok && finalAi.status === 429) {
+    if (hardStopStatus === 0 && finalAi !== null && !finalAi.ok && finalAi.status === 429) {
       // treat exhausted retries on 429 as "try again later"
       hardStopStatus = 429;
     }
 
-    if (!finalAi || !finalAi.ok) {
+    if (finalAi === null || !finalAi.ok) {
       const status = finalAi?.status ?? 503;
       console.error("AI gateway final failure:", status, lastErrText);
 
