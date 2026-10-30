@@ -47,6 +47,7 @@ const PartnersPage = lazy(() => import("./pages/PartnersPage"));
 const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 const WhyUsPage = lazy(() => import("./pages/WhyUsPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const EmailAetherisPage = lazy(() => import("./pages/EmailAetherisPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const DeliverablePage = lazy(() => import("./pages/DeliverablePage"));
@@ -215,6 +216,8 @@ const App = () => (
                       <Route path="/why-us" element={<WhyUsPage />} />
                       <Route path="/about" element={<Navigate to="/" replace />} />
                       <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/email" element={<EmailAetherisPage />} />
+                      <Route path="/business-xray/contact" element={<EmailAetherisPage />} />
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/blog/:slug" element={<BlogPostPage />} />
                       <Route path="/terms" element={<TermsPage />} />
