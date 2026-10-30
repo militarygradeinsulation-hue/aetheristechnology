@@ -31,6 +31,13 @@ export function SiteFooter() {
         </p>
         <p>Runs in your browser. No uploads, no tracking, no account.</p>
       </div>
+      <div className="mx-auto max-w-6xl border-t border-border/70 px-5 pb-5 pt-4 text-center text-xs text-muted-foreground">
+        Copyright © {new Date().getFullYear()} · Owned by{" "}
+        <a href="https://aetheris.technology" className="font-medium text-foreground hover:underline">
+          Aetheris.Technology
+        </a>{" "}
+        · All rights reserved.
+      </div>
     </footer>
   );
 }
