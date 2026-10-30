@@ -73,6 +73,16 @@ describe("Business X-Ray paid website scan contract", () => {
     expect(registry).toContain("'website-report-ready': websiteReportReady");
   });
 
+  it("never presents fabricated financial returns as verified in paid public-only website reports", () => {
+    const scanner = read("supabase/functions/scan-website/index.ts");
+    expect(scanner).toContain("safePublicWebsitePaidView");
+    expect(scanner).toContain('report.financialVerification = "not_verified"');
+    expect(scanner).toContain('report.totalAnnualLeak = "Not verified from public website data"');
+    expect(scanner).toContain('report.roiTable = []');
+    expect(scanner).toContain("publicWebsiteOnly ? safePublicWebsitePaidView(analysis) : analysis");
+    expect(scanner).toContain("safePublicWebsitePaidView(cached)");
+  });
+
   it("provides crawlable answer-first guidance and 6 XML sitemap entries", () => {
     const sitemap = read("public/sitemap.xml");
     expect(sitemap).toContain("<loc>https://aetheris.technology/business-xray/website-report/index.html</loc>");
