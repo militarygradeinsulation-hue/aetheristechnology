@@ -42,6 +42,7 @@ describe("Business X-Ray paid website scan contract", () => {
     expect(worker).toContain("authorization !== SUPABASE_SERVICE_ROLE_KEY");
     expect(worker).toContain('.eq("status", "pending")');
     expect(worker).toContain('status: "generating"');
+    expect(webhook).toContain("runtime.waitUntil(dispatch)");
   });
 
   it("asks for the business website before paying from either website scanner entry", () => {
