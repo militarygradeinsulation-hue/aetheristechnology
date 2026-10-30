@@ -611,11 +611,17 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
 function triggerFunction(name: string, body: Record<string, unknown>) {
   const URL_ = Deno.env.get("SUPABASE_URL")!;
   const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  fetch(`${URL_}/functions/v1/${name}`, {
+  const dispatch = fetch(`${URL_}/functions/v1/${name}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${KEY}` },
     body: JSON.stringify(body),
-  }).catch(e => console.error(`trigger ${name}:`, e));
+  }).then((response) => {
+    if (!response.ok) console.error(`trigger ${name}: worker returned HTTP ${response.status}`);
+  }).catch((e) => console.error(`trigger ${name}:`, e instanceof Error ? e.message : "unknown"));
+  // Keep dispatch alive after the Stripe webhook returns. Background work is
+  // still subject to platform timeouts; pending rows require monitoring.
+  const runtime = (globalThis as any).EdgeRuntime;
+  if (runtime?.waitUntil) runtime.waitUntil(dispatch);
 }
 
 // Fire-and-forget transactional email through the managed send helper.
