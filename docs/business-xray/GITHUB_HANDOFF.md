@@ -21,7 +21,7 @@
 - GitHub `Business X-Ray quality checks` passes (unit/integration + build).
 - Website `Site quality` build passes.
 - Open the static MVP at `/business-xray/index.html`; try a blank assessment and demo on desktop/mobile.
-- Confirm the manual-enquiry inbox listed in `apps/business-xray/src/config/site.ts` actually receives email.
+- Confirm the existing `notify-contact-submission` backend accepts form submissions, returns `{ success: true }` after delivery, and notifies the fixed Aetheris inbox. Use a consented end-to-end test; do not mistake a button click for a delivered email.
 - Distinguish **estimated opportunity** from **verified financial losses** everywhere.
 - Do not collect uploaded company/personnel data on an unprotected public endpoint.
 - Use consent, authentication, company isolation, access policies, and source attribution before future imports.
