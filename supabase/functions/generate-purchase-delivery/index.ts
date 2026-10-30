@@ -152,7 +152,8 @@ async function markFailed(id: string, msg: string) {
 function buildRequestBody(toolType: string, input: Record<string, unknown>): Record<string, unknown> {
   // Use metadata from the checkout session to build generation requests
   // The website URL or business info from metadata is used as input
-  const websiteUrl = (input.website_url as string) || (input.websiteUrl as string) || "https://example.com";
+  // No fictional fallback domain; products requiring a URL validate it below.
+  const websiteUrl = (input.website_url as string) || (input.websiteUrl as string) || "";
   const businessName = (input.business_name as string) || (input.businessName as string) || "";
   const industry = (input.industry as string) || "";
 
