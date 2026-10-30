@@ -22,6 +22,13 @@ describe("golden report view model", () => {
     expect(audit.checkedLeaves).toBeGreaterThan(200);
   });
 
+  it("prints a hosting-safe Golden Report chat link instead of a deep-link URL", () => {
+    const model = build(fullReport);
+    expect(model.meta.askUrl).toContain("/?report_chat=");
+    expect(model.meta.askUrl).not.toContain("/report/");
+    expect(model.meta.askUrl).not.toContain("PUBLIC_SITE_URL");
+  });
+
   it("exports executive summary, top leaks, all chapters and all growth assets", () => {
     const model = build(fullReport);
     const ids = model.sections.map((s) => s.id);
