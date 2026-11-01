@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:golden-standalone": "vite build --config vite.golden-standalone.config.ts && node scripts/golden-standalone-postbuild.mjs",
+    "dev:golden-standalone": "vite --config vite.golden-standalone.config.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run"
