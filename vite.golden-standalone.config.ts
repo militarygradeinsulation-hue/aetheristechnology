@@ -11,6 +11,8 @@ import path from "node:path";
 export default defineConfig({
   plugins: [react()],
   base: "./",
+  // The main website has a large public/ library; it is not part of the standalone scanner.
+  publicDir: false,
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
