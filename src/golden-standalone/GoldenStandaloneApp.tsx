@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { FileSearch2, KeyRound, Loader2, LockKeyhole, ShieldCheck } from "lucide-react";
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
 import { getAdminToken, setAdminToken, clearAdminToken } from "@/lib/adminAuth";
@@ -28,7 +28,7 @@ export function GoldenStandaloneApp() {
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
 
-  async function unlock(e: React.FormEvent<HTMLFormElement>) {
+  async function unlock(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (checking || !pin.trim()) return;
     setChecking(true);
@@ -111,7 +111,7 @@ export function GoldenStandaloneApp() {
                   </div>
                 )}
                 <ForensicScanAllPanel initialScanId={params.initialScanId} initialUrl={params.initialUrl}
-                  initialCompany={params.initialCompany} standalone />
+                  initialCompany={params.initialCompany} standalone canStartScan={authorized} />
               </>
             )}
           </>
