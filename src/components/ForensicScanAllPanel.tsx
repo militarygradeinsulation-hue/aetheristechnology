@@ -141,9 +141,9 @@ function ChapterFinancials({
 }
 
 
-export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
-  const [url, setUrl] = useState("");
-  const [company, setCompany] = useState("");
+export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean } = {}) {
+  const [url, setUrl] = useState(initialUrl);
+  const [company, setCompany] = useState(initialCompany);
   const [scanId, setScanId] = useState<string | null>(() => {
     if (initialScanId) return initialScanId;
 
@@ -176,10 +176,13 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   }, [initialScanId]);
 
 
-  const isAdmin = !!getAdminToken();
-  const headers: Record<string, string> = isAdmin
-    ? { "x-admin-token": getAdminToken() || "" }
-    : { "x-portal-token": getPortalToken() || "" };
+  const isAdmin = !standalone && !!getAdminToken();
+  // Standalone scans still use the server-issued runner credential, but never
+  // disclose internal admin or rep metadata in the white-label interface.
+  const runnerAdminToken = getAdminToken();
+  const headers: Record<string, string> = runnerAdminToken
+    ? { "x-admin-token": runnerAdminToken }
+    : standalone ? {} : { "x-portal-token": getPortalToken() || "" };
 
   async function startScan() {
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
@@ -259,7 +262,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   // it right there instead of hunting for a chat page.
   const autoOpened = useRef(false);
   useEffect(() => {
-    if (report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
+    if (!standalone && report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
       autoOpened.current = true;
       setFixOpen(true);
     }
@@ -411,9 +414,11 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     <GoldenSourceIdentity scan={row} admin />
                   </div>
                 )}
-                <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">
-                  {row.target_url}
-                </a>
+                {standalone ? (
+                  <span className="text-xs text-muted-foreground font-mono break-all">{row.target_url}</span>
+                ) : (
+                  <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">{row.target_url}</a>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <Button
@@ -426,12 +431,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                   }
                   onClick={() => {
                     if (!isDeliverable(report)) return;
-                    import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
+                    if (!standalone) import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
                       trackGoldenReportEvent(row.id, "pdf_download"),
                     );
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "executive",
+                      profile: "executive", whiteLabel: standalone,
                     });
                   }}
                   className="bg-amber-500 text-black hover:bg-amber-400"
@@ -448,7 +453,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     if (!isDeliverable(report)) return;
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "complete",
+                      profile: "complete", whiteLabel: standalone,
                     });
                   }}
                 >
@@ -463,7 +468,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     if (!isDeliverable(report)) return;
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "data_appendix",
+                      profile: "data_appendix", whiteLabel: standalone,
                     });
                   }}
                 >
@@ -676,6 +681,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
           report={report}
           company={row.company_name || row.target_url}
           seed={fixSeed}
+          whiteLabel={standalone}
           onClose={() => setFixOpen(false)}
         />
       )}
