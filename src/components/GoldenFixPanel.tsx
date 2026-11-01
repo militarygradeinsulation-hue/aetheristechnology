@@ -69,6 +69,7 @@ export function GoldenFixPanel({
   seed,
   onClose,
   variant = "docked",
+  whiteLabel = false,
 }: {
   scanId: string;
   report?: FixPanelReport | null;
@@ -77,6 +78,7 @@ export function GoldenFixPanel({
   seed?: string | null;
   onClose?: () => void;
   variant?: "docked" | "page";
+  whiteLabel?: boolean;
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -132,7 +134,7 @@ export function GoldenFixPanel({
     <div className={shell}>
       <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border bg-gradient-to-b from-amber-500/10 to-transparent">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-amber-500">Aetheris Operator · Live</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-amber-500">{whiteLabel ? "Report Assistant" : "Aetheris Operator · Live"}</div>
           <div className="font-serif font-bold truncate">Fix this for me</div>
         </div>
         {onClose && (
