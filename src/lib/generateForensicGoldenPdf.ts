@@ -138,6 +138,8 @@ function bg(doc: jsPDF) {
   doc.rect(PAGE_W - 2, 0, 2, 24, "F");
 }
 
+const whiteLabelDocs = new WeakSet<jsPDF>();
+
 function footer(doc: jsPDF, page: number, askUrl: string) {
   doc.setDrawColor(40, 40, 50);
   doc.setLineWidth(0.3);
@@ -145,13 +147,13 @@ function footer(doc: jsPDF, page: number, askUrl: string) {
   doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   doc.setFont("helvetica", "normal");
-  doc.text("AETHERIS · BUSINESS FORENSICS · USD", M, PAGE_H - 9);
+  doc.text(whiteLabelDocs.has(doc) ? "GOLDEN REPORT · BUSINESS FORENSICS · USD" : "AETHERIS · BUSINESS FORENSICS · USD", M, PAGE_H - 9);
   doc.text(`Page ${page}`, PAGE_W / 2, PAGE_H - 9, { align: "center" });
   doc.setTextColor(...AMBER);
-  doc.textWithLink("ASK THIS REPORT →", PAGE_W - M, PAGE_H - 9, { url: askUrl, align: "right" });
+  if (!whiteLabelDocs.has(doc) && askUrl) doc.textWithLink("ASK THIS REPORT →", PAGE_W - M, PAGE_H - 9, { url: askUrl, align: "right" });
   doc.setTextColor(70, 60, 40);
   doc.setFontSize(6);
-  doc.text("Aetheris AI Studio", PAGE_W - M, PAGE_H - 4, { align: "right" });
+  if (!whiteLabelDocs.has(doc)) doc.text("Aetheris AI Studio", PAGE_W - M, PAGE_H - 4, { align: "right" });
 }
 
 type Cursor = { y: number; page: number };
@@ -465,6 +467,8 @@ export function generateForensicGoldenPdf(opts: {
   generatedAt?: Date;
   /** Defaults to the concise executive deliverable. */
   profile?: RenderProfile;
+  /** Remove Aetheris marks and outbound report links in independently hosted copies. */
+  whiteLabel?: boolean;
 }): jsPDF {
   const { report, company, url, scanId } = opts;
   const profile: RenderProfile = opts.profile ?? "executive";
@@ -545,9 +549,10 @@ export function generateForensicGoldenPdf(opts: {
     }
   } catch { /* diagnostics only */ }
 
-  const askUrl = model.meta.askUrl;
+  const askUrl = opts.whiteLabel ? "" : model.meta.askUrl;
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  if (opts.whiteLabel) whiteLabelDocs.add(doc);
   const cur: Cursor = { y: M + 6, page: 1 };
 
   // WinAnsi-safe text writers.
@@ -568,7 +573,7 @@ export function generateForensicGoldenPdf(opts: {
   doc.setTextColor(...AMBER);
   doc.setFont("times", "italic");
   doc.setFontSize(11);
-  doc.text("AETHERIS · BUSINESS FORENSICS", M, 40);
+  doc.text(opts.whiteLabel ? "GOLDEN REPORT · BUSINESS FORENSICS" : "AETHERIS · BUSINESS FORENSICS", M, 40);
   doc.setDrawColor(...AMBER);
   doc.setLineWidth(0.5);
   doc.line(M, 44, M + 50, 44);
@@ -706,6 +711,6 @@ export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForens
   const safe = (opts.company || "report").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
   const profile = opts.profile ?? "executive";
   const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
-  doc.save(`aetheris-forensic-${safe}-${opts.scanId.slice(0, 8)}${suffix}.pdf`);
+  doc.save(`${opts.whiteLabel ? "golden-report" : "aetheris-forensic"}-${safe}-${opts.scanId.slice(0, 8)}${suffix}.pdf`);
 }
 
