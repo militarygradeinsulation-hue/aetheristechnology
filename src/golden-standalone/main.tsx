@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GoldenStandaloneApp } from "./GoldenStandaloneApp";
 import "@/index.css";
@@ -16,6 +17,7 @@ createRoot(element).render(
       <TooltipProvider>
         <GoldenStandaloneApp />
         <Sonner />
+        <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   </React.StrictMode>,
