@@ -68,9 +68,9 @@ const TARGET_SECONDS = 75;
 
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-async function fetchScanRow(id: string): Promise<Row | null> {
+async function fetchScanRow(id: string, includeAdminHeader = true): Promise<Row | null> {
   try {
-    const adminToken = getAdminToken();
+    const adminToken = includeAdminHeader ? getAdminToken() : null;
     const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
       method: "GET",
       headers: {
@@ -141,7 +141,7 @@ function ChapterFinancials({
 }
 
 
-export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean } = {}) {
+export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean } = {}) {
   const [url, setUrl] = useState(initialUrl);
   const [company, setCompany] = useState(initialCompany);
   const [scanId, setScanId] = useState<string | null>(() => {
@@ -185,6 +185,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     : standalone ? {} : { "x-portal-token": getPortalToken() || "" };
 
   async function startScan() {
+    if (!canStartScan) return;
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
     setBusy(true);
     setScanId(null); setRow(null);
@@ -211,7 +212,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     let stopped = false;
     if (!startedAtRef.current) startedAtRef.current = Date.now();
     const tick = async () => {
-      const data = await fetchScanRow(scanId);
+      const data = await fetchScanRow(scanId, !standalone);
       if (data && !stopped) {
         setRow(data);
         const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;
@@ -278,14 +279,14 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
 
   return (
     <div className="space-y-4">
-      <Card className="p-4 bg-card border-border">
+      {canStartScan && <Card className="p-4 bg-card border-border">
         <div className="flex items-center gap-2 mb-3">
           <ScanLine className="w-4 h-4 text-amber-500" />
           <h3 className="font-semibold tracking-wide">Forensic Scan All — Golden Report</h3>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           Runs every diagnostic against one target: site crawl, SEO, brand contradictions, friction vocabulary,
-          and (when connected) pipeline forensics. Builds a 14-chapter Smart PDF you can search or ask questions of.
+          {standalone ? "and public-facing pipeline signals." : "and (when connected) pipeline forensics."} Builds a 14-chapter Smart PDF you can search or ask questions of.
         </p>
         <div className="grid sm:grid-cols-2 gap-2 mb-3">
           <Input placeholder="Target URL (https://example.com)" value={url} onChange={(e) => setUrl(e.target.value)} />
@@ -295,7 +296,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
           {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ScanLine className="w-4 h-4 mr-2" />}
           Run Scan All
         </Button>
-      </Card>
+      </Card>}
 
       {scanId && (
         <Card className="p-4 bg-card border-border">
