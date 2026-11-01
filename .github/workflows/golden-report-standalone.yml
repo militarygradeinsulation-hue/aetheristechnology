@@ -1,0 +1,52 @@
+name: Golden Report standalone build
+
+on:
+  push:
+    branches: [main, feat/standalone-golden-report-embed]
+    paths:
+      - "golden-standalone.html"
+      - "src/golden-standalone/**"
+      - "src/components/ForensicScanAllPanel.tsx"
+      - "src/components/GoldenFixPanel.tsx"
+      - "src/lib/generateForensicGoldenPdf.ts"
+      - "vite.golden-standalone.config.ts"
+      - "scripts/golden-standalone-postbuild.mjs"
+      - "package.json"
+      - ".github/workflows/golden-report-standalone.yml"
+  pull_request:
+    paths:
+      - "golden-standalone.html"
+      - "src/golden-standalone/**"
+      - "src/components/ForensicScanAllPanel.tsx"
+      - "src/components/GoldenFixPanel.tsx"
+      - "src/lib/generateForensicGoldenPdf.ts"
+      - "vite.golden-standalone.config.ts"
+      - "scripts/golden-standalone-postbuild.mjs"
+      - "package.json"
+      - ".github/workflows/golden-report-standalone.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Build isolated Golden Report website
+        run: bun run build:golden-standalone
+      - name: Verify portable distribution
+        run: |
+          test -s dist-golden-standalone/index.html
+          test -s dist-golden-standalone/golden-standalone.html
+          test -d dist-golden-standalone/assets
+          grep -q 'Golden Report' dist-golden-standalone/index.html
+      - name: Upload portable Golden Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-report-standalone
+          path: dist-golden-standalone/
+          retention-days: 14

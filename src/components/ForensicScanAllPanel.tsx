@@ -68,9 +68,9 @@ const TARGET_SECONDS = 75;
 
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-async function fetchScanRow(id: string): Promise<Row | null> {
+async function fetchScanRow(id: string, includeAdminHeader = true): Promise<Row | null> {
   try {
-    const adminToken = getAdminToken();
+    const adminToken = includeAdminHeader ? getAdminToken() : null;
     const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
       method: "GET",
       headers: {
@@ -141,9 +141,9 @@ function ChapterFinancials({
 }
 
 
-export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string | null } = {}) {
-  const [url, setUrl] = useState("");
-  const [company, setCompany] = useState("");
+export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean } = {}) {
+  const [url, setUrl] = useState(initialUrl);
+  const [company, setCompany] = useState(initialCompany);
   const [scanId, setScanId] = useState<string | null>(() => {
     if (initialScanId) return initialScanId;
 
@@ -176,12 +176,16 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   }, [initialScanId]);
 
 
-  const isAdmin = !!getAdminToken();
-  const headers: Record<string, string> = isAdmin
-    ? { "x-admin-token": getAdminToken() || "" }
-    : { "x-portal-token": getPortalToken() || "" };
+  const isAdmin = !standalone && !!getAdminToken();
+  // Standalone scans still use the server-issued runner credential, but never
+  // disclose internal admin or rep metadata in the white-label interface.
+  const runnerAdminToken = getAdminToken();
+  const headers: Record<string, string> = runnerAdminToken
+    ? { "x-admin-token": runnerAdminToken }
+    : standalone ? {} : { "x-portal-token": getPortalToken() || "" };
 
   async function startScan() {
+    if (!canStartScan) return;
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
     setBusy(true);
     setScanId(null); setRow(null);
@@ -208,7 +212,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
     let stopped = false;
     if (!startedAtRef.current) startedAtRef.current = Date.now();
     const tick = async () => {
-      const data = await fetchScanRow(scanId);
+      const data = await fetchScanRow(scanId, !standalone);
       if (data && !stopped) {
         setRow(data);
         const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;
@@ -259,7 +263,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
   // it right there instead of hunting for a chat page.
   const autoOpened = useRef(false);
   useEffect(() => {
-    if (report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
+    if (!standalone && report && !autoOpened.current && typeof window !== "undefined" && window.innerWidth >= 1024) {
       autoOpened.current = true;
       setFixOpen(true);
     }
@@ -275,14 +279,14 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
 
   return (
     <div className="space-y-4">
-      <Card className="p-4 bg-card border-border">
+      {canStartScan && <Card className="p-4 bg-card border-border">
         <div className="flex items-center gap-2 mb-3">
           <ScanLine className="w-4 h-4 text-amber-500" />
           <h3 className="font-semibold tracking-wide">Forensic Scan All — Golden Report</h3>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           Runs every diagnostic against one target: site crawl, SEO, brand contradictions, friction vocabulary,
-          and (when connected) pipeline forensics. Builds a 14-chapter Smart PDF you can search or ask questions of.
+          {standalone ? "and public-facing pipeline signals." : "and (when connected) pipeline forensics."} Builds a 14-chapter Smart PDF you can search or ask questions of.
         </p>
         <div className="grid sm:grid-cols-2 gap-2 mb-3">
           <Input placeholder="Target URL (https://example.com)" value={url} onChange={(e) => setUrl(e.target.value)} />
@@ -292,7 +296,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
           {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ScanLine className="w-4 h-4 mr-2" />}
           Run Scan All
         </Button>
-      </Card>
+      </Card>}
 
       {scanId && (
         <Card className="p-4 bg-card border-border">
@@ -411,9 +415,11 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     <GoldenSourceIdentity scan={row} admin />
                   </div>
                 )}
-                <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">
-                  {row.target_url}
-                </a>
+                {standalone ? (
+                  <span className="text-xs text-muted-foreground font-mono break-all">{row.target_url}</span>
+                ) : (
+                  <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">{row.target_url}</a>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <Button
@@ -426,12 +432,12 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                   }
                   onClick={() => {
                     if (!isDeliverable(report)) return;
-                    import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
+                    if (!standalone) import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
                       trackGoldenReportEvent(row.id, "pdf_download"),
                     );
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "executive",
+                      profile: "executive", whiteLabel: standalone,
                     });
                   }}
                   className="bg-amber-500 text-black hover:bg-amber-400"
@@ -448,7 +454,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     if (!isDeliverable(report)) return;
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "complete",
+                      profile: "complete", whiteLabel: standalone,
                     });
                   }}
                 >
@@ -463,7 +469,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
                     if (!isDeliverable(report)) return;
                     downloadForensicGoldenPdf({
                       report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "data_appendix",
+                      profile: "data_appendix", whiteLabel: standalone,
                     });
                   }}
                 >
@@ -676,6 +682,7 @@ export function ForensicScanAllPanel({ initialScanId }: { initialScanId?: string
           report={report}
           company={row.company_name || row.target_url}
           seed={fixSeed}
+          whiteLabel={standalone}
           onClose={() => setFixOpen(false)}
         />
       )}
