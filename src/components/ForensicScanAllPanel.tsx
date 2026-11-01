@@ -10,6 +10,7 @@ import { BrandedCreationKit, type BrandKit } from "@/components/BrandedCreationK
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
 import { toast } from "@/hooks/use-toast";
+import { describeGoldenEdgeFailure } from "@/lib/goldenEdgeFailure";
 import { GoldenLeakageBanner } from "@/components/GoldenLeakageBanner";
 import { GoldenEvidenceQuality, isDeliverable } from "@/components/GoldenEvidenceQuality";
 import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
@@ -68,9 +69,9 @@ const TARGET_SECONDS = 75;
 
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-async function fetchScanRow(id: string, includeAdminHeader = true): Promise<Row | null> {
+async function fetchScanRow(id: string, includeAdminHeader = true, runnerToken?: string | null): Promise<Row | null> {
   try {
-    const adminToken = includeAdminHeader ? getAdminToken() : null;
+    const adminToken = runnerToken || (includeAdminHeader ? getAdminToken() : null);
     const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
       method: "GET",
       headers: {
@@ -141,7 +142,7 @@ function ChapterFinancials({
 }
 
 
-export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean } = {}) {
+export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true, runnerToken, onRunnerUnauthorized }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean; runnerToken?: string | null; onRunnerUnauthorized?: () => void } = {}) {
   const [url, setUrl] = useState(initialUrl);
   const [company, setCompany] = useState(initialCompany);
   const [scanId, setScanId] = useState<string | null>(() => {
@@ -176,10 +177,10 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   }, [initialScanId]);
 
 
-  const isAdmin = !standalone && !!getAdminToken();
+  const isAdmin = !standalone && !!(runnerToken || getAdminToken());
   // Standalone scans still use the server-issued runner credential, but never
   // disclose internal admin or rep metadata in the white-label interface.
-  const runnerAdminToken = getAdminToken();
+  const runnerAdminToken = runnerToken || getAdminToken();
   const headers: Record<string, string> = runnerAdminToken
     ? { "x-admin-token": runnerAdminToken }
     : standalone ? {} : { "x-portal-token": getPortalToken() || "" };
@@ -202,7 +203,9 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
       try { sessionStorage.setItem(SCAN_STORAGE_KEY, data.scan_id); } catch { /* ignore */ }
       setScanId(data.scan_id);
     } catch (e) {
-      toast({ title: "Scan failed to start", description: String((e as Error).message || e), variant: "destructive" });
+      const detail = await describeGoldenEdgeFailure(e, "scan-start");
+      if (detail.authorizationRequired) onRunnerUnauthorized?.();
+      toast({ title: "Golden Report could not start", description: detail.message, variant: "destructive" });
     } finally { setBusy(false); }
   }
 
@@ -212,7 +215,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     let stopped = false;
     if (!startedAtRef.current) startedAtRef.current = Date.now();
     const tick = async () => {
-      const data = await fetchScanRow(scanId, !standalone);
+      const data = await fetchScanRow(scanId, !standalone, runnerToken);
       if (data && !stopped) {
         setRow(data);
         const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;

@@ -3,6 +3,7 @@ import { FileSearch2, KeyRound, Loader2, LockKeyhole, ShieldCheck } from "lucide
 import { ForensicScanAllPanel } from "@/components/ForensicScanAllPanel";
 import { getAdminToken, setAdminToken, clearAdminToken } from "@/lib/adminAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { describeGoldenEdgeFailure } from "@/lib/goldenEdgeFailure";
 
 function getParams() {
   const query = new URLSearchParams(window.location.search);
@@ -23,7 +24,8 @@ function getParams() {
 /** Separate application mount: intentionally does not render any Aetheris site shell or routes. */
 export function GoldenStandaloneApp() {
   const params = useMemo(getParams, []);
-  const [authorized, setAuthorized] = useState(Boolean(getAdminToken()));
+  const [runnerToken, setRunnerToken] = useState<string | null>(() => getAdminToken());
+  const authorized = Boolean(runnerToken);
   const [pin, setPin] = useState("");
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
@@ -35,12 +37,14 @@ export function GoldenStandaloneApp() {
     setError("");
     try {
       const { data, error: authError } = await supabase.functions.invoke("admin-pin-login", { body: { pin: pin.trim() } });
-      if (authError || !data?.ok || typeof data.token !== "string") throw new Error("The supplied code was not accepted.");
-      setAdminToken(data.token);
+      if (authError) throw authError;
+      if (!data?.ok || typeof data.token !== "string") throw new Error("No runner token returned.");
+      setRunnerToken(data.token);
+      try { setAdminToken(data.token); } catch { /* third-party storage may be blocked */ }
       setPin("");
-      setAuthorized(true);
-    } catch {
-      setError("The code was not accepted. Use an authorized Golden Report runner code.");
+    } catch (failure) {
+      const detail = await describeGoldenEdgeFailure(failure, "runner-login");
+      setError(detail.message);
     } finally { setChecking(false); }
   }
 
@@ -105,13 +109,18 @@ export function GoldenStandaloneApp() {
                 {authorized && !params.embed && (
                   <div className="mb-4 flex justify-end">
                     <button type="button" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-amber-500"
-                      onClick={() => { clearAdminToken(); setAuthorized(false); }}>
+                      onClick={() => { try { clearAdminToken(); } catch { /* ignored */ } setRunnerToken(null); }}>
                       Lock report runner
                     </button>
                   </div>
                 )}
                 <ForensicScanAllPanel initialScanId={params.initialScanId} initialUrl={params.initialUrl}
-                  initialCompany={params.initialCompany} standalone canStartScan={authorized} />
+                  initialCompany={params.initialCompany} standalone canStartScan={authorized}
+                  runnerToken={runnerToken} onRunnerUnauthorized={() => {
+                    try { clearAdminToken(); } catch { /* ignored */ }
+                    setRunnerToken(null);
+                    setError("Runner session expired or denied. Enter your code again.");
+                  }} />
               </>
             )}
           </>
