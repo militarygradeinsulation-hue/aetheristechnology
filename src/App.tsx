@@ -120,6 +120,8 @@ const BrandVoiceExtensionPage = lazy(() => import("./pages/BrandVoiceExtensionPa
 const OperatorAppPage = lazy(() => import("./pages/OperatorAppPage"));
 const MobileAppPage = lazy(() => import("./pages/MobileAppPage"));
 const AppRouter = lazy(() => import("./app/AppRouter"));
+// Isolated company + person URL research workspace, outside website auth/navigation.
+const ResearchIntelligencePage = lazy(() => import("./golden-standalone/GoldenStandaloneApp").then(m => ({ default: m.GoldenStandaloneApp })));
 const AuthorityArticlePage = lazy(() => import("./pages/AuthorityArticlePage"));
 const GlossaryPage = lazy(() => import("./pages/GlossaryPage"));
 const DigitalYouPage = lazy(() => import("./pages/DigitalYouPage"));
@@ -174,6 +176,8 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
+            {/* One-screen white-label research runner. Avoid all marketing and site-shell routes. */}
+            <Route path="/research-embed" element={<ResearchIntelligencePage />} />
             {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
             <Route path="/staff" element={<StaffEntry />} />
             <Route path="/admin/login" element={<AdminLogin />} />
