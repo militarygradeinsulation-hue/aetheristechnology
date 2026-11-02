@@ -23,6 +23,23 @@ The exact 14-chapter Golden Report **cannot be generated offline**. The source s
 - The source backend grants scan creation only to authorized runners. This package preserves that rule by requiring the server-issued admin runner code. Do not remove it to allow anonymous traffic without a per-tenant metered backend, rate limits, bot protection, quotas, and abuse controls.
 - The current backend includes post-scan archive, CRM attachment, outreach tracking, growth asset generation, and other lifecycle jobs. Those **server-side links are not removed** by this frontend-only packaging. A separate backend deployment is necessary to make the full system genuinely unconnected.
 
+## Immediately available website route
+
+The **same dual-engine research UI** is also registered as `/research-embed` on the Aetheris web application as a top-level route, outside its marketing pages, client AuthProvider, conversion popups and site navigation. After deploying the Aetheris site's latest commit, another site can embed:
+
+```html
+<iframe
+  src="https://aetheris.technology/research-embed?embed=1"
+  title="Company and person research"
+  width="100%"
+  height="1400"
+  style="width:100%;border:0;border-radius:12px"
+  loading="lazy"
+></iframe>
+```
+
+This enables immediate embedding without a second static host, but **the iframe is still served by the Aetheris domain** and both engine backends remain connected. To eliminate that hosting connection, deploy the separate `dist-golden-standalone/` package to your chosen unrelated domain with your own secure backend. Do not represent the hosted route as a fully independent clone.
+
 ## Embed
 
 After uploading the distribution to a separate HTTPS site, you can embed it from any other website:
