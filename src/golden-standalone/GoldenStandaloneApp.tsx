@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { describeGoldenEdgeFailure } from "@/lib/goldenEdgeFailure";
 
 type Mode = "company" | "person";
-const MINDPRINT_RUNNER = "https://mindsteal.lovable.app/mindprint/run";
+const MINDPRINT_RUNNER = import.meta.env.VITE_MINDPRINT_RUNNER_URL || "https://mindsteal.lovable.app/mindprint/run";
 
 function normalizeCompanyUrl(input: string): string {
   const u = new URL(/^https?:\/\//i.test(input.trim()) ? input.trim() : `https://${input.trim()}`);
