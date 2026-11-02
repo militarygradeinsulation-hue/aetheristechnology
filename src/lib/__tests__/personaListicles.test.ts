@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { PERSONA_LISTICLES } from "@/config/personaListicles";
+import { FIELD_PROMISE, HOW_IT_WORKS, PERSONA_LISTICLES } from "@/config/personaListicles";
 import { REAL_CASES } from "@/data/realCaseStudies";
 import { personaAdUrl, resolvePersonaProof, withPersonaTracking } from "@/lib/personaListicle";
 
@@ -18,6 +18,8 @@ describe("persona listicles", () => {
     // Promise
     expect(p.headline.trim()).not.toBe("");
     expect(p.subheadline.trim()).not.toBe("");
+    expect(p.fieldMoment.trim()).not.toBe("");
+    expect(p.officeMoment.trim()).not.toBe("");
     // Properties: the headline's number must match the list length
     expect(p.reasons.length).toBeGreaterThanOrEqual(5);
     const promised = p.headline.match(/^(\d+)\s/);
@@ -26,8 +28,7 @@ describe("persona listicles", () => {
       expect(r.title && r.body && r.fix).toBeTruthy();
     }
     // Positioning
-    expect(p.notAnother.length).toBeGreaterThan(0);
-    expect(p.instead).toMatch(/Aetheris/);
+    expect(p.instead).toMatch(/^I /);
     // Proof
     expect(p.proofCaseIds.length).toBeGreaterThan(0);
     // Packaging
@@ -45,29 +46,44 @@ describe("persona listicles", () => {
   });
 
   it("never wires persona pages to report generation", () => {
-    const page = readFileSync(resolve(__dirname, "../../pages/PersonaListiclePage.tsx"), "utf8");
-    const config = readFileSync(resolve(__dirname, "../../config/personaListicles.ts"), "utf8");
-    for (const src of [page, config]) {
+    const files = ["pages/PersonaListiclePage.tsx", "pages/TradesHubPage.tsx", "config/personaListicles.ts"];
+    for (const src of files.map((f) => readFileSync(resolve(__dirname, "../..", f), "utf8"))) {
       expect(src).not.toMatch(/forensic-scan|golden-report|functions\.invoke|supabase/i);
     }
   });
 });
 
+describe("trades positioning", () => {
+  it("keeps every ad on the in-the-field / office message", () => {
+    for (const p of PERSONA_LISTICLES) {
+      const fieldAd = p.ads.find((a) => a.angle === "In the field");
+      expect(fieldAd, `${p.slug} needs an "In the field" ad`).toBeTruthy();
+      expect(fieldAd!.primaryText).toMatch(/I know how busy you are/);
+      expect(fieldAd!.primaryText).toMatch(/(don't|do not) have to worry/);
+    }
+  });
+
+  it("has a shared field promise and three-step offer", () => {
+    expect(FIELD_PROMISE.headline).toMatch(/in the field/);
+    expect(HOW_IT_WORKS).toHaveLength(3);
+  });
+});
+
 describe("persona tracking links", () => {
   it("adds the persona and passes ad params through", () => {
-    const href = withPersonaTracking("/leak-audit/self-scan", "messy-crm", "?utm_source=facebook&utm_campaign=x&other=1");
+    const href = withPersonaTracking("/leak-audit/self-scan", "roofing", "?utm_source=facebook&utm_campaign=x&other=1");
     const url = new URL(href, "https://example.test");
     expect(url.pathname).toBe("/leak-audit/self-scan");
-    expect(url.searchParams.get("persona")).toBe("messy-crm");
+    expect(url.searchParams.get("persona")).toBe("roofing");
     expect(url.searchParams.get("utm_source")).toBe("facebook");
     expect(url.searchParams.get("utm_campaign")).toBe("x");
     expect(url.searchParams.has("other")).toBe(false);
   });
 
   it("builds ad URLs that land on the matching persona page", () => {
-    const url = new URL(personaAdUrl("https://aetheris.technology", "home-services", "Estimate follow-up"));
-    expect(url.pathname).toBe("/for/home-services");
-    expect(url.searchParams.get("utm_campaign")).toBe("persona_home-services");
-    expect(url.searchParams.get("utm_content")).toBe("estimate_follow_up");
+    const url = new URL(personaAdUrl("https://aetheris.technology", "hvac", "In the field"));
+    expect(url.pathname).toBe("/for/hvac");
+    expect(url.searchParams.get("utm_campaign")).toBe("persona_hvac");
+    expect(url.searchParams.get("utm_content")).toBe("in_the_field");
   });
 });

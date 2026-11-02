@@ -99,6 +99,7 @@ const CapabilitiesPage = lazy(() => import("./pages/CapabilitiesPage"));
 
 const LeakLanderPage = lazy(() => import("./pages/LeakLanderPage"));
 const PersonaListiclePage = lazy(() => import("./pages/PersonaListiclePage"));
+const TradesHubPage = lazy(() => import("./pages/TradesHubPage"));
 const StopGuessingPage = lazy(() => import("./pages/StopGuessingPage"));
 const ResumeForensicsPage = lazy(() => import("./pages/ResumeForensicsPage"));
 const RepPortalPage = lazy(() => import("./pages/RepPortalPage"));
@@ -296,6 +297,7 @@ const App = () => (
 
                       <Route path="/lander" element={<LeakLanderPage />} />
                       <Route path="/for/:slug" element={<PersonaListiclePage />} />
+                      <Route path="/trades" element={<TradesHubPage />} />
                       <Route path="/resume-forensics" element={<ResumeForensicsPage />} />
                       <Route path="/rep-portal" element={<RepPortalPage />} />
                       <Route path="/test-portal" element={<TestPortalPage />} />

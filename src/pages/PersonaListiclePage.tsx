@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { ArrowRight, Calendar, CheckCircle2, ExternalLink, ShieldCheck, Wrench, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, Calendar, CheckCircle2, ExternalLink, HardHat, ShieldCheck, Wrench, XCircle } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -9,23 +9,8 @@ import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
 import { BOOK_MEETING_URL, RUN_AUDIT_URL } from '@/lib/links';
-import { PERSONA_BY_SLUG, personaPath } from '@/config/personaListicles';
+import { FIELD_PROMISE, HOW_IT_WORKS, PERSONA_BY_SLUG, TRADES_HUB_PATH, personaPath } from '@/config/personaListicles';
 import { resolvePersonaProof, withPersonaTracking } from '@/lib/personaListicle';
-
-const HOW_IT_WORKS = [
-  {
-    title: 'Run the free self-scan',
-    text: 'Point it at your website. It flags the leaks visible from the outside in a few minutes.',
-  },
-  {
-    title: 'Review the leaks with us',
-    text: 'On a strategy call we look at your lead flow, follow-up, and systems behind the site.',
-  },
-  {
-    title: 'We build the fixes',
-    text: 'Custom automation, AI, and digital systems aimed at the leaks that cost you the most.',
-  },
-];
 
 const PersonaListiclePage: React.FC = () => {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -35,7 +20,7 @@ const PersonaListiclePage: React.FC = () => {
   const persona = PERSONA_BY_SLUG[slug];
   const proof = useMemo(() => (persona ? resolvePersonaProof(persona) : []), [persona]);
 
-  if (!persona) return <Navigate to="/lander" replace />;
+  if (!persona) return <Navigate to={TRADES_HUB_PATH} replace />;
 
   const path = personaPath(persona.slug);
   const scanHref = withPersonaTracking(RUN_AUDIT_URL, persona.slug, search);
@@ -57,7 +42,8 @@ const PersonaListiclePage: React.FC = () => {
         path={path}
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: persona.persona, path },
+          { name: 'Trades & contractors', path: TRADES_HUB_PATH },
+          { name: persona.trade, path },
         ]}
         faqs={persona.faqs}
         speakable={['h1', '.tldr', 'h2']}
@@ -75,6 +61,13 @@ const PersonaListiclePage: React.FC = () => {
         {/* PROMISE */}
         <header className="px-4 pb-12 pt-32">
           <div className="mx-auto max-w-3xl">
+            <Link
+              to={TRADES_HUB_PATH}
+              className="mb-4 inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-amber"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All trades
+            </Link>
+            <br />
             <p className="mb-5 inline-flex items-center rounded-full border border-amber/30 bg-amber/10 px-4 py-1.5 text-sm font-medium text-amber">
               {persona.eyebrow}
             </p>
@@ -84,16 +77,28 @@ const PersonaListiclePage: React.FC = () => {
               <PrimaryCta />
               <a href={bookHref}>
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  <Calendar className="mr-2 h-4 w-4" /> Book a strategy call
+                  <Calendar className="mr-2 h-4 w-4" /> Book a quick call
                 </Button>
               </a>
             </div>
           </div>
         </header>
 
-        <section className="px-4 pb-12">
-          <div className="glass mx-auto max-w-3xl rounded-2xl border-l-4 border-amber p-6 md:p-8">
-            <p className="text-lg leading-relaxed">{persona.painHook}</p>
+        {/* FIELD vs OFFICE */}
+        <section className="px-4 pb-12" aria-label="While you are in the field">
+          <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+            <div className="glass rounded-2xl p-6">
+              <p className="mb-3 flex items-center gap-2 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">
+                <HardHat className="h-4 w-4" aria-hidden="true" /> Where you are
+              </p>
+              <p className="text-lg leading-relaxed">{persona.fieldMoment}</p>
+            </div>
+            <div className="glass rounded-2xl border-l-4 border-amber p-6">
+              <p className="mb-3 flex items-center gap-2 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">
+                <Building2 className="h-4 w-4" aria-hidden="true" /> What the office is missing
+              </p>
+              <p className="text-lg leading-relaxed">{persona.officeMoment}</p>
+            </div>
           </div>
         </section>
 
@@ -101,7 +106,7 @@ const PersonaListiclePage: React.FC = () => {
         <section className="px-4 py-8" aria-labelledby="reasons-heading">
           <div className="mx-auto max-w-3xl">
             <h2 id="reasons-heading" className="sr-only">
-              {persona.reasons.length} places the business is leaking
+              {persona.reasons.length} office problems costing you work
             </h2>
             <ol className="space-y-6">
               {persona.reasons.map((reason, i) => (
@@ -122,7 +127,7 @@ const PersonaListiclePage: React.FC = () => {
                       <p className="flex items-start gap-2 text-sm">
                         <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
                         <span>
-                          <span className="font-semibold">What we build: </span>
+                          <span className="font-semibold">How I fix it: </span>
                           {reason.fix}
                         </span>
                       </p>
@@ -140,12 +145,13 @@ const PersonaListiclePage: React.FC = () => {
         {/* POSITIONING */}
         <section className="px-4 py-12">
           <div className="mx-auto max-w-3xl">
-            <h2 className="mb-6 font-display text-3xl font-bold">Why this is not another agency</h2>
+            <h2 className="mb-4 font-display text-3xl font-bold">{FIELD_PROMISE.headline}</h2>
+            <p className="mb-6 text-lg text-muted-foreground">{FIELD_PROMISE.body}</p>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="glass rounded-2xl p-6">
                 <p className="mb-4 font-semibold">What you do not need</p>
                 <ul className="space-y-3">
-                  {persona.notAnother.map((item) => (
+                  {FIELD_PROMISE.notAnother.map((item) => (
                     <li key={item} className="flex items-start gap-2 text-muted-foreground">
                       <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
                       {item}
@@ -154,7 +160,7 @@ const PersonaListiclePage: React.FC = () => {
                 </ul>
               </div>
               <div className="glass rounded-2xl border border-amber/30 p-6">
-                <p className="mb-4 font-semibold text-amber">What Aetheris does instead</p>
+                <p className="mb-4 font-semibold text-amber">What I do instead</p>
                 <p className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
                   {persona.instead}
@@ -169,7 +175,7 @@ const PersonaListiclePage: React.FC = () => {
           <section className="px-4 py-12" aria-labelledby="proof-heading">
             <div className="mx-auto max-w-3xl">
               <h2 id="proof-heading" className="mb-2 font-display text-3xl font-bold">
-                What fixing these leaks has done elsewhere
+                What fixing these problems has done for other businesses
               </h2>
               <p className="mb-6 text-sm text-muted-foreground">
                 Independent, published case studies of the same kinds of fixes. Each links to its original source.
@@ -218,7 +224,7 @@ const PersonaListiclePage: React.FC = () => {
               <PrimaryCta />
               <a href={bookHref}>
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Book a strategy call
+                  Book a quick call
                 </Button>
               </a>
             </div>
