@@ -142,7 +142,7 @@ function ChapterFinancials({
 }
 
 
-export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true, runnerToken, onRunnerUnauthorized }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean; runnerToken?: string | null; onRunnerUnauthorized?: () => void } = {}) {
+export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCompany = "", standalone = false, canStartScan = true, runnerToken, onRunnerUnauthorized, autoStart = false, showScanForm = true }: { initialScanId?: string | null; initialUrl?: string; initialCompany?: string; standalone?: boolean; canStartScan?: boolean; runnerToken?: string | null; onRunnerUnauthorized?: () => void; autoStart?: boolean; showScanForm?: boolean } = {}) {
   const [url, setUrl] = useState(initialUrl);
   const [company, setCompany] = useState(initialCompany);
   const [scanId, setScanId] = useState<string | null>(() => {
@@ -208,6 +208,17 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
       toast({ title: "Golden Report could not start", description: detail.message, variant: "destructive" });
     } finally { setBusy(false); }
   }
+
+  // The standalone two-URL workspace starts scans only after an explicit URL form submit.
+  // Guard against React StrictMode effect replay and never auto-start a shared report.
+  const autoStartOnce = useRef(false);
+  useEffect(() => {
+    if (!autoStart || !canStartScan || !initialUrl || initialScanId || autoStartOnce.current) return;
+    autoStartOnce.current = true;
+    void startScan();
+    // These values are immutable over a single mounted scan instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, canStartScan, initialUrl, initialScanId]);
 
   // poll
   useEffect(() => {
@@ -282,7 +293,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
 
   return (
     <div className="space-y-4">
-      {canStartScan && <Card className="p-4 bg-card border-border">
+      {canStartScan && showScanForm && <Card className="p-4 bg-card border-border">
         <div className="flex items-center gap-2 mb-3">
           <ScanLine className="w-4 h-4 text-amber-500" />
           <h3 className="font-semibold tracking-wide">Forensic Scan All — Golden Report</h3>
