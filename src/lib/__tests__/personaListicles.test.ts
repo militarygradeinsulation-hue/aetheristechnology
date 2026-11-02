@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { FIELD_PROMISE, HOW_IT_WORKS, PERSONA_LISTICLES } from "@/config/personaListicles";
 import { REAL_CASES } from "@/data/realCaseStudies";
+import { TRADE_GUARANTEE, TRADE_TIERS } from "@/config/tradePricing";
+import { MEDIA_MENTIONS, PROOF_STATS, TRADE_REVIEWS } from "@/config/tradeProof";
 import { personaAdUrl, resolvePersonaProof, withPersonaTracking } from "@/lib/personaListicle";
 
 const caseIds = new Set(REAL_CASES.map((c) => c.id));
@@ -46,7 +48,13 @@ describe("persona listicles", () => {
   });
 
   it("never wires persona pages to report generation", () => {
-    const files = ["pages/PersonaListiclePage.tsx", "pages/TradesHubPage.tsx", "config/personaListicles.ts"];
+    const files = [
+      "pages/PersonaListiclePage.tsx",
+      "pages/TradesHubPage.tsx",
+      "components/trades/TradeDiamond.tsx",
+      "config/personaListicles.ts",
+      "config/tradePricing.ts",
+    ];
     for (const src of files.map((f) => readFileSync(resolve(__dirname, "../..", f), "utf8"))) {
       expect(src).not.toMatch(/forensic-scan|golden-report|functions\.invoke|supabase/i);
     }
@@ -66,6 +74,42 @@ describe("trades positioning", () => {
   it("has a shared field promise and three-step offer", () => {
     expect(FIELD_PROMISE.headline).toMatch(/in the field/);
     expect(HOW_IT_WORKS).toHaveLength(3);
+  });
+});
+
+describe("trades pricing ladder", () => {
+  it("is free to find, paid to plan, advise, fix, and watch", () => {
+    expect(TRADE_TIERS.map((t) => t.stage)).toEqual(["Find", "Plan", "Advise", "Fix", "Watch"]);
+    const [scan, ...paid] = TRADE_TIERS;
+    expect(scan.cadence).toBe("free");
+    expect(scan.fromDollars).toBe(0);
+    expect(scan.cta.href).toBe("/leak-audit/self-scan");
+    for (const t of paid) expect(t.fromDollars, t.id).toBeGreaterThan(0);
+    expect(TRADE_TIERS.find((t) => t.stage === "Watch")!.cadence).toBe("monthly");
+  });
+
+  it("charges the same Fix Plan price the checkout charges", () => {
+    const plan = TRADE_TIERS.find((t) => t.id === "fix-plan")!;
+    expect(plan.cta.href).toBe("/business-xray/checkout?offer=roadmap");
+    const checkout = readFileSync(resolve(__dirname, "../../pages/BusinessXrayCheckoutPage.tsx"), "utf8");
+    const roadmap = checkout.slice(checkout.indexOf("roadmap: {"), checkout.indexOf("roadmap: {") + 200);
+    expect(roadmap).toContain(`price: "${plan.price}"`);
+  });
+
+  it("keeps the 30-day guarantee wording in sync with /lander", () => {
+    const lander = readFileSync(resolve(__dirname, "../../pages/LeakLanderPage.tsx"), "utf8");
+    expect(lander).toMatch(/guarantee we can help you save money in less than 30 days/);
+    expect(TRADE_GUARANTEE[0]).toMatch(/guarantee I can help you save money in less than 30 days/);
+  });
+});
+
+describe("trades proof slots", () => {
+  it("only holds complete, attributable entries", () => {
+    for (const r of TRADE_REVIEWS) {
+      for (const field of [r.quote, r.name, r.company, r.trade, r.city]) expect(field.trim()).not.toBe("");
+    }
+    for (const m of MEDIA_MENTIONS) expect(m.url).toMatch(/^https:\/\//);
+    for (const s of PROOF_STATS) expect(s.value && s.label).toBeTruthy();
   });
 });
 

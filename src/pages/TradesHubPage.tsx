@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, Calendar, Building2, HardHat } from 'lucide-react';
+import { ArrowRight, Building2, HardHat, Tag } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
-import { BOOK_MEETING_URL, RUN_AUDIT_URL } from '@/lib/links';
+import { RUN_AUDIT_URL } from '@/lib/links';
 import { FIELD_PROMISE, HOW_IT_WORKS, PERSONA_LISTICLES, TRADES_HUB_PATH, personaPath } from '@/config/personaListicles';
 import { withPersonaTracking } from '@/lib/personaListicle';
+import { PricingLadder } from '@/components/trades/TradeDiamond';
 
 const OFFICE_PROBLEMS = [
   'Calls going to voicemail while you are on a job',
@@ -24,7 +25,6 @@ const TradesHubPage: React.FC = () => {
   const { search } = useLocation();
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const scanHref = withPersonaTracking(RUN_AUDIT_URL, 'trades', search);
-  const bookHref = withPersonaTracking(BOOK_MEETING_URL, 'trades', search);
 
   return (
     <div className="relative min-h-screen">
@@ -58,9 +58,9 @@ const TradesHubPage: React.FC = () => {
                   Run the free leak self-scan <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <a href={bookHref}>
+              <a href="#pricing">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  <Calendar className="mr-2 h-4 w-4" /> Book a quick call
+                  <Tag className="mr-2 h-4 w-4" /> See pricing
                 </Button>
               </a>
             </div>
@@ -109,25 +109,21 @@ const TradesHubPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="px-4 py-12">
-          <div className="glass mx-auto max-w-3xl rounded-2xl border border-amber/30 p-6 md:p-10">
+        <section className="px-4 pt-12">
+          <div className="mx-auto max-w-3xl">
             <h2 className="mb-6 font-display text-3xl font-bold">Fast, and it does not take you off the job</h2>
-            <ol className="mb-8 grid gap-4 md:grid-cols-3">
+            <ol className="grid gap-4 md:grid-cols-3">
               {HOW_IT_WORKS.map((step, i) => (
-                <li key={step.title}>
+                <li key={step.title} className="glass rounded-2xl p-5">
                   <p className="mb-1 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">Step {i + 1}</p>
                   <p className="mb-1 font-semibold">{step.title}</p>
                   <p className="text-sm text-muted-foreground">{step.text}</p>
                 </li>
               ))}
             </ol>
-            <Link to={scanHref}>
-              <Button size="lg" className="w-full bg-amber font-semibold text-background hover:bg-amber/90 sm:w-auto">
-                Run the free leak self-scan <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
           </div>
         </section>
+        <PricingLadder slug="trades" search={search} />
 
         <Footer />
       </div>

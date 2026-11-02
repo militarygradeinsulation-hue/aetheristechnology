@@ -109,16 +109,16 @@ export const FIELD_PROMISE = {
 /** Shared three-step offer shown on every trade page and the hub. */
 export const HOW_IT_WORKS = [
   {
-    title: 'Run the free scan from your truck',
-    text: 'Enter your website. In a few minutes it flags the problems customers can see from the outside.',
+    title: 'Free scan: see the problems',
+    text: 'Run it from your truck. In a few minutes it shows what is broken, in plain language. Free, and yours to keep.',
   },
   {
-    title: 'One short call, between jobs',
-    text: 'I look at your calls, estimates, scheduling, and billing, and tell you plainly what is broken.',
+    title: 'Fix Plan: know what to fix first',
+    text: 'I review the findings and send a step-by-step plan, ordered by the money at stake. No call required.',
   },
   {
-    title: 'I fix it. You keep working.',
-    text: 'I build the fixes into the tools you already use and show you what changed. No new software to learn.',
+    title: 'I fix it, then keep watching',
+    text: 'I build the fixes into the tools you already use, remotely, then monitor so they stay fixed.',
   },
 ];
 
@@ -191,7 +191,7 @@ export const PERSONA_LISTICLES: PersonaListicle[] = [
       },
       {
         question: 'How much of my time does this take?',
-        answer: 'Very little. A short call that fits between jobs, then I do the work and show you what changed.',
+        answer: 'Very little. You run the free scan, read the Fix Plan when it suits you, and I do the work remotely. A consultation is there if you want one, but it is not required.',
       },
     ],
     ads: [
@@ -551,7 +551,7 @@ export const PERSONA_LISTICLES: PersonaListicle[] = [
       },
       {
         question: 'How involved do I need to be?',
-        answer: 'One short call to walk through what the scan finds. After that I build and you review.',
+        answer: 'Very little. The Fix Plan arrives in writing, I build remotely, and you review. Book a consultation only if you want to talk it through.',
       },
     ],
     ads: [
@@ -821,7 +821,7 @@ export const PERSONA_LISTICLES: PersonaListicle[] = [
       },
       {
         question: 'How fast can you find the problems?',
-        answer: 'The self-scan flags visible problems in a few minutes. A short call covers the rest of the office.',
+        answer: 'The free scan flags visible problems in a few minutes. The Fix Plan covers the rest of the office and lays out what to fix first.',
       },
     ],
     ads: [
@@ -993,7 +993,7 @@ export const PERSONA_LISTICLES: PersonaListicle[] = [
     instead:
       'I find where your office is breaking under the extra work and build the systems that let it scale with your crews, so you can focus on growing instead of firefighting.',
     proofCaseIds: [19, 24, 40],
-    offerLine: 'Start with the free leak self-scan, then we walk through your office on a short call.',
+    offerLine: 'Start with the free leak self-scan. The Fix Plan then lays out exactly what is breaking as you grow.',
     faqs: [
       {
         question: 'Should I just hire another office person?',
