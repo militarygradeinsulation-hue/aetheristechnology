@@ -114,7 +114,9 @@ async function migrateScan(table,r) {
     scan_payload:r,scanned_at:clean(r.completed_at||r.created_at)
   }],"source_table,source_id");
   if(table==="forensic_scans"){
-    await upsert("forensic_scans",[r],"id");
+    const allowed=["id","requested_by","requester_kind","rep_code","target_url","company_name","hubspot_account_id","status","stage_status","brand_kit_status","raw_findings","brand_kit","report","error_message","private_intake","report_source","portal_source","creator_user_id","creator_name","creator_email","creator_profile_id","lead_name","lead_email","lead_phone","source_notified_at","created_at","updated_at","completed_at"];
+    const row=Object.fromEntries(allowed.filter(k=>Object.prototype.hasOwnProperty.call(r,k)).map(k=>[k,r[k]]));
+    await upsert("forensic_scans",[row],"id");
   }
   return {migrated:1};
 }
