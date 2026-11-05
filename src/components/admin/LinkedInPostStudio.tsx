@@ -23,6 +23,7 @@ const PILLARS = [
   'AI Demystification',
   'CRM & Follow-Up Gaps',
   'Founder Mindset',
+  'Mindprint / Human Intelligence',
   'Industry Specifics (Manufacturing/Construction)',
 ];
 
@@ -86,6 +87,53 @@ const PREMADE_TOPICS: Record<string, string[]> = {
     'Commercial services: why your dispatch system is your biggest revenue leak.',
     'Construction: the change-order leak that bleeds 4-7% of every project.',
     'Why Indianapolis mid-market operators get squeezed harder on margin than Chicago.',
+  ],
+  'Mindprint: How They Think': [
+    'Research tells you who they are. Mindprint tells you how they think.',
+    'Imagine knowing how someone processes information before the first meeting.',
+    'The best sales advantage is not more information. It is knowing how the buyer thinks.',
+    'Most people research titles, companies, and posts. Very few study how the person actually makes decisions.',
+    'You do not need more facts about the buyer. You need to understand how they interpret the facts.',
+  ],
+  'Mindprint: Trust & Decisions': [
+    'Know what builds trust before you ever make the pitch.',
+    'Two buyers can hear the same proposal and need completely different proof before saying yes.',
+    'Some people decide fast. Others need evidence, control, consensus, or time. Selling them the same way is the mistake.',
+    'What if you knew what makes someone skeptical before you triggered it?',
+    'The question is not only what they want. It is what they need to believe before they move.',
+  ],
+  'Mindprint: Communication': [
+    'The same message can build trust with one person and lose another in 30 seconds.',
+    'Knowing what to say matters. Knowing how someone needs to hear it matters more.',
+    'Some executives want the headline first. Others need the logic first. That difference changes the meeting.',
+    'Stop communicating from your own style and start communicating in the way the other person actually processes information.',
+    'Most communication problems are not about intelligence. They are mismatched operating styles.',
+  ],
+  'Mindprint: Friction & Teams': [
+    'Most team friction is predictable once you understand how each person thinks and decides.',
+    'Two smart people can create terrible outcomes simply because they process decisions differently.',
+    'The handoff is not always broken because the process is bad. Sometimes the people are operating from different mental models.',
+    'Before you call someone difficult, understand how they process risk, pressure, and uncertainty.',
+    'Business friction plus human context creates more predictable outcomes.',
+  ],
+  'Mindprint: Leadership': [
+    'A leader leaves a pattern in every decision they make.',
+    'Your company eventually becomes a reflection of how its leaders think, decide, and tolerate risk.',
+    'Leadership style is visible in what gets questioned, what gets ignored, and what gets repeated.',
+    'You can learn a lot about a company by understanding how the person at the top processes information.',
+    'The org chart tells you who reports to whom. Mindprint helps explain how those people actually work together.',
+  ],
+  'Mindprint: Industry Angles': [
+    'Manufacturing: know what the plant manager values before the first call. Stop Guessing. Start Knowing.',
+    'Construction: know how the owner makes decisions before you pitch. Stop Guessing. Start Knowing.',
+    'Healthcare: know how the executive weighs risk before the first meeting. Stop Guessing. Start Knowing.',
+    'Financial services: know what builds trust before you ever talk numbers. Stop Guessing. Start Knowing.',
+    'Commercial real estate: know what actually drives the developer\'s decision before presenting the deal. Stop Guessing. Start Knowing.',
+    'Software: know how the CTO evaluates risk before showing another feature. Stop Guessing. Start Knowing.',
+    'Insurance: know what makes the client feel safe before explaining the policy. Stop Guessing. Start Knowing.',
+    'Logistics: know what the operations leader values before talking price. Stop Guessing. Start Knowing.',
+    'Staffing: know what the hiring manager actually values before sending another resume. Stop Guessing. Start Knowing.',
+    'Private equity: know what the partner is really evaluating before entering the room. Stop Guessing. Start Knowing.',
   ],
 };
 
