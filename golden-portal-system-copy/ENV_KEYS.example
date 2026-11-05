@@ -1,0 +1,10 @@
+# Required/optional runtime keys discovered in the Golden Report dependency chain.
+# Values intentionally omitted.
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+LOVABLE_API_KEY=
+FIRECRAWL_API_KEY=
+OPENAI_API_KEY=
+ABACUS_ROUTELLM_API_KEY=
+AI_ROUTER_DISABLE=

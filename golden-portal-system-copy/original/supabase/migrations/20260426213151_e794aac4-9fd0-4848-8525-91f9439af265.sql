@@ -1,0 +1,1 @@
+UPDATE hygiene_scans SET status = 'failed', ai_status = 'failed', error_message = 'Scan exceeded memory limit (legacy run). Please run a new scan — performance has been fixed.', completed_at = now() WHERE status = 'running';

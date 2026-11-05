@@ -1,0 +1,1 @@
+ALTER TABLE public.subscription_members ADD COLUMN IF NOT EXISTS accepted_at timestamptz;

@@ -1,0 +1,2 @@
+ALTER TABLE public.rep_leads ADD COLUMN IF NOT EXISTS admin_holding boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_rep_leads_admin_holding ON public.rep_leads(admin_holding) WHERE admin_holding = true;

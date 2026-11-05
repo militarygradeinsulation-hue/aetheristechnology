@@ -1,0 +1,3 @@
+UPDATE public.rep_mailboxes SET personal_email = 'al.aetheristechnology@outlook.com', forward_inbound = true WHERE code = '568192';
+UPDATE public.rep_mailboxes SET personal_email = 'steven.aetheristechnology@outlook.com', forward_inbound = true WHERE code = '317469';
+UPDATE public.rep_mailboxes SET personal_email = 'dean.aetheristechnology@outlook.com', forward_inbound = true WHERE code = '482917';

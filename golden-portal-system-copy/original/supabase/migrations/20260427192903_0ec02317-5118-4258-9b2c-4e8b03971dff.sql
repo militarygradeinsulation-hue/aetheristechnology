@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_mirror_contacts_acct_lifecycle_lead_created ON public.mirror_contacts (account_id, lifecycle_stage, lead_status, created_date);
+CREATE INDEX IF NOT EXISTS idx_mirror_engagements_acct_type_ts ON public.mirror_engagements (account_id, type, "timestamp");

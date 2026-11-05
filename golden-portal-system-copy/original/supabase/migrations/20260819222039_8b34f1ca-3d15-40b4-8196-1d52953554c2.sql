@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_subscription_seat_limit() FROM PUBLIC, anon, authenticated;
