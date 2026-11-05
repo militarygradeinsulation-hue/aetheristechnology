@@ -1,0 +1,45 @@
+/// <reference types="npm:@types/react@18.3.1" />
+import * as React from 'npm:react@18.3.1'
+
+export interface TemplateEntry {
+  component: React.ComponentType<any>
+  subject: string | ((data: Record<string, any>) => string)
+  to?: string
+  displayName?: string
+  previewData?: Record<string, any>
+}
+
+import { template as repWelcome } from './rep-welcome.tsx'
+import { template as contactNotification } from './contact-notification.tsx'
+import { template as repApplicationNotification } from './rep-application-notification.tsx'
+import { template as monthlyDelivery } from './monthly-delivery.tsx'
+import { template as deliverableMagicLink } from './deliverable-magic-link.tsx'
+import { template as leadIntakeNotification } from './lead-intake-notification.tsx'
+import { template as repInactivityAlert } from './rep-inactivity-alert.tsx'
+import { template as careersTestAccess } from './careers-test-access.tsx'
+import { template as dailyTouchpoints } from './daily-touchpoints.tsx'
+import { template as universeAccessCode } from './universe-access-code.tsx'
+import { template as repQuote } from './rep-quote.tsx'
+import { template as goldenReportOpened } from './golden-report-opened.tsx'
+import { template as toolShopLicense } from './tool-shop-license.tsx'
+import { template as leakAuditFindings } from './leak-audit-findings.tsx'
+import { template as websiteReportReady } from './website-report-ready.tsx'
+
+export const TEMPLATES: Record<string, TemplateEntry> = {
+  'leak-audit-findings': leakAuditFindings,
+  'website-report-ready': websiteReportReady,
+  'rep-welcome': repWelcome,
+  'contact-notification': contactNotification,
+  'rep-application-notification': repApplicationNotification,
+  'monthly-delivery': monthlyDelivery,
+  'deliverable-magic-link': deliverableMagicLink,
+  'lead-intake-notification': leadIntakeNotification,
+  'rep-inactivity-alert': repInactivityAlert,
+  'careers-test-access': careersTestAccess,
+  'daily-touchpoints': dailyTouchpoints,
+  'universe-access-code': universeAccessCode,
+  'rep-quote': repQuote,
+  'golden-report-opened': goldenReportOpened,
+  'tool-shop-license': toolShopLicense,
+}
+

@@ -1,0 +1,300 @@
+project_id = "ihdjpxhcaiaixmqxyqoe"
+
+[functions.tool-shop]
+verify_jwt = false
+
+[functions.detective-prep]
+verify_jwt = false
+
+[functions.voice-chat]
+verify_jwt = false
+
+[functions.generate-blog]
+verify_jwt = false
+
+[functions.scan-website]
+verify_jwt = false
+
+[functions.rep-code-scan]
+verify_jwt = false
+
+[functions.retrofit-blogs]
+verify_jwt = false
+
+[functions.generate-blog-images]
+verify_jwt = false
+
+[functions.generate-playbook]
+verify_jwt = false
+
+[functions.generate-sitemap]
+verify_jwt = false
+
+[functions.preview-transactional-email]
+verify_jwt = false
+
+[functions.sales-chat]
+verify_jwt = false
+
+[functions.nexus-capture-lead]
+verify_jwt = false
+
+[functions.payments-webhook]
+verify_jwt = false
+
+[functions.head-to-head]
+verify_jwt = false
+
+[functions.get-stripe-price]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.hubspot-oauth-callback]
+verify_jwt = false
+
+[functions.hubspot-sync]
+verify_jwt = false
+
+[functions.generate-custom-playbook]
+verify_jwt = false
+
+[functions.generate-social-content]
+verify_jwt = false
+
+[functions.generate-sales-scripts]
+verify_jwt = false
+
+[functions.generate-content-calendar]
+verify_jwt = false
+
+[functions.generate-follow-up-plan]
+verify_jwt = false
+
+[functions.generate-strategic-questions]
+verify_jwt = false
+
+[functions.generate-brand-contradictions]
+verify_jwt = false
+
+[functions.generate-friction-audit]
+verify_jwt = false
+
+[functions.monthly-delivery]
+verify_jwt = false
+
+[functions.scrape-leads]
+verify_jwt = false
+
+[functions.process-drip]
+verify_jwt = false
+
+[functions.check-drip-replies]
+verify_jwt = false
+
+[functions.generate-drip-batch]
+verify_jwt = false
+
+[functions.seo-discover-trends]
+verify_jwt = false
+
+[functions.seo-weekly-optimize]
+verify_jwt = false
+
+[functions.seo-manual-optimize]
+verify_jwt = false
+
+[functions.seo-rollback]
+verify_jwt = false
+
+[functions.generate-aeo-blog-batch]
+verify_jwt = false
+
+[functions.admin-insights]
+verify_jwt = true
+
+[functions.admin-library]
+verify_jwt = true
+
+[functions.campaign-image-generator]
+verify_jwt = false
+
+[functions.admin-pin-login]
+verify_jwt = false
+
+[functions.owner-icp-prospector]
+verify_jwt = false
+
+# Both manual and scheduled calls validate independent owner/cron credentials in code.
+[functions.owner-buyer-intent]
+verify_jwt = false
+
+[functions.personal-engine-token]
+verify_jwt = false
+
+[functions.linkedin-scrape-post]
+verify_jwt = false
+
+[functions.infer-business-context]
+verify_jwt = false
+
+[functions.rb2b-webhook]
+verify_jwt = false
+
+[functions.export-retargeting-audience]
+verify_jwt = false
+
+[functions.render-for-crawler]
+verify_jwt = false
+
+[functions.prerender-cache-warmer]
+verify_jwt = false
+
+[functions.sync-content-to-outlook]
+verify_jwt = false
+
+[functions.linkedin-auth]
+verify_jwt = false
+
+[functions.linkedin-post]
+verify_jwt = false
+
+[functions.x-auth]
+verify_jwt = false
+
+[functions.x-post]
+verify_jwt = false
+
+[functions.facebook-auth]
+verify_jwt = false
+
+[functions.facebook-post]
+verify_jwt = false
+
+[functions.instagram-post]
+verify_jwt = false
+
+[functions.social-post-requests]
+verify_jwt = false
+
+[functions.seed-demo-data]
+verify_jwt = false
+
+[functions.run-audit]
+verify_jwt = false
+[functions.generate-system-deliverable]
+verify_jwt = false
+
+[functions.deliverable-public]
+verify_jwt = false
+
+[functions.transcribe-audio]
+verify_jwt = false
+
+[functions.inbound-email-webhook]
+verify_jwt = false
+
+[functions.admin-mailboxes]
+verify_jwt = false
+
+[functions.portal-mailbox]
+verify_jwt = false
+
+[functions.creation-studio]
+verify_jwt = false
+
+[functions.outlook-oauth-start]
+verify_jwt = false
+
+[functions.outlook-oauth-callback]
+verify_jwt = false
+
+[functions.outlook-status]
+verify_jwt = false
+
+[functions.easy-mode]
+verify_jwt = false
+
+[functions.revoke-rep-access]
+verify_jwt = false
+
+[functions.extension-leak-scan]
+verify_jwt = false
+
+[functions.extension-operator-chat]
+verify_jwt = false
+
+[functions.extension-leak-scan-ai]
+verify_jwt = false
+
+[functions.extension-brand-voice]
+verify_jwt = false
+
+
+
+
+
+[functions.forensic-scan-all]
+verify_jwt = false
+
+[functions.forensic-report-chat]
+verify_jwt = false
+
+[functions.verify-careers-test-payment]
+verify_jwt = false
+
+[functions.aetheris-nexus-chat]
+verify_jwt = false
+
+[functions.aetheris-nexus-image]
+verify_jwt = false
+
+[functions.aetheris-nexus-prompt-ideas]
+verify_jwt = false
+
+
+[functions.admin-live-traffic]
+verify_jwt = false
+
+
+[functions.reciprocation-tactics]
+verify_jwt = false
+
+[functions.book-writer]
+verify_jwt = false
+
+[functions.try-tool-sandbox]
+verify_jwt = false
+
+
+
+[functions.verify-careers-license]
+verify_jwt = false
+
+[functions.creation-studio-brand]
+verify_jwt = false
+
+[functions.recommend-tools]
+verify_jwt = false
+
+[functions.golden-report-recompile]
+verify_jwt = false
+
+[functions.linkedin-scheduler]
+verify_jwt = false
+
+[functions.nexus-threads]
+verify_jwt = false
+
+[functions.substack-draft]
+verify_jwt = false
+
+[functions.partner-api]
+verify_jwt = false
+
+[functions.company-leak-audit]
+verify_jwt = false
+
+[functions.portal-meeting-flow]
+verify_jwt = false

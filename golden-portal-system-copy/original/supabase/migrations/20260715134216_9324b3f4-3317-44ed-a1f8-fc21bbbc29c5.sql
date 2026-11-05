@@ -1,0 +1,1 @@
+UPDATE public.drip_emails SET status='skipped', error_message=COALESCE(error_message,'')||' | Superseded by Golden Report campaign' WHERE status='pending'; UPDATE public.drip_prospects SET status='imported' WHERE status='active';

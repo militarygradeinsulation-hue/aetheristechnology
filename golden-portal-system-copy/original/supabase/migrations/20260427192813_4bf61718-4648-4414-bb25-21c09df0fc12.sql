@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_mirror_deals_acct_stage_close_amount ON public.mirror_deals (account_id, stage, close_date, amount);
+CREATE INDEX IF NOT EXISTS idx_mirror_deals_open_acct ON public.mirror_deals (account_id, owner_id, amount) WHERE stage IS NULL OR stage NOT LIKE 'closed_%';

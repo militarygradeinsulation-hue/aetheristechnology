@@ -1,0 +1,1 @@
+ALTER TABLE public.careers_attempts ADD COLUMN IF NOT EXISTS admin_notes text;
