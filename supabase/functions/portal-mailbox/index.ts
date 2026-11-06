@@ -369,18 +369,26 @@ serve(async (req) => {
       // Send via Lovable's managed email (handles suppression + unsubscribe).
       // The managed API sends to one recipient; cc/bcc were never delivered by
       // the legacy processor either, so they are not reproduced here.
+      const apiKey = Deno.env.get("LOVABLE_API_KEY");
+      if (!apiKey) {
+        return json(500, { error: "LOVABLE_API_KEY is not configured" });
+      }
       try {
-        await sendLovableEmail({
-          from: fromHeader,
-          sender_domain: SENDER_DOMAIN,
-          to: allowedTo[0],
-          subject,
-          html: finalHtml,
-          text: finalText,
-          purpose: "transactional",
-          label: `rep-mail:${mailbox.code}`,
-          idempotency_key: `rep-mail-${messageId}`,
-        });
+        await sendLovableEmail(
+          {
+            from: fromHeader,
+            sender_domain: SENDER_DOMAIN,
+            to: allowedTo[0],
+            subject,
+            html: finalHtml,
+            text: finalText,
+            purpose: "transactional",
+            label: `rep-mail:${mailbox.code}`,
+            idempotency_key: `rep-mail-${messageId}`,
+            reply_to: mailbox.personal_email || mailbox.forwarding_to || addr,
+          },
+          { apiKey, sendUrl: Deno.env.get("LOVABLE_SEND_URL") },
+        );
       } catch (sendErr) {
         console.error("send failed", sendErr);
         return json(500, { error: "Failed to send email" });
