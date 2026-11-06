@@ -51,6 +51,7 @@ const STAGES: { key: string; label: string }[] = [
   { key: "crm",           label: "CRM / pipeline forensics" },
   { key: "synth",         label: "Synthesizing 14-chapter report" },
   { key: "assets",        label: "Building growth assets (brand, imagery, posts, schedule)" },
+  { key: "compile",       label: "Validating report and financial ledger" },
 
 ];
 
@@ -163,6 +164,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   });
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [fixOpen, setFixOpen] = useState(false);
   const [fixSeed, setFixSeed] = useState<string | null>(null);
@@ -289,7 +291,32 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     ? 100
     : row?.status === "failed"
       ? Math.max(12, Math.round((completedStages / STAGES.length) * 100))
-      : Math.min(94, Math.max(8, Math.round((completedStages / STAGES.length) * 86 + Math.min(elapsedSec / TARGET_SECONDS, 1) * 14)));
+      : stageState("compile") === "running" || row?.status === "finalizing"
+        ? 92
+        : stageState("compile") === "done"
+          ? 98
+          : Math.max(8, Math.min(88, Math.round((completedStages / (STAGES.length - 1)) * 88)));
+  const staleFinalization = !!scanId && !!row && ["running", "finalizing"].includes(row.status) &&
+    ["done", "degraded"].includes(stageState("synth")) &&
+    ["done", "degraded"].includes(stageState("assets")) &&
+    Number.isFinite(new Date(row.updated_at || "").getTime()) &&
+    Date.now() - new Date(row.updated_at || "").getTime() > 120_000;
+  async function recoverReport() {
+    if (!scanId || !isAdmin || recovering) return;
+    setRecovering(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("forensic-scan-all", {
+        body: { action: "finalize", scan_id: scanId },
+        headers: runnerAdminToken ? { "x-admin-token": runnerAdminToken } : {},
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Could not resume finalization");
+      toast({ title: "Finalization restarted", description: "The saved research is being validated without running another paid website scan." });
+    } catch (error) {
+      toast({ title: "Finalization recovery unavailable", description: error instanceof Error ? error.message : "Please contact an administrator.", variant: "destructive" });
+    } finally {
+      setRecovering(false);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -359,6 +386,15 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
               Fast mode is active: slow outside detectors are capped, then the report finalizes from the evidence already captured.
               Target finish: <span className="text-amber-500 font-mono">under 75 seconds</span> on normal sites.
             </p>
+          )}
+          {staleFinalization && (
+            <div className="mt-3 space-y-2 border border-amber-600/50 bg-amber-500/10 p-3 text-sm">
+              <p>Finalization has stopped updating. The research checkpoint is retained. A recovery attempt does not repeat the website crawl or AI synthesis.</p>
+              {isAdmin && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
+                {recovering ? "Resuming..." : "Resume finalization from saved evidence"}
+              </Button>}
+              {!isAdmin && <p>Ask an authorized Aetheris administrator to resume this report.</p>}
+            </div>
           )}
           {row?.status === "completed" && (
             <p className="mt-3 text-xs text-green-500 font-mono uppercase tracking-widest">
