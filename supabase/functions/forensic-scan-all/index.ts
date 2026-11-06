@@ -1564,7 +1564,7 @@ Deno.serve(async (req) => {
       if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(scanId))
         return new Response(JSON.stringify({error:"Valid scan ID required"}),{status:400,headers:{...corsHeaders,"Content-Type":"application/json"}});
       // Only internal service-role invocations or verified staff may recover a scan.
-      const callerBearer = req.headers.get("authorization")?.replace(/^Bearer\\s+/i,"").trim() || "";
+      const callerBearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i,"").trim() || "";
       const serviceOk = callerBearer === SUPABASE_SERVICE_ROLE_KEY;
       const adminOk = await verifyAdminToken(req.headers.get("x-admin-token"), SUPABASE_SERVICE_ROLE_KEY).catch(()=>false);
       if (!serviceOk && !adminOk) return new Response(JSON.stringify({error:"Unauthorized"}),{status:403,headers:{...corsHeaders,"Content-Type":"application/json"}});
