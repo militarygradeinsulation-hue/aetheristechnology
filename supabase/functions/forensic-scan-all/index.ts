@@ -1222,6 +1222,58 @@ async function runScan(id: string, url: string, company: string, accountId: stri
 
 
 
+    // Persist the actual synthesized report before entering a fresh Edge
+    // invocation. An interrupted finalizer can now resume without paid research.
+    await stage("compile", "running", { mode:"isolated", attempt:1 });
+    const checkpoint = await sb.from("forensic_scans").update({
+      raw_findings: findings, report, status: "finalizing", updated_at: nowIso(),
+    }).eq("id", id).select("id").single();
+    if (checkpoint.error || !checkpoint.data) throw new Error("Could not save Golden Report synthesis checkpoint");
+    const handoff = await invokeFn("forensic-scan-all", { action:"finalize", scan_id:id }, 12_000);
+    if (handoff?.error) throw new Error("Finalizer handoff failed: " + String(handoff.error).slice(0,200));
+    // Post-processing is performed by finalizeSavedScan, after the report is
+    // saved as completed. No additional AI or crawler calls here.
+    return;
+
+  } catch (e) {
+    await sb.from("forensic_scans").update({
+      status: "failed",
+      error_message: String((e as Error).message || e),
+    }).eq("id", id);
+  }
+}
+
+// Isolated finalizer: the scan worker has already exhausted most of its Edge
+// runtime budget on research. Starting this in a new authorized invocation gives
+// deterministic compilation a fresh execution budget without re-running AI.
+async function finalizeSavedScan(id: string) {
+  const { data: savedScan, error: loadError } = await sb.from("forensic_scans")
+    .select("id,status,target_url,company_name,raw_findings,report,stage_status,brand_kit")
+    .eq("id", id).single();
+  if (loadError || !savedScan) throw new Error("Golden Report checkpoint not found");
+  if (savedScan.status === "completed") return;
+  if (!["finalizing","running","failed"].includes(savedScan.status)) throw new Error("Scan is not ready for finalization");
+  const states = (savedScan.stage_status || {}) as Record<string,{ state?: string }>;
+  if (states.synth?.state !== "done" && states.synth?.state !== "degraded") throw new Error("Research synthesis is not finished");
+  if (!["done","degraded"].includes(states.assets?.state || "")) throw new Error("Growth assets checkpoint is not finished");
+  const url = String(savedScan.target_url || "");
+  const company = String(savedScan.company_name || "");
+  const findings = (savedScan.raw_findings || {}) as Record<string, unknown>;
+  let report: any = savedScan.report || {};
+  const parsedBrand = (savedScan.brand_kit as {brand?:Brand}|null)?.brand || null;
+  const stage = (name: string, state: string, extra: unknown = null) => setStage(id, name, state, extra);
+  try {
+    // Older interrupted scans saved only a 14-chapter fallback. Never present
+    // that as a real completed report or spend AI credits without approval.
+    if (report.synthesis_incomplete === true) {
+      await sb.from("forensic_scans").update({
+        status: "failed",
+        error_message: "An earlier scan stopped before its synthesized report was checkpointed. Its preliminary evidence is preserved; a new synthesis is required.",
+        updated_at: nowIso(),
+      }).eq("id", id);
+      await stage("compile", "degraded", "earlier synthesis checkpoint incomplete");
+      return;
+    }
     // ─────────── REPORT COMPILER GATE ───────────
     // One pass builds the evidence ledger, deduplicates root causes, prices each
     // unique root cause exactly once, injects the canonical numbers into prose,
@@ -1332,15 +1384,22 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       }
     }
 
-    await sb.from("forensic_scans").update({
+    // Never call a preliminary or inconsistent report "completed".
+    const publishable = compilerState === "compiled" && report?.synthesis_incomplete !== true;
+    const saved = await sb.from("forensic_scans").update({
       raw_findings: findings,
       report,
-      status: "completed",
-      completed_at: nowIso(),
-    }).eq("id", id);
-    if (compilerState !== "compiled") {
-      console.error(`scan ${id}: report is ${compilerState} — downloads and delivery are gated until it compiles clean`);
+      status: publishable ? "completed" : "failed",
+      completed_at: publishable ? nowIso() : null,
+      error_message: publishable ? null : "Golden Report finalization needs review. No unverified report has been published.",
+      updated_at: nowIso(),
+    }).eq("id", id).select("id").single();
+    if (saved.error || !saved.data) throw new Error("Could not persist finalized Golden Report");
+    if (!publishable) {
+      await stage("compile", "degraded", { state: compilerState, reason: "report not publishable" });
+      return;
     }
+
 
     // Post completion work. The scan is already marked completed above, so
     // none of this can delay the report. Archiving also queues the Company
@@ -1461,10 +1520,14 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }
 
   } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
+    console.error("isolated Golden Report finalizer failed", id, reason);
     await sb.from("forensic_scans").update({
       status: "failed",
-      error_message: String((e as Error).message || e),
+      error_message: "Report finalization failed. Research checkpoint preserved. " + reason.slice(0,180),
+      updated_at: nowIso(),
     }).eq("id", id);
+    await stage("compile", "degraded", reason.slice(0,180));
   }
 }
 
@@ -1496,6 +1559,34 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
+    if (body.action === "finalize") {
+      const scanId = typeof body.scan_id === "string" ? body.scan_id : "";
+      if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(scanId))
+        return new Response(JSON.stringify({error:"Valid scan ID required"}),{status:400,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      // Only internal service-role invocations or verified staff may recover a scan.
+      const callerBearer = req.headers.get("authorization")?.replace(/^Bearer\\s+/i,"").trim() || "";
+      const serviceOk = callerBearer === SUPABASE_SERVICE_ROLE_KEY;
+      const adminOk = await verifyAdminToken(req.headers.get("x-admin-token"), SUPABASE_SERVICE_ROLE_KEY).catch(()=>false);
+      if (!serviceOk && !adminOk) return new Response(JSON.stringify({error:"Unauthorized"}),{status:403,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      const {data: scan} = await sb.from("forensic_scans").select("id,status,stage_status,updated_at").eq("id",scanId).maybeSingle();
+      if (!scan) return new Response(JSON.stringify({error:"Scan not found"}),{status:404,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      if (scan.status === "completed") return new Response(JSON.stringify({scan_id:scanId,status:"completed"}),{headers:{...corsHeaders,"Content-Type":"application/json"}});
+      const stages = (scan.stage_status||{}) as Record<string,{state?:string;extra?:unknown}>;
+      if (!["done","degraded"].includes(stages.synth?.state||"") || !["done","degraded"].includes(stages.assets?.state||""))
+        return new Response(JSON.stringify({error:"Research stages are not ready for recovery"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      const last = Date.parse(scan.updated_at || "") || 0;
+      if (scan.status !== "failed" && Date.now()-last < 90_000 && !serviceOk)
+        return new Response(JSON.stringify({error:"Finalization is already in progress"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      const priorAttempt = Number((stages.compile?.extra as {attempt?:number}|null)?.attempt||0);
+      if (priorAttempt >= 3) return new Response(JSON.stringify({error:"Recovery limit reached. Manual review required"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      const claimed=await sb.from("forensic_scans").update({status:"finalizing",error_message:null,updated_at:nowIso()}).eq("id",scanId)
+        .in("status",["running","finalizing","failed"]).select("id").maybeSingle();
+      if (!claimed.data || claimed.error) return new Response(JSON.stringify({error:"Scan could not be claimed"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      await setStage(scanId,"compile","running",{mode:"isolated",attempt:priorAttempt+1});
+      // @ts-expect-error Supabase EdgeRuntime global
+      EdgeRuntime.waitUntil(finalizeSavedScan(scanId));
+      return new Response(JSON.stringify({scan_id:scanId,status:"finalizing",reused_checkpoint:true}),{headers:{...corsHeaders,"Content-Type":"application/json"}});
+    }
     const url = String(body.url || "").trim();
     if (!url) return new Response(JSON.stringify({ error: "url required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const company = String(body.company || "").trim();
