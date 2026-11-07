@@ -170,6 +170,22 @@ export const getLibraryStats = () =>
   call<{ total_scans: number; total_archived: number; total_companies: number }>(
     "golden-report-library", { action: "stats" });
 
+export interface GoldenReportRecoveryResult {
+  ok: boolean;
+  examined: number;
+  missing_before: number;
+  recovered: number;
+  remaining: number;
+  errors: string[];
+  limited: boolean;
+}
+
+/** Repairs only missing completed report index rows; never launches a new scan. */
+export const reconcileMissingGoldenReports = (limit = 10) =>
+  call<GoldenReportRecoveryResult>(
+    "golden-report-library", { action: "reconcile_missing", limit },
+  );
+
 export const runBackfillBatch = (cursor: string | null, batch = 40) =>
   call<{ processed: number; archived: number; skipped: number; errors: string[]; cursor: string | null; done: boolean; total_scans: number; total_archived: number }>(
     "golden-report-library", { action: "backfill", cursor, batch });

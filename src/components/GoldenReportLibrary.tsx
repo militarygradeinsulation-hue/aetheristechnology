@@ -4,7 +4,7 @@
 // Reads only the materialized archive layer; the canonical report always stays
 // in forensic_scans and is opened through the existing Golden Report page/PDF.
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
-  listCompanies, getCompany, getReport, getReportDownload, getLibraryStats, runBackfillBatch,
+  listCompanies, getCompany, getReport, getReportDownload, getLibraryStats, runBackfillBatch, reconcileMissingGoldenReports,
   generateBlueprint, setBlueprintApproval, findCompanyContact, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
@@ -517,6 +517,8 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
   const [scanId, setScanId] = useState<string | null>(null);
   const [stats, setStats] = useState<{ total_scans: number; total_archived: number; total_companies: number } | null>(null);
   const [backfilling, setBackfilling] = useState(false);
+  const [reconciling, setReconciling] = useState(false);
+  const autoReconcileAttempted = useRef(false);
   const [backfillMsg, setBackfillMsg] = useState('');
   const [sysBatching, setSysBatching] = useState(false);
   const [sysMsg, setSysMsg] = useState('');
@@ -536,6 +538,32 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (!portalToken) getLibraryStats().then(setStats).catch(() => {}); }, [portalToken]);
+
+  const recoverMissing = useCallback(async () => {
+    if (portalToken || reconciling) return;
+    setReconciling(true);
+    try {
+      const result = await reconcileMissingGoldenReports(20);
+      const latest = await getLibraryStats();
+      setStats(latest);
+      setBackfillMsg(result.recovered > 0
+        ? `Recovered ${result.recovered} completed report(s) into the permanent library. ${result.remaining} remain unindexed.`
+        : result.errors.length
+          ? `Some saved reports could not be indexed: ${result.errors[0]}`
+          : 'All available completed reports are indexed.');
+      await load();
+    } catch (e) {
+      setBackfillMsg(`Report index recovery failed: ${(e as Error).message}. The original completed report remains saved.`);
+    } finally { setReconciling(false); }
+  }, [portalToken, reconciling, load]);
+
+  // A completed report can be saved even if its asynchronous archive hook fails.
+  // On the first admin library open, restore missing index entries automatically.
+  useEffect(() => {
+    if (portalToken || autoReconcileAttempted.current || !stats || stats.total_scans <= stats.total_archived) return;
+    autoReconcileAttempted.current = true;
+    void recoverMissing();
+  }, [portalToken, stats, recoverMissing]);
 
   const runBackfill = async () => {
     setBackfilling(true);
@@ -616,7 +644,13 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
           </Button>
           {!portalToken && (
             <>
-              <Button size="sm" onClick={runBackfill} disabled={backfilling}>
+              {stats && stats.total_scans > stats.total_archived && (
+                <Button size="sm" variant="outline" onClick={() => void recoverMissing()} disabled={reconciling}>
+                  {reconciling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1 h-4 w-4" />}
+                  Restore missing reports ({Math.max(0, stats.total_scans - stats.total_archived)})
+                </Button>
+              )}
+              <Button size="sm" onClick={runBackfill} disabled={backfilling || reconciling}>
                 {backfilling ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Database className="mr-1 h-4 w-4" />}
                 Archive historical reports
               </Button>

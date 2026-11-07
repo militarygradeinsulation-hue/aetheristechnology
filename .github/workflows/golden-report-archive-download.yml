@@ -8,6 +8,9 @@ on:
       - "src/lib/goldenLibrary.ts"
       - "src/lib/generateForensicGoldenPdf.ts"
       - "src/lib/goldenReportArchiveDownload.test.ts"
+      - "src/lib/goldenReportArchiveRecovery.test.ts"
+      - "supabase/functions/_shared/golden-report-reconciliation.ts"
+      - "supabase/functions/forensic-scan-all/index.ts"
       - "supabase/functions/golden-report-library/**"
       - ".github/workflows/golden-report-archive-download.yml"
   push:
@@ -18,6 +21,9 @@ on:
       - "src/lib/goldenLibrary.ts"
       - "src/lib/generateForensicGoldenPdf.ts"
       - "src/lib/goldenReportArchiveDownload.test.ts"
+      - "src/lib/goldenReportArchiveRecovery.test.ts"
+      - "supabase/functions/_shared/golden-report-reconciliation.ts"
+      - "supabase/functions/forensic-scan-all/index.ts"
       - "supabase/functions/golden-report-library/**"
       - ".github/workflows/golden-report-archive-download.yml"
 
@@ -33,6 +39,6 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Run Golden Report PDF regression tests
-        run: bunx vitest run src/lib/goldenReportArchiveDownload.test.ts src/lib/goldenReportParity.test.ts
+        run: bunx vitest run src/lib/goldenReportArchiveDownload.test.ts src/lib/goldenReportArchiveRecovery.test.ts src/lib/goldenReportParity.test.ts
       - name: Build main Aetheris website
         run: bun run build
