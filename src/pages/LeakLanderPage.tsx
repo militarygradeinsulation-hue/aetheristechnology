@@ -4,7 +4,7 @@ import { ArrowRight, Calendar, Mail, Phone, MapPin, ChevronDown } from "lucide-r
 import { SEOHead } from "@/components/SEOHead";
 import { BOOK_MEETING_URL } from "@/lib/links";
 import { LanderNavbar } from "@/components/lander/LanderNavbar";
-import { AnomalousMatterHero } from "@/components/lander/AnomalousMatterHero";
+import PublicBrainHero from "@/components/lander/PublicBrainHero";
 import { RealCaseStudiesSection } from "@/components/RealCaseStudiesSection";
 import {
   CTA,
@@ -20,7 +20,6 @@ import { SystemBuildsStrip } from "@/components/lander/SystemBuildsStrip";
 const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSection"));
 
 
-import aetherisWordmark from "@/assets/aetheris-wordmark.jpg.asset.json";
 import problemReasonSolution from "@/assets/problem-reason-solution.png.asset.json";
 
 
@@ -30,7 +29,6 @@ const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const LeakLanderPage: React.FC = () => {
   const [leakAuditOpen, setLeakAuditOpen] = useState(false);
-  const [entryPopupOpen, setEntryPopupOpen] = useState(true);
   const [methodologyOpen, setMethodologyOpen] = useState(false);
   const [methodologyActivated, setMethodologyActivated] = useState(false);
   const [caseStudiesOpen, setCaseStudiesOpen] = useState(false);
@@ -38,8 +36,7 @@ const LeakLanderPage: React.FC = () => {
   const [ecosystemOpen, setEcosystemOpen] = useState(false);
   const [ecosystemActivated, setEcosystemActivated] = useState(false);
 
-  const openLeakAuditFromPopup = () => {
-    setEntryPopupOpen(false);
+  const openLeakAudit = () => {
     setLeakAuditOpen(true);
     window.setTimeout(() => {
       document.getElementById("leak-audit")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -57,68 +54,8 @@ const LeakLanderPage: React.FC = () => {
 
       <LanderNavbar />
 
-      {entryPopupOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 px-4 py-8 backdrop-blur-md"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="entry-popup-title"
-          onClick={() => setEntryPopupOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-2xl rounded-[2rem] border border-amber/50 bg-amber p-8 text-background shadow-[0_30px_100px_-25px_hsl(var(--amber)/0.8)] sm:p-12"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setEntryPopupOpen(false)}
-              className="absolute right-5 top-4 text-2xl font-light text-background/65 transition hover:text-background"
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <button
-              type="button"
-              onClick={openLeakAuditFromPopup}
-              className="group flex w-full items-center justify-between gap-6 text-left"
-              aria-label="Curious what we know about you? Go to the Leak Audit."
-            >
-              <div>
-                <h2 id="entry-popup-title" className="font-forensic text-4xl font-black leading-[1.05] sm:text-6xl">
-                  Curious what we know about you?
-                </h2>
-                <p className="mt-8 max-w-xl text-xl font-semibold leading-relaxed text-background/80 sm:text-2xl">
-                  We guarantee we can help you save money in less than 30 days.
-                </p>
-              </div>
-              <ArrowRight className="h-10 w-10 shrink-0 transition-transform group-hover:translate-x-2 sm:h-14 sm:w-14" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      <AnomalousMatterHero
-        eyebrow="Revenue Leak Audit"
-        titleAs="div"
-        title={
-          <img
-            src={aetherisWordmark.url}
-            alt="Aetheris — tools for professionals big tech companies forgot"
-            className="wordmark-storm w-[130%] max-w-none -mx-[15%] sm:w-[115%] sm:max-w-none sm:-mx-[7.5%] h-auto select-none mix-blend-screen"
-            style={{
-              WebkitMaskImage:
-                "linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)",
-              maskImage:
-                "linear-gradient(to right, transparent 0%, #000 18%, #000 82%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)",
-              WebkitMaskComposite: "source-in",
-              maskComposite: "intersect",
-            }}
-            loading="eager"
-          />
-
-        }
-        description=""
-      >
+      <PublicBrainHero onAudit={openLeakAudit} />
+      <section className="flex w-full flex-col items-center gap-6 px-6 pb-16">
         <div className="w-full max-w-4xl rounded-2xl border border-amber/25 bg-card/35 px-6 py-8 text-left shadow-[0_20px_60px_-40px_hsl(var(--amber)/0.45)] backdrop-blur-sm sm:px-8 sm:py-10">
           <p className="font-case text-[10px] uppercase tracking-[0.3em] text-amber/80">
             The human evidence
@@ -234,7 +171,7 @@ const LeakLanderPage: React.FC = () => {
         <p className="font-case text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70 pt-2">
           Indianapolis · Operating nationwide
         </p>
-      </AnomalousMatterHero>
+      </section>
 
       {/* One purchase decision */}
       <section id="what-we-do" className="scroll-mt-28 border-t border-border/60 px-6 py-16 sm:py-20">
