@@ -280,6 +280,39 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     () => (row?.report ? (sanitizedGoldenReport(row.report as never) as ForensicReport) : null),
     [row?.report],
   );
+  // Completed report data is persisted separately from its validation status.
+  // Validation decides whether a PDF is verified, never whether a saved
+  // report can be downloaded. Reuse one path for all three PDF formats.
+  const downloadSavedPdf = (profile: "executive" | "complete" | "data_appendix") => {
+    if (!row?.report || !report) {
+      toast({ title: "Saved report unavailable", description: "No completed report content is loaded yet.", variant: "destructive" });
+      return;
+    }
+    const verified = isDeliverable(report);
+    try {
+      downloadForensicGoldenPdf({
+        report: row.report as ForensicReport,
+        company: row.company_name || row.target_url,
+        url: row.target_url,
+        scanId: row.id,
+        generatedAt: row.completed_at ? new Date(row.completed_at) : undefined,
+        profile,
+        whiteLabel: standalone,
+        archivalCopy: verified ? undefined : {
+          valid: false,
+          state: row.report_state || report.compiler?.state || "needs_review",
+        },
+      });
+      if (!standalone && profile === "executive") {
+        void import("@/lib/goldenReportTracking")
+          .then(({ trackGoldenReportEvent }) => trackGoldenReportEvent(row.id, "pdf_download"))
+          .catch(() => undefined);
+      }
+    } catch (e) {
+      toast({ title: "PDF download failed", description: e instanceof Error ? e.message : "Could not export saved report.", variant: "destructive" });
+    }
+  };
+
   // The live advisor appears with the finished report so the user can ask about
   // it right there instead of hunting for a chat page.
   const autoOpened = useRef(false);
@@ -507,25 +540,13 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                   <a href={row.target_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground font-mono hover:text-amber-500 break-all">{row.target_url}</a>
                 )}
               </div>
-              <div className="flex gap-2 shrink-0">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  disabled={!isDeliverable(report)}
-                  title={
-                    isDeliverable(report)
-                      ? "Executive PDF: the concise client deliverable (default)"
-                      : "Blocked: this report is not evidence-backed. Re-run the scan before sending it out."
-                  }
-                  onClick={() => {
-                    if (!isDeliverable(report)) return;
-                    if (!standalone) import("@/lib/goldenReportTracking").then(({ trackGoldenReportEvent }) =>
-                      trackGoldenReportEvent(row.id, "pdf_download"),
-                    );
-                    downloadForensicGoldenPdf({
-                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "executive", whiteLabel: standalone,
-                    });
-                  }}
+                  title={isDeliverable(report)
+                    ? "Executive PDF: concise client deliverable"
+                    : "Executive PDF: historical copy, prominently marked unverified"}
+                  onClick={() => downloadSavedPdf("executive")}
                   className="bg-amber-500 text-black hover:bg-amber-400"
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Executive PDF
@@ -534,50 +555,18 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={!isDeliverable(report)}
-                  title="Full archival export: every saved field, no page budget."
-                  onClick={() => {
-                    if (!isDeliverable(report)) return;
-                    downloadForensicGoldenPdf({
-                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "complete", whiteLabel: standalone,
-                    });
-                  }}
+                  title="Full saved report PDF, including historical reports requiring review."
+                  onClick={() => downloadSavedPdf("complete")}
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Complete
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={!isDeliverable(report)}
-                  title="Machine-readable financial ledger and reconciliation only."
-                  onClick={() => {
-                    if (!isDeliverable(report)) return;
-                    downloadForensicGoldenPdf({
-                      report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                      profile: "data_appendix", whiteLabel: standalone,
-                    });
-                  }}
+                  title="Financial ledger and reconciliation PDF, labeled unverified when necessary."
+                  onClick={() => downloadSavedPdf("data_appendix")}
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Appendix
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  title="Retained historical copy, including reports pending validation. Unverified values are labeled on every page."
-                  onClick={() => {
-                    try {
-                      downloadForensicGoldenPdf({
-                        report: row.report || report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
-                        profile: "complete", whiteLabel: standalone,
-                        archivalCopy: { valid: false, state: row.report_state || null },
-                      });
-                    } catch (e) {
-                      toast({ title: "Archive PDF could not be prepared", description: (e as Error).message, variant: "destructive" });
-                    }
-                  }}
-                >
-                  <FileDown className="w-4 h-4 mr-1" /> Archive PDF
                 </Button>
                 <Button
                   size="sm"
@@ -609,8 +598,8 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             </div>
             {!isDeliverable(report) && (
               <p className="mt-3 text-xs text-red-400">
-                Verified client PDF exports are unavailable until this report passes the evidence checks. The original
-                source JSON and a prominently labeled historical Archive PDF remain downloadable for your records.
+                This saved report needs evidence review. Executive, Complete, and Appendix PDFs remain downloadable
+                as historical copies marked unverified. No re-scan is required to download the saved report.
               </p>
             )}
           </div>
