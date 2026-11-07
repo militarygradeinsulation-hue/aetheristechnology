@@ -11,8 +11,7 @@
     "dev:golden-standalone": "vite --config vite.golden-standalone.config.ts",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
-    "export:persona-ads": "bun scripts/export-persona-ads.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",
