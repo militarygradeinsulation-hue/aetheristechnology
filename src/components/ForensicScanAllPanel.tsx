@@ -21,6 +21,7 @@ import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialL
 import { CHAPTER_ALLOCATION_NOTE, crossReferenceNote } from "@/lib/goldenMoneyTaxonomy";
 import { Wrench } from "lucide-react";
 import { sanitizedGoldenReport } from "@/lib/goldenMoneySanitizer";
+import { downloadTextFile } from "@/lib/goldenLibrary";
 
 
 
@@ -29,6 +30,7 @@ type Row = {
   target_url: string;
   company_name: string | null;
   status: string;
+  report_state?: string | null;
   stage_status: Record<string, { state: string; at: string; extra?: unknown }>;
   brand_kit_status?: Record<string, { state: string; at: string; extra?: unknown }> | null;
   brand_kit?: BrandKit | null;
@@ -562,6 +564,42 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                 <Button
                   size="sm"
                   variant="outline"
+                  title="Retained historical copy, including reports pending validation. Unverified values are labeled on every page."
+                  onClick={() => {
+                    try {
+                      downloadForensicGoldenPdf({
+                        report: row.report || report, company: row.company_name || row.target_url, url: row.target_url, scanId: row.id,
+                        profile: "complete", whiteLabel: standalone,
+                        archivalCopy: { valid: false, state: row.report_state || null },
+                      });
+                    } catch (e) {
+                      toast({ title: "Archive PDF could not be prepared", description: (e as Error).message, variant: "destructive" });
+                    }
+                  }}
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> Archive PDF
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  title="Lossless copy of the original saved report data. Available even if the PDF validation gate is blocked."
+                  onClick={() => {
+                    downloadTextFile(`golden-report-${row.id}-source.json`, JSON.stringify({
+                      scan_id: row.id,
+                      company: row.company_name,
+                      target_url: row.target_url,
+                      completed_at: row.completed_at ?? null,
+                      report_state: row.report_state ?? null,
+                      status: row.status,
+                      report: row.report,
+                    }, null, 2), "application/json");
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-1" /> Source JSON
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => { setFixSeed(null); setFixOpen(true); }}
                 >
                   <Wrench className="w-4 h-4 mr-1" /> Fix this for me
@@ -571,8 +609,8 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             </div>
             {!isDeliverable(report) && (
               <p className="mt-3 text-xs text-red-400">
-                This report is not backed by company-specific evidence, so downloads are blocked. Re-run the scan to
-                generate a supported forensic result.
+                Verified client PDF exports are unavailable until this report passes the evidence checks. The original
+                source JSON and a prominently labeled historical Archive PDF remain downloadable for your records.
               </p>
             )}
           </div>
