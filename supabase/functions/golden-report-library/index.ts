@@ -324,6 +324,65 @@ serve(async (req) => {
     }
 
 
+    /* Reconcile completed scans that missed their asynchronous archive hook.
+       This never regenerates a Golden Report, contacts an AI provider, or
+       overwrites forensic_scans.report. It indexes only missing scan IDs. */
+    if (action === "reconcile_missing") {
+      if (!isAdmin && !internal) return json({ error: "Forbidden" }, 403);
+      const limit = Math.max(1, Math.min(20, Number(body.limit) || 10));
+      const PAGE = 1000;
+      const MAX_ROWS = 10_000;
+      const completed = new Set<string>();
+      const archived = new Set<string>();
+
+      for (let offset = 0; offset < MAX_ROWS; offset += PAGE) {
+        const { data, error } = await sb.from("forensic_scans")
+          .select("id")
+          .eq("status", "completed")
+          .not("report", "is", null)
+          .order("id", { ascending: true })
+          .range(offset, offset + PAGE - 1);
+        if (error) throw error;
+        for (const row of data || []) completed.add(String(row.id));
+        if ((data || []).length < PAGE) break;
+      }
+      for (let offset = 0; offset < MAX_ROWS; offset += PAGE) {
+        const { data, error } = await sb.from("golden_report_archive")
+          .select("scan_id")
+          .order("scan_id", { ascending: true })
+          .range(offset, offset + PAGE - 1);
+        if (error) throw error;
+        for (const row of data || []) archived.add(String(row.scan_id));
+        if ((data || []).length < PAGE) break;
+      }
+
+      const missing = [...completed].filter((id) => !archived.has(id));
+      let recovered = 0;
+      const errors: string[] = [];
+      for (const id of missing.slice(0, limit)) {
+        try {
+          const { data: scan, error: fetchError } = await sb.from("forensic_scans")
+            .select(SCAN_COLS).eq("id", id).maybeSingle();
+          if (fetchError) throw fetchError;
+          if (!scan) throw new Error("Saved scan not found");
+          const result = await archiveScan(sb, scan as unknown as ScanRow);
+          if (!result.archive_id) throw new Error(result.skipped || "Not archived");
+          recovered++;
+        } catch (e) {
+          errors.push(id + ": " + (e instanceof Error ? e.message : String(e)));
+        }
+      }
+      return json({
+        ok: errors.length === 0,
+        examined: completed.size,
+        missing_before: missing.length,
+        recovered,
+        remaining: Math.max(0, missing.length - recovered),
+        errors: errors.slice(0, 5),
+        limited: completed.size >= MAX_ROWS || archived.size >= MAX_ROWS,
+      });
+    }
+
     /* resumable, idempotent historical backfill */
     if (action === "backfill") {
       if (!isAdmin) return json({ error: "Forbidden" }, 403);
