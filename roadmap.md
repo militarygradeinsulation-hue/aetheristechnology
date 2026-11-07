@@ -1,5 +1,10 @@
 # Roadmap
 
+## Public homepage brain
+- [ ] Add an immediately visible, illustrative interactive brain hero without private data or backend calls.
+- [ ] Verify desktop/mobile rotation, node focus, zoom bounds, reduced motion and WebGL fallback; inspect preview build.
+- [ ] Keep existing navigation, audit and site flows; do not publish.
+
 ## Collective Brain production release
 - [x] Requested migration, function, Collective Brain UI, and AdminDashboard match GitHub main d7cf1ce2193c4819a63923071819cf726c53cf52 byte-for-byte; no manual Git sync operation performed.
 - [x] Resolve Collective Brain 500: missing aggregate tables confirmed; corrected additive migration applied with service-role grants and RLS, no truncation or canonical report modifications. Real admin screen now receives HTTP 200 and displays 1,910 reports, 22,282 findings, and 1,067 companies; 701 stored patterns and 339 pairs. Four auth regressions pass; harness build OK at 2026-10-29T17:03:46Z.
