@@ -11,13 +11,14 @@ import { ACCESS_KEY } from "@/components/TechSolutionsAccessBar";
 import { ScrollText } from "lucide-react";
 import { trackGoldenReportEvent } from "@/lib/goldenReportTracking";
 import { supabase } from "@/integrations/supabase/client";
-import { setAdminToken } from "@/lib/adminAuth";
+import { setAdminToken, getAdminToken } from "@/lib/adminAuth";
 
 const GoldenReportPage: React.FC = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const staffUnlocked = useStaffUnlock();
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [runnerToken, setRunnerToken] = useState<string | null>(() => getAdminToken());
   const tryCode = async () => {
     // The code is checked by the server's admin PIN login; a valid code
     // grants a real admin session (unlimited Golden Report runs).
@@ -25,6 +26,7 @@ const GoldenReportPage: React.FC = () => {
       const { data, error } = await supabase.functions.invoke("admin-pin-login", { body: { pin: code.trim() } });
       if (error || !data?.ok || !data?.token) throw new Error("invalid");
       setAdminToken(data.token);
+      setRunnerToken(data.token);
       try {
         localStorage.setItem(ACCESS_KEY, JSON.stringify({ plan: "staff", unlockedAll: true, code: "STAFF" }));
       } catch { /* ignore */ }
@@ -76,8 +78,8 @@ const GoldenReportPage: React.FC = () => {
                 Evidence first · produced inside a working engagement · no plan to pick, no cart to fill
               </p>
             </div>
-            {hasSharedScan || staffUnlocked ? (
-              <ForensicScanAllPanel />
+            {hasSharedScan || staffUnlocked || !!runnerToken ? (
+              <ForensicScanAllPanel initialScanId={sharedScanId} runnerToken={runnerToken} canStartScan={Boolean(runnerToken)} />
             ) : (
               <div className="max-w-xl mx-auto rounded-sm border border-amber/30 bg-card/60 p-6 text-center">
                 <h2 className="font-forensic text-2xl font-bold mb-2">Golden Reports are run with our team.</h2>
