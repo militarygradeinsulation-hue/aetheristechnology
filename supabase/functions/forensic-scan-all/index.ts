@@ -1419,8 +1419,29 @@ async function finalizeSavedScan(id: string) {
         return undefined;
       });
 
-    // Golden Report Library: archive the completed report (idempotent by scan id).
-    await internalCall("golden-report-library", { action: "archive_scan", scan_id: id });
+    // The canonical report is already persisted in forensic_scans. Index it in
+    // the permanent Library, confirming the *body* as well as HTTP status.
+    // If indexing fails the report remains saved and may be reconciled later.
+    let archivedInLibrary = false;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const archiveResponse = await internalCall("golden-report-library", {
+        action: "archive_scan", scan_id: id, provision: attempt === 1,
+      });
+      const archiveResult = archiveResponse?.ok
+        ? await archiveResponse.json().catch(() => null) as { ok?: boolean; archive_id?: string; skipped?: string } | null
+        : null;
+      if (archiveResult?.ok === true && archiveResult.archive_id) {
+        archivedInLibrary = true;
+        break;
+      }
+      console.error(
+        "[golden-report] archive indexing attempt failed",
+        { scan_id: id, attempt, status: archiveResponse?.status ?? "network_error", reason: archiveResult?.skipped ?? "request_error" },
+      );
+    }
+    if (!archivedInLibrary) {
+      console.error("[golden-report] saved scan requires library reconciliation", { scan_id: id });
+    }
 
     // One completed intake event notifies its original requesting visitor.
     // Other visitors requesting an already completed report are handled by intake.
