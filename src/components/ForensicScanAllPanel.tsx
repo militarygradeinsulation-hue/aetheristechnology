@@ -165,6 +165,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  const [reusedScan, setReusedScan] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [fixOpen, setFixOpen] = useState(false);
   const [fixSeed, setFixSeed] = useState<string | null>(null);
@@ -187,20 +188,22 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     ? { "x-admin-token": runnerAdminToken }
     : standalone ? {} : { "x-portal-token": getPortalToken() || "" };
 
-  async function startScan() {
+  async function startScan(forceNew = false) {
     if (!canStartScan) return;
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
     setBusy(true);
+    setReusedScan(false);
     setScanId(null); setRow(null);
     try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
     try {
       const { data, error } = await supabase.functions.invoke("forensic-scan-all", {
-        body: { url: url.trim(), company: company.trim() || undefined },
+        body: { url: url.trim(), company: company.trim() || undefined, force_new: forceNew || undefined },
         headers,
       });
       if (error) throw error;
       if (!data?.scan_id) throw new Error("No scan id returned");
-      startedAtRef.current = Date.now();
+      setReusedScan(Boolean(data.reused));
+      startedAtRef.current = data.reused ? null : Date.now();
       setElapsedSec(0);
       try { sessionStorage.setItem(SCAN_STORAGE_KEY, data.scan_id); } catch { /* ignore */ }
       setScanId(data.scan_id);
@@ -217,7 +220,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   useEffect(() => {
     if (!autoStart || !canStartScan || !initialUrl || initialScanId || autoStartOnce.current) return;
     autoStartOnce.current = true;
-    void startScan();
+    void startScan(false);
     // These values are immutable over a single mounted scan instance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStart, canStartScan, initialUrl, initialScanId]);
@@ -333,11 +336,42 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
           <Input placeholder="Target URL (https://example.com)" value={url} onChange={(e) => setUrl(e.target.value)} />
           <Input placeholder="Company name (optional)" value={company} onChange={(e) => setCompany(e.target.value)} />
         </div>
-        <Button onClick={startScan} disabled={busy || (!!scanId && row?.status !== "completed" && row?.status !== "failed")} className="bg-amber-500 text-black hover:bg-amber-400">
-          {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ScanLine className="w-4 h-4 mr-2" />}
-          Run Scan All
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => void startScan(false)} disabled={busy || (!!scanId && row?.status !== "completed" && row?.status !== "failed")} className="bg-amber-500 text-black hover:bg-amber-400">
+            {busy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ScanLine className="w-4 h-4 mr-2" />}
+            Run Scan All
+          </Button>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              onClick={() => void startScan(true)}
+              disabled={busy || (!!scanId && row?.status !== "completed" && row?.status !== "failed")}
+              className="border-amber-500/50 text-amber-400"
+            >
+              Run fresh scan
+            </Button>
+          )}
+        </div>
       </Card>}
+
+      {reusedScan && scanId && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+          <p className="text-sm font-semibold text-amber-300">Saved Golden Report loaded</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            A completed report already exists for this domain, so Aetheris reused it instead of spending credits on a duplicate scan.
+            {row?.created_at ? ` Original report: ${new Date(row.created_at).toLocaleString()}.` : ""}
+          </p>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => void startScan(true)}
+              className="mt-2 text-xs font-semibold text-amber-300 underline underline-offset-4"
+            >
+              Run a fresh scan instead
+            </button>
+          )}
+        </div>
+      )}
 
       {scanId && (
         <Card className="p-4 bg-card border-border">
