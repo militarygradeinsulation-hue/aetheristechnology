@@ -469,23 +469,27 @@ export function generateForensicGoldenPdf(opts: {
   profile?: RenderProfile;
   /** Remove Aetheris marks and outbound report links in independently hosted copies. */
   whiteLabel?: boolean;
+  /** Explicit archival export. Never certifies invalid historical findings. */
+  archivalCopy?: { valid: boolean; state?: string | null };
 }): jsPDF {
   const { report, company, url, scanId } = opts;
   const profile: RenderProfile = opts.profile ?? "executive";
+  const archival = opts.archivalCopy;
+  const unverifiedArchive = Boolean(archival && !archival.valid);
 
 
   // ── HARD GATE ── generic/template reports are never exported, even if they
   // predate the compiler: an unsupported dollar headline must not leave the app.
-  if (
+  if (!archival && (
     (report as { report_state?: string } | null)?.report_state === "regeneration_required" ||
     detectGenericReport(report as never).regeneration_required
-  ) {
+  )) {
     throw new Error(
       `Golden Report ${scanId} is generic/template and cannot be exported. Re-run the scan to produce an evidence-backed report.`,
     );
   }
   // A report that failed the consistency compiler is never exported.
-  if (report?.compiler?.state && report.compiler.state !== "compiled") {
+  if (!archival && report?.compiler?.state && report.compiler.state !== "compiled") {
     const first = report.compiler.violations?.[0];
     throw new Error(
       `Golden Report ${scanId} failed the consistency gate and cannot be exported` +
@@ -599,11 +603,13 @@ export function generateForensicGoldenPdf(opts: {
   // the box says "Not calculated"; a generic fallback range is never invented.
   {
     const boxY = cy + 36;
-    const tone = model.leakage ? CRIMSON : AMBER;
-    const headline = model.leakage ? `${model.leakage.rangeLabelAscii} / year` : "Not calculated";
-    const caption = model.leakage
-      ? model.leakage.caption
-      : "This scan produced no priced leak evidence, so no annual revenue loss figure is calculated for this report.";
+    const tone = unverifiedArchive ? AMBER : model.leakage ? CRIMSON : AMBER;
+    const headline = unverifiedArchive ? "NOT VERIFIED" : model.leakage ? `${model.leakage.rangeLabelAscii} / year` : "Not calculated";
+    const caption = unverifiedArchive
+      ? "This is a retained historical copy, not a validated client deliverable. Its findings, dollar estimates and conclusions may be unsupported. Verify the underlying evidence before relying on them."
+      : model.leakage
+        ? model.leakage.caption
+        : "This scan produced no priced leak evidence, so no annual revenue loss figure is calculated for this report.";
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     const capLines = wrap(doc, caption, CW - 8);
@@ -617,7 +623,7 @@ export function generateForensicGoldenPdf(opts: {
     doc.setLineWidth(0.6);
     doc.rect(M, boxY, CW, boxH);
     doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...tone);
-    doc.text(GOLDEN_LEAKAGE_LABEL.toUpperCase(), M + 4, boxY + 7);
+    doc.text(unverifiedArchive ? "HISTORICAL RECORD - REQUIRES REVIEW" : GOLDEN_LEAKAGE_LABEL.toUpperCase(), M + 4, boxY + 7);
     doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...tone);
     doc.text(headline, M + 4, boxY + 20);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
@@ -687,6 +693,24 @@ export function generateForensicGoldenPdf(opts: {
   doc.setPage(indexPage);
   doc.setPage(doc.getNumberOfPages());
 
+  // An archival copy of a failed/legacy report is still retrievable. Label each
+  // page independently so an extracted page cannot be mistaken for certification.
+  if (archival) {
+    const status = archival.valid ? "ARCHIVED GOLDEN REPORT" : "HISTORICAL ARCHIVE - NOT VERIFIED";
+    for (let page = 1; page <= doc.getNumberOfPages(); page++) {
+      doc.setPage(page);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...AMBER);
+      doc.text(status, PAGE_W / 2, 9, { align: "center" });
+      if (!archival.valid) {
+        doc.setFontSize(6);
+        doc.setTextColor(...CRIMSON);
+        doc.text("Findings and monetary values require independent validation", PAGE_W / 2, PAGE_H - 2.5, { align: "center" });
+      }
+    }
+    doc.setPage(doc.getNumberOfPages());
+  }
   return doc;
 }
 
@@ -711,6 +735,7 @@ export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForens
   const safe = (opts.company || "report").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
   const profile = opts.profile ?? "executive";
   const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
-  doc.save(`${opts.whiteLabel ? "golden-report" : "aetheris-forensic"}-${safe}-${opts.scanId.slice(0, 8)}${suffix}.pdf`);
+  const archiveSuffix = opts.archivalCopy ? opts.archivalCopy.valid ? "-archive" : "-archive-unverified" : "";
+  doc.save(`${opts.whiteLabel ? "golden-report" : "aetheris-forensic"}-${safe}-${opts.scanId.slice(0, 8)}${suffix}${archiveSuffix}.pdf`);
 }
 
