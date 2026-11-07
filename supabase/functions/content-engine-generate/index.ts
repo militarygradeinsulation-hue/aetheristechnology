@@ -96,11 +96,11 @@ VOICE REFERENCE (mimic exactly — cadence, vocabulary, rhythm):
 ${s.voice_reference}
 
 CHANNEL-SPECIFIC RULES:
-- First 1.5 seconds = Phase 1 Hook. Diagnosis, dollar figure, contradiction. Never "Hey guys," never "Today I'm going to talk about."
+- First 1.5 seconds = Phase 1 Hook. A precise diagnosis or defensible contradiction. Only use a dollar figure when supplied by a trustworthy verified source. Never start with generic introductions.
 - 60–90 second scripts (~150–220 words). Re-hook every 20–30s with a Loop Opener or Contrast Word.
-- Real numbers beat round numbers. "$847K" beats "almost a million."
+- Evidence beats drama. Do not invent exact or rounded numbers, first person audit outcomes, client stories, financial losses or recovery claims. If the input lacks measured numbers, do not manufacture them.
 - One idea per video. Operator Close at the end — drop and move.
-- CTA must be original to THIS script — pulled from the mechanism you just named, not a stock line. Vary every time. Reference the leak, the audit, the diagnostic, the recovery — your call. Never reuse a phrase across scripts in the same batch.
+- Close with an original, practical operator action derived from the mechanism. Do not force a product pitch, promise a free audit or claim that an unverified financial loss has been recovered. Vary the close across the batch.
 - Max 3 niche hashtags. No emoji decoration. Em dashes BANNED. Never close on a question.
 - HARD BAN on canned phrases: do not write "link in bio runs this scan free," "wonder what we'd find on yours," or any other recycled sign-off. Invent the close fresh, in voice, every time.`;
 }
