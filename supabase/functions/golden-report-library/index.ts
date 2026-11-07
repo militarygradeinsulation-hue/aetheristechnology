@@ -16,6 +16,7 @@ import {
   type ScanRow,
 } from "../_shared/golden-archive.ts";
 import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
+import { canExportGoldenReportSource } from "../_shared/golden-download-access.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -560,12 +561,17 @@ serve(async (req) => {
 
       const { data: scan, error: scanError } = await sb
         .from("forensic_scans")
-        .select("id,company_name,target_url,report,report_state,completed_at,status")
+        .select("id,company_name,target_url,report,report_state,completed_at,status,private_intake")
         .eq("id", scanId)
         .maybeSingle();
       if (scanError) throw scanError;
       if (!scan || (!archive && scan.status !== "completed")) {
         return json({ error: "Completed report not found" }, 404);
+      }
+      // Private intake reports can contain non-public information. Shared
+      // rep/partner library access does not authorize a full source export.
+      if (!canExportGoldenReportSource(globalScope, scan.private_intake)) {
+        return json({ error: "Private report downloads require administrator access" }, 403);
       }
       if (!scan.report || typeof scan.report !== "object" || Array.isArray(scan.report)) {
         return json({ error: "Archived report payload is unavailable. Nothing has been deleted or regenerated." }, 409);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { generateForensicGoldenPdf } from "@/lib/generateForensicGoldenPdf";
 import { QA_FULL_REPORT, QA_META } from "./goldenReportParity.fixture";
+import { canExportGoldenReportSource } from "../../supabase/functions/_shared/golden-download-access";
 
 const flagged = {
   ...QA_FULL_REPORT,
@@ -38,5 +39,19 @@ describe("Golden Report historical exports", () => {
     const commands = JSON.stringify(doc.internal.pages);
     expect(commands).toContain("ARCHIVED GOLDEN REPORT");
     expect(commands).not.toContain("HISTORICAL ARCHIVE - NOT VERIFIED");
+  });
+});
+
+
+describe("Golden Report source download authorization", () => {
+  it("blocks shared portal access to a private intake report", () => {
+    expect(canExportGoldenReportSource(false, true)).toBe(false);
+  });
+  it("permits administrators to export a private report", () => {
+    expect(canExportGoldenReportSource(true, true)).toBe(true);
+  });
+  it("permits authorized non-private library reports", () => {
+    expect(canExportGoldenReportSource(false, false)).toBe(true);
+    expect(canExportGoldenReportSource(false, null)).toBe(true);
   });
 });
