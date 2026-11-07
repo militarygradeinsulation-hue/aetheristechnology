@@ -22,6 +22,7 @@ import { CHAPTER_ALLOCATION_NOTE, crossReferenceNote } from "@/lib/goldenMoneyTa
 import { Wrench } from "lucide-react";
 import { sanitizedGoldenReport } from "@/lib/goldenMoneySanitizer";
 import { downloadTextFile } from "@/lib/goldenLibrary";
+import { canDownloadSavedGoldenReport } from "@/lib/goldenReportDownloadAvailability";
 
 
 
@@ -284,7 +285,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   // Validation decides whether a PDF is verified, never whether a saved
   // report can be downloaded. Reuse one path for all three PDF formats.
   const downloadSavedPdf = (profile: "executive" | "complete" | "data_appendix") => {
-    if (!row?.report || !report) {
+    if (!canDownloadSavedGoldenReport(row?.report) || !report) {
       toast({ title: "Saved report unavailable", description: "No completed report content is loaded yet.", variant: "destructive" });
       return;
     }
@@ -546,6 +547,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                   title={isDeliverable(report)
                     ? "Executive PDF: concise client deliverable"
                     : "Executive PDF: historical copy, prominently marked unverified"}
+                  disabled={!canDownloadSavedGoldenReport(row.report)}
                   onClick={() => downloadSavedPdf("executive")}
                   className="bg-amber-500 text-black hover:bg-amber-400"
                 >
@@ -556,6 +558,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                   size="sm"
                   variant="outline"
                   title="Full saved report PDF, including historical reports requiring review."
+                  disabled={!canDownloadSavedGoldenReport(row.report)}
                   onClick={() => downloadSavedPdf("complete")}
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Complete
@@ -564,6 +567,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
                   size="sm"
                   variant="outline"
                   title="Financial ledger and reconciliation PDF, labeled unverified when necessary."
+                  disabled={!canDownloadSavedGoldenReport(row.report)}
                   onClick={() => downloadSavedPdf("data_appendix")}
                 >
                   <FileDown className="w-4 h-4 mr-1" /> Appendix
