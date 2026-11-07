@@ -1,12 +1,15 @@
-// Persona listicle landing pages ("/for/:slug").
+// Trade & contractor listicle landing pages ("/for/:slug", hub at "/trades").
 //
-// One template, many buyer personas. Each entry is built around the five parts
-// of the conversion diamond so every page answers the same questions in that
-// persona's own language:
+// Core idea: the owner is in the field all day and has no time to make sure
+// the office side (calls, estimates, scheduling, invoicing, reviews, the
+// website) is working. Aetheris finds what is broken and fixes it fast, so they
+// do not have to worry about the office stuff.
 //
-//   Promise     -> headline / subheadline (what's in it for me)
-//   Properties  -> the numbered reasons: where the leak is and what we build
-//   Positioning -> why Aetheris is not another agency or software vendor
+// Each trade page is built around the five parts of the conversion diamond:
+//
+//   Promise     -> headline / subheadline in that trade's words
+//   Properties  -> the numbered office leaks and what gets built to fix them
+//   Positioning -> "you run the jobs, I handle the office problems"
 //   Proof       -> REAL_CASES ids (independent, published, source-linked)
 //   Packaging   -> the offer, the steps, and the risk reversal
 //
@@ -15,41 +18,36 @@
 //   Never add invented testimonials, review counts, or client results here.
 // - CTAs point to the free self-scan and the booking page. These pages must
 //   never trigger a Golden Report or forensic scan (see AGENTS.md).
-// - Each persona carries matching ad variants so ad -> page message match is
+// - Each trade carries matching ad variants so ad -> page message match is
 //   kept in one place and can be exported for the ad account.
 
 export type LeakArea =
+  | 'Missed calls'
   | 'Speed to lead'
+  | 'Estimates & quoting'
   | 'Follow-up'
-  | 'Website conversion'
-  | 'Systems & CRM'
-  | 'Customer retention'
-  | 'Customer experience'
-  | 'Brand & trust'
-  | 'Marketing attribution'
-  | 'Marketing'
-  | 'Message alignment'
-  | 'Messaging'
-  | 'Lead quality'
-  | 'Sales process'
-  | 'Operations'
-  | 'Strategy'
-  | 'Search visibility'
-  | 'Whole-business audit';
+  | 'Scheduling & dispatch'
+  | 'Invoicing & cash flow'
+  | 'Reviews & reputation'
+  | 'Repeat business'
+  | 'Website'
+  | 'Office systems'
+  | 'Marketing tracking'
+  | 'Hiring & crews';
 
 export interface PersonaReason {
-  /** Short, scannable reason title written in the persona's words. */
+  /** Short, scannable reason title written in the trade's words. */
   title: string;
-  /** Two or three sentences describing the leak as they experience it. */
+  /** Two sentences describing the leak as the owner experiences it. */
   body: string;
-  /** Which part of the Aetheris audit finds it. */
+  /** Which part of the office it lives in. */
   leakArea: LeakArea;
-  /** What Aetheris builds to close it. */
+  /** What gets built to close it. */
   fix: string;
 }
 
 export interface PersonaAd {
-  /** Angle name for the ad set, e.g. "Problem" or "Curiosity". */
+  /** Angle name for the ad set, e.g. "In the field" or "Office". */
   angle: string;
   /** First line / scroll stopper. */
   hook: string;
@@ -68,21 +66,25 @@ export interface PersonaFAQ {
 
 export interface PersonaListicle {
   slug: string;
-  /** Who this page is for, short form ("Home service owners"). */
+  /** Trade name for cards and breadcrumbs ("HVAC"). */
+  trade: string;
+  /** Who this page is for, short form ("HVAC contractors"). */
   persona: string;
-  /** The one-line motivation the whole page is built around. */
-  motivation: string;
+  /** One line on the trades hub card. */
+  cardLine: string;
   metaTitle: string;
   metaDescription: string;
   // Promise
   eyebrow: string;
   headline: string;
   subheadline: string;
-  painHook: string;
+  /** Where the owner is while the office leaks, in their trade's terms. */
+  fieldMoment: string;
+  /** What is going wrong back at the office at that same moment. */
+  officeMoment: string;
   // Properties
   reasons: PersonaReason[];
   // Positioning
-  notAnother: string[];
   instead: string;
   // Proof
   proofCaseIds: number[];
@@ -93,959 +95,930 @@ export interface PersonaListicle {
   ads: PersonaAd[];
 }
 
+/** Shared positioning shown on every trade page and the hub. */
+export const FIELD_PROMISE = {
+  headline: "I know how busy you are in the field. You don't have time to make sure everything else is working.",
+  body: "That's my job. I find what's broken in the office side of your business, fast: missed calls, estimates nobody followed up on, invoices that went out late, reviews nobody asked for. Then I fix it, so you can stay on the job and stop worrying about the office stuff.",
+  notAnother: [
+    'Software you have to learn at 9pm after a full day on the job',
+    'A marketing agency that sends you more leads to drop',
+    'A consultant who hands you a report and leaves you to fix it',
+  ],
+};
+
+/** Shared three-step offer shown on every trade page and the hub. */
+export const HOW_IT_WORKS = [
+  {
+    title: 'Free scan: see the problems',
+    text: 'Run it from your truck. In a few minutes it shows what is broken, in plain language. Free, and yours to keep.',
+  },
+  {
+    title: 'Fix Plan: know what to fix first',
+    text: 'I review the findings and send a step-by-step plan, ordered by the money at stake. No call required.',
+  },
+  {
+    title: 'I fix it, then keep watching',
+    text: 'I build the fixes into the tools you already use, remotely, then monitor so they stay fixed.',
+  },
+];
+
 export const PERSONA_LISTICLES: PersonaListicle[] = [
   {
-    slug: 'home-services',
-    persona: 'Home service owners',
-    motivation: 'Jobs are being lost between the first call and the signed estimate.',
-    metaTitle: '7 Places Home Service Businesses Lose Jobs Before the Estimate',
+    slug: 'hvac',
+    trade: 'HVAC',
+    persona: 'HVAC contractors',
+    cardLine: 'No-cool calls going to voicemail while every tech is booked.',
+    metaTitle: '7 Office Problems Costing HVAC Contractors Jobs While You Are in the Field',
     metaDescription:
-      'HVAC, roofing, plumbing, and remodeling owners: find the missed calls, slow quotes, and dead estimates costing you booked jobs, then fix them with automation.',
-    eyebrow: 'For HVAC, roofing, plumbing & remodeling owners',
-    headline: '7 places your home service business is losing jobs before anyone sends a quote',
-    subheadline:
-      "You don't have a lead problem. You have a leak between the phone ringing and the estimate getting signed.",
-    painHook:
-      "The crew is busy, the phone keeps ringing, and somehow revenue is flat. That usually means jobs are slipping out after the call comes in: voicemails nobody returns, estimates nobody follows up on, and past customers nobody calls back.",
+      'HVAC owners: you are on calls all day. Find the missed calls, unsold replacement quotes, and lapsed maintenance plans leaking revenue back at the office, and get them fixed fast.',
+    eyebrow: 'For HVAC contractors',
+    headline: '7 things going wrong at your HVAC office while you are on a service call',
+    subheadline: 'You are in an attic or on a rooftop unit. The office is losing jobs you already paid to get.',
+    fieldMoment: "It's 96 degrees, you're in an attic with a dead condenser, and your phone is buzzing in your pocket.",
+    officeMoment: 'Back at the office, that call goes to voicemail, a replacement quote from last week is still sitting, and nobody has called the maintenance plan customers due this month.',
     reasons: [
       {
-        title: 'After-hours calls go to voicemail and never come back',
-        body: "Homeowners with a leak or a dead AC unit call the next company on the list. If the call isn't answered or returned in minutes, the job is usually gone.",
-        leakArea: 'Speed to lead',
-        fix: 'Missed-call text-back and an after-hours intake assistant that books the visit.',
+        title: 'No-cool calls hit voicemail on the busiest days',
+        body: 'On the hottest days every tech is booked and the phone never stops. Homeowners with no AC call the next company if nobody picks up.',
+        leakArea: 'Missed calls',
+        fix: 'Missed-call text-back and an after-hours answering assistant that books the visit for you.',
       },
       {
-        title: 'Estimates go out and then nothing happens',
-        body: 'Most unsigned estimates are not a no. They are a homeowner who got busy. Without a follow-up sequence, the quote just sits there.',
-        leakArea: 'Follow-up',
-        fix: 'Automatic estimate follow-up by text and email until the customer says yes or no.',
+        title: 'Replacement quotes sit with no follow-up',
+        body: 'A system replacement is a big decision, and most homeowners do not say yes on the spot. Without follow-up, those quotes go to whoever calls back.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Automatic quote follow-up by text and email until the customer says yes or no.',
       },
       {
-        title: 'Your website looks fine but does not book anything',
-        body: 'A phone number in the header and a contact form is not a booking path. Mobile visitors leave when the next step is not obvious.',
-        leakArea: 'Website conversion',
-        fix: 'A mobile-first request flow with instant confirmation and clear service-area answers.',
+        title: 'Maintenance plans lapse quietly',
+        body: 'Tune-up customers are your steadiest revenue. When nobody reminds them, renewals fall off and so do the repair calls that come with them.',
+        leakArea: 'Repeat business',
+        fix: 'Seasonal tune-up reminders and renewal messages that run on their own.',
       },
       {
-        title: 'Leads live in texts, notebooks, and three inboxes',
-        body: 'When the office manager is out, nobody knows who called, what they needed, or who is supposed to call back.',
-        leakArea: 'Systems & CRM',
-        fix: 'One pipeline that captures every call, form, and text with an owner and a next step.',
+        title: 'Dispatch lives on a whiteboard or in one person\'s head',
+        body: 'When the dispatcher is out, nobody knows who is where or which call is next. Techs drive across town twice.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'One schedule every tech and the office can see, with automatic confirmations to customers.',
       },
       {
-        title: 'Past customers never hear from you again',
-        body: 'Maintenance plans, seasonal tune-ups, and referrals come from people who already trust you. Most shops never ask.',
-        leakArea: 'Customer retention',
-        fix: 'Seasonal reminder and review-request campaigns that run on their own.',
+        title: 'Invoices go out days after the job',
+        body: 'Paperwork waits until you get back to the truck, then the office, then the weekend. Cash flow waits too.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Invoices sent from the job site when the work is marked done, with automatic payment reminders.',
       },
       {
-        title: 'Reviews are great, but nobody sees them where they decide',
-        body: 'Five stars on Google do nothing if the quote page, the follow-up email, and the website never show them.',
-        leakArea: 'Brand & trust',
-        fix: 'Review proof placed at every decision point, from the first page to the signed estimate.',
+        title: 'Happy customers are never asked for a review',
+        body: 'You fixed their AC on the worst day of summer. That is the moment to ask, and it passes.',
+        leakArea: 'Reviews & reputation',
+        fix: 'A review request sent automatically after every completed call.',
       },
       {
-        title: 'You are guessing which marketing actually books jobs',
-        body: 'Without tracking from source to signed job, you keep paying for the channels that feel busy instead of the ones that pay.',
-        leakArea: 'Marketing attribution',
-        fix: 'Source tracking from first call to closed job so spend follows real revenue.',
+        title: 'You do not know which ads book jobs',
+        body: 'Without tracking from call to closed job, you keep paying for whatever feels busy instead of what pays.',
+        leakArea: 'Marketing tracking',
+        fix: 'Call and lead tracking tied to booked revenue, in a simple weekly summary.',
       },
-    ],
-    notAnother: [
-      'Another lead-gen vendor selling you more leads to drop',
-      'A website redesign that looks nice and books nothing new',
-      'Software you have to learn, set up, and babysit yourself',
     ],
     instead:
-      'Aetheris finds where booked jobs are leaking out of the business you already have, then builds the follow-up, intake, and tracking systems that plug it.',
-    proofCaseIds: [26, 45, 18],
-    offerLine: 'Start with a free leak self-scan of your site and lead flow. No call required.',
+      'I find where your office is dropping calls, quotes, and renewals, and I build the systems that catch them, so you can stay on the service call.',
+    proofCaseIds: [45, 26, 40],
+    offerLine: 'Start with a free leak self-scan of your website and lead flow. It takes a few minutes and you do not need to get on a call.',
     faqs: [
       {
-        question: 'Do I need to replace my field service software?',
-        answer:
-          'Usually not. Most fixes connect to the tools you already use. We only recommend a replacement when the current tool is the leak.',
+        question: 'Do I have to change my field service software?',
+        answer: 'Usually not. Most fixes connect to what you already use. I only recommend a change when the tool itself is the problem.',
       },
       {
-        question: 'Will automated texts annoy my customers?',
-        answer:
-          'Follow-up is written in your voice, timed around the job, and stops as soon as the customer replies or books.',
+        question: 'How much of my time does this take?',
+        answer: 'Very little. You run the free scan, read the Fix Plan when it suits you, and I do the work remotely. A consultation is there if you want one, but it is not required.',
       },
     ],
     ads: [
       {
-        angle: 'Problem',
-        hook: 'Your phone is ringing. So why is revenue flat?',
+        angle: 'In the field',
+        hook: "You're in an attic. Who's answering your phone?",
         primaryText:
-          'Most home service businesses do not have a lead problem. They lose jobs after the call: missed callbacks, estimates nobody follows up on, past customers nobody calls. Here are the 7 places it usually happens.',
-        headline: '7 places home service jobs leak out',
+          "I know how busy you are in the field. While you're on a call, the office is missing no-cool calls, sitting on replacement quotes, and letting maintenance plans lapse. I find those problems fast and fix them, so you don't have to worry about the office stuff.",
+        headline: '7 things going wrong at your HVAC office',
         cta: 'Learn More',
       },
       {
-        angle: 'Estimate follow-up',
-        hook: 'That unsigned estimate is probably not a no.',
+        angle: 'Office',
+        hook: 'That replacement quote from last week? Nobody followed up.',
         primaryText:
-          'Homeowners get busy. Without follow-up, good quotes just sit there. See where your business is leaking booked jobs, then let us build the system that closes them.',
+          'HVAC owners lose big jobs after the quote, not before it. Run a free leak scan and see where your office is dropping work while you are in the field.',
         headline: 'Stop losing jobs after the quote',
         cta: 'Get Offer',
       },
     ],
   },
   {
-    slug: 'ad-spend-no-sales',
-    persona: 'Owners paying for ads that do not turn into sales',
-    motivation: 'The ads are producing leads, but the leads are not producing revenue.',
-    metaTitle: '7 Reasons Your Ads Make Leads but Not Sales',
+    slug: 'plumbing',
+    trade: 'Plumbing',
+    persona: 'Plumbing contractors',
+    cardLine: 'Emergency calls lost while you are under a sink.',
+    metaTitle: '7 Office Problems Costing Plumbers Jobs While You Are on a Call',
     metaDescription:
-      'Paying for ads that bring leads but not revenue? Find where leads go cold between the click and the close, then fix the follow-up, routing, and tracking.',
-    eyebrow: 'For owners spending real money on ads',
-    headline: '7 reasons your ads bring in leads but not sales',
-    subheadline: 'The leak is rarely the ad. It is everything that happens after the form is submitted.',
-    painHook:
-      "The agency report says cost per lead looks great. The bank account disagrees. Somewhere between the click and the close, leads are going cold, and nobody is accountable for that gap.",
+      'Plumbing owners: you are under a sink or in a crawlspace all day. Find the missed emergency calls, slow estimates, and late invoices leaking money back at the office.',
+    eyebrow: 'For plumbing contractors',
+    headline: '7 things your plumbing office is missing while you are under a sink',
+    subheadline: 'Emergency calls do not wait. If nobody answers, the homeowner calls the next plumber on Google.',
+    fieldMoment: "You're in a crawlspace with your hands full and water on the floor.",
+    officeMoment: 'Meanwhile a burst-pipe call goes to voicemail, a water-heater estimate sits unanswered, and three invoices from last week still have not gone out.',
     reasons: [
       {
-        title: 'Nobody calls the lead back for hours',
-        body: 'Leads cool fast. A lead that waits until tomorrow has often already talked to someone else.',
+        title: 'Emergency calls go to voicemail',
+        body: 'Burst pipes and backed-up drains are urgent. A homeowner who reaches voicemail is already dialing the next number.',
+        leakArea: 'Missed calls',
+        fix: 'Instant text-back on missed calls and an answering assistant that captures the job and books it.',
+      },
+      {
+        title: 'Bigger estimates never get a second call',
+        body: 'Water heaters, repipes, and sewer lines are not same-day decisions. Without follow-up, those jobs go to someone else.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Estimate follow-up that runs automatically until you get an answer.',
+      },
+      {
+        title: 'Customers do not know when you are coming',
+        body: 'Vague arrival windows lead to cancellations and angry calls to the office.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'Automatic appointment confirmations and on-my-way texts.',
+      },
+      {
+        title: 'Paperwork piles up in the truck',
+        body: 'Job notes, parts, and invoices wait until the end of the day or the end of the week.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Invoicing and payment from the job site, with reminders that chase unpaid bills for you.',
+      },
+      {
+        title: 'One-time customers never hear from you again',
+        body: 'Drain cleanings, water heater flushes, and inspections are easy repeat work. Most shops never ask.',
+        leakArea: 'Repeat business',
+        fix: 'Simple reminder campaigns for routine maintenance and annual checks.',
+      },
+      {
+        title: 'Your website does not show you are available now',
+        body: 'People with a leak want to know you can come today. A slow site with a contact form loses them.',
+        leakArea: 'Website',
+        fix: 'A fast mobile page with tap-to-call, service area, and same-day request up front.',
+      },
+      {
+        title: 'Reviews are not being asked for',
+        body: 'Plumbing is chosen on trust. Every job without a review request is proof you never collected.',
+        leakArea: 'Reviews & reputation',
+        fix: 'Automatic review requests after every completed job.',
+      },
+    ],
+    instead:
+      'I find the calls, estimates, and invoices slipping through your office and set up the systems that handle them, so you can stay focused on the job in front of you.',
+    proofCaseIds: [45, 48, 26],
+    offerLine: 'Run the free leak self-scan on your website and lead flow. A few minutes, no call required.',
+    faqs: [
+      {
+        question: 'Will this work if I am a one-truck shop?',
+        answer: 'Yes. Owner-operators usually feel the office problems the most, because there is nobody else to catch them.',
+      },
+      {
+        question: 'Do I have to learn new software?',
+        answer: 'No. I set it up and connect it to what you already use. You just see more booked jobs and fewer loose ends.',
+      },
+    ],
+    ads: [
+      {
+        angle: 'In the field',
+        hook: "You're under a sink. Your phone is ringing.",
+        primaryText:
+          "I know how busy you are in the field. While you're on a job, emergency calls go to voicemail and estimates sit. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things your plumbing office is missing',
+        cta: 'Learn More',
+      },
+      {
+        angle: 'Office',
+        hook: 'Every missed emergency call is a job for the next plumber.',
+        primaryText:
+          'Run a free leak scan and see where your office is losing calls, estimates, and invoices while you are in the field.',
+        headline: 'Find what your office is missing',
+        cta: 'Get Offer',
+      },
+    ],
+  },
+  {
+    slug: 'electrical',
+    trade: 'Electrical',
+    persona: 'Electrical contractors',
+    cardLine: 'Bids and panel quotes going cold while you are on site.',
+    metaTitle: '7 Office Problems Costing Electrical Contractors Work While You Are on Site',
+    metaDescription:
+      'Electrical contractors: you are on site all day. Find the slow bids, missed calls, and late invoices leaking money back at the office, and get them fixed fast.',
+    eyebrow: 'For electrical contractors',
+    headline: '7 things slipping through your electrical office while you are on site',
+    subheadline: 'You are pulling wire or swapping a panel. The office is letting bids and callbacks go cold.',
+    fieldMoment: "You're on a ladder with a panel open and no free hand for your phone.",
+    officeMoment: 'Back at the office, a panel-upgrade lead waits a day for a reply, a builder is still waiting on your bid, and change orders from last month have not been billed.',
+    reasons: [
+      {
+        title: 'New leads wait until you are off the ladder',
+        body: 'Homeowners and builders contact several electricians. The first one to answer usually gets the work.',
         leakArea: 'Speed to lead',
-        fix: 'Instant lead alerts, auto-routing, and a first response that goes out in seconds.',
+        fix: 'Instant replies and lead capture that book the walkthrough without you stopping work.',
       },
       {
-        title: 'The landing page promises something the sales call does not',
-        body: 'When the ad says one thing and the conversation says another, trust drops and the lead stops answering.',
-        leakArea: 'Message alignment',
-        fix: 'Ads, landing pages, and sales scripts rebuilt around the same promise.',
+        title: 'Bids take too long to send',
+        body: 'Writing a bid at night from scratch means bids go out late, or not at all.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Bid and quote templates with your pricing built in, ready to send from your phone.',
       },
       {
-        title: 'One follow-up attempt, then silence',
-        body: 'Most teams try once or twice. Most buyers need more touches than that before they are ready to talk.',
+        title: 'Sent bids never get a follow-up',
+        body: 'Builders and homeowners get busy. A bid with no follow-up is a bid you probably lost.',
         leakArea: 'Follow-up',
-        fix: 'A multi-touch nurture sequence across text, email, and calls that runs without reminders.',
+        fix: 'Automatic follow-up on every open bid until it is won or closed out.',
       },
       {
-        title: 'You optimize for cheap leads instead of paying customers',
-        body: 'If the ad platform never learns which leads closed, it keeps finding more of the wrong people.',
-        leakArea: 'Marketing attribution',
-        fix: 'Closed-deal data sent back to the ad platforms so they target buyers, not form fillers.',
+        title: 'Change orders do not get billed',
+        body: 'Extra work done on site gets agreed verbally and forgotten by the time the invoice goes out.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Change orders captured on site and added to the invoice automatically.',
       },
       {
-        title: 'Junk and duplicate leads waste sales time',
-        body: 'Fake numbers, repeat submissions, and tire kickers eat the hours your team should spend on real buyers.',
-        leakArea: 'Lead quality',
-        fix: 'Lead validation and scoring before anything reaches a salesperson.',
+        title: 'Permits and inspections are tracked on paper',
+        body: 'Missed inspection dates hold up jobs and final payments.',
+        leakArea: 'Office systems',
+        fix: 'Permit and inspection tracking with reminders before each date.',
       },
       {
-        title: 'Every visitor gets the same generic page',
-        body: 'A first-time visitor, a price shopper, and a ready buyer all need different next steps. One page cannot serve all three.',
-        leakArea: 'Website conversion',
-        fix: 'Persona-matched landing pages so each audience lands on a page written for them.',
+        title: 'Past customers forget you did their work',
+        body: 'EV chargers, generators, and upgrades are natural next jobs for people who already trust you.',
+        leakArea: 'Repeat business',
+        fix: 'Simple check-in campaigns that offer the next upgrade at the right time.',
       },
       {
-        title: 'Nobody owns the number between lead and revenue',
-        body: 'Marketing owns leads. Sales owns deals. The handoff in between is where money disappears.',
-        leakArea: 'Sales process',
-        fix: 'One shared pipeline view with clear handoff rules and weekly leak reporting.',
+        title: 'Your website looks like nobody updates it',
+        body: 'Builders and homeowners check you out online before they call. An outdated site costs you the call.',
+        leakArea: 'Website',
+        fix: 'A clean, fast site that shows your work, licensing, and an easy way to request a bid.',
       },
-    ],
-    notAnother: [
-      'Another agency promising cheaper leads',
-      'A dashboard full of vanity metrics',
-      'More budget poured into a funnel that already leaks',
     ],
     instead:
-      'Aetheris audits the whole path from ad click to closed deal, shows where the money is leaking, and builds the follow-up and tracking systems that turn the leads you already pay for into revenue.',
-    proofCaseIds: [7, 11, 2],
-    offerLine: 'Run the free leak self-scan and see where your funnel drops leads before you spend another dollar.',
+      'I find where bids, callbacks, and billing fall through in your office and build the systems that catch them, so you can keep working while it gets handled.',
+    proofCaseIds: [23, 19, 40],
+    offerLine: 'Start with the free leak self-scan of your website and lead flow. No call required.',
     faqs: [
       {
-        question: 'Will you replace my ad agency?',
-        answer:
-          'Not necessarily. We usually work around the agency, fixing what happens after the lead arrives, which is where most of the loss is.',
+        question: 'I mostly work for builders. Does this still apply?',
+        answer: 'Yes. Bid speed, follow-up, change orders, and billing are usually the biggest leaks for builder work.',
       },
       {
-        question: 'What if my leads really are bad?',
-        answer:
-          'Then the audit will show it, and we fix the targeting signal by feeding closed-deal data back to the ad platforms.',
+        question: 'How quickly can things get fixed?',
+        answer: 'The scan shows problems in minutes. Simple fixes like missed-call text-back can be running quickly; bigger systems are scoped with you first.',
       },
     ],
     ads: [
       {
-        angle: 'Problem',
-        hook: 'Great cost per lead. Terrible revenue.',
+        angle: 'In the field',
+        hook: "You're on a ladder. Who's following up on your bids?",
         primaryText:
-          'If your ads bring in leads but not sales, the problem is usually not the ad. It is the follow-up, the handoff, and the tracking after the click. Here are the 7 places it breaks.',
-        headline: 'Why your ads make leads, not sales',
+          "I know how busy you are on site. While you work, leads wait, bids go cold, and change orders go unbilled. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things slipping through your office',
         cta: 'Learn More',
       },
       {
-        angle: 'Speed',
-        hook: 'How long does your team take to call a new lead back?',
+        angle: 'Office',
+        hook: 'How many bids did you send last month with no follow-up?',
         primaryText:
-          'Leads cool fast. Find out where your funnel is quietly dropping the leads you already paid for with a free leak self-scan.',
-        headline: 'Stop paying for leads you lose',
+          'Run a free leak scan and see where your office is losing bids, calls, and billing while you are on site.',
+        headline: 'Stop losing bids to silence',
         cta: 'Get Offer',
       },
     ],
   },
   {
-    slug: 'founder-led-sales',
-    persona: 'Founders who still close every deal',
-    motivation: 'Growth stops whenever the founder is busy, sick, or on vacation.',
-    metaTitle: '7 Signs Your Business Still Depends on You to Close Every Deal',
+    slug: 'roofing',
+    trade: 'Roofing',
+    persona: 'Roofing contractors',
+    cardLine: 'Inspection leads and storm calls going cold while crews are on roofs.',
+    metaTitle: '7 Office Problems Costing Roofers Jobs While You Are on a Roof',
     metaDescription:
-      'If revenue stops when you stop selling, the business has a system gap. Find where founder-led sales is capping growth and build a process the team can run.',
-    eyebrow: 'For founders and owners who are still the best salesperson',
-    headline: '7 signs your sales process is really just you',
-    subheadline: 'If revenue drops when you take a week off, the business does not have a sales system yet. It has a founder.',
-    painHook:
-      'You close better than anyone on the team, so every important deal ends up on your desk. That worked to get here. It is also the reason growth stalls every time your calendar fills up.',
+      'Roofing owners: you are on roofs and running crews all day. Find the slow inspection replies, unsigned estimates, and missed storm calls leaking jobs back at the office.',
+    eyebrow: 'For roofing contractors',
+    headline: '7 ways your roofing office loses jobs while you are up on a roof',
+    subheadline: 'Storm season is when you are busiest and when the office drops the most leads.',
+    fieldMoment: "You're up on a roof checking hail damage and your phone has six missed calls.",
+    officeMoment: 'Back at the office, inspection requests sit for a day, signed estimates wait on insurance paperwork, and last week\'s quotes have not been followed up.',
     reasons: [
       {
-        title: 'The pitch lives in your head',
-        body: 'What you say, which objections you hear, and how you answer them have never been written down, so nobody else can repeat it.',
-        leakArea: 'Sales process',
-        fix: 'Your best calls turned into scripts, objection guides, and talk tracks the team can use.',
-      },
-      {
-        title: 'Leads wait until you have time',
-        body: 'When you are the bottleneck, good prospects wait days for a reply and quietly buy from someone faster.',
+        title: 'Inspection requests wait too long for a reply',
+        body: 'After a storm, homeowners call several roofers. The ones who answer first get on the roof first.',
         leakArea: 'Speed to lead',
-        fix: 'Automated first response and qualification so only ready buyers reach your calendar.',
+        fix: 'Instant replies and online inspection booking that fill your schedule without you stopping work.',
       },
       {
-        title: 'The pipeline is a feeling, not a report',
-        body: 'You know roughly what is closing this month, but only because you are in every conversation.',
-        leakArea: 'Systems & CRM',
-        fix: 'A pipeline that shows stage, value, and next step for every deal without asking you.',
+        title: 'Estimates go out and nobody follows up',
+        body: 'Roof replacements are expensive decisions. Homeowners need a nudge, and most roofers never send one.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Estimate follow-up by text and email that runs until the homeowner decides.',
       },
       {
-        title: 'Proposals start from scratch every time',
-        body: 'Rewriting the same proposal for each deal costs hours and creates inconsistent pricing.',
-        leakArea: 'Operations',
-        fix: 'Proposal and quote templates with pricing logic built in.',
+        title: 'Insurance paperwork stalls signed jobs',
+        body: 'Claims, photos, and adjuster details live in emails and camera rolls, and jobs wait while someone hunts for them.',
+        leakArea: 'Office systems',
+        fix: 'One job file for photos, claim details, and documents, with reminders on what is missing.',
       },
       {
-        title: 'Follow-up depends on you remembering',
-        body: 'Deals that need a nudge in two weeks only get one if you happen to think of it.',
-        leakArea: 'Follow-up',
-        fix: 'Follow-up tasks and sequences triggered by deal stage, not by memory.',
+        title: 'Crew schedules change and nobody hears about it',
+        body: 'Weather moves jobs. When customers and crews are not told, you get no-shows and angry calls.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'Automatic schedule updates to crews and customers when a job moves.',
       },
       {
-        title: 'New hires take months to sell anything',
-        body: 'Without a playbook, every new salesperson learns by trial and error on real prospects.',
-        leakArea: 'Sales process',
-        fix: 'An onboarding playbook and AI practice partner trained on how you actually sell.',
+        title: 'Final payments drag after the job is done',
+        body: 'The roof is finished, but the final invoice and the insurance check take weeks to chase.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Invoices sent on completion with automatic reminders until paid.',
       },
       {
-        title: 'You cannot see which deals are worth your time',
-        body: 'Without scoring, a small deal and a strategic one get the same attention from you.',
-        leakArea: 'Lead quality',
-        fix: 'Lead scoring that routes the right deals to you and the rest to the team.',
+        title: 'Neighbors never see your work',
+        body: 'Every finished roof is an opportunity on that street. Most roofers never follow up with the neighbors or ask for referrals.',
+        leakArea: 'Repeat business',
+        fix: 'Review and referral requests after every completed roof.',
       },
-    ],
-    notAnother: [
-      'A generic sales training course',
-      'A CRM your team will stop updating in a month',
-      'A hire you are expected to train from nothing',
+      {
+        title: 'Your site does not prove you are legit',
+        body: 'After storms, homeowners worry about storm chasers. A weak website makes you look like one.',
+        leakArea: 'Website',
+        fix: 'A site that shows local projects, licensing, warranty, and real reviews up front.',
+      },
     ],
     instead:
-      'Aetheris captures how you sell, finds where deals stall when you are not there, and builds the process, tools, and automation that let the team close without you in every call.',
-    proofCaseIds: [19, 21, 24],
-    offerLine: 'Start with the free leak self-scan, then map your sales process with us on a strategy call.',
+      'I find where inspection leads, estimates, and payments get stuck in your office, and I build the systems that move them, so you can stay on the roof.',
+    proofCaseIds: [26, 46, 18],
+    offerLine: 'Run the free leak self-scan on your website and lead flow. A few minutes, no call required.',
     faqs: [
       {
-        question: 'Do I need a sales team already?',
-        answer:
-          'No. Many founders start by automating qualification and follow-up first, so the first hire walks into a working system.',
+        question: 'Will this help during storm season when we are slammed?',
+        answer: 'That is when it helps most. Automated replies and booking keep leads from piling up when everyone is on a roof.',
       },
       {
-        question: 'How do you capture how I sell?',
-        answer:
-          'We review real calls, emails, and proposals, then turn the patterns into scripts and playbooks you approve.',
+        question: 'Do you work with my CRM?',
+        answer: 'In most cases, yes. I connect to the tools you already use before suggesting anything new.',
       },
     ],
     ads: [
       {
-        angle: 'Problem',
-        hook: 'Does revenue stop when you take a week off?',
+        angle: 'In the field',
+        hook: "You're on a roof. Six missed calls.",
         primaryText:
-          'If you are still the one closing every deal, the business has a founder, not a sales system. Here are 7 signs, and what to build instead.',
-        headline: '7 signs your sales process is just you',
+          "I know how busy you are in the field. While crews are on roofs, inspection requests wait, estimates sit, and payments drag. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 ways your office loses roofing jobs',
         cta: 'Learn More',
       },
       {
-        angle: 'Freedom',
-        hook: 'You should not have to be on every sales call.',
+        angle: 'Storm season',
+        hook: 'Storm season is when your office drops the most leads.',
         primaryText:
-          'We turn how you sell into a process your team can run, with automated follow-up, scoring, and playbooks. Start with a free leak self-scan.',
-        headline: 'Build a sales system that runs without you',
+          'Run a free leak scan and see where inspection requests and estimates are getting lost while you are on roofs.',
+        headline: 'Catch every storm lead',
         cta: 'Get Offer',
       },
     ],
   },
   {
-    slug: 'burned-by-agencies',
-    persona: 'Owners who have been burned by marketing agencies',
-    motivation: 'They paid for marketing before and could not tell what it did.',
-    metaTitle: '7 Reasons Your Last Marketing Agency Did Not Work',
+    slug: 'remodeling',
+    trade: 'Remodeling',
+    persona: 'Remodelers and general contractors',
+    cardLine: 'Big proposals and change orders lost between the jobsite and the office.',
+    metaTitle: '7 Office Problems Costing Remodelers and GCs While You Are on the Jobsite',
     metaDescription:
-      'Tried agencies and got reports instead of revenue? Learn why marketing alone rarely fixes growth, and how a full-business leak audit finds the real problem.',
-    eyebrow: 'For owners who have tried an agency already',
-    headline: '7 reasons your last marketing agency did not move the needle',
-    subheadline: 'It probably was not just a bad agency. Marketing cannot fix a leak that is somewhere else in the business.',
-    painHook:
-      'You paid the retainer, read the monthly reports, and still could not say what it did for revenue. That is frustrating, and it is common. Most agencies are only allowed to look at one part of the problem.',
+      'Remodelers and general contractors: you are running jobsites all day. Find the slow proposals, unbilled change orders, and lost leads leaking money back at the office.',
+    eyebrow: 'For remodelers & general contractors',
+    headline: '7 things your remodeling office drops while you are running the jobsite',
+    subheadline: 'You are managing subs and solving problems on site. Proposals, follow-up, and billing are falling behind.',
+    fieldMoment: "You're on a jobsite sorting out a sub who didn't show and an inspector who did.",
+    officeMoment: 'Back at the office, a kitchen lead from Tuesday still has no reply, a proposal is half-written, and the last change order never made it onto an invoice.',
     reasons: [
       {
-        title: 'They only looked at the marketing',
-        body: 'If leads are lost in follow-up, sales, or operations, better ads just send more people into the same leak.',
-        leakArea: 'Whole-business audit',
-        fix: 'A forensic review of marketing, sales, follow-up, and operations before anything is built.',
-      },
-      {
-        title: 'Reports measured activity, not revenue',
-        body: 'Impressions, clicks, and posts are easy to report. Booked revenue is what you actually needed.',
-        leakArea: 'Marketing attribution',
-        fix: 'Tracking that ties every channel to closed revenue, reported in plain numbers.',
-      },
-      {
-        title: 'The strategy was a template',
-        body: 'The same playbook gets sold to every client. Your market, offer, and buyers deserved their own plan.',
-        leakArea: 'Strategy',
-        fix: 'A plan built from what the audit finds in your business, not a package tier.',
-      },
-      {
-        title: 'Nobody fixed what happened after the lead',
-        body: 'The agency handed off leads and walked away. Response time, follow-up, and close rate stayed exactly the same.',
-        leakArea: 'Follow-up',
-        fix: 'Follow-up and handoff automation so leads are worked, not just delivered.',
-      },
-      {
-        title: 'Your brand said different things in different places',
-        body: 'The website, the ads, and the sales team each told a slightly different story, and buyers noticed.',
-        leakArea: 'Brand & trust',
-        fix: 'One clear message carried across site, ads, emails, and sales conversations.',
-      },
-      {
-        title: 'You were locked into a retainer, not a result',
-        body: 'Monthly fees continued whether or not anything improved.',
-        leakArea: 'Strategy',
-        fix: 'Scoped builds tied to specific leaks, with what will change spelled out up front.',
-      },
-      {
-        title: 'You never owned the systems they built',
-        body: 'When the contract ended, the accounts, data, and automations left with them.',
-        leakArea: 'Systems & CRM',
-        fix: 'Systems built in your accounts, documented, and yours to keep.',
-      },
-    ],
-    notAnother: [
-      'Another retainer for posts and monthly reports',
-      'A marketing-only fix for a whole-business problem',
-      'Systems you lose access to when the contract ends',
-    ],
-    instead:
-      'Aetheris starts by finding where the business is actually losing time, leads, and revenue, across marketing and everything after it, then builds the specific fixes. You see the findings before you buy anything.',
-    proofCaseIds: [27, 28, 18],
-    offerLine: 'See the findings first. Run the free leak self-scan before you commit to anything.',
-    faqs: [
-      {
-        question: 'How is this different from an agency?',
-        answer:
-          'An agency usually sells marketing. Aetheris audits the whole business first, then builds fixes wherever the leak actually is, which is often not marketing.',
-      },
-      {
-        question: 'Do I have to sign a long contract?',
-        answer:
-          'No. You can start with the free self-scan and decide from there based on what it finds.',
-      },
-    ],
-    ads: [
-      {
-        angle: 'Empathy',
-        hook: 'Paid an agency and still cannot tell what it did?',
-        primaryText:
-          'It usually is not just a bad agency. Marketing cannot fix leaks in follow-up, sales, or operations. Here are 7 reasons the last one did not work.',
-        headline: 'Why your last agency did not work',
-        cta: 'Learn More',
-      },
-      {
-        angle: 'Findings first',
-        hook: 'See what is broken before you pay anyone to fix it.',
-        primaryText:
-          'Run a free leak self-scan of your site and lead flow. You keep the findings either way.',
-        headline: 'Findings first. Then decide.',
-        cta: 'Get Offer',
-      },
-    ],
-  },
-  {
-    slug: 'drowning-in-admin',
-    persona: 'Owners buried in manual admin work',
-    motivation: 'The team spends its best hours on copy-paste work instead of customers.',
-    metaTitle: '7 Admin Tasks Quietly Costing Your Business Hours Every Week',
-    metaDescription:
-      'Double entry, manual invoicing, chasing paperwork: find the admin work draining your team and replace it with automation that runs in the background.',
-    eyebrow: 'For businesses where the work is good but the admin is endless',
-    headline: '7 admin jobs your team should never do by hand again',
-    subheadline: 'Every hour spent copying data between systems is an hour not spent on customers or growth.',
-    painHook:
-      'Your people are good. They are just spending a large part of every week retyping, chasing, and checking things a system could do. It does not show up as a line item, but it shows up as overtime, mistakes, and slow growth.',
-    reasons: [
-      {
-        title: 'The same data gets typed into three systems',
-        body: 'Customer details go into the CRM, then the invoicing tool, then a spreadsheet. Every copy is a chance for an error.',
-        leakArea: 'Operations',
-        fix: 'Integrations that enter data once and sync it everywhere it is needed.',
-      },
-      {
-        title: 'Invoices go out late or not at all',
-        body: 'When billing waits on someone finding time, cash flow waits too.',
-        leakArea: 'Operations',
-        fix: 'Invoices created and sent automatically when the work is marked complete.',
-      },
-      {
-        title: 'Someone chases paperwork every single day',
-        body: 'Signed forms, documents, and approvals get requested again and again by hand.',
-        leakArea: 'Customer experience',
-        fix: 'Automated document requests and reminders that stop when the file arrives.',
-      },
-      {
-        title: 'Onboarding new customers is a checklist on someone\'s desk',
-        body: 'When onboarding depends on one person, customers wait and steps get missed.',
-        leakArea: 'Customer experience',
-        fix: 'An onboarding flow that sends the right steps to the customer and the team on its own.',
-      },
-      {
-        title: 'Reports are built by hand every week',
-        body: 'Someone pulls numbers from several tools and pastes them into a spreadsheet so leadership can see what happened.',
-        leakArea: 'Systems & CRM',
-        fix: 'A live dashboard fed directly from the systems you already use.',
-      },
-      {
-        title: 'Scheduling takes a dozen messages',
-        body: 'Back-and-forth emails to find a time waste both your team\'s time and the customer\'s patience.',
-        leakArea: 'Operations',
-        fix: 'Self-serve booking connected to real calendars and service rules.',
-      },
-      {
-        title: 'Common questions get answered from scratch every time',
-        body: 'The same customer questions eat inbox and phone time all day.',
-        leakArea: 'Customer experience',
-        fix: 'An AI assistant trained on your answers that handles routine questions and escalates the rest.',
-      },
-    ],
-    notAnother: [
-      'A new all-in-one platform you have to migrate everything into',
-      'A consultant who documents the problem and leaves',
-      'Automation that breaks the first time something changes',
-    ],
-    instead:
-      'Aetheris maps where your team\'s hours are going, finds the repeat work worth automating, and builds the integrations and assistants that take it off their plate, using the tools you already have wherever possible.',
-    proofCaseIds: [40, 47, 23],
-    offerLine: 'Start with the free leak self-scan, then we map the hours on a strategy call.',
-    faqs: [
-      {
-        question: 'Will we have to change all our software?',
-        answer:
-          'Rarely. Most automation connects the tools you already use. We only recommend a change when a tool is the bottleneck.',
-      },
-      {
-        question: 'Will automation replace my staff?',
-        answer:
-          'The goal is to give your people their time back for customers and higher-value work, not to remove them.',
-      },
-    ],
-    ads: [
-      {
-        angle: 'Problem',
-        hook: 'How many hours does your team spend retyping data?',
-        primaryText:
-          'Double entry, manual invoices, chasing paperwork. Here are 7 admin jobs your team should never do by hand again, and what replaces them.',
-        headline: '7 admin jobs to automate now',
-        cta: 'Learn More',
-      },
-      {
-        angle: 'Time back',
-        hook: 'Your best people are stuck doing copy-paste work.',
-        primaryText:
-          'We find the repeat work draining your team and build automation that runs in the background. Start with a free leak self-scan.',
-        headline: 'Give your team their week back',
-        cta: 'Get Offer',
-      },
-    ],
-  },
-  {
-    slug: 'multi-location',
-    persona: 'Multi-location owners',
-    motivation: 'Every location runs a little differently, and the owner cannot see why one outperforms another.',
-    metaTitle: '7 Reasons Your Locations Perform Differently and How to Fix It',
-    metaDescription:
-      'Running multiple locations? Find the process, follow-up, and reporting gaps that make one location thrive and another stall, then standardize what works.',
-    eyebrow: 'For owners running two or more locations',
-    headline: '7 reasons one of your locations outperforms the others',
-    subheadline: 'It is usually not the market. It is the process, and right now every location has its own.',
-    painHook:
-      'Same brand, same services, very different results. Without one system across locations, you cannot see where the gap comes from, so the best location\'s habits never spread to the rest.',
-    reasons: [
-      {
-        title: 'Each location handles leads its own way',
-        body: 'One answers fast and follows up. Another lets calls go to voicemail. Customers feel the difference.',
+        title: 'New leads wait days for a first reply',
+        body: 'Homeowners planning a remodel contact several contractors. Slow replies tell them you are too busy for them.',
         leakArea: 'Speed to lead',
-        fix: 'One intake and routing standard across every location, measured weekly.',
+        fix: 'An instant first reply and a short intake form that qualifies the project before you call.',
       },
       {
-        title: 'You cannot compare locations side by side',
-        body: 'Every manager reports differently, so you are comparing spreadsheets instead of performance.',
-        leakArea: 'Systems & CRM',
-        fix: 'A single dashboard showing leads, response time, and revenue per location.',
+        title: 'Proposals take a week of evenings',
+        body: 'Every proposal starts from an old document and a lot of retyping. Late proposals lose to faster contractors.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Proposal templates with your scopes and pricing built in.',
       },
       {
-        title: 'Local pages are thin or missing',
-        body: 'Customers searching near each location find a generic page or a competitor.',
-        leakArea: 'Website conversion',
-        fix: 'Location pages with local proof, services, and booking for each site.',
+        title: 'Change orders are agreed on site and forgotten',
+        body: 'Extra work gets a handshake and never shows up on the bill.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Change orders signed on a phone and added to the next invoice automatically.',
       },
       {
-        title: 'The brand drifts from one location to the next',
-        body: 'Different signage, messaging, and offers make the business feel like separate companies.',
-        leakArea: 'Brand & trust',
-        fix: 'Shared brand and message standards, with templates each location can use.',
+        title: 'Clients call you for every update',
+        body: 'When homeowners do not know what is happening, they call you on the jobsite.',
+        leakArea: 'Office systems',
+        fix: 'Automatic weekly project updates so clients stay informed without calling you.',
       },
       {
-        title: 'Best practices stay trapped at one site',
-        body: 'Your top manager has habits that work. Nobody has written them down for the others.',
-        leakArea: 'Sales process',
-        fix: 'Playbooks built from your best location and rolled out to the rest.',
+        title: 'Sub and material schedules live in texts',
+        body: 'When the schedule is spread across text threads, things get missed and jobs slip.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'One shared schedule for subs, deliveries, and inspections with reminders.',
       },
       {
-        title: 'Reviews and reputation vary by location',
-        body: 'One location has strong reviews, another barely asks. Local search rewards the difference.',
-        leakArea: 'Customer retention',
-        fix: 'Automated review requests for every location after every completed job.',
+        title: 'Finished projects are never shown off',
+        body: 'Your best marketing is the work you just finished. Most remodelers never get photos or reviews online.',
+        leakArea: 'Reviews & reputation',
+        fix: 'An end-of-project routine that collects photos, a review, and a referral.',
       },
       {
-        title: 'Data does not match between systems',
-        body: 'Each location\'s numbers come from different tools, so totals rarely agree.',
-        leakArea: 'Operations',
-        fix: 'Integrated systems so every location reports from the same source.',
-      },
-    ],
-    notAnother: [
-      'A franchise-style rulebook nobody follows',
-      'One more tool each manager uses differently',
-      'Corporate reporting that arrives a month late',
-    ],
-    instead:
-      'Aetheris audits every location against the same standard, shows exactly where each one leaks, and builds the shared systems that make your best location the default.',
-    proofCaseIds: [6, 16, 24],
-    offerLine: 'Run the free leak self-scan on your main site, then compare locations with us on a strategy call.',
-    faqs: [
-      {
-        question: 'Do all locations need the same software?',
-        answer:
-          'Not always. We can connect different tools into one reporting view first, then standardize where it pays off.',
-      },
-      {
-        question: 'How many locations do I need for this to make sense?',
-        answer: 'Two is enough. The gap between locations is often the clearest leak in the business.',
-      },
-    ],
-    ads: [
-      {
-        angle: 'Problem',
-        hook: 'Same brand. Very different results.',
-        primaryText:
-          'If one location outperforms the rest, it is usually process, not market. Here are 7 reasons locations drift apart, and how to make your best one the standard.',
-        headline: 'Why one location wins and others stall',
-        cta: 'Learn More',
-      },
-      {
-        angle: 'Visibility',
-        hook: 'Can you compare your locations side by side right now?',
-        primaryText:
-          'We build one view of leads, response time, and revenue across every location. Start with a free leak self-scan.',
-        headline: 'See every location in one place',
-        cta: 'Get Offer',
-      },
-    ],
-  },
-  {
-    slug: 'great-reputation-weak-website',
-    persona: 'Businesses with a great reputation and a weak website',
-    motivation: 'Referrals are strong, but the website loses the people who check it before calling.',
-    metaTitle: '7 Ways Your Website Undersells a Business Customers Already Love',
-    metaDescription:
-      'Great reputation, weak website? Find where your site loses referrals and searchers who check you out before calling, then fix it so it converts.',
-    eyebrow: 'For businesses that win on reputation',
-    headline: '7 ways your website is underselling a business people already love',
-    subheadline: 'Referrals check your website before they call. Right now it may be talking them out of it.',
-    painHook:
-      'Customers recommend you. Then the person they told looks you up, lands on a dated or confusing site, and calls someone else. The reputation did its job. The website did not.',
-    reasons: [
-      {
-        title: 'Your best proof is nowhere on the site',
-        body: 'Reviews, results, and the reasons customers stay with you are scattered or missing.',
-        leakArea: 'Brand & trust',
-        fix: 'Proof placed on every key page, pulled from real reviews and outcomes.',
-      },
-      {
-        title: 'It is slow or broken on phones',
-        body: 'Most people check you out on a phone. A slow or awkward mobile experience costs you the call.',
-        leakArea: 'Website conversion',
-        fix: 'A fast, mobile-first rebuild of the pages that matter most.',
-      },
-      {
-        title: 'Visitors cannot tell what to do next',
-        body: 'Without one clear next step, people leave to think about it and do not come back.',
-        leakArea: 'Website conversion',
-        fix: 'Clear calls to action and a simple request or booking path on every page.',
-      },
-      {
-        title: 'The site describes services, not results',
-        body: 'Lists of what you do are not as persuasive as what changes for the customer.',
-        leakArea: 'Messaging',
-        fix: 'Copy rewritten around customer outcomes, in the words your customers use.',
-      },
-      {
-        title: 'Search engines and AI assistants cannot find you',
-        body: 'If your site is not structured for search and AI answers, competitors get recommended instead.',
-        leakArea: 'Search visibility',
-        fix: 'Structured content and technical fixes for search and AI answer engines.',
-      },
-      {
-        title: 'Form submissions go into a black hole',
-        body: 'A form that emails one inbox, with no confirmation and no follow-up, loses warm leads.',
-        leakArea: 'Follow-up',
-        fix: 'Instant confirmation, routing to the right person, and automatic follow-up.',
-      },
-      {
-        title: 'The brand online does not match the business in person',
-        body: 'Customers who know you are surprised by the site. New visitors only see the site.',
-        leakArea: 'Brand & trust',
-        fix: 'A brand refresh that makes the site look like the business your customers describe.',
-      },
-    ],
-    notAnother: [
-      'A pretty redesign that converts the same as before',
-      'A template site that looks like your competitors',
-      'A site launch with no follow-up system behind it',
-    ],
-    instead:
-      'Aetheris audits how your website, brand, and follow-up perform against your real reputation, then rebuilds the parts that lose people, so the site sells as well as your customers do.',
-    proofCaseIds: [13, 18, 17],
-    offerLine: 'Run the free leak self-scan on your website and see exactly where visitors drop off.',
-    faqs: [
-      {
-        question: 'Do I need a whole new website?',
-        answer:
-          'Not always. Sometimes the biggest gains come from fixing a few key pages, the mobile experience, and the follow-up behind the form.',
-      },
-      {
-        question: 'Can you use our existing reviews?',
-        answer: 'Yes. We use your real reviews and outcomes and never invent testimonials.',
-      },
-    ],
-    ads: [
-      {
-        angle: 'Problem',
-        hook: 'Your customers love you. Your website does not show it.',
-        primaryText:
-          'Referrals look you up before they call. Here are 7 ways your website might be talking them out of it, and how to fix each one.',
-        headline: '7 ways your site undersells you',
-        cta: 'Learn More',
-      },
-      {
-        angle: 'Scan',
-        hook: 'Find out where your website loses people.',
-        primaryText:
-          'Run a free leak self-scan of your site and see where visitors drop off before they ever call.',
-        headline: 'Free website leak scan',
-        cta: 'Get Offer',
-      },
-    ],
-  },
-  {
-    slug: 'ai-curious-owner',
-    persona: 'Owners who want to use AI but do not know where to start',
-    motivation: 'They know AI matters but do not want to waste money on the wrong tools.',
-    metaTitle: '7 Places AI Can Actually Save Your Business Time and Money',
-    metaDescription:
-      'Know you should be using AI but not sure where? Find the practical places AI and automation pay off in your business, starting with the leaks that cost the most.',
-    eyebrow: 'For owners who know AI matters but want a practical start',
-    headline: '7 places AI can actually pay off in your business this quarter',
-    subheadline: 'Skip the hype. Start where your business is already losing time, leads, or money.',
-    painHook:
-      'Everyone says you should be using AI. Nobody tells you where it will actually help your business instead of becoming one more subscription. The right place to start is wherever you are already leaking.',
-    reasons: [
-      {
-        title: 'Answering leads instantly, day and night',
-        body: 'An AI assistant can respond, answer common questions, and book appointments while your team is busy or asleep.',
+        title: 'You cannot tell which leads are worth a site visit',
+        body: 'Driving out to price a project that was never real wastes your best hours.',
         leakArea: 'Speed to lead',
-        fix: 'An AI intake assistant trained on your services, pricing rules, and calendar.',
+        fix: 'Lead screening for budget, timeline, and scope before you schedule a visit.',
       },
-      {
-        title: 'Following up so nobody falls through the cracks',
-        body: 'AI can draft and send personal follow-up based on what each lead asked about.',
-        leakArea: 'Follow-up',
-        fix: 'AI-written follow-up sequences you approve once and then run on their own.',
-      },
-      {
-        title: 'Handling routine customer questions',
-        body: 'Order status, hours, policies, and how-to questions can be answered without tying up staff.',
-        leakArea: 'Customer experience',
-        fix: 'A support assistant that answers routine questions and hands off the rest.',
-      },
-      {
-        title: 'Writing marketing in your voice',
-        body: 'AI trained on your brand can turn one idea into posts, emails, and pages without sounding generic.',
-        leakArea: 'Marketing',
-        fix: 'A brand-voice content system that drafts in your style for your review.',
-      },
-      {
-        title: 'Cleaning and enriching your customer data',
-        body: 'AI can find duplicates, fill gaps, and flag stale records so your list is actually usable.',
-        leakArea: 'Systems & CRM',
-        fix: 'Automated data hygiene and enrichment for your CRM.',
-      },
-      {
-        title: 'Summarizing calls and meetings',
-        body: 'Notes, action items, and CRM updates can be captured automatically instead of typed afterward.',
-        leakArea: 'Operations',
-        fix: 'Call and meeting summaries that update records and create tasks.',
-      },
-      {
-        title: 'Spotting which leads and customers need attention',
-        body: 'AI scoring can show which leads are ready to buy and which customers are at risk of leaving.',
-        leakArea: 'Lead quality',
-        fix: 'Lead and churn scoring built on your own history.',
-      },
-    ],
-    notAnother: [
-      'A chatbot bolted onto your site with no strategy behind it',
-      'A stack of AI subscriptions nobody uses',
-      'A one-size-fits-all AI course',
     ],
     instead:
-      'Aetheris finds where your business is leaking first, then builds custom AI and automation aimed at those exact leaks, so every tool has a job and a measurable result.',
-    proofCaseIds: [30, 45, 46],
-    offerLine: 'Run the free leak self-scan and see where AI would pay off first in your business.',
+      'I find where proposals, change orders, and client communication break down in your office, and I set up the systems that handle them, so you can run the jobsite.',
+    proofCaseIds: [23, 46, 13],
+    offerLine: 'Start with the free leak self-scan of your website and lead flow. No call required.',
     faqs: [
       {
-        question: 'Do I need technical staff to use this?',
-        answer: 'No. We build, connect, and document the systems so your team only uses the results.',
+        question: 'We use project management software already. Is this different?',
+        answer: 'Yes. I look at whether the software and the office around it are actually catching leads, proposals, and billing, and fix what is not.',
       },
       {
-        question: 'Is our data safe with AI tools?',
-        answer:
-          'We choose tools and setups based on your data sensitivity and keep systems inside accounts you control.',
+        question: 'How involved do I need to be?',
+        answer: 'Very little. The Fix Plan arrives in writing, I build remotely, and you review. Book a consultation only if you want to talk it through.',
       },
     ],
     ads: [
       {
-        angle: 'Curiosity',
-        hook: 'Where should your business actually use AI?',
+        angle: 'In the field',
+        hook: "You're running a jobsite. Who's writing the next proposal?",
         primaryText:
-          'Skip the hype. Here are 7 practical places AI pays off in a real business, starting wherever you are already losing time or leads.',
-        headline: '7 places AI actually pays off',
+          "I know how busy you are in the field. While you manage subs and inspections, leads wait, proposals stall, and change orders go unbilled. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things your office drops',
         cta: 'Learn More',
       },
       {
-        angle: 'Practical start',
-        hook: 'Do not buy another AI tool until you read this.',
+        angle: 'Change orders',
+        hook: 'How many change orders never made it onto an invoice?',
         primaryText:
-          'The right first AI project fixes a leak you already have. Run a free leak self-scan to find yours.',
-        headline: 'Find your first AI win',
+          'Run a free leak scan and see where your office is losing leads, proposals, and billing while you are on the jobsite.',
+        headline: 'Stop leaving money on the jobsite',
         cta: 'Get Offer',
       },
     ],
   },
   {
-    slug: 'messy-crm',
-    persona: 'Teams with a CRM nobody trusts',
-    motivation: 'The CRM is full of duplicates and stale data, so the team works around it.',
-    metaTitle: '7 Signs Your CRM Is Costing You Deals',
+    slug: 'landscaping',
+    trade: 'Landscaping',
+    persona: 'Landscaping and lawn care companies',
+    cardLine: 'Spring quotes and renewals falling behind while crews are out.',
+    metaTitle: '7 Office Problems Costing Landscapers While Crews Are in the Field',
     metaDescription:
-      'Duplicates, stale contacts, and missing follow-ups? Find out how a messy CRM leaks revenue and how to turn it into a system your team trusts.',
-    eyebrow: 'For teams whose CRM is more mess than help',
-    headline: '7 signs your CRM is costing you deals instead of closing them',
-    subheadline: 'If your team keeps its own spreadsheets, the CRM is not the system of record. It is a graveyard.',
-    painHook:
-      'You paid for the CRM. The team still keeps side spreadsheets, nobody trusts the reports, and leads get contacted twice or not at all. Bad data quietly breaks every system built on top of it.',
+      'Landscaping and lawn care owners: you are out with crews all day. Find the missed quote requests, lapsed renewals, and late invoices leaking money back at the office.',
+    eyebrow: 'For landscaping & lawn care companies',
+    headline: '7 things your landscaping office misses while you are out with the crews',
+    subheadline: 'Spring is your busiest season and your office\'s worst. Quotes, renewals, and billing pile up.',
+    fieldMoment: "You're on a mower or running an install crew from sunrise to dark.",
+    officeMoment: 'Back at the office, quote requests stack up, last year\'s customers have not been asked to renew, and recurring invoices are going out late.',
     reasons: [
       {
-        title: 'The same contact exists three times',
-        body: 'Duplicates mean the same person gets called twice, or nobody calls because someone else was supposed to.',
-        leakArea: 'Systems & CRM',
-        fix: 'Deduplication and rules that stop new duplicates at the door.',
-      },
-      {
-        title: 'Half the contacts are out of date',
-        body: 'People change jobs, numbers, and emails. Stale records waste outreach and hurt email deliverability.',
-        leakArea: 'Lead quality',
-        fix: 'Ongoing validation and enrichment that keeps records current.',
-      },
-      {
-        title: 'Deals have no next step',
-        body: 'Without a next action and a date, deals drift until someone notices they went cold.',
-        leakArea: 'Follow-up',
-        fix: 'Required next steps and automatic tasks for every open deal.',
-      },
-      {
-        title: 'Nobody trusts the reports',
-        body: 'When the data is wrong, forecasts are wrong, and leadership goes back to asking people.',
-        leakArea: 'Systems & CRM',
-        fix: 'Clean pipeline stages and dashboards built on data the team trusts.',
-      },
-      {
-        title: 'Leads are not routed to the right person',
-        body: 'Without routing rules, leads sit unassigned or land with the wrong rep.',
+        title: 'Spring quote requests pile up',
+        body: 'Everyone calls at once in spring. The landscaper who quotes first usually gets the season.',
         leakArea: 'Speed to lead',
-        fix: 'Automatic lead routing by territory, service, or availability.',
+        fix: 'Instant replies and online quote requests that collect property details for you.',
       },
       {
-        title: 'Marketing and sales see different numbers',
-        body: 'Separate tools and definitions mean every meeting starts with arguing about the data.',
-        leakArea: 'Marketing attribution',
-        fix: 'Shared definitions and synced data between marketing and sales tools.',
+        title: 'Last year\'s customers are not asked to renew',
+        body: 'Recurring customers are your best revenue. When nobody reaches out, they drift to whoever knocks first.',
+        leakArea: 'Repeat business',
+        fix: 'Automatic renewal campaigns before each season starts.',
       },
       {
-        title: 'Updating the CRM feels like extra work',
-        body: 'If logging activity takes time, people skip it, and the data gets worse.',
-        leakArea: 'Operations',
-        fix: 'Automatic activity capture from email, calls, and meetings.',
+        title: 'Recurring billing is done by hand',
+        body: 'Weekly and monthly invoices take hours to send and are easy to miss.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Automated recurring invoices and card-on-file payments.',
       },
-    ],
-    notAnother: [
-      'A migration to a shiny new CRM with the same bad data',
-      'A one-time cleanup that is messy again in six months',
-      'More fields nobody fills in',
+      {
+        title: 'Rain days scramble the whole schedule',
+        body: 'Weather pushes routes, and customers do not hear about it until they wonder where you are.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'Automatic schedule-change texts to customers and crews.',
+      },
+      {
+        title: 'Upsells never get offered',
+        body: 'Aeration, mulch, cleanups, and lighting are easy add-ons for customers you already serve.',
+        leakArea: 'Repeat business',
+        fix: 'Seasonal add-on offers sent to current customers at the right time.',
+      },
+      {
+        title: 'Install estimates go cold',
+        body: 'Patios, plantings, and hardscape are bigger decisions. Without follow-up, those estimates fade.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Estimate follow-up that runs on its own.',
+      },
+      {
+        title: 'Hiring is a constant scramble',
+        body: 'Finding seasonal crew members takes time you do not have in the busy season.',
+        leakArea: 'Hiring & crews',
+        fix: 'A simple hiring page and applicant flow that screens candidates for you.',
+      },
     ],
     instead:
-      'Aetheris audits your CRM and the processes feeding it, cleans what is there, and builds the rules and automation that keep it clean, so the team finally works from one trusted system.',
-    proofCaseIds: [1, 4, 3],
-    offerLine: 'Start with the free leak self-scan, then we review your CRM on a strategy call.',
+      'I find where quotes, renewals, and billing are falling behind in your office, and I build the systems that keep them moving, so you can stay with your crews.',
+    proofCaseIds: [26, 40, 25],
+    offerLine: 'Run the free leak self-scan on your website and lead flow. A few minutes, no call required.',
     faqs: [
       {
-        question: 'Do we need to switch CRMs?',
-        answer:
-          'Usually not. Most CRM problems are data and process problems. We fix those first and only recommend a switch if the tool truly cannot do the job.',
+        question: 'Can this help with recurring maintenance customers?',
+        answer: 'Yes. Renewals, recurring billing, and seasonal add-ons are usually the fastest wins for landscapers.',
       },
       {
-        question: 'Will the cleanup lose any of our data?',
-        answer: 'No. We back up before changes and merge records instead of deleting history.',
+        question: 'Is this only for big companies?',
+        answer: 'No. Smaller crews often benefit most because the owner is doing both the field work and the office work.',
       },
     ],
     ads: [
       {
-        angle: 'Problem',
-        hook: 'Does your team keep side spreadsheets instead of using the CRM?',
+        angle: 'In the field',
+        hook: "You're out with the crews. The quote requests are piling up.",
         primaryText:
-          'That usually means nobody trusts the data. Here are 7 signs your CRM is costing you deals, and how to fix it without starting over.',
-        headline: '7 signs your CRM is costing deals',
+          "I know how busy you are in the field. While crews are out, quote requests wait, renewals slip, and invoices go out late. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things your office misses',
         cta: 'Learn More',
       },
       {
-        angle: 'Clean data',
-        hook: 'Bad data breaks every system built on top of it.',
+        angle: 'Renewals',
+        hook: 'Did last year\'s customers get asked to renew?',
         primaryText:
-          'We clean your CRM and build the rules that keep it clean. Start with a free leak self-scan.',
-        headline: 'Turn your CRM into a trusted system',
+          'Run a free leak scan and see where your office is losing quotes, renewals, and billing while you are in the field.',
+        headline: 'Keep every recurring customer',
         cta: 'Get Offer',
       },
     ],
   },
   {
-    slug: 'professional-services',
-    persona: 'Professional service firms',
-    motivation: 'Intake, proposals, and onboarding are slow, so good clients sign elsewhere.',
-    metaTitle: '7 Places Professional Service Firms Lose Clients Before Engagement',
+    slug: 'painting',
+    trade: 'Painting',
+    persona: 'Painting contractors',
+    cardLine: 'Estimates and color consults slipping while you are on a ladder.',
+    metaTitle: '7 Office Problems Costing Painting Contractors While You Are on the Job',
     metaDescription:
-      'Law, accounting, consulting, and agency firms: find where slow intake, proposals, and onboarding lose good clients, then automate the path to engagement.',
-    eyebrow: 'For law, accounting, consulting & advisory firms',
-    headline: '7 places your firm loses good clients before the engagement letter',
-    subheadline: 'The work is excellent. The path from first inquiry to signed engagement is where clients slip away.',
-    painHook:
-      'Prospective clients reach out when they have a problem right now. If intake is slow, the proposal takes a week, and onboarding is a pile of forms, many of them sign with the firm that made it easy.',
+      'Painting contractors: you are on ladders and job sites all day. Find the slow estimates, missed follow-ups, and lost referrals leaking money back at the office.',
+    eyebrow: 'For painting contractors',
+    headline: '7 things your painting office lets slip while you are on a ladder',
+    subheadline: 'You have paint on your hands and a crew to run. Estimates and follow-ups wait until tonight.',
+    fieldMoment: "You're cutting in a ceiling and can't touch your phone.",
+    officeMoment: 'Back at the office, estimate requests wait, sent quotes get no follow-up, and finished customers are never asked for a review.',
     reasons: [
       {
-        title: 'Inquiries wait for a partner to review them',
-        body: 'When every inquiry needs a senior person before anyone replies, response times stretch into days.',
+        title: 'Estimate requests wait until the end of the day',
+        body: 'Homeowners usually get three quotes. The first painter to reply sets the bar.',
         leakArea: 'Speed to lead',
-        fix: 'Structured intake that qualifies and responds right away, then routes to the right person.',
+        fix: 'Instant replies and online estimate booking with photo upload.',
       },
       {
-        title: 'Conflict checks and qualification are manual',
-        body: 'Staff gather the same information by email over several rounds.',
-        leakArea: 'Operations',
-        fix: 'Smart intake forms that collect what you need the first time.',
+        title: 'Estimates are written at night',
+        body: 'Measuring and pricing by hand means quotes go out late, and late quotes lose.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Estimate templates with your rates built in, ready to send from your phone.',
       },
       {
-        title: 'Proposals take too long to send',
-        body: 'Each engagement letter or proposal starts from an old document and a lot of editing.',
-        leakArea: 'Sales process',
-        fix: 'Proposal templates with scope and fee logic built in.',
-      },
-      {
-        title: 'Prospects go quiet after the consultation',
-        body: 'Without structured follow-up, interested prospects drift away while deciding.',
+        title: 'Sent quotes never get a second touch',
+        body: 'A quote without follow-up is usually a quote someone else wins.',
         leakArea: 'Follow-up',
-        fix: 'Post-consultation follow-up that answers common concerns and makes signing easy.',
+        fix: 'Automatic quote follow-up until the customer decides.',
       },
       {
-        title: 'Onboarding is a pile of forms and emails',
-        body: 'New clients chase documents and signatures before work can start.',
-        leakArea: 'Customer experience',
-        fix: 'A guided onboarding portal with e-signature and document collection.',
+        title: 'Deposits and final payments are chased by hand',
+        body: 'Collecting deposits and final payments takes calls and texts you do not have time for.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Online deposits and automatic final invoices with reminders.',
       },
       {
-        title: 'Your expertise is invisible online',
-        body: 'Clients look for proof you have solved their exact problem. Most firm websites say little about that.',
-        leakArea: 'Brand & trust',
-        fix: 'Practice-area pages and content that show specific expertise and outcomes.',
+        title: 'Finished jobs never become reviews or referrals',
+        body: 'A freshly painted house is your best ad. Most painters never ask the owner to share it.',
+        leakArea: 'Reviews & reputation',
+        fix: 'Review and referral requests sent automatically after every job.',
       },
       {
-        title: 'Past clients are not asked for referrals',
-        body: 'Satisfied clients are the best source of new work, and most firms rarely ask.',
-        leakArea: 'Customer retention',
-        fix: 'Automated check-ins and referral requests at natural points in the relationship.',
+        title: 'Your best work is not on your website',
+        body: 'Homeowners want to see your work before they call. A thin gallery loses them.',
+        leakArea: 'Website',
+        fix: 'A simple, fast site that shows before-and-after projects and makes requesting an estimate easy.',
       },
-    ],
-    notAnother: [
-      'Generic practice-management software',
-      'A marketing campaign aimed at the wrong clients',
-      'More billable hours spent on admin',
+      {
+        title: 'Past customers forget about you',
+        body: 'Exteriors need repainting and rooms get redone. Customers who are not reminded call someone new.',
+        leakArea: 'Repeat business',
+        fix: 'Check-in messages to past customers at natural repaint times.',
+      },
     ],
     instead:
-      'Aetheris maps how clients move from first inquiry to signed engagement, finds where they drop off, and builds the intake, proposal, and onboarding systems that make your firm the easy choice.',
-    proofCaseIds: [23, 46, 26],
-    offerLine: 'Run the free leak self-scan on your firm\'s website and intake path.',
+      'I find where estimates, follow-up, and payments fall behind in your office, and I set up the systems that handle them, so you can keep painting.',
+    proofCaseIds: [18, 26, 13],
+    offerLine: 'Start with the free leak self-scan of your website and lead flow. No call required.',
     faqs: [
       {
-        question: 'Can this work with our practice-management system?',
-        answer: 'In most cases, yes. We connect to the systems you already use for matters, billing, and documents.',
+        question: 'I do not have office staff. Does this still make sense?',
+        answer: 'Yes. When you are the office, automating replies, follow-up, and billing gives you your evenings back.',
       },
       {
-        question: 'Is client information handled carefully?',
-        answer:
-          'Yes. We design intake and automation around your confidentiality obligations and keep data in systems you control.',
+        question: 'Will customers know messages are automated?',
+        answer: 'Messages are written in your voice and stop as soon as the customer replies or books.',
       },
     ],
     ads: [
       {
-        angle: 'Problem',
-        hook: 'Great work. Slow intake. Lost clients.',
+        angle: 'In the field',
+        hook: "You're on a ladder. Your estimates are waiting.",
         primaryText:
-          'Prospective clients sign with the firm that makes it easy. Here are 7 places professional service firms lose good clients before the engagement letter.',
-        headline: 'Where firms lose clients before engagement',
+          "I know how busy you are on the job. While you paint, estimate requests wait, quotes go unanswered, and reviews never get asked for. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things your office lets slip',
         cta: 'Learn More',
       },
       {
-        angle: 'Speed',
-        hook: 'How long does your firm take to reply to a new inquiry?',
+        angle: 'Evenings',
+        hook: 'Still writing estimates at 10pm?',
         primaryText:
-          'We automate intake, proposals, and onboarding so good clients sign faster. Start with a free leak self-scan.',
-        headline: 'Win clients faster',
+          'Run a free leak scan and see where your office is losing estimates, follow-ups, and reviews while you are on the job.',
+        headline: 'Get your evenings back',
+        cta: 'Get Offer',
+      },
+    ],
+  },
+  {
+    slug: 'concrete',
+    trade: 'Concrete',
+    persona: 'Concrete and paving contractors',
+    cardLine: 'Bids and pour schedules falling apart between the site and the office.',
+    metaTitle: '7 Office Problems Costing Concrete and Paving Contractors',
+    metaDescription:
+      'Concrete and paving contractors: you are on pours and job sites all day. Find the slow bids, schedule chaos, and late billing leaking money back at the office.',
+    eyebrow: 'For concrete & paving contractors',
+    headline: '7 things your concrete office gets wrong while you are on a pour',
+    subheadline: 'When the truck is on site, nothing else matters. That is exactly when the office drops the ball.',
+    fieldMoment: "The truck is on site, the clock is running, and you're finishing a slab.",
+    officeMoment: 'Back at the office, a driveway lead goes unanswered, a commercial bid is late, and weather has moved three pours that customers have not heard about.',
+    reasons: [
+      {
+        title: 'Leads wait while you are on a pour',
+        body: 'You cannot stop to answer the phone. By the time you call back, the customer has another bid.',
+        leakArea: 'Missed calls',
+        fix: 'Missed-call text-back and online bid requests with photos and measurements.',
+      },
+      {
+        title: 'Bids go out late',
+        body: 'Measuring, pricing, and writing bids at night means slow turnaround on the work you want most.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Bid templates with your pricing logic, ready to send quickly.',
+      },
+      {
+        title: 'Weather reschedules turn into phone tag',
+        body: 'Rain moves pours, and every customer needs a call. Nobody has time to make them all.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'Automatic reschedule messages to customers and crews.',
+      },
+      {
+        title: 'Final invoices lag behind the work',
+        body: 'The job is done but the invoice waits on paperwork, and you wait on the money.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Invoices sent on completion with automatic payment reminders.',
+      },
+      {
+        title: 'Bids are never followed up',
+        body: 'Many bids are not lost. They are just forgotten by both sides.',
+        leakArea: 'Follow-up',
+        fix: 'Automatic follow-up on every open bid.',
+      },
+      {
+        title: 'Your finished work is invisible online',
+        body: 'Driveways, patios, and lots are great proof. Without photos and reviews online, nobody sees them.',
+        leakArea: 'Reviews & reputation',
+        fix: 'A routine that collects job photos and reviews after every finished project.',
+      },
+      {
+        title: 'You do not know which work pays best',
+        body: 'Without tracking jobs from lead to final payment, it is hard to see which work to chase.',
+        leakArea: 'Marketing tracking',
+        fix: 'Simple job and lead tracking that shows where your profit comes from.',
+      },
+    ],
+    instead:
+      'I find where leads, bids, and billing fall through in your office and build the systems that handle them, so you can stay focused on the pour.',
+    proofCaseIds: [19, 40, 24],
+    offerLine: 'Run the free leak self-scan on your website and lead flow. A few minutes, no call required.',
+    faqs: [
+      {
+        question: 'We do residential and commercial. Can this handle both?',
+        answer: 'Yes. Residential leads usually need speed and follow-up; commercial bids need tracking and billing. I set up both.',
+      },
+      {
+        question: 'How fast can you find the problems?',
+        answer: 'The free scan flags visible problems in a few minutes. The Fix Plan covers the rest of the office and lays out what to fix first.',
+      },
+    ],
+    ads: [
+      {
+        angle: 'In the field',
+        hook: "The truck is on site. Who's answering your leads?",
+        primaryText:
+          "I know how busy you are in the field. While you're on a pour, leads wait, bids go late, and invoices lag. I find those office problems fast and fix them, so you don't have to worry about them.",
+        headline: '7 things your office gets wrong',
+        cta: 'Learn More',
+      },
+      {
+        angle: 'Bids',
+        hook: 'How many bids did nobody follow up on?',
+        primaryText:
+          'Run a free leak scan and see where your office is losing leads, bids, and billing while you are on site.',
+        headline: 'Win the bids you already sent',
+        cta: 'Get Offer',
+      },
+    ],
+  },
+  {
+    slug: 'owner-operator',
+    trade: 'Owner-operators',
+    persona: 'Owner-operators who are still on the tools',
+    cardLine: 'You are the tech, the salesperson, and the office. Something has to give.',
+    metaTitle: '7 Office Jobs Owner-Operators Should Stop Doing Themselves',
+    metaDescription:
+      'Still on the tools and running the office at night? Find the office work leaking time and money from your trade business, and get it handled so you can focus on the work.',
+    eyebrow: 'For owner-operators still on the tools',
+    headline: '7 office jobs you should not be doing at 9pm after a day in the field',
+    subheadline: 'You are the tech, the estimator, and the office. The office part is where money is leaking.',
+    fieldMoment: "You're working all day, then doing estimates, invoices, and callbacks from the kitchen table at night.",
+    officeMoment: 'Every day, calls go unanswered while you work, estimates go out late, and invoices wait for the weekend.',
+    reasons: [
+      {
+        title: 'Calling back every lead yourself',
+        body: 'You cannot answer while you work, and leads do not wait until evening.',
+        leakArea: 'Missed calls',
+        fix: 'Missed-call text-back and an answering assistant that books jobs for you.',
+      },
+      {
+        title: 'Writing every estimate from scratch',
+        body: 'Each estimate eats an hour you do not have.',
+        leakArea: 'Estimates & quoting',
+        fix: 'Estimate templates you can send from your phone in minutes.',
+      },
+      {
+        title: 'Remembering who needs a follow-up',
+        body: 'If it depends on your memory, it gets missed when you are busy, which is always.',
+        leakArea: 'Follow-up',
+        fix: 'Automatic follow-up on every estimate and lead.',
+      },
+      {
+        title: 'Sending invoices on the weekend',
+        body: 'Late invoices mean late payments and a weekend that is not really off.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Invoices sent from the job when the work is done, with automatic reminders.',
+      },
+      {
+        title: 'Scheduling by text message',
+        body: 'Back-and-forth texts to find a time eat your day in small pieces.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'Online booking tied to your real calendar, with automatic confirmations.',
+      },
+      {
+        title: 'Asking for reviews (or forgetting to)',
+        body: 'Reviews win you work, but asking feels awkward and is easy to skip.',
+        leakArea: 'Reviews & reputation',
+        fix: 'A review request sent automatically after every job.',
+      },
+      {
+        title: 'Keeping track of everything in your head',
+        body: 'Customer details, job notes, and money owed live in your phone, your truck, and your memory.',
+        leakArea: 'Office systems',
+        fix: 'One simple system that holds every customer, job, and payment.',
+      },
+    ],
+    instead:
+      'I take the office work off your plate: I find what is leaking, set up the systems that handle it, and keep them running, so you can do the work you are actually good at.',
+    proofCaseIds: [45, 40, 47],
+    offerLine: 'Start with the free leak self-scan. It takes a few minutes and you can do it from the truck.',
+    faqs: [
+      {
+        question: 'I cannot afford an office manager. Is this cheaper?',
+        answer: 'Automation handles a lot of what an office manager would do, without a full-time salary. The scan shows where it would help first.',
+      },
+      {
+        question: 'Do I have to set anything up myself?',
+        answer: 'No. I set it up, connect it to what you use, and show you how it works.',
+      },
+    ],
+    ads: [
+      {
+        angle: 'In the field',
+        hook: 'Doing estimates at the kitchen table again tonight?',
+        primaryText:
+          "I know how busy you are in the field. You shouldn't also have to run the office at night. I find what's broken in the office side of your business fast and fix it, so you don't have to worry about it.",
+        headline: '7 office jobs to stop doing yourself',
+        cta: 'Learn More',
+      },
+      {
+        angle: 'Office',
+        hook: "You're the tech, the estimator, and the office.",
+        primaryText:
+          'Run a free leak scan from your truck and see which office work is costing you the most.',
+        headline: 'Stop running the office at night',
+        cta: 'Get Offer',
+      },
+    ],
+  },
+  {
+    slug: 'growing-crews',
+    trade: 'Growing crews',
+    persona: 'Trade businesses growing past a few crews',
+    cardLine: 'More crews, more jobs, and an office that cannot keep up.',
+    metaTitle: '7 Signs Your Office Cannot Keep Up With Your Crews',
+    metaDescription:
+      'Growing from one crew to several? Find where scheduling, billing, and lead handling are breaking down as you grow, and get the office systems fixed fast.',
+    eyebrow: 'For trade businesses running multiple crews',
+    headline: '7 signs your office cannot keep up with your crews anymore',
+    subheadline: 'The work is growing. The office is still running the way it did when it was just you.',
+    fieldMoment: "You're driving between job sites, checking on crews, and putting out fires.",
+    officeMoment: 'Back at the office, schedules collide, invoices fall behind, and nobody can tell you which crew or job is actually making money.',
+    reasons: [
+      {
+        title: 'Schedules collide every week',
+        body: 'Double-booked crews and missed appointments mean wasted labor and upset customers.',
+        leakArea: 'Scheduling & dispatch',
+        fix: 'One shared schedule for every crew with automatic customer confirmations.',
+      },
+      {
+        title: 'Leads still go through you',
+        body: 'Every new job still needs your call, so leads wait when you are on site.',
+        leakArea: 'Speed to lead',
+        fix: 'Lead intake and routing that books jobs without you in the middle.',
+      },
+      {
+        title: 'Billing is weeks behind',
+        body: 'More jobs mean more invoices, and the office cannot keep up, so cash gets tight while you are busy.',
+        leakArea: 'Invoicing & cash flow',
+        fix: 'Automatic invoicing on job completion and payment reminders.',
+      },
+      {
+        title: 'You cannot see which crews make money',
+        body: 'Without job costing, you do not know which crews, job types, or customers are profitable.',
+        leakArea: 'Office systems',
+        fix: 'A simple dashboard of jobs, labor, and revenue by crew.',
+      },
+      {
+        title: 'Hiring takes forever',
+        body: 'You need more people, and finding and screening them eats your time.',
+        leakArea: 'Hiring & crews',
+        fix: 'A hiring page and automated applicant screening.',
+      },
+      {
+        title: 'Quality and reviews vary by crew',
+        body: 'Some crews get great reviews and some get none. Customers notice the difference.',
+        leakArea: 'Reviews & reputation',
+        fix: 'Automatic review requests per job so you can see each crew\'s results.',
+      },
+      {
+        title: 'The office manager is the only one who knows how things work',
+        body: 'When one person holds the whole system in their head, a sick day stops the business.',
+        leakArea: 'Office systems',
+        fix: 'Documented, automated office processes anyone can follow.',
+      },
+    ],
+    instead:
+      'I find where your office is breaking under the extra work and build the systems that let it scale with your crews, so you can focus on growing instead of firefighting.',
+    proofCaseIds: [19, 24, 40],
+    offerLine: 'Start with the free leak self-scan. The Fix Plan then lays out exactly what is breaking as you grow.',
+    faqs: [
+      {
+        question: 'Should I just hire another office person?',
+        answer: 'Sometimes. But automating scheduling, billing, and follow-up first means the next hire does higher-value work instead of data entry.',
+      },
+      {
+        question: 'Will my crews need to learn something new?',
+        answer: 'Usually just how to mark a job done from their phone. The rest runs in the background.',
+      },
+    ],
+    ads: [
+      {
+        angle: 'In the field',
+        hook: 'More crews. Same office. Something is breaking.',
+        primaryText:
+          "I know how busy you are running crews in the field. When the office can't keep up, schedules collide and billing falls behind. I find those problems fast and fix them, so you don't have to worry about the office stuff.",
+        headline: '7 signs your office is behind',
+        cta: 'Learn More',
+      },
+      {
+        angle: 'Growth',
+        hook: 'Do you know which crew is making you money?',
+        primaryText:
+          'Run a free leak scan and see where your office is breaking down as you grow.',
+        headline: 'Build an office that keeps up',
         cta: 'Get Offer',
       },
     ],
@@ -1057,3 +1030,5 @@ export const PERSONA_BY_SLUG: Record<string, PersonaListicle> = Object.fromEntri
 );
 
 export const personaPath = (slug: string) => `/for/${slug}`;
+
+export const TRADES_HUB_PATH = '/trades';

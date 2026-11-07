@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { ArrowRight, Calendar, CheckCircle2, ExternalLink, ShieldCheck, Wrench, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, HardHat, Tag, Wrench } from 'lucide-react';
 import { Background } from '@/components/Background';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -8,24 +8,11 @@ import { ContactModal } from '@/components/ContactModal';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { combineSchemas, serviceSchema } from '@/lib/schemas';
-import { BOOK_MEETING_URL, RUN_AUDIT_URL } from '@/lib/links';
-import { PERSONA_BY_SLUG, personaPath } from '@/config/personaListicles';
+import { RUN_AUDIT_URL } from '@/lib/links';
+import { FIELD_PROMISE, HOW_IT_WORKS, PERSONA_BY_SLUG, TRADES_HUB_PATH, personaPath } from '@/config/personaListicles';
 import { resolvePersonaProof, withPersonaTracking } from '@/lib/personaListicle';
-
-const HOW_IT_WORKS = [
-  {
-    title: 'Run the free self-scan',
-    text: 'Point it at your website. It flags the leaks visible from the outside in a few minutes.',
-  },
-  {
-    title: 'Review the leaks with us',
-    text: 'On a strategy call we look at your lead flow, follow-up, and systems behind the site.',
-  },
-  {
-    title: 'We build the fixes',
-    text: 'Custom automation, AI, and digital systems aimed at the leaks that cost you the most.',
-  },
-];
+import { PRICING_FAQS } from '@/config/tradePricing';
+import { AlternativesTable, PricingLadder, ProofSection, ProofStrip } from '@/components/trades/TradeDiamond';
 
 const PersonaListiclePage: React.FC = () => {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -35,11 +22,11 @@ const PersonaListiclePage: React.FC = () => {
   const persona = PERSONA_BY_SLUG[slug];
   const proof = useMemo(() => (persona ? resolvePersonaProof(persona) : []), [persona]);
 
-  if (!persona) return <Navigate to="/lander" replace />;
+  if (!persona) return <Navigate to={TRADES_HUB_PATH} replace />;
 
   const path = personaPath(persona.slug);
   const scanHref = withPersonaTracking(RUN_AUDIT_URL, persona.slug, search);
-  const bookHref = withPersonaTracking(BOOK_MEETING_URL, persona.slug, search);
+  const faqs = [...persona.faqs, ...PRICING_FAQS];
 
   const PrimaryCta = () => (
     <Link to={scanHref}>
@@ -57,9 +44,10 @@ const PersonaListiclePage: React.FC = () => {
         path={path}
         breadcrumbs={[
           { name: 'Home', path: '/' },
-          { name: persona.persona, path },
+          { name: 'Trades & contractors', path: TRADES_HUB_PATH },
+          { name: persona.trade, path },
         ]}
-        faqs={persona.faqs}
+        faqs={faqs}
         speakable={['h1', '.tldr', 'h2']}
         jsonLd={combineSchemas(
           serviceSchema(persona.headline, persona.metaDescription, {
@@ -75,6 +63,13 @@ const PersonaListiclePage: React.FC = () => {
         {/* PROMISE */}
         <header className="px-4 pb-12 pt-32">
           <div className="mx-auto max-w-3xl">
+            <Link
+              to={TRADES_HUB_PATH}
+              className="mb-4 inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:text-amber"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All trades
+            </Link>
+            <br />
             <p className="mb-5 inline-flex items-center rounded-full border border-amber/30 bg-amber/10 px-4 py-1.5 text-sm font-medium text-amber">
               {persona.eyebrow}
             </p>
@@ -82,26 +77,41 @@ const PersonaListiclePage: React.FC = () => {
             <p className="tldr mb-8 text-xl text-muted-foreground">{persona.subheadline}</p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <PrimaryCta />
-              <a href={bookHref}>
+              <a href="#pricing">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  <Calendar className="mr-2 h-4 w-4" /> Book a strategy call
+                  <Tag className="mr-2 h-4 w-4" /> See pricing
                 </Button>
               </a>
             </div>
           </div>
         </header>
 
-        <section className="px-4 pb-12">
-          <div className="glass mx-auto max-w-3xl rounded-2xl border-l-4 border-amber p-6 md:p-8">
-            <p className="text-lg leading-relaxed">{persona.painHook}</p>
+        {/* PROOF (quick hit, emotional): hidden until real reviews exist */}
+        <ProofStrip slug={persona.slug} />
+
+        {/* FIELD vs OFFICE: emotional bridge */}
+        <section className="px-4 pb-12" aria-label="While you are in the field">
+          <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+            <div className="glass rounded-2xl p-6">
+              <p className="mb-3 flex items-center gap-2 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">
+                <HardHat className="h-4 w-4" aria-hidden="true" /> Where you are
+              </p>
+              <p className="text-lg leading-relaxed">{persona.fieldMoment}</p>
+            </div>
+            <div className="glass rounded-2xl border-l-4 border-amber p-6">
+              <p className="mb-3 flex items-center gap-2 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">
+                <Building2 className="h-4 w-4" aria-hidden="true" /> What the office is missing
+              </p>
+              <p className="text-lg leading-relaxed">{persona.officeMoment}</p>
+            </div>
           </div>
         </section>
 
-        {/* PROPERTIES: the numbered listicle */}
+        {/* PROPERTIES (logical): the numbered listicle */}
         <section className="px-4 py-8" aria-labelledby="reasons-heading">
           <div className="mx-auto max-w-3xl">
             <h2 id="reasons-heading" className="sr-only">
-              {persona.reasons.length} places the business is leaking
+              {persona.reasons.length} office problems costing you work
             </h2>
             <ol className="space-y-6">
               {persona.reasons.map((reason, i) => (
@@ -122,7 +132,7 @@ const PersonaListiclePage: React.FC = () => {
                       <p className="flex items-start gap-2 text-sm">
                         <Wrench className="mt-0.5 h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
                         <span>
-                          <span className="font-semibold">What we build: </span>
+                          <span className="font-semibold">How I fix it: </span>
                           {reason.fix}
                         </span>
                       </p>
@@ -137,100 +147,42 @@ const PersonaListiclePage: React.FC = () => {
           </div>
         </section>
 
-        {/* POSITIONING */}
+        {/* POSITIONING (logical) */}
         <section className="px-4 py-12">
           <div className="mx-auto max-w-3xl">
-            <h2 className="mb-6 font-display text-3xl font-bold">Why this is not another agency</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="glass rounded-2xl p-6">
-                <p className="mb-4 font-semibold">What you do not need</p>
-                <ul className="space-y-3">
-                  {persona.notAnother.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-muted-foreground">
-                      <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="glass rounded-2xl border border-amber/30 p-6">
-                <p className="mb-4 font-semibold text-amber">What Aetheris does instead</p>
-                <p className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
-                  {persona.instead}
-                </p>
-              </div>
-            </div>
+            <h2 className="mb-4 font-display text-3xl font-bold">{FIELD_PROMISE.headline}</h2>
+            <p className="mb-6 text-lg text-muted-foreground">{FIELD_PROMISE.body}</p>
+            <AlternativesTable instead={persona.instead} />
           </div>
         </section>
 
-        {/* PROOF */}
-        {proof.length > 0 && (
-          <section className="px-4 py-12" aria-labelledby="proof-heading">
-            <div className="mx-auto max-w-3xl">
-              <h2 id="proof-heading" className="mb-2 font-display text-3xl font-bold">
-                What fixing these leaks has done elsewhere
-              </h2>
-              <p className="mb-6 text-sm text-muted-foreground">
-                Independent, published case studies of the same kinds of fixes. Each links to its original source.
-                These are not Aetheris client results.
-              </p>
-              <div className="grid gap-4 md:grid-cols-3">
-                {proof.map((c) => (
-                  <article key={c.id} className="glass flex flex-col rounded-2xl p-5">
-                    <p className="mb-2 font-display text-lg font-bold text-amber">{c.headline}</p>
-                    <p className="mb-3 text-sm font-semibold">{c.title}</p>
-                    <p className="mb-4 flex-1 text-sm text-muted-foreground">{c.outcome}</p>
-                    <a
-                      href={c.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-11 items-center gap-1 text-xs text-muted-foreground underline-offset-4 hover:text-amber hover:underline"
-                    >
-                      Source: {c.source} <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                    </a>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* PROOF (full, emotional): real reviews first, then sourced results */}
+        <ProofSection slug={persona.slug} cases={proof} />
 
-        {/* PACKAGING */}
-        <section className="px-4 py-12">
-          <div className="glass mx-auto max-w-3xl rounded-2xl border border-amber/30 p-6 md:p-10">
+        {/* PACKAGING (logical): how it works, price ladder, risk reversal */}
+        <section className="px-4 pt-12">
+          <div className="mx-auto max-w-3xl">
             <h2 className="mb-2 font-display text-3xl font-bold">How it works</h2>
             <p className="mb-8 text-lg text-muted-foreground">{persona.offerLine}</p>
-            <ol className="mb-8 grid gap-4 md:grid-cols-3">
+            <ol className="grid gap-4 md:grid-cols-3">
               {HOW_IT_WORKS.map((step, i) => (
-                <li key={step.title}>
+                <li key={step.title} className="glass rounded-2xl p-5">
                   <p className="mb-1 font-case text-[10px] uppercase tracking-[0.25em] text-amber/80">Step {i + 1}</p>
                   <p className="mb-1 font-semibold">{step.title}</p>
                   <p className="text-sm text-muted-foreground">{step.text}</p>
                 </li>
               ))}
             </ol>
-            <p className="mb-6 flex items-start gap-2 text-sm">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
-              The self-scan is free and self-serve. You keep what it finds whether or not you work with us.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <PrimaryCta />
-              <a href={bookHref}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Book a strategy call
-                </Button>
-              </a>
-            </div>
           </div>
         </section>
+        <PricingLadder slug={persona.slug} search={search} />
 
         {/* FAQ */}
         <section className="px-4 py-12">
           <div className="mx-auto max-w-3xl">
             <h2 className="mb-6 font-display text-3xl font-bold">Questions</h2>
             <div className="space-y-4">
-              {persona.faqs.map((faq) => (
+              {faqs.map((faq) => (
                 <details key={faq.question} className="glass group rounded-2xl p-5">
                   <summary className="cursor-pointer list-none font-semibold">{faq.question}</summary>
                   <p className="mt-3 text-muted-foreground">{faq.answer}</p>
