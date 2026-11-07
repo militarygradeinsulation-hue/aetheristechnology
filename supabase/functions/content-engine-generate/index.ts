@@ -453,7 +453,60 @@ serve(async (req) => {
         }
       }
 
+      // Scheduled posts must use the same anonymized Golden Report collective intelligence
+      // as the random post brain. Do not infer verified financial losses from scan flags.
+      const { data: patterns, error: patternError } = await supabase
+        .from("golden_report_collective_patterns")
+        .select("pattern_title,category,report_count,company_count,report_share,sample_actions,evidence_grades")
+        .order("report_count", { ascending: false })
+        .limit(35);
+      if (patternError) throw patternError;
+      const reportPatternContext = (patterns || []).map((p: any) => {
+        const action = Array.isArray(p.sample_actions) ? p.sample_actions[0] : null;
+        return [
+          String(p.pattern_title || ""),
+          "Reports: " + Number(p.report_count || 0),
+          "Companies: " + Number(p.company_count || 0),
+          p.report_share != null ? "Share of eligible reports: " + (Number(p.report_share) * 100).toFixed(1) + "%" : "",
+          action ? "Potential diagnostic: " + String(action).slice(0, 180) : "",
+        ].filter(Boolean).join(" | ");
+      }).join("\n");
+
+      // This table stores the operator's actual captured replies, not guessed
+      // engagement. An empty library must be disclosed to the planner.
+      const { data: replyRecords, error: replyError } = await supabase
+        .from("linkedin_reply_library")
+        .select("post_summary,post_text,stance,rationale,generated_reply,created_at")
+        .order("created_at", { ascending: false })
+        .limit(35);
+      if (replyError) throw replyError;
+      const replyContext = (replyRecords || []).map((r: any) => [
+        "Topic: " + String(r.post_summary || r.post_text || "").slice(0, 350),
+        r.stance ? "Stance: " + String(r.stance).slice(0, 100) : "",
+        r.rationale ? "Reasoning: " + String(r.rationale).slice(0, 220) : "",
+        r.generated_reply ? "Saved response: " + String(r.generated_reply).slice(0, 350) : "",
+      ].filter(Boolean).join("\n")).join("\n\n");
+
+      const { data: recentPosts } = await supabase
+        .from("content_engine_posts")
+        .select("topic_angle,hook")
+        .order("scheduled_date", { ascending: false })
+        .limit(35);
+      const recentAngles = (recentPosts || []).map((p: any) => String(p.topic_angle || p.hook || "").slice(0, 180)).filter(Boolean);
+
+      const editorialIntelligence = [
+        "MANDATORY EDITORIAL BASIS: anonymized Golden Report Library recurring patterns. Rotate across the leading distinct root causes, not just CRM and manufacturing.",
+        reportPatternContext || "No aggregate patterns available. Do not invent library statistics.",
+        "CAPTURED LINKEDIN REPLIES: " + (replyContext || "None recorded in the connected reply library. Do not pretend to know what the operator replied to."),
+        replyContext,
+        "RECENT TOPICS TO AVOID REPEATING:\n" + recentAngles.join("\n"),
+        "VOICE: a systems architect's causal precision plus Alex Hormozi-style directness, economic clarity, concrete mechanisms and sharp contrasts. Do not impersonate or quote either person. No motivational filler, hype, invented first-person client stories or unsupported dollar figures.",
+        "POST STRUCTURE: decisive claim, observed failure signal, why the system creates it, business consequence, a practical diagnostic or corrective action, decisive close. State measured counts as sample observations, not population prevalence. Flag hypothetical examples explicitly. Never equate website signals with proven financial losses.",
+        "SCHEDULE: distribute distinct pattern families across dates; make the actual generated scripts and captions match the selected pattern. Respect operator direction and existing scheduled slots.",
+      ].join("\n\n");
+
       const directionBlock = [
+        editorialIntelligence,
         userPrompt && `OPERATOR DIRECTION (highest priority — every post must serve this):\n${userPrompt}`,
         topicSeeds.length && `TOPIC SEEDS (mix into the angles, do not just repeat):\n- ${topicSeeds.join("\n- ")}`,
         sourceSnippets.length && `SOURCE MATERIAL (mine these for hooks, numbers, and angles — do not paraphrase, extract the sharpest insights):\n\n${sourceSnippets.join("\n\n---\n\n")}`,
