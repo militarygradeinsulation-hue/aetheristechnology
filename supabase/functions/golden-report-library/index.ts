@@ -16,6 +16,7 @@ import {
   type ScanRow,
 } from "../_shared/golden-archive.ts";
 import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
+import { missingGoldenReportArchiveIds } from "../_shared/golden-report-reconciliation.ts";
 import { canExportGoldenReportSource } from "../_shared/golden-download-access.ts";
 
 const corsHeaders = {
@@ -356,7 +357,7 @@ serve(async (req) => {
         if ((data || []).length < PAGE) break;
       }
 
-      const missing = [...completed].filter((id) => !archived.has(id));
+      const missing = missingGoldenReportArchiveIds(completed, archived);
       let recovered = 0;
       const errors: string[] = [];
       for (const id of missing.slice(0, limit)) {
