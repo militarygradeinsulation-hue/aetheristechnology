@@ -16,6 +16,7 @@ import {
   type ScanRow,
 } from "../_shared/golden-archive.ts";
 import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
+import { canExportGoldenReportSource } from "../_shared/golden-download-access.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -569,7 +570,7 @@ serve(async (req) => {
       }
       // Private intake reports can contain non-public information. Shared
       // rep/partner library access does not authorize a full source export.
-      if (!globalScope && scan.private_intake === true) {
+      if (!canExportGoldenReportSource(globalScope, scan.private_intake)) {
         return json({ error: "Private report downloads require administrator access" }, 403);
       }
       if (!scan.report || typeof scan.report !== "object" || Array.isArray(scan.report)) {
