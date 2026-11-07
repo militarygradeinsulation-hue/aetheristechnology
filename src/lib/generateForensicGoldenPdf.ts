@@ -730,8 +730,74 @@ export function auditGoldenPdfParity(opts: {
   return { model, audit: auditGoldenReportParity(opts.report, model) };
 }
 
+/**
+ * Failsafe for archived reports with malformed legacy structure. Every saved
+ * source line remains available rather than leaving the user with no PDF.
+ * The separate JSON download remains the lossless canonical record.
+ */
+function generateGoldenArchiveSourcePdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]): jsPDF {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const valid = opts.archivalCopy?.valid === true;
+  const label = valid ? "HISTORICAL GOLDEN REPORT - SOURCE COPY" : "HISTORICAL GOLDEN REPORT - UNVERIFIED SOURCE";
+  let page = 0;
+  let y = 0;
+
+  const beginPage = () => {
+    if (page > 0) doc.addPage();
+    page++;
+    bg(doc);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...AMBER);
+    doc.text(label, M, 12);
+    doc.setDrawColor(...AMBER);
+    doc.line(M, 15, PAGE_W - M, 15);
+    doc.setTextColor(...MUTED);
+    doc.setFontSize(6.5);
+    doc.text("Retained source text; not an independently verified analysis", M, PAGE_H - 9);
+    doc.text("Page " + page, PAGE_W - M, PAGE_H - 9, { align: "right" });
+    doc.setFont("courier", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...BODY);
+    y = 24;
+  };
+  beginPage();
+
+  const text = [
+    "Golden Report historical source export",
+    "Scan ID: " + opts.scanId,
+    "Company: " + opts.company,
+    "Target: " + opts.url,
+    "Archive status: " + (opts.archivalCopy?.state || "historical"),
+    "Verification: " + (valid ? "archive marked valid" : "UNVERIFIED; findings and money values may be unsupported"),
+    "WARNING: The formatted PDF renderer could not render this historical record.",
+    "Use the accompanying source JSON for the exact saved data and full fidelity.",
+    "",
+    JSON.stringify(opts.report, null, 2) || "{}",
+  ].join("\n");
+
+  for (const sourceLine of text.split("\n")) {
+    const wrapped = doc.splitTextToSize(sanitize(sourceLine), CW) as string[];
+    for (const line of wrapped.length ? wrapped : [""]) {
+      if (y > BOTTOM - 3) beginPage();
+      if (line) doc.text(line, M, y);
+      y += 4.2;
+    }
+  }
+  return doc;
+}
+
 export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]) {
-  const doc = generateForensicGoldenPdf(opts);
+  let doc: jsPDF;
+  try {
+    doc = generateForensicGoldenPdf(opts);
+  } catch (error) {
+    // Never bypass validation for normal client-facing exports. Archival copies
+    // carry their own explicit warning and preserve the original source data.
+    if (!opts.archivalCopy) throw error;
+    console.warn("[golden-pdf] Structured archive export failed; using source-text PDF", error);
+    doc = generateGoldenArchiveSourcePdf(opts);
+  }
   const safe = (opts.company || "report").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
   const profile = opts.profile ?? "executive";
   const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
