@@ -23,7 +23,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-admin-token, x-portal-token, x-internal-key, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 const SCAN_COLS =
   "id, target_url, company_name, report, raw_findings, report_source, portal_source, rep_code, creator_name, creator_email, report_state, financial_model_version, completed_at, status";
@@ -537,6 +537,52 @@ serve(async (req) => {
         .in("scan_id", list.map((r) => String(r.scan_id)))
         .order("created_at", { ascending: false });
       return json({ company, reports: list, blueprints: bps || [] });
+    }
+
+    /* On-demand download source: always return the saved canonical report, never
+       a regenerated summary. Reuse the archive's existing admin/portal scope
+       before touching the full forensic_scans payload. */
+    if (action === "get_download") {
+      const scanId = String(body.scan_id ?? "").trim();
+      if (!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(scanId)) {
+        return json({ error: "Valid scan_id required" }, 400);
+      }
+      let aq = sb.from("golden_report_archive")
+        .select("scan_id,company_id,is_valid,report_state,report_version,completed_at,raw_company_name,target_url")
+        .eq("scan_id", scanId);
+      aq = scoped(aq as never) as never;
+      const { data: archive, error: archiveError } = await aq.maybeSingle();
+      if (archiveError) throw archiveError;
+      // Only admins/internal service calls can recover a completed scan that
+      // has not yet been indexed by the library. Portal users require an
+      // existing authorized archive record; this is not a scope bypass.
+      if (!archive && !globalScope) return json({ error: "Report not found in authorized library" }, 404);
+
+      const { data: scan, error: scanError } = await sb
+        .from("forensic_scans")
+        .select("id,company_name,target_url,report,report_state,completed_at,status")
+        .eq("id", scanId)
+        .maybeSingle();
+      if (scanError) throw scanError;
+      if (!scan || (!archive && scan.status !== "completed")) {
+        return json({ error: "Completed report not found" }, 404);
+      }
+      if (!scan.report || typeof scan.report !== "object" || Array.isArray(scan.report)) {
+        return json({ error: "Archived report payload is unavailable. Nothing has been deleted or regenerated." }, 409);
+      }
+      // The UI can distinguish a validated deliverable from a retained,
+      // explicitly unverified historical copy. Never silently certify a report.
+      return json({
+        scan_id: scan.id,
+        company: scan.company_name || archive?.raw_company_name || "Golden Report",
+        url: scan.target_url || archive?.target_url || "",
+        completed_at: scan.completed_at || archive?.completed_at || null,
+        report: scan.report,
+        archive_valid: archive?.is_valid === true,
+        archive_state: archive?.report_state || (archive ? null : "not_archived"),
+        report_state: scan.report_state || null,
+        report_version: archive?.report_version || null,
+      });
     }
 
     /* single report detail + findings */

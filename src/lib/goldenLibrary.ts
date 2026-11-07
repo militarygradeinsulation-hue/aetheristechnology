@@ -69,6 +69,19 @@ export interface ArchiveRow {
   completed_at: string | null;
 }
 
+/** Exact saved scan report, fetched on demand for authenticated library downloads. */
+export interface GoldenReportDownload {
+  scan_id: string;
+  company: string;
+  url: string;
+  completed_at: string | null;
+  report: Record<string, unknown>;
+  archive_valid: boolean;
+  archive_state: string | null;
+  report_state: string | null;
+  report_version: number | null;
+}
+
 export interface FindingRow {
   id: string;
   finding_key: string;
@@ -145,6 +158,10 @@ export const getReport = (scanId: string, portalToken?: string | null) =>
   call<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] }>(
     "golden-report-library", { action: "get_report", scan_id: scanId }, portalToken);
 
+/** Fetches canonical report content only after existing admin/portal authorization. */
+export const getReportDownload = (scanId: string, portalToken?: string | null) =>
+  call<GoldenReportDownload>("golden-report-library", { action: "get_download", scan_id: scanId }, portalToken);
+
 export const findCompanyContact = (companyId: string, portalToken?: string | null) =>
   call<{ ok: boolean; contact: { poc_name: string | null; poc_title: string | null; poc_email: string | null; poc_phone: string | null; poc_found_at: string } }>(
     "golden-report-library", { action: "find_contact", company_id: companyId }, portalToken);
@@ -182,6 +199,9 @@ export function downloadTextFile(name: string, content: string, mime = "text/pla
   const a = document.createElement("a");
   a.href = url;
   a.download = name;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  // Revoke after the browser has had time to start the download.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

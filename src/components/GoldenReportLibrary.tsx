@@ -14,11 +14,12 @@ import {
 } from 'lucide-react';
 import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
-  listCompanies, getCompany, getReport, getLibraryStats, runBackfillBatch,
+  listCompanies, getCompany, getReport, getReportDownload, getLibraryStats, runBackfillBatch,
   generateBlueprint, setBlueprintApproval, findCompanyContact, formatExposure, downloadTextFile,
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
 import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
+import type { ForensicReport } from '@/lib/generateForensicGoldenPdf';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
@@ -256,6 +257,7 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
   const [loading, setLoading] = useState(true);
   const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
+  const [downloading, setDownloading] = useState<'pdf' | 'json' | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -264,6 +266,47 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
     finally { setLoading(false); }
   }, [scanId, portalToken]);
   useEffect(() => { load(); }, [load]);
+
+  const downloadSaved = async (format: 'pdf' | 'json') => {
+    if (downloading) return;
+    setDownloading(format);
+    try {
+      const saved = await getReportDownload(scanId, portalToken);
+      if (format === 'json') {
+        downloadTextFile(`golden-report-${saved.scan_id}-source.json`, JSON.stringify({
+          record_type: 'golden_report_canonical_source',
+          export_date: new Date().toISOString(),
+          scan_id: saved.scan_id,
+          company: saved.company,
+          target_url: saved.url,
+          completed_at: saved.completed_at,
+          archive_valid: saved.archive_valid,
+          archive_state: saved.archive_state,
+          report_state: saved.report_state,
+          report_version: saved.report_version,
+          report: saved.report,
+        }, null, 2), 'application/json');
+      } else {
+        const [{ downloadForensicGoldenPdf }, { isDeliverable }] = await Promise.all([
+          import('@/lib/generateForensicGoldenPdf'), import('@/components/GoldenEvidenceQuality'),
+        ]);
+        const valid = saved.archive_valid && isDeliverable(saved.report);
+        downloadForensicGoldenPdf({
+          report: saved.report as ForensicReport,
+          company: saved.company,
+          url: saved.url,
+          scanId: saved.scan_id,
+          generatedAt: saved.completed_at ? new Date(saved.completed_at) : undefined,
+          profile: 'complete',
+          archivalCopy: { valid, state: saved.archive_state || saved.report_state },
+        });
+      }
+    } catch (e) {
+      toast({ title: 'Report download failed', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
   if (!data) return <div className="p-6 text-sm text-muted-foreground">Report not found.</div>;
@@ -301,8 +344,23 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
             onClick={() => { navigator.clipboard.writeText(shareUrl); toast({ title: 'Share link copied' }); }}>
             <Link2 className="mr-1 h-3.5 w-3.5" /> Copy share link
           </Button>
+          <Button size="sm" onClick={() => void downloadSaved('pdf')} disabled={downloading !== null}>
+            {downloading === 'pdf' ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-1 h-3.5 w-3.5" />}
+            Download PDF
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => void downloadSaved('json')} disabled={downloading !== null}>
+            {downloading === 'json' ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-1 h-3.5 w-3.5" />}
+            Download original JSON
+          </Button>
         </div>
       </div>
+
+      {!archive.is_valid && (
+        <p role="note" className="text-xs leading-relaxed text-amber-400">
+          Historical report retained for your records. The PDF and original JSON remain available even when this report
+          requires verification or regeneration. Findings and money estimates in an unverified PDF are not certified.
+        </p>
+      )}
 
       <BlueprintPanel archive={archive} blueprints={blueprints} onRefresh={load} />
 
