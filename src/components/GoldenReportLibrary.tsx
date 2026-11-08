@@ -19,7 +19,9 @@ import {
   type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
 } from '@/lib/goldenLibrary';
 import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
-import type { ForensicReport } from '@/lib/generateForensicGoldenPdf';
+import { downloadForensicGoldenPdf, type ForensicReport } from '@/lib/generateForensicGoldenPdf';
+import { reserveSavedPdfTab } from '@/lib/mobileGoldenPdf';
+import { isDeliverable } from '@/components/GoldenEvidenceQuality';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
@@ -270,6 +272,9 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
 
   const downloadSaved = async (format: 'pdf' | 'json') => {
     if (downloading) return;
+    // iOS/Safari blocks downloads started after asynchronous API requests.
+    // Reserve the viewer directly inside the click handler, before any await.
+    const pdfTab = format === 'pdf' ? reserveSavedPdfTab() : null;
     setDownloading(format);
     try {
       const saved = await getReportDownload(scanId, portalToken);
@@ -288,9 +293,6 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
           report: saved.report,
         }, null, 2), 'application/json');
       } else {
-        const [{ downloadForensicGoldenPdf }, { isDeliverable }] = await Promise.all([
-          import('@/lib/generateForensicGoldenPdf'), import('@/components/GoldenEvidenceQuality'),
-        ]);
         const valid = saved.archive_valid && isDeliverable(saved.report);
         downloadForensicGoldenPdf({
           report: saved.report as ForensicReport,
@@ -300,9 +302,10 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
           generatedAt: saved.completed_at ? new Date(saved.completed_at) : undefined,
           profile: 'complete',
           archivalCopy: { valid, state: saved.archive_state || saved.report_state },
-        });
+        }, pdfTab);
       }
     } catch (e) {
+      try { pdfTab?.close(); } catch { /* browser may restrict closing the tab */ }
       toast({ title: 'Report download failed', description: (e as Error).message, variant: 'destructive' });
     } finally {
       setDownloading(null);
