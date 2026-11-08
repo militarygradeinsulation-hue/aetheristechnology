@@ -16,7 +16,7 @@ import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
   listCompanies, getCompany, getReport, getReportDownload, getLibraryStats, runBackfillBatch, reconcileMissingGoldenReports,
   generateBlueprint, setBlueprintApproval, findCompanyContact, formatExposure, downloadTextFile,
-  type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
+  type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany, type GoldenReportDownload,
 } from '@/lib/goldenLibrary';
 import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
 import { downloadForensicGoldenPdf, type ForensicReport } from '@/lib/generateForensicGoldenPdf';
@@ -261,6 +261,18 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
   const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
   const [downloading, setDownloading] = useState<'pdf' | 'json' | null>(null);
+  // Preload the canonical saved report so the PDF can often be produced in the
+  // original click event, without waiting for a network response on iOS.
+  const savedReportCache = useRef<GoldenReportDownload | null>(null);
+  useEffect(() => {
+    let active = true;
+    savedReportCache.current = null;
+    void getReportDownload(scanId, portalToken)
+      .then((saved) => { if (active) savedReportCache.current = saved; })
+      .catch(() => { /* retry when the user clicks Download */ });
+    return () => { active = false; savedReportCache.current = null; };
+  }, [scanId, portalToken]);
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -274,10 +286,13 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
     if (downloading) return;
     // iOS/Safari blocks downloads started after asynchronous API requests.
     // Reserve the viewer directly inside the click handler, before any await.
-    const pdfTab = format === 'pdf' ? reserveSavedPdfTab() : null;
+    const cached = savedReportCache.current;
+    const pdfTab = format === 'pdf' && !cached ? reserveSavedPdfTab() : null;
     setDownloading(format);
     try {
-      const saved = await getReportDownload(scanId, portalToken);
+      // On a cache hit there is no await before the PDF is generated/saved.
+      // Safari then retains the original user gesture for a direct download.
+      const saved = cached || await getReportDownload(scanId, portalToken);
       if (format === 'json') {
         downloadTextFile(`golden-report-${saved.scan_id}-source.json`, JSON.stringify({
           record_type: 'golden_report_canonical_source',
