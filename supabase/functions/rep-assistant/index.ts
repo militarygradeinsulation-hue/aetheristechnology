@@ -152,7 +152,13 @@ const PORTAL_NAV_TARGETS: Record<string, { label: string; path: string }> = {
   meetings: { label: "Executive meetings", path: "/portal?tab=meetings" },
   workspace: { label: "Workspace", path: "/portal?tab=workspace" },
   playbook: { label: "Playbook", path: "/portal?tab=playbook" },
-  golden_reports: { label: "Golden Report Library", path: "/portal/legacy?tab=tools&tool=golden-report" },
+  forecast: { label: "Forecast", path: "/portal/legacy?tab=forecast" },
+  commissions: { label: "Commissions", path: "/portal/legacy?tab=commissions" },
+  documents: { label: "Documents", path: "/portal/legacy?tab=documents" },
+  team: { label: "Team", path: "/portal/legacy?tab=team" },
+  inbox: { label: "Inbox", path: "/portal/legacy?tab=inbox" },
+  command: { label: "Command Center", path: "/portal/legacy?tab=command" },
+  golden_reports: { label: "Golden Report Library", path: "/portal/legacy?tab=goldenlibrary" },
 };
 const PORTAL_READ_TOOLS = [
   {
