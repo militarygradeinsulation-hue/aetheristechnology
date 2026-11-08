@@ -7,6 +7,7 @@ import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-
 import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
 import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
+import { isPermittedPortalTool, isPermittedPortalNavigation } from "../_shared/portal-assistant-policy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -542,7 +543,7 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
           try { parsedArgs = JSON.parse(call.function.arguments || "{}"); } catch { /* ignore */ }
           let result: unknown;
           try {
-            result = permittedTools.has(call.function.name)
+            result = isPermittedPortalTool(call.function.name, permittedTools)
               ? await runPartnerTool(sb, call.function.name, parsedArgs, { code: claims.code, role: claims.role })
               : { error: "Tool not permitted for this portal session" };
           } catch (e) {
@@ -560,10 +561,7 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
       const navigation = [...convo].reverse()
         .filter((entry: any) => entry.role === "tool" && typeof entry.content === "string")
         .map((entry: any) => { try { return JSON.parse(entry.content)?.navigation; } catch { return null; } })
-        .find((nav: any) => nav && (
-          Object.values(PORTAL_NAV_TARGETS).some((x) => x.path === nav.path) ||
-          /^\/portal\/legacy\?tab=goldenlibrary&report=[0-9a-f-]{36}(?:&download=pdf)?$/i.test(nav.path)
-        ));
+        .find((nav: any) => nav && isPermittedPortalNavigation(nav.path));
       return new Response(JSON.stringify({ content: msg.content || "", navigation: navigation || null }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
