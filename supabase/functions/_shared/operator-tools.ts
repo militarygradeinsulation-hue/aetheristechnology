@@ -7,6 +7,8 @@
 // - markContactRead
 // - addDripProspect
 
+import { normalizeFirecrawlSearchResponse } from "./firecrawl-search-response.ts";
+
 const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
 
 export async function webSearch(query: string, limit = 5): Promise<unknown> {
@@ -14,26 +16,24 @@ export async function webSearch(query: string, limit = 5): Promise<unknown> {
   const q = String(query || "").trim();
   if (!q) return { error: "query required" };
   try {
-    const r = await fetch("https://api.firecrawl.dev/v1/search", {
+    // Firecrawl Search v2 returns results under data.web. A bounded
+    // timeout prevents the assistant from waiting indefinitely for the web.
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
+      signal: AbortSignal.timeout(12_000),
       headers: {
         Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ query: q, limit: Math.min(Math.max(limit, 1), 10) }),
+      body: JSON.stringify({ query: q, limit: Math.min(Math.max(limit, 1), 10), sources: ["web"] }),
     });
     if (!r.ok) {
       const txt = await r.text();
       return { error: `Firecrawl ${r.status}: ${txt.slice(0, 300)}` };
     }
     const json = await r.json();
-    const items = (json?.data || []).map((d: any) => ({
-      title: d.title,
-      url: d.url,
-      description: d.description,
-      snippet: (d.markdown || d.content || "").slice(0, 400),
-    }));
-    return { query: q, results: items };
+    const items = normalizeFirecrawlSearchResponse(json);
+    return { query: q, results: items, source: "Firecrawl live web search" };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "web search failed" };
   }
