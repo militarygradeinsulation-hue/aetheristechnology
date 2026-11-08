@@ -12,8 +12,12 @@ export function reserveSavedPdfTab(): Window | null {
   if (typeof window === "undefined" || !requiresEarlyPdfTab(window.navigator.userAgent, window.navigator.platform, window.navigator.maxTouchPoints)) return null;
   const viewer = window.open("", "_blank");
   if (viewer) {
-    viewer.document.title = "Preparing Golden Report PDF";
-    viewer.document.body.textContent = "Preparing your saved Golden Report PDF…";
+    try {
+      viewer.document.title = "Preparing Golden Report PDF";
+      if (viewer.document.body) {
+        viewer.document.body.textContent = "Preparing your saved Golden Report PDF…";
+      }
+    } catch { /* Some browsers restrict the transient blank tab document. */ }
   }
   return viewer;
 }
