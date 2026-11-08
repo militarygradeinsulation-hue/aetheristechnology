@@ -637,8 +637,8 @@ serve(async (req) => {
       const { data: reports } = await aq.order("completed_at", { ascending: false });
       const privateScanIds = await privateScansForPortal();
       const visibleReports = (reports || []).filter((r: { scan_id: string }) => !privateScanIds.has(String(r.scan_id)));
-      const list = (reports || []) as Record<string, unknown>[];
-      if (scopeCodes !== null && list.length === 0) return json({ error: "Forbidden" }, 403);
+      const list = visibleReports as Record<string, unknown>[];
+      if (!globalScope && list.length === 0) return json({ error: "not found" }, 404);
       const { data: bps } = await sb.from("golden_system_blueprints")
         .select("id, scan_id, blueprint_version, status, approval_state, validation_passed, created_at, error_message")
         .in("scan_id", list.map((r) => String(r.scan_id)))
