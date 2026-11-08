@@ -298,3 +298,11 @@ verify_jwt = false
 
 [functions.portal-meeting-flow]
 verify_jwt = false
+
+# Both functions enforce HMAC portal/admin tokens in application code.
+# Legacy/new publishable browser API keys are not JWTs.
+[functions.rep-assistant]
+verify_jwt = false
+
+[functions.golden-report-library]
+verify_jwt = false

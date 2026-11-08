@@ -1,11 +1,13 @@
 // Rep / Partner Sales Coach assistant.
 // - Auth: HMAC portal token (rep or partner role).
-// - Reps: pure sales-coach prompt, NO database tools.
-// - Partners: same coach + small set of read-only company-wide tools.
+// - Reps: scoped lead lookups, library search, web search, and navigation.
+// - Partners: additional authorized read-only company-wide tools.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
+import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
+import { isPermittedPortalTool, isPermittedPortalNavigation } from "../_shared/portal-assistant-policy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -142,9 +144,81 @@ const PARTNER_TOOLS = [
 ];
 
 // Tools every authenticated portal user (rep or partner) can use for live info.
+
+const PORTAL_NAV_TARGETS: Record<string, { label: string; path: string }> = {
+  leads: { label: "My leads", path: "/portal?tab=leads" },
+  coach: { label: "Coach", path: "/portal?tab=coach" },
+  training: { label: "Training", path: "/portal?tab=training" },
+  calendar: { label: "Calendar", path: "/portal?tab=calendar" },
+  meetings: { label: "Executive meetings", path: "/portal?tab=meetings" },
+  workspace: { label: "Workspace", path: "/portal?tab=workspace" },
+  playbook: { label: "Playbook", path: "/portal?tab=playbook" },
+  forecast: { label: "Forecast", path: "/portal/legacy?tab=forecast" },
+  commissions: { label: "Commissions", path: "/portal/legacy?tab=commissions" },
+  documents: { label: "Documents", path: "/portal/legacy?tab=documents" },
+  team: { label: "Team", path: "/portal/legacy?tab=team" },
+  inbox: { label: "Inbox", path: "/portal/legacy?tab=inbox" },
+  command: { label: "Command Center", path: "/portal/legacy?tab=command" },
+  golden_reports: { label: "Golden Report Library", path: "/portal/legacy?tab=goldenlibrary" },
+};
+const PORTAL_READ_TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "search_my_clients",
+      description: "Look up real leads and client contact information visible to the signed-in rep. Partners may search all leads. Read only. Never guess a phone or email.",
+      parameters: {
+        type: "object",
+        properties: { query: { type: "string" }, limit: { type: "integer", maximum: 20 } },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_golden_reports",
+      description: "Find saved Golden Report company records and their known or inferred industry, with report count and secure in-portal navigation. No private report payloads or client secrets.",
+      parameters: {
+        type: "object",
+        properties: { query: { type: "string" }, industry: { type: "string" }, limit: { type: "integer", maximum: 20 } },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "open_golden_report",
+      description: "Open or download a specific existing Golden Report by its saved scan ID. Verifies report visibility before returning a clickable action.",
+      parameters: {
+        type: "object",
+        properties: {
+          scan_id: { type: "string", description: "Exact UUID from search_golden_reports results" },
+          action: { type: "string", enum: ["view", "download_pdf"] },
+        },
+        required: ["scan_id", "action"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "open_portal_section",
+      description: "Offer a navigable portal section to the user. Only approved sections are available. Return a clickable action; never fabricate a portal control or mutate data.",
+      parameters: {
+        type: "object",
+        properties: { section: { type: "string", enum: Object.keys(PORTAL_NAV_TARGETS) } },
+        required: ["section"],
+      },
+    },
+  },
+];
+
 const REP_LIVE_TOOLS = [
   SHARED_TOOL_SCHEMAS.web_search,
   SHARED_TOOL_SCHEMAS.search_content_library,
+  ...PORTAL_READ_TOOLS,
 ];
 
 const limit = (n: unknown, def: number, max: number) => {
@@ -153,7 +227,7 @@ const limit = (n: unknown, def: number, max: number) => {
   return Math.min(Math.floor(v), max);
 };
 
-async function runPartnerTool(sb: any, name: string, args: Record<string, unknown>) {
+async function runPartnerTool(sb: any, name: string, args: Record<string, unknown>, claims: { code: string; role: string }) {
   if (name === "get_company_summary") {
     const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
     const [reps, salesAgg, leadsD, leadsA, contacts, blog, drip] = await Promise.all([
@@ -220,6 +294,104 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     return data || [];
   }
 
+  if (name === "open_portal_section") {
+    const section = String(args.section || "");
+    const destination = PORTAL_NAV_TARGETS[section];
+    if (!destination) return { error: "Unknown portal section" };
+    return { navigation: destination, requires_user_click: true };
+  }
+  if (name === "open_golden_report") {
+    const id = String(args.scan_id || "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      return { error: "Valid saved scan ID required" };
+    }
+    const { data: archive } = await sb.from("golden_report_archive")
+      .select("scan_id").eq("scan_id", id).maybeSingle();
+    if (!archive) return { error: "No saved report found" };
+    const { data: record } = await sb.from("forensic_scans")
+      .select("id,private_intake").eq("id", id).maybeSingle();
+    if (!record || record.private_intake !== false) return { error: "This report is not available to this portal session" };
+    const download = args.action === "download_pdf";
+    return {
+      navigation: {
+        label: download ? "Download saved Golden Report PDF" : "View Golden Report",
+        path: "/portal/legacy?tab=goldenlibrary&report=" + encodeURIComponent(id) + (download ? "&download=pdf" : ""),
+      },
+      requires_user_click: true,
+    };
+  }
+  if (name === "search_my_clients") {
+    const term = String(args.query || "").trim().replace(/[%,()]/g, "").slice(0, 100);
+    if (term.length < 2) return { error: "Search needs at least two characters" };
+    let q = sb.from("rep_leads")
+      .select("id,business_name,contact_name,email,phone,website,industry,status,claimed_by_code")
+      .or(`business_name.ilike.%${term}%,contact_name.ilike.%${term}%,email.ilike.%${term}%`)
+      .limit(limit(args.limit, 10, 20));
+    if (claims.role !== "partner") q = q.eq("claimed_by_code", claims.code);
+    const { data, error } = await q;
+    if (error) return { error: "Client lookup failed" };
+    return { clients: (data || []).map((r: any) => ({
+      name: r.contact_name, company: r.business_name, email: r.email,
+      phone: r.phone, website: r.website, industry: r.industry,
+      status: r.status,
+    })), scope: claims.role === "partner" ? "partner_visible" : "my_claimed_leads" };
+  }
+  if (name === "search_golden_reports") {
+    const term = String(args.query || "").trim().replace(/[%,()]/g, "").slice(0, 100);
+    const industry = String(args.industry || "").trim().slice(0, 90);
+    if (!term && !industry) return { error: "Supply a company, industry, or keyword" };
+    // Only return a small public-facing summary. This does not expose the
+    // complete report, private intake records, or other reps' contact records.
+    const { data, error } = await sb.from("golden_report_companies")
+      .select("id,display_name,primary_domain,website_url,industry,business_summary")
+      .limit(2000);
+    if (error) return { error: "Golden Report lookup failed" };
+    const matches = (data || []).map((r: any) => {
+      const guess = r.industry ? null : classifyIndustryHeuristic({
+        companyName: r.display_name, domain: r.primary_domain,
+        websiteUrl: r.website_url, reportEvidence: r.business_summary,
+      });
+      return {
+        company: r.display_name, domain: r.primary_domain || r.website_url,
+        industry: r.industry || (guess && guess.confidence >= 0.73 ? guess.industry : null) || "Unclassified",
+        industry_inferred: !r.industry && !!guess && guess.confidence >= 0.73,
+        navigation: PORTAL_NAV_TARGETS.golden_reports,
+      };
+    }).filter((r: any) =>
+      (!industry || r.industry.toLowerCase().includes(industry.toLowerCase())) &&
+      (!term || [r.company, r.domain, r.industry].some((v: string) => String(v || "").toLowerCase().includes(term.toLowerCase())))
+    ).slice(0, limit(args.limit, 10, 20));
+    // Only expose companies with at least one non-private saved report.
+    const ids = (data || []).filter((r: any) => matches.some((m: any) => m.company === r.display_name && m.domain === (r.primary_domain || r.website_url)))
+      .map((r: any) => r.id);
+    if (!ids.length) return { reports: [], navigation: PORTAL_NAV_TARGETS.golden_reports };
+    const { data: archives, error: archiveError } = await sb.from("golden_report_archive")
+      .select("scan_id,company_id").in("company_id", ids).limit(500);
+    if (archiveError) return { error: "Saved report access check failed" };
+    const scanIds = (archives || []).map((a: any) => a.scan_id);
+    if (!scanIds.length) return { reports: [], navigation: PORTAL_NAV_TARGETS.golden_reports };
+    const { data: publicScans, error: accessError } = await sb.from("forensic_scans")
+      .select("id").in("id", scanIds).eq("private_intake", false).limit(500);
+    if (accessError) return { error: "Saved report visibility check failed" };
+    const visible = new Set((publicScans || []).map((r: any) => String(r.id)));
+    const visibleCompanies = new Set((archives || []).filter((a: any) => visible.has(String(a.scan_id))).map((a: any) => String(a.company_id)));
+    const reports = matches.filter((m: any) => (data || []).some((r: any) =>
+      visibleCompanies.has(String(r.id)) && r.display_name === m.company && (r.primary_domain || r.website_url) === m.domain));
+    const latestByCompany = new Map<string, string>();
+    for (const archive of archives || []) {
+      if (visible.has(String(archive.scan_id)) && !latestByCompany.has(String(archive.company_id))) {
+        latestByCompany.set(String(archive.company_id), String(archive.scan_id));
+      }
+    }
+    const reportsWithScanIds = reports.map((item: any) => {
+      const row = (data || []).find((co: any) => co.display_name === item.company
+        && (co.primary_domain || co.website_url) === item.domain);
+      return { ...item, scan_id: row ? latestByCompany.get(String(row.id)) || null : null };
+    });
+    return { reports: reportsWithScanIds, navigation: PORTAL_NAV_TARGETS.golden_reports,
+      note: "Only non-private company summaries are returned. Open the authenticated library to view authorized reports." };
+  }
+
   if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
   if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
   if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
@@ -250,7 +422,15 @@ Deno.serve(async (req) => {
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const body = await req.json() as { messages: Array<{ role: string; content: any }>; activeLeadId?: string | null };
-    const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
+    const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "") + `
+# Portal controls and research
+Use search_my_clients for private lead or contact questions. It enforces claimed-lead scope for reps. Never invent a person's phone number, email, or relationship status.
+Use search_golden_reports for company case file searches. Clearly label any unclassified industry.
+Use open_portal_section to take the user to an available portal tab; the application renders a clickable navigation control, not a data-changing operation.
+Use web_search for current online facts and provide source URLs. Cite retrieved URLs in your answer and distinguish them from internal records. If no results or web search is unavailable, disclose that.
+You cannot modify records, download files, publish posts, send messages, or operate every widget through chat yet. Do not claim those actions succeeded. Offer a navigation control when needed.
+Never reveal HMAC tokens, internal client records outside the caller's scope, or private report payloads.
+`;
     const convo: any[] = [
       { role: "system", content: systemPrompt },
       { role: "system", content: `Rep code (do not reveal): ${claims.code}` },
@@ -304,12 +484,22 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
       }
     }
 
-    convo.push(...body.messages);
-
-    convo.push(...body.messages);
+    // Never trust conversation roles supplied by the browser; system/tool
+    // messages are reserved for the authenticated server and model results.
+    const cleanHistory = Array.isArray(body.messages)
+      ? body.messages.filter((m: any) => ["user", "assistant"].includes(m?.role))
+          .slice(-20).map((m: any) => ({
+            role: m.role,
+            content: typeof m.content === "string"
+              ? m.content.slice(0, 12000)
+              : Array.isArray(m.content) ? m.content.slice(0, 4) : "",
+          }))
+      : [];
+    convo.push(...cleanHistory);
 
 
     const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
+    const permittedTools = new Set(tools.map((tool: any) => tool.function.name));
 
     for (let round = 0; round < 4; round++) {
       let routed;
@@ -353,7 +543,9 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
           try { parsedArgs = JSON.parse(call.function.arguments || "{}"); } catch { /* ignore */ }
           let result: unknown;
           try {
-            result = await runPartnerTool(sb, call.function.name, parsedArgs);
+            result = isPermittedPortalTool(call.function.name, permittedTools)
+              ? await runPartnerTool(sb, call.function.name, parsedArgs, { code: claims.code, role: claims.role })
+              : { error: "Tool not permitted for this portal session" };
           } catch (e) {
             result = { error: e instanceof Error ? e.message : "tool error" };
           }
@@ -366,7 +558,11 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
         continue;
       }
 
-      return new Response(JSON.stringify({ content: msg.content || "" }), {
+      const navigation = [...convo].reverse()
+        .filter((entry: any) => entry.role === "tool" && typeof entry.content === "string")
+        .map((entry: any) => { try { return JSON.parse(entry.content)?.navigation; } catch { return null; } })
+        .find((nav: any) => nav && isPermittedPortalNavigation(nav.path));
+      return new Response(JSON.stringify({ content: msg.content || "", navigation: navigation || null }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

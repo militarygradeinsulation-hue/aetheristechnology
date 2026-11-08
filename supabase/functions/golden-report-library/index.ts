@@ -439,6 +439,16 @@ serve(async (req) => {
       return json({ total_scans: total ?? 0, total_archived: done ?? 0, total_companies: companies ?? 0 });
     }
 
+    // Library summaries contain metadata from saved scans. Prevent portal
+    // sessions from accidentally discovering private-intake report details.
+    const privateScansForPortal = async (): Promise<Set<string>> => {
+      if (globalScope) return new Set();
+      const { data, error } = await sb.from("forensic_scans")
+        .select("id").eq("private_intake", true).limit(5000);
+      if (error) throw error;
+      return new Set((data || []).map((r: { id: string }) => r.id));
+    };
+
     /* company-first search list */
     if (action === "list_companies") {
       const limit = Math.max(1, Math.min(60, Number(body.limit) || 24));
@@ -459,7 +469,9 @@ serve(async (req) => {
       if (body.until) aq = aq.lte("completed_at", String(body.until));
       const { data: archives, error: aerr } = await aq.order("completed_at", { ascending: false }).limit(4000);
       if (aerr) throw aerr;
-      let rows = (archives || []) as Record<string, unknown>[];
+      const privateScanIds = await privateScansForPortal();
+      let rows = ((archives || []) as Record<string, unknown>[])
+        .filter((r) => !privateScanIds.has(String(r.scan_id)));
 
       // Company lookup (chunked — there can be thousands of distinct companies)
       const companyIds = [...new Set(rows.map((r) => String(r.company_id)).filter((id) => id && id !== "null"))];
@@ -474,6 +486,36 @@ serve(async (req) => {
       }
 
 
+      // Stored classifications are sparse in older archives. For search only,
+      // derive a conservative, explicitly inferred industry from public report
+      // metadata. Never write guesses into the canonical company record.
+      const inferredIndustries = new Map<string, { industry: string | null; source: string }>();
+      const industryFor = (companyId: string) => {
+        const cached = inferredIndustries.get(companyId);
+        if (cached) return cached;
+        const co = companies.get(companyId) || {};
+        const stored = String(co.industry || "").trim();
+        const guess = stored ? null : classifyIndustryHeuristic({
+          companyName: String(co.display_name || ""),
+          domain: String(co.primary_domain || ""),
+          websiteUrl: String(co.website_url || ""),
+          reportEvidence: String(co.business_summary || "").slice(0, 1200),
+        });
+        const resolved = {
+          industry: stored || (guess && guess.confidence >= 0.73 ? guess.industry : null),
+          source: stored ? "classified" : guess && guess.confidence >= 0.73 ? "inferred" : "unknown",
+        };
+        inferredIndustries.set(companyId, resolved);
+        return resolved;
+      };
+      const industryCounts = new Map<string, number>();
+      for (const companyId of companyIds) {
+        const industry = industryFor(companyId).industry || "Unclassified";
+        industryCounts.set(industry, (industryCounts.get(industry) || 0) + 1);
+      }
+      const industries = [...industryCounts.entries()].map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
       if (search) {
         const needle = search.toLowerCase();
         const matchingFindingScans = new Set<string>();
@@ -484,6 +526,7 @@ serve(async (req) => {
           const c = companies.get(String(r.company_id));
           const hay = [
             c?.display_name, c?.primary_domain, c?.website_url, c?.business_summary,
+            industryFor(String(r.company_id)).industry,
             (c?.aliases as string[] | undefined)?.join(" "),
             r.executive_summary, r.target_url,
           ].map((x) => String(x ?? "").toLowerCase()).join(" ");
@@ -492,8 +535,8 @@ serve(async (req) => {
       }
 
       if (body.industry) {
-        rows = rows.filter((r) => String(companies.get(String(r.company_id))?.industry ?? "")
-          .toLowerCase().includes(String(body.industry).toLowerCase()));
+        const selected = String(body.industry).toLowerCase();
+        rows = rows.filter((r) => (industryFor(String(r.company_id)).industry || "Unclassified").toLowerCase() === selected);
       }
 
       // Blueprint status per scan
@@ -545,7 +588,8 @@ serve(async (req) => {
             website_url: c.website_url ?? null,
             business_summary: c.business_summary ?? null,
             summary_source: c.summary_source ?? null,
-            industry: c.industry ?? null,
+            industry: industryFor(cid).industry,
+            industry_source: industryFor(cid).source,
             location: c.location ?? null,
             contact_names: c.contact_names ?? [],
             aliases: c.aliases ?? [],
@@ -579,7 +623,7 @@ serve(async (req) => {
 
       const totalCards = cards.length;
       cards = cards.slice(offset, offset + limit);
-      return json({ items: cards, total: totalCards, limit, offset });
+      return json({ items: cards, total: totalCards, industries, limit, offset });
     }
 
     /* company detail — report timeline */
@@ -591,8 +635,10 @@ serve(async (req) => {
       let aq = sb.from("golden_report_archive").select("*").eq("company_id", companyId);
       aq = scoped(aq as never) as never;
       const { data: reports } = await aq.order("completed_at", { ascending: false });
-      const list = (reports || []) as Record<string, unknown>[];
-      if (scopeCodes !== null && list.length === 0) return json({ error: "Forbidden" }, 403);
+      const privateScanIds = await privateScansForPortal();
+      const visibleReports = (reports || []).filter((r: { scan_id: string }) => !privateScanIds.has(String(r.scan_id)));
+      const list = visibleReports as Record<string, unknown>[];
+      if (!globalScope && list.length === 0) return json({ error: "not found" }, 404);
       const { data: bps } = await sb.from("golden_system_blueprints")
         .select("id, scan_id, blueprint_version, status, approval_state, validation_passed, created_at, error_message")
         .in("scan_id", list.map((r) => String(r.scan_id)))
@@ -659,6 +705,11 @@ serve(async (req) => {
       aq = scoped(aq as never) as never;
       const { data: archive } = await aq.maybeSingle();
       if (!archive) return json({ error: "not found" }, 404);
+      if (!globalScope) {
+        const { data: scanVisibility } = await sb.from("forensic_scans")
+          .select("private_intake").eq("id", scanId).maybeSingle();
+        if (!scanVisibility || scanVisibility.private_intake === true) return json({ error: "not found" }, 404);
+      }
       const { data: findings } = await sb.from("golden_report_findings_index")
         .select("*").eq("scan_id", scanId).order("priority", { ascending: true });
       const { data: blueprints } = await sb.from("golden_system_blueprints")

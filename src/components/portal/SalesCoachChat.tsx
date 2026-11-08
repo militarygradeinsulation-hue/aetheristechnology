@@ -11,7 +11,8 @@ type Attachment =
   | { kind: 'image'; name: string; dataUrl: string; mimeType: string }
   | { kind: 'text'; name: string; text: string; mimeType: string };
 
-type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[]; attachments?: Attachment[] };
+type PortalNavigation = { label: string; path: string };
+type Msg = { role: 'user' | 'assistant'; content: string; suggestions?: string[]; navigation?: PortalNavigation; attachments?: Attachment[] };
 
 const ASSISTANT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rep-assistant`;
 const STORAGE_KEY = 'aetheris_sales_coach_convo';
@@ -45,7 +46,7 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
     role: 'assistant',
     content: isPartner
       ? "**Aetheris Nexus online — Advisor + Coach + Trainer + Company View, one chat.**\n\nAsk me to pitch, coach a live objection, drill you on a script, quiz you on the playbook, rewrite an email, or pull live company numbers (leads, reps, submissions, forecast). I route myself — you just talk."
-      : "**Aetheris Nexus online — Advisor + Coach + Trainer, one chat.**\n\nAsk me to pitch a specific prospect, coach you through an objection, drill you on a script, quiz you on the playbook, rewrite an email, or explain commission math. I route myself — you just talk.",
+      : "**Aetheris Nexus online — Advisor + Coach + Trainer + Portal Guide.**\n\nAsk me to find one of your clients, look up a Golden Report, research a company on the web, or open a portal section. I can search and navigate using your permissions.",
     suggestions: isPartner
       ? ['Give me a company summary', 'Coach me through "too expensive"', 'Quiz me on the 21-Day Diagnostic']
       : ['Pitch a 10-person operator', 'Coach me through "too expensive"', 'Quiz me on the Leak Audit'],
@@ -178,7 +179,12 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
       }
       const data = await res.json();
       const { clean, suggestions } = parseSuggestions(String(data.content || ''));
-      setMessages((prev) => [...prev, { role: 'assistant', content: clean || '(no response)', suggestions }]);
+      // Server-validated allowlist: never navigate to an arbitrary model URL.
+      const nav = data.navigation as PortalNavigation | null;
+      const staticPortalNav = /^\/portal(?:\/legacy)?\?tab=[a-z]+$/.test(nav?.path || '');
+      const savedReportNav = /^\/portal\/legacy\?tab=goldenlibrary&report=[0-9a-f-]{36}(?:&download=pdf)?$/i.test(nav?.path || '');
+      const navigation = nav && (staticPortalNav || savedReportNav) ? nav : undefined;
+      setMessages((prev) => [...prev, { role: 'assistant', content: clean || '(no response)', suggestions, navigation }]);
     } catch (e) {
       setMessages((prev) => [...prev, {
         role: 'assistant',
@@ -391,6 +397,15 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
                 <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:text-amber prose-code:text-amber prose-code:bg-background/40 prose-code:px-1 prose-code:rounded prose-code:before:hidden prose-code:after:hidden">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
+                {msg.role === 'assistant' && msg.navigation && (
+                  <button
+                    type="button"
+                    onClick={() => window.location.assign(msg.navigation!.path)}
+                    className="mt-2 rounded border border-amber/50 bg-amber/10 px-3 py-1.5 text-xs font-semibold text-amber hover:bg-amber/20"
+                  >
+                    Open {msg.navigation.label}
+                  </button>
+                )}
                 {isLastAssistant && msg.suggestions && msg.suggestions.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {msg.suggestions.map((s) => (

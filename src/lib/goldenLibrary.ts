@@ -12,6 +12,7 @@ export interface LibraryCompany {
   business_summary: string | null;
   summary_source: string | null;
   industry: string | null;
+  industry_source?: "classified" | "inferred" | "unknown";
   location: string | null;
   contact_names: string[] | null;
   aliases: string[] | null;
@@ -148,7 +149,7 @@ export interface ListParams {
 }
 
 export const listCompanies = (p: ListParams, portalToken?: string | null) =>
-  call<{ items: LibraryCard[]; total: number }>("golden-report-library", { action: "list_companies", ...p }, portalToken);
+  call<{ items: LibraryCard[]; total: number; industries: Array<{ name: string; count: number }> }>("golden-report-library", { action: "list_companies", ...p }, portalToken);
 
 export const getCompany = (companyId: string, portalToken?: string | null) =>
   call<{ company: LibraryCompany; reports: ArchiveRow[]; blueprints: BlueprintRow[] }>(
