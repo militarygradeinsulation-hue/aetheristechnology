@@ -319,7 +319,24 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
       (!industry || r.industry.toLowerCase().includes(industry.toLowerCase())) &&
       (!term || [r.company, r.domain, r.industry].some((v: string) => String(v || "").toLowerCase().includes(term.toLowerCase())))
     ).slice(0, limit(args.limit, 10, 20));
-    return { reports: matches, note: "Search covers saved company summaries only; open the authenticated library for complete reports." };
+    // Only expose companies with at least one non-private saved report.
+    const ids = (data || []).filter((r: any) => matches.some((m: any) => m.company === r.display_name && m.domain === (r.primary_domain || r.website_url)))
+      .map((r: any) => r.id);
+    if (!ids.length) return { reports: [], navigation: PORTAL_NAV_TARGETS.golden_reports };
+    const { data: archives, error: archiveError } = await sb.from("golden_report_archive")
+      .select("scan_id,company_id").in("company_id", ids).limit(500);
+    if (archiveError) return { error: "Saved report access check failed" };
+    const scanIds = (archives || []).map((a: any) => a.scan_id);
+    if (!scanIds.length) return { reports: [], navigation: PORTAL_NAV_TARGETS.golden_reports };
+    const { data: publicScans, error: accessError } = await sb.from("forensic_scans")
+      .select("id").in("id", scanIds).eq("private_intake", false).limit(500);
+    if (accessError) return { error: "Saved report visibility check failed" };
+    const visible = new Set((publicScans || []).map((r: any) => String(r.id)));
+    const visibleCompanies = new Set((archives || []).filter((a: any) => visible.has(String(a.scan_id))).map((a: any) => String(a.company_id)));
+    const reports = matches.filter((m: any) => (data || []).some((r: any) =>
+      visibleCompanies.has(String(r.id)) && r.display_name === m.company && (r.primary_domain || r.website_url) === m.domain));
+    return { reports, navigation: PORTAL_NAV_TARGETS.golden_reports,
+      note: "Only non-private company summaries are returned. Open the authenticated library to view authorized reports." };
   }
 
   if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
