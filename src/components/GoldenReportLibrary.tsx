@@ -253,7 +253,8 @@ const CompanySystemPanel: React.FC<{ scanId: string; eligible: boolean }> = ({ s
 
 
 
-const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId, onBack }) => {
+const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpen?: boolean }> = ({ scanId, onBack, downloadOnOpen = false }) => {
+  const autoDownloadAttempted = useRef(false);
   const [loading, setLoading] = useState(true);
   const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
@@ -307,6 +308,15 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void }> = ({ scanId
       setDownloading(null);
     }
   };
+
+  // A user-clicked assistant action may request an authenticated download.
+  // A per-detail guard prevents duplicate automatic downloads after re-renders.
+  useEffect(() => {
+    if (downloadOnOpen && !loading && data && !autoDownloadAttempted.current) {
+      autoDownloadAttempted.current = true;
+      void downloadSaved('pdf');
+    }
+  }, [downloadOnOpen, loading, data, scanId]);
 
   if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-amber" /></div>;
   if (!data) return <div className="p-6 text-sm text-muted-foreground">Report not found.</div>;
@@ -516,7 +526,13 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(0);
   const [companyId, setCompanyId] = useState<string | null>(null);
-  const [scanId, setScanId] = useState<string | null>(null);
+  const [scanId, setScanId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const fromLink = new URLSearchParams(window.location.search).get('report');
+    return fromLink && /^[0-9a-f-]{36}$/i.test(fromLink) ? fromLink : null;
+  });
+  const [downloadOnOpen, setDownloadOnOpen] = useState(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('download') === 'pdf');
   const [stats, setStats] = useState<{ total_scans: number; total_archived: number; total_companies: number } | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [reconciling, setReconciling] = useState(false);
@@ -615,7 +631,7 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
 
   if (scanId) return (
     <LibraryTokenCtx.Provider value={portalToken}>
-      <ReportDetail scanId={scanId} onBack={() => setScanId(null)} />
+      <ReportDetail scanId={scanId} downloadOnOpen={downloadOnOpen} onBack={() => { setScanId(null); setDownloadOnOpen(false); }} />
     </LibraryTokenCtx.Provider>
   );
   if (companyId) return (
