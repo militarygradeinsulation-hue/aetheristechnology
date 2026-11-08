@@ -1151,13 +1151,13 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     await stage("synth", "running", { cap_seconds: 150, mode: "per-chapter-waves" });
     let report: any = fbEarly;
     try {
-      // Hard watchdog: whatever synthesis returns inside 150s wins; otherwise
+      // Hard watchdog: whatever synthesis returns inside 90s wins; otherwise
       // we ship the fallback and mark the scan completed. Prevents the row
       // from being stuck in "running" forever if the model stalls.
       const synth = synthesizeReport(findings, url, company);
       let cancelWatchdog: (() => void) | undefined;
       const watchdog = new Promise<null>((resolve) => {
-        const timeout = setTimeout(() => resolve(null), 150_000);
+        const timeout = setTimeout(() => resolve(null), 90_000);
         cancelWatchdog = () => clearTimeout(timeout);
       });
       let result: Awaited<typeof synth> | null;
