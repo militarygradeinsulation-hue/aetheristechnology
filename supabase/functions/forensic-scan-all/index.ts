@@ -1188,50 +1188,36 @@ async function runScan(id: string, url: string, company: string, accountId: stri
         chapters_total: CHAPTERS.length,
       };
     }
-    await stage("synth", report?.synth_fallback?.degraded ? "degraded" : "done", report?.synth_fallback ?? null);
-
-    // A report where EVERY chapter and the summary are template text is not a
-    // real report. Flag it explicitly so nothing downstream can present it as one.
+    // A report where every chapter and the summary are template text is
+    // preliminary only. Never mislabel it as a completed forensic report.
     const sf = report?.synth_fallback;
     if (sf?.degraded && sf.summary_fallback && (sf.chapters_fallback?.length ?? 0) >= CHAPTERS.length) {
       report.fully_generic = true;
       console.error(`scan ${id}: fully generic report — no AI chapter survived`);
     }
 
-    // Growth assets: deterministic imagery concepts, posts and 30 day schedule
-    // built straight from this company's findings. No AI on the critical path,
-    // so the report can never wait on it and never ships with empty tabs.
-    // AI enrichment runs in the background after completion and merges over
-    // this base (see the report-deliverables function).
-    await stage("assets", "running", { mode: "deterministic" });
-    try {
-      report.deliverables = buildFallbackDeliverables({
-        company,
-        url,
-        report,
-        brand: parsedBrand as unknown as Record<string, unknown> | null,
-      });
-      await stage("assets", "done", {
-        mode: "deterministic",
-        imagery: report.deliverables.imagery.concepts.length,
-        posts: report.deliverables.posts.length,
-        schedule: report.deliverables.schedule.days.length,
-      });
-    } catch (e) {
-      console.error("growth assets failed:", e instanceof Error ? e.message : String(e));
-      await stage("assets", "degraded", "growth assets threw");
-    }
-
-
-
-
-    // Persist the actual synthesized report before entering a fresh Edge
-    // invocation. An interrupted finalizer can now resume without paid research.
-    await stage("compile", "running", { mode:"isolated", attempt:1 });
+    // Atomic synthesis checkpoint: save the *actual synthesized payload* and
+    // its progress state together. A worker interruption after this point is
+    // recoverable by finalization without repeating AI research or crawling.
+    // Growth assets and financial compilation run in the fresh finalizer.
+    await stageQueue;
+    const { data: priorStageRow, error: stageReadError } = await sb
+      .from("forensic_scans").select("stage_status").eq("id", id).single();
+    if (stageReadError || !priorStageRow) throw new Error("Could not read synthesis stage checkpoint");
+    const stamp = nowIso();
+    const stage_status = {
+      ...((priorStageRow.stage_status || {}) as Record<string, unknown>),
+      synth: { state: report?.synth_fallback?.degraded ? "degraded" : "done", at: stamp, extra: report?.synth_fallback ?? null },
+      compile: { state: "running", at: stamp, extra: { mode: "isolated", attempt: 1 } },
+    };
     const checkpoint = await sb.from("forensic_scans").update({
-      raw_findings: findings, report, status: "finalizing", updated_at: nowIso(),
-    }).eq("id", id).select("id").single();
-    if (checkpoint.error || !checkpoint.data) throw new Error("Could not save Golden Report synthesis checkpoint");
+      raw_findings: findings,
+      report,
+      stage_status,
+      status: "finalizing",
+      updated_at: stamp,
+    }).eq("id", id).eq("status", "running").select("id").single();
+    if (checkpoint.error || !checkpoint.data) throw new Error("Could not persist synthesized report checkpoint");
     const handoff = await invokeFn("forensic-scan-all", { action:"finalize", scan_id:id }, 12_000);
     if (handoff?.error) throw new Error("Finalizer handoff failed: " + String(handoff.error).slice(0,200));
     // Post-processing is performed by finalizeSavedScan, after the report is
@@ -1258,7 +1244,6 @@ async function finalizeSavedScan(id: string) {
   if (!["finalizing","running","failed"].includes(savedScan.status)) throw new Error("Scan is not ready for finalization");
   const states = (savedScan.stage_status || {}) as Record<string,{ state?: string }>;
   if (states.synth?.state !== "done" && states.synth?.state !== "degraded") throw new Error("Research synthesis is not finished");
-  if (!["done","degraded"].includes(states.assets?.state || "")) throw new Error("Growth assets checkpoint is not finished");
   const url = String(savedScan.target_url || "");
   const company = String(savedScan.company_name || "");
   const findings = (savedScan.raw_findings || {}) as Record<string, unknown>;
@@ -1277,6 +1262,30 @@ async function finalizeSavedScan(id: string) {
       await stage("compile", "degraded", "earlier synthesis checkpoint incomplete");
       return;
     }
+    // Deterministic growth assets are intentionally generated only AFTER the
+    // synthesized report checkpoint is persisted in the original worker.
+    // If this worker is interrupted, finalization can be retried from storage.
+    if (!["done", "degraded"].includes(states.assets?.state || "")) {
+      await stage("assets", "running", { mode: "deterministic" });
+      try {
+        report.deliverables = buildFallbackDeliverables({
+          company,
+          url,
+          report,
+          brand: parsedBrand as unknown as Record<string, unknown> | null,
+        });
+        await stage("assets", "done", {
+          mode: "deterministic",
+          imagery: report.deliverables.imagery.concepts.length,
+          posts: report.deliverables.posts.length,
+          schedule: report.deliverables.schedule.days.length,
+        });
+      } catch (assetError) {
+        console.error("growth assets failed:", assetError instanceof Error ? assetError.message : String(assetError));
+        await stage("assets", "degraded", "growth assets threw");
+      }
+    }
+
     // ─────────── REPORT COMPILER GATE ───────────
     // One pass builds the evidence ledger, deduplicates root causes, prices each
     // unique root cause exactly once, injects the canonical numbers into prose,
@@ -1596,8 +1605,8 @@ Deno.serve(async (req) => {
       if (!scan) return new Response(JSON.stringify({error:"Scan not found"}),{status:404,headers:{...corsHeaders,"Content-Type":"application/json"}});
       if (scan.status === "completed") return new Response(JSON.stringify({scan_id:scanId,status:"completed"}),{headers:{...corsHeaders,"Content-Type":"application/json"}});
       const stages = (scan.stage_status||{}) as Record<string,{state?:string;extra?:unknown}>;
-      if (!["done","degraded"].includes(stages.synth?.state||"") || !["done","degraded"].includes(stages.assets?.state||""))
-        return new Response(JSON.stringify({error:"Research stages are not ready for recovery"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      if (!["done","degraded"].includes(stages.synth?.state||""))
+        return new Response(JSON.stringify({error:"Synthesized report checkpoint is not ready for finalization"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
       const last = Date.parse(scan.updated_at || "") || 0;
       if (scan.status !== "failed" && Date.now()-last < 90_000 && !serviceOk)
         return new Response(JSON.stringify({error:"Finalization is already in progress"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
