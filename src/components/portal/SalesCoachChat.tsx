@@ -181,8 +181,9 @@ export const SalesCoachChat: React.FC<Props> = ({ embedded = false }) => {
       const { clean, suggestions } = parseSuggestions(String(data.content || ''));
       // Server-validated allowlist: never navigate to an arbitrary model URL.
       const nav = data.navigation as PortalNavigation | null;
-      const navigation = nav && /^\/portal(?:\/legacy)?\?(?:tab=[a-z]+(?:&tool=golden-report)?)$/.test(nav.path)
-        ? nav : undefined;
+      const staticPortalNav = /^\/portal(?:\/legacy)?\?tab=[a-z]+$/.test(nav?.path || '');
+      const savedReportNav = /^\/portal\/legacy\?tab=goldenlibrary&report=[0-9a-f-]{36}(?:&download=pdf)?$/i.test(nav?.path || '');
+      const navigation = nav && (staticPortalNav || savedReportNav) ? nav : undefined;
       setMessages((prev) => [...prev, { role: 'assistant', content: clean || '(no response)', suggestions, navigation }]);
     } catch (e) {
       setMessages((prev) => [...prev, {
