@@ -605,7 +605,7 @@ EVIDENCE RULES — non-negotiable, violating any of these invalidates the report
 5. Do not invent findings. If a tool returned an error, say so and pivot to what other tools showed. Empty findings for a chapter means write "no signal detected in this pass" — not a fabricated leak.`;
 
 
-async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _model?: string, tier: AiTier = "heavy") {
+async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _model?: string, tier: AiTier = "heavy", retryOnFailure = true) {
   const doCall = async (t: number) => {
     const res = await routedChatCompletion({
       tier,
@@ -632,6 +632,7 @@ async function aiJson(prompt: string, maxTokens: number, timeoutMs: number, _mod
     if (first && Object.keys(first).length) return first;
     throw new Error("empty json");
   } catch (e) {
+    if (!retryOnFailure) throw e;
     console.warn("aiJson attempt 1 failed, retrying:", e instanceof Error ? e.message : String(e));
     return await doCall(timeoutMs);
   }
@@ -777,7 +778,9 @@ Return JSON:
   "priorityFixes": ["<top 3 in order>"]
 }`;
   try {
-    const out = await aiJson(prompt, 2200, 45_000, undefined, "bulk");
+    // Optional contradiction analysis cannot consume the entire fast scan.
+    // Never retry in fast mode: a failed/slow call is recorded as unverified.
+    const out = await aiJson(prompt, 2200, 9_000, undefined, "bulk", false);
     if (out && Array.isArray(out.contradictions) && out.contradictions.length) {
       return { ...out, _via: "in_process_crawl_analysis", pages_analyzed: (text.match(/## Crawled page/g) || []).length || 1 };
     }
@@ -1107,7 +1110,7 @@ async function runScan(id: string, url: string, company: string, accountId: stri
           socialLinks: "Not provided",
           idealCustomer: "business owner or decision-maker evaluating the company online",
           desiredPerception: ["credible", "clear", "trustworthy", "operator-grade"],
-        }, 30_000);
+        }, 10_000);
       })();
 
       const [frictionAudit, brandContradictions] = await Promise.all([
