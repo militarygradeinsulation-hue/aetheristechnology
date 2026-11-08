@@ -3,12 +3,13 @@
  * from the button click. Opening it after awaiting a Supabase request is
  * considered a popup and may be blocked, making PDF downloads appear broken.
  */
-export function requiresEarlyPdfTab(userAgent: string, platform = ""): boolean {
-  return /iPhone|iPad|iPod/i.test(userAgent) || (platform === "MacIntel" && /Mobile|Safari/i.test(userAgent) && /Touch/.test(userAgent));
+export function requiresEarlyPdfTab(userAgent: string, platform = "", maxTouchPoints = 0): boolean {
+  // Modern iPads may advertise a desktop Mac Safari user agent.
+  return /iPhone|iPad|iPod/i.test(userAgent) || (platform === "MacIntel" && maxTouchPoints > 1 && /Safari/i.test(userAgent));
 }
 
 export function reserveSavedPdfTab(): Window | null {
-  if (typeof window === "undefined" || !requiresEarlyPdfTab(window.navigator.userAgent, window.navigator.platform)) return null;
+  if (typeof window === "undefined" || !requiresEarlyPdfTab(window.navigator.userAgent, window.navigator.platform, window.navigator.maxTouchPoints)) return null;
   const viewer = window.open("", "_blank");
   if (viewer) {
     viewer.document.title = "Preparing Golden Report PDF";
