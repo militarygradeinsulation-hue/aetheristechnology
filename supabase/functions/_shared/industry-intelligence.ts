@@ -1,5 +1,7 @@
 export const INDUSTRY_TAXONOMY = [
   "Construction & Home Services",
+  "Architecture & Design",
+  "Engineering & Technical Services",
   "Manufacturing & Industrial",
   "Healthcare & Medical",
   "Financial Services",
@@ -34,8 +36,10 @@ export type IndustryGuess = {
 };
 
 const RULES: Array<{ industry: IndustryName; re: RegExp; weight: number; label: string }> = [
+  { industry: "Architecture & Design", re: /\b(architect(?:ure|ural|s)?|interior design|architectural design|landscape architecture|design studio)\b/i, weight: 5, label: "architecture/design keyword" },
+  { industry: "Engineering & Technical Services", re: /\b(engineer(?:ing|s)?|technical consult(?:ing|ancy)|civil engineering|structural engineer(?:ing)?|mechanical engineer(?:ing)?)\b/i, weight: 4, label: "engineering keyword" },
   { industry: "Construction & Home Services", re: /\b(construction|contractor|contracting|roof|roofing|hvac|plumb|electric|electrical|remodel|renovation|landscap|paving|concrete|flooring|fence|windows?|doors?|handyman|insulation)\b/i, weight: 4, label: "construction/trade keyword" },
-  { industry: "Manufacturing & Industrial", re: /\b(manufactur|fabricat|machin|cnc|industrial|tooling|aerospace|precision|metalwork|assembly|factory|plant)\b/i, weight: 4, label: "manufacturing keyword" },
+  { industry: "Manufacturing & Industrial", re: /\b(manufactur(?:ing|er|ers|e)?|fabricat(?:ion|or|ors|ing|e)?|machin(?:ing|ery|es|e)?|cnc|industrial|tooling|aerospace|precision machining|metalwork|assembly|factory|plant)\b/i, weight: 4, label: "manufacturing keyword" },
   { industry: "Healthcare & Medical", re: /\b(health|medical|clinic|hospital|dental|dentist|ortho|surgery|therapy|therapeutic|pharma|pharmacy|patient|care center|wellness)\b/i, weight: 4, label: "healthcare keyword" },
   { industry: "Financial Services", re: /\b(bank|banking|wealth|investment|investor|capital|mortgage|lending|credit union|financial planning|asset management)\b/i, weight: 4, label: "financial services keyword" },
   { industry: "Accounting & Finance Services", re: /\b(accounting|accountant|bookkeep|cpa|tax advisory|tax service|fractional cfo|cfo services?)\b/i, weight: 4, label: "accounting/CFO keyword" },
@@ -53,7 +57,7 @@ const RULES: Array<{ industry: IndustryName; re: RegExp; weight: number; label: 
   { industry: "Media & Marketing", re: /\b(marketing|advertising|media|creative agency|branding|public relations|communications agency|content studio)\b/i, weight: 3, label: "marketing/media keyword" },
   { industry: "Government & Public Sector", re: /\b(government|municipal|county|city of|department of|public works|state agency)\b/i, weight: 4, label: "government keyword" },
   { industry: "Sports & Entertainment", re: /\b(sports|athletic|league|ncaa|entertainment|theater|theatre|music|gaming|esports)\b/i, weight: 4, label: "sports/entertainment keyword" },
-  { industry: "HR & Recruiting", re: /\b(recruit|staffing|talent|human resources|\bhr\b|workforce|payroll|people operations)\b/i, weight: 4, label: "HR/recruiting keyword" },
+  { industry: "HR & Recruiting", re: /\b(recruit(?:ing|ment|er|ers)?|staffing|talent|human resources|hr|workforce|payroll|people operations)\b/i, weight: 4, label: "HR/recruiting keyword" },
   { industry: "Automotive", re: /\b(auto|automotive|motors|dealership|collision|tire|vehicle|car dealer|truck dealer)\b/i, weight: 4, label: "automotive keyword" },
   { industry: "Agriculture & Food Production", re: /\b(agriculture|farm|farming|agri|crop|livestock|dairy|food production|food processing)\b/i, weight: 4, label: "agriculture/food production keyword" },
   { industry: "Energy & Utilities", re: /\b(energy|utility|utilities|solar|renewable|oil|gas|power generation|electric utility)\b/i, weight: 4, label: "energy/utilities keyword" },
