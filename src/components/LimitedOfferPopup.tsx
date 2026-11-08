@@ -1,170 +1,87 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Lock, AlertTriangle } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { AETHERIS_PROMO_IMAGE } from "@/data/aetherisPromoImage";
 
-const STORAGE_KEY = "aetheris_limited_offer_v1";
-
+/** Original image supplied by the owner. Dismissal is remembered per browser. */
+const STORAGE_KEY = "aetheris_intelligence_promo_v2";
 const HIDDEN_PREFIXES = [
-  "/admin",
-  "/staff",
-  "/portal",
-  "/partner-portal",
-  "/checkout",
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/reset-password",
-  "/unsubscribe",
-  "/subscribe-onboarding",
-  "/try",
-  "/nexus-iq",
-  "/detective-mode",
-  "/tech-solutions",
+  "/admin", "/staff", "/portal", "/partner-portal", "/checkout",
+  "/login", "/signup", "/forgot-password", "/reset-password",
+  "/unsubscribe", "/subscribe-onboarding", "/try", "/nexus-iq",
+  "/detective-mode", "/tech-solutions",
 ];
-
-const schema = z.object({
-  name: z.string().trim().min(1, "Enter your name").max(120),
-  email: z.string().trim().email("Enter a valid email").max(255),
-  company: z.string().trim().max(200).optional(),
-});
 
 export function LimitedOfferPopup() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
-  const [err, setErr] = useState<string | null>(null);
   const dismissedRef = useRef(false);
+  const hidden = HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
-  const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
-
-  const isSuppressed = () => {
+  const suppressed = () => {
     if (dismissedRef.current) return true;
-    try {
-      if (localStorage.getItem(STORAGE_KEY)) return true;
-    } catch {
-      /* ignore */
-    }
-    return false;
+    try { return Boolean(window.localStorage.getItem(STORAGE_KEY)); }
+    catch { return false; }
   };
 
   useEffect(() => {
-    if (hidden) return;
-    if (isSuppressed()) return;
-
-    const timer = window.setTimeout(() => {
-      if (!isSuppressed()) setOpen(true);
-    }, 8000);
-
+    if (hidden || suppressed()) return;
+    const timeout = window.setTimeout(() => {
+      if (!suppressed()) setOpen(true);
+    }, 8_000);
     const onExit = (e: MouseEvent) => {
-      if (e.clientY <= 0 && !isSuppressed()) {
-        setOpen(true);
-      }
-      // Always stop listening once the cursor has left the viewport.
+      if (e.clientY <= 0 && !suppressed()) setOpen(true);
       document.removeEventListener("mouseleave", onExit);
     };
-    document.addEventListener("mouseleave", onExit);
-
+    // Exit-intent only on pointer devices. Touch scrolling must not open a modal.
+    if (window.matchMedia?.("(hover: hover) and (pointer: fine)").matches) {
+      document.addEventListener("mouseleave", onExit);
+    }
     return () => {
-      window.clearTimeout(timer);
+      window.clearTimeout(timeout);
       document.removeEventListener("mouseleave", onExit);
     };
-  }, [hidden]);
+  }, [hidden, pathname]);
 
-  const dismiss = (persist: boolean) => {
+  const dismiss = () => {
     dismissedRef.current = true;
-    if (persist) {
-      try {
-        localStorage.setItem(STORAGE_KEY, String(Date.now()));
-      } catch {
-        /* ignore */
-      }
-    }
+    try { window.localStorage.setItem(STORAGE_KEY, String(Date.now())); }
+    catch { /* private browsing */ }
     setOpen(false);
-  };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr(null);
-    const parsed = schema.safeParse({ name, email, company });
-    if (!parsed.success) {
-      setErr(parsed.error.issues[0]?.message ?? "Check your inputs");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.functions.invoke("nexus-capture-lead", {
-        body: {
-          name: parsed.data.name,
-          email: parsed.data.email,
-          company: parsed.data.company || null,
-          note: "LIMITED OFFER — Free Revenue Leak Snapshot claim",
-          pathname,
-        },
-      });
-      if (error) throw error;
-      setDone(true);
-      try {
-        localStorage.setItem(STORAGE_KEY, String(Date.now()));
-      } catch {
-        /* ignore */
-      }
-      toast({
-        title: "You're in.",
-        description: "Check your inbox — we'll send your Leak Snapshot instructions within 24 hours.",
-      });
-    } catch (e: any) {
-      setErr(e?.message ?? "Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   if (hidden) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : dismiss(true))}>
-      <DialogContent className="max-w-lg border-amber/40 bg-background/95 backdrop-blur-xl">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl leading-snug">
-            One honest question for every founder:
-          </DialogTitle>
-          <DialogDescription className="text-foreground/90 text-lg pt-3 font-serif italic">
-            "Do you feel like you sometimes waste money on marketing because you don't get the right leads or sales? Do you wish it was all done for you and you had all the answers custom to you?"
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="pt-2 space-y-4">
-          <p className="text-foreground/85 text-base">
-            If so, here's my gift to you.
-          </p>
-          <a
-            href="https://businessforensics.tech/try/golden-report"
-            className="block"
-            onClick={() => dismiss(true)}
+    <Dialog open={open} onOpenChange={(next) => next ? setOpen(true) : dismiss()}>
+      <DialogContent className="w-[calc(100vw-24px)] max-w-[980px] max-h-[90dvh] overflow-y-auto rounded-xl border border-amber/40 bg-[#0c0d12] p-0 shadow-2xl [&>button]:z-20 [&>button]:rounded-full [&>button]:bg-black/75 [&>button]:p-2 [&>button]:text-white">
+        <DialogTitle className="sr-only">Aetheris Business Intelligence: No pitch, just proof</DialogTitle>
+        <DialogDescription className="sr-only">
+          Joseph Toney demonstrates how business intelligence can help you reach companies using evidence competitors do not have.
+        </DialogDescription>
+        <img
+          src={AETHERIS_PROMO_IMAGE}
+          alt="Aetheris Technology. I'll show you how to get in front of them using intelligence your competitors don't have. Free. If it works, we talk partnership. Money-back guarantee. No pitch. Just proof. Joseph Toney, AI Architect."
+          className="block h-auto w-full"
+          width={1125}
+          height={618}
+          loading="eager"
+        />
+        <div className="flex flex-wrap items-center justify-center gap-3 px-4 pb-5 pt-2">
+          <Link
+            to="/try/golden-report"
+            onClick={dismiss}
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-amber px-6 py-2.5 text-center text-sm font-bold uppercase tracking-wider text-background transition-opacity hover:opacity-90"
           >
-            <Button className="w-full bg-amber hover:bg-amber/90 text-background font-bold uppercase tracking-wider">
-              Get the Golden Report
-            </Button>
-          </a>
-          <p className="text-sm text-muted-foreground text-center">Hope it helps.</p>
-          <button
-            type="button"
-            onClick={() => dismiss(true)}
-            className="w-full text-xs text-muted-foreground/70 hover:text-muted-foreground underline"
+            See the intelligence
+          </Link>
+          <Link
+            to="/contact"
+            onClick={dismiss}
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-amber/50 px-5 py-2.5 text-center text-sm font-semibold text-amber hover:bg-amber/10"
           >
-            Close
-          </button>
+            Discuss a partnership
+          </Link>
         </div>
       </DialogContent>
     </Dialog>

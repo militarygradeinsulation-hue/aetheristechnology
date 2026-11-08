@@ -8,6 +8,10 @@ on:
       - "src/lib/goldenLibrary.ts"
       - "src/lib/generateForensicGoldenPdf.ts"
       - "src/lib/goldenReportArchiveDownload.test.ts"
+      - "src/lib/mobileGoldenPdf.ts"
+      - "src/lib/mobileGoldenPdf.test.ts"
+      - "src/components/LimitedOfferPopup.tsx"
+      - "src/data/aetherisPromoImage.ts"
       - "src/lib/goldenReportDownloadAvailability.ts"
       - "src/lib/goldenReportArchiveRecovery.test.ts"
       - "supabase/functions/_shared/golden-report-reconciliation.ts"
@@ -22,6 +26,10 @@ on:
       - "src/lib/goldenLibrary.ts"
       - "src/lib/generateForensicGoldenPdf.ts"
       - "src/lib/goldenReportArchiveDownload.test.ts"
+      - "src/lib/mobileGoldenPdf.ts"
+      - "src/lib/mobileGoldenPdf.test.ts"
+      - "src/components/LimitedOfferPopup.tsx"
+      - "src/data/aetherisPromoImage.ts"
       - "src/lib/goldenReportDownloadAvailability.ts"
       - "src/lib/goldenReportArchiveRecovery.test.ts"
       - "supabase/functions/_shared/golden-report-reconciliation.ts"
@@ -41,6 +49,6 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Run Golden Report PDF regression tests
-        run: bunx vitest run src/lib/goldenReportArchiveDownload.test.ts src/lib/goldenReportArchiveRecovery.test.ts src/lib/goldenReportParity.test.ts
+        run: bunx vitest run src/lib/goldenReportArchiveDownload.test.ts src/lib/goldenReportArchiveRecovery.test.ts src/lib/goldenReportParity.test.ts src/lib/mobileGoldenPdf.test.ts
       - name: Build main Aetheris website
         run: bun run build

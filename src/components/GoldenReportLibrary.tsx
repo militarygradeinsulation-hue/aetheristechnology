@@ -16,10 +16,12 @@ import { GoldenSourceBadge } from '@/components/GoldenSourceBadge';
 import {
   listCompanies, getCompany, getReport, getReportDownload, getLibraryStats, runBackfillBatch, reconcileMissingGoldenReports,
   generateBlueprint, setBlueprintApproval, findCompanyContact, formatExposure, downloadTextFile,
-  type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany,
+  type LibraryCard, type ArchiveRow, type FindingRow, type BlueprintRow, type LibraryCompany, type GoldenReportDownload,
 } from '@/lib/goldenLibrary';
 import { composeSystem, composeBatch, type CompanySystemRow } from '@/lib/companySystem';
-import type { ForensicReport } from '@/lib/generateForensicGoldenPdf';
+import { downloadForensicGoldenPdf, type ForensicReport } from '@/lib/generateForensicGoldenPdf';
+import { reserveSavedPdfTab } from '@/lib/mobileGoldenPdf';
+import { isDeliverable } from '@/components/GoldenEvidenceQuality';
 
 const SOURCES = [
   { v: '', l: 'All sources' },
@@ -259,6 +261,18 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
   const portalToken = useLibraryToken();
   const [data, setData] = useState<{ archive: ArchiveRow; company: LibraryCompany; findings: FindingRow[]; blueprints: BlueprintRow[] } | null>(null);
   const [downloading, setDownloading] = useState<'pdf' | 'json' | null>(null);
+  // Preload the canonical saved report so the PDF can often be produced in the
+  // original click event, without waiting for a network response on iOS.
+  const savedReportCache = useRef<GoldenReportDownload | null>(null);
+  useEffect(() => {
+    let active = true;
+    savedReportCache.current = null;
+    void getReportDownload(scanId, portalToken)
+      .then((saved) => { if (active) savedReportCache.current = saved; })
+      .catch(() => { /* retry when the user clicks Download */ });
+    return () => { active = false; savedReportCache.current = null; };
+  }, [scanId, portalToken]);
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -270,9 +284,15 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
 
   const downloadSaved = async (format: 'pdf' | 'json') => {
     if (downloading) return;
+    // iOS/Safari blocks downloads started after asynchronous API requests.
+    // Reserve the viewer directly inside the click handler, before any await.
+    const cached = savedReportCache.current;
+    const pdfTab = format === 'pdf' && !cached ? reserveSavedPdfTab() : null;
     setDownloading(format);
     try {
-      const saved = await getReportDownload(scanId, portalToken);
+      // On a cache hit there is no await before the PDF is generated/saved.
+      // Safari then retains the original user gesture for a direct download.
+      const saved = cached || await getReportDownload(scanId, portalToken);
       if (format === 'json') {
         downloadTextFile(`golden-report-${saved.scan_id}-source.json`, JSON.stringify({
           record_type: 'golden_report_canonical_source',
@@ -288,9 +308,6 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
           report: saved.report,
         }, null, 2), 'application/json');
       } else {
-        const [{ downloadForensicGoldenPdf }, { isDeliverable }] = await Promise.all([
-          import('@/lib/generateForensicGoldenPdf'), import('@/components/GoldenEvidenceQuality'),
-        ]);
         const valid = saved.archive_valid && isDeliverable(saved.report);
         downloadForensicGoldenPdf({
           report: saved.report as ForensicReport,
@@ -300,9 +317,10 @@ const ReportDetail: React.FC<{ scanId: string; onBack: () => void; downloadOnOpe
           generatedAt: saved.completed_at ? new Date(saved.completed_at) : undefined,
           profile: 'complete',
           archivalCopy: { valid, state: saved.archive_state || saved.report_state },
-        });
+        }, pdfTab);
       }
     } catch (e) {
+      try { pdfTab?.close(); } catch { /* browser may restrict closing the tab */ }
       toast({ title: 'Report download failed', description: (e as Error).message, variant: 'destructive' });
     } finally {
       setDownloading(null);

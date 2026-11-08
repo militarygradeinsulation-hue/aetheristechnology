@@ -16,6 +16,7 @@
 // watermark are unchanged.
 
 import jsPDF from "jspdf";
+import { showSavedGoldenPdf } from "@/lib/mobileGoldenPdf";
 import { buildBusinessXray, XRAY_EDGE_LABEL, XRAY_STATUS_LABEL } from "@/lib/businessXray";
 
 /** Static Business X-Ray summary for the PDF. Reads existing report data only. */
@@ -787,7 +788,7 @@ function generateGoldenArchiveSourcePdf(opts: Parameters<typeof generateForensic
   return doc;
 }
 
-export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0]) {
+export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForensicGoldenPdf>[0], reservedPdfTab?: Window | null) {
   let doc: jsPDF;
   try {
     doc = generateForensicGoldenPdf(opts);
@@ -802,6 +803,6 @@ export function downloadForensicGoldenPdf(opts: Parameters<typeof generateForens
   const profile = opts.profile ?? "executive";
   const suffix = profile === "executive" ? "" : `-${profile.replace(/_/g, "-")}`;
   const archiveSuffix = opts.archivalCopy ? opts.archivalCopy.valid ? "-archive" : "-archive-unverified" : "";
-  doc.save(`${opts.whiteLabel ? "golden-report" : "aetheris-forensic"}-${safe}-${opts.scanId.slice(0, 8)}${suffix}${archiveSuffix}.pdf`);
+  showSavedGoldenPdf(doc, `${opts.whiteLabel ? "golden-report" : "aetheris-forensic"}-${safe}-${opts.scanId.slice(0, 8)}${suffix}${archiveSuffix}.pdf`, reservedPdfTab || null);
 }
 
