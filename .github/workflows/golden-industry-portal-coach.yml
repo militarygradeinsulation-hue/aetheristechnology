@@ -6,6 +6,9 @@ on:
       - "src/components/GoldenReportLibrary.tsx"
       - "src/lib/goldenLibrary.ts"
       - "src/lib/goldenIndustryAndPortal.test.ts"
+      - "src/lib/firecrawlPortalSearch.test.ts"
+      - "supabase/functions/_shared/operator-tools.ts"
+      - "supabase/functions/_shared/firecrawl-search-response.ts"
       - "src/components/portal/SalesCoachChat.tsx"
       - "supabase/functions/golden-report-library/**"
       - "supabase/functions/rep-assistant/**"
@@ -17,6 +20,9 @@ on:
       - "src/components/GoldenReportLibrary.tsx"
       - "src/lib/goldenLibrary.ts"
       - "src/lib/goldenIndustryAndPortal.test.ts"
+      - "src/lib/firecrawlPortalSearch.test.ts"
+      - "supabase/functions/_shared/operator-tools.ts"
+      - "supabase/functions/_shared/firecrawl-search-response.ts"
       - "src/components/portal/SalesCoachChat.tsx"
       - "supabase/functions/golden-report-library/**"
       - "supabase/functions/rep-assistant/**"
@@ -34,6 +40,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Industry classification regression tests
-        run: bunx vitest run src/lib/goldenIndustryAndPortal.test.ts
+        run: bunx vitest run src/lib/goldenIndustryAndPortal.test.ts src/lib/firecrawlPortalSearch.test.ts
       - name: Build portal and library
         run: bun run build
