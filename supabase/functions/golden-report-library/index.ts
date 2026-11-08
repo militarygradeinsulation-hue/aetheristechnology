@@ -474,6 +474,36 @@ serve(async (req) => {
       }
 
 
+      // Stored classifications are sparse in older archives. For search only,
+      // derive a conservative, explicitly inferred industry from public report
+      // metadata. Never write guesses into the canonical company record.
+      const inferredIndustries = new Map<string, { industry: string | null; source: string }>();
+      const industryFor = (companyId: string) => {
+        const cached = inferredIndustries.get(companyId);
+        if (cached) return cached;
+        const co = companies.get(companyId) || {};
+        const stored = String(co.industry || "").trim();
+        const guess = stored ? null : classifyIndustryHeuristic({
+          companyName: String(co.display_name || ""),
+          domain: String(co.primary_domain || ""),
+          websiteUrl: String(co.website_url || ""),
+          reportEvidence: String(co.business_summary || "").slice(0, 1200),
+        });
+        const resolved = {
+          industry: stored || (guess && guess.confidence >= 0.73 ? guess.industry : null),
+          source: stored ? "classified" : guess && guess.confidence >= 0.73 ? "inferred" : "unknown",
+        };
+        inferredIndustries.set(companyId, resolved);
+        return resolved;
+      };
+      const industryCounts = new Map<string, number>();
+      for (const companyId of companyIds) {
+        const industry = industryFor(companyId).industry || "Unclassified";
+        industryCounts.set(industry, (industryCounts.get(industry) || 0) + 1);
+      }
+      const industries = [...industryCounts.entries()].map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
       if (search) {
         const needle = search.toLowerCase();
         const matchingFindingScans = new Set<string>();
@@ -484,6 +514,7 @@ serve(async (req) => {
           const c = companies.get(String(r.company_id));
           const hay = [
             c?.display_name, c?.primary_domain, c?.website_url, c?.business_summary,
+            industryFor(String(r.company_id)).industry,
             (c?.aliases as string[] | undefined)?.join(" "),
             r.executive_summary, r.target_url,
           ].map((x) => String(x ?? "").toLowerCase()).join(" ");
@@ -492,8 +523,8 @@ serve(async (req) => {
       }
 
       if (body.industry) {
-        rows = rows.filter((r) => String(companies.get(String(r.company_id))?.industry ?? "")
-          .toLowerCase().includes(String(body.industry).toLowerCase()));
+        const selected = String(body.industry).toLowerCase();
+        rows = rows.filter((r) => (industryFor(String(r.company_id)).industry || "Unclassified").toLowerCase() === selected);
       }
 
       // Blueprint status per scan
@@ -545,7 +576,8 @@ serve(async (req) => {
             website_url: c.website_url ?? null,
             business_summary: c.business_summary ?? null,
             summary_source: c.summary_source ?? null,
-            industry: c.industry ?? null,
+            industry: industryFor(cid).industry,
+            industry_source: industryFor(cid).source,
             location: c.location ?? null,
             contact_names: c.contact_names ?? [],
             aliases: c.aliases ?? [],
@@ -579,7 +611,7 @@ serve(async (req) => {
 
       const totalCards = cards.length;
       cards = cards.slice(offset, offset + limit);
-      return json({ items: cards, total: totalCards, limit, offset });
+      return json({ items: cards, total: totalCards, industries, limit, offset });
     }
 
     /* company detail — report timeline */
