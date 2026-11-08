@@ -335,11 +335,16 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
         : stageState("compile") === "done"
           ? 98
           : Math.max(8, Math.min(88, Math.round((completedStages / (STAGES.length - 1)) * 88)));
+  // Asset generation now belongs to the isolated finalizer, not the initial
+  // worker. A finished synthesis alone is enough to recover a saved checkpoint.
+  // Old pre-checkpoint scans containing only the preliminary template must not
+  // claim they can resume real synthesis without a new scan.
+  const synthesizedCheckpointSaved = row?.report?.synthesis_incomplete !== true;
   const staleFinalization = !!scanId && !!row && ["running", "finalizing"].includes(row.status) &&
     ["done", "degraded"].includes(stageState("synth")) &&
-    ["done", "degraded"].includes(stageState("assets")) &&
     Number.isFinite(new Date(row.updated_at || "").getTime()) &&
-    Date.now() - new Date(row.updated_at || "").getTime() > 120_000;
+    Date.now() - new Date(row.updated_at || "").getTime() > 90_000;
+  const canRecoverSavedCheckpoint = staleFinalization && synthesizedCheckpointSaved;
   async function recoverReport() {
     if (!scanId || !isAdmin || recovering) return;
     setRecovering(true);
@@ -459,8 +464,10 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
           )}
           {staleFinalization && (
             <div className="mt-3 space-y-2 border border-amber-600/50 bg-amber-500/10 p-3 text-sm">
-              <p>Finalization has stopped updating. The research checkpoint is retained. A recovery attempt does not repeat the website crawl or AI synthesis.</p>
-              {isAdmin && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
+              <p>{synthesizedCheckpointSaved
+                ? "Finalization has stopped updating. The saved synthesis can be finalized without re-running the website crawl or AI synthesis."
+                : "An older worker stopped before the completed synthesis was saved. Only preliminary evidence remains; this scan cannot safely be completed without new synthesis."}</p>
+              {isAdmin && canRecoverSavedCheckpoint && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
                 {recovering ? "Resuming..." : "Resume finalization from saved evidence"}
               </Button>}
               {!isAdmin && <p>Ask an authorized Aetheris administrator to resume this report.</p>}
