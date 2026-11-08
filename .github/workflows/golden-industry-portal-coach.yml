@@ -1,0 +1,39 @@
+name: Golden Report industry and portal assistant
+
+on:
+  pull_request:
+    paths:
+      - "src/components/GoldenReportLibrary.tsx"
+      - "src/lib/goldenLibrary.ts"
+      - "src/lib/goldenIndustryAndPortal.test.ts"
+      - "src/components/portal/SalesCoachChat.tsx"
+      - "supabase/functions/golden-report-library/**"
+      - "supabase/functions/rep-assistant/**"
+      - "supabase/functions/_shared/industry-intelligence.ts"
+      - ".github/workflows/golden-industry-portal-coach.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/components/GoldenReportLibrary.tsx"
+      - "src/lib/goldenLibrary.ts"
+      - "src/lib/goldenIndustryAndPortal.test.ts"
+      - "src/components/portal/SalesCoachChat.tsx"
+      - "supabase/functions/golden-report-library/**"
+      - "supabase/functions/rep-assistant/**"
+      - "supabase/functions/_shared/industry-intelligence.ts"
+      - ".github/workflows/golden-industry-portal-coach.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Industry classification regression tests
+        run: bunx vitest run src/lib/goldenIndustryAndPortal.test.ts
+      - name: Build portal and library
+        run: bun run build
