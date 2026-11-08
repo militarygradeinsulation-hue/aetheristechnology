@@ -188,6 +188,21 @@ const PORTAL_READ_TOOLS = [
   {
     type: "function",
     function: {
+      name: "open_golden_report",
+      description: "Open or download a specific existing Golden Report by its saved scan ID. Verifies report visibility before returning a clickable action.",
+      parameters: {
+        type: "object",
+        properties: {
+          scan_id: { type: "string", description: "Exact UUID from search_golden_reports results" },
+          action: { type: "string", enum: ["view", "download_pdf"] },
+        },
+        required: ["scan_id", "action"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "open_portal_section",
       description: "Offer a navigable portal section to the user. Only approved sections are available. Return a clickable action; never fabricate a portal control or mutate data.",
       parameters: {
@@ -284,6 +299,26 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     if (!destination) return { error: "Unknown portal section" };
     return { navigation: destination, requires_user_click: true };
   }
+  if (name === "open_golden_report") {
+    const id = String(args.scan_id || "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      return { error: "Valid saved scan ID required" };
+    }
+    const { data: archive } = await sb.from("golden_report_archive")
+      .select("scan_id").eq("scan_id", id).maybeSingle();
+    if (!archive) return { error: "No saved report found" };
+    const { data: record } = await sb.from("forensic_scans")
+      .select("id,private_intake").eq("id", id).maybeSingle();
+    if (!record || record.private_intake !== false) return { error: "This report is not available to this portal session" };
+    const download = args.action === "download_pdf";
+    return {
+      navigation: {
+        label: download ? "Download saved Golden Report PDF" : "View Golden Report",
+        path: "/portal/legacy?tab=goldenlibrary&report=" + encodeURIComponent(id) + (download ? "&download=pdf" : ""),
+      },
+      requires_user_click: true,
+    };
+  }
   if (name === "search_my_clients") {
     const term = String(args.query || "").trim().replace(/[%,()]/g, "").slice(0, 100);
     if (term.length < 2) return { error: "Search needs at least two characters" };
@@ -341,7 +376,18 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     const visibleCompanies = new Set((archives || []).filter((a: any) => visible.has(String(a.scan_id))).map((a: any) => String(a.company_id)));
     const reports = matches.filter((m: any) => (data || []).some((r: any) =>
       visibleCompanies.has(String(r.id)) && r.display_name === m.company && (r.primary_domain || r.website_url) === m.domain));
-    return { reports, navigation: PORTAL_NAV_TARGETS.golden_reports,
+    const latestByCompany = new Map<string, string>();
+    for (const archive of archives || []) {
+      if (visible.has(String(archive.scan_id)) && !latestByCompany.has(String(archive.company_id))) {
+        latestByCompany.set(String(archive.company_id), String(archive.scan_id));
+      }
+    }
+    const reportsWithScanIds = reports.map((item: any) => {
+      const row = (data || []).find((co: any) => co.display_name === item.company
+        && (co.primary_domain || co.website_url) === item.domain);
+      return { ...item, scan_id: row ? latestByCompany.get(String(row.id)) || null : null };
+    });
+    return { reports: reportsWithScanIds, navigation: PORTAL_NAV_TARGETS.golden_reports,
       note: "Only non-private company summaries are returned. Open the authenticated library to view authorized reports." };
   }
 
@@ -514,7 +560,10 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
       const navigation = [...convo].reverse()
         .filter((entry: any) => entry.role === "tool" && typeof entry.content === "string")
         .map((entry: any) => { try { return JSON.parse(entry.content)?.navigation; } catch { return null; } })
-        .find((nav: any) => nav && Object.values(PORTAL_NAV_TARGETS).some((x) => x.path === nav.path));
+        .find((nav: any) => nav && (
+          Object.values(PORTAL_NAV_TARGETS).some((x) => x.path === nav.path) ||
+          /^\/portal\/legacy\?tab=goldenlibrary&report=[0-9a-f-]{36}(?:&download=pdf)?$/i.test(nav.path)
+        ));
       return new Response(JSON.stringify({ content: msg.content || "", navigation: navigation || null }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
