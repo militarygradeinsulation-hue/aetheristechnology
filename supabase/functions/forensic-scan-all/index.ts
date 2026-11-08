@@ -1155,8 +1155,19 @@ async function runScan(id: string, url: string, company: string, accountId: stri
       // we ship the fallback and mark the scan completed. Prevents the row
       // from being stuck in "running" forever if the model stalls.
       const synth = synthesizeReport(findings, url, company);
-      const watchdog = new Promise<null>((resolve) => setTimeout(() => resolve(null), 150_000));
-      const result = await Promise.race([synth, watchdog]);
+      let cancelWatchdog: (() => void) | undefined;
+      const watchdog = new Promise<null>((resolve) => {
+        const timeout = setTimeout(() => resolve(null), 150_000);
+        cancelWatchdog = () => clearTimeout(timeout);
+      });
+      let result: Awaited<typeof synth> | null;
+      try {
+        result = await Promise.race([synth, watchdog]);
+      } finally {
+        // A settled synthesis must not leave a 150-second timer holding the
+        // Edge Function worker open while the next stage tries to checkpoint.
+        cancelWatchdog?.();
+      }
       if (result) {
         report = result;
         if (!report.chapters || report.chapters.length < CHAPTERS.length) {
