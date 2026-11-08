@@ -1,0 +1,28 @@
+name: Golden Report fast checkpoint reliability
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/forensic-scan-all/**"
+      - "src/components/ForensicScanAllPanel.tsx"
+      - "src/lib/goldenFastCheckpoint.test.ts"
+      - ".github/workflows/golden-fast-checkpoint.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/forensic-scan-all/**"
+      - "src/components/ForensicScanAllPanel.tsx"
+      - "src/lib/goldenFastCheckpoint.test.ts"
+      - ".github/workflows/golden-fast-checkpoint.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Scan checkpoint regression tests
+        run: bunx vitest run src/lib/goldenFastCheckpoint.test.ts
+      - name: Build web app
+        run: bun run build

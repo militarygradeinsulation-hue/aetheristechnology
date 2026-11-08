@@ -69,7 +69,7 @@ const BRAND_KIT_STAGES: { key: string; label: string }[] = [
 const SCAN_STORAGE_KEY = "aetheris:golden-report:scan-id";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-const TARGET_SECONDS = 75;
+const TARGET_SECONDS = 75; // reference target only, not a hard completion promise
 
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
@@ -335,11 +335,16 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
         : stageState("compile") === "done"
           ? 98
           : Math.max(8, Math.min(88, Math.round((completedStages / (STAGES.length - 1)) * 88)));
+  // Asset generation now belongs to the isolated finalizer, not the initial
+  // worker. A finished synthesis alone is enough to recover a saved checkpoint.
+  // Old pre-checkpoint scans containing only the preliminary template must not
+  // claim they can resume real synthesis without a new scan.
+  const synthesizedCheckpointSaved = (row?.report as { synthesis_incomplete?: boolean } | null)?.synthesis_incomplete !== true;
   const staleFinalization = !!scanId && !!row && ["running", "finalizing"].includes(row.status) &&
     ["done", "degraded"].includes(stageState("synth")) &&
-    ["done", "degraded"].includes(stageState("assets")) &&
     Number.isFinite(new Date(row.updated_at || "").getTime()) &&
-    Date.now() - new Date(row.updated_at || "").getTime() > 120_000;
+    Date.now() - new Date(row.updated_at || "").getTime() > 90_000;
+  const canRecoverSavedCheckpoint = staleFinalization && synthesizedCheckpointSaved;
   async function recoverReport() {
     if (!scanId || !isAdmin || recovering) return;
     setRecovering(true);
@@ -454,13 +459,15 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
           {row?.status !== "completed" && row?.status !== "failed" && (
             <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
               Fast mode is active: slow outside detectors are capped, then the report finalizes from the evidence already captured.
-              Target finish: <span className="text-amber-500 font-mono">under 75 seconds</span> on normal sites.
+              The estimate depends on actual research and finalization time; slow optional detectors are capped.
             </p>
           )}
           {staleFinalization && (
             <div className="mt-3 space-y-2 border border-amber-600/50 bg-amber-500/10 p-3 text-sm">
-              <p>Finalization has stopped updating. The research checkpoint is retained. A recovery attempt does not repeat the website crawl or AI synthesis.</p>
-              {isAdmin && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
+              <p>{synthesizedCheckpointSaved
+                ? "Finalization has stopped updating. The saved synthesis can be finalized without re-running the website crawl or AI synthesis."
+                : "An older worker stopped before the completed synthesis was saved. Only preliminary evidence remains; this scan cannot safely be completed without new synthesis."}</p>
+              {isAdmin && canRecoverSavedCheckpoint && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
                 {recovering ? "Resuming..." : "Resume finalization from saved evidence"}
               </Button>}
               {!isAdmin && <p>Ask an authorized Aetheris administrator to resume this report.</p>}
