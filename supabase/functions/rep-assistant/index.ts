@@ -142,9 +142,60 @@ const PARTNER_TOOLS = [
 ];
 
 // Tools every authenticated portal user (rep or partner) can use for live info.
+
+const PORTAL_NAV_TARGETS: Record<string, { label: string; path: string }> = {
+  leads: { label: "My leads", path: "/portal?tab=leads" },
+  coach: { label: "Coach", path: "/portal?tab=coach" },
+  training: { label: "Training", path: "/portal?tab=training" },
+  calendar: { label: "Calendar", path: "/portal?tab=calendar" },
+  meetings: { label: "Executive meetings", path: "/portal?tab=meetings" },
+  workspace: { label: "Workspace", path: "/portal?tab=workspace" },
+  playbook: { label: "Playbook", path: "/portal?tab=playbook" },
+  golden_reports: { label: "Golden Report Library", path: "/portal/legacy?tab=tools&tool=golden-report" },
+};
+const PORTAL_READ_TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "search_my_clients",
+      description: "Look up real leads and client contact information visible to the signed-in rep. Partners may search all leads. Read only. Never guess a phone or email.",
+      parameters: {
+        type: "object",
+        properties: { query: { type: "string" }, limit: { type: "integer", maximum: 20 } },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_golden_reports",
+      description: "Find saved Golden Report company records and their known or inferred industry, with report count and secure in-portal navigation. No private report payloads or client secrets.",
+      parameters: {
+        type: "object",
+        properties: { query: { type: "string" }, industry: { type: "string" }, limit: { type: "integer", maximum: 20 } },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "open_portal_section",
+      description: "Offer a navigable portal section to the user. Only approved sections are available. Return a clickable action; never fabricate a portal control or mutate data.",
+      parameters: {
+        type: "object",
+        properties: { section: { type: "string", enum: Object.keys(PORTAL_NAV_TARGETS) } },
+        required: ["section"],
+      },
+    },
+  },
+];
+
 const REP_LIVE_TOOLS = [
   SHARED_TOOL_SCHEMAS.web_search,
   SHARED_TOOL_SCHEMAS.search_content_library,
+  ...PORTAL_READ_TOOLS,
 ];
 
 const limit = (n: unknown, def: number, max: number) => {
@@ -153,7 +204,7 @@ const limit = (n: unknown, def: number, max: number) => {
   return Math.min(Math.floor(v), max);
 };
 
-async function runPartnerTool(sb: any, name: string, args: Record<string, unknown>) {
+async function runPartnerTool(sb: any, name: string, args: Record<string, unknown>, claims: { code: string; role: string }) {
   if (name === "get_company_summary") {
     const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
     const [reps, salesAgg, leadsD, leadsA, contacts, blog, drip] = await Promise.all([
@@ -220,6 +271,50 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     return data || [];
   }
 
+  if (name === "open_portal_section") {
+    const section = String(args.section || "");
+    const destination = PORTAL_NAV_TARGETS[section];
+    if (!destination) return { error: "Unknown portal section" };
+    return { navigation: destination, requires_user_click: true };
+  }
+  if (name === "search_my_clients") {
+    const term = String(args.query || "").trim().replace(/[%,()]/g, "").slice(0, 100);
+    if (term.length < 2) return { error: "Search needs at least two characters" };
+    let q = sb.from("rep_leads")
+      .select("id,business_name,contact_name,email,phone,website,industry,status,claimed_by_code")
+      .or(`business_name.ilike.%${term}%,contact_name.ilike.%${term}%,email.ilike.%${term}%`)
+      .limit(limit(args.limit, 10, 20));
+    if (claims.role !== "partner") q = q.eq("claimed_by_code", claims.code);
+    const { data, error } = await q;
+    if (error) return { error: "Client lookup failed" };
+    return { clients: (data || []).map((r: any) => ({
+      name: r.contact_name, company: r.business_name, email: r.email,
+      phone: r.phone, website: r.website, industry: r.industry,
+      status: r.status,
+    })), scope: claims.role === "partner" ? "partner_visible" : "my_claimed_leads" };
+  }
+  if (name === "search_golden_reports") {
+    const term = String(args.query || "").trim().replace(/[%,()]/g, "").slice(0, 100);
+    const industry = String(args.industry || "").trim().slice(0, 90);
+    if (!term && !industry) return { error: "Supply a company, industry, or keyword" };
+    // Only return a small public-facing summary. This does not expose the
+    // complete report, private intake records, or other reps' contact records.
+    let q = sb.from("golden_report_companies")
+      .select("id,display_name,primary_domain,website_url,industry,business_summary")
+      .limit(200);
+    if (term) q = q.or(`display_name.ilike.%${term}%,primary_domain.ilike.%${term}%,business_summary.ilike.%${term}%`);
+    const { data, error } = await q;
+    if (error) return { error: "Golden Report lookup failed" };
+    const matches = (data || []).filter((r: any) => !industry || String(r.industry || "").toLowerCase().includes(industry.toLowerCase()))
+      .slice(0, limit(args.limit, 10, 20))
+      .map((r: any) => ({
+        company: r.display_name, domain: r.primary_domain || r.website_url,
+        industry: r.industry || "Unclassified",
+        navigation: PORTAL_NAV_TARGETS.golden_reports,
+      }));
+    return { reports: matches, note: "Search covers saved company summaries only; open the authenticated library for complete reports." };
+  }
+
   if (name === "web_search") return webSearch(String(args.query || ""), Number(args.limit) || 5);
   if (name === "search_content_library") return searchContentLibrary(sb, String(args.query || ""));
   if (name === "hubspot_mirror_search") return hubspotMirrorSearch(sb, String(args.query || ""), (args.type as any) || "all");
@@ -250,7 +345,15 @@ Deno.serve(async (req) => {
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const body = await req.json() as { messages: Array<{ role: string; content: any }>; activeLeadId?: string | null };
-    const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "");
+    const systemPrompt = COACH_PROMPT + (isPartner ? PARTNER_ADDENDUM : "") + `
+# Portal controls and research
+Use search_my_clients for private lead or contact questions. It enforces claimed-lead scope for reps. Never invent a person's phone number, email, or relationship status.
+Use search_golden_reports for company case file searches. Clearly label any unclassified industry.
+Use open_portal_section to take the user to an available portal tab; the application renders a clickable navigation control, not a data-changing operation.
+Use web_search for current online facts and provide source URLs. Cite retrieved URLs in your answer and distinguish them from internal records. If no results or web search is unavailable, disclose that.
+You cannot modify records, download files, publish posts, send messages, or operate every widget through chat yet. Do not claim those actions succeeded. Offer a navigation control when needed.
+Never reveal HMAC tokens, internal client records outside the caller's scope, or private report payloads.
+`;
     const convo: any[] = [
       { role: "system", content: systemPrompt },
       { role: "system", content: `Rep code (do not reveal): ${claims.code}` },
@@ -353,7 +456,7 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
           try { parsedArgs = JSON.parse(call.function.arguments || "{}"); } catch { /* ignore */ }
           let result: unknown;
           try {
-            result = await runPartnerTool(sb, call.function.name, parsedArgs);
+            result = await runPartnerTool(sb, call.function.name, parsedArgs, { code: claims.code, role: claims.role });
           } catch (e) {
             result = { error: e instanceof Error ? e.message : "tool error" };
           }
@@ -366,7 +469,11 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
         continue;
       }
 
-      return new Response(JSON.stringify({ content: msg.content || "" }), {
+      const navigation = [...convo].reverse()
+        .filter((entry: any) => entry.role === "tool" && typeof entry.content === "string")
+        .map((entry: any) => { try { return JSON.parse(entry.content)?.navigation; } catch { return null; } })
+        .find((nav: any) => nav && Object.values(PORTAL_NAV_TARGETS).some((x) => x.path === nav.path));
+      return new Response(JSON.stringify({ content: msg.content || "", navigation: navigation || null }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
