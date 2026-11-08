@@ -509,6 +509,8 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   const [source, setSource] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [industries, setIndustries] = useState<Array<{ name: string; count: number }>>([]);
   const [state, setState] = useState('');
   const [blueprint, setBlueprint] = useState<'' | 'has' | 'none'>('');
   const [sort, setSort] = useState('newest');
@@ -529,12 +531,13 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await listCompanies({ search: debounced, source, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT }, portalToken);
+      const res = await listCompanies({ search: debounced, source, industry, state, blueprint, sort, limit: LIMIT, offset: page * LIMIT }, portalToken);
       setItems(res.items); setTotal(res.total);
+      setIndustries(res.industries || []);
     } catch (e) {
       setError((e as Error).message);
     } finally { setLoading(false); }
-  }, [debounced, source, state, blueprint, sort, page, portalToken]);
+  }, [debounced, source, industry, state, blueprint, sort, page, portalToken]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (!portalToken) getLibraryStats().then(setStats).catch(() => {}); }, [portalToken]);
@@ -670,8 +673,12 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
         <div className="relative min-w-[220px] flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} aria-label="Search the Golden Report library"
-            placeholder="Search business, domain, URL, summary, finding…" className="h-8 pl-9 text-sm" />
+            placeholder="Search business, industry, domain, URL, finding…" className="h-8 pl-9 text-sm" />
         </div>
+        <select aria-label="Filter by industry" className={selectCls} value={industry} onChange={e => { setIndustry(e.target.value); setPage(0); }}>
+          <option value="">All industries</option>
+          {industries.map(item => <option key={item.name} value={item.name}>{item.name} ({item.count})</option>)}
+        </select>
         <select aria-label="Filter by source" className={selectCls} value={source} onChange={e => { setSource(e.target.value); setPage(0); }}>
           {SOURCES.map(s => <option key={s.v} value={s.v}>{s.l}</option>)}
         </select>
@@ -710,6 +717,7 @@ export const GoldenReportLibrary: React.FC<GoldenReportLibraryProps> = ({ portal
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-sm font-bold text-foreground group-hover:text-amber">{card.company.display_name}</p>
                     <p className="truncate font-mono text-[10px] text-muted-foreground">{card.company.primary_domain || card.company.website_url || '—'}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">{card.company.industry || 'Unclassified'}{card.company.industry_source === 'inferred' ? ' (inferred)' : ''}</p>
                   </div>
                 </div>
                 {card.company.business_summary && (
