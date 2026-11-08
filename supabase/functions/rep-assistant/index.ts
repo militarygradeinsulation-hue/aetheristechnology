@@ -1,11 +1,12 @@
 // Rep / Partner Sales Coach assistant.
 // - Auth: HMAC portal token (rep or partner role).
-// - Reps: pure sales-coach prompt, NO database tools.
-// - Partners: same coach + small set of read-only company-wide tools.
+// - Reps: scoped lead lookups, library search, web search, and navigation.
+// - Partners: additional authorized read-only company-wide tools.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
 import { SHARED_TOOL_SCHEMAS, webSearch, searchContentLibrary, hubspotMirrorSearch } from "../_shared/operator-tools.ts";
 import { routedChatCompletion } from "../_shared/ai-router.ts";
+import { classifyIndustryHeuristic } from "../_shared/industry-intelligence.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -299,19 +300,25 @@ async function runPartnerTool(sb: any, name: string, args: Record<string, unknow
     if (!term && !industry) return { error: "Supply a company, industry, or keyword" };
     // Only return a small public-facing summary. This does not expose the
     // complete report, private intake records, or other reps' contact records.
-    let q = sb.from("golden_report_companies")
+    const { data, error } = await sb.from("golden_report_companies")
       .select("id,display_name,primary_domain,website_url,industry,business_summary")
-      .limit(200);
-    if (term) q = q.or(`display_name.ilike.%${term}%,primary_domain.ilike.%${term}%,business_summary.ilike.%${term}%`);
-    const { data, error } = await q;
+      .limit(2000);
     if (error) return { error: "Golden Report lookup failed" };
-    const matches = (data || []).filter((r: any) => !industry || String(r.industry || "").toLowerCase().includes(industry.toLowerCase()))
-      .slice(0, limit(args.limit, 10, 20))
-      .map((r: any) => ({
+    const matches = (data || []).map((r: any) => {
+      const guess = r.industry ? null : classifyIndustryHeuristic({
+        companyName: r.display_name, domain: r.primary_domain,
+        websiteUrl: r.website_url, reportEvidence: r.business_summary,
+      });
+      return {
         company: r.display_name, domain: r.primary_domain || r.website_url,
-        industry: r.industry || "Unclassified",
+        industry: r.industry || (guess && guess.confidence >= 0.73 ? guess.industry : null) || "Unclassified",
+        industry_inferred: !r.industry && !!guess && guess.confidence >= 0.73,
         navigation: PORTAL_NAV_TARGETS.golden_reports,
-      }));
+      };
+    }).filter((r: any) =>
+      (!industry || r.industry.toLowerCase().includes(industry.toLowerCase())) &&
+      (!term || [r.company, r.domain, r.industry].some((v: string) => String(v || "").toLowerCase().includes(term.toLowerCase())))
+    ).slice(0, limit(args.limit, 10, 20));
     return { reports: matches, note: "Search covers saved company summaries only; open the authenticated library for complete reports." };
   }
 
@@ -407,12 +414,22 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
       }
     }
 
-    convo.push(...body.messages);
-
-    convo.push(...body.messages);
+    // Never trust conversation roles supplied by the browser; system/tool
+    // messages are reserved for the authenticated server and model results.
+    const cleanHistory = Array.isArray(body.messages)
+      ? body.messages.filter((m: any) => ["user", "assistant"].includes(m?.role))
+          .slice(-20).map((m: any) => ({
+            role: m.role,
+            content: typeof m.content === "string"
+              ? m.content.slice(0, 12000)
+              : Array.isArray(m.content) ? m.content.slice(0, 4) : "",
+          }))
+      : [];
+    convo.push(...cleanHistory);
 
 
     const tools = isPartner ? [...PARTNER_TOOLS, ...REP_LIVE_TOOLS] : REP_LIVE_TOOLS;
+    const permittedTools = new Set(tools.map((tool: any) => tool.function.name));
 
     for (let round = 0; round < 4; round++) {
       let routed;
@@ -456,7 +473,9 @@ When the rep asks you to draft an email, DM, or call script: lead with the highe
           try { parsedArgs = JSON.parse(call.function.arguments || "{}"); } catch { /* ignore */ }
           let result: unknown;
           try {
-            result = await runPartnerTool(sb, call.function.name, parsedArgs, { code: claims.code, role: claims.role });
+            result = permittedTools.has(call.function.name)
+              ? await runPartnerTool(sb, call.function.name, parsedArgs, { code: claims.code, role: claims.role })
+              : { error: "Tool not permitted for this portal session" };
           } catch (e) {
             result = { error: e instanceof Error ? e.message : "tool error" };
           }
