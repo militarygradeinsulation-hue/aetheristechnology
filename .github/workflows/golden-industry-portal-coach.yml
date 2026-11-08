@@ -8,6 +8,7 @@ on:
       - "src/lib/goldenIndustryAndPortal.test.ts"
       - "src/lib/firecrawlPortalSearch.test.ts"
       - "src/lib/portalAssistantPolicy.test.ts"
+      - "src/lib/portalReportNavigation.test.ts"
       - "supabase/functions/_shared/portal-assistant-policy.ts"
       - "src/pages/PortalPage.tsx"
       - "supabase/functions/_shared/operator-tools.ts"
@@ -25,6 +26,7 @@ on:
       - "src/lib/goldenIndustryAndPortal.test.ts"
       - "src/lib/firecrawlPortalSearch.test.ts"
       - "src/lib/portalAssistantPolicy.test.ts"
+      - "src/lib/portalReportNavigation.test.ts"
       - "supabase/functions/_shared/portal-assistant-policy.ts"
       - "src/pages/PortalPage.tsx"
       - "supabase/functions/_shared/operator-tools.ts"
@@ -46,6 +48,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Industry classification regression tests
-        run: bunx vitest run src/lib/goldenIndustryAndPortal.test.ts src/lib/firecrawlPortalSearch.test.ts src/lib/portalAssistantPolicy.test.ts
+        run: bunx vitest run src/lib/goldenIndustryAndPortal.test.ts src/lib/firecrawlPortalSearch.test.ts src/lib/portalAssistantPolicy.test.ts src/lib/portalReportNavigation.test.ts
       - name: Build portal and library
         run: bun run build
