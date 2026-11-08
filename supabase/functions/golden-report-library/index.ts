@@ -439,6 +439,16 @@ serve(async (req) => {
       return json({ total_scans: total ?? 0, total_archived: done ?? 0, total_companies: companies ?? 0 });
     }
 
+    // Library summaries contain metadata from saved scans. Prevent portal
+    // sessions from accidentally discovering private-intake report details.
+    const privateScansForPortal = async (): Promise<Set<string>> => {
+      if (globalScope) return new Set();
+      const { data, error } = await sb.from("forensic_scans")
+        .select("id").eq("private_intake", true).limit(5000);
+      if (error) throw error;
+      return new Set((data || []).map((r: { id: string }) => r.id));
+    };
+
     /* company-first search list */
     if (action === "list_companies") {
       const limit = Math.max(1, Math.min(60, Number(body.limit) || 24));
@@ -459,7 +469,9 @@ serve(async (req) => {
       if (body.until) aq = aq.lte("completed_at", String(body.until));
       const { data: archives, error: aerr } = await aq.order("completed_at", { ascending: false }).limit(4000);
       if (aerr) throw aerr;
-      let rows = (archives || []) as Record<string, unknown>[];
+      const privateScanIds = await privateScansForPortal();
+      let rows = ((archives || []) as Record<string, unknown>[])
+        .filter((r) => !privateScanIds.has(String(r.scan_id)));
 
       // Company lookup (chunked — there can be thousands of distinct companies)
       const companyIds = [...new Set(rows.map((r) => String(r.company_id)).filter((id) => id && id !== "null"))];
@@ -623,6 +635,8 @@ serve(async (req) => {
       let aq = sb.from("golden_report_archive").select("*").eq("company_id", companyId);
       aq = scoped(aq as never) as never;
       const { data: reports } = await aq.order("completed_at", { ascending: false });
+      const privateScanIds = await privateScansForPortal();
+      const visibleReports = (reports || []).filter((r: { scan_id: string }) => !privateScanIds.has(String(r.scan_id)));
       const list = (reports || []) as Record<string, unknown>[];
       if (scopeCodes !== null && list.length === 0) return json({ error: "Forbidden" }, 403);
       const { data: bps } = await sb.from("golden_system_blueprints")
@@ -691,6 +705,11 @@ serve(async (req) => {
       aq = scoped(aq as never) as never;
       const { data: archive } = await aq.maybeSingle();
       if (!archive) return json({ error: "not found" }, 404);
+      if (!globalScope) {
+        const { data: scanVisibility } = await sb.from("forensic_scans")
+          .select("private_intake").eq("id", scanId).maybeSingle();
+        if (!scanVisibility || scanVisibility.private_intake === true) return json({ error: "not found" }, 404);
+      }
       const { data: findings } = await sb.from("golden_report_findings_index")
         .select("*").eq("scan_id", scanId).order("priority", { ascending: true });
       const { data: blueprints } = await sb.from("golden_system_blueprints")
