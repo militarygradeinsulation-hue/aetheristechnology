@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
+import { SCANNED_LEADS_PAGE_SIZE, safeDirectoryPage, safeDirectorySearch, websiteScanIssues, enrichedLeadIssues, indexedReportIssue, scanCompanyName, safePublicUrl, contactNameList } from "../_shared/scanned-leads-directory.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,6 +115,141 @@ serve(async (req) => {
       const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
       if (error) throw error;
       return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Read-only admin directory for existing scans. Never initiates enrichment,
+    // Firecrawl, AI requests, or prospect discovery.
+    if (action === "scanned_leads_directory") {
+      const source = ["forensic", "website", "enriched"].includes(body.source) ? body.source : "forensic";
+      const page = safeDirectoryPage(body.page);
+      const search = safeDirectorySearch(body.search);
+      const from = page * SCANNED_LEADS_PAGE_SIZE;
+      const to = from + SCANNED_LEADS_PAGE_SIZE - 1;
+      const searchValue = search ? `%${search}%` : "";
+      const countsQuery = async () => {
+        const [f, w, e] = await Promise.all([
+          supabase.from("forensic_scans").select("id", { count: "exact", head: true }),
+          supabase.from("website_scans").select("id", { count: "exact", head: true }),
+          supabase.from("rep_leads").select("id", { count: "exact", head: true }).not("enrichment", "is", null),
+        ]);
+        for (const r of [f,w,e]) if (r.error) throw r.error;
+        return { forensic: f.count || 0, website: w.count || 0, enriched: e.count || 0 };
+      };
+      const counts = await countsQuery();
+      let rows: Record<string, unknown>[] = [];
+      let total = 0;
+      if (source === "forensic") {
+        let q = supabase.from("forensic_scans")
+          .select("id,target_url,company_name,lead_name,lead_email,lead_phone,status,error_message,created_at,completed_at", { count: "exact" })
+          .order("created_at", { ascending: false });
+        if (search) q = q.or(`company_name.ilike.${searchValue},target_url.ilike.${searchValue},lead_name.ilike.${searchValue},lead_email.ilike.${searchValue}`);
+        const scans = await q.range(from,to);
+        if (scans.error) throw scans.error;
+        total = scans.count || 0;
+        const found = scans.data || [];
+        const ids = found.map((item: any) => item.id);
+        const ar = ids.length
+          ? await supabase.from("golden_report_archive")
+            .select("id,scan_id,company_id,report_state,report_source,leak_count,finding_count,score,grade,executive_summary,annual_low,annual_high")
+            .in("scan_id",ids)
+          : { data: [], error: null };
+        if (ar.error) throw ar.error;
+        const archives = ar.data || [];
+        const archiveIds = archives.map((a: any)=>a.id);
+        const companyIds = [...new Set(archives.map((a: any)=>a.company_id).filter(Boolean))];
+        const [companiesRes, findingsRes] = await Promise.all([
+          companyIds.length
+            ? supabase.from("golden_report_companies").select("id,display_name,website_url,industry,location,poc_name,poc_title,poc_email,poc_phone,contact_names").in("id",companyIds)
+            : Promise.resolve({ data: [], error: null }),
+          archiveIds.length
+            ? supabase.from("golden_report_findings_index")
+              .select("archive_id,title,detail,category,evidence_grade,priority,recommended_action,annual_low,annual_high")
+              .in("archive_id",archiveIds).order("priority", { ascending: true }).limit(1200)
+            : Promise.resolve({ data: [], error: null }),
+        ]);
+        if (companiesRes.error) throw companiesRes.error;
+        if (findingsRes.error) throw findingsRes.error;
+        const byScan = new Map(archives.map((item:any)=>[item.scan_id,item]));
+        const companies = new Map((companiesRes.data||[]).map((item:any)=>[item.id,item]));
+        const byArchive = new Map<string, any[]>();
+        for (const finding of findingsRes.data || []) {
+          const list = byArchive.get(finding.archive_id) || [];
+          if (list.length < 50) list.push(finding);
+          byArchive.set(finding.archive_id,list);
+        }
+        rows = found.map((item:any) => {
+          const archive: any = byScan.get(item.id) || null;
+          const company: any = archive ? companies.get(archive.company_id) || null : null;
+          const issues = (archive ? byArchive.get(archive.id) || [] : [])
+            .map(indexedReportIssue).filter(Boolean);
+          return {
+            id:item.id, source:"forensic", name:scanCompanyName(item.target_url,company?.display_name || item.company_name),
+            website:safePublicUrl(company?.website_url || item.target_url),
+            contactName:item.lead_name || company?.poc_name || contactNameList(company?.contact_names).join(", ") || null,
+            contactEmail:item.lead_email || company?.poc_email || null,
+            contactPhone:item.lead_phone || company?.poc_phone || null,
+            contactTitle:company?.poc_title || null, industry:company?.industry || null, location:company?.location || null,
+            date:item.completed_at || item.created_at, status:item.status,
+            score:archive?.score ?? null, grade:archive?.grade || null,
+            summary:archive?.executive_summary || item.error_message || null,
+            reportState:archive?.report_state || null, reportSource:archive?.report_source || null,
+            issues, issueCount:archive?.finding_count ?? issues.length, leakCount:archive?.leak_count ?? null,
+            annualLow:archive?.annual_low ?? null, annualHigh:archive?.annual_high ?? null,
+            archiveId:archive?.id || null, scanId:item.id,
+          };
+        });
+      } else if (source === "website") {
+        let q = supabase.from("website_scans")
+          .select("id,url,score,gaps,created_at", { count: "exact" })
+          .order("created_at", { ascending: false });
+        if (search) q = q.ilike("url",searchValue);
+        const data = await q.range(from,to);
+        if (data.error) throw data.error;
+        total = data.count || 0;
+        rows = (data.data || []).map((item:any)=>{
+          const body = item.gaps || {};
+          const issues = websiteScanIssues(body);
+          return {
+            id:item.id, source:"website", name:scanCompanyName(item.url,body.companyName),
+            website:safePublicUrl(item.url), contactName:null,contactEmail:null,contactPhone:null,
+            contactTitle:null,industry:null,location:null,date:item.created_at,status:"completed",
+            score:item.score,grade:body.grade || null,summary:body.executiveSummary || null,
+            reportState:body._fallback ? "fallback" : "website scan",reportSource:"website scan",
+            issues, issueCount:issues.length, leakCount:null,annualLow:null,annualHigh:null,archiveId:null,scanId:null,
+          };
+        });
+      } else {
+        let q = supabase.from("rep_leads")
+          .select("id,business_name,contact_name,email,phone,website,industry,location,score,why_fit,status,enrichment,enriched_at,created_at,notes", { count: "exact" })
+          .not("enrichment","is",null).order("created_at", { ascending: false });
+        if (search) q = q.or(`business_name.ilike.${searchValue},contact_name.ilike.${searchValue},email.ilike.${searchValue},website.ilike.${searchValue}`);
+        const data = await q.range(from,to);
+        if (data.error) throw data.error;
+        total = data.count || 0;
+        rows = (data.data || []).map((item:any)=>{
+          const e = item.enrichment || {};
+          const rr = e.rocketreach || {};
+          const scan = e.scan || {};
+          const issues = enrichedLeadIssues(e);
+          return {
+            id:item.id,source:"enriched",name:scanCompanyName(item.website,item.business_name),
+            website:safePublicUrl(item.website || scan.scanned_url),
+            contactName:item.contact_name || rr.name || null,
+            contactEmail:item.email || rr.best_email || null,
+            contactPhone:item.phone || (Array.isArray(rr.phones) && typeof rr.phones[0] === "string" ? rr.phones[0] : null),
+            contactTitle:rr.title || null,linkedinUrl:safePublicUrl(rr.linkedin_url),
+            industry:item.industry || e.industry_refined || null,location:item.location || rr.location || null,
+            date:item.enriched_at || item.created_at,status:item.status || "enriched",
+            score:item.score ?? scan.score ?? null,grade:scan.grade || null,
+            summary:scan.executiveSummary || item.why_fit || item.notes || null,
+            reportState:scan._fallback ? "fallback" : "enriched",reportSource:"lead enrichment",
+            issues,issueCount:issues.length,leakCount:null,annualLow:null,annualHigh:null,archiveId:null,scanId:null,
+          };
+        });
+      }
+      return new Response(JSON.stringify({ rows, counts, source, page, pageSize:SCANNED_LEADS_PAGE_SIZE, total }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
