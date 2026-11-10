@@ -66,3 +66,14 @@ jobs:
             2*) echo "Social content scanner deployed and preflight successful." >> "$GITHUB_STEP_SUMMARY" ;;
             *) echo "::error::Social scanner preflight returned HTTP $status"; exit 1 ;;
           esac
+      - name: Verify latest backend handles invalid input without paid provider calls
+        shell: bash
+        run: |
+          set -eu
+          status="$(curl -sS --max-time 20 -o /tmp/social-scan-invalid.json -w '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' \
+            -d '{"url":""}' \
+            "https://$SUPABASE_PROJECT_ID.supabase.co/functions/v1/generate-social-content")"
+          test "$status" = "400"
+          grep -q '"code":"INVALID_URL"' /tmp/social-scan-invalid.json
+          echo "Latest deployed function returned validated INVALID_URL response." >> "$GITHUB_STEP_SUMMARY"
