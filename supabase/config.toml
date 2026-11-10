@@ -306,3 +306,17 @@ verify_jwt = false
 
 [functions.golden-report-library]
 verify_jwt = false
+
+# Manual lead discovery uses application-level HMAC/portal-token verification.
+# Keep the Supabase JWT gate off so the existing rep and admin clients work.
+# These functions enforce their own authorization before any paid provider call.
+[functions.admin-scrape-leads]
+verify_jwt = false
+
+[functions.portal-scrape-leads]
+verify_jwt = false
+
+# Scheduled prospecting remains guarded. Its pg_cron job was removed, its
+# database setting is off, and its new code requires explicit server opt-in.
+[functions.admin-scrape-leads-cron]
+verify_jwt = true
