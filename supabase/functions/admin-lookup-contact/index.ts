@@ -44,8 +44,7 @@ async function firecrawlSearch(query: string, apiKey: string, limit = 8) {
   const res = await fetch("https://api.firecrawl.dev/v2/search", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    // Return links and snippets. A pasted URL is scraped separately above.
-    body: JSON.stringify({ query, limit }),
+    body: JSON.stringify({ query, limit, scrapeOptions: { formats: ["markdown"] } }),
   });
   if (!res.ok) return [];
   const data = await res.json();
