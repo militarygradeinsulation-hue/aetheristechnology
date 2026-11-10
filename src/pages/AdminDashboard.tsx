@@ -51,6 +51,8 @@ const CommissionStructurePanel = lazy(() => import('@/components/admin/Commissio
 const AdminQuotingPos = lazy(() => import('@/components/admin/AdminQuotingPos').then(m => ({ default: m.AdminQuotingPos })));
 const LeadPipelinePanel = lazy(() => import('@/components/admin/LeadPipelinePanel').then(m => ({ default: m.LeadPipelinePanel })));
 const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser').then(m => ({ default: m.AdminLeadBrowser })));
+const ScannedLeadsDirectory = lazy(() => import('@/components/admin/ScannedLeadsDirectory').then(m => ({ default: m.ScannedLeadsDirectory })));
+
 const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
 const AdminCareersTest = lazy(() => import('@/components/admin/AdminCareersTest').then(m => ({ default: m.AdminCareersTest })));
 const AdminCareersPanel = lazy(() => import('@/components/admin/AdminCareersPanel').then(m => ({ default: m.AdminCareersPanel })));
@@ -237,7 +239,7 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'collectivebrain' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector'>(() => {
+  const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'collectivebrain' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector' | 'scannedleads'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved === 'prospector' && !hasValidAdminToken()) return 'workspace';
@@ -277,6 +279,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'hiring', label: 'Hiring', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
+    { key: 'scannedleads', label: 'Scanned Leads', icon: ScanSearch },
     { key: 'library', label: 'Library', icon: Library },
     { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
     { key: 'onboarding', label: 'Aetheris Academy', icon: GraduationCap },
@@ -297,7 +300,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'collectivebrain', 'command', 'prospector', 'meetingflow']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'collectivebrain', 'command', 'prospector', 'meetingflow', 'scannedleads']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -624,6 +627,7 @@ const AdminDashboard: React.FC = () => {
       case 'easymode': return <EasyModeTool />;
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
+      case 'scannedleads': return <Suspense fallback={<PanelFallback />}><ScannedLeadsDirectory /></Suspense>;
       case 'goldenlibrary': return <GoldenReportLibrary />;
       case 'collectivebrain': return <GoldenReportCollectiveBrain />;
       case 'command': return (
@@ -765,6 +769,9 @@ const AdminDashboard: React.FC = () => {
                 </div>
               )}
             </div>
+            <Button variant="outline" size="sm" onClick={() => jumpToTab('scannedleads')} title="View all saved scans and available contact details" className="border-amber/50 text-amber hover:bg-amber/10">
+              <ScanSearch className="w-4 h-4 mr-1" /> Scanned Leads
+            </Button>
             <NotificationBell me="admin" onCountChange={setUnreadNotifs} />
             <Link to="/app/dashboard">
               <Button variant="outline" size="sm" title="Open HubSpot revenue recovery dashboard">
@@ -807,6 +814,18 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
         <OperatorIdentityBar />
         <Suspense fallback={null}><AdminLiveTrafficBar /></Suspense>
+        <button type="button" onClick={() => jumpToTab('scannedleads')} className="w-full rounded-xl border border-amber/50 bg-amber/10 hover:bg-amber/20 transition p-4 text-left" aria-label="View all scanned leads, contact details and issues">
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex items-center gap-3">
+              <ScanSearch className="w-6 h-6 text-amber shrink-0" />
+              <div>
+                <div className="text-base font-semibold text-foreground">Scanned Leads</div>
+                <div className="text-sm text-muted-foreground">One click to saved scans, contacts, and findings. No new scans.</div>
+              </div>
+            </div>
+            <span className="text-amber font-semibold text-sm shrink-0">View All →</span>
+          </div>
+        </button>
         <Link to="/aetheris-ai" className="block w-full rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:border-amber-500 transition p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
