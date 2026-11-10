@@ -7,7 +7,11 @@ on:
       - "src/**"
       - "supabase/functions/generate-social-content/**"
       - "supabase/functions/_shared/social-content-*.ts"
+      - "supabase/functions/_shared/scanned-leads-directory*"
+      - "supabase/functions/admin-data/**"
       - "supabase/functions/_shared/lead-enrichment*"
+      - "supabase/functions/_shared/scanned-leads-directory*"
+      - "supabase/functions/admin-data/**"
       - "supabase/functions/admin-scrape-leads-cron/**"
       - "supabase/functions/admin-scrape-leads/**"
       - "supabase/functions/portal-scrape-leads/**"
@@ -44,5 +48,7 @@ jobs:
         run: bunx vitest run supabase/functions/_shared/social-content-source.test.ts supabase/functions/_shared/social-content-loader.test.ts
       - name: Test manual Firecrawl lead-enrichment budget
         run: bunx vitest run supabase/functions/_shared/lead-enrichment.test.ts
+      - name: Test scanned leads directory evidence normalization
+        run: bunx vitest run supabase/functions/_shared/scanned-leads-directory.test.ts
       - name: Build website
         run: bun run build
