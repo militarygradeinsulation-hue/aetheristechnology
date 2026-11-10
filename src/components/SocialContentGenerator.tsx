@@ -148,7 +148,24 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
         headers: adminToken ? { 'x-admin-token': adminToken } : undefined,
       });
       clearInterval(interval);
-      if (error || !data) throw new Error(error?.message || 'Failed to generate');
+      if (error) {
+        let message = error.message || 'Failed to generate content';
+        // Supabase wraps non-2xx responses. Prefer the backend's specific,
+        // actionable error instead of "Edge Function returned a non-2xx status code".
+        const response = (error as { context?: unknown }).context;
+        if (response instanceof Response) {
+          try {
+            const payload = await response.clone().json();
+            if (payload && typeof payload.error === 'string') message = payload.error;
+          } catch {
+            // Preserve the original network or function error.
+          }
+        }
+        throw new Error(message);
+      }
+      if (!data || typeof data !== 'object' || !Array.isArray(data.caseFiles)) {
+        throw new Error('The scanner did not return a valid content pack.');
+      }
       setProgress(100);
       setPhaseLabel('Done!');
       setTimeout(() => setResult(data), 500);
@@ -236,10 +253,10 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
             <Globe className="w-6 h-6 text-amber" />
             <h2 className="text-2xl font-bold text-foreground font-display">Enter Your Website</h2>
           </div>
-          <p className="text-muted-foreground mb-6">We'll scan your site and generate a Forensic Content Pack, 7 posts across five formats, each built to find a leak, name a leak, or fix a leak.</p>
-          <div className="flex gap-3">
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourbusiness.com" className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleGenerate()} />
-            <Button onClick={handleGenerate} className="bg-amber hover:bg-amber/90 text-background font-bold px-8">Run Forensic Scan</Button>
+          <p className="text-muted-foreground mb-6">Paste a company website or LinkedIn company page. We'll look for public evidence and generate a Forensic Content Pack: 7 posts across five formats.</p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Website or LinkedIn company URL" aria-label="Company website or LinkedIn company URL" className="min-w-0 flex-1" onKeyDown={(e) => e.key === 'Enter' && handleGenerate()} />
+            <Button onClick={handleGenerate} disabled={!url.trim()} className="bg-amber hover:bg-amber/90 text-background font-bold px-6 shrink-0">Run Forensic Scan</Button>
           </div>
         </div>
       )}
@@ -261,6 +278,18 @@ export const SocialContentGenerator: React.FC<{ adminMode?: boolean }> = ({ admi
               Forensic Content Pack: <span className="text-amber">{result.businessName || 'Your Business'}</span>
             </h2>
             <p className="text-muted-foreground">7 forensic posts + weekly rotation, five formats, each finds a leak, names a leak, or fixes a leak</p>
+            {Array.isArray(result.sourceEvidence?.urls) && result.sourceEvidence.urls.length > 0 && (
+              <div className="mt-3 text-xs text-muted-foreground">
+                <p>Public evidence: {result.sourceEvidence.method === 'indexed-search' ? 'Indexed company pages' : 'Company website'}</p>
+                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-1">
+                  {result.sourceEvidence.urls.map((source: string) => (
+                    <a key={source} href={source} target="_blank" rel="noopener noreferrer" className="text-amber underline underline-offset-2 break-all">
+                      {source}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <QuickDownloadBar
