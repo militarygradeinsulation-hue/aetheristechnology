@@ -1,5 +1,5 @@
 // Shared lead enrichment helper.
-// 1) Scrapes the company's site (homepage + likely contact/about pages) via Firecrawl.
+// 1) Scrapes only the homepage and one likely contact page via Firecrawl.
 // 2) Extracts contact info: real-person emails first, then generic mailboxes
 //    (info@, contact@, sales@, hello@, support@, admin@) as a fallback so we
 //    NEVER leave a lead without contact info when the site exposes one.
@@ -70,9 +70,10 @@ export interface EnrichedContact {
 }
 
 /**
- * Try the homepage first, then /contact, /about, /team — stop as soon as we
- * have a same-domain real-person email. Always return the best generic
- * mailbox we find if no person email is present.
+ * Limit paid enrichment to two company pages. The homepage and /contact are
+ * enough for triage, and missing details can be researched on demand.
+ * Stop early when a same-domain real-person email is found.
+ * Return the best generic mailbox when it is the only available contact.
  */
 export async function enrichLeadFromWebsite(
   website: string,
@@ -81,7 +82,7 @@ export async function enrichLeadFromWebsite(
   if (!website || !apiKey) return {};
   const domain = normalizeDomain(website);
   const base = `https://${domain}`;
-  const paths = ["", "/contact", "/contact-us", "/about", "/about-us", "/team", "/leadership"];
+  const paths = ["", "/contact"];
 
   const found = new Map<string, number>(); // email -> score
   let phone: string | undefined;

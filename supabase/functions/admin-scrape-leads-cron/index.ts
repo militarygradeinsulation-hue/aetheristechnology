@@ -93,6 +93,14 @@ async function aiScoreLeads(searchResults: any[], industry: string, count: numbe
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  // Scheduled prospecting is opt-in and off by default. Accidentally restoring
+  // a pg_cron entry must not spend Firecrawl credits or AI gateway tokens.
+  // Manual person/company research is unaffected.
+  if (Deno.env.get("ENABLE_SCHEDULED_LEAD_SCRAPING") !== "true") {
+    return new Response(JSON.stringify({ ok: true, skipped: "automatic lead scraping disabled" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   try {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);

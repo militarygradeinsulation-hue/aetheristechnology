@@ -30,7 +30,9 @@ async function firecrawlSearch(query: string, apiKey: string, limit = 15) {
   const res = await fetch("https://api.firecrawl.dev/v2/search", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query, limit, scrapeOptions: { formats: ["markdown"] } }),
+    // Search results are only used for shortlisting. Do not buy a page scrape
+    // for every candidate; detailed site enrichment is explicitly selective.
+    body: JSON.stringify({ query, limit }),
   });
   const data = await res.json();
   const items = Array.isArray(data?.data) ? data.data : Array.isArray(data?.data?.web) ? data.data.web : [];
