@@ -7,6 +7,10 @@ on:
       - "src/**"
       - "supabase/functions/generate-social-content/**"
       - "supabase/functions/_shared/social-content-*.ts"
+      - "supabase/functions/_shared/lead-enrichment*"
+      - "supabase/functions/admin-scrape-leads-cron/**"
+      - "supabase/functions/admin-scrape-leads/**"
+      - "supabase/functions/portal-scrape-leads/**"
       - "public/**"
       - "package.json"
       - "bun.lock"
@@ -15,6 +19,10 @@ on:
     paths:
       - "src/**"
       - "public/**"
+      - "supabase/functions/_shared/lead-enrichment*"
+      - "supabase/functions/admin-scrape-leads-cron/**"
+      - "supabase/functions/admin-scrape-leads/**"
+      - "supabase/functions/portal-scrape-leads/**"
       - "package.json"
       - "bun.lock"
       - ".github/workflows/site-quality.yml"
@@ -34,5 +42,7 @@ jobs:
         run: bunx vitest run src/lib/executiveMeetingFlow.test.ts src/lib/buyerIntentCore.test.ts src/lib/businessXrayPayments.test.ts src/lib/aetherisDirectEmail.test.ts src/lib/xraySelfServe.test.ts src/lib/goldenEdgeFailure.test.ts
       - name: Test social scanner company URL and Firecrawl fallback
         run: bunx vitest run supabase/functions/_shared/social-content-source.test.ts supabase/functions/_shared/social-content-loader.test.ts
+      - name: Test manual Firecrawl lead-enrichment budget
+        run: bunx vitest run supabase/functions/_shared/lead-enrichment.test.ts
       - name: Build website
         run: bun run build
