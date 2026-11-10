@@ -12,11 +12,11 @@ describe("manual lead enrichment Firecrawl budget", () => {
     const requests: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (_endpoint: string, init?: RequestInit) => {
       requests.push(JSON.parse(String(init?.body)).url);
-      return page("Meet Jane Doe, Founder. Email: jane.doe@example.com");
+      return page("Meet Jane Doe, Founder. Email: jane.doe@acmeindustries.com");
     }));
-    const lead = await enrichLeadFromWebsite("https://example.com", "test-key");
-    expect(lead.email).toBe("jane.doe@example.com");
-    expect(requests).toEqual(["https://example.com"]);
+    const lead = await enrichLeadFromWebsite("https://acmeindustries.com", "test-key");
+    expect(lead.email).toBe("jane.doe@acmeindustries.com");
+    expect(requests).toEqual(["https://acmeindustries.com"]);
   });
 
   it("limits manual research to two pages, even if neither has contact data", async () => {
@@ -25,9 +25,9 @@ describe("manual lead enrichment Firecrawl budget", () => {
       requests.push(JSON.parse(String(init?.body)).url);
       return page("Company description with no contact details.");
     }));
-    const lead = await enrichLeadFromWebsite("https://example.com", "test-key");
+    const lead = await enrichLeadFromWebsite("https://acmeindustries.com", "test-key");
     expect(lead.email).toBeUndefined();
-    expect(requests).toEqual(["https://example.com", "https://example.com/contact"]);
+    expect(requests).toEqual(["https://acmeindustries.com", "https://acmeindustries.com/contact"]);
   });
 
   it("keeps a generic business mailbox when no person email is published", async () => {
@@ -35,11 +35,11 @@ describe("manual lead enrichment Firecrawl budget", () => {
     vi.stubGlobal("fetch", vi.fn(async (_endpoint: string, init?: RequestInit) => {
       const url = JSON.parse(String(init?.body)).url;
       requests.push(url);
-      return page(url.endsWith("/contact") ? "Email our team: info@example.com" : "Welcome to Example");
+      return page(url.endsWith("/contact") ? "Email our team: info@acmeindustries.com" : "Welcome to Example");
     }));
-    const lead = await enrichLeadFromWebsite("example.com", "test-key");
-    expect(lead.email).toBe("info@example.com");
-    expect(lead.all_emails).toContain("info@example.com");
+    const lead = await enrichLeadFromWebsite("acmeindustries.com", "test-key");
+    expect(lead.email).toBe("info@acmeindustries.com");
+    expect(lead.all_emails).toContain("info@acmeindustries.com");
     expect(requests).toHaveLength(2);
   });
 });
