@@ -42,6 +42,14 @@ export interface FullReport {
   competitiveBrief: string;
 }
 
+export type GeneratedScanPdf = { blob: Blob; filename: string };
+
+// Keep filenames safe on Windows, macOS, and mobile devices without altering the report subject.
+const scanPdfFilename = (subject: string, suffix: string): string => {
+  const stem = (subject || 'Website Analysis').replace(/[^a-zA-Z0-9._ -]+/g, '_').replace(/\s+/g, '_').slice(0, 80) || 'Website_Analysis';
+  return `${stem}_${suffix}.pdf`;
+};
+
 const M = BRIEF.margin;
 
 function gapCard(doc: jsPDF, gap: ReportGap, y: number, subtitle: string): number {
@@ -115,7 +123,7 @@ function gapCard(doc: jsPDF, gap: ReportGap, y: number, subtitle: string): numbe
 }
 
 // ============ PREVIEW (1 page teaser) ============
-export function generatePreviewPdf(report: FullReport): void {
+export function generatePreviewPdf(report: FullReport, downloadNow = true): GeneratedScanPdf {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const subject = report.companyName || 'Website Analysis';
   paintBg(doc);
@@ -141,11 +149,14 @@ export function generatePreviewPdf(report: FullReport): void {
   briefBody(doc, 'Contact: businessforensics.tech  ·  (317) 495-4601', y, { color: BRIEF.muted, size: 9 });
 
   stampFooters(doc, subject);
-  doc.save(`${subject.replace(/\s+/g, '_')}_Scan_Preview.pdf`);
+  const filename = scanPdfFilename(subject, 'Scan_Preview');
+  const blob = doc.output('blob');
+  if (downloadNow) doc.save(filename);
+  return { blob, filename };
 }
 
 // ============ FULL REPORT ============
-export function generateFullReport(report: FullReport): void {
+export function generateFullReport(report: FullReport, downloadNow = true): GeneratedScanPdf {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const subject = report.companyName || 'Website Analysis';
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -301,5 +312,8 @@ export function generateFullReport(report: FullReport): void {
   );
 
   stampFooters(doc, subject);
-  doc.save(`${subject.replace(/\s+/g, '_')}_Executive_Diagnostic.pdf`);
+  const filename = scanPdfFilename(subject, 'Executive_Diagnostic');
+  const blob = doc.output('blob');
+  if (downloadNow) doc.save(filename);
+  return { blob, filename };
 }
