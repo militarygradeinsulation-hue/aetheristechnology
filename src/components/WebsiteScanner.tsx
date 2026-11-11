@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, AlertTriangle, AlertCircle, Info, Lock, Globe, FileDown, ArrowRight, Zap, DollarSign, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import { ChaosScanReport } from '@/components/ChaosScanReport';
 import { scanResultToChaos } from '@/lib/toolChaosAdapters';
 import { BOOK_MEETING_URL } from '@/lib/links';
+import { toast } from 'sonner';
 
 interface Gap {
   category: string;
@@ -275,6 +276,19 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
   const [purchasedTier, setPurchasedTier] = useState<string | null>(null);
   const { trackEvent } = useTrackEvent();
   const { user } = useAuth();
+  const activePdfUrl = useRef<string | null>(null);
+  const [preparedPdf, setPreparedPdf] = useState<{ url: string; filename: string } | null>(null);
+
+  // The blob URL belongs to this scan result; release it on replacement/unmount.
+  const clearPreparedPdf = useCallback(() => {
+    if (activePdfUrl.current) URL.revokeObjectURL(activePdfUrl.current);
+    activePdfUrl.current = null;
+    setPreparedPdf(null);
+  }, []);
+
+  useEffect(() => () => {
+    if (activePdfUrl.current) URL.revokeObjectURL(activePdfUrl.current);
+  }, []);
 
   // Check for existing purchase when result loads
   const checkPurchase = useCallback(async (scanUrl: string) => {
@@ -298,6 +312,7 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
     setIsLoading(true);
     setError('');
     setResult(null);
+    clearPreparedPdf();
     setScanPhase(0);
     setPurchasedTier(null);
     trackEvent('website_scan_started', { url: url.trim() });
@@ -342,13 +357,43 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
   };
 
   const handleDownloadPreview = () => {
-    if (!result) return;
-    if (isUnlocked) {
-      generateFullReport(result);
-      trackEvent('scan_full_downloaded', { url: url.trim(), score: result.score });
-    } else {
-      generatePreviewPdf(result);
-      trackEvent('scan_preview_downloaded', { url: url.trim(), score: result.score });
+    if (!result) {
+      toast.error('Run a website scan before downloading a report.');
+      return;
+    }
+    try {
+      // Build the file without relying on the PDF library's automatic save action.
+      const file = isUnlocked
+        ? generateFullReport(result, false)
+        : generatePreviewPdf(result, false);
+      if (!(file.blob instanceof Blob) || file.blob.size < 100) {
+        throw new Error('The report generator returned an empty PDF.');
+      }
+
+      const objectUrl = URL.createObjectURL(file.blob);
+      if (activePdfUrl.current) URL.revokeObjectURL(activePdfUrl.current);
+      activePdfUrl.current = objectUrl;
+      setPreparedPdf({ url: objectUrl, filename: file.filename });
+
+      // A real browser anchor is more reliable in embedded/mobile browsers.
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = file.filename;
+      anchor.rel = 'noopener';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      // Browsers do not expose whether a user approved a disk save.
+      toast.info('PDF prepared. If it did not save, use Open PDF below.');
+      trackEvent(isUnlocked ? 'scan_full_downloaded' : 'scan_preview_downloaded', {
+        url: url.trim(),
+        score: result.score,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not create the PDF.';
+      toast.error('PDF download failed', { description: message });
+      console.error('Website scan PDF generation failed', error);
     }
   };
 
@@ -442,15 +487,31 @@ export const WebsiteScanner = ({ onContactClick, hideHeader = false, staffUnlock
                 ))}
               </div>
 
-              {/* Download preview link */}
+              {/* Native file links remain available even when the browser blocks auto-save. */}
               <div className="text-center mt-4">
                 <button
+                  type="button"
                   onClick={handleDownloadPreview}
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                   {isUnlocked ? 'Download Full Report PDF' : 'Download Preview PDF'}
                 </button>
+                {preparedPdf && (
+                  <div className="mt-3 flex flex-col items-center gap-2" role="status" aria-live="polite">
+                    <p className="text-xs text-muted-foreground">
+                      PDF ready. If your browser blocked the download, open the report below.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+                      <a className="text-primary underline underline-offset-4" href={preparedPdf.url} download={preparedPdf.filename}>
+                        Download again
+                      </a>
+                      <a className="text-primary underline underline-offset-4" href={preparedPdf.url} target="_blank" rel="noopener noreferrer">
+                        Open PDF
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Gated section with tiered pricing */}
