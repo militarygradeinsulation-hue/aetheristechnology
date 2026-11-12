@@ -12,7 +12,7 @@ export type OriginalGoldenReport = {
   coverUrl: string;
 };
 
-const PUBLIC_FILES = "https://businessforensics.tech/golden-reports/";
+const PUBLIC_FILES = "https://mindsteal.lovable.app/golden-reports/";
 
 export const ORIGINAL_GOLDEN_REPORTS: OriginalGoldenReport[] = [
   {
