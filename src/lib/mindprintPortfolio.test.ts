@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MINDPRINT_PORTFOLIO_EXAMPLES } from "./mindprintPortfolio";
+import { ORIGINAL_GOLDEN_REPORTS } from "./goldenPortfolio";
 
 const source = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
 
@@ -47,5 +48,33 @@ describe("Aetheris Mindprint portfolio examples", () => {
     expect(animated).toContain("Open the public Mindprint report");
     expect(animated).not.toContain('from "next/image"');
     expect(animated).not.toContain("@tabler/icons-react");
+  });
+});
+
+describe("Original Golden Report portfolio links", () => {
+  const expectedIds = ["stay-dry-roofing", "joe-degrandis", "joe-ciuni", "hamida-architects"];
+
+  it("uses only the four actual PDF files published by the Mindprint source project", () => {
+    expect(ORIGINAL_GOLDEN_REPORTS.map(report => report.id)).toEqual(expectedIds);
+    for (const report of ORIGINAL_GOLDEN_REPORTS) {
+      expect(new URL(report.pdfUrl).origin).toBe("https://businessforensics.tech");
+      expect(new URL(report.pdfUrl).pathname).toBe("/golden-reports/" + report.id + ".pdf");
+      expect(new URL(report.coverUrl).pathname).toBe("/golden-reports/" + report.id + "-cover.jpg");
+      expect(report.pages).toBeGreaterThan(10);
+    }
+  });
+
+  it("opens the original PDF directly from its cover, never a generated report viewer", () => {
+    const portfolio = source("../pages/PortfolioPage.tsx");
+    expect(portfolio).toContain("ORIGINAL_GOLDEN_REPORTS.map");
+    expect(portfolio).toContain("href={report.pdfUrl}");
+    expect(portfolio).toContain("src={report.coverUrl}");
+    expect(portfolio).toContain('type="application/pdf"');
+    expect(portfolio).toContain('target="_blank"');
+    expect(portfolio).toContain('rel="noopener noreferrer"');
+    expect(portfolio).toContain("Open original PDF");
+    expect(portfolio).not.toContain("/golden-preview/");
+    expect(portfolio).not.toContain("/golden-report/run");
+    expect(portfolio).not.toContain("generateForensicGoldenPdf");
   });
 });
