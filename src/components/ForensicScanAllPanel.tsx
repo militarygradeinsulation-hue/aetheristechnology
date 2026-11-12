@@ -375,7 +375,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     setRecovering(true);
     try {
       const { data, error } = await supabase.functions.invoke("forensic-scan-all", {
-        body: { action: "finalize", scan_id: scanId },
+        body: { action: "finalize", scan_id: scanId, confirm_saved_retry: true },
         headers: runnerAdminToken ? { "x-admin-token": runnerAdminToken } : {},
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Could not resume finalization");
