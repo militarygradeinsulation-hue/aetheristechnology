@@ -124,7 +124,7 @@ serve(async (req) => {
     // 3) ALWAYS search by company/domain to surface 2-3 additional decision-makers
     let additionalProfiles: any[] = [];
     if (company || domain) {
-      const r = await fetch(`${RR_BASE}/search`, {
+      const r = await fetch(`${RR_BASE}/person/search`, {
         method: "POST",
         headers,
         body: JSON.stringify({
