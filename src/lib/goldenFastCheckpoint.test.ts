@@ -41,7 +41,7 @@ describe("Golden Report durable synthesis checkpoint", () => {
     expect(handler).toContain("body.confirm_saved_retry === true");
     expect(handler).toContain("priorAttempt >= 5");
     expect(handler).toContain("priorAttempt >= 3 && !manualSavedRetry");
-    expect(handler).toContain('event: "golden_compile_first_pass"');
+    expect(worker).toContain('event: "golden_compile_first_pass"');
   });
 
   it("allows checkpoint recovery without requiring post-processing to be done", () => {
