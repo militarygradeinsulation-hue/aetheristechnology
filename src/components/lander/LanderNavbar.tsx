@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { name: "What We Do", to: "/#what-we-do" },
   { name: "Pricing", to: "/#prices" },
   { name: "Case Studies", to: "/#case-studies" },
+  { name: "Portfolio", to: "/portfolio" },
   { name: "Free Leak Check", to: "/leak-audit/self-scan" },
   { name: "Golden Report", to: "/golden-report" },
   { name: "Partners", to: "/partners" },

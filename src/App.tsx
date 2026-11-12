@@ -129,6 +129,7 @@ const ForensicReportAskPage = lazy(() => import("./pages/ForensicReportAskPage")
 const NexusIQPage = lazy(() => import("./pages/NexusIQPage"));
 const AetherisNexusPage = lazy(() => import("./pages/AetherisNexusPage"));
 const CaseStudiesPage = lazy(() => import("./pages/CaseStudiesPage"));
+const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const RepToolLinkPage = lazy(() => import("./pages/RepToolLinkPage"));
 const ChaosScanPage = lazy(() => import("./pages/ChaosScanPage"));
 const ToolsShopRedeemPage = lazy(() => import("./pages/ToolsShopRedeemPage"));
@@ -284,6 +285,7 @@ const App = () => (
                       <Route path="/golden-report-intelligence" element={<GoldenReportIntelligencePage />} />
                       <Route path="/industries" element={<Navigate to="/careers" replace />} />
                       <Route path="/case-studies" element={<CaseStudiesPage />} />
+                      <Route path="/portfolio" element={<PortfolioPage />} />
                       {Object.keys(VERTICAL_BY_SLUG).map((slug) => (
                         <Route key={slug} path={`/${slug}`} element={<VerticalLandingPage />} />
                       ))}
