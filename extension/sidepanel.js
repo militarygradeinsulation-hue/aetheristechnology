@@ -1561,12 +1561,14 @@ async function runFindContacts() {
   if (!out) return;
   const url = state.activeUrl || state.lastScan?.url;
   if (!url) { toast("Open a page first."); return; }
-  out.innerHTML = `<div class="contacts-card"><h4>Contacts · scraping site + RocketReach…</h4><div class="muted">This can take 10-20 seconds.</div></div>`;
+  const accessCode = await getAccessCode();
+  if (!accessCode) { toast("Enter an active rep code to scan contacts."); return; }
+  out.innerHTML = `<div class="contacts-card"><h4>Contacts · scanning company sources…</h4></div>`;
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/extension-contacts`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, accessCode }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
