@@ -164,7 +164,7 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
   let additionalProfiles: any[] = [];
   if (company || domain) {
     try {
-      const r = await fetch(`${RR_BASE}/search`, {
+      const r = await fetch(`${RR_BASE}/person/search`, {
         method: "POST",
         headers,
         body: JSON.stringify({
