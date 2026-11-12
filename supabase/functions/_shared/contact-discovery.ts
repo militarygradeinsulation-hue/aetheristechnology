@@ -64,6 +64,15 @@ const cleanPhone = (value: string): string | null => {
   if (/^(\d)\1{9}$/.test(local) || local.startsWith("000") || local.slice(3, 6) === "000") return null;
   return phone;
 };
+/** Decode only the email address published in Cloudflare's cfemail markup. */
+export function decodeCloudflareEmail(hex: string): string | null {
+  if (!/^[0-9a-f]+$/i.test(hex) || hex.length < 6 || hex.length % 2 !== 0) return null;
+  const key = Number.parseInt(hex.slice(0, 2), 16);
+  let value = "";
+  for (let i = 2; i < hex.length; i += 2)
+    value += String.fromCharCode(Number.parseInt(hex.slice(i, i + 2), 16) ^ key);
+  return cleanEmail(value);
+}
 const decoded = (value: string): string => value
   .replace(/&commat;|&#0*64;|&#x0*40;/gi, "@")
   .replace(/&period;|&#0*46;|&#x0*2e;/gi, ".")
@@ -123,6 +132,10 @@ function extractPage(page: SeedPage): { evidence: ContactEvidence[]; links: unkn
     for (const m of body.matchAll(/\btel:([+0-9().\s-]{10,25})/gi)) add("phone", m[1]!, "tel");
     for (const m of body.matchAll(/"telephone"\s*:\s*"([^"]+)"/gi)) add("phone", m[1]!, "structured_data");
     for (const m of body.matchAll(/"email"\s*:\s*"([^"]+)"/gi)) add("email", m[1]!, "structured_data");
+  }
+  for (const m of html.matchAll(/data-cfemail\s*=\s*["']([a-f0-9]+)["']/gi)) {
+    const email = decodeCloudflareEmail(m[1]!);
+    if (email) add("email", email, "structured_data");
   }
   for (const mail of md.match(EMAIL) || []) add("email", mail, "page_text");
   for (const phone of md.match(PHONE) || []) add("phone", phone, "page_text");
@@ -238,6 +251,6 @@ export async function discoverPublicBusinessContacts(
     all_phones: phones.slice(0, 10).map(x => x.value),
     evidence, pages_scanned: scanned, candidate_pages: targets,
     requests: counts, ...(homepageText ? { markdown_excerpt: homepageText } : {}),
-    status: email && phone ? "found" : email || phone ? "partial" : "not_found",
+    status: email && phone ? "found" : email || phone ? "partial" : scanned.length ? "not_found" : "unavailable",
   };
 }
