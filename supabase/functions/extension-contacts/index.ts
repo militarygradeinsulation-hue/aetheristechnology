@@ -4,6 +4,7 @@
 // the domain. Returns a single merged payload for the side panel.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { discoverPublicBusinessContacts, safeBusinessUrl } from "../_shared/contact-discovery.ts";
 
 const corsHeaders = {
@@ -13,6 +14,29 @@ const corsHeaders = {
 };
 
 const RR_BASE = "https://api.rocketreach.co/api/v2";
+// A contact lookup uses paid APIs. Require an active rep code and rate limit
+// before initiating any discovery request. No service key leaves the server.
+const contactUsage = new Map<string, { count: number; until: number }>();
+async function authorizeContactScan(code: string): Promise<boolean> {
+  if (!/^[A-Z0-9_-]{3,60}$/.test(code)) return false;
+  const url = Deno.env.get("SUPABASE_URL");
+  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !secret) return false;
+  const db = createClient(url, secret);
+  const { data, error } = await db.from("rep_codes")
+    .select("code,is_active").eq("code", code).maybeSingle();
+  return !error && data?.is_active === true;
+}
+function contactLimitReached(code: string): boolean {
+  const now = Date.now(), current = contactUsage.get(code);
+  if (!current || current.until <= now) {
+    contactUsage.set(code, { count: 1, until: now + 3_600_000 });
+    return false;
+  }
+  if (current.count >= 5) return true;
+  current.count++;
+  return false;
+}
 const FC_BASE = "https://api.firecrawl.dev/v2";
 
 function json(body: unknown, status = 200) {
@@ -33,7 +57,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
     const body = await req.json().catch(() => ({}));
+    const accessCode = String(body.accessCode || "").trim().toUpperCase();
+    if (!(await authorizeContactScan(accessCode))) return json({ error: "Active rep access code required" }, 401);
+    if (contactLimitReached(accessCode)) return json({ error: "Contact research limit reached (5 per hour)" }, 429);
     const url = String(body.url || body.pageUrl || "").trim();
     if (!url) return json({ error: "Missing url" }, 400);
 
