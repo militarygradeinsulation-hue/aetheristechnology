@@ -202,7 +202,8 @@ export async function discoverPublicBusinessContacts(
   if (!targets.length && !haveBoth() && opts.mapIfNeeded !== false && counts.scrape < maxPages) {
     counts.map++;
     const mapped = await requestFirecrawl("/map", { url: origin, limit: 35, includeSubdomains: false }, apiKey);
-    const links = (mapped as { links?: unknown[] } | null)?.links;
+    const envelope = mapped as { links?: unknown[]; data?: { links?: unknown[] } } | null;
+    const links = envelope?.links || envelope?.data?.links;
     if (Array.isArray(links)) allLinks.push(...links);
     targets = candidates();
   }
