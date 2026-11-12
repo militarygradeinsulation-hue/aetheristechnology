@@ -5,6 +5,8 @@ on:
       - "supabase/functions/forensic-scan-all/**"
       - "src/components/ForensicScanAllPanel.tsx"
       - "src/lib/goldenFastCheckpoint.test.ts"
+      - "src/lib/goldenScanRecovery.ts"
+      - "src/lib/goldenScanRecovery.test.ts"
       - ".github/workflows/golden-fast-checkpoint.yml"
   push:
     branches: [main]
@@ -12,6 +14,8 @@ on:
       - "supabase/functions/forensic-scan-all/**"
       - "src/components/ForensicScanAllPanel.tsx"
       - "src/lib/goldenFastCheckpoint.test.ts"
+      - "src/lib/goldenScanRecovery.ts"
+      - "src/lib/goldenScanRecovery.test.ts"
       - ".github/workflows/golden-fast-checkpoint.yml"
 permissions:
   contents: read
@@ -23,6 +27,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Scan checkpoint regression tests
-        run: bunx vitest run src/lib/goldenFastCheckpoint.test.ts
+        run: bunx vitest run src/lib/goldenFastCheckpoint.test.ts src/lib/goldenScanRecovery.test.ts
       - name: Build web app
         run: bun run build

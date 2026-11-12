@@ -23,6 +23,7 @@ import { Wrench } from "lucide-react";
 import { sanitizedGoldenReport } from "@/lib/goldenMoneySanitizer";
 import { downloadTextFile } from "@/lib/goldenLibrary";
 import { canDownloadSavedGoldenReport } from "@/lib/goldenReportDownloadAvailability";
+import { canRecoverGoldenCheckpoint, isGoldenScanStalled } from "@/lib/goldenScanRecovery";
 
 
 
@@ -73,21 +74,33 @@ const TARGET_SECONDS = 75; // reference target only, not a hard completion promi
 
 const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
-async function fetchScanRow(id: string, includeAdminHeader = true, runnerToken?: string | null): Promise<Row | null> {
+async function fetchScanRow(id: string, includeAdminHeader = true, runnerToken?: string | null): Promise<Row> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 12_000);
   try {
     const adminToken = runnerToken || (includeAdminHeader ? getAdminToken() : null);
     const r = await fetch(`${SUPABASE_URL}/functions/v1/forensic-scan-all?id=${encodeURIComponent(id)}`, {
       method: "GET",
+      signal: controller.signal,
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         ...(adminToken ? { "x-admin-token": adminToken } : {}),
       },
     });
-    if (!r.ok) return null;
-    return (await r.json()) as Row;
-  } catch {
-    return null;
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) throw new Error("Runner access expired. Sign in again.");
+      if (r.status === 404) throw new Error("Saved scan not found or not available to this session.");
+      throw new Error(`Report status request failed (HTTP ${r.status}).`);
+    }
+    const result = (await r.json()) as Row;
+    if (!result?.id) throw new Error("Report service returned an invalid status response.");
+    return result;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") throw new Error("Report status request timed out.");
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
   }
 }
 
@@ -168,6 +181,9 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   const [row, setRow] = useState<Row | null>(null);
   const [busy, setBusy] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  const [pollFailures, setPollFailures] = useState(0);
+  const [lastPollError, setLastPollError] = useState<string | null>(null);
+  const [pollCycle, setPollCycle] = useState(0);
   const [reusedScan, setReusedScan] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [fixOpen, setFixOpen] = useState(false);
@@ -196,6 +212,8 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     if (!url.trim()) { toast({ title: "Enter a URL", variant: "destructive" }); return; }
     setBusy(true);
     setReusedScan(false);
+    setPollFailures(0);
+    setLastPollError(null);
     setScanId(null); setRow(null);
     try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
     try {
@@ -234,8 +252,11 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
     let stopped = false;
     if (!startedAtRef.current) startedAtRef.current = Date.now();
     const tick = async () => {
-      const data = await fetchScanRow(scanId, !standalone, runnerToken);
-      if (data && !stopped) {
+      try {
+        const data = await fetchScanRow(scanId, !standalone, runnerToken);
+        if (stopped) return;
+        setPollFailures(0);
+        setLastPollError(null);
         setRow(data);
         const createdAt = data.created_at ? new Date(data.created_at).getTime() : NaN;
         const completedAt = data.completed_at ? new Date(data.completed_at).getTime() : NaN;
@@ -251,19 +272,26 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             return next;
           });
         }
-        if (data.status === "completed" || data.status === "failed") {
+        if (data.status === "completed") {
           try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
           return;
         }
+        // Keep failed scan IDs in this browser so a saved checkpoint can be
+        // resumed after a refresh, without a duplicate paid scan.
+        if (data.status === "failed") return;
+      } catch (error) {
+        if (stopped) return;
+        setPollFailures((count) => Math.min(count + 1, 100));
+        setLastPollError(error instanceof Error ? error.message : "The report service did not respond.");
       }
-      pollRef.current = window.setTimeout(tick, 3000) as unknown as number;
+      if (!stopped) pollRef.current = window.setTimeout(tick, 3000) as unknown as number;
     };
     tick();
     return () => {
       stopped = true;
       if (pollRef.current) window.clearTimeout(pollRef.current);
     };
-  }, [scanId]);
+  }, [scanId, pollCycle]);
 
   useEffect(() => {
     if (!scanId || row?.status === "completed" || row?.status === "failed") return;
@@ -339,21 +367,21 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   // worker. A finished synthesis alone is enough to recover a saved checkpoint.
   // Old pre-checkpoint scans containing only the preliminary template must not
   // claim they can resume real synthesis without a new scan.
-  const synthesizedCheckpointSaved = (row?.report as { synthesis_incomplete?: boolean } | null)?.synthesis_incomplete !== true;
-  const staleFinalization = !!scanId && !!row && ["running", "finalizing"].includes(row.status) &&
-    ["done", "degraded"].includes(stageState("synth")) &&
-    Number.isFinite(new Date(row.updated_at || "").getTime()) &&
-    Date.now() - new Date(row.updated_at || "").getTime() > 90_000;
-  const canRecoverSavedCheckpoint = staleFinalization && synthesizedCheckpointSaved;
+  const canRecoverSavedCheckpoint = canRecoverGoldenCheckpoint(row);
+  const staleFinalization = isGoldenScanStalled(row) || canRecoverSavedCheckpoint;
+  const canResumeWithCurrentSession = isAdmin || Boolean(runnerToken);
   async function recoverReport() {
-    if (!scanId || !isAdmin || recovering) return;
+    if (!scanId || !canResumeWithCurrentSession || recovering) return;
     setRecovering(true);
     try {
       const { data, error } = await supabase.functions.invoke("forensic-scan-all", {
-        body: { action: "finalize", scan_id: scanId },
+        body: { action: "finalize", scan_id: scanId, confirm_saved_retry: true },
         headers: runnerAdminToken ? { "x-admin-token": runnerAdminToken } : {},
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || "Could not resume finalization");
+      setPollFailures(0);
+      setLastPollError(null);
+      setPollCycle((cycle) => cycle + 1);
       toast({ title: "Finalization restarted", description: "The saved research is being validated without running another paid website scan." });
     } catch (error) {
       toast({ title: "Finalization recovery unavailable", description: error instanceof Error ? error.message : "Please contact an administrator.", variant: "destructive" });
@@ -424,6 +452,12 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
               </span>
             )}
           </div>
+          {pollFailures >= 3 && (
+            <div role="alert" className="mb-4 rounded-md border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-300">
+              The report is not responding. Progress may be outdated. {lastPollError}
+              <span className="block text-xs mt-1">The screen will keep checking. Do not restart the paid scan while the status is unknown.</span>
+            </div>
+          )}
           <div className="mb-4 space-y-2">
             <div className="h-2 rounded-full bg-muted overflow-hidden border border-border">
               <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${progressPct}%` }} />
@@ -463,14 +497,14 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             </p>
           )}
           {staleFinalization && (
-            <div className="mt-3 space-y-2 border border-amber-600/50 bg-amber-500/10 p-3 text-sm">
-              <p>{synthesizedCheckpointSaved
-                ? "Finalization has stopped updating. The saved synthesis can be finalized without re-running the website crawl or AI synthesis."
-                : "An older worker stopped before the completed synthesis was saved. Only preliminary evidence remains; this scan cannot safely be completed without new synthesis."}</p>
-              {isAdmin && canRecoverSavedCheckpoint && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
+            <div role="alert" className="mt-3 space-y-2 border border-amber-600/50 bg-amber-500/10 p-3 text-sm">
+              <p>{canRecoverSavedCheckpoint
+                ? "This report stopped before finalization. Its saved research can be compiled without a second website crawl or AI synthesis."
+                : "The scan has not updated for several minutes. No complete synthesis checkpoint is available to resume. Do not run a fresh scan unless you approve another paid research pass."}</p>
+              {canResumeWithCurrentSession && canRecoverSavedCheckpoint && <Button type="button" variant="outline" disabled={recovering} onClick={() => void recoverReport()}>
                 {recovering ? "Resuming..." : "Resume finalization from saved evidence"}
               </Button>}
-              {!isAdmin && <p>Ask an authorized Aetheris administrator to resume this report.</p>}
+              {!canResumeWithCurrentSession && canRecoverSavedCheckpoint && <p>Sign in as an authorized Aetheris runner to resume this report.</p>}
             </div>
           )}
           {row?.status === "completed" && (

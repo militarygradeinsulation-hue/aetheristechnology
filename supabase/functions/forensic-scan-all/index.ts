@@ -1230,16 +1230,28 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }).eq("id", id).eq("status", "running").select("id").single();
     if (checkpoint.error || !checkpoint.data) throw new Error("Could not persist synthesized report checkpoint");
     const handoff = await invokeFn("forensic-scan-all", { action:"finalize", scan_id:id }, 12_000);
-    if (handoff?.error) throw new Error("Finalizer handoff failed: " + String(handoff.error).slice(0,200));
+    if (handoff?.error) {
+      // The checkpoint is durable and may already be finalizing in a separate
+      // worker. A slow handoff is not proof that the report failed: leave it
+      // recoverable instead of overwriting its saved status with "failed".
+      console.error("Golden Report finalizer handoff needs recovery", {
+        scan_id: id,
+        reason: String(handoff.error).slice(0, 180),
+      });
+    }
     // Post-processing is performed by finalizeSavedScan, after the report is
     // saved as completed. No additional AI or crawler calls here.
     return;
 
   } catch (e) {
+    // Only the unfinished research worker may mark a scan failed. Once the
+    // synthesis checkpoint moves to "finalizing", the isolated finalizer
+    // owns its status and recovery must preserve the completed research.
     await sb.from("forensic_scans").update({
       status: "failed",
       error_message: String((e as Error).message || e),
-    }).eq("id", id);
+      updated_at: nowIso(),
+    }).eq("id", id).in("status", ["queued", "running"]);
   }
 }
 
@@ -1304,11 +1316,15 @@ async function finalizeSavedScan(id: string) {
     // or counts — every surface reads report.report_consistency / overall_leakage.
     let compilerState: "compiled" | "needs_review" | "regeneration_required" = "needs_review";
     try {
+      console.log(JSON.stringify({ event: "golden_compile_start", scan_id: id, saved_chapters: Array.isArray(report?.chapters) ? report.chapters.length : 0, saved_leaks: Array.isArray(report?.top_leaks) ? report.top_leaks.length : 0 }));
+      const startedCompileAt = Date.now();
       let compiled = compileGoldenReport({ report, rawFindings: findings, url, company });
+      console.log(JSON.stringify({ event: "golden_compile_first_pass", scan_id: id, elapsed_ms: Date.now() - startedCompileAt, state: compiled.state, violations: compiled.violations.length }));
       // Second deterministic pass: repairs made in pass 1 (canonical totals and
       // counts) can unlock violations that were only reachable after rewriting.
       if (!compiled.ok) {
         compiled = compileGoldenReport({ report: compiled.report, rawFindings: findings, url, company });
+        console.log(JSON.stringify({ event: "golden_compile_second_pass", scan_id: id, elapsed_ms: Date.now() - startedCompileAt, state: compiled.state, violations: compiled.violations.length }));
       }
       report = compiled.report;
       compilerState = compiled.state;
@@ -1622,7 +1638,13 @@ Deno.serve(async (req) => {
       if (scan.status !== "failed" && Date.now()-last < 90_000 && !serviceOk)
         return new Response(JSON.stringify({error:"Finalization is already in progress"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
       const priorAttempt = Number((stages.compile?.extra as {attempt?:number}|null)?.attempt||0);
-      if (priorAttempt >= 3) return new Response(JSON.stringify({error:"Recovery limit reached. Manual review required"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
+      // Production scans created before the checkpoint fix may already have
+      // exhausted three isolated finalizer attempts. Permit up to two further
+      // EXPLICIT staff-initiated compilation attempts from their saved report.
+      // Never allow cron/service callers to automatically extend the retry cap.
+      const manualSavedRetry = adminOk && body.confirm_saved_retry === true && !serviceOk;
+      if (priorAttempt >= 5 || (priorAttempt >= 3 && !manualSavedRetry))
+        return new Response(JSON.stringify({error:"Recovery limit reached. An authorized runner must explicitly retry the saved checkpoint (maximum five attempts); no new crawl or AI synthesis will run."}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
       const claimed=await sb.from("forensic_scans").update({status:"finalizing",error_message:null,updated_at:nowIso()}).eq("id",scanId)
         .in("status",["running","finalizing","failed"]).select("id").maybeSingle();
       if (!claimed.data || claimed.error) return new Response(JSON.stringify({error:"Scan could not be claimed"}),{status:409,headers:{...corsHeaders,"Content-Type":"application/json"}});
