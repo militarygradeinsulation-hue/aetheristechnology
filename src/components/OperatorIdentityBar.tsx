@@ -5,7 +5,7 @@ import { getPortalProfile } from '@/lib/portalAuth';
 /**
  * Identity + daily-brief strip shown at the top of the Admin and Portal areas.
  * - Braden (partner code 963169) sees "COO · Braden Roberts".
- * - Everyone else (master admin / Joseph) sees "CEO · Joseph Toney".
+ * - The executive portal header displays the Aetheris Technology brand.
  * - A short "Today's brief" line rotates deterministically each day per role.
  */
 
@@ -47,7 +47,7 @@ export const OperatorIdentityBar: React.FC<{ compact?: boolean }> = ({ compact }
     if (portal?.role === 'partner') {
       return { role: 'COO' as const, name: portal.rep_name || 'Partner', title: 'Operating Partner' };
     }
-    return { role: 'CEO' as const, name: 'Joseph Toney', title: 'Chief Executive Officer' };
+    return { role: 'CEO' as const, name: 'Aetheris Technology', title: 'Executive Portal' };
   }, []);
 
   const Icon = role === 'CEO' ? Crown : Briefcase;
@@ -56,22 +56,22 @@ export const OperatorIdentityBar: React.FC<{ compact?: boolean }> = ({ compact }
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-amber/30 bg-amber/5">
-        <Icon className="w-3.5 h-3.5 text-amber" />
-        <span className="font-mono text-[10px] uppercase tracking-widest text-amber">{role}</span>
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-red-800/45 bg-red-950/30">
+        <Icon className="w-3.5 h-3.5 text-red-300" />
+        <span className="font-mono text-[10px] uppercase tracking-widest text-red-300">{role}</span>
         <span className="text-sm font-semibold text-foreground truncate">{name}</span>
       </div>
     );
   }
 
   return (
-    <div className="border border-amber/30 rounded-xl bg-gradient-to-r from-amber/10 via-card/40 to-background p-4 flex items-center justify-between gap-4 flex-wrap">
+    <div className="border border-red-800/40 rounded-xl bg-gradient-to-r from-red-950/40 via-card/40 to-background p-4 flex items-center justify-between gap-4 flex-wrap">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-full bg-amber/20 border border-amber/40 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-amber" />
+        <div className="w-10 h-10 rounded-full bg-red-950/60 border border-red-700/50 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-red-300" />
         </div>
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-amber">
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-red-300">
             {role} · {title}
           </div>
           <div className="font-display text-lg font-semibold text-foreground leading-tight truncate">
@@ -80,7 +80,7 @@ export const OperatorIdentityBar: React.FC<{ compact?: boolean }> = ({ compact }
         </div>
       </div>
       <div className="flex items-start gap-3 min-w-0 flex-1 sm:max-w-xl">
-        <CalendarDays className="w-4 h-4 text-amber mt-0.5 flex-shrink-0" />
+        <CalendarDays className="w-4 h-4 text-red-300 mt-0.5 flex-shrink-0" />
         <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             {today} · Today's brief

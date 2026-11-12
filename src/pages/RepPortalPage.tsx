@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PortalLoginFrame, PORTAL_LOGIN_INPUT_CLASS, PORTAL_LOGIN_BUTTON_CLASS } from '@/components/portal/PortalLoginFrame';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -374,42 +375,34 @@ const RepPortalPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
-      <Link
-        to="/"
-        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to website
-      </Link>
-      <div className="glass p-8 rounded-2xl max-w-sm w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground font-display">Rep Portal</h1>
-          <p className="text-muted-foreground text-sm mt-1">Enter your code and email to view your stats</p>
-        </div>
-        <form onSubmit={handleLogin} className="space-y-3">
-          <Input
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="6-digit Rep Code"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            required
-            autoFocus
-          />
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Button type="submit" className="w-full" disabled={loading || code.length !== 6}>
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'View Dashboard'}
-          </Button>
-        </form>
-      </div>
-    </div>
+    <PortalLoginFrame title="Rep Portal" description="Enter your code and email to view your stats.">
+      <form onSubmit={handleLogin} className="space-y-4">
+        <Input
+          type="text"
+          inputMode="numeric"
+          maxLength={6}
+          placeholder="6-digit Rep Code"
+          aria-label="Six-digit rep code"
+          className={PORTAL_LOGIN_INPUT_CLASS}
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+          required
+          autoFocus
+        />
+        <Input
+          type="email"
+          placeholder="Email"
+          aria-label="Rep email"
+          className={PORTAL_LOGIN_INPUT_CLASS}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <Button type="submit" className={PORTAL_LOGIN_BUTTON_CLASS} disabled={loading || code.length !== 6}>
+          {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'View Dashboard'}
+        </Button>
+      </form>
+    </PortalLoginFrame>
   );
 };
 
