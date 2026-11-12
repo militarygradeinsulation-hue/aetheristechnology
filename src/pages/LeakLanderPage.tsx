@@ -14,7 +14,7 @@ import { Footer } from "@/components/Footer";
 import { PricingTimeline } from "@/components/PricingTimeline";
 import { MethodologyAI } from "@/components/lander/MethodologyAI";
 import { LeakAuditFlow } from "@/components/lander/LeakAuditFlow";
-import { SystemBuildsStrip } from "@/components/lander/SystemBuildsStrip";
+import { MindprintPortfolioShowcase } from "@/components/lander/MindprintPortfolioShowcase";
 
 // Reuse the original interactive chaos-physics graph without bloating the initial hero.
 const HomeMindMapSection = React.lazy(() => import("@/components/HomeMindMapSection"));
@@ -258,8 +258,8 @@ const LeakLanderPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Restored interactive Chaos Theory graph from the existing site code. */}
-      <SystemBuildsStrip />
+      {/* Real public Mindprint examples replace the obsolete systems-built strip. */}
+      <MindprintPortfolioShowcase />
 
       {/* The Leak Ecosystem — compact until the visitor chooses to explore the interactive map. */}
       <section id="chaos-theory" className="scroll-mt-28 border-t border-border/60 px-6 py-10 sm:py-12">
