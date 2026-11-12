@@ -36,6 +36,14 @@ describe("Golden Report durable synthesis checkpoint", () => {
     expect(workerCode).not.toContain('if (handoff?.error) throw new Error');
   });
 
+  it("allows two bounded manual attempts after the old three-attempt cap", () => {
+    const handler = worker.slice(worker.indexOf('if (body.action === "finalize")'));
+    expect(handler).toContain("body.confirm_saved_retry === true");
+    expect(handler).toContain("priorAttempt >= 5");
+    expect(handler).toContain("priorAttempt >= 3 && !manualSavedRetry");
+    expect(handler).toContain('event: "golden_compile_first_pass"');
+  });
+
   it("allows checkpoint recovery without requiring post-processing to be done", () => {
     const handler = worker.slice(worker.indexOf('if (body.action === "finalize")'));
     expect(handler).toContain("Synthesized report checkpoint is not ready for finalization");
