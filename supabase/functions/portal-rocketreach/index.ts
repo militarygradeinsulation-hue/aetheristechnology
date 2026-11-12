@@ -97,10 +97,11 @@ serve(async (req) => {
     })();
 
     let person: any = null;
+    let personFromSearch = false;
     let raw: any = null;
 
     // 1) Try lookup by email first (most precise)
-    if (email) {
+    if (email && !/^(?:info|sales|contact|hello|support|admin|office|help|team|reception)@/i.test(email)) {
       const url = `${RR_BASE}/person/lookup?email=${encodeURIComponent(email)}`;
       const r = await fetch(url, { headers });
       raw = await r.json().catch(() => null);
@@ -144,7 +145,7 @@ serve(async (req) => {
         if (!person && name) {
           const exact = additionalProfiles.find((p: any) =>
             String(p?.name || "").trim().toLowerCase() === name.toLowerCase());
-          if (exact) person = exact;
+          if (exact) { person = exact; personFromSearch = true; }
         }
         if (person) additionalProfiles = additionalProfiles.filter((p: any) =>
           p?.id !== person?.id && p?.name !== person?.name);
@@ -157,7 +158,7 @@ serve(async (req) => {
     // optional paid lookup to avoid multiplying RocketReach credits.
     let candidateLookupCalls = 0;
     if (body.enrich_candidates === true) {
-      const candidate = person && !(person.emails || []).length && !(person.phones || []).length
+      const candidate = personFromSearch && person && !(person.emails || []).length && !(person.phones || []).length
         ? person : !person ? additionalProfiles[0] : null;
       const identifier = candidate?.id ? "id=" + encodeURIComponent(String(candidate.id))
         : candidate?.linkedin_url ? "linkedin_url=" + encodeURIComponent(String(candidate.linkedin_url)) : "";
@@ -243,7 +244,9 @@ serve(async (req) => {
       if (domain && addr.endsWith("@" + domain)) s += 15;
       return s;
     };
-    const rawEmails = person ? (person.emails || []).map((e: any) => ({
+    const rawEmails = person ? (person.emails || [])
+      .filter((e: any) => e?.smtp_valid !== false && e?.smtp_valid !== "invalid")
+      .map((e: any) => ({
       email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid,
     })) : [];
     const rankedEmails = [...rawEmails].sort((a, b) => rankEmail(b) - rankEmail(a));
