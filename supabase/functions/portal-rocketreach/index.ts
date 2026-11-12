@@ -151,6 +151,31 @@ serve(async (req) => {
       }
     }
 
+    // Search returns candidate summaries, not guaranteed revealed contact
+    // information. On an explicit single-lead lookup, enrich at most ONE
+    // identity-matched or first company candidate. Batch scans skip this
+    // optional paid lookup to avoid multiplying RocketReach credits.
+    let candidateLookupCalls = 0;
+    if (body.enrich_candidates === true) {
+      const candidate = person && !(person.emails || []).length && !(person.phones || []).length
+        ? person : !person ? additionalProfiles[0] : null;
+      const identifier = candidate?.id ? "id=" + encodeURIComponent(String(candidate.id))
+        : candidate?.linkedin_url ? "linkedin_url=" + encodeURIComponent(String(candidate.linkedin_url)) : "";
+      if (identifier) {
+        candidateLookupCalls++;
+        try {
+          const response = await fetch(RR_BASE + "/person/lookup?" + identifier, { headers });
+          const detail = await response.json().catch(() => null);
+          const expectedName = String(candidate?.name || "").trim().toLowerCase();
+          if (response.ok && detail && expectedName &&
+            String(detail.name || "").trim().toLowerCase() === expectedName) {
+            if (person) person = detail;
+            else additionalProfiles[0] = detail;
+          }
+        } catch { /* keep a search candidate; do not claim contact verification */ }
+      }
+    }
+
     const firecrawl = await firecrawlPromise;
 
     // ---- Backfill emails/phones from Firecrawl page extraction ----
@@ -282,6 +307,7 @@ serve(async (req) => {
       source: person ? "rocketreach" : (mergedEmails.length || mergedPhones.length ? "website" : "company_candidates"),
       identity_status: person ? "matched" : name ? "unverified" : "company_only",
       contact_evidence: (firecrawl as any)?.contact_evidence || [],
+      contact_lookup_calls: candidateLookupCalls,
       additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
         const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
         const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
