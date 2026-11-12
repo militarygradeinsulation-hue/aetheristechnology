@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { PortalLoginFrame, PORTAL_LOGIN_INPUT_CLASS, PORTAL_LOGIN_BUTTON_CLASS } from '@/components/portal/PortalLoginFrame';
 import { supabase } from '@/integrations/supabase/client';
 import { setAdminToken, clearAdminToken, setOwnerToken } from '@/lib/adminAuth';
 import { clearPortalSession } from '@/lib/portalAuth';
@@ -45,40 +46,25 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 relative overflow-hidden">
-      <Link
-
-        to="/"
-        className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to website
-      </Link>
-      <div className="glass p-8 rounded-2xl max-w-sm w-full relative z-10">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-amber" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Admin Access</h1>
-          <p className="text-muted-foreground text-sm mt-1">Enter your PIN to continue</p>
-        </div>
-
-        <form onSubmit={handlePinSubmit} className="space-y-3">
-          <Input
-            type="password"
-            inputMode="numeric"
-            placeholder="PIN"
-            value={pin}
-            onChange={e => setPin(e.target.value)}
-            required
-            autoComplete="one-time-code"
-            autoFocus
-          />
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={pinLoading}>
-            {pinLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock with PIN'}
-          </Button>
-        </form>
-      </div>
-    </div>
+    <PortalLoginFrame title="Admin Access" description="Enter your PIN to continue.">
+      <form onSubmit={handlePinSubmit} className="space-y-4">
+        <Input
+          type="password"
+          inputMode="numeric"
+          placeholder="PIN"
+          aria-label="Administrator PIN"
+          className={PORTAL_LOGIN_INPUT_CLASS}
+          value={pin}
+          onChange={e => setPin(e.target.value)}
+          required
+          autoComplete="one-time-code"
+          autoFocus
+        />
+        <Button type="submit" className={PORTAL_LOGIN_BUTTON_CLASS} disabled={pinLoading}>
+          {pinLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</> : 'Unlock with PIN'}
+        </Button>
+      </form>
+    </PortalLoginFrame>
   );
 };
 
