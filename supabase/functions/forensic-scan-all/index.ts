@@ -1230,16 +1230,28 @@ async function runScan(id: string, url: string, company: string, accountId: stri
     }).eq("id", id).eq("status", "running").select("id").single();
     if (checkpoint.error || !checkpoint.data) throw new Error("Could not persist synthesized report checkpoint");
     const handoff = await invokeFn("forensic-scan-all", { action:"finalize", scan_id:id }, 12_000);
-    if (handoff?.error) throw new Error("Finalizer handoff failed: " + String(handoff.error).slice(0,200));
+    if (handoff?.error) {
+      // The checkpoint is durable and may already be finalizing in a separate
+      // worker. A slow handoff is not proof that the report failed: leave it
+      // recoverable instead of overwriting its saved status with "failed".
+      console.error("Golden Report finalizer handoff needs recovery", {
+        scan_id: id,
+        reason: String(handoff.error).slice(0, 180),
+      });
+    }
     // Post-processing is performed by finalizeSavedScan, after the report is
     // saved as completed. No additional AI or crawler calls here.
     return;
 
   } catch (e) {
+    // Only the unfinished research worker may mark a scan failed. Once the
+    // synthesis checkpoint moves to "finalizing", the isolated finalizer
+    // owns its status and recovery must preserve the completed research.
     await sb.from("forensic_scans").update({
       status: "failed",
       error_message: String((e as Error).message || e),
-    }).eq("id", id);
+      updated_at: nowIso(),
+    }).eq("id", id).in("status", ["queued", "running"]);
   }
 }
 
