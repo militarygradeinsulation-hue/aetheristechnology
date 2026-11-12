@@ -21,7 +21,7 @@ export type MindprintPortfolioExample = {
 
 // The Mindprint homepage uses these public example routes when its
 // historical vault-backed shared links cannot be verified.
-const REPORT_BASE = "https://businessforensics.tech/examples/";
+const REPORT_BASE = "https://mindsteal.lovable.app/examples/";
 
 export const MINDPRINT_PORTFOLIO_EXAMPLES: MindprintPortfolioExample[] = [
   {
