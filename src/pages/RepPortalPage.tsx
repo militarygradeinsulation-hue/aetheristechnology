@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PortalLoginFrame, PORTAL_LOGIN_INPUT_CLASS, PORTAL_LOGIN_BUTTON_CLASS } from '@/components/portal/PortalLoginFrame';
+import { BUSINESS_LEAKS_HOME } from '@/lib/businessLeaksHome';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,9 +152,15 @@ const RepPortalPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-start justify-center px-4 relative">
         <div className="absolute top-4 left-4 z-10">{cert}</div>
-        <Button variant="ghost" size="sm" className="absolute top-4 right-4" onClick={() => setRepData(null)}>
-          <ArrowLeft className="w-4 h-4 mr-1" /> Log out
-        </Button>
+        <div className="absolute top-4 right-4 z-10 flex flex-wrap items-center justify-end gap-2">
+          <a href={BUSINESS_LEAKS_HOME} aria-label="Back to Business Leaks website home"
+            className="inline-flex min-h-11 items-center gap-1 rounded-md border border-border px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to Business Leaks Home
+          </a>
+          <Button variant="ghost" size="sm" onClick={() => setRepData(null)}>
+            Log out
+          </Button>
+        </div>
         <EasyModeWrapper tabKey="rep-portal">
           <div className="max-w-3xl w-full space-y-6 py-16">
             <div className="text-center">
