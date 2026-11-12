@@ -30,7 +30,6 @@ serve(async (req) => {
 
   try {
     const RR_KEY = Deno.env.get("ROCKETREACH_API_KEY");
-    if (!RR_KEY) return jsonResp({ error: "RocketReach not configured" }, 500);
 
     const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
@@ -63,7 +62,7 @@ serve(async (req) => {
       return jsonResp({ ok: true, cached: true, person: existing || null, firecrawl: existingFc });
     }
 
-    const headers = { "Api-Key": RR_KEY, "Content-Type": "application/json" };
+    const headers = { "Api-Key": RR_KEY || "", "Content-Type": "application/json" };
     const domain = domainFromUrl(lead.website);
     const name = (body.name || lead.contact_name || "").trim();
     const company = (body.company || lead.business_name || "").trim();
@@ -100,6 +99,8 @@ serve(async (req) => {
     let personFromSearch = false;
     let raw: any = null;
 
+    let additionalProfiles: any[] = [];
+    if (RR_KEY) {
     // 1) Try lookup by email first (most precise)
     if (email && !/^(?:info|sales|contact|hello|support|admin|office|help|team|reception)@/i.test(email)) {
       const url = `${RR_BASE}/person/lookup?email=${encodeURIComponent(email)}`;
@@ -123,7 +124,6 @@ serve(async (req) => {
     }
 
     // 3) ALWAYS search by company/domain to surface 2-3 additional decision-makers
-    let additionalProfiles: any[] = [];
     if (company || domain) {
       const r = await fetch(`${RR_BASE}/person/search`, {
         method: "POST",
@@ -177,6 +177,8 @@ serve(async (req) => {
       }
     }
 
+    }
+    // A missing RocketReach key must not suppress public company contacts.
     const firecrawl = await firecrawlPromise;
 
     // ---- Backfill emails/phones from Firecrawl page extraction ----
