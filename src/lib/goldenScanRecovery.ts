@@ -6,7 +6,7 @@ export type GoldenScanSnapshot = {
   status: string;
   updated_at?: string | null;
   stage_status?: Record<string, { state?: string } | undefined> | null;
-  report?: { synthesis_incomplete?: boolean } | null;
+  report?: unknown;
 };
 
 export const GOLDEN_FINALIZATION_RECOVERY_MS = 90_000;
@@ -30,7 +30,7 @@ export function isGoldenScanStalled(scan: GoldenScanSnapshot | null, nowMs = Dat
  */
 export function canRecoverGoldenCheckpoint(scan: GoldenScanSnapshot | null, nowMs = Date.now()): boolean {
   if (!scan || !["running", "finalizing", "failed"].includes(scan.status)) return false;
-  if (!scan.report || scan.report.synthesis_incomplete === true) return false;
+  if (!scan.report || typeof scan.report !== "object" || (scan.report as { synthesis_incomplete?: boolean }).synthesis_incomplete === true) return false;
   const synthesis = scan.stage_status?.synth?.state;
   if (synthesis !== "done" && synthesis !== "degraded") return false;
   if (scan.status === "failed") return true;
