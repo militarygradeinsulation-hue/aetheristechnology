@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { contactPageCandidates, discoverPublicBusinessContacts, safeBusinessUrl } from "./contact-discovery.ts";
+import { contactPageCandidates, decodeCloudflareEmail, discoverPublicBusinessContacts, safeBusinessUrl } from "./contact-discovery.ts";
 
 const respond = (data: unknown, status = 200) => new Response(JSON.stringify({
   success: true, data,
@@ -84,6 +84,22 @@ describe("public contact discovery cost and attribution", () => {
       "https://acmeindustries.com/blog/post",
       "https://acmeindustries.com/team",
     ])).toEqual(["https://acmeindustries.com/team"]);
+  });
+
+  it("decodes only a published Cloudflare-protected email and does not invent one", async () => {
+    const clear = "hello@acmeindustries.com";
+    const hex = "32" + [...clear].map(c => (c.charCodeAt(0) ^ 0x32).toString(16).padStart(2, "0")).join("");
+    expect(decodeCloudflareEmail(hex)).toBe(clear);
+    expect(decodeCloudflareEmail("nothex")).toBeNull();
+    vi.stubGlobal("fetch", vi.fn(async () => respond({
+      markdown: "Contact us",
+      html: '<span class="__cf_email__" data-cfemail="' + hex + '">[email protected]</span>' +
+        '<a href="tel:+13175551234">Call</a>',
+    })));
+    const result = await discoverPublicBusinessContacts("acmeindustries.com", "key");
+    expect(result.email).toBe(clear);
+    expect(result.phone).toBe("+13175551234");
+    expect(result.requests.scrape).toBe(1);
   });
 
   it("never generates assumed email addresses when the site has only a name", async () => {
