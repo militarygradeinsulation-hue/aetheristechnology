@@ -1,4 +1,4 @@
-name: Deploy Firecrawl spending guards
+name: Deploy bounded Aetheris contact discovery
 
 on:
   push:
@@ -8,6 +8,15 @@ on:
       - "supabase/functions/admin-scrape-leads/**"
       - "supabase/functions/portal-scrape-leads/**"
       - "supabase/functions/_shared/lead-enrichment.ts"
+      - "supabase/functions/_shared/contact-discovery.ts"
+      - "supabase/functions/_shared/contact-discovery.test.ts"
+      - "supabase/functions/_shared/lead-enrichment.test.ts"
+      - "supabase/functions/portal-rocketreach/**"
+      - "supabase/functions/detective-prep/**"
+      - "supabase/functions/extension-contacts/**"
+      - "src/lib/portalLeads.ts"
+      - "src/components/portal/LeadsBoard.tsx"
+      - "extension/sidepanel.js"
       - "supabase/config.toml"
       - ".github/workflows/deploy-firecrawl-guards.yml"
   workflow_dispatch:
@@ -27,8 +36,10 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
-      - name: Confirm manual enrichment budget
-        run: bunx vitest run supabase/functions/_shared/lead-enrichment.test.ts
+      - name: Verify contact discovery and manual enrichment budgets
+        run: bunx vitest run supabase/functions/_shared/contact-discovery.test.ts supabase/functions/_shared/lead-enrichment.test.ts
+      - name: Verify application build
+        run: bun run build
 
   deploy:
     needs: verify
@@ -52,18 +63,21 @@ jobs:
       - uses: supabase/setup-cli@v3.0.1
         with:
           version: 2.108.0
-      - name: Deploy only three lead discovery functions
+      - name: Deploy six contact and lead discovery functions
         shell: bash
         run: |
           set -euo pipefail
           supabase functions deploy admin-scrape-leads-cron --project-ref "$SUPABASE_PROJECT_ID"
           supabase functions deploy admin-scrape-leads --project-ref "$SUPABASE_PROJECT_ID"
           supabase functions deploy portal-scrape-leads --project-ref "$SUPABASE_PROJECT_ID"
+          supabase functions deploy portal-rocketreach --project-ref "$SUPABASE_PROJECT_ID"
+          supabase functions deploy detective-prep --project-ref "$SUPABASE_PROJECT_ID"
+          supabase functions deploy extension-contacts --project-ref "$SUPABASE_PROJECT_ID"
       - name: Verify manual scrapers still reject unauthenticated requests
         shell: bash
         run: |
           set -euo pipefail
-          for function_name in admin-scrape-leads portal-scrape-leads; do
+          for function_name in admin-scrape-leads portal-scrape-leads portal-rocketreach detective-prep; do
             status="$(curl -sS --max-time 20 -o /tmp/firecrawl-unauthorized.json -w '%{http_code}' \
               -X POST -H 'Content-Type: application/json' -d '{}' \
               "https://$SUPABASE_PROJECT_ID.supabase.co/functions/v1/$function_name")"
@@ -72,4 +86,4 @@ jobs:
               exit 1
             fi
           done
-          echo "Both manual endpoints correctly reject missing credentials." >> "$GITHUB_STEP_SUMMARY"
+          echo "All protected manual and deep-scan endpoints reject missing credentials." >> "$GITHUB_STEP_SUMMARY"
