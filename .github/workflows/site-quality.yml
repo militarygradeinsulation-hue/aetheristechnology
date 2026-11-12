@@ -52,5 +52,7 @@ jobs:
         run: bunx vitest run supabase/functions/_shared/scanned-leads-directory.test.ts
       - name: Verify red portal login and executive branding
         run: bunx vitest run src/components/portal/PortalLoginFrame.test.tsx
+      - name: Verify Mindprint portfolio example identities and routes
+        run: bunx vitest run src/lib/mindprintPortfolio.test.ts
       - name: Build website
         run: bun run build
