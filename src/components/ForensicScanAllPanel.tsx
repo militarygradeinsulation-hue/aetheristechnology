@@ -183,6 +183,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
   const [recovering, setRecovering] = useState(false);
   const [pollFailures, setPollFailures] = useState(0);
   const [lastPollError, setLastPollError] = useState<string | null>(null);
+  const [pollCycle, setPollCycle] = useState(0);
   const [reusedScan, setReusedScan] = useState(false);
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [fixOpen, setFixOpen] = useState(false);
@@ -287,7 +288,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
       stopped = true;
       if (pollRef.current) window.clearTimeout(pollRef.current);
     };
-  }, [scanId]);
+  }, [scanId, pollCycle]);
 
   useEffect(() => {
     if (!scanId || row?.status === "completed" || row?.status === "failed") return;
@@ -377,6 +378,7 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
       if (error || data?.error) throw new Error(data?.error || error?.message || "Could not resume finalization");
       setPollFailures(0);
       setLastPollError(null);
+      setPollCycle((cycle) => cycle + 1);
       toast({ title: "Finalization restarted", description: "The saved research is being validated without running another paid website scan." });
     } catch (error) {
       toast({ title: "Finalization recovery unavailable", description: error instanceof Error ? error.message : "Please contact an administrator.", variant: "destructive" });
