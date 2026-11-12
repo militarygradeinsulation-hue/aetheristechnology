@@ -4,6 +4,8 @@
 // the domain. Returns a single merged payload for the side panel.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
+import { discoverPublicBusinessContacts, safeBusinessUrl } from "../_shared/contact-discovery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +14,29 @@ const corsHeaders = {
 };
 
 const RR_BASE = "https://api.rocketreach.co/api/v2";
+// A contact lookup uses paid APIs. Require an active rep code and rate limit
+// before initiating any discovery request. No service key leaves the server.
+const contactUsage = new Map<string, { count: number; until: number }>();
+async function authorizeContactScan(code: string): Promise<boolean> {
+  if (!/^[A-Z0-9_-]{3,60}$/.test(code)) return false;
+  const url = Deno.env.get("SUPABASE_URL");
+  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !secret) return false;
+  const db = createClient(url, secret);
+  const { data, error } = await db.from("rep_codes")
+    .select("code,is_active").eq("code", code).maybeSingle();
+  return !error && data?.is_active === true;
+}
+function contactLimitReached(code: string): boolean {
+  const now = Date.now(), current = contactUsage.get(code);
+  if (!current || current.until <= now) {
+    contactUsage.set(code, { count: 1, until: now + 3_600_000 });
+    return false;
+  }
+  if (current.count >= 5) return true;
+  current.count++;
+  return false;
+}
 const FC_BASE = "https://api.firecrawl.dev/v2";
 
 function json(body: unknown, status = 200) {
@@ -32,80 +57,46 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
     const body = await req.json().catch(() => ({}));
+    const accessCode = String(body.accessCode || "").trim().toUpperCase();
+    if (!(await authorizeContactScan(accessCode))) return json({ error: "Active rep access code required" }, 401);
+    if (contactLimitReached(accessCode)) return json({ error: "Contact research limit reached (5 per hour)" }, 429);
     const url = String(body.url || body.pageUrl || "").trim();
     if (!url) return json({ error: "Missing url" }, 400);
 
-    const domain = hostnameOf(url);
-    if (!domain) return json({ error: "Invalid url" }, 400);
+    const domain = safeBusinessUrl(url)?.hostname.replace(/^www\./, "") || null;
+    if (!domain) return json({ error: "Invalid public company URL" }, 400);
 
     const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY");
     const RR_KEY = Deno.env.get("ROCKETREACH_API_KEY");
 
-    // -------- Firecrawl: scrape homepage + likely contact / about pages --------
+    // Same capped, evidence-backed collector used by manual lead enrichment.
+    // Return the previous home/extras/sitemap fields for extension compatibility.
     const firecrawlPromise = (async () => {
       if (!FC_KEY) return null;
-      try {
-        const fullUrl = url.startsWith("http") ? url : `https://${url}`;
-        const [scrape, map] = await Promise.all([
-          fetch(`${FC_BASE}/scrape`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: fullUrl,
-              formats: ["markdown", "links", {
-                type: "json",
-                prompt: "Extract: emails (array of strings), phones (array of strings), addresses (array), leadership (array of {name,title,email,linkedin}), social_links (object: linkedin, twitter, facebook, instagram, youtube), legal_name, tagline.",
-              }],
-              onlyMainContent: true,
-            }),
-          }).then(r => r.json()).catch(() => null),
-          fetch(`${FC_BASE}/map`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ url: fullUrl, search: "contact about team leadership", limit: 25 }),
-          }).then(r => r.json()).catch(() => null),
-        ]);
-
-        const sd = (scrape as any)?.data || scrape || {};
-        const links = Array.isArray((map as any)?.links) ? (map as any).links : [];
-        const normLinks = links.map((l: any) => typeof l === "string" ? l : (l?.url || l?.href || "")).filter(Boolean);
-
-        // Pull contact / about / team pages too, max 3 extra scrapes.
-        const extraTargets = normLinks
-          .filter((l: string) => /\/(contact|about|team|leadership|company|staff)/i.test(l))
-          .slice(0, 3);
-        const extraScrapes = await Promise.all(extraTargets.map((t: string) =>
-          fetch(`${FC_BASE}/scrape`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: t,
-              formats: ["markdown", {
-                type: "json",
-                prompt: "Extract: emails (array), phones (array), leadership (array of {name,title,email,linkedin}).",
-              }],
-              onlyMainContent: true,
-            }),
-          }).then(r => r.json()).catch(() => null)
-        ));
-
-        return {
-          home: sd,
-          extras: extraScrapes.map((r, i) => ({ url: extraTargets[i], data: (r as any)?.data || r })).filter(x => x.data),
-          sitemap: normLinks.slice(0, 50),
-        };
-      } catch (e) {
-        console.error("Firecrawl error:", e);
-        return null;
-      }
+      const contactScan = await discoverPublicBusinessContacts(url, FC_KEY, {
+        maxPages: 3, mapIfNeeded: true,
+      });
+      return {
+        home: {
+          markdown: contactScan.markdown_excerpt || "",
+          json: { emails: contactScan.all_emails, phones: contactScan.all_phones },
+        },
+        extras: [],
+        sitemap: contactScan.candidate_pages,
+        evidence: contactScan.evidence,
+        discovery_status: contactScan.status,
+        pages_scanned: contactScan.pages_scanned,
+        requests: contactScan.requests,
+      };
     })();
 
     // -------- RocketReach: top decision-makers at this domain --------
     const rocketreachPromise = (async () => {
       if (!RR_KEY) return null;
       try {
-        const r = await fetch(`${RR_BASE}/search`, {
+        const r = await fetch(`${RR_BASE}/person/search`, {
           method: "POST",
           headers: { "Api-Key": RR_KEY, "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -194,6 +185,12 @@ serve(async (req) => {
       socials,
       leadership_from_site: leadership,
       decision_makers: rocketreach || [],
+      contact_evidence: firecrawl?.evidence || [],
+      contact_discovery: firecrawl ? {
+        status: firecrawl.discovery_status,
+        pages_scanned: firecrawl.pages_scanned,
+        requests: firecrawl.requests,
+      } : null,
       sources: {
         firecrawl: !!firecrawl,
         rocketreach: !!rocketreach,

@@ -81,7 +81,7 @@ export const portalLeads = {
     callPortalLeads('update_status', { id, ...opts }),
   upload: (rows: Partial<RepLead>[]) => callPortalLeads('upload', { rows }) as Promise<{ ok: true; inserted: number }>,
   download: () => callPortalLeads('download') as Promise<{ ok: true; rows: any[] }>,
-  scan: async (id: string, opts: { url?: string; force?: boolean; businessName?: string } = {}) => {
+  scan: async (id: string, opts: { url?: string; force?: boolean; businessName?: string; enrichCandidates?: boolean } = {}) => {
     const res = await callPortalLeads('scan', { id, url: opts.url, force: opts.force }) as { ok: true; scan: LeadScan; cached: boolean; scheduled?: number };
     // Auto-save every fresh scan to the rep's workspace history. Cached hits are
     // already in the library from a prior run, so we skip to avoid duplicates.
@@ -105,7 +105,7 @@ export const portalLeads = {
     const token = getPortalToken();
     if (!token) throw new Error('Not signed in');
     const { data, error } = await supabase.functions.invoke('portal-rocketreach', {
-      body: { id, force: opts.force, name: opts.name, company: opts.company, email: opts.email },
+      body: { id, force: opts.force, name: opts.name, company: opts.company, email: opts.email, enrich_candidates: opts.enrichCandidates !== false },
       headers: { 'x-portal-token': token },
     });
     if (error) throw new Error(error.message);

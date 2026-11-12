@@ -1561,12 +1561,14 @@ async function runFindContacts() {
   if (!out) return;
   const url = state.activeUrl || state.lastScan?.url;
   if (!url) { toast("Open a page first."); return; }
-  out.innerHTML = `<div class="contacts-card"><h4>Contacts · scraping site + RocketReach…</h4><div class="muted">This can take 10-20 seconds.</div></div>`;
+  const accessCode = await getAccessCode();
+  if (!accessCode) { toast("Enter an active rep code to scan contacts."); return; }
+  out.innerHTML = `<div class="contacts-card"><h4>Contacts · scanning company sources…</h4></div>`;
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/extension-contacts`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, accessCode }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
@@ -1594,6 +1596,10 @@ function renderContacts(d) {
   const socials = d.socials || {};
   const dms = d.decision_makers || [];
   const siteLeaders = d.leadership_from_site || [];
+  const contactEvidence = Array.isArray(d.contact_evidence) ? d.contact_evidence : [];
+  const evidencePages = [...new Set(contactEvidence.map(e => e.source_url).filter(u => {
+    try { return new URL(u).protocol === "https:"; } catch { return false; }
+  }))].slice(0, 5);
   const noteParts = [];
   if (!d.sources?.firecrawl_configured) noteParts.push("Firecrawl not configured");
   if (!d.sources?.rocketreach_configured) noteParts.push("RocketReach not configured");
@@ -1647,6 +1653,10 @@ function renderContacts(d) {
         ${noteParts.length ? `<div class="muted" style="font-size:11px;margin-bottom:8px">⚠ ${escapeHtml(noteParts.join(" · "))}</div>` : ""}
         <div class="contacts-section"><h5>Emails (${emails.length})</h5>${emailChips}</div>
         <div class="contacts-section"><h5>Phones (${phones.length})</h5>${phoneChips}</div>
+        <div class="contacts-section"><h5>Published contact evidence (${contactEvidence.length})</h5>
+          <div class="muted" style="font-size:11px;margin-bottom:6px">Published on company pages does not mean a mailbox is deliverable or a phone belongs to a specific employee.</div>
+          ${evidencePages.length ? evidencePages.map(url => `<div><a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)} ↗</a></div>`).join("") : `<span class="muted">No attributable site contact found.</span>`}
+        </div>
         <div class="contacts-section"><h5>Social</h5>${socialBits}</div>
         <div class="contacts-section"><h5>Decision-makers · RocketReach (${dms.length})</h5>${dmRows}</div>
         ${siteLeaderRows}

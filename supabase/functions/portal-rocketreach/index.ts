@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.86.0";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { discoverPublicBusinessContacts, safeBusinessUrl } from "../_shared/contact-discovery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,6 @@ serve(async (req) => {
 
   try {
     const RR_KEY = Deno.env.get("ROCKETREACH_API_KEY");
-    if (!RR_KEY) return jsonResp({ error: "RocketReach not configured" }, 500);
 
     const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const claims = await verifyPortalToken(getPortalTokenFromRequest(req), secret);
@@ -43,7 +43,7 @@ serve(async (req) => {
 
     const { data: lead, error: leadErr } = await supabase
       .from("rep_leads")
-      .select("id,business_name,contact_name,email,website,enrichment,claimed_by_code,assigned_to_code")
+      .select("id,business_name,contact_name,email,phone,website,enrichment,enriched_at,claimed_by_code,assigned_to_code")
       .eq("id", leadId)
       .maybeSingle();
     if (leadErr || !lead) return jsonResp({ error: "Lead not found" }, 404);
@@ -55,82 +55,61 @@ serve(async (req) => {
 
     const existing = (lead.enrichment as any)?.rocketreach;
     const existingFc = (lead.enrichment as any)?.firecrawl;
-    if (existing && existingFc && !force) {
-      return jsonResp({ ok: true, cached: true, person: existing, firecrawl: existingFc });
+    const checkedAt = lead.enriched_at ? new Date(lead.enriched_at).getTime() : NaN;
+    // Do not spend credits repeatedly on a recent scan without new evidence.
+    if (!force && existingFc && Number.isFinite(checkedAt) &&
+        Date.now() - checkedAt < 24 * 60 * 60 * 1000) {
+      return jsonResp({ ok: true, cached: true, person: existing || null, firecrawl: existingFc });
     }
 
-    const headers = { "Api-Key": RR_KEY, "Content-Type": "application/json" };
+    const headers = { "Api-Key": RR_KEY || "", "Content-Type": "application/json" };
     const domain = domainFromUrl(lead.website);
     const name = (body.name || lead.contact_name || "").trim();
     const company = (body.company || lead.business_name || "").trim();
     const email = (body.email || lead.email || "").trim();
 
-    // Kick off Firecrawl in parallel for max company detail
-    const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY");
-    const websiteUrl = lead.website
-      ? (lead.website.startsWith("http") ? lead.website : `https://${lead.website}`)
-      : null;
+    // Bounded business-page discovery; do not incur search+scrape or AI
+    // extraction costs on every request. Previously saved company metadata
+    // remains available to Detective Mode.
+    const FC_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
+    const websiteUrl = safeBusinessUrl(lead.website || "")?.origin || null;
     const firecrawlPromise = (async () => {
-      if (!FC_KEY || !websiteUrl) return null;
-      try {
-        const [scrapeRes, mapRes, searchRes] = await Promise.all([
-          fetch("https://api.firecrawl.dev/v2/scrape", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              url: websiteUrl,
-              formats: ["markdown", "summary", "links", "branding", {
-                type: "json",
-                prompt: "Extract company info: legal_name, tagline, description, services (array), industries (array), founded_year, employee_count, headquarters, locations (array), phones (array), emails (array), social_links (object: linkedin, twitter, facebook, instagram, youtube), leadership (array of {name,title}), key_clients (array), tech_stack (array), unique_selling_points (array)"
-              }],
-              onlyMainContent: true,
-            }),
-          }).then(r => r.json()).catch(() => null),
-          fetch("https://api.firecrawl.dev/v2/map", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ url: websiteUrl, limit: 50 }),
-          }).then(r => r.json()).catch(() => null),
-          name || company ? fetch("https://api.firecrawl.dev/v2/search", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              query: `${name || ""} ${company || domain || ""} site:linkedin.com OR contact OR email`.trim(),
-              limit: 5,
-            }),
-          }).then(r => r.json()).catch(() => null) : null,
-        ]);
-        const sd = (scrapeRes as any)?.data || scrapeRes;
-        return {
-          summary: sd?.summary || null,
-          json: sd?.json || null,
-          branding: sd?.branding || null,
-          links_count: Array.isArray(sd?.links) ? sd.links.length : 0,
-          metadata: sd?.metadata || null,
-          markdown_excerpt: typeof sd?.markdown === "string" ? sd.markdown.slice(0, 4000) : null,
-          sitemap: Array.isArray((mapRes as any)?.links)
-            ? (mapRes as any).links.slice(0, 50).map((l: any) => typeof l === "string" ? l : (l?.url || l?.href || "")).filter(Boolean)
-            : [],
-          web_results: Array.isArray((searchRes as any)?.data) ? (searchRes as any).data.slice(0, 5).map((r: any) => ({
-            url: r.url, title: r.title, description: r.description,
-          })) : [],
-          fetched_at: new Date().toISOString(),
-        };
-      } catch (e) {
-        console.error("Firecrawl error:", e);
-        return null;
-      }
+      if (!FC_KEY || !websiteUrl) return existingFc || null;
+      const contacts = await discoverPublicBusinessContacts(websiteUrl, FC_KEY, {
+        maxPages: 3, mapIfNeeded: true,
+      });
+      return {
+        ...(existingFc && typeof existingFc === "object" ? existingFc : {}),
+        json: {
+          ...(existingFc?.json && typeof existingFc.json === "object" ? existingFc.json : {}),
+          emails: contacts.all_emails, phones: contacts.all_phones,
+        },
+        markdown_excerpt: contacts.markdown_excerpt || existingFc?.markdown_excerpt || null,
+        sitemap: contacts.candidate_pages,
+        contact_evidence: contacts.evidence,
+        contact_discovery: {
+          status: contacts.status, pages_scanned: contacts.pages_scanned,
+          requests: contacts.requests, verified: false,
+        },
+        fetched_at: new Date().toISOString(),
+      };
     })();
 
     let person: any = null;
+    let personFromSearch = false;
     let raw: any = null;
 
+    let additionalProfiles: any[] = [];
+    if (RR_KEY) {
     // 1) Try lookup by email first (most precise)
-    if (email) {
+    if (email && !/^(?:info|sales|contact|hello|support|admin|office|help|team|reception)@/i.test(email)) {
       const url = `${RR_BASE}/person/lookup?email=${encodeURIComponent(email)}`;
       const r = await fetch(url, { headers });
       raw = await r.json().catch(() => null);
-      if (r.ok && raw && (raw.id || raw.name)) person = raw;
+      if (r.ok && raw && (raw.id || raw.name) && (
+        (raw.emails || []).some((e: any) => String(e.email || e).toLowerCase() === email.toLowerCase()) ||
+        (name && String(raw.name || "").trim().toLowerCase() === name.toLowerCase())
+      )) person = raw;
     }
 
     // 2) Fall back to name + company/domain lookup
@@ -141,13 +120,12 @@ serve(async (req) => {
       const url = `${RR_BASE}/person/lookup?${params.toString()}`;
       const r = await fetch(url, { headers });
       raw = await r.json().catch(() => null);
-      if (r.ok && raw && (raw.id || raw.name)) person = raw;
+      if (r.ok && raw && String(raw.name || "").trim().toLowerCase() === name.toLowerCase()) person = raw;
     }
 
     // 3) ALWAYS search by company/domain to surface 2-3 additional decision-makers
-    let additionalProfiles: any[] = [];
     if (company || domain) {
-      const r = await fetch(`${RR_BASE}/search`, {
+      const r = await fetch(`${RR_BASE}/person/search`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -163,17 +141,44 @@ serve(async (req) => {
       const sraw = await r.json().catch(() => null);
       if (r.ok && sraw?.profiles?.length) {
         additionalProfiles = sraw.profiles;
-        if (!person) {
-          person = additionalProfiles[0];
-          additionalProfiles = additionalProfiles.slice(1);
-          raw = sraw;
-        } else {
-          // remove the primary person from alternates if present
-          additionalProfiles = additionalProfiles.filter((p: any) => p?.id !== person?.id && p?.name !== person?.name);
+        // A company search supplies candidates, not a verified lead identity.
+        if (!person && name) {
+          const exact = additionalProfiles.find((p: any) =>
+            String(p?.name || "").trim().toLowerCase() === name.toLowerCase());
+          if (exact) { person = exact; personFromSearch = true; }
         }
+        if (person) additionalProfiles = additionalProfiles.filter((p: any) =>
+          p?.id !== person?.id && p?.name !== person?.name);
       }
     }
 
+    // Search returns candidate summaries, not guaranteed revealed contact
+    // information. On an explicit single-lead lookup, enrich at most ONE
+    // identity-matched or first company candidate. Batch scans skip this
+    // optional paid lookup to avoid multiplying RocketReach credits.
+    let candidateLookupCalls = 0;
+    if (body.enrich_candidates === true) {
+      const candidate = personFromSearch && person && !(person.emails || []).length && !(person.phones || []).length
+        ? person : !person ? additionalProfiles[0] : null;
+      const identifier = candidate?.id ? "id=" + encodeURIComponent(String(candidate.id))
+        : candidate?.linkedin_url ? "linkedin_url=" + encodeURIComponent(String(candidate.linkedin_url)) : "";
+      if (identifier) {
+        candidateLookupCalls++;
+        try {
+          const response = await fetch(RR_BASE + "/person/lookup?" + identifier, { headers });
+          const detail = await response.json().catch(() => null);
+          const expectedName = String(candidate?.name || "").trim().toLowerCase();
+          if (response.ok && detail && expectedName &&
+            String(detail.name || "").trim().toLowerCase() === expectedName) {
+            if (person) person = detail;
+            else additionalProfiles[0] = detail;
+          }
+        } catch { /* keep a search candidate; do not claim contact verification */ }
+      }
+    }
+
+    }
+    // A missing RocketReach key must not suppress public company contacts.
     const firecrawl = await firecrawlPromise;
 
     // ---- Backfill emails/phones from Firecrawl page extraction ----
@@ -206,7 +211,7 @@ serve(async (req) => {
     }
 
     // If nothing found at all, return cached data (if any) or a soft empty response
-    if (!person && !firecrawl && fcEmails.size === 0 && fcPhones.size === 0) {
+    if (!person && !additionalProfiles.length && !firecrawl && fcEmails.size === 0 && fcPhones.size === 0) {
       const cachedRr = (lead.enrichment as any)?.rocketreach || null;
       const cachedFc = (lead.enrichment as any)?.firecrawl || null;
       if (cachedRr || cachedFc) {
@@ -241,7 +246,9 @@ serve(async (req) => {
       if (domain && addr.endsWith("@" + domain)) s += 15;
       return s;
     };
-    const rawEmails = person ? (person.emails || []).map((e: any) => ({
+    const rawEmails = person ? (person.emails || [])
+      .filter((e: any) => e?.smtp_valid !== false && e?.smtp_valid !== "invalid")
+      .map((e: any) => ({
       email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid,
     })) : [];
     const rankedEmails = [...rawEmails].sort((a, b) => rankEmail(b) - rankEmail(a));
@@ -284,7 +291,7 @@ serve(async (req) => {
       }
     });
 
-    const summary = (person || mergedEmails.length || mergedPhones.length) ? {
+    const summary = (person || additionalProfiles.length || mergedEmails.length || mergedPhones.length) ? {
       id: person?.id || null,
       name: person?.name || name || null,
       title: person?.current_title || person?.normalized_title || null,
@@ -302,7 +309,10 @@ serve(async (req) => {
       education: person ? (person.education || []).slice(0, 3) : [],
       links: person?.links || fcJsonEarly?.social_links || {},
       lookup_status: person?.status || (person ? null : "firecrawl_only"),
-      source: person ? "rocketreach" : "firecrawl_only",
+      source: person ? "rocketreach" : (mergedEmails.length || mergedPhones.length ? "website" : "company_candidates"),
+      identity_status: person ? "matched" : name ? "unverified" : "company_only",
+      contact_evidence: (firecrawl as any)?.contact_evidence || [],
+      contact_lookup_calls: candidateLookupCalls,
       additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
         const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
         const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
@@ -340,15 +350,16 @@ serve(async (req) => {
     };
     const patch: Record<string, unknown> = { enrichment: newEnrichment, enriched_at: new Date().toISOString() };
     const fcJson = firecrawl?.json as any;
-    const bestEmailFinal = bestEmail || summary?.emails?.[0]?.email || (Array.isArray(fcJson?.emails) ? fcJson.emails[0] : null);
-    const bestPhoneFinal = summary?.phones?.[0]?.number || (Array.isArray(fcJson?.phones) ? fcJson.phones[0] : null);
-    const bestNameFinal = summary?.name || null;
+    const bestEmailFinal = (person && bestEmail) || [...fcEmails].find(addr =>
+      !!domain && addr.endsWith("@" + domain)) || null;
+    const bestPhoneFinal = (person && personPhones[0]?.number) || [...fcPhones][0] || null;
+    const bestNameFinal = person?.name || null;
     const bestBusinessFinal = fcJson?.legal_name || null;
-    // On force re-run OR empty fields, write the latest/best info
-    if (bestEmailFinal && (force || !lead.email)) patch.email = String(bestEmailFinal).toLowerCase();
-    if (bestPhoneFinal && (force || !lead.phone)) patch.phone = bestPhoneFinal;
-    if (bestNameFinal && (force || !lead.contact_name)) patch.contact_name = bestNameFinal;
-    if (bestBusinessFinal && (force || !lead.business_name)) patch.business_name = bestBusinessFinal;
+    // A refresh must not replace a known contact with a different person.
+    if (bestEmailFinal && !lead.email) patch.email = String(bestEmailFinal).toLowerCase();
+    if (bestPhoneFinal && !lead.phone) patch.phone = bestPhoneFinal;
+    if (bestNameFinal && !lead.contact_name) patch.contact_name = bestNameFinal;
+    if (bestBusinessFinal && !lead.business_name) patch.business_name = bestBusinessFinal;
 
     await supabase.from("rep_leads").update(patch).eq("id", leadId);
 

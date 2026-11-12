@@ -6,6 +6,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import { verifyPortalToken, getPortalTokenFromRequest } from "../_shared/portal-token.ts";
+import { discoverPublicBusinessContacts, safeBusinessUrl } from "../_shared/contact-discovery.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,54 +115,23 @@ function mergeContactsFromFirecrawl(rr: any, fc: any, domain: string | null, nam
 }
 
 async function runFirecrawl(websiteUrl: string, name: string, company: string, domain: string | null, FC_KEY: string) {
-  try {
-    const [scrapeRes, mapRes, searchRes] = await Promise.all([
-      fetch("https://api.firecrawl.dev/v2/scrape", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: websiteUrl,
-          formats: ["markdown", "summary", "links", "branding", {
-            type: "json",
-            prompt: "Extract company info: legal_name, tagline, description, services (array), industries (array), founded_year, employee_count, headquarters, locations (array), phones (array), emails (array), social_links (object: linkedin, twitter, facebook, instagram, youtube), leadership (array of {name,title}), key_clients (array), tech_stack (array), unique_selling_points (array)"
-          }],
-          onlyMainContent: true,
-        }),
-      }).then(r => r.json()).catch(() => null),
-      fetch("https://api.firecrawl.dev/v2/map", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ url: websiteUrl, limit: 50 }),
-      }).then(r => r.json()).catch(() => null),
-      (name || company) ? fetch("https://api.firecrawl.dev/v2/search", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${FC_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `${name || ""} ${company || domain || ""} site:linkedin.com OR contact OR email`.trim(),
-          limit: 5,
-        }),
-      }).then(r => r.json()).catch(() => null) : null,
-    ]);
-    const sd = (scrapeRes as any)?.data || scrapeRes;
-    return {
-      summary: sd?.summary || null,
-      json: sd?.json || null,
-      branding: sd?.branding || null,
-      links_count: Array.isArray(sd?.links) ? sd.links.length : 0,
-      metadata: sd?.metadata || null,
-      markdown_excerpt: typeof sd?.markdown === "string" ? sd.markdown.slice(0, 4000) : null,
-      sitemap: Array.isArray((mapRes as any)?.links)
-        ? (mapRes as any).links.slice(0, 50).map((l: any) => typeof l === "string" ? l : (l?.url || l?.href || "")).filter(Boolean)
-        : [],
-      web_results: Array.isArray((searchRes as any)?.data) ? (searchRes as any).data.slice(0, 5).map((r: any) => ({
-        url: r.url, title: r.title, description: r.description,
-      })) : [],
-      fetched_at: new Date().toISOString(),
-    };
-  } catch (e) {
-    console.error("Firecrawl error:", e);
-    return null;
-  }
+  const website = safeBusinessUrl(websiteUrl)?.origin;
+  if (!website) return null;
+  const contacts = await discoverPublicBusinessContacts(website, FC_KEY, {
+    maxPages: 3, mapIfNeeded: true,
+  });
+  return {
+    summary: null, branding: null,
+    json: { legal_name: company || null, emails: contacts.all_emails, phones: contacts.all_phones },
+    sitemap: contacts.candidate_pages,
+    markdown_excerpt: contacts.markdown_excerpt || null,
+    contact_evidence: contacts.evidence,
+    contact_discovery: {
+      status: contacts.status, requests: contacts.requests,
+      pages_scanned: contacts.pages_scanned,
+    },
+    fetched_at: new Date().toISOString(),
+  };
 }
 
 async function runRocketReach(RR_KEY: string, name: string, company: string, email: string, domain: string | null) {
@@ -173,7 +143,10 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
     try {
       const r = await fetch(`${RR_BASE}/person/lookup?email=${encodeURIComponent(email)}`, { headers });
       const raw = await r.json().catch(() => null);
-      if (r.ok && raw && (raw.id || raw.name)) person = raw;
+      if (r.ok && raw && (raw.id || raw.name) && (
+        (raw.emails || []).some((e: any) => String(e.email || e).toLowerCase() === email.toLowerCase()) ||
+        (name && String(raw.name || "").trim().toLowerCase() === name.toLowerCase())
+      )) person = raw;
     } catch { /* noop */ }
   }
   // 2) name + company/domain
@@ -184,14 +157,14 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
       if (domain) params.set("current_employer_domain", domain);
       const r = await fetch(`${RR_BASE}/person/lookup?${params.toString()}`, { headers });
       const raw = await r.json().catch(() => null);
-      if (r.ok && raw && (raw.id || raw.name)) person = raw;
+      if (r.ok && raw && String(raw.name || "").trim().toLowerCase() === name.toLowerCase()) person = raw;
     } catch { /* noop */ }
   }
   // 3) company search for decision-makers
   let additionalProfiles: any[] = [];
   if (company || domain) {
     try {
-      const r = await fetch(`${RR_BASE}/search`, {
+      const r = await fetch(`${RR_BASE}/person/search`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -207,12 +180,13 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
       const sraw = await r.json().catch(() => null);
       if (r.ok && sraw?.profiles?.length) {
         additionalProfiles = sraw.profiles;
-        if (!person) {
-          person = additionalProfiles[0];
-          additionalProfiles = additionalProfiles.slice(1);
-        } else {
-          additionalProfiles = additionalProfiles.filter((p: any) => p?.id !== person?.id && p?.name !== person?.name);
+        if (!person && name) {
+          const exact = additionalProfiles.find((p: any) =>
+            String(p?.name || "").trim().toLowerCase() === name.toLowerCase());
+          if (exact) person = exact;
         }
+        if (person) additionalProfiles = additionalProfiles.filter((p: any) =>
+          p?.id !== person?.id && p?.name !== person?.name);
       }
     } catch { /* noop */ }
   }
@@ -239,22 +213,23 @@ async function runRocketReach(RR_KEY: string, name: string, company: string, ema
     email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid,
   })) : [];
   const rankedEmails = [...rawEmails].sort((a, b) => rankEmail(b) - rankEmail(a));
-  return person ? {
-    id: person.id,
-    name: person.name,
-    title: person.current_title || person.normalized_title,
-    employer: person.current_employer,
-    location: [person.city, person.region, person.country].filter(Boolean).join(", "),
-    linkedin_url: person.linkedin_url,
+  return person || additionalProfiles.length ? {
+    id: person?.id || null,
+    name: person?.name || name || null,
+    title: person?.current_title || person?.normalized_title || null,
+    employer: person?.current_employer || company || null,
+    location: person ? [person.city, person.region, person.country].filter(Boolean).join(", ") : "",
+    linkedin_url: person?.linkedin_url || null,
+    identity_status: person ? "matched" : name ? "unverified" : "company_only",
     emails: rankedEmails,
     best_email: rankedEmails[0]?.email || null,
-    phones: (person.phones || []).map((p: any) => ({ number: p.number, type: p.type, is_premium: p.is_premium })),
-    profile_pic: person.profile_pic,
-    job_history: (person.job_history || []).slice(0, 5).map((j: any) => ({
+    phones: (person?.phones || []).map((p: any) => ({ number: p.number, type: p.type, is_premium: p.is_premium })),
+    profile_pic: person?.profile_pic || null,
+    job_history: (person?.job_history || []).slice(0, 5).map((j: any) => ({
       title: j.title, company_name: j.company_name, start_date: j.start_date, end_date: j.end_date,
     })),
-    education: (person.education || []).slice(0, 3),
-    links: person.links || {},
+    education: (person?.education || []).slice(0, 3),
+    links: person?.links || {},
     additional_contacts: additionalProfiles.slice(0, 3).map((p: any) => {
       const emails = (p.emails || []).map((e: any) => ({ email: e.email, type: e.type, grade: e.grade, smtp_valid: e.smtp_valid }));
       const ranked = [...emails].sort((a, b) => rankEmail(b) - rankEmail(a));
