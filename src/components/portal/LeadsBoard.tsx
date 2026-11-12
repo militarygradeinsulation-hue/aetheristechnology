@@ -359,7 +359,7 @@ export const LeadsBoard: React.FC = () => {
         unique.map(async l => {
           try {
             // force: true so every selected lead gets a complete fresh scan
-            const out = await portalLeads.rocketReach(l.id, { force: true });
+            const out = await portalLeads.rocketReach(l.id, { force: true, enrichCandidates: false });
             setBulkStatuses(prev => ({ ...prev, [l.id]: 'done' }));
             return out;
           } catch (e) {
@@ -453,7 +453,7 @@ export const LeadsBoard: React.FC = () => {
           // 2) Deep scan (RocketReach + Firecrawl)
           let rrRes: any = null;
           try {
-            rrRes = await portalLeads.rocketReach(l.id, { force: true });
+            rrRes = await portalLeads.rocketReach(l.id, { force: true, enrichCandidates: false });
             await leadClues.log(l.id, {
               kind: 'rocketreach',
               label: rrRes?.cached ? 'Loaded saved deep scan (batch)' : 'Deep scan complete (batch)',
