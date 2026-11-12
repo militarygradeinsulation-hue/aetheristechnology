@@ -68,7 +68,7 @@ serve(async (req) => {
     const rocketreachPromise = (async () => {
       if (!RR_KEY) return null;
       try {
-        const r = await fetch(`${RR_BASE}/search`, {
+        const r = await fetch(`${RR_BASE}/person/search`, {
           method: "POST",
           headers: { "Api-Key": RR_KEY, "Content-Type": "application/json" },
           body: JSON.stringify({
