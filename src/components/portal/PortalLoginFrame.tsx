@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft, LockKeyhole } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { BUSINESS_LEAKS_HOME } from '@/lib/businessLeaksHome';
 
 /**
  * Shared Aetheris red-and-black login presentation. Authentication is handled
@@ -41,12 +41,13 @@ export function PortalLoginFrame({ title, description, children, footer }: Props
           maskImage: 'linear-gradient(to bottom, black 0%, transparent 85%)',
         }}
       />
-      <Link
-        to="/"
-        className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-zinc-400 transition-colors hover:text-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+      <a
+        href={BUSINESS_LEAKS_HOME}
+        aria-label="Back to Business Leaks website home"
+        className="absolute left-5 top-5 z-10 inline-flex min-h-11 items-center gap-2 rounded-md px-2 py-1 text-sm text-zinc-200 transition-colors hover:text-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to website
-      </Link>
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to Business Leaks Home
+      </a>
 
       <section
         aria-labelledby="aetheris-portal-login-title"

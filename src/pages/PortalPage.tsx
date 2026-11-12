@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PortalLoginFrame, PORTAL_LOGIN_INPUT_CLASS, PORTAL_LOGIN_BUTTON_CLASS } from '@/components/portal/PortalLoginFrame';
+import { BUSINESS_LEAKS_HOME } from '@/lib/businessLeaksHome';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -982,6 +983,10 @@ const PortalPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <a href={BUSINESS_LEAKS_HOME} aria-label="Back to Business Leaks website home"
+              className="inline-flex min-h-11 items-center rounded-md border border-amber/50 px-3 py-2 text-xs font-semibold text-amber hover:bg-amber/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber">
+              <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden="true" /> Back to Business Leaks Home
+            </a>
             <div className="relative hidden md:block">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input

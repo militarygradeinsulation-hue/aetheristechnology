@@ -7,6 +7,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { BUSINESS_LEAKS_HOME } from '@/lib/businessLeaksHome';
 import {
   ArrowLeftRight, LogOut, Home, Users, ClipboardList, GraduationCap,
   MessageSquare, Palette, Sparkles, ChevronDown, ChevronUp, Info,
@@ -244,8 +245,10 @@ const NewPortalPage: React.FC = () => {
             >
               <Target className="w-3.5 h-3.5 mr-1" /> Meeting Flow
             </Button>
-            <Button asChild size="sm" variant="ghost" className="h-8 text-muted-foreground hover:text-amber-300">
-              <Link to="/"><Home className="w-3.5 h-3.5 mr-1" /> Main site</Link>
+            <Button asChild size="sm" variant="ghost" className="min-h-11 text-amber-200 hover:text-amber-300">
+              <a href={BUSINESS_LEAKS_HOME} aria-label="Back to Business Leaks website home">
+                <Home className="w-3.5 h-3.5 mr-1" /> Back to Business Leaks Home
+              </a>
             </Button>
             <Button
               size="sm" variant="outline"

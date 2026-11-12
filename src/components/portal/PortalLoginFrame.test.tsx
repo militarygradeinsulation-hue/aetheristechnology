@@ -24,7 +24,8 @@ describe('Aetheris portal identity and login theme', () => {
 
     expect(html).toContain('Aetheris Technology');
     expect(html).toContain('Admin Access');
-    expect(html).toContain('Back to website');
+    expect(html).toContain('Back to Business Leaks Home');
+    expect(html).toContain('href="https://every-business-leaks.lovable.app/"');
     expect(html).toContain('border-red-800');
     expect(html).toContain('bg-[#08080a]');
     expect(PORTAL_LOGIN_BUTTON_CLASS).toContain('bg-crimson');
