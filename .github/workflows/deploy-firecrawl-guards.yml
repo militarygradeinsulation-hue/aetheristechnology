@@ -1,6 +1,24 @@
 name: Deploy bounded Aetheris contact discovery
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/functions/admin-scrape-leads-cron/**"
+      - "supabase/functions/admin-scrape-leads/**"
+      - "supabase/functions/portal-scrape-leads/**"
+      - "supabase/functions/_shared/lead-enrichment.ts"
+      - "supabase/functions/_shared/contact-discovery.ts"
+      - "supabase/functions/_shared/contact-discovery.test.ts"
+      - "supabase/functions/_shared/lead-enrichment.test.ts"
+      - "supabase/functions/portal-rocketreach/**"
+      - "supabase/functions/detective-prep/**"
+      - "supabase/functions/extension-contacts/**"
+      - "src/lib/portalLeads.ts"
+      - "src/components/portal/LeadsBoard.tsx"
+      - "extension/sidepanel.js"
+      - "supabase/config.toml"
+      - ".github/workflows/deploy-firecrawl-guards.yml"
   push:
     branches: [main]
     paths:
@@ -42,6 +60,7 @@ jobs:
         run: bun run build
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 12
