@@ -50,5 +50,7 @@ jobs:
         run: bunx vitest run supabase/functions/_shared/lead-enrichment.test.ts
       - name: Test scanned leads directory evidence normalization
         run: bunx vitest run supabase/functions/_shared/scanned-leads-directory.test.ts
+      - name: Verify red portal login and executive branding
+        run: bunx vitest run src/components/portal/PortalLoginFrame.test.tsx
       - name: Build website
         run: bun run build
