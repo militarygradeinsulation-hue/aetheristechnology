@@ -29,6 +29,13 @@ describe("Golden Report durable synthesis checkpoint", () => {
     expect(worker).toContain("90_000");
   });
 
+  it("preserves a persisted synthesis checkpoint if the isolated finalizer handoff fails", () => {
+    const workerCode = worker.slice(worker.indexOf("async function runScan("), worker.indexOf("async function finalizeSavedScan("));
+    expect(workerCode).toContain('console.error("Golden Report finalizer handoff needs recovery"');
+    expect(workerCode).toContain('.in("status", ["queued", "running"])');
+    expect(workerCode).not.toContain('if (handoff?.error) throw new Error');
+  });
+
   it("allows checkpoint recovery without requiring post-processing to be done", () => {
     const handler = worker.slice(worker.indexOf('if (body.action === "finalize")'));
     expect(handler).toContain("Synthesized report checkpoint is not ready for finalization");
