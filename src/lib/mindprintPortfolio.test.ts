@@ -18,7 +18,7 @@ describe("Aetheris Mindprint portfolio examples", () => {
       expect(item.fallbackSrc).toMatch(/^https:\/\//);
       expect(item.portraitCredit).toContain("Photo:");
       const report = new URL(item.href);
-      expect(report.hostname).toBe("businessforensics.tech");
+      expect(report.hostname).toBe("mindsteal.lovable.app");
       expect(report.pathname).toBe("/examples/" + item.name.toLowerCase().replace(/\s+/g, "-"));
     }
   });
@@ -57,7 +57,7 @@ describe("Original Golden Report portfolio links", () => {
   it("uses only the four actual PDF files published by the Mindprint source project", () => {
     expect(ORIGINAL_GOLDEN_REPORTS.map(report => report.id)).toEqual(expectedIds);
     for (const report of ORIGINAL_GOLDEN_REPORTS) {
-      expect(new URL(report.pdfUrl).origin).toBe("https://businessforensics.tech");
+      expect(new URL(report.pdfUrl).origin).toBe("https://mindsteal.lovable.app");
       expect(new URL(report.pdfUrl).pathname).toBe("/golden-reports/" + report.id + ".pdf");
       expect(new URL(report.coverUrl).pathname).toBe("/golden-reports/" + report.id + "-cover.jpg");
       expect(report.pages).toBeGreaterThan(10);
