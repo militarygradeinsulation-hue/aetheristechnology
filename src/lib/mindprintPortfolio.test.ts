@@ -19,7 +19,7 @@ describe("Aetheris Mindprint portfolio examples", () => {
       expect(item.portraitCredit).toContain("Photo:");
       const report = new URL(item.href);
       expect(report.hostname).toBe("businessforensics.tech");
-      expect(report.pathname.startsWith("/shared-intel/b3duZXI.")).toBe(true);
+      expect(report.pathname).toBe("/examples/" + item.name.toLowerCase().replace(/\s+/g, "-"));
     }
   });
 
