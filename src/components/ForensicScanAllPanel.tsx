@@ -272,10 +272,13 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             return next;
           });
         }
-        if (data.status === "completed" || data.status === "failed") {
+        if (data.status === "completed") {
           try { sessionStorage.removeItem(SCAN_STORAGE_KEY); } catch { /* ignore */ }
           return;
         }
+        // Keep failed scan IDs in this browser so a saved checkpoint can be
+        // resumed after a refresh, without a duplicate paid scan.
+        if (data.status === "failed") return;
       } catch (error) {
         if (stopped) return;
         setPollFailures((count) => Math.min(count + 1, 100));
