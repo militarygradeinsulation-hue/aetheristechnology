@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PortalLoginFrame, PORTAL_LOGIN_INPUT_CLASS, PORTAL_LOGIN_BUTTON_CLASS } from '@/components/portal/PortalLoginFrame';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -527,47 +528,39 @@ const PortalPage: React.FC = () => {
   // ============ LOGIN VIEW ============
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
-        <Link
-          to="/"
-          className="absolute top-4 left-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to website
-        </Link>
-        <div className="glass p-8 rounded-2xl max-w-sm w-full">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-amber/20 flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-amber" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground font-display">Rep / Partner Portal</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Enter your access code to view your tools, commissions, and AI Sales Coach.
-            </p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-3">
-            <Input
-              type="password"
-              inputMode="numeric"
-              maxLength={12}
-              placeholder="Access code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              required
-              autoFocus
-              autoComplete="one-time-code"
-            />
-            <Button type="submit" className="w-full bg-amber text-background hover:bg-amber/90" disabled={loading || code.length < 4}>
-              {loading
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</>
-                : 'Unlock Portal'}
-            </Button>
-          </form>
-          <p className="text-xs text-muted-foreground text-center mt-6">
+      <PortalLoginFrame
+        title="Rep / Partner Portal"
+        description="Enter your access code to view your tools, commissions, and AI Sales Coach."
+        footer={
+          <p className="text-sm text-zinc-400">
             Don't have a code?{' '}
-            <Link to="/careers" className="text-amber hover:underline">Apply to become a rep</Link>
+            <Link to="/careers" className="font-medium text-red-300 hover:text-red-200 hover:underline">
+              Apply to become a rep
+            </Link>
           </p>
-        </div>
-      </div>
+        }
+      >
+        <form onSubmit={handleLogin} className="space-y-4">
+          <Input
+            type="password"
+            inputMode="numeric"
+            maxLength={12}
+            placeholder="Access code"
+            aria-label="Portal access code"
+            className={PORTAL_LOGIN_INPUT_CLASS}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+            required
+            autoFocus
+            autoComplete="one-time-code"
+          />
+          <Button type="submit" className={PORTAL_LOGIN_BUTTON_CLASS} disabled={loading || code.length < 4}>
+            {loading
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</>
+              : 'Unlock Portal'}
+          </Button>
+        </form>
+      </PortalLoginFrame>
     );
   }
 
