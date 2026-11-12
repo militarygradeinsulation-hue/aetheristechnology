@@ -101,7 +101,7 @@ export const portalLeads = {
   listReps: () => callPortalLeads('list_reps') as Promise<{ ok: true; reps: { code: string; rep_name: string | null }[] }>,
   forward: (id: string, target_code: string, note?: string) =>
     callPortalLeads('forward', { id, target_code, note }) as Promise<{ ok: true; target: string }>,
-  rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string; businessName?: string } = {}) => {
+  rocketReach: async (id: string, opts: { force?: boolean; name?: string; company?: string; email?: string; businessName?: string; enrichCandidates?: boolean } = {}) => {
     const token = getPortalToken();
     if (!token) throw new Error('Not signed in');
     const { data, error } = await supabase.functions.invoke('portal-rocketreach', {
