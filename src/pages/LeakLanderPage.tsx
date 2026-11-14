@@ -1,3 +1,4 @@
+import { LovablePartnerSpotlight } from "@/components/LovablePartnerSpotlight";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Mail, Phone, MapPin, ChevronDown } from "lucide-react";
@@ -56,6 +57,7 @@ const LeakLanderPage: React.FC = () => {
       />
 
       <LanderNavbar />
+        <LovablePartnerSpotlight />
 
       {entryPopupOpen && (
         <div
