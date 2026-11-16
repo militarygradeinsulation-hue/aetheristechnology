@@ -39,6 +39,61 @@ const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || "";
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const FIRECRAWL = "https://api.firecrawl.dev/v2";
+// Optional self-hosted Aetheris Crawl. Configure a reachable HTTPS URL in production.
+// Never expose AC_API_KEY in client code; the crawler is called only from this Edge Function.
+const AC_CRAWL_BASE_URL = (Deno.env.get("AC_CRAWL_BASE_URL") || "").replace(/\\/+$/, "");
+const AC_API_KEY = Deno.env.get("AC_API_KEY") || "";
+function aetherisCrawlEnabled(): boolean {
+  if (!AC_CRAWL_BASE_URL) return false;
+  try {
+    const endpoint = new URL(AC_CRAWL_BASE_URL);
+    return endpoint.protocol === "https:" ||
+      (endpoint.protocol === "http:" && ["localhost", "127.0.0.1"].includes(endpoint.hostname));
+  } catch { return false; }
+}
+async function aetherisCrawlPost(path: "/v1/scrape" | "/v1/crawl", body: Record<string, unknown>, timeoutMs: number): Promise<Record<string, unknown> | null> {
+  if (!aetherisCrawlEnabled()) return null;
+  try {
+    const result = await fetchJsonWithTimeout(`${AC_CRAWL_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(AC_API_KEY ? { Authorization: `Bearer ${AC_API_KEY}` } : {}) },
+      body: JSON.stringify(body),
+    }, timeoutMs, "Aetheris Crawl");
+    return result && typeof result === "object" && !result.error ? result as Record<string, unknown> : null;
+  } catch (e) {
+    console.warn("Aetheris Crawl unavailable:", e instanceof Error ? e.message : String(e));
+    return null;
+  }
+}
+function normalizeAetherisScrape(raw: Record<string, unknown>, url: string): Record<string, unknown> | null {
+  const nested = raw.data && typeof raw.data === "object" ? raw.data as Record<string, unknown> : raw;
+  const markdown = typeof nested.markdown === "string" ? nested.markdown :
+    typeof nested.content === "string" ? nested.content :
+    typeof nested.text === "string" ? nested.text : "";
+  if (markdown.trim().length <= 80) return null;
+  const metadata = nested.metadata && typeof nested.metadata === "object" ? nested.metadata : {};
+  return { success: true, _via: "aetheris_crawl", data: {
+    ...nested, markdown, metadata: { sourceURL: url, ...(metadata as Record<string, unknown>) },
+  } };
+}
+async function aetherisScrape(url: string): Promise<Record<string, unknown> | null> {
+  const raw = await aetherisCrawlPost("/v1/scrape", { url, force: false, include_html: false }, 10_000);
+  return raw ? normalizeAetherisScrape(raw, url) : null;
+}
+async function aetherisMap(url: string): Promise<Record<string, unknown> | null> {
+  const raw = await aetherisCrawlPost("/v1/crawl", { url, limit: 15, max_depth: 2, use_sitemap: true }, 12_000);
+  if (!raw) return null;
+  const data = raw.data && typeof raw.data === "object" ? raw.data as Record<string, unknown> : raw;
+  const pages = Array.isArray(data.pages) ? data.pages : Array.isArray(data.results) ? data.results :
+    Array.isArray(data.documents) ? data.documents : Array.isArray(data) ? data : [];
+  const links = [...new Set([
+    ...(Array.isArray(data.links) ? data.links : []),
+    ...pages.map((p: unknown) => p && typeof p === "object" ? (p as Record<string, unknown>).url : null),
+  ].filter((u): u is string => typeof u === "string" && /^https?:\\/\\//i.test(u)))];
+  // A valid empty crawl must not suppress the existing map fallback.
+  return links.length ? { success: true, _via: "aetheris_crawl", links } : null;
+}
+
 const CRAWLER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 const nowIso = () => new Date().toISOString();
@@ -436,6 +491,9 @@ async function firecrawlScrape(url: string) {
   // so public Golden Report scans do not stall on provider timeouts.
   const internal = await internalCrawlerScrape(url);
   if (scrapeHasContent(internal)) return internal;
+  // Prefer a configured Aetheris Crawl instance after the existing in-process crawler.
+  const selfHosted = await aetherisScrape(url);
+  if (selfHosted) return selfHosted;
   if (!FIRECRAWL_API_KEY) return await directFetchFallback(url);
   // Attempt 1: fast pass, main content only.
   let res = await firecrawlScrapeOnce(url, { waitFor: 0, onlyMainContent: true }, 8_000);
@@ -456,6 +514,8 @@ async function firecrawlScrape(url: string) {
 async function firecrawlMap(url: string) {
   const internal = await internalCrawlerMap(url);
   if (internal) return internal;
+  const selfHosted = await aetherisMap(url);
+  if (selfHosted) return selfHosted;
   if (!FIRECRAWL_API_KEY) return null;
   return await fetchJsonWithTimeout(`${FIRECRAWL}/map`, {
       method: "POST",
