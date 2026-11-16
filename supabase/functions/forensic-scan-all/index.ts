@@ -41,7 +41,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const FIRECRAWL = "https://api.firecrawl.dev/v2";
 // Optional self-hosted Aetheris Crawl. Configure a reachable HTTPS URL in production.
 // Never expose AC_API_KEY in client code; the crawler is called only from this Edge Function.
-const AC_CRAWL_BASE_URL = (Deno.env.get("AC_CRAWL_BASE_URL") || "").replace(/\\/+$/, "");
+const AC_CRAWL_BASE_URL = (Deno.env.get("AC_CRAWL_BASE_URL") || "").replace(/\/+$/, "");
 const AC_API_KEY = Deno.env.get("AC_API_KEY") || "";
 function aetherisCrawlEnabled(): boolean {
   if (!AC_CRAWL_BASE_URL) return false;
@@ -89,7 +89,7 @@ async function aetherisMap(url: string): Promise<Record<string, unknown> | null>
   const links = [...new Set([
     ...(Array.isArray(data.links) ? data.links : []),
     ...pages.map((p: unknown) => p && typeof p === "object" ? (p as Record<string, unknown>).url : null),
-  ].filter((u): u is string => typeof u === "string" && /^https?:\\/\\//i.test(u)))];
+  ].filter((u): u is string => typeof u === "string" && /^https?:\/\//i.test(u)))];
   // A valid empty crawl must not suppress the existing map fallback.
   return links.length ? { success: true, _via: "aetheris_crawl", links } : null;
 }
