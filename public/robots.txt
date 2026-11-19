@@ -19,6 +19,7 @@ Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
+Disallow: /v/
 
 User-agent: Bingbot
 Allow: /
@@ -29,6 +30,7 @@ Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
+Disallow: /v/
 
 User-agent: OAI-SearchBot
 Allow: /
@@ -151,6 +153,7 @@ Disallow: /checkout-return
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /unsubscribe
+Disallow: /v/
 
 Sitemap: https://aetheris.technology/sitemap.xml
 
