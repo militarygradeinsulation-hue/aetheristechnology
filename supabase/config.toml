@@ -320,3 +320,7 @@ verify_jwt = false
 # database setting is off, and its new code requires explicit server opt-in.
 [functions.admin-scrape-leads-cron]
 verify_jwt = true
+
+# Private outreach video links are authorized by unguessable access tokens in function code.
+[functions.private-video]
+verify_jwt = false
