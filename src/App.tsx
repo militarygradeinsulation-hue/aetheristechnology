@@ -40,6 +40,7 @@ import NewsPage from "./pages/NewsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 
 // Lazy: everything else (~1.5MB → split into per-route chunks)
+const PrivateVideoPage = lazy(() => import("./pages/PrivateVideoPage"));
 const LeakAuditPage = lazy(() => import("./pages/LeakAuditPage"));
 const RevenueLeakAuditPage = lazy(() => import("./pages/RevenueLeakAuditPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
@@ -177,6 +178,8 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
+            {/* Unlisted outreach video: no site navigation or global marketing shell. */}
+            <Route path="/v/:token" element={<PrivateVideoPage />} />
             {/* One-screen white-label research runner. Avoid all marketing and site-shell routes. */}
             <Route path="/research-embed" element={<ResearchIntelligencePage />} />
             {/* Admin routes, isolated from AuthProvider for instant PIN-only login */}
