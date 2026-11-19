@@ -9,6 +9,19 @@ export default function PrivateVideoPage() {
   const [error, setError] = useState("");
   const sent = useRef(new Set<string>());
   useEffect(() => {
+    document.title = "Private Video | Aetheris";
+    const robots = document.querySelector('meta[name="robots"]');
+    const previous = robots?.getAttribute("content");
+    if (robots) robots.setAttribute("content", "noindex, nofollow, noarchive, nosnippet");
+    const previousCanonical = document.querySelector('link[rel="canonical"]');
+    const oldCanonical = previousCanonical?.getAttribute("href");
+    previousCanonical?.removeAttribute("href");
+    return () => {
+      if (robots && previous !== null && previous !== undefined) robots.setAttribute("content", previous);
+      if (previousCanonical && oldCanonical !== null && oldCanonical !== undefined) previousCanonical.setAttribute("href", oldCanonical);
+    };
+  }, []);
+  useEffect(() => {
     if (!token || !/^[a-f0-9-]{36}$/i.test(token)) { setError("This link is not available."); return; }
     let cancelled = false;
     const sessionId = crypto.randomUUID();
