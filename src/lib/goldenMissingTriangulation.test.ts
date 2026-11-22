@@ -72,6 +72,20 @@ describe("Golden Report missing-information triangulation", () => {
     expect(lead?.independentSources).toBe(0);
   });
 
+  it("does not count neutral source copy as proof of a business problem", () => {
+    const output = buildMissingTriangulation({
+      evidence_ledger: [{claim_id:"p",category:"lead_capture",
+        statement:"Our quote request form confirms every submission and a team member responds promptly.",
+        source_url:"https://example.com/contact",status:"verified"}],
+      compiled_findings:[{finding_id:"f",category:"lead_capture",chapter_slug:"lead capture",
+        statement:"The company has a quote form and a response process.",claim_ids:["p"]}],
+    });
+    const lead = output.hypotheses.find(h=>h.id==="lead-response");
+    expect(lead?.independentSources).toBe(0);
+    expect(lead?.support).toBe("tentative");
+    expect(lead?.clues[0].issueSignal).toBe(false);
+  });
+
   it("abstains from theorizing when a scan has zero evidence", () => {
     expect(buildMissingTriangulation({}).hypotheses).toEqual([]);
     const empty = buildMissingTriangulation({report_consistency:{detected_findings:0}});
