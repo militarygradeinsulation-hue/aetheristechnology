@@ -19,6 +19,8 @@ export interface MissingClue {
   sourceLocator: string | null;
   sourceFamily: string;
   evidenceStatus: string;
+  /** Source text itself indicates a problem, rather than only mentioning the domain. */
+  issueSignal: boolean;
   direct: boolean;
 }
 
@@ -81,6 +83,10 @@ const isDirect = (status: string): boolean =>
   ["verified", "observed", "observed_public_copy", "source_verified"].includes(status.toLowerCase());
 const meaningful = (s: string): boolean =>
   s.length >= 16 && !/^(unknown|n\/a|not available|no finding|none|not assessed)$/i.test(s);
+/** A subject mention alone must never turn into evidence of an actual defect. */
+const issueInSource = (s: string): boolean =>
+  /\b(no|not|never|missing|absent|without|unclear|unassigned|untracked|unanswered|unknown|delayed?|broken|fail(?:ed|ure|ing)?|drop(?:ped)?|lost|loss|wast(?:e|ed|ing)|error|stalled?|unverified|unexplained|omitted|inconsistent|incomplete|cannot|unable|lack(?:s|ing)?|doesn't|isn't)\b/i.test(s);
+
 const possibleGap = (s: string): boolean =>
   /(?:\bunknown\b|\b(?:not|never) (?:measured|verified|available|provided|tracked|observed|established)\b|\b(?:no|insufficient|missing) (?:data|information|evidence|records|metrics)\b|\b0 (?:findings|verified findings|priced leaks|matches)\b)/i.test(s);
 
@@ -204,7 +210,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
       id, statement, category: string(e.category), evidenceStatus: status,
       sourceUrl: url, sourceLocator: locator,
       sourceFamily: family(url, locator, string(e.source_kind)),
-      direct: isDirect(status),
+      direct: isDirect(status), issueSignal: issueInSource(statement),
     });
   }
 
@@ -231,7 +237,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
       push({
         id: string(f.finding_id) || "compiled-" + signals.length,
         statement, category, evidenceStatus: string(f.status) || "report_statement",
-        sourceUrl: null, sourceLocator: null, sourceFamily: "report-only", direct: false,
+        sourceUrl: null, sourceLocator: null, sourceFamily: "report-only", direct: false, issueSignal: issueInSource(statement),
       }, chapter + " " + category + " " + statement);
     } else {
       for (const clue of matched.slice(0, 6)) {
@@ -251,7 +257,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
       id: string(a.id) || "active-" + signals.length,
       statement, category: string(a.pattern) || string(a.lens) || "public_site",
       evidenceStatus: status, sourceUrl: url, sourceLocator: null,
-      sourceFamily: family(url, null, "website"), direct: isDirect(status),
+      sourceFamily: family(url, null, "website"), direct: isDirect(status), issueSignal: issueInSource(statement),
     }, context + " " + statement);
   }
 
@@ -271,7 +277,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
         if (meaningful(statement)) push({
           id: "chapter-" + i + "-" + j, statement, category: string(ch.slug),
           evidenceStatus: "chapter_report", sourceUrl: url, sourceLocator: null,
-          sourceFamily: family(url, null, "report"), direct: false,
+          sourceFamily: family(url, null, "report"), direct: false, issueSignal: issueInSource(statement),
         }, title + " " + combined.slice(0, 350));
       }
     }
@@ -282,11 +288,13 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
     const matched = signals.filter(signal => def.pattern.test(signal.context)).slice(0, 40);
     if (!matched.length) continue;
     if (def.paired && !def.paired.every(re => matched.some(c => re.test(c.context)))) continue;
+    // Observed presence of a form, pricing or a contact page does NOT prove it
+    // is broken. It supports asking the question, but not claiming corroboration.
     const supporting = [...matched].sort((a, b) =>
-      Number(b.direct) - Number(a.direct) ||
+      Number(b.issueSignal && b.direct) - Number(a.issueSignal && a.direct) ||
       Number(b.sourceFamily !== "report-only") - Number(a.sourceFamily !== "report-only"),
     ).slice(0, 5);
-    const direct = supporting.filter(s => s.direct && s.sourceFamily !== "report-only");
+    const direct = supporting.filter(s => s.direct && s.issueSignal && s.sourceFamily !== "report-only");
     const independent = new Set(direct.map(s => s.sourceFamily)).size;
     const signalCategories = new Set(direct.map(s => norm(s.category)).filter(Boolean)).size;
     const hasAttributed = supporting.some(s => s.sourceFamily !== "report-only" && !!(s.sourceUrl || s.sourceLocator));
@@ -316,6 +324,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
       "Saved claims and quoted public copy remain separate from inferred explanations.",
       "Distinct URLs on one website count as one source family; repeated compiler statements do not count as independent confirmation.",
       "Converging support requires two independent observed source families and two different signal categories.",
+      "A source that merely mentions a process does not count as proof of a defect. The source text must contain a problem signal to raise support strength.",
       "Evidence support is not a probability, score of a person, verified business result or calculated financial loss.",
       "Unknown remains unknown until the requested first-party evidence is verified.",
     ],
