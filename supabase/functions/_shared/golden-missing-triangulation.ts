@@ -29,6 +29,8 @@ export interface MissingHypothesis {
   lens: MissingLens;
   question: string;
   possibleAnswer: string;
+  /** Case-specific explanation of how saved observations lead to this theory. */
+  rationale: string;
   alternateExplanation: string;
   missingInformation: string;
   verification: string;
@@ -303,9 +305,15 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
     const support: MissingSupport = independent >= 2 && signalCategories >= 2
       ? "converging" : independent >= 1 && hasAttributed ? "single_source" : "tentative";
     const linkedGaps = gaps.filter(g => def.pattern.test(g)).slice(0, 3);
+    const problemClues = supporting.filter(c => c.issueSignal);
+    const rationale = problemClues.length
+      ? "The saved material contains these problem signals: " +
+        problemClues.slice(0, 2).map(c => "\u201c" + c.statement.slice(0, 170) + "\u201d").join("; ") +
+        ". This suggests an explanation worth testing, but the downstream outcome has not been observed."
+      : "The saved material mentions the relevant process, but does not demonstrate that it failed. This is an investigation question, not corroborated evidence of a problem.";
     hypotheses.push({
       id: def.id, lens: def.lens, question: def.question,
-      possibleAnswer: def.possibleAnswer, alternateExplanation: def.alternateExplanation,
+      possibleAnswer: def.possibleAnswer, rationale, alternateExplanation: def.alternateExplanation,
       missingInformation: def.missingInformation, verification: def.verification,
       disconfirmingResult: def.disconfirmingResult, support,
       independentSources: independent, signalFamilies: signalCategories,
