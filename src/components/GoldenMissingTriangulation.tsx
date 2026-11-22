@@ -69,6 +69,12 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
         </div>
         <p className="text-sm leading-relaxed text-white/85">{h.possibleAnswer}</p>
       </div>
+      <div className="rounded-lg border border-white/10 bg-white/[0.025] p-3">
+        <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-white/60">
+          How the clues connect
+        </div>
+        <p className="text-xs leading-relaxed text-white/75">{h.rationale}</p>
+      </div>
       <div>
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/55">
           Source clues · {h.independentSources} independent observed {h.independentSources === 1 ? "family" : "families"}
