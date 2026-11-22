@@ -148,9 +148,28 @@ export function GoldenFrictionWorkspace({
 
   if (!authorized || !scanId) return null;
   return (
-    <section className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-4 sm:p-5 space-y-3">
+    <details className="mt-4 overflow-hidden rounded-xl border border-amber-500/25 bg-[#16161b]">
+      <summary className="flex min-h-[76px] cursor-pointer items-center justify-between gap-3 px-4 py-3.5 sm:px-5 [&::-webkit-details-marker]:hidden">
+        <span className="flex min-w-0 items-center gap-3">
+          <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-300">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6M7 17h3"/>
+            </svg>
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-white">Private correction workspace</span>
+            <span className="mt-1 block text-[11px] leading-tight text-white/55">
+              Assign fixes, measure results and link permitted Mindprint evidence
+            </span>
+          </span>
+        </span>
+        <span className="shrink-0 rounded-lg border border-amber-500/25 bg-amber-500/[0.06] px-2 py-1 text-[10px] font-mono text-amber-300">
+          {records.length} saved
+        </span>
+      </summary>
+      <section className="space-y-3 border-t border-white/10 px-4 py-4 sm:px-5">
       <div className="flex flex-col gap-1">
-        <h3 className="font-semibold text-base">Private correction workspace</h3>
+        <h3 className="sr-only">Manage friction experiments</h3>
         <p className="text-xs text-muted-foreground">
           Assign a finding, record a measurable baseline, test a change and save the result.
           Only an authorized operator or report-scoped rep can use these private records.
@@ -294,6 +313,7 @@ export function GoldenFrictionWorkspace({
       )}
 
       {notice && <p role="status" className="text-xs text-muted-foreground">{notice}</p>}
-    </section>
+      </section>
+    </details>
   );
 }
