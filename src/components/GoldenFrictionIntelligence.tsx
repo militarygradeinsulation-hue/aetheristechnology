@@ -14,7 +14,7 @@ const lensNumber: Record<FrictionLensId, string> = {
   economic: "04",
 };
 
-export function GoldenFrictionIntelligence({ report }: { report: unknown }) {
+export function GoldenFrictionIntelligence({ report, onInvestigate }: { report: unknown; onInvestigate?: (prompt: string) => void }) {
   const model = buildFrictionIntelligence(report);
 
   return (
@@ -111,6 +111,20 @@ export function GoldenFrictionIntelligence({ report }: { report: unknown }) {
                   <div className="mb-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Measure</div>
                   <p>{item.metric}</p>
                 </div>
+                {onInvestigate && (
+                  <button type="button" onClick={() => onInvestigate([
+                    "Investigate this Golden Report behavioral friction finding.",
+                    "Recorded finding: " + item.observation,
+                    "Evidence: " + item.evidence.map(e => e.statement + (e.sourceUrl ? " (" + e.sourceUrl + ")" : "")).join("; "),
+                    "Hypothesis to TEST, not assume: " + item.hypothesis,
+                    "Proposed test: " + item.test,
+                    "Measurement: " + item.metric,
+                    "Separate observed evidence from speculation. Give the exact steps, baseline needed, owner role and measurement method. Do not invent costs or psychological motives.",
+                  ].join("\n"))}
+                    className="inline-flex rounded border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-500 hover:bg-amber-500/20">
+                    Ask This Report to design the test
+                  </button>
+                )}
               </div>
             </details>
           ))}
