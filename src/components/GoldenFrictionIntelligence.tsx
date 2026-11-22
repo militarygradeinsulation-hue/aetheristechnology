@@ -1,4 +1,7 @@
+import { useMemo, useState } from "react";
 import { buildFrictionIntelligence, type FrictionLensId } from "../../supabase/functions/_shared/golden-friction-intelligence";
+import type { ActiveFrictionSignal } from "../../supabase/functions/_shared/golden-friction-scan";
+import { GoldenFrictionWorkspace } from "@/components/GoldenFrictionWorkspace";
 
 const lensAccent: Record<FrictionLensId, string> = {
   operational: "text-blue-400",
@@ -14,8 +17,19 @@ const lensNumber: Record<FrictionLensId, string> = {
   economic: "04",
 };
 
-export function GoldenFrictionIntelligence({ report, onInvestigate }: { report: unknown; onInvestigate?: (prompt: string) => void }) {
-  const model = buildFrictionIntelligence(report);
+export function GoldenFrictionIntelligence({
+  report, scanId, onInvestigate,
+}: {
+  report: unknown; scanId?: string;
+  onInvestigate?: (prompt: string) => void;
+}) {
+  const [reviewedSignals, setReviewedSignals] = useState<ActiveFrictionSignal[] | null>(null);
+  const model = useMemo(() => {
+    const record = report && typeof report === "object" && !Array.isArray(report) ? report as Record<string, unknown> : {};
+    return buildFrictionIntelligence(reviewedSignals ? {
+      ...record, behavioral_friction_signals: reviewedSignals,
+    } : record);
+  }, [report, reviewedSignals]);
 
   return (
     <section aria-labelledby="golden-friction-title" className="space-y-4">
@@ -134,6 +148,14 @@ export function GoldenFrictionIntelligence({ report, onInvestigate }: { report: 
           This saved case file does not contain sufficient structured findings for behavioral classification.
           Review the evidence ledger or request internal data before assigning friction causes.
         </div>
+      )}
+
+      {scanId && (
+        <GoldenFrictionWorkspace
+          scanId={scanId}
+          opportunities={model.opportunities}
+          onActiveScan={setReviewedSignals}
+        />
       )}
 
       <details className="rounded border border-border/70 p-3">
