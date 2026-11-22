@@ -33,6 +33,8 @@ export interface FrictionOpportunity {
   patternLabel: string;
   chapter: string;
   observation: string;
+  /** Root cause from compiler, when available. Used only to group duplicates. */
+  rootCauseId?: string;
   basis: "linked_claim" | "report_statement";
   evidence: FrictionEvidence[];
   hypothesis: string;
@@ -184,14 +186,14 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
 
   const candidates: FrictionOpportunity[] = [];
   const seen = new Set<string>();
-  const add = (id: string, chapter: string, observation: string, evidence: FrictionEvidence[], basis: FrictionOpportunity["basis"], context: string) => {
+  const add = (id: string, chapter: string, observation: string, evidence: FrictionEvidence[], basis: FrictionOpportunity["basis"], context: string, rootCauseId?: string) => {
     if (!meaningful(observation)) return;
     // A financial phrase alone is not proof of money lost. Never calculate new losses.
     for (const lens of classify(context)) {
       const key = lens + ":" + observation.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
-      candidates.push(opportunity(id, lens, chapter, observation, evidence, basis, context));
+      candidates.push({ ...opportunity(id, lens, chapter, observation, evidence, basis, context), ...(rootCauseId ? { rootCauseId } : {}) });
     }
   };
 
@@ -206,6 +208,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
       str(finding.finding_id) || "compiled-" + candidates.length,
       chapter, statement, evidence, evidence.length ? "linked_claim" : "report_statement",
       [chapter, str(finding.category), statement].join(" "),
+      str(finding.root_cause_id) || undefined,
     );
   }
 
@@ -274,7 +277,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
     o.evidence.length ? 1 : 0;
   candidates.sort((a, b) => evidenceRank(b) - evidenceRank(a));
   const lenses = LENSES.map(({ id, title, question }) => {
-    const opportunities = candidates.filter(c => c.lens === id).slice(0, 4);
+    const opportunities = candidates.filter(c => c.lens === id).slice(0, 10);
     return {
       id, title, question, opportunities,
       status: opportunities.some(o => o.evidence.some(e => (e.sourceUrl || e.sourceLocator) && e.status !== "audit_suggestion_not_verified"))
@@ -283,7 +286,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
     };
   });
   // Preserve coverage for ALL FOUR lenses, including the economic layer.
-  const queue = lenses.flatMap(l => l.opportunities.slice(0, 3));
+  const queue = lenses.flatMap(l => l.opportunities.slice(0, 8));
   return {
     version: "1.0", preliminary: true, lenses, opportunities: queue,
     notes: [
