@@ -6,6 +6,16 @@ on:
       - 'src/components/GoldenFrictionIntelligence.tsx'
       - 'src/components/ForensicScanAllPanel.tsx'
       - 'src/lib/goldenFrictionIntelligence.test.ts'
+      - 'src/lib/goldenActiveFriction.test.ts'
+      - 'src/components/GoldenFrictionWorkspace.tsx'
+      - 'supabase/functions/golden-friction-workspace/index.ts'
+      - 'supabase/functions/_shared/golden-friction-scan.ts'
+      - 'supabase/functions/forensic-scan-all/index.ts'
+      - 'src/lib/goldenActiveFriction.test.ts'
+      - 'src/components/GoldenFrictionWorkspace.tsx'
+      - 'supabase/functions/golden-friction-workspace/index.ts'
+      - 'supabase/functions/_shared/golden-friction-scan.ts'
+      - 'supabase/functions/forensic-scan-all/index.ts'
       - 'supabase/functions/_shared/golden-friction-intelligence.ts'
       - 'supabase/functions/_shared/golden-report-model.ts'
       - '.github/workflows/golden-friction-intelligence.yml'
@@ -32,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Run friction model and report parity tests
-        run: bunx vitest run src/lib/goldenFrictionIntelligence.test.ts src/lib/goldenReportParity.test.ts src/lib/goldenExecutiveProfile.test.ts src/lib/businessXray.test.ts
+        run: bunx vitest run src/lib/goldenFrictionIntelligence.test.ts src/lib/goldenActiveFriction.test.ts src/lib/goldenReportParity.test.ts src/lib/goldenExecutiveProfile.test.ts src/lib/businessXray.test.ts
       - name: Check production build
         run: bun run build
       - name: Check standalone Golden Report build
