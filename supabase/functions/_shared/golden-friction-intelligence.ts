@@ -62,12 +62,12 @@ const LENSES: Array<{ id: FrictionLensId; title: string; question: string; match
   {
     id: "operational", title: "Operational friction",
     question: "Where do handoffs, response times or process steps obstruct work?",
-    match: /\b(handoff|workflow|process|routing|pipeline|crm|follow.?up|lead|quote|response|manual|rework|delay|automat|operation|capacity|ownership|task|system|integration|delivery|form)\b/i,
+    match: /\b(handoff|workflow|process|routing|pipeline|crm|follow.?up|lead|quote|response|manual|rework|delay|automat\w*|operation\w*|capacity|ownership|task|system|integration|delivery|form)\b/i,
   },
   {
     id: "perceptual", title: "Perceptual friction",
     question: "What about the offer, presentation or buying path may create uncertainty?",
-    match: /\b(pric|proposal|offer|message|brand|position|trust|review|proof|language|cta|call to action|website|choice|default|framing|credib|clarity|confus|expectation|comparison|social|testimonial|copy|conversion)\b/i,
+    match: /\b(pric\w*|proposal|offer|message|brand|position|trust|review|proof|language|cta|call to action|website|choice|default|framing|credib\w*|clarity|confus\w*|expectation|comparison|social|testimonial|copy|conversion)\b/i,
   },
   {
     id: "human", title: "Human friction",
@@ -77,7 +77,7 @@ const LENSES: Array<{ id: FrictionLensId; title: string; question: string; match
   {
     id: "economic", title: "Economic friction",
     question: "What revenue, margin or cost exposure should be measured?",
-    match: /\b(margin|revenue|cost|churn|retention|conversion|loss|lost|profit|spend|expense|financial|budget|wast|leak|roi|sales)\b/i,
+    match: /\b(margin|revenue|cost|churn|retention|conversion|loss|lost|profit|spend|expense|financial|budget|wast\w*|leak\w*|roi|sales)\b/i,
   },
 ];
 
@@ -145,11 +145,11 @@ function classify(value: string): FrictionLensId[] {
 }
 
 function detectPattern(value: string, lens: FrictionLensId): FrictionPattern {
-  if (/\b(automat|self.service|chatbot|bot|standardiz|script)\b/i.test(value) &&
-      /\b(trust|human|reassur|relationship|service|buyer|customer|personal)\b/i.test(value)) return "doorman_risk";
-  if (/\b(default|choice|options?|pricing|pric|proposal|quote|package|checkout|form)\b/i.test(value) && lens === "perceptual") return "choice_architecture";
-  if (/\b(brand|message|framing|jargon|position|confus|clarity|copy|language|differentiat)\b/i.test(value) && lens === "perceptual") return "framing_gap";
-  if (/\b(proof|trust|reassur|risk|guarantee|credib|testimonial|case study)\b/i.test(value) && lens === "perceptual") return "dual_logic";
+  if (/\b(automat\w*|self.service|chatbot|bot|standardiz\w*|script)\b/i.test(value) &&
+      /\b(trust|human|reassur\w*|relationship|service|buyer|customer|personal)\b/i.test(value)) return "doorman_risk";
+  if (/\b(default|choice|options?|pricing|pric\w*|proposal|quote|package|checkout|form)\b/i.test(value) && lens === "perceptual") return "choice_architecture";
+  if (/\b(brand|message|framing|jargon|position\w*|confus\w*|clarity|copy|language|differentiat)\b/i.test(value) && lens === "perceptual") return "framing_gap";
+  if (/\b(proof|trust|reassur\w*|risk|guarantee|credib\w*|testimonial|case study)\b/i.test(value) && lens === "perceptual") return "dual_logic";
   if (lens === "human") return "people_coordination";
   if (lens === "economic") return "economic_exposure";
   return "handoff_gap";
