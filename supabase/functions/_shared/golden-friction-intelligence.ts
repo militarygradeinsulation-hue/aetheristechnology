@@ -267,8 +267,12 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
   // Show the strongest traceable items first, never presenting review prompts
   // as confirmed causes. Caps keep the executive surface lean without hiding
   // existing report chapters or the underlying evidence ledger.
-  candidates.sort((a, b) => Number(b.evidence.some(e => e.sourceUrl || e.sourceLocator)) -
-    Number(a.evidence.some(e => e.sourceUrl || e.sourceLocator)));
+  const evidenceRank = (o: FrictionOpportunity): number =>
+    o.evidence.some(e => e.status === "observed_public_copy" && !!e.sourceUrl) ? 4 :
+    o.evidence.some(e => e.status === "verified" && !!(e.sourceUrl || e.sourceLocator)) ? 3 :
+    o.evidence.some(e => (e.sourceUrl || e.sourceLocator) && e.status !== "audit_suggestion_not_verified") ? 2 :
+    o.evidence.length ? 1 : 0;
+  candidates.sort((a, b) => evidenceRank(b) - evidenceRank(a));
   const lenses = LENSES.map(({ id, title, question }) => {
     const opportunities = candidates.filter(c => c.lens === id).slice(0, 4);
     return {
@@ -278,7 +282,8 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
         : opportunities.length ? "review_required" as const : "not_evaluated" as const,
     };
   });
-  const queue = lenses.flatMap(l => l.opportunities).slice(0, 12);
+  // Preserve coverage for ALL FOUR lenses, including the economic layer.
+  const queue = lenses.flatMap(l => l.opportunities.slice(0, 3));
   return {
     version: "1.0", preliminary: true, lenses, opportunities: queue,
     notes: [
