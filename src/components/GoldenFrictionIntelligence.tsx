@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  Activity, ArrowDownRight, ArrowUpRight, ArrowRight, CheckCircle2,
-  ChevronDown, ChevronRight, CircleHelp, ClipboardList, Eye, FileText,
+  Activity, ArrowRight,
+  ChevronDown, CircleHelp, ClipboardList, Eye, FileText,
   Filter, Lightbulb, Link2, MessageSquareText, Search, ShieldCheck,
   Users2, Wallet, Workflow, X,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import {
 import type { ActiveFrictionSignal } from "../../supabase/functions/_shared/golden-friction-scan";
 import { GoldenFrictionWorkspace } from "@/components/GoldenFrictionWorkspace";
 import {
-  evidenceStrength, EVIDENCE_LABEL, groupInvestigations, observationHeadline,
+  EVIDENCE_LABEL, groupInvestigations, observationHeadline,
   type InvestigationGroup,
 } from "@/lib/goldenFrictionPresentation";
 
