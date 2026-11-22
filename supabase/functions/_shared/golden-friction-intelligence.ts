@@ -277,7 +277,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
     o.evidence.length ? 1 : 0;
   candidates.sort((a, b) => evidenceRank(b) - evidenceRank(a));
   const lenses = LENSES.map(({ id, title, question }) => {
-    const opportunities = candidates.filter(c => c.lens === id).slice(0, 4);
+    const opportunities = candidates.filter(c => c.lens === id).slice(0, 10);
     return {
       id, title, question, opportunities,
       status: opportunities.some(o => o.evidence.some(e => (e.sourceUrl || e.sourceLocator) && e.status !== "audit_suggestion_not_verified"))
@@ -286,7 +286,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
     };
   });
   // Preserve coverage for ALL FOUR lenses, including the economic layer.
-  const queue = lenses.flatMap(l => l.opportunities.slice(0, 3));
+  const queue = lenses.flatMap(l => l.opportunities.slice(0, 8));
   return {
     version: "1.0", preliminary: true, lenses, opportunities: queue,
     notes: [
