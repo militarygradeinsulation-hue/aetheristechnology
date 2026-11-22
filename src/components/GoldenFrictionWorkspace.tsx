@@ -112,7 +112,20 @@ export function GoldenFrictionWorkspace({
         throw new Error("Confirm permission before linking Mindprint evidence.");
       }
       const payload: Record<string, unknown> = {
-        ...form,
+        finding_id: form.finding_id,
+        lens: form.lens,
+        observation: form.observation,
+        hypothesis: form.hypothesis,
+        proposed_test: form.proposed_test,
+        metric: form.metric,
+        owner_role: form.owner_role,
+        status: form.status,
+        baseline_value: form.baseline_value,
+        result_value: form.result_value,
+        baseline_period: form.baseline_period,
+        result_period: form.result_period,
+        measurement_notes: form.measurement_notes,
+        revision: form.revision,
         ...(admin && clearMindprint ? { clear_mindprint: true } : {}),
         ...(admin && person.professional_evidence.trim() && consent ? {
           mindprint_context: person, mindprint_consent_attested: true,
