@@ -680,7 +680,11 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
             <GoldenTopLeaks report={report as never} />
 
             {/* Four evidence-led friction models use the saved findings; no new scans or costs. */}
-            <GoldenFrictionIntelligence report={report} />
+            <GoldenFrictionIntelligence
+              report={report}
+              scanId={row.id}
+              onInvestigate={(prompt) => { setFixSeed(prompt); setFixOpen(true); }}
+            />
 
             {/* Additive Business X-Ray: reads existing findings only; failure never blocks the report. */}
             <BusinessXray report={report} />
