@@ -40,6 +40,8 @@ import {
 } from "./golden-money-taxonomy.ts";
 
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
+import { buildFrictionIntelligence } from "./golden-friction-intelligence.ts";
+
 
 
 
@@ -991,6 +993,77 @@ function extrasSection(report: Record<string, unknown>): Section | null {
 }
 
 
+
+/**
+ * Canonical PDF section for behavioral friction. Rendered from saved findings
+ * with the same logic as the on-screen Friction Intelligence panel.
+ * This is a decision-support queue, not a financial total or causal diagnosis.
+ */
+function frictionIntelligenceSection(report: Record<string, unknown>, executive: boolean): Section {
+  const intelligence = buildFrictionIntelligence(report);
+  const blocks: Block[] = [
+    {
+      kind: "callout",
+      tone: "amber",
+      label: "Investigation framework (preliminary)",
+      text: "Four views of existing findings. These are hypotheses to test, not verified buyer motives, personality diagnoses, or additional revenue-loss amounts.",
+    },
+    {
+      kind: "table",
+      label: "Four friction lenses",
+      columns: ["Lens", "Evidence status", "Investigation leads"],
+      widths: [0.40, 0.32, 0.28],
+      rows: intelligence.lenses.map(lens => [
+        lens.title,
+        lens.status === "source_linked" ? "Source linked; confirm" :
+          lens.status === "review_required" ? "Review required" : "Not evaluated",
+        String(lens.opportunities.length),
+      ]),
+    },
+  ];
+
+  const perLens = executive ? 1 : 3;
+  for (const lens of intelligence.lenses) {
+    const items = lens.opportunities.slice(0, perLens);
+    if (!items.length) continue;
+    blocks.push({ kind: "subheading", text: lens.title });
+    for (const item of items) {
+      blocks.push({ kind: "kv", label: item.patternLabel, value: item.observation });
+      blocks.push({ kind: "kv", label: "Evidence basis", value:
+        item.evidence.length
+          ? item.evidence.map(e => [
+            e.claimId,
+            e.status,
+            e.statement,
+            e.sourceUrl || e.sourceLocator || "No source locator",
+          ].filter(Boolean).join(" | ")).join("\n")
+          : "Report statement only. Original source evidence must be confirmed.",
+      });
+      blocks.push({ kind: "kv", label: "Hypothesis to verify", value: item.hypothesis });
+      blocks.push({ kind: "kv", label: "Practical test", value: item.test });
+      blocks.push({ kind: "kv", label: "Measure", value: item.metric });
+    }
+  }
+  if (!intelligence.opportunities.length) {
+    blocks.push({ kind: "paragraph", text:
+      "This scan has insufficient evidence to classify behavioral friction. The areas were not evaluated; absence of findings does not prove the business has no friction." });
+  }
+  blocks.push({
+    kind: "paragraph",
+    text: "Mindprint participation requires permission. People-related hypotheses need human confirmation. Any financial impact must use a measured baseline and the Golden Report financial ledger.",
+  });
+
+  return {
+    id: "behavioral-friction-intelligence",
+    title: "Behavioral Friction Intelligence",
+    kicker: "HIDDEN FRICTION",
+    newPage: !executive,
+    indexed: true,
+    density: executive ? "compact" : "full",
+    blocks,
+  };
+}
+
 /**
  * Build the one view model both the on-screen report and the PDF read from.
  * Everything the website shows for a scan is represented here, in the same
@@ -1086,6 +1159,7 @@ export function buildGoldenReportModel(opts: {
   // deliverable does not carry it.
   if (!executive) pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
+  sections.push(frictionIntelligenceSection(report, executive));
 
   if (has(report.executive_summary)) {
     sections.push({
