@@ -27,7 +27,7 @@ describe("Golden Report missing-information triangulation", () => {
     expect(output.zeroCaveats).toHaveLength(2);
     expect(output.hypothesisOnly).toBe(true);
     expect(output.hypotheses.some(h => h.question.includes("qualified buyer"))).toBe(true);
-    expect(output.hypotheses.every(h => !!h.alternateExplanation && !!h.verification && !!h.disconfirmingResult)).toBe(true);
+    expect(output.hypotheses.every(h => !!h.rationale && !!h.alternateExplanation && !!h.verification && !!h.disconfirmingResult)).toBe(true);
     expect(JSON.stringify(output)).not.toMatch(/annual_low|annual_high|\$\s*[1-9][0-9]+/);
     expect(output.unresolvedAreas.some(x => x.includes("Sales Pipeline"))).toBe(true);
   });
