@@ -255,6 +255,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
     }, context + " " + statement);
   }
 
+  const hasStructuredSignals = signals.length > 0;
   for (const [i, row] of list(report.chapters).entries()) {
     const ch = obj(row);
     const title = string(ch.title) || string(ch.slug) || "Chapter " + (i + 1);
@@ -262,7 +263,7 @@ export function buildMissingTriangulation(rawReport: unknown): MissingTriangulat
     if (possibleGap(combined)) gaps.push(title + ": missing or unverified information indicated in the chapter");
     // A legacy chapter still permits working hypotheses when it has cited evidence,
     // but this does not elevate generated chapter prose to primary-source proof.
-    if (signals.length === 0) {
+    if (!hasStructuredSignals) {
       for (const [j, evidence] of list(ch.evidence).entries()) {
         const ev = obj(evidence);
         const statement = [tidy(ev.label), tidy(ev.value)].filter(Boolean).join(": ");
