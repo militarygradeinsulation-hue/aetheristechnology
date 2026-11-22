@@ -212,7 +212,7 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
   // Active scanner evidence is generated from the SAVED crawl and audit, not
   // new scraping or AI calls. Source copy is different from an audit suggestion.
   for (const [i, raw] of arr(report.behavioral_friction_signals).entries()) {
-    const signal = object(raw);
+    const signal = obj(raw);
     const observation = text(signal.observation);
     const excerpt = text(signal.excerpt);
     const lens = str(signal.lens) as FrictionLensId;
