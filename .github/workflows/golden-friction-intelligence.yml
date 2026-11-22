@@ -4,29 +4,31 @@ on:
   pull_request:
     paths:
       - 'src/components/GoldenFrictionIntelligence.tsx'
+      - 'src/components/GoldenFrictionWorkspace.tsx'
       - 'src/components/ForensicScanAllPanel.tsx'
       - 'src/lib/goldenFrictionIntelligence.test.ts'
       - 'src/lib/goldenActiveFriction.test.ts'
-      - 'src/components/GoldenFrictionWorkspace.tsx'
-      - 'supabase/functions/golden-friction-workspace/index.ts'
-      - 'supabase/functions/_shared/golden-friction-scan.ts'
-      - 'supabase/functions/forensic-scan-all/index.ts'
-      - 'src/lib/goldenActiveFriction.test.ts'
-      - 'src/components/GoldenFrictionWorkspace.tsx'
-      - 'supabase/functions/golden-friction-workspace/index.ts'
-      - 'supabase/functions/_shared/golden-friction-scan.ts'
-      - 'supabase/functions/forensic-scan-all/index.ts'
       - 'supabase/functions/_shared/golden-friction-intelligence.ts'
+      - 'supabase/functions/_shared/golden-friction-scan.ts'
       - 'supabase/functions/_shared/golden-report-model.ts'
+      - 'supabase/functions/forensic-scan-all/index.ts'
+      - 'supabase/functions/golden-friction-workspace/index.ts'
+      - 'supabase/migrations/*golden_friction_experiments.sql'
       - '.github/workflows/golden-friction-intelligence.yml'
   push:
     branches: [main]
     paths:
       - 'src/components/GoldenFrictionIntelligence.tsx'
+      - 'src/components/GoldenFrictionWorkspace.tsx'
       - 'src/components/ForensicScanAllPanel.tsx'
       - 'src/lib/goldenFrictionIntelligence.test.ts'
+      - 'src/lib/goldenActiveFriction.test.ts'
       - 'supabase/functions/_shared/golden-friction-intelligence.ts'
+      - 'supabase/functions/_shared/golden-friction-scan.ts'
       - 'supabase/functions/_shared/golden-report-model.ts'
+      - 'supabase/functions/forensic-scan-all/index.ts'
+      - 'supabase/functions/golden-friction-workspace/index.ts'
+      - 'supabase/migrations/*golden_friction_experiments.sql'
       - '.github/workflows/golden-friction-intelligence.yml'
   workflow_dispatch:
 
