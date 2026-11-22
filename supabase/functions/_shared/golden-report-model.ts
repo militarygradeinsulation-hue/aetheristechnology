@@ -1085,6 +1085,7 @@ function missingTriangulationSection(report: Record<string, unknown>, executive:
   for (const h of selected) {
     blocks.push({ kind: "subheading", text: h.question });
     blocks.push({ kind: "kv", label: "Plausible explanation (unverified)", value: h.possibleAnswer });
+    blocks.push({ kind: "kv", label: "How saved clues support this theory", value: h.rationale });
     blocks.push({ kind: "kv", label: "Evidence support", value:
       (h.support === "converging" ? "Converging observed source families" :
         h.support === "single_source" ? "One observed source family" : "Tentative; insufficient independent corroboration") +
