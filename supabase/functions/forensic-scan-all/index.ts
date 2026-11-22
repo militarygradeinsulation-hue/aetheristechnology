@@ -1090,6 +1090,7 @@ function dedupeTopLeaks(
 import { LEAKAGE_CALCULATION_VERSION } from "../_shared/golden-leakage.ts";
 import { resolveFinancialLedger } from "../_shared/golden-ledger.ts";
 import { compileGoldenReport } from "../_shared/golden-compiler.ts";
+import { buildActiveFrictionSignals } from "../_shared/golden-friction-scan.ts";
 
 
 
@@ -1485,6 +1486,12 @@ async function finalizeSavedScan(id: string) {
 
     // Never call a preliminary or inconsistent report "completed".
     const publishable = compilerState === "compiled" && report?.synthesis_incomplete !== true;
+    // Behavioral Friction Intelligence uses saved crawl and copy-audit output.
+    // This requires no additional paid crawl, AI generation or live probe.
+    // Attach AFTER the compiler so its financial and consistency invariants
+    // remain unchanged; these are hypotheses, never new priced findings.
+    report.behavioral_friction_signals = buildActiveFrictionSignals(findings, url);
+
     const saved = await sb.from("forensic_scans").update({
       raw_findings: findings,
       report,

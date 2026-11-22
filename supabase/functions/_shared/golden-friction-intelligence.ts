@@ -209,6 +209,40 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
     );
   }
 
+  // Active scanner evidence is generated from the SAVED crawl and audit, not
+  // new scraping or AI calls. Source copy is different from an audit suggestion.
+  for (const [i, raw] of arr(report.behavioral_friction_signals).entries()) {
+    const signal = obj(raw);
+    const observation = text(signal.observation);
+    const excerpt = text(signal.excerpt);
+    const lens = str(signal.lens) as FrictionLensId;
+    if (!LENSES.some(l => l.id === lens) || !meaningful(observation) || !meaningful(excerpt)) continue;
+    const key = lens + ":" + observation.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const pattern = str(signal.pattern) as FrictionPattern;
+    const safePattern = pattern in PATTERN_LABEL ? pattern : detectPattern(observation, lens);
+    const observed = str(signal.evidence_status) === "observed_public_copy";
+    candidates.push({
+      id: str(signal.id) || "active-" + i,
+      lens, pattern: safePattern,
+      patternLabel: PATTERN_LABEL[safePattern],
+      chapter: "Saved public-site evidence",
+      observation,
+      basis: "linked_claim",
+      evidence: [{
+        claimId: str(signal.id) || "active-" + i,
+        statement: excerpt,
+        status: observed ? "observed_public_copy" : "audit_suggestion_not_verified",
+        sourceUrl: safeUrl(signal.source_url),
+        sourceLocator: null,
+      }],
+      hypothesis: str(signal.hypothesis) || PATTERN_GUIDE[safePattern].hypothesis,
+      test: str(signal.test) || PATTERN_GUIDE[safePattern].test,
+      metric: str(signal.metric) || PATTERN_GUIDE[safePattern].metric,
+    });
+  }
+
   // Legacy reports may have chapters but no compiled findings. They remain
   // preliminary report statements, NEVER promoted to source-verified claims.
   if (!candidates.length) {
@@ -233,18 +267,23 @@ export function buildFrictionIntelligence(rawReport: unknown): FrictionIntellige
   // Show the strongest traceable items first, never presenting review prompts
   // as confirmed causes. Caps keep the executive surface lean without hiding
   // existing report chapters or the underlying evidence ledger.
-  candidates.sort((a, b) => Number(b.evidence.some(e => e.sourceUrl || e.sourceLocator)) -
-    Number(a.evidence.some(e => e.sourceUrl || e.sourceLocator)));
+  const evidenceRank = (o: FrictionOpportunity): number =>
+    o.evidence.some(e => e.status === "observed_public_copy" && !!e.sourceUrl) ? 4 :
+    o.evidence.some(e => e.status === "verified" && !!(e.sourceUrl || e.sourceLocator)) ? 3 :
+    o.evidence.some(e => (e.sourceUrl || e.sourceLocator) && e.status !== "audit_suggestion_not_verified") ? 2 :
+    o.evidence.length ? 1 : 0;
+  candidates.sort((a, b) => evidenceRank(b) - evidenceRank(a));
   const lenses = LENSES.map(({ id, title, question }) => {
     const opportunities = candidates.filter(c => c.lens === id).slice(0, 4);
     return {
       id, title, question, opportunities,
-      status: opportunities.some(o => o.evidence.some(e => e.sourceUrl || e.sourceLocator))
+      status: opportunities.some(o => o.evidence.some(e => (e.sourceUrl || e.sourceLocator) && e.status !== "audit_suggestion_not_verified"))
         ? "source_linked" as const
         : opportunities.length ? "review_required" as const : "not_evaluated" as const,
     };
   });
-  const queue = lenses.flatMap(l => l.opportunities).slice(0, 12);
+  // Preserve coverage for ALL FOUR lenses, including the economic layer.
+  const queue = lenses.flatMap(l => l.opportunities.slice(0, 3));
   return {
     version: "1.0", preliminary: true, lenses, opportunities: queue,
     notes: [

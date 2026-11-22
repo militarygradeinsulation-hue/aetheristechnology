@@ -324,3 +324,7 @@ verify_jwt = true
 # Private outreach video links are authorized by unguessable access tokens in function code.
 [functions.private-video]
 verify_jwt = false
+
+# Manual HMAC authorization (admin or exactly scoped report rep) in function body.
+[functions.golden-friction-workspace]
+verify_jwt = false

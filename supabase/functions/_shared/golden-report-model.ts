@@ -155,6 +155,7 @@ const NON_DISPLAY_KEYS = new Set([
   "overall_leakage",
   "synth_fallback",
   "deliverables_status",
+  "behavioral_friction_signals",
 ]);
 
 const str = (v: unknown): string => (v == null ? "" : String(v)).trim();
@@ -940,6 +941,7 @@ const CLAIMED_KEYS = new Set([
   "deliverables",
   
   "generated_at",
+  "behavioral_friction_signals",
 ]);
 
 /** Recursively renders any saved value into blocks, losing nothing. */
