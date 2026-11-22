@@ -12,6 +12,7 @@ import {
 } from "../../supabase/functions/_shared/golden-friction-intelligence";
 import type { ActiveFrictionSignal } from "../../supabase/functions/_shared/golden-friction-scan";
 import { GoldenFrictionWorkspace } from "@/components/GoldenFrictionWorkspace";
+import { GoldenMissingTriangulation } from "@/components/GoldenMissingTriangulation";
 import {
   EVIDENCE_LABEL, groupInvestigations, observationHeadline,
   type InvestigationGroup,
@@ -407,6 +408,8 @@ export function GoldenFrictionIntelligence({
           </div>
         )}
       </div>
+
+      <GoldenMissingTriangulation report={report} onInvestigate={onInvestigate}/>
 
       {scanId && <GoldenFrictionWorkspace
         scanId={scanId}
