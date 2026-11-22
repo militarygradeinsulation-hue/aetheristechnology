@@ -17,6 +17,7 @@ import { GoldenGrowthAssets } from "@/components/GoldenGrowthAssets";
 import { GoldenSourceBadge, GoldenSourceIdentity } from "@/components/GoldenSourceBadge";
 import { GoldenFixPanel, chapterFixPrompt } from "@/components/GoldenFixPanel";
 import { GoldenTopLeaks } from "@/components/GoldenTopLeaks";
+import { GoldenFrictionIntelligence } from "@/components/GoldenFrictionIntelligence";
 import { chapterAllocation, crossReferencedIn, formatUsdRange, resolveFinancialLedger, NON_PRICEABLE_CHAPTER_SLUGS } from "@/lib/goldenLedger";
 import { CHAPTER_ALLOCATION_NOTE, crossReferenceNote } from "@/lib/goldenMoneyTaxonomy";
 import { Wrench } from "lucide-react";
@@ -677,6 +678,9 @@ export function ForensicScanAllPanel({ initialScanId, initialUrl = "", initialCo
 
             {/* Canonical Top 10 — reads the Financial Leak Ledger, never its own math. */}
             <GoldenTopLeaks report={report as never} />
+
+            {/* Four evidence-led friction models use the saved findings; no new scans or costs. */}
+            <GoldenFrictionIntelligence report={report} />
 
             {/* Additive Business X-Ray: reads existing findings only; failure never blocks the report. */}
             <BusinessXray report={report} />
