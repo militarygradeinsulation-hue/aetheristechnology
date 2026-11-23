@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { GoldenTheoryEvidenceReview, useGoldenTriangulationEvidence } from "@/components/GoldenTriangulationEvidenceReview";
-import { VALID_HYPOTHESES, type ReviewHypothesisId } from "../../supabase/functions/_shared/golden-triangulation-review";
+import { VALID_HYPOTHESES, reviewTheoryEvidence, type ReviewHypothesisId } from "../../supabase/functions/_shared/golden-triangulation-review";
 import { ArrowRight, BrainCircuit, ChevronDown, CircleHelp, FileQuestion, Link2, SearchCheck, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
   buildMissingTriangulation,
@@ -47,6 +47,8 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
   review?: ReturnType<typeof useGoldenTriangulationEvidence>;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const reviewState = review?.authorized && review.status === "ready" && VALID_HYPOTHESES.has(h.id)
+    ? reviewTheoryEvidence(h.id, review.records) : null;
   return <article className="overflow-hidden rounded-xl border border-white/10 bg-[#161820]">
     <button type="button" onClick={() => setExpanded(v => !v)} aria-expanded={expanded}
       className="flex min-h-[88px] w-full items-start gap-3 px-3 py-4 text-left sm:px-4">
@@ -57,6 +59,11 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
         <div className="mb-1 flex flex-wrap items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300">{LENSES[h.lens]}</span>
           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${TONE[h.support]}`}>{LABEL[h.support]}</span>
+          {reviewState && reviewState.status !== "unreviewed" && (
+            <span className={`rounded-full border border-sky-400/25 px-2 py-0.5 text-[10px] font-medium ${reviewState.status === "challenged" || reviewState.status === "mixed" ? "text-rose-300" : "text-sky-300"}`}>
+              Review: {reviewState.status.replaceAll("_"," ")}
+            </span>
+          )}
         </div>
         <h4 className="text-sm font-semibold leading-snug text-white">{h.question}</h4>
         <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-white/70">
