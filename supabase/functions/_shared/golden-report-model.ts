@@ -41,6 +41,7 @@ import {
 
 import { buildEvidenceConfidence, EVIDENCE_CONFIDENCE_TITLE } from "./golden-evidence-confidence.ts";
 import { buildFrictionIntelligence } from "./golden-friction-intelligence.ts";
+import { buildMissingTriangulation } from "./golden-missing-triangulation.ts";
 
 
 
@@ -1066,6 +1067,57 @@ function frictionIntelligenceSection(report: Record<string, unknown>, executive:
   };
 }
 
+
+/**
+ * Evidence-first missing-information hypotheses.
+ * A ZERO count is never rewritten. These are proposed explanations to
+ * investigate, not verified business findings or additions to the money ledger.
+ */
+function missingTriangulationSection(report: Record<string, unknown>, executive: boolean): Section | null {
+  const model = buildMissingTriangulation(report);
+  if (!model.hypotheses.length && !model.zeroCaveats.length && !model.unresolvedAreas.length) return null;
+  const blocks: Block[] = [{
+    kind: "callout", tone: "amber", label: "Theories based on saved evidence, not verified findings",
+    text: "A missing observation, unknown value or zero priced finding does not mean the real-world issue is absent. These explanations are hypotheses. They do not change canonical counts, financial losses or the evidence ledger.",
+  }];
+  for (const caveat of model.zeroCaveats) blocks.push({ kind: "paragraph", text: caveat });
+  const selected = model.hypotheses.slice(0, executive ? 3 : 8);
+  for (const h of selected) {
+    blocks.push({ kind: "subheading", text: h.question });
+    blocks.push({ kind: "kv", label: "Plausible explanation (unverified)", value: h.possibleAnswer });
+    blocks.push({ kind: "kv", label: "How saved clues support this theory", value: h.rationale });
+    blocks.push({ kind: "kv", label: "Evidence support", value:
+      (h.support === "converging" ? "Converging observed source families" :
+        h.support === "single_source" ? "One observed source family" : "Tentative; insufficient independent corroboration") +
+      " | independent families: " + h.independentSources +
+      " | signal categories: " + h.signalFamilies,
+    });
+    for (const clue of h.clues.slice(0, executive ? 2 : 5)) {
+      blocks.push({ kind: "kv", label: "Clue: " + clue.evidenceStatus,
+        value: clue.statement + (clue.sourceUrl ? "\nSource: " + clue.sourceUrl :
+          clue.sourceLocator ? "\nLocator: " + clue.sourceLocator :
+          "\nOriginal source not independently confirmed"),
+      });
+    }
+    blocks.push({ kind: "kv", label: "Alternative explanation", value: h.alternateExplanation });
+    blocks.push({ kind: "kv", label: "Missing data to confirm", value: h.missingInformation });
+    blocks.push({ kind: "kv", label: "Next verification", value: h.verification });
+    if (!executive) blocks.push({ kind: "kv", label: "What would disprove this theory", value: h.disconfirmingResult });
+  }
+  if (!selected.length) blocks.push({ kind: "paragraph", text: "No defensible theory could be formed from this saved evidence. Do not replace unknown data with guesses." });
+  if (!executive && model.unresolvedAreas.length) blocks.push({ kind: "bullets", label: "Other unresolved report areas", items: model.unresolvedAreas });
+  blocks.push({ kind: "paragraph", text: "Evidence support is qualitative and is not a statistically calibrated probability of any outcome. Do not price these hypotheses or classify them as verified problems until first-party records confirm them." });
+  return {
+    id: "missing-information-triangulation",
+    title: "Missing Information Triangulation",
+    kicker: "EVIDENCE-GUIDED THEORIES",
+    newPage: !executive,
+    indexed: true,
+    density: executive ? "compact" : "full",
+    blocks,
+  };
+}
+
 /**
  * Build the one view model both the on-screen report and the PDF read from.
  * Everything the website shows for a scan is represented here, in the same
@@ -1162,6 +1214,7 @@ export function buildGoldenReportModel(opts: {
   if (!executive) pushIf(sections as never, reconciliationSection(ledger) as never);
   pushIf(sections as never, evidenceSection(report) as never);
   sections.push(frictionIntelligenceSection(report, executive));
+  pushIf(sections as never, missingTriangulationSection(report, executive) as never);
 
   if (has(report.executive_summary)) {
     sections.push({
