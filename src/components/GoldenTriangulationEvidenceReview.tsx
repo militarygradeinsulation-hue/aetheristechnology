@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { GoldenCrmCsvPreview } from "@/components/GoldenCrmCsvPreview";
+import { GoldenScopedCrmPreview } from "@/components/GoldenScopedCrmPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
@@ -66,8 +67,9 @@ export function useGoldenTriangulationEvidence(scanId?:string){
   };
   return {authorized,records,status,error,save};
 }
-export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,error}:{
+export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,error,scanId}:{
   hypothesisId:ReviewHypothesisId;
+  scanId?:string;
   records:ReviewEvidence[];
   onSave:(record:Input)=>Promise<void>;
   status:"idle"|"loading"|"ready"|"error";
@@ -128,6 +130,17 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
           <p className="font-mono text-[10px] text-white/45 break-all">Source record: {row.source_reference}</p>
         </li>)}
       </ul>}
+      <GoldenScopedCrmPreview
+        scanId={scanId}
+        onUseSummary={(preview)=>{
+          setKind("crm");
+          setDirection("");
+          setReference(("mirror_companies:"+preview.company_record_id).slice(0,300));
+          setObservation(preview.statement.slice(0,2400));
+          setReviewed(false);
+          setNotice("Read-only company context drafted. Verify relevance to this theory before selecting supports or challenges. Nothing has been saved.");
+        }}
+      />
       <GoldenCrmCsvPreview
         theoryId={hypothesisId}
         onUseSummary={(summary)=>{setKind("crm");setDirection("");setObservation(summary.slice(0,2400));setReviewed(false);setNotice("Summary drafted locally. Check the claim against the export, choose supports or challenges, and enter a source reference before saving.");}}
