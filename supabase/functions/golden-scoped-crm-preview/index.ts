@@ -11,7 +11,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-token.ts";
 import {
-  normalizeReportDomain, companyMatchesReport, buildScopedCompanyPreview,
+  normalizeReportDomain, companyMatchesReport, chooseUniqueCompanyMatch,
   type ScopedCompanyRecord,
 } from "../_shared/golden-scoped-crm.ts";
 
@@ -71,9 +71,10 @@ serve(async (req) => {
       .eq("user_id", identity.user.id)
       .not("hubspot_connected_at", "is", null)
       .not("hubspot_refresh_token_encrypted", "is", null)
-      .limit(25);
+      .limit(26);
     if (accountError) return reply({ error: "Unable to verify connected CRM ownership" }, 500);
     if (!accounts?.length) return reply({ ok: true, status: "no_owned_connected_account" });
+    if (accounts.length > 25) return reply({ ok: true, status: "too_many_accounts" });
 
     const results: ScopedCompanyRecord[] = [];
     // Fixed account limit and exact-domain match make this a bounded,
@@ -91,18 +92,8 @@ serve(async (req) => {
       if (results.length > 1) break;
     }
 
-    if (!results.length) return reply({
-      ok: true, status: "no_exact_match",
-      notice: "No single exact-domain company record was found in the signed-in user's connected CRM.",
-    });
-    if (results.length !== 1) return reply({
-      ok: true, status: "ambiguous",
-      notice: "Multiple company records match. Resolve duplicates in the CRM before drawing conclusions.",
-    });
-
-    const preview = buildScopedCompanyPreview(scan.target_url, results[0]);
-    if (!preview) return reply({ ok: true, status: "no_exact_match" });
-    return reply({ ok: true, status: "matched", preview });
+    const choice = chooseUniqueCompanyMatch(scan.target_url, results);
+    return reply({ ok: true, ...choice });
   } catch (error) {
     console.error("[golden-scoped-crm-preview]", error instanceof Error ? error.message : "unknown");
     return reply({ error: "Unable to evaluate company context" }, 500);
