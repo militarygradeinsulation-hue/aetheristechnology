@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook, Target, Radar, Globe } from 'lucide-react';
+import { RefreshCw, LogOut, Eye, EyeOff, Users, FileText, Lightbulb, ArrowLeft, Loader2, TrendingUp, BarChart3, Wrench, Megaphone, Phone, Calendar, Mail, Brain, AlertTriangle, ScanText, ChevronLeft, ChevronDown, BookOpen, Library, Sparkles, Database, Send, Clock, Trash2, Search, X, Handshake, Image as ImageIcon, FileBox, Inbox, FlaskConical, MessageSquare, Newspaper, GraduationCap, CalendarDays, CalendarClock, BookMarked, DollarSign, Building2, Zap, Briefcase, ArrowDownToLine, Activity, BarChart, LayoutGrid, Maximize2, Minimize2, Film, UserPlus, FileUp, ShoppingCart, ScanSearch, FileSearch, Mic, Languages, ScrollText, Swords, Twitter, Facebook, Target, Radar } from 'lucide-react';
 const ForensicScanAllPanel = lazy(() => import('@/components/ForensicScanAllPanel').then(m => ({ default: m.ForensicScanAllPanel })));
 const ReciprocationDoctrineTool = lazy(() => import('@/components/ReciprocationDoctrineTool').then(m => ({ default: m.ReciprocationDoctrineTool })));
 import { Input } from '@/components/ui/input';
@@ -55,8 +55,6 @@ const AdminLeadBrowser = lazy(() => import('@/components/admin/AdminLeadBrowser'
 const ScannedLeadsDirectory = lazy(() => import('@/components/admin/ScannedLeadsDirectory').then(m => ({ default: m.ScannedLeadsDirectory })));
 
 const ToolLeadsPanel = lazy(() => import('@/components/admin/ToolLeadsPanel').then(m => ({ default: m.ToolLeadsPanel })));
-const ToolHealthPanel = lazy(() => import('@/components/admin/ToolHealthPanel').then(m => ({ default: m.ToolHealthPanel })));
-
 const AdminCareersTest = lazy(() => import('@/components/admin/AdminCareersTest').then(m => ({ default: m.AdminCareersTest })));
 const AdminCareersPanel = lazy(() => import('@/components/admin/AdminCareersPanel').then(m => ({ default: m.AdminCareersPanel })));
 const AdminHiresOnboardingPanel = lazy(() => import('@/components/admin/AdminHiresOnboardingPanel'));
@@ -74,7 +72,6 @@ const SalesCrmPanel = lazy(() => import('@/components/admin/SalesCrmPanel'));
 const TeamMessageBoard = lazy(() => import('@/components/team/TeamMessageBoard'));
 const AdminNewsPanel = lazy(() => import('@/components/admin/AdminNewsPanel'));
 const AdminForensicsSystemsPanel = lazy(() => import('@/components/admin/AdminForensicsSystemsPanel').then(m => ({ default: m.AdminForensicsSystemsPanel })));
-const AdminPaymentsPanel = lazy(() => import('@/components/admin/AdminPaymentsPanel'));
 const AdminGoldenOpensPanel = lazy(() => import('@/components/admin/AdminGoldenOpensPanel'));
 const AdminUniverseAnalyticsPanel = lazy(() => import('@/components/admin/AdminUniverseAnalyticsPanel'));
 const AdminComponentStudioPanel = lazy(() => import('@/components/admin/AdminComponentStudioPanel'));
@@ -243,12 +240,10 @@ const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [stats, setStats] = useState({ visitors: 0, pageViews: 0, linkedInClicks: 0, formSubmissions: 0 });
   const ACTIVE_TAB_KEY = 'admin.activeTab.v1';
-  const [leadView, setLeadView] = useState<LeadsView>('existing');
   const [activeTab, setActiveTabState] = useState<'overview' | 'submissions' | 'events' | 'insights' | 'tools' | 'library' | 'crm' | 'sales' | 'seo' | 'outlook' | 'engine' | 'commissions' | 'forecast' | 'portal' | 'meetingflow' | 'playbook' | 'team' | 'training' | 'onboarding' | 'calendars' | 'companycal' | 'news' | 'systems' | 'goldenlibrary' | 'collectivebrain' | 'workspace' | 'mediastudio' | 'hiring' | 'documents' | 'careers' | 'mailboxes' | 'catalog' | 'liveevents' | 'briefings' | 'hires' | 'easymode' | 'ideas' | 'toolleads' | 'execdesk' | 'command' | 'prospector' | 'scannedleads'>(() => {
     try {
       const saved = localStorage.getItem(ACTIVE_TAB_KEY);
       if (saved === 'prospector' && !hasValidAdminToken()) return 'workspace';
-      if (saved === 'scannedleads') return 'submissions';
       if (saved) return saved as any;
     } catch {}
     return 'workspace';
@@ -285,6 +280,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'briefings', label: 'Briefings', icon: BookMarked },
     { key: 'hiring', label: 'Hiring', icon: CalendarClock },
     { key: 'submissions', label: 'Leads', icon: Inbox },
+    { key: 'scannedleads', label: 'Scanned Leads', icon: ScanSearch },
     { key: 'library', label: 'Library', icon: Library },
     { key: 'mailboxes', label: 'Mailboxes', icon: Mail },
     { key: 'onboarding', label: 'Aetheris Academy', icon: GraduationCap },
@@ -305,7 +301,7 @@ const AdminDashboard: React.FC = () => {
     { key: 'command', label: 'Command Center', icon: Activity },
   ];
   const VISIBLE_TABS_KEY = 'admin.visibleTabs.v1';
-  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'collectivebrain', 'command', 'prospector', 'meetingflow']; // newly added tabs auto-show even if user has saved prefs
+  const ALWAYS_INCLUDE_NEW = ['hires', 'briefings', 'mediastudio', 'hiring', 'chaosscan', 'headtohead', 'goldenlibrary', 'collectivebrain', 'command', 'prospector', 'meetingflow', 'scannedleads']; // newly added tabs auto-show even if user has saved prefs
   const [visibleTabs, setVisibleTabsState] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(VISIBLE_TABS_KEY);
@@ -407,21 +403,17 @@ const AdminDashboard: React.FC = () => {
     ? ALL_TAB_DEFS.filter(t => t.label.toLowerCase().includes(tabSearch.toLowerCase()))
     : [];
   const jumpToTab = (key: string) => {
-    // Legacy Scanned Leads links open the same Leads workspace, preselected
-    // to forensic records. No duplicate Lead Browser or second data silo.
-    const resolved = key === 'scannedleads' ? 'submissions' : key;
-    if (key === 'scannedleads') setLeadView('forensic');
-    if (!visibleTabs.includes(resolved)) setVisibleTabs([...visibleTabs, resolved]);
+    if (!visibleTabs.includes(key)) setVisibleTabs([...visibleTabs, key]);
     setLayout('tabs');
-    setActiveTab(resolved as typeof activeTab);
+    setActiveTab(key as typeof activeTab);
     setTabSearch('');
     setTabSearchOpen(false);
-    if (resolved === 'insights' && !recommendations) fetchInsights();
-    if (resolved === 'outlook' && postingSchedule.length === 0) fetchSchedule();
-    if (resolved !== 'tools') setActiveTool(null);
+    if (key === 'insights' && !recommendations) fetchInsights();
+    if (key === 'outlook' && postingSchedule.length === 0) fetchSchedule();
+    if (key !== 'tools') setActiveTool(null);
     // Scroll the tab into view so the user lands on what they searched for.
     setTimeout(() => {
-      const el = document.getElementById(`admin-tab-btn-${resolved}`);
+      const el = document.getElementById(`admin-tab-btn-${key}`);
       el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       const main = document.querySelector('main');
       main?.scrollTo?.({ top: 0, behavior: 'smooth' });
@@ -636,12 +628,9 @@ const AdminDashboard: React.FC = () => {
       case 'easymode': return <EasyModeTool />;
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
+      case 'scannedleads': return <Suspense fallback={<PanelFallback />}><ScannedLeadsDirectory /></Suspense>;
       case 'goldenlibrary': return (
         <div className="space-y-4">
-          <Link to="/admin/browser-research"
-            className="inline-flex items-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm font-semibold text-amber-300 hover:bg-amber-400/20">
-            <Globe className="h-4 w-4" /> Open Live Browser Research
-          </Link>
           <Suspense fallback={<PanelFallback />}><GoldenCrmVerificationQueue /></Suspense>
           <GoldenReportLibrary />
         </div>
@@ -695,7 +684,7 @@ const AdminDashboard: React.FC = () => {
       case 'prospector': return hasValidAdminToken() ? <OwnerIcpProspector /> : null;
       
       case 'commissions': return <div className="space-y-6"><AdminQuotingPos /><CommissionStructurePanel /></div>;
-      case 'catalog': return <><AdminPaymentsPanel /><ServicesPricing /></>;
+      case 'catalog': return <ServicesPricing />;
       case 'liveevents': return <AdminLiveEventsPanel />;
       case 'forecast': return <ForecastSettingsPanel />;
       case 'portal': return <CompanyPortalPreview />;
@@ -719,7 +708,7 @@ const AdminDashboard: React.FC = () => {
       case 'mailboxes': return <AdminMailboxesPanel />;
       case 'seo': return <SEOOptimizer />;
       case 'overview': return <OverviewBody statCards={statCards} conversionRate={conversionRate} topPages={topPages} eventBreakdown={eventBreakdown} />;
-      case 'submissions': return <SubmissionsBody submissions={submissions} toggleRead={toggleRead} deleteSubmission={deleteSubmission} leadView={leadView} onLeadViewChange={setLeadView} />;
+      case 'submissions': return <SubmissionsBody submissions={submissions} toggleRead={toggleRead} deleteSubmission={deleteSubmission} />;
       case 'events': return <EventsBody eventsSubTab={eventsSubTab} setEventsSubTab={setEventsSubTab} eventFilter={eventFilter} setEventFilter={setEventFilter} filteredEvents={filteredEvents} />;
       case 'insights': return <InsightsBody recommendations={recommendations} loadingInsights={loadingInsights} fetchInsights={fetchInsights} />;
       case 'tools': return <ToolsBody activeTool={activeTool} setActiveTool={setActiveTool} />;
@@ -786,7 +775,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            <Button variant="outline" size="sm" onClick={() => jumpToTab('scannedleads')} title="View all saved scans, contact details, and findings" className="border-amber/50 text-amber hover:bg-amber/10">
+            <Button variant="outline" size="sm" onClick={() => jumpToTab('scannedleads')} title="View all saved scans and available contact details" className="border-amber/50 text-amber hover:bg-amber/10">
               <ScanSearch className="w-4 h-4 mr-1" /> Scanned Leads
             </Button>
             <NotificationBell me="admin" onCountChange={setUnreadNotifs} />
@@ -831,16 +820,16 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
         <OperatorIdentityBar />
         <Suspense fallback={null}><AdminLiveTrafficBar /></Suspense>
-        <button type="button" onClick={() => jumpToTab('scannedleads')} className="w-full rounded-xl border border-amber/50 bg-amber/10 hover:bg-amber/20 transition p-4 text-left" aria-label="View scanned leads, contacts and issues">
+        <button type="button" onClick={() => jumpToTab('scannedleads')} className="w-full rounded-xl border border-amber/50 bg-amber/10 hover:bg-amber/20 transition p-4 text-left" aria-label="View all scanned leads, contact details and issues">
           <div className="flex justify-between items-center gap-3">
             <div className="flex items-center gap-3">
               <ScanSearch className="w-6 h-6 text-amber shrink-0" />
               <div>
                 <div className="text-base font-semibold text-foreground">Scanned Leads</div>
-                <div className="text-sm text-muted-foreground">View saved forensic scans, contacts, and issues. No new scans.</div>
+                <div className="text-sm text-muted-foreground">One click to saved scans, contacts, and findings. No new scans.</div>
               </div>
             </div>
-            <span className="text-amber font-semibold text-sm shrink-0">View All</span>
+            <span className="text-amber font-semibold text-sm shrink-0">View All →</span>
           </div>
         </button>
         <Link to="/aetheris-ai" className="block w-full rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:border-amber-500 transition p-4">
@@ -1203,40 +1192,15 @@ const OverviewBody: React.FC<{
   </div>
 );
 
-type LeadsView = 'existing' | 'forensic' | 'website' | 'enriched';
-
 const SubmissionsBody: React.FC<{
   submissions: ContactSubmission[];
   toggleRead: (id: string, isRead: boolean) => void;
   deleteSubmission: (id: string) => void;
-  leadView: LeadsView;
-  onLeadViewChange: (view: LeadsView) => void;
-}> = ({ submissions, toggleRead, deleteSubmission, leadView, onLeadViewChange }) => (
+}> = ({ submissions, toggleRead, deleteSubmission }) => (
   <div className="space-y-6">
-    <section className="space-y-3">
-      <div>
-        <h2 className="text-2xl font-semibold font-display text-foreground">Leads</h2>
-        <p className="text-sm text-muted-foreground">One workspace for lead contacts, prior scans, saved enrichment and the next steps already recorded.</p>
-      </div>
-      <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Lead record groups">
-        {([
-          { key: 'existing', label: 'Lead Browser' },
-          { key: 'forensic', label: 'Forensic Reports' },
-          { key: 'website', label: 'Website Scans' },
-          { key: 'enriched', label: 'Enriched Leads' },
-        ] as const).map(tab => (
-          <Button key={tab.key} type="button" role="tab" aria-selected={leadView === tab.key}
-            size="sm" variant={leadView === tab.key ? 'default' : 'outline'}
-            className={leadView === tab.key ? 'bg-amber hover:bg-amber/90 text-background' : ''}
-            onClick={() => onLeadViewChange(tab.key)}>{tab.label}</Button>
-        ))}
-      </div>
-    </section>
-    {leadView === 'existing' ? (
-      <>
-        <AdminRepLeadsView />
-        <AdminLeadBrowser />
-        <div className="space-y-4">
+    <AdminRepLeadsView />
+    <AdminLeadBrowser />
+    <div className="space-y-4">
       <h3 className="font-display text-lg text-foreground">Form Submissions</h3>
       {submissions.length === 0 ? (
         <div className="glass p-12 rounded-xl text-center text-muted-foreground">No submissions yet.</div>
@@ -1270,13 +1234,7 @@ const SubmissionsBody: React.FC<{
           </div>
         ))
       )}
-        </div>
-      </>
-    ) : (
-      <Suspense fallback={<PanelFallback />}>
-        <ScannedLeadsDirectory selectedSource={leadView} onSourceChange={onLeadViewChange} embedded />
-      </Suspense>
-    )}
+    </div>
   </div>
 );
 
@@ -1365,9 +1323,6 @@ const ToolsBody: React.FC<{ activeTool: ToolKey | null; setActiveTool: (t: ToolK
           <h2 className="text-2xl font-bold text-foreground font-display">My Tools</h2>
           <span className="text-xs text-muted-foreground ml-2">Full access, no paywall</span>
         </div>
-        <Suspense fallback={<PanelFallback />}>
-          <ToolHealthPanel />
-        </Suspense>
         <div className="flex flex-wrap gap-1.5 mb-4">
           {(Object.keys(CATEGORY_STYLE) as ToolCategory[]).map((cat) => {
             const s = CATEGORY_STYLE[cat];
