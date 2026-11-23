@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { GoldenTheoryEvidenceReview, useGoldenTriangulationEvidence } from "@/components/GoldenTriangulationEvidenceReview";
+import { VALID_HYPOTHESES, reviewTheoryEvidence, type ReviewHypothesisId } from "../../supabase/functions/_shared/golden-triangulation-review";
 import { ArrowRight, BrainCircuit, ChevronDown, CircleHelp, FileQuestion, Link2, SearchCheck, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
   buildMissingTriangulation,
@@ -40,10 +42,13 @@ export function makeTriangulationPrompt(h: MissingHypothesis): string {
   ].join("\n");
 }
 
-function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
+function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
   hypothesis: MissingHypothesis; index: number; onInvestigate?: (prompt: string) => void;
+  review?: ReturnType<typeof useGoldenTriangulationEvidence>;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const reviewState = review?.authorized && review.status === "ready" && VALID_HYPOTHESES.has(h.id)
+    ? reviewTheoryEvidence(h.id, review.records) : null;
   return <article className="overflow-hidden rounded-xl border border-white/10 bg-[#161820]">
     <button type="button" onClick={() => setExpanded(v => !v)} aria-expanded={expanded}
       className="flex min-h-[88px] w-full items-start gap-3 px-3 py-4 text-left sm:px-4">
@@ -54,6 +59,11 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
         <div className="mb-1 flex flex-wrap items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300">{LENSES[h.lens]}</span>
           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${TONE[h.support]}`}>{LABEL[h.support]}</span>
+          {reviewState && reviewState.status !== "unreviewed" && (
+            <span className={`rounded-full border border-sky-400/25 px-2 py-0.5 text-[10px] font-medium ${reviewState.status === "challenged" || reviewState.status === "mixed" ? "text-rose-300" : "text-sky-300"}`}>
+              Review: {reviewState.status.replaceAll("_"," ")}
+            </span>
+          )}
         </div>
         <h4 className="text-sm font-semibold leading-snug text-white">{h.question}</h4>
         <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-white/70">
@@ -113,6 +123,10 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
           <strong className="text-white/80">What could disprove it: </strong>{h.disconfirmingResult}
         </p>
       </div>
+      {review?.authorized && VALID_HYPOTHESES.has(h.id) && <GoldenTheoryEvidenceReview
+        hypothesisId={h.id as ReviewHypothesisId} records={review.records}
+        onSave={review.save} status={review.status} error={review.error}
+      />}
       {onInvestigate && <button type="button"
         onClick={() => onInvestigate(makeTriangulationPrompt(h))}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-amber-400 px-4 py-2 text-xs font-semibold text-[#141414] hover:bg-amber-300 sm:w-auto">
@@ -122,10 +136,11 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
   </article>;
 }
 
-export function GoldenMissingTriangulation({ report, onInvestigate }: {
-  report: unknown; onInvestigate?: (prompt: string) => void;
+export function GoldenMissingTriangulation({ report, scanId, onInvestigate }: {
+  report: unknown; scanId?: string; onInvestigate?: (prompt: string) => void;
 }) {
   const model = useMemo(() => buildMissingTriangulation(report), [report]);
+  const review = useGoldenTriangulationEvidence(scanId);
   const [expanded, setExpanded] = useState(false);
   if (!model.hypotheses.length && !model.zeroCaveats.length && !model.unresolvedAreas.length) return null;
   const visible = expanded ? model.hypotheses : model.hypotheses.slice(0, 3);
@@ -151,7 +166,8 @@ export function GoldenMissingTriangulation({ report, onInvestigate }: {
     </div>}
 
     {visible.length ? <div className="space-y-2">
-      {visible.map((h, i) => <HypothesisCard key={h.id} hypothesis={h} index={i} onInvestigate={onInvestigate}/>)}
+      {visible.map((h, i) => <HypothesisCard key={h.id} hypothesis={h} index={i}
+        onInvestigate={onInvestigate} review={review}/>)}
       {!expanded && model.hypotheses.length > 3 && <button type="button"
         onClick={() => setExpanded(true)}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-3 text-xs font-medium text-white/80">
