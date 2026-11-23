@@ -13,7 +13,7 @@ import { verifyAdminToken, getAdminTokenFromRequest } from "../_shared/admin-tok
 import {
   normalizeReportDomain, companyMatchesReport, buildScopedCompanyPreview,
   type ScopedCompanyRecord,
-} from "../../../src/lib/goldenScopedCrm.ts";
+} from "../_shared/golden-scoped-crm.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
