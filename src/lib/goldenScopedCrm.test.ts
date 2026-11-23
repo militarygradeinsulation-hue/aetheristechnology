@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  normalizeReportDomain, companyMatchesReport, buildScopedCompanyPreview,
+  normalizeReportDomain, companyMatchesReport, buildScopedCompanyPreview, chooseUniqueCompanyMatch,
   type ScopedCompanyRecord,
 } from "./goldenScopedCrm";
 
@@ -44,6 +44,14 @@ describe("Golden Report signed-owner CRM company scoping", () => {
     expect(preview?.statement).toContain("does not establish contact response time");
     expect(preview?.statement).not.toMatch(/\$\d+|confirmed revenue loss/i);
     expect(preview?.limitations.some(x=>x.includes("No contact, deal"))).toBe(true);
+  });
+
+  it("requires exactly one candidate and never chooses a duplicate by order", () => {
+    expect(chooseUniqueCompanyMatch("https://example.com", [company]).status).toBe("matched");
+    expect(chooseUniqueCompanyMatch("https://example.com", [
+      company, {...company,id:"different-record",domain:"www.example.com"},
+    ]).status).toBe("ambiguous");
+    expect(chooseUniqueCompanyMatch("https://example.com", [{...company,domain:"other.example.com"}]).status).toBe("no_exact_match");
   });
 
   it("never exposes another company's CRM record", () => {
