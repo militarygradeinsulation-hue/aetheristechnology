@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { GoldenTheoryEvidenceReview, useGoldenTriangulationEvidence } from "@/components/GoldenTriangulationEvidenceReview";
+import { VALID_HYPOTHESES, type ReviewHypothesisId } from "../../supabase/functions/_shared/golden-triangulation-review";
 import { ArrowRight, BrainCircuit, ChevronDown, CircleHelp, FileQuestion, Link2, SearchCheck, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
   buildMissingTriangulation,
@@ -40,8 +42,9 @@ export function makeTriangulationPrompt(h: MissingHypothesis): string {
   ].join("\n");
 }
 
-function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
+function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
   hypothesis: MissingHypothesis; index: number; onInvestigate?: (prompt: string) => void;
+  review?: ReturnType<typeof useGoldenTriangulationEvidence>;
 }) {
   const [expanded, setExpanded] = useState(false);
   return <article className="overflow-hidden rounded-xl border border-white/10 bg-[#161820]">
@@ -113,6 +116,10 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
           <strong className="text-white/80">What could disprove it: </strong>{h.disconfirmingResult}
         </p>
       </div>
+      {review?.authorized && VALID_HYPOTHESES.has(h.id) && <GoldenTheoryEvidenceReview
+        hypothesisId={h.id as ReviewHypothesisId} records={review.records}
+        onSave={review.save} status={review.status} error={review.error}
+      />}
       {onInvestigate && <button type="button"
         onClick={() => onInvestigate(makeTriangulationPrompt(h))}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-amber-400 px-4 py-2 text-xs font-semibold text-[#141414] hover:bg-amber-300 sm:w-auto">
@@ -122,10 +129,11 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate }: {
   </article>;
 }
 
-export function GoldenMissingTriangulation({ report, onInvestigate }: {
-  report: unknown; onInvestigate?: (prompt: string) => void;
+export function GoldenMissingTriangulation({ report, scanId, onInvestigate }: {
+  report: unknown; scanId?: string; onInvestigate?: (prompt: string) => void;
 }) {
   const model = useMemo(() => buildMissingTriangulation(report), [report]);
+  const review = useGoldenTriangulationEvidence(scanId);
   const [expanded, setExpanded] = useState(false);
   if (!model.hypotheses.length && !model.zeroCaveats.length && !model.unresolvedAreas.length) return null;
   const visible = expanded ? model.hypotheses : model.hypotheses.slice(0, 3);
@@ -151,7 +159,8 @@ export function GoldenMissingTriangulation({ report, onInvestigate }: {
     </div>}
 
     {visible.length ? <div className="space-y-2">
-      {visible.map((h, i) => <HypothesisCard key={h.id} hypothesis={h} index={i} onInvestigate={onInvestigate}/>)}
+      {visible.map((h, i) => <HypothesisCard key={h.id} hypothesis={h} index={i}
+        onInvestigate={onInvestigate} review={review}/>)}
       {!expanded && model.hypotheses.length > 3 && <button type="button"
         onClick={() => setExpanded(true)}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-3 text-xs font-medium text-white/80">

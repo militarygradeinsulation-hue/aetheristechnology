@@ -409,7 +409,7 @@ export function GoldenFrictionIntelligence({
         )}
       </div>
 
-      <GoldenMissingTriangulation report={report} onInvestigate={onInvestigate}/>
+      <GoldenMissingTriangulation report={report} scanId={scanId} onInvestigate={onInvestigate}/>
 
       {scanId && <GoldenFrictionWorkspace
         scanId={scanId}
