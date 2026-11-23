@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GoldenCrmCsvPreview } from "@/components/GoldenCrmCsvPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
@@ -126,6 +127,10 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
           <p className="font-mono text-[10px] text-white/45 break-all">Source record: {row.source_reference}</p>
         </li>)}
       </ul>}
+      <GoldenCrmCsvPreview
+        theoryId={hypothesisId}
+        onUseSummary={(summary)=>{setKind("crm");setObservation(summary.slice(0,2400));setReviewed(false);setNotice("Summary drafted locally. Check the claim against the export, choose supports or challenges, and enter a source reference before saving.");}}
+      />
       <div className="space-y-2 rounded-lg border border-white/10 p-3">
         <div className="text-xs font-semibold text-white/85">Add a reviewed business record</div>
         <p className="text-[11px] leading-relaxed text-white/50">
