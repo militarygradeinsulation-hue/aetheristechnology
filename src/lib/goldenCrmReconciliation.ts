@@ -44,7 +44,7 @@ const norm = (text: string) => text.toLowerCase().replace(/^\uFEFF/,"").replace(
 const aliases: Record<string,string[]> = {
   id: ["hs_object_id","Record ID","record_id","contact id","deal id","id"],
   created: ["createdate","Create date","Created At","Lead Created At","Lead Date","Date Created"],
-  firstResponse: ["first_response_at","First Response Date","First Responded At","First Reply Date","first_reply_at","First Contacted Date","hs_first_engagement_date"],
+  firstResponse: ["first_response_at","First Response Date","First Responded At","First Reply Date","first_reply_at","First Contacted Date"],
   owner: ["hubspot_owner_id","HubSpot Owner","Owner ID","Assigned Owner","Lead Owner","Deal Owner"],
   source: ["hs_analytics_source","Original Source","Original source drill-down 1","Lead Source","utm_source","source"],
   dealStage: ["dealstage","Deal Stage","Stage","Opportunity Stage"],
