@@ -79,3 +79,15 @@ export function buildScopedCompanyPreview(reportUrl: string, company: ScopedComp
     ],
   };
 }
+
+/** Fail closed when the candidate selection is ambiguous, even across accounts. */
+export function chooseUniqueCompanyMatch(
+  reportUrl: string, candidates: ScopedCompanyRecord[],
+): { status: "matched"; preview: ScopedCrmPreview } |
+   { status: "no_exact_match" | "ambiguous" } {
+  const matches = candidates.filter(row => companyMatchesReport(reportUrl, row.domain || ""));
+  if (!matches.length) return { status: "no_exact_match" };
+  if (matches.length !== 1) return { status: "ambiguous" };
+  const preview = buildScopedCompanyPreview(reportUrl, matches[0]);
+  return preview ? { status: "matched", preview } : { status: "no_exact_match" };
+}
