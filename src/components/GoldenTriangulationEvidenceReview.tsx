@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GoldenCrmCsvPreview } from "@/components/GoldenCrmCsvPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { getAdminToken } from "@/lib/adminAuth";
 import { getPortalToken } from "@/lib/portalAuth";
@@ -72,7 +73,7 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
   status:"idle"|"loading"|"ready"|"error";
   error:string;
 }){
-  const [direction,setDirection]=useState<EvidenceDirection>("supports");
+  const [direction,setDirection]=useState<EvidenceDirection | "">("");
   const [kind,setKind]=useState<EvidenceKind>("crm");
   const [reference,setReference]=useState("");
   const [observation,setObservation]=useState("");
@@ -83,6 +84,7 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
   const related=records.filter(r=>r.hypothesis_id===hypothesisId);
   const submit=async()=>{
     if(busy)return;
+    if(!direction){setNotice("Choose whether the reviewed evidence supports or challenges the theory.");return;}
     setBusy(true);setNotice("");
     try{
       await onSave({hypothesis_id:hypothesisId,direction,evidence_kind:kind,
@@ -126,6 +128,10 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
           <p className="font-mono text-[10px] text-white/45 break-all">Source record: {row.source_reference}</p>
         </li>)}
       </ul>}
+      <GoldenCrmCsvPreview
+        theoryId={hypothesisId}
+        onUseSummary={(summary)=>{setKind("crm");setDirection("");setObservation(summary.slice(0,2400));setReviewed(false);setNotice("Summary drafted locally. Check the claim against the export, choose supports or challenges, and enter a source reference before saving.");}}
+      />
       <div className="space-y-2 rounded-lg border border-white/10 p-3">
         <div className="text-xs font-semibold text-white/85">Add a reviewed business record</div>
         <p className="text-[11px] leading-relaxed text-white/50">
@@ -133,8 +139,9 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="block space-y-1 text-[11px] text-white/65">Relation to theory
-            <select value={direction} onChange={e=>setDirection(e.target.value as EvidenceDirection)}
+            <select value={direction} onChange={e=>setDirection(e.target.value as EvidenceDirection | "")}
               className="min-h-11 w-full rounded border border-white/15 bg-[#15161c] p-2 text-xs text-white">
+              <option value="">Choose after reviewing</option>
               <option value="supports">Supports the theory</option>
               <option value="challenges">Challenges the theory</option>
             </select>
@@ -159,7 +166,7 @@ export function GoldenTheoryEvidenceReview({hypothesisId,records,onSave,status,e
           <input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)} className="mt-1"/>
           I reviewed this authorized business record and can trace the observation to it.
         </label>
-        <button type="button" disabled={busy||status!=="ready"||!reviewed||reference.trim().length<3||observation.trim().length<16}
+        <button type="button" disabled={busy||status!=="ready"||!direction||!reviewed||reference.trim().length<3||observation.trim().length<16}
           onClick={submit}
           className="min-h-11 w-full rounded-lg bg-sky-400 px-3 text-xs font-semibold text-[#12141a] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto">
           {busy?"Saving review…":"Save reviewed evidence"}
