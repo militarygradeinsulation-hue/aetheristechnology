@@ -42,8 +42,8 @@ export function makeTriangulationPrompt(h: MissingHypothesis): string {
   ].join("\n");
 }
 
-function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
-  hypothesis: MissingHypothesis; index: number; onInvestigate?: (prompt: string) => void;
+function HypothesisCard({ hypothesis: h, index, onInvestigate, review, scanId }: {
+  hypothesis: MissingHypothesis; index: number; scanId?: string; onInvestigate?: (prompt: string) => void;
   review?: ReturnType<typeof useGoldenTriangulationEvidence>;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -124,7 +124,7 @@ function HypothesisCard({ hypothesis: h, index, onInvestigate, review }: {
         </p>
       </div>
       {review?.authorized && VALID_HYPOTHESES.has(h.id) && <GoldenTheoryEvidenceReview
-        hypothesisId={h.id as ReviewHypothesisId} records={review.records}
+        hypothesisId={h.id as ReviewHypothesisId} scanId={scanId} records={review.records}
         onSave={review.save} status={review.status} error={review.error}
       />}
       {onInvestigate && <button type="button"
@@ -167,7 +167,7 @@ export function GoldenMissingTriangulation({ report, scanId, onInvestigate }: {
 
     {visible.length ? <div className="space-y-2">
       {visible.map((h, i) => <HypothesisCard key={h.id} hypothesis={h} index={i}
-        onInvestigate={onInvestigate} review={review}/>)}
+        onInvestigate={onInvestigate} review={review} scanId={scanId}/>)}
       {!expanded && model.hypotheses.length > 3 && <button type="button"
         onClick={() => setExpanded(true)}
         className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-3 text-xs font-medium text-white/80">
