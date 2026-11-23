@@ -328,3 +328,7 @@ verify_jwt = false
 # Manual HMAC authorization (admin or exactly scoped report rep) in function body.
 [functions.golden-friction-workspace]
 verify_jwt = false
+
+# Admin PIN plus CRM-owner Supabase Auth JWT validated in the handler.
+[functions.golden-scoped-crm-preview]
+verify_jwt = false
