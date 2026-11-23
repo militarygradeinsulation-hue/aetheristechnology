@@ -35,21 +35,20 @@ export function GoldenScopedCrmPreview({
     setError("");
     setResult(null);
     try {
-      const pinToken = getAdminToken();
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session?.access_token || !pinToken) {
+      if (sessionError || !sessionData.session?.access_token || !getAdminToken()) {
         throw new Error("Sign in with the owner of the connected CRM account before checking company records.");
       }
-      const { data, error: callError } = await supabase.functions.invoke("golden-scoped-crm-preview", {
-        body: { scan_id: scanId },
-        headers: {
-          Authorization: "Bearer " + sessionData.session.access_token,
-          "x-admin-token": pinToken,
-        },
-      });
-      if (callError) throw new Error(callError.message || "CRM context service is not available");
-      if (!data?.ok) throw new Error(String(data?.error || "CRM context unavailable"));
-      setResult(data as Result);
+      // No Edge Function deployment required. This authenticated PostgREST RPC
+      // performs account-ownership and exact-domain checks on the server.
+      const { data, error: callError } = await supabase.rpc(
+        "golden_scoped_crm_preview_rpc" as never,
+        { p_scan_id: scanId } as never,
+      );
+      if (callError) throw new Error(callError.message || "CRM database preview is unavailable");
+      const response = data as unknown as Result & { error?: string };
+      if (!response?.ok) throw new Error(response?.error || "CRM ownership verification failed");
+      setResult(response);
     } catch (e) {
       setError((e as Error).message || "Unable to check CRM context");
     } finally {
@@ -65,7 +64,7 @@ export function GoldenScopedCrmPreview({
       </div>
       <p className="text-[11px] leading-relaxed text-white/65">
         Read-only lookup of an exact-domain company record in a CRM account that you own.
-        Requires both admin access and a signed-in CRM account owner. No contacts, deals,
+        Requires a signed-in CRM account owner and exact domain matching. No contacts, deals,
         call logs, or payment records are read.
       </p>
       <button type="button" disabled={busy} onClick={() => { void run(); }}

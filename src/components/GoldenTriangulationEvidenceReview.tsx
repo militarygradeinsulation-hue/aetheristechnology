@@ -33,10 +33,26 @@ const getHeaders=() => {
   return admin?{"x-admin-token":admin}:portal?{"x-portal-token":portal}:{};
 };
 async function request(scanId:string,action:"list"|"add",record?:Input){
+  // Prefer the already-available database API for signed-in CRM account
+  // owners. Every row is scoped server-side to that owner AND exact company.
+  // This path needs no GitHub runner or Edge deployment.
+  const {data:sessionData}=await supabase.auth.getSession();
+  if(sessionData.session?.access_token && getAdminToken()){
+    const {data,error}=await supabase.rpc(
+      "golden_scoped_crm_review_rpc" as never,
+      {p_scan_id:scanId,p_action:action,p_record:record||null} as never,
+    );
+    if(error)throw new Error(error.message||"Private CRM review database service is unavailable");
+    const result=data as unknown as {ok:boolean;error?:string;records?:ReviewEvidence[];record?:ReviewEvidence};
+    if(!result?.ok)throw new Error(result?.error||"CRM owner and company match are required");
+    return result as {ok:true;records?:ReviewEvidence[];record?:ReviewEvidence};
+  }
+  // Existing scoped rep/Admin workflow is preserved. No escalation or
+  // service role credentials ever reach the browser.
   const {data,error}=await supabase.functions.invoke("golden-triangulation-review", {
-    body:{scan_id:scanId,action,...(record?{record}:{})}, headers:getHeaders(),
+    body:{scan_id:scanId,action,...(record?{record}:{})},headers:getHeaders(),
   });
-  if(error)throw new Error(error.message||"Private evidence service unavailable");
+  if(error)throw new Error(error.message||"Private evidence service unavailable. For CRM fallback, sign in as the connected account owner.");
   if(!data?.ok)throw new Error(String(data?.error||"Private evidence service unavailable"));
   return data as {ok:true;records?:ReviewEvidence[];record?:ReviewEvidence};
 }
