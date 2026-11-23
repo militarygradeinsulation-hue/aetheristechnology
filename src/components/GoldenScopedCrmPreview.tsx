@@ -6,13 +6,14 @@ import type { ScopedCrmPreview } from "@/lib/goldenScopedCrm";
 
 type Result =
   | { ok: true; status: "matched"; preview: ScopedCrmPreview }
-  | { ok: true; status: "no_exact_match" | "ambiguous" | "invalid_report_domain" | "no_owned_connected_account"; notice?: string };
+  | { ok: true; status: "no_exact_match" | "ambiguous" | "invalid_report_domain" | "no_owned_connected_account" | "too_many_accounts"; notice?: string };
 
 const STATUS_COPY: Record<string,string> = {
   no_exact_match: "No exact-domain company match was found in your connected CRM. No evidence was inferred.",
   ambiguous: "More than one company record matched this domain. Resolve the ambiguity in your CRM before drawing conclusions.",
   invalid_report_domain: "This report has no usable public company domain. No CRM matching was performed.",
   no_owned_connected_account: "Your signed-in account has no connected, authorized HubSpot account available for this review.",
+  too_many_accounts: "Too many connected CRM accounts to verify safely. Narrow the linked accounts before running this check.",
 };
 
 export function GoldenScopedCrmPreview({
