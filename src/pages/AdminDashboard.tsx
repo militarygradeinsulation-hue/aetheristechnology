@@ -37,6 +37,7 @@ const PlaybookCreator = lazy(() => import('@/components/PlaybookCreator').then(m
 const AllInOneGenerator = lazy(() => import('@/components/AllInOneGenerator').then(m => ({ default: m.AllInOneGenerator })));
 const AdminLibrary = lazy(() => import('@/components/AdminLibrary').then(m => ({ default: m.AdminLibrary })));
 const GoldenReportLibrary = lazy(() => import('@/components/GoldenReportLibrary').then(m => ({ default: m.GoldenReportLibrary })));
+const GoldenCrmVerificationQueue = lazy(() => import('@/components/admin/GoldenCrmVerificationQueue'));
 const GoldenReportCollectiveBrain = lazy(() => import('@/components/admin/GoldenReportCollectiveBrain'));
 const ContentCalendar = lazy(() => import('@/components/admin/ContentCalendar').then(m => ({ default: m.ContentCalendar })));
 const ContentEngine = lazy(() => import('@/components/admin/ContentEngine').then(m => ({ default: m.ContentEngine })));
@@ -628,7 +629,12 @@ const AdminDashboard: React.FC = () => {
       case 'ideas': return <IdeaRoom isAdmin />;
       case 'systems': return <AdminForensicsSystemsPanel />;
       case 'scannedleads': return <Suspense fallback={<PanelFallback />}><ScannedLeadsDirectory /></Suspense>;
-      case 'goldenlibrary': return <GoldenReportLibrary />;
+      case 'goldenlibrary': return (
+        <div className="space-y-4">
+          <Suspense fallback={<PanelFallback />}><GoldenCrmVerificationQueue /></Suspense>
+          <GoldenReportLibrary />
+        </div>
+      );
       case 'collectivebrain': return <GoldenReportCollectiveBrain />;
       case 'command': return (
         <div className="space-y-3">
